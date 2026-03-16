@@ -16,7 +16,7 @@ function TopMenu({ categoriaSelecionada, aoSelecionarMetodo }) {
     return (
         <div style={{marginBottom: "20px", padding: "10px", borderBottom: "1px solid #ccc"}}>
 
-           {metodosDaCategoria.map((metodosDisponiveis, index) => (
+           {metodosDaCategoria.map((metodosDisponiveis, index) => ( //.map é para passar por todos os elements do array (vetor metodosDaCategoria)
 
                 <button
                     key={index}

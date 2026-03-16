@@ -2,6 +2,7 @@ import {useState} from "react"; //essa importaçao do react nos permite usar est
 
 import MainLayout from "./components/layout/MainLayout";
 import TopMenu from "./components/layout/TopMenu";
+import Bissecao from "./pages/Bissecao";
 
 function App() {
 
@@ -26,11 +27,14 @@ function App() {
         aoSelecionarMetodo={setMetodoSelecionado} 
         categoriaSelecionada={categoriaSelecionada}>
 
-      </TopMenu>
+      </TopMenu> 
 
-      <p>Método selecionado: {metodoSelecionado}</p>
+      
+      {metodoSelecionado === "Bisseção" && <Bissecao />}  
 
     </MainLayout>
+
+    //Aqui se o metodo selecionado for igual a Bissecao, ele vai renderizar oque esta dentro do arquivo bissecao.jsx
 
   );
 }
