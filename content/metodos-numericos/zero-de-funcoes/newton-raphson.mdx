@@ -1,0 +1,149 @@
+---
+titulo: "Método de Newton-Raphson"
+slug: "newton-raphson"
+categoria: "metodos-numericos"
+subcategoria: "zero-de-funcoes"
+descricao: "O irmão mais rápido da bisseção — usa a derivada para 'cortar caminho'. Convergência quadrática quando funciona, divergência espetacular quando não."
+ordem: 2
+publicado: true
+tags: ["raízes", "derivada", "convergência quadrática", "tangente"]
+prerrequisitos: ["bisseção", "derivada"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-04-28"
+usadoEm: ["Cálculo Numérico", "Otimização", "Vol implícita em Black-Scholes"]
+---
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definição rigorosa">
+
+Dado $f \in C^2([a,b])$ e um chute inicial $x_0$ próximo da raiz $\xi$ com $f'(\xi) \neq 0$, a iteração de Newton-Raphson é:
+
+<Equation numero="1" explicacao={<>Cada iteração toma a tangente à curva no ponto atual e segue até cruzar o eixo <Eq>{`x`}</Eq>. Esse cruzamento é o próximo chute.</>}>
+{`x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}`}
+</Equation>
+
+<Teorema titulo="Convergência quadrática">
+
+Sob as hipóteses acima, a sequência $(x_n)$ converge para $\xi$ e existe $C > 0$ tal que:
+
+<Equation numero="2" explicacao={<>O erro <strong>eleva-se ao quadrado</strong> a cada iteração — o número de casas decimais corretas <strong>dobra</strong>. 4 casas → 8 casas → 16 casas. Razoável e impressionante.</>}>
+{`|x_{n+1} - \\xi| \\leq C \\cdot |x_n - \\xi|^2`}
+</Equation>
+
+</Teorema>
+
+</Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Imagina uma escorrega comprida no parquinho.
+
+Você está no alto da escorrega e quer saber **onde ela toca o chão**.
+
+Em vez de descer escorregando devagarinho, você **olha pra ponta da escorrega bem reta** e adivinha onde ela vai parar — onde a linha dela bate no chão.
+
+Aí você anda pra esse ponto, sobe um pouquinho na escorrega que continua dali, e olha de novo. Só que agora está bem mais perto do final.
+
+Newton é assim: olha a inclinação, faz uma reta no chão, vai pra esse ponto. Bem rápido.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+A bisseção do outro tópico procurava raiz **dividindo o intervalo em dois**. Devagar, mas garantido.
+
+Newton-Raphson tem outra estratégia: **usa a inclinação da função** pra dar um salto grande na direção da raiz.
+
+Imagina a função desenhada num gráfico. Você está num ponto. Você desenha **a tangente** (a reta que toca a curva nesse ponto sem cruzar). Onde essa reta cruza o eixo horizontal? Esse é seu próximo chute.
+
+Cada salto te leva muito mais perto que a bisseção. Tipo um foguete versus uma bicicleta. Mas se você apontar mal, o foguete pode te jogar **pro lado errado**.
+
+</Porta>
+
+<Porta nivel="15" titulo="Pra adolescente de 15 anos">
+
+Você quer achar a raiz de:
+
+$$ f(x) = x^3 - 2x - 5 $$
+
+Pegando $x_0 = 2$:
+
+- $f(2) = 8 - 4 - 5 = -1$
+- $f'(x) = 3x^2 - 2$, então $f'(2) = 10$
+- $x_1 = 2 - (-1)/10 = 2{,}1$
+
+Iteração 2:
+- $f(2{,}1) = 9{,}261 - 4{,}2 - 5 = 0{,}061$
+- $f'(2{,}1) = 13{,}23$
+- $x_2 = 2{,}1 - 0{,}061/13{,}23 = 2{,}0954$
+
+Iteração 3:
+- $f(2{,}0954) \approx 0{,}00018$
+- $x_3 \approx 2{,}09455148$
+
+Em **3 iterações**, você tem 8 casas corretas. A bisseção precisaria de mais de 25 iterações pra mesma precisão.
+
+<Insight>
+
+**Por que Newton é tão mais rápido?** Porque usa **mais informação**: além do valor de $f$, usa a derivada $f'$. A derivada diz "para onde a função está indo". Bisseção só sabe "ainda tem raiz aqui dentro". Quem sabe mais, anda mais rápido — desde que não confie demais.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia">
+
+Newton-Raphson é o método de raiz mais usado em engenharia, **dentro do envelope de aplicação**. Tem três armadilhas clássicas:
+
+### Armadilha 1: derivada zero
+
+Se $f'(x_n) = 0$, a iteração quebra (divisão por zero). Acontece em mínimos/máximos da função. Solução prática: usar **regra de proteção** — se $|f'(x_n)| < \delta$, cair pra bisseção.
+
+### Armadilha 2: ciclo
+
+Considere $f(x) = x^3 - 2x + 2$. Com $x_0 = 0$, gera-se $x_1 = 1$, $x_2 = 0$, $x_3 = 1$, ... — ciclo eterno entre 0 e 1.
+
+### Armadilha 3: divergência
+
+Para $f(x) = \arctan(x)$ com $x_0$ longe da raiz $\xi = 0$, Newton diverge. Cada passo afasta mais.
+
+### O método de Brent (na vida real)
+
+Por isso, código de produção (`scipy.optimize.brentq`, MATLAB `fzero`) usa **híbrido**: Newton ou interpolação inversa quando o passo cai dentro do bracketing; bisseção quando sai. Garantia + velocidade.
+
+### Aplicação real: vol implícita
+
+A vol implícita do mercado de opções é resolvida por Newton-Raphson sobre Black-Scholes. Como $\partial C/\partial \sigma > 0$ sempre (vega positivo), a função é monotônica e Newton converge em ~3-5 iterações com tolerância de $10^{-8}$.
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional">
+
+Em mesa de derivativos, Newton-Raphson sobre $\sigma \mapsto \text{BS}(S, K, r, \sigma, T) - C_{\text{mkt}}$ é o motor que extrai vol implícita do livro de ofertas em **microsegundos**. Cada cotação atualiza, recalcula vol, atualiza superfície.
+
+Mas a versão pura de Newton não é a que está em produção. Está:
+
+- **Halley method** (ordem 3) — ainda mais rápido se você tem segunda derivada (e BS tem)
+- **Brent** — quando precisa robustez (ex: opção quase deep-OTM, vega tendendo a zero)
+- **Bisecção** — fallback quando tudo mais falha
+
+Em equipes quant, "qual root finder usar" é decisão por **classe de instrumento**:
+
+- Listed equity options: Brent (preço bid-ask cria ruído)
+- OTC swaps complexos: Newton com warm-start da iteração anterior
+- Exotics com pricing por simulação Monte Carlo: bisseção (pricing não é diferenciável)
+
+A escolha errada não derruba sistema mas degrada latência — e em high-frequency, latência é P&L.
+
+</Porta>
+
+</DuasPortas>
+
+<Leituras>
+
+- **Burden, R.; Faires, D.** *Numerical Analysis*. Cap. 2.
+- **NPS Naval Postgraduate** — [Newton's method PDF](https://cs.nyu.edu/~overton/NumericalComputing/newton.pdf). Convergência quadrática provada com cuidado.
+- **Wikipedia** — [Newton's method](https://en.wikipedia.org/wiki/Newton's_method).
+
+</Leituras>

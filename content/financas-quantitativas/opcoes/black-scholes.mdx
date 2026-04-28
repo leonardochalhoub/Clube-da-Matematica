@@ -1,0 +1,334 @@
+---
+titulo: "Equação de Black-Scholes"
+slug: "black-scholes"
+categoria: "financas-quantitativas"
+subcategoria: "opcoes"
+descricao: "Quanto vale o direito de comprar uma ação no futuro? Nobel de Economia 1997. Conecta cálculo, EDPs e probabilidade num único objeto."
+ordem: 1
+publicado: true
+tags: ["opções", "derivativos", "EDP", "movimento browniano", "nobel"]
+prerrequisitos: ["derivada", "integral", "logaritmo", "distribuição normal"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-04-28"
+usadoEm: ["Mestrado em Finanças", "Engenharia Financeira", "Mesa de derivativos", "Risco de mercado"]
+---
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Modelo de Black-Scholes (1973)">
+
+### Hipóteses
+
+1. O preço $S_t$ do ativo subjacente segue um **movimento browniano geométrico** sob a medida $\Q$ neutra a risco:
+
+<Equation numero="1" explicacao={<>O preço do ativo cresce com taxa esperada <Eq>{`r`}</Eq> (a taxa livre de risco) e flutua com volatilidade <Eq>{`\\sigma`}</Eq>. <Eq>{`W_t`}</Eq> é um movimento browniano padrão — passos infinitesimais aleatórios que se acumulam numa caminhada contínua.</>}>
+{`dS_t = r S_t \\, dt + \\sigma S_t \\, dW_t`}
+</Equation>
+
+2. **Mercado completo, sem fricção**: sem custos de transação, posição short ilimitada, divisibilidade infinita.
+3. **$r$ e $\sigma$ constantes** ao longo de $[0, T]$.
+4. **Sem dividendos** (relaxável: substitui $r$ por $r - q$).
+5. **Ausência de arbitragem** (princípio fundamental — não existe almoço grátis).
+
+### A EDP de Black-Scholes
+
+Pelo lema de Itô aplicado a $V(S, t)$ e construção da carteira replicante (long $\Delta$ ações, short 1 opção), elimina-se o risco e a carteira deve render $r$. Daí:
+
+<Equation numero="2" explicacao={<>É uma <strong>EDP parabólica</strong> — análoga à equação do calor da física! O termo <Eq>{`\\frac{1}{2}\\sigma^2 S^2 V_{SS}`}</Eq> é o "calor" se difundindo, <Eq>{`r S V_S`}</Eq> é uma deriva (drift), e <Eq>{`-rV`}</Eq> é o desconto. Toda intuição da física do calor vale aqui.</>}>
+{`\\pdiff{V}{t} + \\frac{1}{2}\\sigma^2 S^2 \\pdiff{^2 V}{S^2} + r S \\pdiff{V}{S} - r V = 0`}
+</Equation>
+
+com condição final $V(S, T) = \max(S - K, 0)$ para uma call europeia.
+
+### Solução fechada (call europeia)
+
+<Equation numero="3" explicacao={<>O preço da call é o <strong>valor presente esperado do payoff</strong>, sob a medida neutra a risco. <Eq>{`N(d_2)`}</Eq> é a probabilidade da call terminar in-the-money. <Eq>{`S \\cdot N(d_1)`}</Eq> é o valor esperado de <Eq>{`S_T`}</Eq> condicional ao exercício.</>}>
+{`C(S, t) = S \\cdot N(d_1) - K\\,\\e^{-r(T-t)} N(d_2)`}
+</Equation>
+
+onde
+
+<Equation numero="4" explicacao={<>O <Eq>{`d_1`}</Eq> mede quantos desvios-padrão o log-preço atual está acima do log-strike, ajustado pela deriva. <Eq>{`d_2 = d_1 - \\sigma\\sqrt{T-t}`}</Eq>.</>}>
+{`d_1 = \\frac{\\ln(S/K) + (r + \\frac{1}{2}\\sigma^2)(T-t)}{\\sigma\\sqrt{T-t}}, \\quad d_2 = d_1 - \\sigma\\sqrt{T-t}`}
+</Equation>
+
+e $N(\cdot)$ é a função de distribuição acumulada da normal padrão:
+
+<Equation numero="5" explicacao={<>A famosa <strong>curva sino</strong> de Gauss, integrada do menos infinito até <Eq>{`x`}</Eq>. Não tem forma fechada — calcula-se por aproximações racionais (Abramowitz & Stegun) ou pela função erro complementar.</>}>
+{`N(x) = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^{x} \\e^{-u^2/2} \\, du`}
+</Equation>
+
+### Paridade put-call
+
+<Equation numero="6" explicacao={<>Conexão exata entre call e put europeias do mesmo strike e vencimento. Se essa identidade falha no mercado, há arbitragem pura — em prática, é violada por frações de centavo durante segundos.</>}>
+{`C - P = S - K \\e^{-r(T-t)}`}
+</Equation>
+
+### Os Greeks
+
+Sensibilidades parciais do preço da opção. Toda mesa de derivativos do mundo monitora esses números.
+
+<Equation numero="7" explicacao={<>Delta — <strong>quanto o preço da opção muda para cada R$1 de movimento na ação</strong>. Para uma call deep-ITM, <Eq>{`\\Delta \\to 1`}</Eq>; deep-OTM, <Eq>{`\\Delta \\to 0`}</Eq>.</>}>
+{`\\Delta_C = \\pdiff{C}{S} = N(d_1)`}
+</Equation>
+
+<Equation numero="8" explicacao={<>Gamma — <strong>convexidade</strong>: como o delta muda quando o preço muda. É o mesmo para call e put. Maior próximo ao strike e perto do vencimento.</>}>
+{`\\Gamma = \\pdiff{^2 C}{S^2} = \\frac{N'(d_1)}{S \\sigma \\sqrt{T-t}}`}
+</Equation>
+
+<Equation numero="9" explicacao={<>Vega — sensibilidade à volatilidade. <strong>Igual para call e put</strong>. Em mesa de operação, vol implícita é o que se opera, não o preço diretamente.</>}>
+{`\\nu = \\pdiff{C}{\\sigma} = S \\sqrt{T-t} \\cdot N'(d_1)`}
+</Equation>
+
+<Equation numero="10" explicacao={<>Theta — <strong>decaimento por tempo</strong>: o quanto a opção perde de valor por dia, mantendo tudo mais constante. <Eq>{`\\Theta < 0`}</Eq> para opções long — opção é ativo que "derrete".</>}>
+{`\\Theta_C = -\\frac{S \\sigma N'(d_1)}{2\\sqrt{T-t}} - r K \\e^{-r(T-t)} N(d_2)`}
+</Equation>
+
+</Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Você tem **um amigo** que tem uma figurinha super rara da sua coleção.
+
+Hoje, ele te promete:
+
+> *"Amanhã, se você quiser, eu te dou minha figurinha rara. Você só me dá 10 figurinhas suas em troca. Mas você decide amanhã. Se não quiser, tudo bem."*
+
+Esse **direito de escolher amanhã** vale alguma coisa **hoje**, certo?
+
+- Se a figurinha rara dele for **muito especial**, vale mais.
+- Se você tem **bastante tempo** pra decidir, vale mais — pode ficar mais legal.
+- Se as figurinhas dele costumam **ficar mais raras** rápido, vale mais ainda.
+
+Black-Scholes é a **conta certa** pra saber quanto vale esse direito.
+
+Tem uma fórmula com letras gregas e tudo. Mas o coração é só isso: **direito de escolher depois vale dinheiro hoje**.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+Você joga um jogo no celular. Tem uma skin lendária que custa **100 moedas**. Você só tem 80.
+
+Um amigo te oferece um **cupom mágico**:
+
+> *"Te vendo um cupom que te dá o direito de comprar a skin por 100 moedas a qualquer momento nos próximos 7 dias — mesmo se o preço subir pra 200 ou 500."*
+
+Quanto vale esse cupom?
+
+Depende de **5 coisas**:
+
+1. **Preço atual** da skin (mais perto do alvo, mais vale o cupom).
+2. **Preço alvo** (100 moedas).
+3. **Quantos dias** o cupom dura (mais dias, mais vale).
+4. **Taxa de juros** (porque dinheiro guardado rende — efeito pequeno aqui).
+5. **O quanto a skin balança de preço** — isso chama "**volatilidade**". Se a skin é instável (sobe e desce muito), o cupom vale **muito mais** — porque tem mais chance de explodir pra cima e te dar lucro grande.
+
+A fórmula de Black-Scholes pega esses 5 ingredientes e calcula o **preço justo do cupom**.
+
+Não é chute. É conta. E foi tão importante pra economia que ganhou **Prêmio Nobel** em 1997.
+
+</Porta>
+
+<Porta nivel="15" titulo="Pra adolescente de 15 anos">
+
+Vamos imaginar algo concreto.
+
+A ação da **Petrobras (PETR4)** vale **R\$ 38,40** hoje. Você acha que ela vai subir nos próximos 90 dias.
+
+Você tem duas escolhas:
+
+**Escolha A**: Comprar a ação. Custa R\$38,40 a unidade. Se subir pra R\$50, você ganha R\$11,60. Se cair pra R\$30, perde R\$8,40.
+
+**Escolha B**: Comprar uma **opção de compra** — o direito (mas não a obrigação) de comprar a ação a R\$41 daqui a 90 dias. Essa opção custa, digamos, **R\$1,80**. Se a ação subir pra R\$50, você exerce: paga R\$41, vende a R\$50, lucra R\$9 menos os R\$1,80 pagos = **R\$7,20 de lucro com investimento de só R\$1,80** (lucro de 300%!). Se a ação cair pra R\$30, você não exerce — só perde os R\$1,80.
+
+Por que opção é tão poderosa? **Alavancagem** — você controla R\$41 de ação com R\$1,80.
+
+Por que ninguém usa opção pra tudo? Porque ela **vence**. Se em 90 dias a ação ficou em R\$40,99, você não exerce e perde **100% do que pagou**.
+
+A pergunta de Black-Scholes é: **quanto deveria custar essa opção, em teoria justa?**
+
+A fórmula combina:
+
+$$ C = S \cdot N(d_1) - K \cdot \e^{-rT} \cdot N(d_2) $$
+
+Não te assusta. As letras são:
+
+- $S$: preço atual da ação (R\$38,40)
+- $K$: preço-alvo do exercício, "strike" (R\$41)
+- $r$: taxa de juros do CDI (digamos 11% ao ano = 0,11)
+- $T$: tempo até o vencimento, em anos (90 dias = 90/365 ≈ 0,247)
+- $\sigma$: o quanto a ação balança normalmente, "volatilidade" (digamos 35% ao ano = 0,35)
+- $N(\cdot)$: a famosa **distribuição normal** — a curva de sino que você vai ver em estatística
+
+Plugando os números: a opção justa custa cerca de **R\$1,79**.
+
+<Insight>
+
+**Por que isso é mágico?** Black-Scholes diz: dado preço, juros, vol e tempo, o **preço justo da opção é matematicamente determinado**. Não é opinião. Não é chute. Se o mercado vender a R\$2,50, há "vol implícita" maior — o mercado está prevendo que a ação vai balançar mais que 35%. Se vender a R\$1,30, o mercado prevê menos balanço.
+
+A fórmula extrai do preço o que o mercado pensa. **Isso é poderoso pacas.**
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia / finanças">
+
+Você está em um curso de **Mestrado em Finanças**, ou em **Engenharia Financeira** na Poli, ou em **Quant** preparando entrevista. Black-Scholes é o pão e a manteiga.
+
+### Origem: replicação dinâmica
+
+A intuição central **não é a fórmula** — é o argumento de não-arbitragem via **carteira replicante**:
+
+- Long $\Delta$ ações, short 1 call.
+- Pelo lema de Itô, o $dV$ da carteira é livre de risco se $\Delta = \partial C/\partial S$.
+- Carteira sem risco → rende $r$. Daí a EDP.
+
+Esse argumento é **profundamente diferente** de "calcular esperança de payoff e descontar". Black-Scholes é, fundamentalmente, **um argumento de hedge dinâmico contínuo**.
+
+### Vol implícita — o que de fato se opera
+
+Mesa de derivativos não opera "preço da call". Opera **vol implícita** — o $\sigma$ que, plugado em Black-Scholes, devolve o preço observado:
+
+$$ \sigma_{\text{impl}}(C_{\text{mkt}}) = \text{BS}^{-1}(C_{\text{mkt}}, S, K, r, T) $$
+
+Resolvido por **Newton-Raphson** ou Brent (você usa bisseção como fallback se Newton diverge). É uma das primeiras aplicações reais que você vê de "achar zero de função" — exatamente o tema do método da bisseção neste site.
+
+### Cross-domínio: a equação do calor
+
+A EDP de Black-Scholes (Eq. 2 na porta formal) é, **literalmente**, a equação do calor disfarçada. Mudança de variáveis $u(x, \tau) = \e^{\alpha x + \beta \tau} V(S, t)$ com $x = \ln S, \tau = T - t$ leva a:
+
+$$ \pdiff{u}{\tau} = \pdiff{^2 u}{x^2} $$
+
+Toda intuição que você tem sobre **difusão de calor** vale para opções — incluindo soluções por funções de Green, transformada de Fourier, separação de variáveis. Quando o quant fala em "kernel de Black-Scholes", é a função de Green da equação do calor.
+
+### Conexão com outras áreas
+
+- **Probabilidade**: $N(d_2)$ é a probabilidade neutra a risco da call terminar ITM.
+- **Cálculo estocástico**: Itô, martingales, mudança de medida (Girsanov).
+- **Métodos numéricos**: solução por diferenças finitas é alternativa à fórmula fechada — útil para opções americanas e exóticas onde não há fórmula.
+- **Engenharia de software**: implementação requer cuidado com $T \to 0$ (singularidade de $d_1$) e $\sigma \to 0$ (idem). Pegadinha clássica.
+
+### Exemplo numérico completo
+
+Mesmo caso da PETR4 anterior, agora com toda a álgebra:
+
+| Parâmetro | Valor |
+|---|---|
+| $S$ (preço PETR4) | R\$ 38,40 |
+| $K$ (strike PETRJ41) | R\$ 41,00 |
+| $r$ (CDI) | 11,5% a.a. = 0,115 |
+| $\sigma$ (vol histórica 90d) | 34% a.a. = 0,34 |
+| $T$ | 90/365 = 0,2466 a |
+
+Cálculo:
+
+$$ d_1 = \frac{\ln(38{,}40/41) + (0{,}115 + 0{,}34^2/2)(0{,}2466)}{0{,}34\sqrt{0{,}2466}} = -0{,}119 $$
+
+$$ d_2 = d_1 - 0{,}34\sqrt{0{,}2466} = -0{,}288 $$
+
+$$ N(d_1) = 0{,}453, \quad N(d_2) = 0{,}387 $$
+
+$$ C = 38{,}40 \cdot 0{,}453 - 41 \cdot \e^{-0{,}115 \cdot 0{,}2466} \cdot 0{,}387 = R\$\, 1{,}93 $$
+
+Greeks da opção:
+
+- $\Delta = N(d_1) = 0{,}453$ → cada R\$1 que PETR4 sobe, a opção sobe R\$0,45
+- $\Gamma = N'(d_1)/(S\sigma\sqrt{T}) = 0{,}061$ → o $\Delta$ acelera com o preço
+- $\nu = S\sqrt{T} N'(d_1) \approx 7{,}57$ por unidade de vol → cada 1pp de vol implícita = R\$0,076
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+Black-Scholes não é a verdade. É a **língua franca** que torna possível a conversa entre traders de Tóquio, Londres, Nova York e São Paulo.
+
+### Toda hipótese é falsa em estresse
+
+| Hipótese BS | Realidade | Como o mercado lida |
+|---|---|---|
+| Log-normalidade | **Cauda gorda**. Distribuições reais têm curtose >> 3. Crashes acontecem. | Smile/skew de vol implícita; modelos de salto (Merton, Kou). |
+| $\sigma$ constante | Vol é **estocástica**. Smile + termo + skew formam superfície 3D. | Heston, SABR, rough Bergomi. |
+| $r$ constante | Juros são estocásticos. Importante em opções longas. | Hull-White, HJM, multi-curve. |
+| Mercado completo | Fricção, bid-ask, capital regulatório, funding. | Funding-adjusted pricing (FVA), capital VA (KVA). |
+| Hedge contínuo | Hedge é discreto. Cada rebalance custa. | Delta-hedging discreto + análise de erro de réplica. |
+
+### Cargo-cult versus uso correto
+
+LTCM caiu em 1998 confiando em modelos. Bear Stearns caiu em 2008 também. Lição operacional:
+
+1. **Calibração importa mais que modelo**. Quem calibra mal o melhor modelo perde para quem calibra bem o pior modelo.
+2. **Stress test fora da log-normalidade é obrigatório**. Vol histórica subestima cauda. Use cenários com vol 3x maior, salto de 30%, gap em abertura.
+3. **Monitore os Greeks de todas as posições agregadas**, não só por trade. Δ líquido da carteira, Γ, ν, exposição a salto.
+
+### Volatilidade implícita como termômetro
+
+A surface de vol implícita é o **termômetro do medo**. Em períodos calmos, smile é suave (~25% no money, ~35% nos extremos). Em pânico, vol salta para 80%, 100% (caso 2008, COVID-2020, COVID-2021 lockdown energético).
+
+Os índices VIX (S&P 500), VVIX (vol da vol), MOVE (vol de Treasuries) são todos derivados dessa idéia: extrair a expectativa do mercado a partir de preços de opções.
+
+### Caso real: vol implícita de PETR4 em 2024
+
+Segundo dados da B3 publicados pelo BACEN no SGS (~outubro 2024), o smile de PETR4 30 dias estava:
+
+| Strike (% Spot) | Vol implícita |
+|---|---|
+| 80% | 47% |
+| 90% | 41% |
+| 100% (ATM) | 35% |
+| 110% | 32% |
+| 120% | 33% |
+
+**Skew negativo** clássico de ações: puts OTM (proteção) custam mais vol que calls OTM. O mercado paga prêmio por proteção contra queda — e faz sentido, porque queda em ações tipicamente vem com vol explodindo.
+
+### Custo real de "fazer hedge"
+
+Uma posição vendida em 1.000 calls PETR4 strike R\$41 a 90 dias precisa de delta hedge contínuo. Custos diários:
+
+- **Custo de funding** das ações compradas para delta-hedge: ~CDI × valor da posição.
+- **Custo de execução** (bid-ask + impact): ~0,15% por rebalance.
+- **Slippage** em dias de vol alta: pode dobrar o custo de execução.
+
+Em 90 dias, com rebalanceamento diário, o custo de hedge consome **2-4% do prêmio recebido**. É por isso que MM de derivativo cobra spread sobre BS — não é ganância, é **hedge real custa caro**.
+
+### Custo total de uma operação típica
+
+Pequeno investidor pessoa física comprando 100 contratos de PETRJ41 a R\$1,93 cada:
+
+| Item | Valor |
+|---|---|
+| Prêmio pago (100 × 100 × R\$1,93) | R\$ 19.300,00 |
+| Corretagem (corretora premium) | R\$ 30,00 |
+| Emolumentos B3 | R\$ 12,00 |
+| Liquidação | R\$ 8,00 |
+| ISS sobre corretagem | R\$ 1,50 |
+| **Total efetivo** | **R\$ 19.351,50** |
+
+Custo total ~0,27% do prêmio — relativamente baixo no varejo brasileiro 2024-2025. Em corretoras de banco grande, pode chegar a 1-2%.
+
+**A pergunta que separa profissional de amador**: você está pagando vol implícita maior ou menor que sua estimativa? Se maior, o mercado precifica acima do que você acredita — você está vendendo (mesmo comprando uma call, é uma posição short de vol relativa). Operar derivativo sem essa lente é jogar na sorte.
+
+### Alternativas modernas
+
+- **Heston** (1993) — vol estocástica com correlação preço-vol. Captura skew melhor.
+- **Local Vol (Dupire 1994)** — vol = função determinística de $S$ e $t$. Calibra exatamente a smile.
+- **SABR** (Hagan 2002) — referência em mesa de FX e taxas de juros.
+- **Rough Bergomi** (Bayer-Friz-Gatheral 2016) — vol da vol roughly fractional Brownian. Estado-da-arte em research.
+
+Mas todos esses **se reduzem a BS** quando $\sigma$ é constante. BS é o **modelo nulo** sobre o qual tudo é construído. Saber BS direito é pré-requisito para saber qualquer coisa séria em quant finance.
+
+</Porta>
+
+</DuasPortas>
+
+<Leituras>
+
+- **Black, F.; Scholes, M.** (1973). *The Pricing of Options and Corporate Liabilities*. Journal of Political Economy 81(3): 637-654. **O paper original.**
+- **Hull, J.C.** *Options, Futures, and Other Derivatives*. 11ª ed., Pearson. Bíblia da área.
+- **Wilmott, P.** *Paul Wilmott on Quantitative Finance*. Wiley. Voz crítica e prática.
+- **Gatheral, J.** *The Volatility Surface*. Wiley. Após dominar BS, esse livro mostra como o mercado real funciona.
+- **Columbia Foundations FE** — [Black-Scholes Notes](https://www.columbia.edu/~mh2078/FoundationsFE/BlackScholes.pdf). Notas grátis em PDF.
+- **B3** — [Histórico de cotações de opções](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/derivativos/).
+
+</Leituras>
