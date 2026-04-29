@@ -4,6 +4,7 @@ import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { LocaleProvider } from '@/components/layout/LocaleProvider'
+import { VisitorTracker } from '@/components/layout/VisitorTracker'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Pular para o conteúdo principal
           </a>
           <Header />
+          <VisitorTracker />
           <main id="conteudo" tabIndex={-1} className="flex-1">
             {children}
           </main>
