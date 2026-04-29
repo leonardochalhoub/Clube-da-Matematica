@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import katex from 'katex'
 import { type Prova, PROVAS } from '@/content/provas-data'
 
@@ -10,7 +10,6 @@ const macros: Record<string, string> = {
 }
 
 function renderMath(text: string): string {
-  // Inline $...$ → KaTeX
   return text.replace(/\$([^$]+)\$/g, (_, expr) => {
     try {
       return katex.renderToString(expr, {
@@ -25,26 +24,33 @@ function renderMath(text: string): string {
 }
 
 function renderMarkdown(text: string): string {
-  // Lightweight markdown: **bold** and \n\n paragraphs
   let html = renderMath(text)
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
   html = html.replace(/\n\n/g, '</p><p class="mt-2">')
   return `<p>${html}</p>`
 }
 
-interface ProvaViewerProps {
-  initialId?: string
-}
-
-export function ProvaViewer({ initialId }: ProvaViewerProps) {
-  const [provaId, setProvaId] = useState<string>(initialId ?? PROVAS[0]!.id)
+export function ProvaViewer() {
+  const [trimFiltro, setTrimFiltro] = useState<number>(1)
+  const provasDoTrim = useMemo(
+    () => PROVAS.filter((p) => p.trim === trimFiltro),
+    [trimFiltro],
+  )
+  const [provaId, setProvaId] = useState<string>(
+    provasDoTrim.find((p) => p.status === 'curada')?.id ??
+      provasDoTrim[0]?.id ??
+      PROVAS[0]!.id,
+  )
   const [revealed, setRevealed] = useState<Record<number, boolean>>({})
 
-  const prova = PROVAS.find((p) => p.id === provaId)
-  if (!prova) return null
+  const prova = PROVAS.find((p) => p.id === provaId) ?? provasDoTrim[0] ?? PROVAS[0]!
 
-  function toggleReveal(num: number) {
-    setRevealed((r) => ({ ...r, [num]: !r[num] }))
+  function selectTrim(t: number) {
+    setTrimFiltro(t)
+    const novas = PROVAS.filter((p) => p.trim === t)
+    const primeiraCurada = novas.find((p) => p.status === 'curada')
+    setProvaId(primeiraCurada?.id ?? novas[0]?.id ?? PROVAS[0]!.id)
+    setRevealed({})
   }
 
   function selectProva(id: string) {
@@ -52,18 +58,49 @@ export function ProvaViewer({ initialId }: ProvaViewerProps) {
     setRevealed({})
   }
 
+  function toggleReveal(num: number) {
+    setRevealed((r) => ({ ...r, [num]: !r[num] }))
+  }
+
   const totalQuestoes = prova.questoes.length
   const totalReveladas = Object.values(revealed).filter(Boolean).length
 
   return (
     <div className="not-prose">
-      {/* Seletor de prova */}
+      {/* Filtro por trimestre */}
+      <div className="mb-4 rounded-2xl border border-clube-mist-soft/40 bg-clube-cream-soft p-4">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
+          Trimestre
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((t) => {
+            const ativo = t === trimFiltro
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => selectTrim(t)}
+                className={
+                  'rounded-full px-3 py-1 font-mono text-xs font-semibold transition-all ' +
+                  (ativo
+                    ? 'bg-clube-teal text-white shadow-sm'
+                    : 'border border-clube-mist-soft/60 bg-clube-surface text-clube-ink/85 hover:border-clube-teal hover:text-clube-teal')
+                }
+              >
+                T{t}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Seletor de versão dentro do trim */}
       <div className="mb-6 rounded-2xl border border-clube-mist-soft/40 bg-clube-cream-soft p-4">
         <label
           htmlFor="prova-select"
           className="mb-2 block text-xs font-semibold uppercase tracking-wider text-clube-gold-deep"
         >
-          Trocar de prova
+          Versão da prova
         </label>
         <select
           id="prova-select"
@@ -71,9 +108,9 @@ export function ProvaViewer({ initialId }: ProvaViewerProps) {
           onChange={(e) => selectProva(e.target.value)}
           className="w-full rounded-lg border border-clube-mist-soft/60 bg-clube-surface px-3 py-2 text-sm text-clube-ink focus:border-clube-teal focus:outline-none"
         >
-          {PROVAS.map((p) => (
+          {provasDoTrim.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.titulo}
+              {p.titulo} {p.status === 'curada' ? '✓' : '· em curadoria'}
             </option>
           ))}
         </select>
@@ -100,11 +137,25 @@ export function ProvaViewer({ initialId }: ProvaViewerProps) {
         </div>
         <p className="mt-2 text-sm text-clube-mist">{prova.descricao}</p>
         <p className="mt-1 text-xs italic text-clube-mist/70">
-          Trim {prova.trim} · versão {prova.versao} · {totalQuestoes} questões
-          · {totalReveladas} resolução{totalReveladas === 1 ? '' : 'ões'}{' '}
-          revelada{totalReveladas === 1 ? '' : 's'}
+          Trim {prova.trim} · versão {prova.versao} · {totalQuestoes} questões ·{' '}
+          {totalReveladas} resolução{totalReveladas === 1 ? '' : 'ões'} revelada
+          {totalReveladas === 1 ? '' : 's'}
         </p>
       </header>
+
+      {/* Caso seja stub em-curadoria */}
+      {prova.status === 'em-curadoria' && (
+        <div className="mb-8 rounded-xl border-2 border-dashed border-clube-mist-soft p-6 text-center">
+          <p className="text-sm text-clube-mist">
+            Esta versão está sendo curada. As questões saem de OpenStax,
+            Active Calculus e outros livros públicos — escrever cada questão
+            com passo a passo profundo leva tempo.
+          </p>
+          <p className="mt-3 text-sm text-clube-ink">
+            <strong>Use a versão 1 deste trimestre por enquanto.</strong>
+          </p>
+        </div>
+      )}
 
       {/* Questões */}
       <ol className="space-y-6">
@@ -128,6 +179,24 @@ export function ProvaViewer({ initialId }: ProvaViewerProps) {
                 __html: renderMath(q.enunciado),
               }}
             />
+
+            {/* Fonte original */}
+            <div className="mt-3 rounded-md border border-clube-mist-soft/30 bg-clube-cream-soft px-3 py-2 text-[11px]">
+              <span className="font-semibold uppercase tracking-wider text-clube-mist">
+                fonte:
+              </span>{' '}
+              <a
+                href={q.fonteOriginal.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-clube-teal hover:text-clube-teal-deep"
+              >
+                {q.fonteOriginal.livro}
+              </a>{' '}
+              <span className="text-clube-mist">
+                · {q.fonteOriginal.ref} · {q.fonteOriginal.licenca}
+              </span>
+            </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button

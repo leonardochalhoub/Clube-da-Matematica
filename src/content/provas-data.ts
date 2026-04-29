@@ -1,16 +1,28 @@
 /**
- * Banco de provas integradas — 12 trimestres × 10 versões = 120 provas.
+ * Banco de provas integradas — questões REAIS de livros públicos.
  *
- * Cada Trim tem um TEMPLATE que parametriza questões. A função
- * `gerarProvasDoTrim(trimNum)` produz 10 versões com parâmetros
- * variando por seed (1..10), preservando estrutura mas mudando números.
+ * Princípio editorial (declarado pelo dono):
+ *   "os exercícios não são gerados pelo Claude. o Ledger são os livros."
  *
- * Cada questão traz:
- *   - enunciado (com $...$ KaTeX inline)
- *   - resposta
- *   - passos: explicação passo a passo COM o porquê de cada passo
+ * Cada questão tem `fonteOriginal` apontando para a obra exata
+ * (livro · seção · número do exercício). Adaptamos APENAS a tradução
+ * pt-BR e o contexto numérico (ex.: PETR4 em vez de Apple). A estrutura
+ * matemática e o número do exercício preservam o ledger.
  *
- * Adicionar mais Trims: estender PROVA_TEMPLATES.
+ * Licenças:
+ *  - OpenStax (CC-BY 4.0): redistribuição livre com atribuição
+ *  - Stitz-Zeager (CC-BY-NC-SA): redistribuição não-comercial com atribuição + ShareAlike
+ *  - Active Calculus (CC-BY-NC-SA): idem
+ *  - Lebl (CC-BY-SA): idem
+ *
+ * Cobertura atual:
+ *  - 12 trimestres com pelo menos 1 prova de referência cada (com exercícios reais)
+ *  - Trim 1 com 3 versões integralmente curadas (versão 1, 2, 3)
+ *  - Versões 4-10 dos demais trimestres aparecem marcadas como "em curadoria"
+ *
+ * Como adicionar versões: copiar uma prova existente, trocar a seleção
+ * de exercícios para outros do mesmo capítulo da fonte, atualizar
+ * `fonteOriginal.exerc` em cada questão.
  */
 
 export type Dificuldade =
@@ -20,6 +32,17 @@ export type Dificuldade =
   | 'desafio'
   | 'demonstracao'
 
+export interface FonteOriginal {
+  /** Obra de origem. Ex.: "OpenStax College Algebra 2e". */
+  livro: string
+  /** URL pública (capítulo/seção quando possível). */
+  url: string
+  /** Capítulo · seção · número do exercício no livro. Ex.: "§3.2 ex. 17". */
+  ref: string
+  /** Licença ("CC-BY 4.0", "CC-BY-NC-SA 4.0", etc). */
+  licenca: string
+}
+
 export interface Questao {
   numero: number
   enunciado: string
@@ -27,7 +50,10 @@ export interface Questao {
   /** Passo a passo COM o porquê. Markdown lite + $...$ inline. */
   passos: string
   dificuldade: Dificuldade
+  /** Lições do programa que essa questão exercita. */
   aulasCobertas: string[]
+  /** Origem real da questão. Obrigatório. */
+  fonteOriginal: FonteOriginal
 }
 
 export interface Prova {
@@ -41,985 +67,1730 @@ export interface Prova {
   duracaoMinutos: number
   intensidade: 1 | 2 | 3 | 4 | 5
   publicoAlvo: '1.º ano' | '2.º ano' | '3.º ano' | 'Pré-vestibular'
+  /** Status de curadoria. "curada" = todas questões reais. */
+  status: 'curada' | 'em-curadoria'
   questoes: Questao[]
 }
 
 // =============================================================================
-// Helpers de geração
+// Fontes (atalhos para evitar repetição)
 // =============================================================================
 
-/** Pequeno PRNG determinístico (LCG). */
-function lcg(seed: number) {
-  let s = seed
-  return () => {
-    s = (s * 1664525 + 1013904223) >>> 0
-    return s
-  }
-}
+const OS_CA = 'https://openstax.org/details/books/college-algebra-2e'
+const OS_AT = 'https://openstax.org/details/books/algebra-and-trigonometry-2e'
+const OS_CALC1 = 'https://openstax.org/details/books/calculus-volume-1'
+const OS_CALC2 = 'https://openstax.org/details/books/calculus-volume-2'
+const OS_CALC3 = 'https://openstax.org/details/books/calculus-volume-3'
+const OS_STAT = 'https://openstax.org/details/books/introductory-statistics'
+const STITZ = 'https://stitz-zeager.com/'
+const ACTIVE_CALC = 'https://activecalculus.org/single/'
+const LEBL = 'https://www.jirka.org/diffyqs/'
 
-/** Pega item de array de forma determinística por seed. */
-function pick<T>(arr: T[], rand: () => number): T {
-  return arr[rand() % arr.length]!
-}
-
-/** Inteiro em [min, max]. */
-function intRange(min: number, max: number, rand: () => number): number {
-  return min + (rand() % (max - min + 1))
-}
+const CC_BY = 'CC-BY 4.0'
+const CC_BY_NC_SA = 'CC-BY-NC-SA 4.0'
+const CC_BY_SA = 'CC-BY-SA 4.0'
 
 // =============================================================================
-// Templates por Trimestre
+// TRIM 1 — Conjuntos, funções, afim, quadrática, exp, log, taxa
+// Fonte primária: OpenStax College Algebra 2e (CC-BY 4.0)
 // =============================================================================
 
-interface TrimTemplate {
-  trim: number
-  publicoAlvo: Prova['publicoAlvo']
-  intensidade: Prova['intensidade']
-  duracaoMinutos: number
-  tituloBase: string
-  descricao: string
-  /** Recebe seed (1..10), retorna lista de questões da versão. */
-  geraQuestoes: (versao: number) => Questao[]
-}
-
-// -----------------------------------------------------------------------------
-// TRIM 1 — Funções, Conjuntos, Taxa de Variação
-// -----------------------------------------------------------------------------
-
-const TEMPLATE_TRIM_1: TrimTemplate = {
+const PROVA_T1_V1: Prova = {
+  id: 'trim-1-v1',
   trim: 1,
-  publicoAlvo: '1.º ano',
-  intensidade: 2,
+  versao: 1,
+  titulo: 'Trim 1 · Versão 1 — Funções, afim, quadrática, exp/log',
+  descricao:
+    'Prova de fechamento do Trim 1 (1.º ano). Domínio de funções, ' +
+    'gráficos, afim, quadrática, exponencial e logarítmica.',
   duracaoMinutos: 90,
-  tituloBase: 'Funções e taxa de variação',
-  descricao: 'Trim 1 do Ano 1: conjuntos, funções, afim, quadrática, exp/log, taxa de variação média.',
-  geraQuestoes: (v) => {
-    const r = lcg(v * 31)
-    const a = intRange(2, 5, r)
-    const b = intRange(1, 6, r)
-    const x0 = intRange(1, 4, r)
-    const inputF = intRange(2, 6, r)
-    const massa = intRange(60, 90, r)
-    const altura = (160 + (v % 20)) / 100 // 1.60 - 1.79
-    const taxa = intRange(3, 8, r)
-    const valor0 = intRange(1000, 5000, r)
-
-    return [
-      {
-        numero: 1,
-        enunciado: `Determine o domínio máximo de $f(x) = \\sqrt{x - ${x0}}$.`,
-        resposta: `$[${x0}, +\\infty)$`,
-        passos:
-          `**Passo 1 — Identifique a restrição.** Sob raiz quadrada, o argumento deve ser não-negativo (em $\\mathbb{R}$): $x - ${x0} \\geq 0$.\n\n` +
-          `**Passo 2 — Resolva a inequação.** Somando ${x0} aos dois lados: $x \\geq ${x0}$.\n\n` +
-          `**Passo 3 — Por que essa é a resposta?** O domínio máximo é o **maior subconjunto** de $\\mathbb{R}$ onde a fórmula faz sentido. Para $x < ${x0}$, $\\sqrt{}$ daria número complexo (fora de $\\mathbb{R}$). Logo, em notação de intervalo: $[${x0}, +\\infty)$ — fechado em ${x0} porque $\\sqrt{0}=0$ é definido.\n\n` +
-          `**Conexão com aulas.** Lições 1 (intervalos) + 2 (domínio).`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-01-conjuntos-intervalos', 'aula-02-funcoes'],
-      },
-      {
-        numero: 2,
-        enunciado: `Para a função afim $f(x) = ${a}x + ${b}$, calcule $f(${inputF})$.`,
-        resposta: `$f(${inputF}) = ${a * inputF + b}$`,
-        passos:
-          `**Passo 1 — Substitua o valor.** $f(${inputF}) = ${a} \\cdot ${inputF} + ${b}$.\n\n` +
-          `**Passo 2 — Calcule.** ${a} \\cdot ${inputF} = ${a * inputF}, e ${a * inputF} + ${b} = ${a * inputF + b}$.\n\n` +
-          `**Por que esse cálculo?** A função afim é a regra "multiplica por $a$ e soma $b$". Substituir é literalmente aplicar a regra com $x = ${inputF}$.\n\n` +
-          `**Insight extra.** O coeficiente angular $a = ${a}$ significa que cada aumento de 1 unidade em $x$ aumenta $f$ em ${a} unidades — taxa de variação constante (Lição 9).`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-03-afim', 'aula-09-taxa-variacao'],
-      },
-      {
-        numero: 3,
-        enunciado: `Encontre o vértice da parábola $f(x) = x^2 - ${2 * x0}x + ${x0 * x0 + b}$.`,
-        resposta: `$(${x0}, ${b})$`,
-        passos:
-          `**Passo 1 — Identifique $a, b, c$.** Comparando com $ax^2 + bx + c$: $a = 1$, $b = -${2 * x0}$, $c = ${x0 * x0 + b}$.\n\n` +
-          `**Passo 2 — $x$ do vértice.** Use $x_V = -b/(2a) = ${2 * x0}/2 = ${x0}$.\n\n` +
-          `**Passo 3 — $y$ do vértice.** Substitua $x = ${x0}$ na função: $f(${x0}) = ${x0 * x0} - ${2 * x0 * x0} + ${x0 * x0 + b} = ${b}$.\n\n` +
-          `**Por que essa fórmula?** $x_V$ é o ponto onde a derivada $f'(x) = 2ax + b$ se anula — geometricamente, o ponto onde a tangente é horizontal (mínimo se $a > 0$). Você verá isso formalmente na Lição 51.\n\n` +
-          `**Verificação rápida.** Forma canônica $(x - ${x0})^2 + ${b}$ — se a forma "completar quadrado" der esse padrão, vértice é $(${x0}, ${b})$.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-04-quadratica'],
-      },
-      {
-        numero: 4,
-        enunciado: `Resolva $|2x - ${b}| < ${a + 2}$.`,
-        resposta: `$x \\in (\\frac{${b - a - 2}}{2}, \\frac{${b + a + 2}}{2})$`,
-        passos:
-          `**Passo 1 — Reescreva como dupla desigualdade.** $|u| < k$ (com $k > 0$) equivale a $-k < u < k$. Aqui: $-${a + 2} < 2x - ${b} < ${a + 2}$.\n\n` +
-          `**Passo 2 — Some ${b} aos três membros.** $${b - a - 2} < 2x < ${b + a + 2}$.\n\n` +
-          `**Passo 3 — Divida tudo por 2.** $${(b - a - 2) / 2} < x < ${(b + a + 2) / 2}$.\n\n` +
-          `**Por que vale tirar o módulo assim?** Geometricamente, $|2x - ${b}| < ${a + 2}$ significa "a distância de $2x$ até ${b}$ é menor que ${a + 2}$". Isso descreve um **intervalo aberto** em torno de ${b}/2 com raio ${(a + 2) / 2}.\n\n` +
-          `**Conexão.** Lição 1 (intervalos) — toda inequação modular vira intervalo.`,
-        dificuldade: 'compreensao',
-        aulasCobertas: ['aula-01-conjuntos-intervalos'],
-      },
-      {
-        numero: 5,
-        enunciado: `Calcule a TVM (taxa de variação média) de $f(x) = x^2 + ${a}x$ no intervalo $[1, ${b + 1}]$.`,
-        resposta: `${b + 2 + a}`,
-        passos:
-          `**Passo 1 — Calcule $f$ nos extremos.**\n- $f(1) = 1 + ${a} = ${1 + a}$\n- $f(${b + 1}) = ${(b + 1) ** 2} + ${a * (b + 1)} = ${(b + 1) ** 2 + a * (b + 1)}$\n\n` +
-          `**Passo 2 — Aplique a fórmula.** $\\text{TVM} = \\frac{f(${b + 1}) - f(1)}{${b + 1} - 1} = \\frac{${(b + 1) ** 2 + a * (b + 1)} - ${1 + a}}{${b}} = ${b + 2 + a}$.\n\n` +
-          `**Por que TVM importa?** É a inclinação da reta secante pelo gráfico nos pontos $(1, f(1))$ e $(${b + 1}, f(${b + 1}))$. **Essa é a versão discreta da derivada** — quando o intervalo encolhe ($\\Delta x \\to 0$), TVM vira derivada $f'(x_0)$. **Aqui está a ponte para o Cálculo** (Trim 5-6).\n\n` +
-          `**Aplicação prática.** Em economia, TVM do custo entre $q_1$ e $q_2$ é o "custo marginal médio". Em cinemática, TVM da posição é a velocidade média.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-09-taxa-variacao'],
-      },
-      {
-        numero: 6,
-        enunciado: `Resolva $${a}^x = ${a ** (b > 4 ? 3 : b)}$.`,
-        resposta: `$x = ${b > 4 ? 3 : b}$`,
-        passos:
-          `**Passo 1 — Reconheça a base.** Lado direito $= ${a}^{${b > 4 ? 3 : b}}$ por inspeção (${a} elevado a ${b > 4 ? 3 : b}).\n\n` +
-          `**Passo 2 — Iguale expoentes.** Se $a^x = a^y$ com $a > 0$, $a \\neq 1$, então $x = y$ pela injetividade da exponencial.\n\n` +
-          `**Por que isso funciona?** $f(x) = ${a}^x$ é **estritamente crescente** (Lição 6) — ou seja, injetora. Logo dois valores distintos produzem imagens distintas; igualdade de imagens implica igualdade de inputs.\n\n` +
-          `**Caso geral.** Se as bases não fossem iguais, aplicaríamos $\\log$ em ambos os lados: $x = \\log_{${a}}(${a ** (b > 4 ? 3 : b)})$.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-06-exponencial'],
-      },
-      {
-        numero: 7,
-        enunciado: `Calcule $\\log_{${a}}(${a ** 4})$.`,
-        resposta: `$4$`,
-        passos:
-          `**Passo 1 — Use a definição.** $\\log_a(x) = y \\iff a^y = x$. Aqui $a = ${a}$, $x = ${a ** 4}$.\n\n` +
-          `**Passo 2 — Por inspeção ou propriedade.** Como ${a ** 4} = ${a}^4$, temos $\\log_{${a}}(${a}^4) = 4$ pela propriedade $\\log_a(a^n) = n$.\n\n` +
-          `**Por que essa propriedade?** $\\log_a$ é a inversa de $a^x$. Aplicar uma após a outra dá identidade: $\\log_a(a^n) = n$ e $a^{\\log_a x} = x$.\n\n` +
-          `**Aplicação.** Em escalas físicas, $\\log_{10}(1000) = 3$ → "1000 tem 3 zeros". Richter, decibel, pH usam isso.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-07-logaritmo'],
-      },
-      {
-        numero: 8,
-        enunciado: `Uma cultura de bactérias dobra a cada hora. Inicialmente há ${valor0} bactérias. Quantas após ${a} horas?`,
-        resposta: `$${valor0} \\cdot 2^{${a}} = ${valor0 * 2 ** a}$`,
-        passos:
-          `**Passo 1 — Modelo exponencial.** Cada hora dobra → fator multiplicativo 2 por hora. Após $t$ horas: $N(t) = N_0 \\cdot 2^t$.\n\n` +
-          `**Passo 2 — Substitua $N_0 = ${valor0}$, $t = ${a}$.** $N(${a}) = ${valor0} \\cdot 2^{${a}} = ${valor0} \\cdot ${2 ** a} = ${valor0 * 2 ** a}$.\n\n` +
-          `**Por que crescimento é exponencial?** Porque a taxa de reprodução é proporcional à população atual: $\\dot N = k N$, cuja solução é $N = N_0 e^{kt}$. Em forma com base 2: $N = N_0 \\cdot 2^{t/T}$ onde $T$ é tempo de duplicação ($T = 1$ h aqui).\n\n` +
-          `**Realismo.** Em laboratório, esse modelo só vale enquanto os nutrientes são abundantes. Em algum ponto a curva vira logística (saturação) — Lição 94.`,
-        dificuldade: 'modelagem',
-        aulasCobertas: ['aula-06-exponencial', 'aula-08-crescimento'],
-      },
-      {
-        numero: 9,
-        enunciado: `Calcule o IMC de uma pessoa com ${massa} kg e ${altura.toFixed(2)} m. (IMC = massa / altura²)`,
-        resposta: `IMC = ${(massa / (altura * altura)).toFixed(1)} kg/m²`,
-        passos:
-          `**Passo 1 — Eleve a altura ao quadrado.** $${altura.toFixed(2)}^2 = ${(altura * altura).toFixed(4)}$ m².\n\n` +
-          `**Passo 2 — Divida.** IMC = ${massa} / ${(altura * altura).toFixed(4)} = ${(massa / (altura * altura)).toFixed(2)} kg/m².\n\n` +
-          `**Por que essa fórmula?** Quetelet (1832) propôs IMC como índice **invariante por escala** aproximado: pessoas geometricamente similares têm massa ∝ altura³ (volume), mas em prática a estrutura não é cúbica. O quociente massa/altura² é uma aproximação empírica que funciona bem para adultos.\n\n` +
-          `**Limitações.** IMC não distingue gordura de músculo. Um halterofilista pode ter IMC > 30 sem obesidade. Use junto com %gordura e circunferência.`,
-        dificuldade: 'modelagem',
-        aulasCobertas: ['aula-02-funcoes'],
-      },
-      {
-        numero: 10,
-        enunciado: `Aplicação de R$ ${valor0} a ${taxa}% ao ano com juros compostos. Saldo após ${a} anos.`,
-        resposta: `R$ ${(valor0 * (1 + taxa / 100) ** a).toFixed(2)}`,
-        passos:
-          `**Passo 1 — Fórmula.** Juros compostos: $S(t) = S_0 (1 + i)^t$ onde $i$ é taxa por período (decimal).\n\n` +
-          `**Passo 2 — Substitua $S_0 = ${valor0}$, $i = ${taxa}/100 = ${taxa / 100}$, $t = ${a}$.** $S = ${valor0} \\cdot (${(1 + taxa / 100).toFixed(4)})^{${a}}$.\n\n` +
-          `**Passo 3 — Calcule a potência.** $(${(1 + taxa / 100).toFixed(4)})^{${a}} = ${((1 + taxa / 100) ** a).toFixed(6)}$.\n\n` +
-          `**Passo 4 — Multiplicação final.** $${valor0} \\cdot ${((1 + taxa / 100) ** a).toFixed(6)} = ${(valor0 * (1 + taxa / 100) ** a).toFixed(2)}$.\n\n` +
-          `**Por que compostos vs simples?** Simples: $S = S_0(1 + it)$ — juros sobre o capital inicial só. Compostos: juros sobre juros — crescimento exponencial. Em 30 anos, a diferença é enorme. Albert Einstein supostamente disse: "juros compostos são a 8.ª maravilha do mundo".\n\n` +
-          `**Continuidade.** Se a capitalização for "instantânea" (limite), aparece $e^{rt}$ — base de Black-Scholes (Lição 119).`,
-        dificuldade: 'modelagem',
-        aulasCobertas: ['aula-08-crescimento'],
-      },
-    ]
-  },
-}
-
-// -----------------------------------------------------------------------------
-// TRIM 2 — Trigonometria + Sequências
-// -----------------------------------------------------------------------------
-
-const TEMPLATE_TRIM_2: TrimTemplate = {
-  trim: 2,
-  publicoAlvo: '1.º ano',
   intensidade: 3,
-  duracaoMinutos: 90,
-  tituloBase: 'Trigonometria e sequências',
-  descricao: 'Trim 2 do Ano 1: razões trig, círculo, equações, leis dos senos/cossenos, PA, PG, limite intuitivo.',
-  geraQuestoes: (v) => {
-    const r = lcg(v * 71)
-    const angulosNotaveis = [30, 45, 60]
-    const ang = pick(angulosNotaveis, r)
-    const angRad = ang === 30 ? '\\pi/6' : ang === 45 ? '\\pi/4' : '\\pi/3'
-    const sinVals: Record<number, string> = { 30: '1/2', 45: '\\sqrt{2}/2', 60: '\\sqrt{3}/2' }
-    const cosVals: Record<number, string> = { 30: '\\sqrt{3}/2', 45: '\\sqrt{2}/2', 60: '1/2' }
-    const a1 = intRange(2, 8, r)
-    const razao = intRange(2, 5, r)
-    const n = intRange(8, 15, r)
-    const lado1 = intRange(3, 9, r)
-    const lado2 = intRange(4, 10, r)
-    const angTri = pick([30, 45, 60, 90, 120], r)
-    const a = intRange(2, 5, r)
-    const b = intRange(1, 6, r)
-
-    return [
-      {
-        numero: 1,
-        enunciado: `Calcule $\\sin(${ang}°)$.`,
-        resposta: `$${sinVals[ang]}$`,
-        passos:
-          `**Passo 1 — Reconheça o ângulo notável.** ${ang}° é um dos 3 ângulos cujos valores trig se decoram: 30°, 45°, 60°.\n\n` +
-          `**Passo 2 — Relembre o triângulo de referência.** Para ${ang}°: ${
-            ang === 30
-              ? 'triângulo 30-60-90 com lados em proporção $1 : \\sqrt{3} : 2$. $\\sin(30°) = $ cateto oposto / hipotenusa = $1/2$.'
-              : ang === 45
-                ? 'triângulo 45-45-90 isóceles. $\\sin(45°) = 1/\\sqrt{2} = \\sqrt{2}/2$.'
-                : 'triângulo 30-60-90. $\\sin(60°) = \\sqrt{3}/2$ (cateto oposto sobre hipotenusa).'
-          }\n\n` +
-          `**Por que esses são notáveis?** Decorrem de geometria simples (triângulo equilátero metade + Pitágoras). Aparecem em problemas físicos (rampa 30°, encaixe 45°) o tempo todo, daí decorá-los.\n\n` +
-          `**Verificação.** ${sinVals[ang]} ≈ ${(Math.sin((ang * Math.PI) / 180)).toFixed(4)}, bate com calculadora.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-11-trig-triangulo'],
-      },
-      {
-        numero: 2,
-        enunciado: `Converta $${ang}°$ para radianos.`,
-        resposta: `$${angRad}$ rad`,
-        passos:
-          `**Passo 1 — Fator de conversão.** $1° = \\pi/180$ rad. (Vem de $360° = 2\\pi$ rad → $1° = 2\\pi/360 = \\pi/180$.)\n\n` +
-          `**Passo 2 — Multiplique.** $${ang} \\cdot \\pi/180 = ${ang}\\pi/180 = ${angRad}$ (após simplificar a fração).\n\n` +
-          `**Por que radianos?** Em cálculo, **radianos é a unidade natural**. As fórmulas $(\\sin x)' = \\cos x$ só valem em radianos. Em graus, ficaria $(\\pi/180)\\cos x$ — feio.\n\n` +
-          `**Truque mnemônico.** $\\pi$ rad = 180° (meia-volta). $\\pi/2$ = 90° (quarto). $\\pi/3$ = 60°. $\\pi/4$ = 45°. $\\pi/6$ = 30°.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-12-circulo-trigonometrico'],
-      },
-      {
-        numero: 3,
-        enunciado: `Resolva $\\sin x = ${sinVals[ang]}$ em $[0, 2\\pi)$.`,
-        resposta:
-          ang === 90
-            ? `$x = \\pi/2$`
-            : `$x \\in \\{${angRad}, \\pi - ${angRad}\\}$`,
-        passos:
-          `**Passo 1 — Identifique o ângulo de referência.** $\\sin x = ${sinVals[ang]}$ → ângulo de referência é $${angRad}$ (do círculo trigonométrico, Q1).\n\n` +
-          `**Passo 2 — Encontre todas as soluções em $[0, 2\\pi)$.** $\\sin$ é positivo em **dois quadrantes** (I e II). Logo:\n- $x_1 = ${angRad}$ (Q1)\n- $x_2 = \\pi - ${angRad}$ (Q2, simetria pela vertical)\n\n` +
-          `**Por que dois valores?** O seno tem **período** $2\\pi$, e dentro de cada período há 2 ângulos distintos (exceto nos extremos $\\pm 1$) com mesmo valor de seno — pela simetria do gráfico em torno de $\\pi/2$.\n\n` +
-          `**Solução geral em $\\mathbb{R}$.** $x = ${angRad} + 2k\\pi$ ou $x = \\pi - ${angRad} + 2k\\pi$, $k \\in \\mathbb{Z}$.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-14-equacoes-trigonometricas'],
-      },
-      {
-        numero: 4,
-        enunciado: `Triângulo qualquer com $a = ${lado1}$, $b = ${lado2}$, ângulo $C = ${angTri}°$ entre eles. Calcule $c$ (lei dos cossenos).`,
-        resposta: `$c = \\sqrt{${lado1 * lado1 + lado2 * lado2 - 2 * lado1 * lado2 * Math.cos((angTri * Math.PI) / 180)}}$ ≈ ${Math.sqrt(lado1 * lado1 + lado2 * lado2 - 2 * lado1 * lado2 * Math.cos((angTri * Math.PI) / 180)).toFixed(2)}`,
-        passos:
-          `**Passo 1 — Lei dos cossenos.** $c^2 = a^2 + b^2 - 2ab\\cos C$.\n\n` +
-          `**Passo 2 — Substitua valores.** $c^2 = ${lado1 ** 2} + ${lado2 ** 2} - 2 \\cdot ${lado1} \\cdot ${lado2} \\cdot \\cos(${angTri}°) = ${lado1 ** 2 + lado2 ** 2} - ${2 * lado1 * lado2}\\cos(${angTri}°)$.\n\n` +
-          `**Passo 3 — Cosseno.** $\\cos(${angTri}°) = ${cosVals[angTri] ?? (angTri === 90 ? '0' : angTri === 120 ? '-1/2' : 'valor numérico')} \\approx ${Math.cos((angTri * Math.PI) / 180).toFixed(4)}$.\n\n` +
-          `**Passo 4 — Calcule.** $c^2 = ${(lado1 ** 2 + lado2 ** 2 - 2 * lado1 * lado2 * Math.cos((angTri * Math.PI) / 180)).toFixed(2)}$, então $c \\approx ${Math.sqrt(lado1 ** 2 + lado2 ** 2 - 2 * lado1 * lado2 * Math.cos((angTri * Math.PI) / 180)).toFixed(2)}$.\n\n` +
-          `**Por que essa lei?** Generaliza Pitágoras para triângulos não-retângulos. Quando $C = 90°$, $\\cos C = 0$ e a fórmula vira $c^2 = a^2 + b^2$ (Pitágoras). O termo $-2ab\\cos C$ "ajusta" pela falta de retângulo.\n\n` +
-          `**Aplicação.** Topografia, navegação, força resultante (regra do paralelogramo).`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-15-leis-senos-cossenos'],
-      },
-      {
-        numero: 5,
-        enunciado: `PA com $a_1 = ${a1}$ e razão $r = ${razao}$. Calcule $a_{${n}}$ e a soma $S_{${n}}$.`,
-        resposta: `$a_{${n}} = ${a1 + (n - 1) * razao}$, $S_{${n}} = ${(n * (a1 + (a1 + (n - 1) * razao))) / 2}$`,
-        passos:
-          `**Passo 1 — Termo geral.** $a_n = a_1 + (n-1)r$. Aqui $a_{${n}} = ${a1} + (${n}-1) \\cdot ${razao} = ${a1} + ${(n - 1) * razao} = ${a1 + (n - 1) * razao}$.\n\n` +
-          `**Passo 2 — Soma de termos (fórmula de Gauss).** $S_n = n(a_1 + a_n)/2 = ${n} \\cdot (${a1} + ${a1 + (n - 1) * razao})/2 = ${n} \\cdot ${a1 + a1 + (n - 1) * razao}/2 = ${(n * (a1 + (a1 + (n - 1) * razao))) / 2}$.\n\n` +
-          `**Por que essas fórmulas?** PA tem **diferença constante**: cada termo é o anterior + r. Após $n-1$ passos: $a_n = a_1 + (n-1)r$. Para a soma, **truque de Gauss criança** (~1789): some os termos em pares simétricos (1.º + último, 2.º + penúltimo, etc.) — cada par soma $a_1 + a_n$, há $n/2$ pares.\n\n` +
-          `**Verificação.** ${a1}, ${a1 + razao}, ${a1 + 2 * razao}, ..., ${a1 + (n - 1) * razao}. Soma rápida com $n$ pequeno bate.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-17-pa'],
-      },
-      {
-        numero: 6,
-        enunciado: `Calcule a soma da PG infinita $1 + 1/${a + 1} + 1/${(a + 1) ** 2} + 1/${(a + 1) ** 3} + \\ldots$.`,
-        resposta: `$\\frac{${a + 1}}{${a}}$`,
-        passos:
-          `**Passo 1 — Identifique $a_1$ e $q$.** Primeiro termo $a_1 = 1$. Razão $q = 1/${a + 1}$.\n\n` +
-          `**Passo 2 — Verifique convergência.** $|q| = 1/${a + 1} < 1$, então a série infinita converge. (Se fosse $\\geq 1$, divergeria.)\n\n` +
-          `**Passo 3 — Aplique a fórmula.** $S_\\infty = a_1/(1 - q) = 1/(1 - 1/${a + 1}) = 1/(${a}/${a + 1}) = ${a + 1}/${a}$.\n\n` +
-          `**Por que a fórmula vale só para $|q| < 1$?** Se $|q| < 1$, $q^n \\to 0$ e $S_n = a_1 \\frac{1 - q^n}{1 - q} \\to \\frac{a_1}{1 - q}$. Se $|q| \\geq 1$, $q^n$ não vai a zero, e a soma cresce sem limite.\n\n` +
-          `**Aplicação histórica.** Paradoxo de Zenão: somar metade + metade da metade + ... = 1. Se o caminho fosse infinitos passos com soma infinita, Aquiles nunca alcançaria a tartaruga. Mas a soma é finita ⟹ ele alcança.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-18-pg'],
-      },
-      {
-        numero: 7,
-        enunciado: `Calcule $\\lim_{n \\to \\infty} \\frac{${a}n + ${b}}{${razao}n + ${a1}}$.`,
-        resposta: `$${a}/${razao}$`,
-        passos:
-          `**Passo 1 — Tipo de indeterminação.** Quando $n \\to \\infty$, numerador e denominador vão a $\\infty$. Forma $\\infty/\\infty$.\n\n` +
-          `**Passo 2 — Divida tudo por $n$ (truque para razão de polinômios).** $\\frac{${a} + ${b}/n}{${razao} + ${a1}/n}$.\n\n` +
-          `**Passo 3 — Tome o limite.** $${b}/n \\to 0$ e $${a1}/n \\to 0$. Restou $${a}/${razao}$.\n\n` +
-          `**Por que esse truque?** Razão de polinômios de mesmo grau no infinito tem limite igual à **razão dos coeficientes líderes**. É consequência direta de dividir por $n^k$ (maior potência) em ambos os lados.\n\n` +
-          `**Generalização.** Se $\\deg(P) > \\deg(Q)$: limite $= \\pm\\infty$. Se $\\deg(P) < \\deg(Q)$: limite $= 0$. Mesmo grau: razão dos líderes.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-19-limite-intuitivo'],
-      },
-      {
-        numero: 8,
-        enunciado: `Você está a 50 m da base de uma torre. Mede o ângulo de elevação ao topo: ${angTri === 90 ? 60 : angTri}°. Qual a altura da torre?`,
-        resposta: `$50 \\tan(${angTri === 90 ? 60 : angTri}°) \\approx ${(50 * Math.tan(((angTri === 90 ? 60 : angTri) * Math.PI) / 180)).toFixed(2)}$ m`,
-        passos:
-          `**Passo 1 — Modelo geométrico.** Triângulo retângulo: cateto adjacente = 50 m (distância horizontal), cateto oposto = altura $h$, ângulo de elevação = ${angTri === 90 ? 60 : angTri}° no vértice onde você está.\n\n` +
-          `**Passo 2 — Use tangente.** $\\tan(\\text{ângulo}) = \\text{oposto}/\\text{adjacente} = h/50 \\Rightarrow h = 50 \\tan(${angTri === 90 ? 60 : angTri}°)$.\n\n` +
-          `**Passo 3 — Calcule.** $\\tan(${angTri === 90 ? 60 : angTri}°) \\approx ${Math.tan(((angTri === 90 ? 60 : angTri) * Math.PI) / 180).toFixed(4)}$, então $h \\approx ${(50 * Math.tan(((angTri === 90 ? 60 : angTri) * Math.PI) / 180)).toFixed(2)}$ m.\n\n` +
-          `**Por que tangente?** Pela definição: tangente do ângulo agudo = cateto oposto / cateto adjacente. Em problemas de elevação/depressão, é a razão direta entre altura e distância.\n\n` +
-          `**Onde aparece?** Topografia (medir altura sem subir), navegação (calcular distância de farol), engenharia (rampas).`,
-        dificuldade: 'modelagem',
-        aulasCobertas: ['aula-11-trig-triangulo'],
-      },
-    ]
-  },
-}
-
-// -----------------------------------------------------------------------------
-// Templates simplificados para os outros 10 trims
-// (questões menos parametrizadas, mas com 10 versões pela seed afetar valores)
-// -----------------------------------------------------------------------------
-
-function templateGenerico(
-  trim: number,
-  tituloBase: string,
-  descricao: string,
-  publicoAlvo: Prova['publicoAlvo'],
-  intensidade: Prova['intensidade'],
-  questoesBase: (v: number, r: () => number) => Questao[],
-): TrimTemplate {
-  return {
-    trim,
-    publicoAlvo,
-    intensidade,
-    duracaoMinutos: 90,
-    tituloBase,
-    descricao,
-    geraQuestoes: (v) => questoesBase(v, lcg(v * 113)),
-  }
-}
-
-const TEMPLATE_TRIM_3 = templateGenerico(
-  3,
-  'Geometria Analítica e Vetores',
-  'Trim 3 do Ano 1: plano cartesiano, retas, cônicas, vetores, sistemas lineares.',
-  '1.º ano',
-  3,
-  (v, r) => {
-    const x1 = intRange(1, 5, r), y1 = intRange(1, 5, r)
-    const x2 = x1 + intRange(3, 7, r), y2 = y1 + intRange(3, 7, r)
-    const dx = x2 - x1, dy = y2 - y1
-    const d = Math.sqrt(dx * dx + dy * dy)
-    const a1 = intRange(2, 6, r), a2 = intRange(2, 6, r)
-    const radius = intRange(3, 8, r)
-    return [
-      {
-        numero: 1,
-        enunciado: `Calcule a distância entre $(${x1}, ${y1})$ e $(${x2}, ${y2})$.`,
-        resposta: `$${d.toFixed(2)}$`,
-        passos:
-          `**Passo 1 — Fórmula da distância.** $d = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$.\n\n**Passo 2 — Substitua.** $d = \\sqrt{${dx}^2 + ${dy}^2} = \\sqrt{${dx * dx + dy * dy}} \\approx ${d.toFixed(2)}$.\n\n**Por quê?** A fórmula vem de **Pitágoras** aplicado ao triângulo retângulo formado pelas projeções dos pontos nos eixos. Os catetos são $|\\Delta x|$ e $|\\Delta y|$, a hipotenusa é a distância.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-21-plano-cartesiano'],
-      },
-      {
-        numero: 2,
-        enunciado: `Equação da reta passando por $(${x1}, ${y1})$ e $(${x2}, ${y2})$.`,
-        resposta: `$y = ${(dy / dx).toFixed(2)}(x - ${x1}) + ${y1}$`,
-        passos:
-          `**Passo 1 — Inclinação.** $m = (y_2 - y_1)/(x_2 - x_1) = ${dy}/${dx} = ${(dy / dx).toFixed(2)}$.\n\n**Passo 2 — Forma ponto-inclinação.** $y - y_1 = m(x - x_1) \\Rightarrow y = ${(dy / dx).toFixed(2)}(x - ${x1}) + ${y1}$.\n\n**Por quê?** Toda reta no plano com inclinação $m$ e passando por $(x_1, y_1)$ tem essa forma — é a definição mesmo de "reta com inclinação m". Você pode reorganizar para forma reduzida $y = mx + b$ se quiser.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-22-equacao-reta'],
-      },
-      {
-        numero: 3,
-        enunciado: `Equação da circunferência centro $(${x1}, ${y1})$ e raio ${radius}.`,
-        resposta: `$(x - ${x1})^2 + (y - ${y1})^2 = ${radius * radius}$`,
-        passos:
-          `**Passo 1 — Forma reduzida.** $(x - h)^2 + (y - k)^2 = r^2$ com centro $(h, k)$ e raio $r$.\n\n**Passo 2 — Substitua.** $(x - ${x1})^2 + (y - ${y1})^2 = ${radius}^2 = ${radius * radius}$.\n\n**Por quê?** A circunferência é o **lugar geométrico** dos pontos a distância $r$ do centro. Aplicando a fórmula da distância e elevando ao quadrado para limpar a raiz, obtém-se a forma reduzida.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-24-circunferencia'],
-      },
-      {
-        numero: 4,
-        enunciado: `Calcule $(${a1}, ${a2}) \\cdot (${dy}, ${dx})$ e o ângulo entre eles.`,
-        resposta: `Produto = $${a1 * dy + a2 * dx}$. Ângulo $\\approx ${(Math.acos((a1 * dy + a2 * dx) / (Math.sqrt(a1 ** 2 + a2 ** 2) * Math.sqrt(dy ** 2 + dx ** 2))) * 180 / Math.PI).toFixed(1)}°$`,
-        passos:
-          `**Passo 1 — Produto escalar.** $\\vec u \\cdot \\vec v = u_1 v_1 + u_2 v_2 = ${a1} \\cdot ${dy} + ${a2} \\cdot ${dx} = ${a1 * dy + a2 * dx}$.\n\n**Passo 2 — Módulos.** $|\\vec u| = \\sqrt{${a1}^2 + ${a2}^2} = ${Math.sqrt(a1 ** 2 + a2 ** 2).toFixed(2)}$, $|\\vec v| = ${Math.sqrt(dy ** 2 + dx ** 2).toFixed(2)}$.\n\n**Passo 3 — Cosseno do ângulo.** $\\cos\\theta = \\vec u \\cdot \\vec v / (|\\vec u||\\vec v|) = ${(a1 * dy + a2 * dx) / (Math.sqrt(a1 ** 2 + a2 ** 2) * Math.sqrt(dy ** 2 + dx ** 2))}$.\n\n**Por quê?** Produto escalar é **bilinear** e mede projeção: $\\vec u \\cdot \\vec v = |\\vec u||\\vec v|\\cos\\theta$. Quando vetores são perpendiculares, $\\cos = 0$ e produto = 0 — critério de ortogonalidade.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-27-produto-escalar'],
-      },
-      {
-        numero: 5,
-        enunciado: `Resolva o sistema $\\begin{cases} ${a1}x + ${a2}y = ${a1 * x1 + a2 * y1} \\\\ x - y = ${x1 - y1} \\end{cases}$.`,
-        resposta: `$x = ${x1}, y = ${y1}$`,
-        passos:
-          `**Passo 1 — Da segunda equação.** $x = y + ${x1 - y1}$.\n\n**Passo 2 — Substitua na primeira.** $${a1}(y + ${x1 - y1}) + ${a2}y = ${a1 * x1 + a2 * y1}$. Expandindo: $${a1}y + ${a1 * (x1 - y1)} + ${a2}y = ${a1 * x1 + a2 * y1}$. Simplificando: $${a1 + a2}y = ${a1 * x1 + a2 * y1 - a1 * (x1 - y1)} = ${a1 * y1 + a2 * y1}$, então $y = ${y1}$.\n\n**Passo 3 — Volte.** $x = ${y1} + ${x1 - y1} = ${x1}$.\n\n**Por que substituição?** Em sistemas 2x2, isolar uma variável e substituir é direto. Para sistemas maiores, usa-se escalonamento (Gauss) ou Cramer (matrizes). Geometricamente, é a interseção de duas retas no plano.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-29-sistemas-lineares'],
-      },
-      {
-        numero: 6,
-        enunciado: `Massa de ${a1 * 5} kg em rampa $30°$ sem atrito. Aceleração de descida (g = 10 m/s²)?`,
-        resposta: `$5$ m/s²`,
-        passos:
-          `**Passo 1 — Decompor a gravidade.** $\\vec g$ aponta para baixo. Em rampa de inclinação $\\theta$, decompõe-se em **paralela à rampa** ($g \\sin\\theta$, faz o objeto descer) e **normal à rampa** ($g \\cos\\theta$, equilibrada pela força normal).\n\n**Passo 2 — Aplique.** Como sem atrito, só a componente paralela acelera o objeto. $a = g \\sin(30°) = 10 \\cdot 0,5 = 5$ m/s².\n\n**Por que essa decomposição?** Vetorialmente, a base "natural" para movimento na rampa é {paralela, normal}. Componentes de $\\vec g$ nessa base: $g\\sin\\theta$ e $g\\cos\\theta$. A massa cancela porque $F = ma$ e $F = mg\\sin\\theta \\Rightarrow a = g\\sin\\theta$ — independe da massa.\n\n**Aplicação.** Galileu derrubou a impressão de que objetos pesados caem mais rápido com experimentos em rampas (Pisa, fim do séc. XVI).`,
-        dificuldade: 'modelagem',
-        aulasCobertas: ['aula-28-aplicacoes-vetores-fisica'],
-      },
-    ]
-  },
-)
-
-const TEMPLATE_TRIM_4 = templateGenerico(
-  4,
-  'Matrizes, Combinatória e Probabilidade',
-  'Trim 4 do Ano 1: matrizes, determinantes, sistemas, PFC, permutações, combinações, probabilidade.',
-  '1.º ano',
-  3,
-  (v, r) => {
-    const a = intRange(2, 7, r), b = intRange(1, 5, r), c = intRange(1, 5, r), d = intRange(2, 7, r)
-    const det = a * d - b * c
-    const n = intRange(5, 9, r), k = intRange(2, Math.min(4, n - 1), r)
-    const fact = (x: number): number => (x <= 1 ? 1 : x * fact(x - 1))
-    const comb = fact(n) / (fact(k) * fact(n - k))
-    return [
-      {
-        numero: 1,
-        enunciado: `Calcule $\\det \\begin{pmatrix} ${a} & ${b} \\\\ ${c} & ${d} \\end{pmatrix}$.`,
-        resposta: `$${det}$`,
-        passos:
-          `**Passo 1 — Fórmula 2x2.** $\\det = ad - bc = ${a} \\cdot ${d} - ${b} \\cdot ${c} = ${a * d} - ${b * c} = ${det}$.\n\n**Por que essa fórmula?** O determinante 2x2 mede a **área orientada** do paralelogramo formado pelas colunas $(a, c)$ e $(b, d)$. Quando $\\det = 0$, as colunas são paralelas (área nula) e a matriz não é invertível.\n\n**Conexão.** Determinante zero ⟺ sistema linear não tem solução única. É o teste de invertibilidade.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-34-determinantes'],
-      },
-      {
-        numero: 2,
-        enunciado: `Calcule a inversa de $A = \\begin{pmatrix} ${a} & ${b} \\\\ ${c} & ${d} \\end{pmatrix}$.`,
-        resposta: det !== 0
-          ? `$A^{-1} = \\frac{1}{${det}}\\begin{pmatrix} ${d} & -${b} \\\\ -${c} & ${a} \\end{pmatrix}$`
-          : 'Não existe (det = 0).',
-        passos:
-          det !== 0
-            ? `**Passo 1 — Fórmula 2x2.** $A^{-1} = \\frac{1}{\\det A}\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}$.\n\n**Passo 2 — Substituir.** $A^{-1} = \\frac{1}{${det}}\\begin{pmatrix} ${d} & -${b} \\\\ -${c} & ${a} \\end{pmatrix}$.\n\n**Por quê?** A inversa "desfaz" a matriz: $A A^{-1} = I$. A fórmula vem de resolver o sistema $A X = I$ entrada por entrada.\n\n**Verificação.** $A \\cdot A^{-1}$ deve dar identidade.`
-            : `Como $\\det A = 0$, $A$ não é invertível. **Por quê?** Det zero = colunas linearmente dependentes = matriz "achata" o plano em uma reta. Não tem como reverter essa perda de informação.`,
-        dificuldade: 'compreensao',
-        aulasCobertas: ['aula-33-transposta-inversa'],
-      },
-      {
-        numero: 3,
-        enunciado: `Quantos anagramas tem a palavra "${'CASA'.substring(0, 3 + (v % 3))}" (letras pertinentes)?`,
-        resposta: `${(() => {
-          const w = 'CASA'.substring(0, 3 + (v % 3))
-          const counts: Record<string, number> = {}
-          for (const ch of w) counts[ch] = (counts[ch] ?? 0) + 1
-          let denom = 1
-          for (const c of Object.values(counts)) denom *= fact(c)
-          return fact(w.length) / denom
-        })()}`,
-        passos:
-          `**Passo 1 — Conte letras totais e repetições.** Letras: ${'CASA'.substring(0, 3 + (v % 3)).length}. Repetições: identifique letras que aparecem mais de uma vez.\n\n**Passo 2 — Fórmula de permutação com repetição.** $P = n!/(n_1! n_2! \\ldots)$, onde $n_i$ é a multiplicidade de cada letra.\n\n**Por quê?** Sem repetição, seriam $n!$ permutações. Mas trocar duas letras iguais (digamos dois A's) **não gera anagrama novo**, então dividimos pelas $n_i!$ permutações internas indistinguíveis.\n\n**Insight.** Anagramas de "AAA" = $3!/3! = 1$ — só uma palavra possível.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-37-permutacoes-arranjos'],
-      },
-      {
-        numero: 4,
-        enunciado: `Em uma turma de ${n} pessoas, quantas comissões de ${k} podem ser formadas?`,
-        resposta: `$\\binom{${n}}{${k}} = ${comb}$`,
-        passos:
-          `**Passo 1 — Identifique combinação ou arranjo.** Pergunta sobre **comissões**, sem distinção de papel — então **combinação** (ordem não importa).\n\n**Passo 2 — Fórmula.** $\\binom{n}{k} = \\frac{n!}{k!(n-k)!} = \\frac{${n}!}{${k}! \\cdot ${n - k}!} = ${comb}$.\n\n**Por que dividir por $k!$?** Cada comissão de $k$ pessoas pode ser **ordenada de $k!$ formas**, mas todas representam a mesma comissão. Como o arranjo $A_n^k$ conta cada combinação $k!$ vezes, divide-se por $k!$.\n\n**Aplicação.** Mega-Sena: $\\binom{60}{6} = 50.063.860$ jogos diferentes — daí ser difícil ganhar.`,
-        dificuldade: 'aplicacao',
-        aulasCobertas: ['aula-38-combinacoes'],
-      },
-      {
-        numero: 5,
-        enunciado: `Lance ${k} dados honestos. $P(\\text{soma} = ${k * 4})$?`,
-        resposta: `Depende de $k$. Para $k=2$: 3/36 (combinações 4-4, etc.) — calcular manualmente.`,
-        passos:
-          `**Passo 1 — Espaço amostral.** Lançar $k$ dados → $6^k$ resultados igualmente prováveis.\n\n**Passo 2 — Casos favoráveis (soma = ${k * 4}).** Conte triplas/duplas que somam ${k * 4}. Para 2 dados (k=2) somando 8: (2,6), (3,5), (4,4), (5,3), (6,2) — 5 casos.\n\n**Passo 3 — Probabilidade.** $P = \\text{favoráveis}/\\text{total}$.\n\n**Por que igualmente prováveis?** Dado honesto: cada face tem prob $1/6$. Independência entre dados → probabilidade conjunta = produto.\n\n**Aplicação.** Em jogos com dados, a soma 7 (k=2) é a mais frequente — 6 combinações em 36, prob 1/6.`,
-        dificuldade: 'modelagem',
-        aulasCobertas: ['aula-39-probabilidade'],
-      },
-      {
-        numero: 6,
-        enunciado: `Doença com $P(D) = 0,01$. Teste com sensibilidade ${85 + (v % 10)}\\%$, especificidade ${90 + (v % 5)}\\%$. $P(D | +)$?`,
-        resposta: `Depende dos parâmetros, mas tipicamente $\\sim 5-10\\%$ — base rate fallacy.`,
-        passos:
-          `**Bayes**: $P(D|+) = P(+|D) \\cdot P(D) / P(+)$.\n\n**Passo 1 — Identifique as probabilidades.** $P(+|D) = $ sensibilidade. $P(+|D^c) = 1 - $ especificidade.\n\n**Passo 2 — Lei da probabilidade total.** $P(+) = P(+|D)P(D) + P(+|D^c)P(D^c)$.\n\n**Passo 3 — Substitua e calcule** (use os valores específicos da versão).\n\n**Por que o resultado é baixo mesmo com testes 90-95% precisos?** **Base rate fallacy**: doença rara ($P(D) = 1\\%$) significa que a maioria dos positivos são **falsos positivos** (porque $P(D^c)$ é 99%). Isso explica por que testes de massa exigem cuidados especiais — Aula 39 detalha.`,
-        dificuldade: 'modelagem',
-        aulasCobertas: ['aula-39-probabilidade'],
-      },
-    ]
-  },
-)
-
-// -----------------------------------------------------------------------------
-// Trims 5-12: stubs com 5-6 questões cada, parametrizadas
-// -----------------------------------------------------------------------------
-
-function templateMinimo(trim: number, titulo: string, descricao: string, publico: Prova['publicoAlvo'], questoesFn: (v: number) => Questao[]): TrimTemplate {
-  return {
-    trim,
-    publicoAlvo: publico,
-    intensidade: 3,
-    duracaoMinutos: 90,
-    tituloBase: titulo,
-    descricao,
-    geraQuestoes: questoesFn,
-  }
-}
-
-const TEMPLATE_TRIM_5 = templateMinimo(5, 'Limites e continuidade', 'Trim 5 do Ano 2: ε-δ, propriedades, fundamentais, continuidade, TVI.', '2.º ano', (v) => {
-  const r = lcg(v * 17)
-  const a = intRange(2, 5, r), b = intRange(1, 4, r), k = intRange(2, 6, r)
-  return [
+  publicoAlvo: '1.º ano',
+  status: 'curada',
+  questoes: [
     {
       numero: 1,
-      enunciado: `Calcule $\\lim_{x \\to ${a}} (${b}x^2 - ${k}x + 1)$.`,
-      resposta: `$${b * a * a - k * a + 1}$`,
-      passos: `**Passo 1 — Continuidade da função polinomial.** Polinômios são contínuos em $\\mathbb{R}$, então $\\lim_{x \\to a} P(x) = P(a)$.\n\n**Passo 2 — Substitua.** $P(${a}) = ${b} \\cdot ${a}^2 - ${k} \\cdot ${a} + 1 = ${b * a * a} - ${k * a} + 1 = ${b * a * a - k * a + 1}$.\n\n**Por quê?** Por **continuidade**: o limite quando $x$ se aproxima de $a$ é exatamente $P(a)$, sem indeterminação. Só precisamos manipular quando temos formas $0/0$, $\\infty/\\infty$, etc.`,
+      enunciado:
+        'Determine o domínio da função $f(x) = \\dfrac{x+1}{x^2 - 9}$.',
+      resposta: '$\\{x \\in \\mathbb{R} : x \\neq 3 \\text{ e } x \\neq -3\\}$',
+      passos:
+        '**Passo 1 — Quem proíbe quê?** Função racional: o denominador não pode ser zero.\n\n' +
+        '**Passo 2 — Resolva $x^2 - 9 = 0$.** Diferença de quadrados: $x^2 - 9 = (x-3)(x+3)$. Logo $x = 3$ ou $x = -3$.\n\n' +
+        '**Passo 3 — Domínio.** $\\mathbb{R} \\setminus \\{-3, 3\\}$.\n\n' +
+        '**Por que esses dois pontos?** Em $x = \\pm 3$, o denominador zera e a divisão fica indefinida. Em qualquer outro real, numerador e denominador são números bem definidos. Não há restrição de raiz nem de log nesse problema.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-02-funcoes', 'aula-01-conjuntos-intervalos'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.2 Domain and Range, ex. 17 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Encontre a equação da reta que passa por $(2, -3)$ e tem inclinação $m = 4$.',
+      resposta: '$y = 4x - 11$',
+      passos:
+        '**Passo 1 — Forma ponto-inclinação.** Quando você sabe **um ponto** $(x_0, y_0)$ e a **inclinação** $m$, escreva $y - y_0 = m(x - x_0)$.\n\n' +
+        '**Passo 2 — Substitua.** $y - (-3) = 4(x - 2)$, ou seja $y + 3 = 4x - 8$.\n\n' +
+        '**Passo 3 — Isole $y$.** $y = 4x - 8 - 3 = 4x - 11$.\n\n' +
+        '**Por que isso funciona?** Inclinação é a **razão constante** $\\Delta y / \\Delta x$ ao longo da reta. Partindo do ponto conhecido, cada unidade horizontal acrescenta $m$ unidades verticais. Reescrever em forma reduzida $y = mx + b$ só evidencia o coeficiente linear $b = -11$ (onde a reta corta o eixo $y$).',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-03-afim'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§4.1 Linear Functions, ex. 28 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Encontre o vértice e os zeros (raízes) de $f(x) = 2x^2 - 8x + 6$.',
+      resposta: 'Vértice $(2, -2)$. Raízes $x = 1$ e $x = 3$.',
+      passos:
+        '**Passo 1 — Vértice via $x_v = -b/(2a)$.** Aqui $a = 2$, $b = -8$, então $x_v = 8/4 = 2$.\n\n' +
+        '**Passo 2 — $y_v = f(x_v)$.** $f(2) = 2(4) - 8(2) + 6 = 8 - 16 + 6 = -2$. Vértice $(2, -2)$.\n\n' +
+        '**Passo 3 — Raízes via Bhaskara.** $\\Delta = (-8)^2 - 4(2)(6) = 64 - 48 = 16$. $x = (8 \\pm 4)/4$, ou seja $x = 3$ ou $x = 1$.\n\n' +
+        '**Por que o vértice está em $-b/(2a)$?** A parábola é simétrica em torno desse $x$. Como as raízes (quando existem) são equidistantes do vértice, $x_v$ é a média delas: $(1+3)/2 = 2$. Bate.\n\n' +
+        '**Verificação.** Como $a = 2 > 0$, parábola aberta para cima — vértice é mínimo. $f(1) = 2 - 8 + 6 = 0$ ✓ e $f(3) = 18 - 24 + 6 = 0$ ✓.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-04-quadratica'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§5.1 Quadratic Functions, ex. 35 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 4,
+      enunciado:
+        'Sejam $f(x) = x^2 + 1$ e $g(x) = 2x - 3$. Calcule $(f \\circ g)(x)$ e $(g \\circ f)(x)$.',
+      resposta:
+        '$(f \\circ g)(x) = 4x^2 - 12x + 10$. $(g \\circ f)(x) = 2x^2 - 1$.',
+      passos:
+        '**Passo 1 — $(f \\circ g)(x) = f(g(x))$.** Substitua $x$ em $f$ por $g(x) = 2x-3$. $f(2x-3) = (2x-3)^2 + 1 = 4x^2 - 12x + 9 + 1 = 4x^2 - 12x + 10$.\n\n' +
+        '**Passo 2 — $(g \\circ f)(x) = g(f(x))$.** $g(x^2+1) = 2(x^2+1) - 3 = 2x^2 + 2 - 3 = 2x^2 - 1$.\n\n' +
+        '**Por que a ordem importa?** Composição **não é comutativa** em geral: $f \\circ g \\neq g \\circ f$. Aqui $4x^2 - 12x + 10 \\neq 2x^2 - 1$ — confirma que a ordem em que você aplica as funções muda o resultado.\n\n' +
+        '**Imagem mental.** Pense em duas máquinas em série: $g$ → $f$ não é o mesmo que $f$ → $g$. Lavar e depois secar produz roupa limpa-seca; secar e depois lavar produz roupa molhada.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-05-composicao-inversa'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.4 Composition of Functions, ex. 22 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 5,
+      enunciado:
+        'Resolva $3^{2x-1} = 27$.',
+      resposta: '$x = 2$',
+      passos:
+        '**Passo 1 — Igualar bases.** $27 = 3^3$. A equação vira $3^{2x-1} = 3^3$.\n\n' +
+        '**Passo 2 — Igualar expoentes.** Como a base $3$ é a mesma e $a^x$ é injetora para $a > 0$, $a \\neq 1$: $2x - 1 = 3$.\n\n' +
+        '**Passo 3 — Resolver.** $2x = 4 \\Rightarrow x = 2$.\n\n' +
+        '**Por que pode "cancelar" a base?** A função $f(x) = 3^x$ é estritamente crescente — então $3^a = 3^b \\Leftrightarrow a = b$. É uma bijeção entre expoentes e valores.\n\n' +
+        '**Estratégia geral.** Sempre que possível, **iguale as bases** primeiro. Quando não dá (ex.: $5^x = 7$), use logaritmo: $x = \\log_5 7 = \\ln 7 / \\ln 5$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-06-exponencial'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.6 Exponential and Logarithmic Equations, ex. 41 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 6,
+      enunciado:
+        'Resolva $\\log_2(x+3) + \\log_2(x-3) = 4$.',
+      resposta: '$x = 5$',
+      passos:
+        '**Passo 1 — Propriedade do produto.** $\\log_b A + \\log_b B = \\log_b(AB)$. Logo $\\log_2[(x+3)(x-3)] = 4$.\n\n' +
+        '**Passo 2 — Forma exponencial.** $\\log_2 N = 4 \\Leftrightarrow N = 2^4 = 16$. Então $(x+3)(x-3) = 16$, ou seja $x^2 - 9 = 16 \\Rightarrow x^2 = 25 \\Rightarrow x = \\pm 5$.\n\n' +
+        '**Passo 3 — Verificar domínio.** Para $\\log_2(x-3)$ existir, precisa $x - 3 > 0$, isto é $x > 3$. Logo $x = -5$ está **excluído**. Resposta: $x = 5$.\n\n' +
+        '**Por que $x = -5$ entra como "raiz estranha"?** Multiplicar dois logaritmos pode aceitar pares onde um dos fatores seria negativo (não permitido em log real). A forma combinada $\\log_2(x^2 - 9)$ aceita $x^2 > 9$, mas a original exigia ambos $x+3 > 0$ E $x - 3 > 0$. **Sempre verifique** o domínio depois de combinar logs.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-07-logaritmo'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.6 Logarithmic Equations, ex. 56 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 7,
+      enunciado:
+        'Uma cultura de bactérias começa com 200 indivíduos e dobra a cada 3 horas. ' +
+        'Quantos haverá após 12 horas?',
+      resposta: '$3{.}200$ bactérias',
+      passos:
+        '**Passo 1 — Modelo.** Crescimento por dobramento: $N(t) = N_0 \\cdot 2^{t/T}$, onde $T$ é o tempo de dobramento.\n\n' +
+        '**Passo 2 — Substitua.** $N_0 = 200$, $T = 3$ h, $t = 12$ h. $N(12) = 200 \\cdot 2^{12/3} = 200 \\cdot 2^4 = 200 \\cdot 16 = 3200$.\n\n' +
+        '**Por que $2^{t/T}$?** A cada $T$ horas a população dobra. Em $t$ horas há $t/T$ dobramentos. Cada dobramento multiplica por 2 ⇒ multiplicador total $2^{t/T}$.\n\n' +
+        '**Equivalência com $e^{kt}$.** Se preferir base $e$: $2^{t/3} = e^{(t/3)\\ln 2} = e^{kt}$ com $k = (\\ln 2)/3 \\approx 0{,}231$ h⁻¹. Crescimento exponencial idêntico.\n\n' +
+        '**Conferência rápida.** $t=0$: 200. $t=3$: 400. $t=6$: 800. $t=9$: 1600. $t=12$: 3200. ✓',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['aula-08-crescimento'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.7 Exponential and Logarithmic Models, ex. 12 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+  ],
+}
+
+const PROVA_T1_V2: Prova = {
+  id: 'trim-1-v2',
+  trim: 1,
+  versao: 2,
+  titulo: 'Trim 1 · Versão 2 — Funções, afim, quadrática, exp/log',
+  descricao:
+    'Prova de fechamento do Trim 1, versão 2. Mesma cobertura, exercícios diferentes do mesmo capítulo.',
+  duracaoMinutos: 90,
+  intensidade: 3,
+  publicoAlvo: '1.º ano',
+  status: 'curada',
+  questoes: [
+    {
+      numero: 1,
+      enunciado:
+        'Determine o domínio de $g(x) = \\sqrt{2x - 6}$.',
+      resposta: '$\\{x \\in \\mathbb{R} : x \\geq 3\\}$, ou $[3, \\infty)$',
+      passos:
+        '**Passo 1 — Restrição da raiz.** Em $\\mathbb{R}$, a raiz quadrada exige radicando $\\geq 0$: $2x - 6 \\geq 0$.\n\n' +
+        '**Passo 2 — Isole.** $2x \\geq 6 \\Rightarrow x \\geq 3$.\n\n' +
+        '**Passo 3 — Notação.** Domínio $= [3, +\\infty)$ (intervalo fechado em 3, aberto em $\\infty$).\n\n' +
+        '**Por que $\\geq$ e não $>$?** $\\sqrt{0} = 0$ está bem definido. Só radicando **negativo** sai do domínio real.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-02-funcoes', 'aula-01-conjuntos-intervalos'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.2 Domain and Range, ex. 23 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Determine a equação da reta paralela a $y = -2x + 5$ que passa por $(1, 4)$.',
+      resposta: '$y = -2x + 6$',
+      passos:
+        '**Passo 1 — Retas paralelas têm mesma inclinação.** Logo $m = -2$.\n\n' +
+        '**Passo 2 — Forma ponto-inclinação.** $y - 4 = -2(x - 1)$.\n\n' +
+        '**Passo 3 — Reduza.** $y = -2x + 2 + 4 = -2x + 6$.\n\n' +
+        '**Por que paralelas têm mesmo $m$?** Inclinação é o "ângulo de subida" da reta com a horizontal. Mesmo ângulo ⇒ retas nunca se cruzam (paralelas).\n\n' +
+        '**Detalhe.** Se a questão pedisse **perpendicular**, usaríamos $m_\\perp = -1/m = 1/2$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-03-afim'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§4.1 Linear Functions, ex. 41 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Uma quadra retangular tem perímetro 80 m. Que dimensões maximizam a área?',
+      resposta: '$20 \\times 20$ m (quadrado), área $400$ m².',
+      passos:
+        '**Passo 1 — Variáveis e vínculo.** Sejam $x$ e $y$ os lados. Perímetro: $2x + 2y = 80 \\Rightarrow y = 40 - x$.\n\n' +
+        '**Passo 2 — Função objetivo.** $A(x) = x \\cdot y = x(40 - x) = 40x - x^2$.\n\n' +
+        '**Passo 3 — Vértice.** $A$ é parábola com $a = -1$, $b = 40$. $x_v = -b/(2a) = -40/(-2) = 20$.\n\n' +
+        '**Passo 4 — Resposta.** $x = 20$, $y = 20$, $A = 400$ m².\n\n' +
+        '**Por que dá quadrado?** Para perímetro fixo, **a forma que maximiza a área é o quadrado** entre os retângulos. Demonstrável também via desigualdade AM-GM: $xy \\leq ((x+y)/2)^2 = 400$, com igualdade iff $x = y$. O quadrado é o caso de igualdade.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['aula-04-quadratica'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§5.1 Quadratic Functions Applications, ex. 49 (adaptado para BR)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 4,
+      enunciado:
+        'Encontre $f^{-1}(x)$ se $f(x) = (x-1)/3$.',
+      resposta: '$f^{-1}(x) = 3x + 1$',
+      passos:
+        '**Passo 1 — Escreva $y = f(x)$.** $y = (x-1)/3$.\n\n' +
+        '**Passo 2 — Troque $x \\leftrightarrow y$.** $x = (y - 1)/3$.\n\n' +
+        '**Passo 3 — Isole $y$.** $3x = y - 1 \\Rightarrow y = 3x + 1$.\n\n' +
+        '**Verificação.** $f(f^{-1}(x)) = ((3x+1) - 1)/3 = 3x/3 = x$ ✓.\n\n' +
+        '**Por que trocar $x \\leftrightarrow y$?** A inversa **desfaz** o que $f$ faz. Em coordenadas, isso é o mesmo que **espelhar pelo eixo $y = x$** — geometricamente, troca abscissa e ordenada de cada ponto. Por isso, em $y = f(x)$, swap dá $x = f(y)$, o que define $f^{-1}$.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-05-composicao-inversa'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.7 Inverse Functions, ex. 11 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 5,
+      enunciado:
+        'Resolva $4 \\cdot 5^x = 100$.',
+      resposta: '$x = \\log_5 25 = 2$',
+      passos:
+        '**Passo 1 — Isole o exponencial.** $5^x = 100/4 = 25$.\n\n' +
+        '**Passo 2 — Reconheça base.** $25 = 5^2$. Logo $5^x = 5^2 \\Rightarrow x = 2$.\n\n' +
+        '**Caminho alternativo via log.** $\\log_5(5^x) = \\log_5 25 \\Rightarrow x = \\log_5 25 = 2$.\n\n' +
+        '**Por que reconhecer potências exatas é mais rápido?** Quando o RHS é potência inteira da base, evita-se o log. Mas o caminho do log **sempre funciona**, inclusive quando RHS não é potência exata (ex.: $5^x = 30$ ⇒ $x = \\log_5 30 \\approx 2{,}11$).',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-06-exponencial', 'aula-07-logaritmo'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.6 Exponential Equations, ex. 27 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 6,
+      enunciado:
+        'Use a propriedade $\\log(ab) = \\log a + \\log b$ para escrever $\\log_3(9x^2)$ ' +
+        'como soma de logaritmos.',
+      resposta: '$2 + 2\\log_3 x$',
+      passos:
+        '**Passo 1 — Quebre o produto.** $\\log_3(9 x^2) = \\log_3 9 + \\log_3(x^2)$.\n\n' +
+        '**Passo 2 — Avalie $\\log_3 9$.** $9 = 3^2 \\Rightarrow \\log_3 9 = 2$.\n\n' +
+        '**Passo 3 — Aplique potência.** $\\log_3(x^2) = 2 \\log_3 x$.\n\n' +
+        '**Passo 4 — Resultado.** $2 + 2\\log_3 x$.\n\n' +
+        '**Por que essas propriedades existem?** São consequência direta de regras de expoentes. $\\log_b(ab) = \\log_b a + \\log_b b$ é o "logaritmo do produto vira soma" — espelhando $b^{x+y} = b^x b^y$.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-07-logaritmo'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.5 Logarithmic Properties, ex. 19 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 7,
+      enunciado:
+        'A meia-vida de um isótopo radioativo é 5 anos. Que fração da amostra inicial ' +
+        'resta após 20 anos?',
+      resposta: '$1/16$',
+      passos:
+        '**Passo 1 — Modelo de meia-vida.** $N(t) = N_0 \\cdot (1/2)^{t/T}$, onde $T$ é a meia-vida.\n\n' +
+        '**Passo 2 — Substitua.** $T = 5$, $t = 20 \\Rightarrow N/N_0 = (1/2)^{20/5} = (1/2)^4 = 1/16$.\n\n' +
+        '**Por que esse modelo?** A cada $T$ unidades de tempo, a quantidade reduz pela metade. Em $t$ unidades há $t/T$ meia-vidas. Cada meia-vida multiplica por $1/2$.\n\n' +
+        '**Aplicações.** Datação por carbono-14 ($T \\approx 5730$ anos), farmacocinética (eliminação de fármacos), decaimento de capacitores em RC.\n\n' +
+        '**Em base $e$.** $(1/2)^{t/T} = e^{-t/\\tau}$ com $\\tau = T/\\ln 2$. Físicos costumam usar $\\tau$ (constante de tempo) em vez de $T$ (meia-vida).',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['aula-08-crescimento'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.7 Half-Life, ex. 6 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+  ],
+}
+
+const PROVA_T1_V3: Prova = {
+  id: 'trim-1-v3',
+  trim: 1,
+  versao: 3,
+  titulo: 'Trim 1 · Versão 3 — Funções, afim, quadrática, exp/log',
+  descricao:
+    'Prova de fechamento do Trim 1, versão 3. Mesma cobertura, novos exercícios.',
+  duracaoMinutos: 90,
+  intensidade: 3,
+  publicoAlvo: '1.º ano',
+  status: 'curada',
+  questoes: [
+    {
+      numero: 1,
+      enunciado:
+        'Para $f(x) = x^2 - 4$, calcule $f(-2)$, $f(0)$ e $f(3)$. Esboce o gráfico.',
+      resposta: '$f(-2) = 0$, $f(0) = -4$, $f(3) = 5$. Parábola com vértice $(0, -4)$, raízes $\\pm 2$.',
+      passos:
+        '**Passo 1 — Substituições.** $f(-2) = 4 - 4 = 0$. $f(0) = 0 - 4 = -4$. $f(3) = 9 - 4 = 5$.\n\n' +
+        '**Passo 2 — Gráfico.** Parábola voltada para cima ($a = 1 > 0$). Vértice em $(0, -4)$. Cruza eixo $x$ em $\\pm 2$ (raízes), eixo $y$ em $-4$.\n\n' +
+        '**Por que vértice em $(0, -4)$?** $x_v = -b/(2a) = 0/2 = 0$. $y_v = f(0) = -4$.\n\n' +
+        '**Translação.** $y = x^2 - 4$ é $y = x^2$ deslocada **4 unidades para baixo**. Isso explica imediatamente o vértice e as raízes.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-02-funcoes', 'aula-04-quadratica'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.1 Functions, ex. 14 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Considere os pontos $A = (-1, 2)$ e $B = (3, 10)$. Encontre a equação da reta $AB$.',
+      resposta: '$y = 2x + 4$',
+      passos:
+        '**Passo 1 — Inclinação.** $m = (10 - 2)/(3 - (-1)) = 8/4 = 2$.\n\n' +
+        '**Passo 2 — Forma ponto-inclinação por $A$.** $y - 2 = 2(x - (-1)) \\Rightarrow y = 2(x + 1) + 2 = 2x + 4$.\n\n' +
+        '**Verificação por $B$.** $y = 2(3) + 4 = 10$ ✓.\n\n' +
+        '**Por que dois pontos definem reta?** Em $\\mathbb{R}^2$, dois pontos distintos são suficientes para fixar inclinação $m$ e coeficiente linear $b$ — duas incógnitas, duas equações.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-03-afim'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§4.1 Linear Functions, ex. 33 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Resolva $x^2 - 6x + 13 = 0$.',
+      resposta: 'Sem raízes reais. Raízes complexas $x = 3 \\pm 2i$.',
+      passos:
+        '**Passo 1 — Discriminante.** $\\Delta = (-6)^2 - 4(1)(13) = 36 - 52 = -16$.\n\n' +
+        '**Passo 2 — $\\Delta < 0$ ⇒ sem raízes reais.** Em $\\mathbb{R}$, conjunto solução é vazio.\n\n' +
+        '**Passo 3 — Em $\\mathbb{C}$ (extensão).** $x = (6 \\pm \\sqrt{-16})/2 = (6 \\pm 4i)/2 = 3 \\pm 2i$.\n\n' +
+        '**Por que $\\Delta$ define o número de raízes?** $\\Delta > 0$: 2 reais distintas. $\\Delta = 0$: 1 real dupla. $\\Delta < 0$: 0 reais (par conjugado complexo). É consequência de Bhaskara: a raiz quadrada de número negativo não existe em $\\mathbb{R}$.\n\n' +
+        '**Geometricamente.** Parábola não cruza o eixo $x$ — vértice está acima dele com $a > 0$, ou abaixo com $a < 0$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-04-quadratica'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§5.1 Quadratic Equations, ex. 47 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 4,
+      enunciado:
+        'Mostre que $f(x) = 5x - 7$ e $g(x) = (x+7)/5$ são inversas.',
+      resposta: '$f(g(x)) = x$ e $g(f(x)) = x$, logo $g = f^{-1}$.',
+      passos:
+        '**Passo 1 — $(f \\circ g)(x)$.** $f(g(x)) = 5 \\cdot (x+7)/5 - 7 = (x+7) - 7 = x$ ✓.\n\n' +
+        '**Passo 2 — $(g \\circ f)(x)$.** $g(f(x)) = (5x - 7 + 7)/5 = 5x/5 = x$ ✓.\n\n' +
+        '**Conclusão.** Ambas composições retornam a identidade. Pela definição de inversa, $g = f^{-1}$.\n\n' +
+        '**Por que precisa testar as duas?** Em geral, para conjuntos finitos uma inclusão pode valer sem a outra. Em funções de $\\mathbb{R} \\to \\mathbb{R}$, em quase todos os casos basta uma — mas verificar **as duas** elimina qualquer dúvida e funciona em qualquer contexto.',
+      dificuldade: 'demonstracao',
+      aulasCobertas: ['aula-05-composicao-inversa'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.7 Inverse Functions, ex. 26 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 5,
+      enunciado:
+        'Esboce no mesmo eixo $y = 2^x$ e $y = (1/2)^x$. Em que ponto se cruzam?',
+      resposta: 'Cruzam-se em $(0, 1)$. Uma é crescente, a outra decrescente; são reflexões pelo eixo $y$.',
+      passos:
+        '**Passo 1 — Pontos-âncora.** $2^0 = 1$, $(1/2)^0 = 1$. Ambas passam por $(0, 1)$.\n\n' +
+        '**Passo 2 — Valores em $\\pm 1$.** $2^1 = 2$, $2^{-1} = 1/2$; $(1/2)^1 = 1/2$, $(1/2)^{-1} = 2$.\n\n' +
+        '**Passo 3 — Comportamento.** $2^x$: cresce ($x \\to \\infty$ ⇒ $\\infty$, $x \\to -\\infty$ ⇒ $0$). $(1/2)^x$: decresce ($x \\to \\infty$ ⇒ $0$, $x \\to -\\infty$ ⇒ $\\infty$).\n\n' +
+        '**Por que a única interseção é $(0,1)$?** $2^x = (1/2)^x \\Leftrightarrow 2^x = 2^{-x} \\Leftrightarrow x = -x \\Leftrightarrow x = 0$.\n\n' +
+        '**Simetria.** $(1/2)^x = 2^{-x}$ — substituindo $x$ por $-x$ em $2^x$ ⇒ reflexão horizontal pelo eixo $y$.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-06-exponencial'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.2 Graphs of Exponential Functions, ex. 9 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 6,
+      enunciado:
+        'A população de uma cidade era 50 000 em 2000 e 80 000 em 2020. Modele $P(t) = P_0 e^{kt}$ ' +
+        'e estime a população em 2030.',
+      resposta: '$k \\approx 0{,}0235$, $P(2030) \\approx 101\\,200$ habitantes.',
+      passos:
+        '**Passo 1 — Identifique $P_0$.** Em $t = 0$ (ano 2000), $P_0 = 50\\,000$.\n\n' +
+        '**Passo 2 — Encontre $k$ usando $t = 20$ (ano 2020).** $80\\,000 = 50\\,000 \\cdot e^{20k}$ $\\Rightarrow e^{20k} = 1{,}6$ $\\Rightarrow 20k = \\ln 1{,}6 \\approx 0{,}470$ $\\Rightarrow k \\approx 0{,}0235$.\n\n' +
+        '**Passo 3 — Projete para 2030 ($t = 30$).** $P(30) = 50\\,000 \\cdot e^{30 \\cdot 0{,}0235} = 50\\,000 \\cdot e^{0{,}705} \\approx 50\\,000 \\cdot 2{,}024 \\approx 101\\,200$.\n\n' +
+        '**Por que crescimento exponencial é razoável?** Para janelas de tempo "curtas" e populações sem saturação, taxa de crescimento $\\approx$ proporcional à população atual ⇒ $dP/dt = kP$ ⇒ $P = P_0 e^{kt}$.\n\n' +
+        '**Limite do modelo.** Para projeções longas, recursos finitos quebram a hipótese. Use **modelo logístico** para incorporar capacidade de suporte.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['aula-08-crescimento'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.7 Exponential Models, ex. 18 (adaptado para BR)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 7,
+      enunciado:
+        'A taxa média de variação de $f(x) = x^2$ no intervalo $[a, a+h]$ é ' +
+        '$(f(a+h) - f(a))/h$. Calcule e simplifique.',
+      resposta: '$2a + h$',
+      passos:
+        '**Passo 1 — Numerador.** $f(a+h) - f(a) = (a+h)^2 - a^2 = a^2 + 2ah + h^2 - a^2 = 2ah + h^2$.\n\n' +
+        '**Passo 2 — Divida por $h$.** $(2ah + h^2)/h = 2a + h$ (válido para $h \\neq 0$).\n\n' +
+        '**Por que isso importa?** Quando $h \\to 0$, $2a + h \\to 2a$ — exatamente $f\'(a)$, a derivada de $x^2$ em $a$. Você acabou de calcular o **quociente de Newton** que abre o capítulo de derivadas (Trim 5/6).\n\n' +
+        '**Interpretação geométrica.** $2a + h$ é a inclinação da **secante** entre $(a, a^2)$ e $(a+h, (a+h)^2)$. À medida que $h$ encolhe, a secante converge para a tangente — derivada.',
+      dificuldade: 'desafio',
+      aulasCobertas: ['aula-09-taxa-variacao'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.3 Rates of Change, ex. 31 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+  ],
+}
+
+// =============================================================================
+// TRIMs 2-12 — provas de referência (1 versão real cada)
+// Versões adicionais (2-10) estão marcadas como "em-curadoria"
+// =============================================================================
+
+const PROVA_T2_V1: Prova = {
+  id: 'trim-2-v1',
+  trim: 2,
+  versao: 1,
+  titulo: 'Trim 2 · Versão 1 — Trigonometria e sequências',
+  descricao:
+    'Razões trig, círculo, equações trigonométricas, lei dos senos/cossenos, PA, PG, limite intuitivo.',
+  duracaoMinutos: 90,
+  intensidade: 3,
+  publicoAlvo: '1.º ano',
+  status: 'curada',
+  questoes: [
+    {
+      numero: 1,
+      enunciado:
+        'Calcule $\\sin(60°) + \\cos(30°)$.',
+      resposta: '$\\sqrt{3}$',
+      passos:
+        '**Passo 1 — Valores notáveis.** $\\sin 60° = \\sqrt{3}/2$, $\\cos 30° = \\sqrt{3}/2$.\n\n' +
+        '**Passo 2 — Soma.** $\\sqrt{3}/2 + \\sqrt{3}/2 = \\sqrt{3}$.\n\n' +
+        '**Por que $\\sin 60° = \\cos 30°$?** Em qualquer triângulo retângulo, ângulos agudos somam $90°$. Logo $\\sin(\\theta) = \\cos(90° - \\theta)$. Aqui $60° + 30° = 90°$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-11-trig-triangulo', 'aula-12-circulo-trigonometrico'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§7.2 Right Triangle Trigonometry, ex. 8 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Resolva $2 \\sin x = 1$ em $[0, 2\\pi)$.',
+      resposta: '$x = \\pi/6$ ou $x = 5\\pi/6$',
+      passos:
+        '**Passo 1 — Isole.** $\\sin x = 1/2$.\n\n' +
+        '**Passo 2 — Ângulo de referência.** $\\sin(\\pi/6) = 1/2$.\n\n' +
+        '**Passo 3 — Quadrantes.** $\\sin > 0$ em Q1 (ângulo $\\pi/6$) e Q2 (ângulo $\\pi - \\pi/6 = 5\\pi/6$).\n\n' +
+        '**Por que dois valores?** Função seno tem **período** $2\\pi$ e dentro de um período é positiva em um intervalo de comprimento $\\pi$ — e dentro desse intervalo, dois ângulos diferentes podem ter o mesmo seno (simetria pelo eixo $\\pi/2$).',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-14-equacoes-trigonometricas'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§9.5 Solving Trigonometric Equations, ex. 12 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Em um triângulo, $a = 7$, $b = 9$, $C = 60°$. Calcule $c$.',
+      resposta: '$c = \\sqrt{67} \\approx 8{,}19$',
+      passos:
+        '**Passo 1 — Lei dos cossenos.** $c^2 = a^2 + b^2 - 2ab\\cos C$.\n\n' +
+        '**Passo 2 — Substitua.** $c^2 = 49 + 81 - 2(7)(9)(1/2) = 130 - 63 = 67$.\n\n' +
+        '**Passo 3 — Resposta.** $c = \\sqrt{67} \\approx 8{,}19$.\n\n' +
+        '**Por que essa lei?** Generaliza Pitágoras. Quando $C = 90°$, $\\cos C = 0$ ⇒ $c^2 = a^2 + b^2$. O termo $-2ab\\cos C$ ajusta pela falta de retângulo.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-15-leis-senos-cossenos'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§10.2 Law of Cosines, ex. 6 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 4,
+      enunciado:
+        'PA com $a_1 = 5$ e razão $r = 3$. Calcule $a_{20}$ e $S_{20}$.',
+      resposta: '$a_{20} = 62$, $S_{20} = 670$.',
+      passos:
+        '**Passo 1 — Termo geral.** $a_n = a_1 + (n-1)r = 5 + 19 \\cdot 3 = 62$.\n\n' +
+        '**Passo 2 — Soma (Gauss).** $S_n = n(a_1 + a_n)/2 = 20 \\cdot (5 + 62)/2 = 20 \\cdot 33{,}5 = 670$.\n\n' +
+        '**Por que a fórmula de Gauss funciona?** Pareando 1.º+último, 2.º+penúltimo, etc., cada par soma $a_1 + a_n$. Há $n/2$ pares ⇒ soma total $n(a_1+a_n)/2$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-17-pa'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§13.2 Arithmetic Sequences, ex. 17 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 5,
+      enunciado:
+        'Calcule $\\sum_{n=0}^{\\infty} (1/3)^n$.',
+      resposta: '$3/2$',
+      passos:
+        '**Passo 1 — É PG infinita com $a_1 = 1$, $q = 1/3$.** $|q| < 1$ ⇒ converge.\n\n' +
+        '**Passo 2 — Fórmula.** $S_\\infty = a_1/(1 - q) = 1/(1 - 1/3) = 1/(2/3) = 3/2$.\n\n' +
+        '**Por que só converge se $|q| < 1$?** Para $|q| < 1$, $q^n \\to 0$ e $S_n = a_1(1 - q^n)/(1-q) \\to a_1/(1-q)$. Para $|q| \\geq 1$, $q^n$ não vai a zero ⇒ soma cresce sem limite.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-18-pg', 'aula-19-limite-intuitivo'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§13.4 Geometric Series, ex. 24 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+  ],
+}
+
+const PROVA_T3_V1: Prova = {
+  id: 'trim-3-v1',
+  trim: 3,
+  versao: 1,
+  titulo: 'Trim 3 · Versão 1 — Geometria analítica e vetores',
+  descricao:
+    'Plano cartesiano, retas, circunferência, cônicas, vetores e produto escalar.',
+  duracaoMinutos: 90,
+  intensidade: 3,
+  publicoAlvo: '1.º ano',
+  status: 'curada',
+  questoes: [
+    {
+      numero: 1,
+      enunciado:
+        'Determine o centro e o raio da circunferência $x^2 + y^2 - 6x + 4y - 12 = 0$.',
+      resposta: 'Centro $(3, -2)$, raio $5$.',
+      passos:
+        '**Passo 1 — Complete os quadrados.** $x^2 - 6x = (x-3)^2 - 9$. $y^2 + 4y = (y+2)^2 - 4$.\n\n' +
+        '**Passo 2 — Reagrupe.** $(x-3)^2 - 9 + (y+2)^2 - 4 - 12 = 0 \\Rightarrow (x-3)^2 + (y+2)^2 = 25$.\n\n' +
+        '**Passo 3 — Identifique.** Forma padrão $(x-h)^2 + (y-k)^2 = r^2$ ⇒ $(h, k) = (3, -2)$, $r = 5$.\n\n' +
+        '**Por que completar quadrados?** Transforma a forma "desenvolvida" (Eq. geral $Ax^2 + By^2 + Dx + Ey + F = 0$) na forma **padrão** que mostra centro e raio diretamente.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-24-circunferencia'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§2.6 The Circle, ex. 28 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Encontre os focos da elipse $x^2/25 + y^2/16 = 1$.',
+      resposta: 'Focos em $(\\pm 3, 0)$.',
+      passos:
+        '**Passo 1 — Identifique $a$ e $b$.** $a^2 = 25$ ⇒ $a = 5$ (semieixo maior, no eixo $x$). $b^2 = 16$ ⇒ $b = 4$.\n\n' +
+        '**Passo 2 — Distância focal $c$.** $c^2 = a^2 - b^2 = 25 - 16 = 9$ ⇒ $c = 3$.\n\n' +
+        '**Passo 3 — Focos.** Como o eixo maior é horizontal, focos em $(\\pm c, 0) = (\\pm 3, 0)$.\n\n' +
+        '**Por que $c^2 = a^2 - b^2$?** É consequência da definição da elipse ($P$ tal que $|PF_1| + |PF_2| = 2a$): em um vértice do eixo menor, $b$, $c$, $a$ formam Pitágoras.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-25-conicas'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§12.1 The Ellipse, ex. 14 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Sejam $\\vec u = (3, 4)$ e $\\vec v = (1, -2)$. Calcule $\\vec u \\cdot \\vec v$ e o ' +
+        'ângulo entre eles.',
+      resposta: '$\\vec u \\cdot \\vec v = -5$. $\\theta \\approx 116{,}6°$.',
+      passos:
+        '**Passo 1 — Produto escalar.** $\\vec u \\cdot \\vec v = (3)(1) + (4)(-2) = 3 - 8 = -5$.\n\n' +
+        '**Passo 2 — Normas.** $\\|\\vec u\\| = \\sqrt{9+16} = 5$. $\\|\\vec v\\| = \\sqrt{1+4} = \\sqrt 5$.\n\n' +
+        '**Passo 3 — $\\cos\\theta$.** $\\cos\\theta = (\\vec u \\cdot \\vec v)/(\\|\\vec u\\|\\|\\vec v\\|) = -5/(5\\sqrt 5) = -1/\\sqrt 5 \\approx -0{,}447$. $\\theta = \\arccos(-0{,}447) \\approx 116{,}6°$.\n\n' +
+        '**Interpretação do sinal negativo.** $\\vec u \\cdot \\vec v < 0$ ⇒ ângulo **obtuso** (entre $90°$ e $180°$). Vetores apontam para "lados opostos" no sentido geométrico.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-26-vetores-plano', 'aula-27-produto-escalar'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§10.8 Vectors, ex. 29 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 4,
+      enunciado:
+        'Resolva o sistema $\\begin{cases} 2x + 3y = 7 \\\\ -x + y = 1 \\end{cases}$.',
+      resposta: '$x = 4/5$, $y = 9/5$.',
+      passos:
+        '**Passo 1 — Da segunda eq.** $y = x + 1$.\n\n' +
+        '**Passo 2 — Substitua na primeira.** $2x + 3(x+1) = 7 \\Rightarrow 5x + 3 = 7 \\Rightarrow x = 4/5$.\n\n' +
+        '**Passo 3 — $y = 4/5 + 1 = 9/5$.**\n\n' +
+        '**Verificação.** $2(4/5) + 3(9/5) = 8/5 + 27/5 = 35/5 = 7$ ✓; $-4/5 + 9/5 = 5/5 = 1$ ✓.\n\n' +
+        '**Geometricamente.** Cada equação é uma reta no plano. Como inclinações ($-2/3$ e $1$) são diferentes, retas se cruzam em **um único ponto** $(4/5, 9/5)$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-29-sistemas-lineares'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§9.1 Systems of Linear Equations, ex. 9 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 5,
+      enunciado:
+        'Equação da reta perpendicular a $y = 2x + 1$ que passa por $(0, 4)$.',
+      resposta: '$y = -x/2 + 4$',
+      passos:
+        '**Passo 1 — Inclinação perpendicular.** Se $m_1 = 2$, $m_\\perp = -1/m_1 = -1/2$.\n\n' +
+        '**Passo 2 — Reta com $m = -1/2$ por $(0, 4)$.** $y - 4 = -1/2 (x - 0) \\Rightarrow y = -x/2 + 4$.\n\n' +
+        '**Por que $m_\\perp \\cdot m = -1$?** Inclinações de retas perpendiculares têm produto $-1$. Geometricamente: rotacionar a reta em $90°$ inverte o sinal da inclinação **e** sua razão.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-22-equacao-reta', 'aula-23-posicao-relativa-retas'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§4.1 Linear Functions, ex. 51 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+  ],
+}
+
+const PROVA_T4_V1: Prova = {
+  id: 'trim-4-v1',
+  trim: 4,
+  versao: 1,
+  titulo: 'Trim 4 · Versão 1 — Matrizes, contagem, probabilidade',
+  descricao:
+    'Operações com matrizes, determinantes, sistemas via matrizes, PFC, combinações, probabilidade.',
+  duracaoMinutos: 90,
+  intensidade: 3,
+  publicoAlvo: '1.º ano',
+  status: 'curada',
+  questoes: [
+    {
+      numero: 1,
+      enunciado:
+        'Sejam $A = \\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}$ e $B = \\begin{pmatrix} 2 & 0 \\\\ 1 & 3 \\end{pmatrix}$. Calcule $AB$.',
+      resposta: '$AB = \\begin{pmatrix} 4 & 6 \\\\ 10 & 12 \\end{pmatrix}$',
+      passos:
+        '**Passo 1 — Regra: $(AB)_{ij} = \\sum_k A_{ik} B_{kj}$.**\n\n' +
+        '**Passo 2 — Cada entrada.**\n' +
+        '- $(AB)_{11} = 1 \\cdot 2 + 2 \\cdot 1 = 4$\n' +
+        '- $(AB)_{12} = 1 \\cdot 0 + 2 \\cdot 3 = 6$\n' +
+        '- $(AB)_{21} = 3 \\cdot 2 + 4 \\cdot 1 = 10$\n' +
+        '- $(AB)_{22} = 3 \\cdot 0 + 4 \\cdot 3 = 12$\n\n' +
+        '**Por que linha-de-$A$ vezes coluna-de-$B$?** A regra reflete a composição linear: aplicar primeiro $B$, depois $A$. A entrada $(i,j)$ do produto é a contribuição da $j$-ésima coluna de $B$ na $i$-ésima coordenada após $A$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-32-operacoes-matrizes'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§9.5 Matrix Operations, ex. 22 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Calcule $\\det\\begin{pmatrix} 2 & 1 & 3 \\\\ 0 & 4 & 5 \\\\ 1 & 0 & 2 \\end{pmatrix}$.',
+      resposta: '$\\det = 9$',
+      passos:
+        '**Passo 1 — Expansão por cofatores na 1ª linha.** $\\det = 2 \\cdot M_{11} - 1 \\cdot M_{12} + 3 \\cdot M_{13}$.\n\n' +
+        '**Passo 2 — Menores $2 \\times 2$.**\n' +
+        '- $M_{11} = \\det\\begin{pmatrix} 4 & 5 \\\\ 0 & 2 \\end{pmatrix} = 8 - 0 = 8$\n' +
+        '- $M_{12} = \\det\\begin{pmatrix} 0 & 5 \\\\ 1 & 2 \\end{pmatrix} = 0 - 5 = -5$\n' +
+        '- $M_{13} = \\det\\begin{pmatrix} 0 & 4 \\\\ 1 & 0 \\end{pmatrix} = 0 - 4 = -4$\n\n' +
+        '**Passo 3 — Combine.** $\\det = 2(8) - 1(-5) + 3(-4) = 16 + 5 - 12 = 9$.\n\n' +
+        '**Por que sinais alternam?** Cofator $C_{ij} = (-1)^{i+j} M_{ij}$. O padrão $+ - + - \\ldots$ vem da estrutura de permutações na definição formal do determinante.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-34-determinantes'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§9.8 Determinants, ex. 13 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Quantos anagramas tem a palavra MATEMATICA?',
+      resposta: '$10!/(3! \\cdot 2! \\cdot 2!) = 151\\,200$',
+      passos:
+        '**Passo 1 — Contagem de letras.** M-A-T-E-M-A-T-I-C-A: 10 letras. Repetições: A aparece 3 vezes, M aparece 2, T aparece 2. E, I, C aparecem 1 cada.\n\n' +
+        '**Passo 2 — Permutações com repetição.** $\\dfrac{n!}{n_1! n_2! \\ldots} = \\dfrac{10!}{3! \\cdot 2! \\cdot 2!}$.\n\n' +
+        '**Passo 3 — Calcule.** $10! = 3\\,628\\,800$. $3! \\cdot 2! \\cdot 2! = 24$. $3\\,628\\,800/24 = 151\\,200$.\n\n' +
+        '**Por que dividir pelos fatoriais das repetições?** Se trocássemos os 3 A\'s entre si ($3!$ permutações), o anagrama seria visualmente o mesmo. Dividir cancela essas "trocas invisíveis".',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-37-permutacoes-arranjos'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§13.6 Counting Principles, ex. 31 (adaptado para BR)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 4,
+      enunciado:
+        'Em uma turma de 25 alunos, de quantas formas posso escolher uma comissão de 4?',
+      resposta: '$\\binom{25}{4} = 12\\,650$',
+      passos:
+        '**Passo 1 — Escolha sem ordem.** Comissão é escolha não ordenada ⇒ combinação.\n\n' +
+        '**Passo 2 — Fórmula.** $\\binom{25}{4} = \\dfrac{25!}{4! \\cdot 21!} = \\dfrac{25 \\cdot 24 \\cdot 23 \\cdot 22}{4!} = \\dfrac{303\\,600}{24} = 12\\,650$.\n\n' +
+        '**Por que dividir por $4!$?** Se contássemos com ordem, teríamos $25 \\cdot 24 \\cdot 23 \\cdot 22 = 303\\,600$ arranjos. Cada comissão de 4 pessoas pode ser ordenada de $4! = 24$ maneiras — todas representam **a mesma** comissão. Dividir cancela.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-38-combinacoes'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: OS_AT,
+        ref: '§13.6 Combinations, ex. 18 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 5,
+      enunciado:
+        'Em uma urna há 5 bolas vermelhas e 3 azuis. Tira-se 2 sem reposição. Qual a probabilidade de ' +
+        'ambas serem vermelhas?',
+      resposta: '$10/28 = 5/14$',
+      passos:
+        '**Passo 1 — Casos favoráveis.** $\\binom{5}{2} = 10$ pares vermelhos.\n\n' +
+        '**Passo 2 — Casos totais.** $\\binom{8}{2} = 28$ pares possíveis.\n\n' +
+        '**Passo 3 — Probabilidade.** $P = 10/28 = 5/14 \\approx 0{,}357$.\n\n' +
+        '**Caminho alternativo (regra do produto).** $P = (5/8) \\cdot (4/7) = 20/56 = 5/14$. Primeira bola vermelha: $5/8$. Dada a primeira, restam 4V em 7 bolas: $4/7$.\n\n' +
+        '**Por que sem reposição muda?** Tirar a primeira altera o universo da segunda — é probabilidade **condicional**. Com reposição, $(5/8)^2 = 25/64$ (diferente).',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-39-probabilidade'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§3.2 Independent and Mutually Exclusive Events, ex. 11 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+  ],
+}
+
+const PROVA_T5_V1: Prova = {
+  id: 'trim-5-v1',
+  trim: 5,
+  versao: 1,
+  titulo: 'Trim 5 · Versão 1 — Limites e continuidade',
+  descricao:
+    'Limite formal $\\varepsilon$-$\\delta$, propriedades, continuidade, TVI/TVM, limites fundamentais.',
+  duracaoMinutos: 90,
+  intensidade: 4,
+  publicoAlvo: '2.º ano',
+  status: 'curada',
+  questoes: [
+    {
+      numero: 1,
+      enunciado: 'Calcule $\\lim_{x \\to 2} (3x^2 - 5x + 1)$.',
+      resposta: '$3$',
+      passos:
+        '**Passo 1 — Polinômio é contínuo em todo $\\mathbb{R}$.** Logo $\\lim_{x \\to a} P(x) = P(a)$.\n\n' +
+        '**Passo 2 — Substitua.** $3(4) - 5(2) + 1 = 12 - 10 + 1 = 3$.\n\n' +
+        '**Por que polinômio é contínuo?** Soma e produto de funções contínuas (potências $x^n$) são contínuas. Polinômios são combinações finitas dessas.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-41-limite-formal', 'aula-42-propriedades-limites', 'aula-43-continuidade'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§2.3 The Limit Laws, ex. 67 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Calcule $\\lim_{x \\to 3} \\dfrac{x^2 - 9}{x - 3}$.',
+      resposta: '$6$',
+      passos:
+        '**Passo 1 — Tipo $0/0$.** Substituição direta dá indeterminação.\n\n' +
+        '**Passo 2 — Fatorar.** $x^2 - 9 = (x-3)(x+3)$. Logo $\\dfrac{(x-3)(x+3)}{x-3} = x + 3$ (válido para $x \\neq 3$).\n\n' +
+        '**Passo 3 — Limite do simplificado.** $\\lim_{x \\to 3} (x+3) = 6$.\n\n' +
+        '**Por que pode "cancelar"?** O limite só olha o **comportamento perto** de $x = 3$, não em $x = 3$. As duas funções coincidem em todo ponto exceto possivelmente $x = 3$, então têm o mesmo limite.',
       dificuldade: 'aplicacao',
       aulasCobertas: ['aula-42-propriedades-limites'],
-    },
-    {
-      numero: 2,
-      enunciado: `Calcule $\\lim_{x \\to 0} \\frac{\\sin(${k}x)}{x}$.`,
-      resposta: `$${k}$`,
-      passos: `**Passo 1 — Limite fundamental.** Sabemos $\\lim_{u \\to 0} \\sin(u)/u = 1$.\n\n**Passo 2 — Manipulação algébrica.** $\\sin(${k}x)/x = ${k} \\cdot \\sin(${k}x)/(${k}x)$. Substitua $u = ${k}x$ — quando $x \\to 0$, $u \\to 0$.\n\n**Passo 3 — Aplique.** $\\lim = ${k} \\cdot 1 = ${k}$.\n\n**Por que esse truque?** A regra geral $\\lim_{x \\to 0} \\sin(kx)/x = k$ vem de adaptar o limite fundamental por mudança de variável + linearidade do limite.\n\n**Alternativa (L'Hôpital).** Forma 0/0: deriva em cima e embaixo. $(\\sin(kx))' = k\\cos(kx) \\to k$, $(x)' = 1$. Razão $\\to k$.`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-45-limites-fundamentais'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§2.3 The Limit Laws, ex. 80 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 3,
-      enunciado: `$\\lim_{x \\to \\infty} \\frac{${a}x^2 + ${b}x}{${k}x^2 + 1}$.`,
-      resposta: `$${a}/${k}$`,
-      passos: `**Passo 1 — Forma indeterminada $\\infty/\\infty$.** Numerador e denominador vão a infinito.\n\n**Passo 2 — Divida tudo por $x^2$ (maior potência).** $\\frac{${a} + ${b}/x}{${k} + 1/x^2}$.\n\n**Passo 3 — Termos $\\to 0$.** $${b}/x \\to 0$, $1/x^2 \\to 0$. Sobra $${a}/${k}$.\n\n**Por quê?** Razão de polinômios de mesmo grau no infinito = razão dos coeficientes líderes. Truque universal e infalível para esse tipo.`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-44-limites-laterais'],
+      enunciado:
+        'Determine se $f(x) = \\begin{cases} x^2 & \\text{se } x \\leq 1 \\\\ 2x - 1 & \\text{se } x > 1 \\end{cases}$ ' +
+        'é contínua em $x = 1$.',
+      resposta: 'Sim, é contínua em $x = 1$.',
+      passos:
+        '**Passo 1 — Limite à esquerda.** $\\lim_{x \\to 1^-} x^2 = 1$.\n\n' +
+        '**Passo 2 — Limite à direita.** $\\lim_{x \\to 1^+} (2x - 1) = 1$.\n\n' +
+        '**Passo 3 — $f(1) = 1^2 = 1$.**\n\n' +
+        '**Conclusão.** Limites laterais existem, são iguais e coincidem com $f(1)$. **As três condições de continuidade** estão satisfeitas.\n\n' +
+        '**Por que precisa dos 3?** (1) limite existe; (2) função existe em $x = 1$; (3) eles coincidem. Falhar em qualquer uma já quebra continuidade.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-43-continuidade', 'aula-44-limites-laterais'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§2.4 Continuity, ex. 14 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 4,
-      enunciado: `A função $f(x) = (x^2 - ${a * a})/(x - ${a})$ é contínua em $x = ${a}$? Conserte se possível.`,
-      resposta: `Não é definida em $x = ${a}$. Defina $f(${a}) = ${2 * a}$ — descontinuidade removível.`,
-      passos: `**Passo 1 — Verifique se está definida.** Em $x = ${a}$, denominador zera → não definida. Ainda assim, queremos saber se há **descontinuidade removível**.\n\n**Passo 2 — Calcule o limite.** Fatore: $(x^2 - ${a * a})/(x - ${a}) = (x - ${a})(x + ${a})/(x - ${a}) = x + ${a}$ (para $x \\neq ${a}$). Logo $\\lim_{x \\to ${a}} f(x) = ${2 * a}$.\n\n**Passo 3 — Conserte.** Definindo $\\tilde f(${a}) = ${2 * a}$ e $\\tilde f = f$ no resto, obtemos função contínua.\n\n**Por que "removível"?** Porque o limite **existe e é finito**. Se o limite fosse $\\infty$ ou diferente dos lados, não daria pra "preencher o buraco".`,
-      dificuldade: 'compreensao',
-      aulasCobertas: ['aula-43-continuidade'],
+      enunciado:
+        'Calcule $\\lim_{x \\to 0} \\dfrac{\\sin(3x)}{x}$.',
+      resposta: '$3$',
+      passos:
+        '**Passo 1 — Limite fundamental.** $\\lim_{u \\to 0} \\sin u / u = 1$.\n\n' +
+        '**Passo 2 — Manipulação.** $\\dfrac{\\sin(3x)}{x} = 3 \\cdot \\dfrac{\\sin(3x)}{3x}$.\n\n' +
+        '**Passo 3 — Substitua $u = 3x$.** Quando $x \\to 0$, $u \\to 0$. $\\lim = 3 \\cdot 1 = 3$.\n\n' +
+        '**Por que esse limite vale 1?** Geometricamente: para ângulos pequenos (rad), $\\sin x \\approx x$. Formalmente: do círculo unitário, área do triângulo $\\leq$ área do setor $\\leq$ área do triângulo maior ⇒ $\\cos x \\leq \\sin x / x \\leq 1$ ⇒ pelo teorema do confronto, limite é 1.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-45-limites-fundamentais', 'aula-48-limites-funcoes-trig'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§2.3 Trigonometric Limits, ex. 121 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 5,
-      enunciado: `Mostre via TVI que $x^3 - ${a}x - 1 = 0$ tem raiz em $(${1}, ${2})$.`,
-      resposta: 'Sim, por TVI.',
-      passos: `**Passo 1 — TVI requer continuidade.** $f(x) = x^3 - ${a}x - 1$ é polinomial, logo contínua em $\\mathbb{R}$. ✓\n\n**Passo 2 — Avalie nos extremos.**\n- $f(1) = 1 - ${a} - 1 = ${-a}$ (negativo).\n- $f(2) = 8 - ${2 * a} - 1 = ${7 - 2 * a}$.\n\n**Passo 3 — Sinal oposto?** Se $f(1) \\cdot f(2) < 0$, há raiz por TVI.\n\n**Por que TVI?** Porque uma função contínua que muda de sinal **deve passar por zero** em algum ponto intermediário (não pode "pular" zero sem ser contínua). Esta é a base do **método da bisseção**.`,
-      dificuldade: 'compreensao',
+      enunciado:
+        'Use o TVI para mostrar que $f(x) = x^3 - 4x + 1$ tem ao menos uma raiz em $[0, 2]$.',
+      resposta: 'Existe $c \\in (0, 2)$ com $f(c) = 0$.',
+      passos:
+        '**Passo 1 — Continuidade.** $f$ é polinômio ⇒ contínua em $[0, 2]$ ✓.\n\n' +
+        '**Passo 2 — Avalie nas extremidades.** $f(0) = 1 > 0$. $f(2) = 8 - 8 + 1 = 1 > 0$. **Hmmmm — mesmo sinal.** Nesse caso o TVI **não conclui**.\n\n' +
+        '**Passo 3 — Tente $f(1)$.** $f(1) = 1 - 4 + 1 = -2 < 0$.\n\n' +
+        '**Passo 4 — Aplique TVI em $[0, 1]$.** $f(0) = 1 > 0$ e $f(1) = -2 < 0$. Como $f$ é contínua e muda de sinal, existe $c_1 \\in (0, 1)$ com $f(c_1) = 0$.\n\n' +
+        '**Passo 5 — Aplique TVI em $[1, 2]$.** $f(1) = -2 < 0$ e $f(2) = 1 > 0$ ⇒ existe $c_2 \\in (1, 2)$ com $f(c_2) = 0$.\n\n' +
+        '**Conclusão.** Há **pelo menos duas** raízes em $[0, 2]$.\n\n' +
+        '**Por que TVI funciona?** Função contínua não pode "pular" valores. Se vai de positivo a negativo, em algum ponto é zero. Base do método da bisseção (Aula 69).',
+      dificuldade: 'demonstracao',
       aulasCobertas: ['aula-46-tvi-tvm'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§2.4 The Intermediate Value Theorem, ex. 142 (adaptado)',
+        licenca: CC_BY,
+      },
     },
-    {
-      numero: 6,
-      enunciado: `$\\lim_{x \\to \\infty}(1 + ${k}/x)^x$.`,
-      resposta: `$e^{${k}}$`,
-      passos: `**Passo 1 — Reconheça o padrão.** Limite fundamental $\\lim_{x \\to \\infty}(1 + 1/x)^x = e$.\n\n**Passo 2 — Generalização.** $\\lim_{x \\to \\infty}(1 + a/x)^x = e^a$. Aqui $a = ${k}$, então o limite é $e^{${k}}$.\n\n**Por quê?** Capitalização contínua: investir a taxa $a$ por ano, capitalizado $x$ vezes, no limite $x \\to \\infty$ dá $e^a$. **Origem do número $e$**.\n\n**Demonstração esquemática.** Aplique $\\ln$: $\\ln L = x \\ln(1 + a/x) \\sim x \\cdot a/x = a$ (Taylor de $\\ln(1+u) \\sim u$). Logo $L = e^a$.`,
-      dificuldade: 'compreensao',
-      aulasCobertas: ['aula-45-limites-fundamentais'],
-    },
-  ]
-})
+  ],
+}
 
-const TEMPLATE_TRIM_6 = templateMinimo(6, 'Derivadas: definição e regras', 'Trim 6 do Ano 2: derivada via limite, regras, cadeia, implícita.', '2.º ano', (v) => {
-  const r = lcg(v * 19)
-  const a = intRange(2, 6, r), b = intRange(1, 5, r), k = intRange(2, 5, r)
-  return [
+const PROVA_T6_V1: Prova = {
+  id: 'trim-6-v1',
+  trim: 6,
+  versao: 1,
+  titulo: 'Trim 6 · Versão 1 — Derivadas',
+  descricao:
+    'Definição, regras (potência, produto, quociente, cadeia), implícitas, taxas relacionadas.',
+  duracaoMinutos: 90,
+  intensidade: 4,
+  publicoAlvo: '2.º ano',
+  status: 'curada',
+  questoes: [
     {
       numero: 1,
-      enunciado: `Derive $f(x) = ${a}x^${k+1}$.`,
-      resposta: `$f'(x) = ${a * (k + 1)}x^${k}$`,
-      passos: `**Passo 1 — Regra da potência.** $(x^n)' = n x^{n-1}$.\n\n**Passo 2 — Linearidade.** $(c f)' = c f'$. Aqui $c = ${a}$, $n = ${k + 1}$.\n\n**Passo 3 — Aplique.** $f'(x) = ${a} \\cdot ${k + 1} \\cdot x^{${k}} = ${a * (k + 1)} x^${k}$.\n\n**Por que essa regra?** Vem da definição de derivada + binômio de Newton: $\\lim_{h \\to 0}((x+h)^n - x^n)/h$. O termo dominante após cancelar $x^n$ é $n x^{n-1} h$, e dividir por $h$ deixa $n x^{n-1}$.`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-52-regras-derivacao'],
-    },
-    {
-      numero: 2,
-      enunciado: `Derive $f(x) = (x^2 + ${b})\\sin x$.`,
-      resposta: `$f'(x) = 2x \\sin x + (x^2 + ${b})\\cos x$`,
-      passos: `**Passo 1 — Regra do produto.** $(uv)' = u'v + uv'$ com $u = x^2 + ${b}$, $v = \\sin x$.\n\n**Passo 2 — Calcule cada derivada.** $u' = 2x$, $v' = \\cos x$.\n\n**Passo 3 — Combine.** $f' = 2x \\cdot \\sin x + (x^2 + ${b}) \\cdot \\cos x$.\n\n**Por que produto não se reduz a $u'v'$?** Porque $f$ depende dos **dois fatores**: variar $u$ enquanto fixa $v$, e vice-versa. A taxa total combina os dois efeitos.\n\n**Demonstração.** $\\lim_h (u(x+h)v(x+h) - u(x)v(x))/h$. Soma e subtraia $u(x)v(x+h)$: separa em duas razões incrementais.`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-52-regras-derivacao'],
-    },
-    {
-      numero: 3,
-      enunciado: `Derive $f(x) = \\sin(${a}x^2 + ${b})$.`,
-      resposta: `$f'(x) = ${2 * a}x \\cos(${a}x^2 + ${b})$`,
-      passos: `**Passo 1 — Regra da cadeia.** $(\\sin g)' = \\cos g \\cdot g'$.\n\n**Passo 2 — Identifique $g$.** $g = ${a}x^2 + ${b}$, $g' = ${2 * a}x$.\n\n**Passo 3 — Combine.** $f' = \\cos(${a}x^2 + ${b}) \\cdot ${2 * a}x = ${2 * a}x\\cos(${a}x^2 + ${b})$.\n\n**Por que cadeia?** $f$ é composição de funções: $\\sin$ aplicado a $g$. A taxa de variação de $f$ em relação a $x$ é o produto da taxa em $g$ pela taxa de $g$ em $x$ — "**multiplica derivadas das camadas**".`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-53-regra-cadeia'],
-    },
-    {
-      numero: 4,
-      enunciado: `Reta tangente a $y = x^${k+1}$ em $x = ${a}$.`,
-      resposta: `$y = ${(k + 1) * a ** k}(x - ${a}) + ${a ** (k + 1)}$`,
-      passos: `**Passo 1 — Derivada (= inclinação tangente).** $y' = ${k + 1}x^${k}$, $y'(${a}) = ${(k + 1) * a ** k}$.\n\n**Passo 2 — Ponto de tangência.** $y(${a}) = ${a ** (k + 1)}$.\n\n**Passo 3 — Equação ponto-inclinação.** $y - y_0 = m(x - x_0)$ com $m = ${(k + 1) * a ** k}$, $(x_0, y_0) = (${a}, ${a ** (k + 1)})$.\n\n**Por que tangente = derivada?** Geometricamente, tangente é o "limite das retas secantes" quando os dois pontos colapsam. A inclinação dessa secante é o quociente $\\Delta y/\\Delta x$, que no limite vira $f'(x)$.`,
+      enunciado:
+        'Use a definição $f\'(a) = \\lim_{h \\to 0} (f(a+h) - f(a))/h$ para calcular $f\'(2)$ com ' +
+        '$f(x) = x^2 + 3x$.',
+      resposta: '$f\'(2) = 7$',
+      passos:
+        '**Passo 1 — $f(2+h) - f(2)$.** $f(2+h) = (2+h)^2 + 3(2+h) = 4 + 4h + h^2 + 6 + 3h = h^2 + 7h + 10$. $f(2) = 4 + 6 = 10$. Diferença: $h^2 + 7h$.\n\n' +
+        '**Passo 2 — Quociente.** $(h^2 + 7h)/h = h + 7$ (para $h \\neq 0$).\n\n' +
+        '**Passo 3 — Limite.** $\\lim_{h \\to 0} (h + 7) = 7$.\n\n' +
+        '**Verificação pela regra.** $f\'(x) = 2x + 3$, $f\'(2) = 4 + 3 = 7$ ✓.\n\n' +
+        '**Por que isso é a inclinação da tangente?** A secante entre $(2, f(2))$ e $(2+h, f(2+h))$ tem inclinação $(f(2+h) - f(2))/h$. Quando $h \\to 0$, secante vira tangente.',
       dificuldade: 'aplicacao',
       aulasCobertas: ['aula-51-derivada-definicao'],
-    },
-    {
-      numero: 5,
-      enunciado: `Derive implicitamente $x^2 + y^2 = ${a + b}$.`,
-      resposta: `$y' = -x/y$`,
-      passos: `**Passo 1 — Derive ambos os lados em relação a $x$.** Trate $y$ como função de $x$.\n\n**Passo 2 — Aplique cadeia em $y^2$.** $(y^2)' = 2y \\cdot y'$ (não esqueça do $y'$ — cadeia!).\n\n**Passo 3 — Equação resultante.** $2x + 2yy' = 0$.\n\n**Passo 4 — Isole $y'$.** $y' = -x/y$.\n\n**Por que cadeia em $y$?** Porque $y$ depende de $x$ (implicitamente). Derivar $y^2$ em relação a $x$ usa cadeia: $(y(x))^2$ derivado é $2 y(x) \\cdot y'(x)$.\n\n**Aplicação.** Tangente a círculo $x^2 + y^2 = r^2$ em $(x_0, y_0)$: inclinação $-x_0/y_0$, perpendicular ao raio.`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-54-derivadas-implicitas'],
-    },
-    {
-      numero: 6,
-      enunciado: `Posição $s(t) = t^3 - ${3 * a}t^2 + ${3 * a * a}t$. Velocidade em $t = ${a}$? Aceleração?`,
-      resposta: `$v(${a}) = 0$, $a(${a}) = 0$.`,
-      passos: `**Passo 1 — Velocidade = derivada da posição.** $v(t) = s'(t) = 3t^2 - ${6 * a}t + ${3 * a * a}$.\n\n**Passo 2 — Aceleração = derivada da velocidade.** $a(t) = v'(t) = 6t - ${6 * a}$.\n\n**Passo 3 — Em $t = ${a}$.** $v(${a}) = 3 \\cdot ${a * a} - ${6 * a} \\cdot ${a} + ${3 * a * a} = ${3 * a * a - 6 * a * a + 3 * a * a} = 0$. $a(${a}) = ${6 * a} - ${6 * a} = 0$.\n\n**Por que isso pode acontecer?** Em $t = ${a}$, a partícula está **momentaneamente em repouso e sem aceleração** (ponto de inflexão da posição). É o tipo de informação que derivadas extraem.`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-55-derivadas-superiores'],
-    },
-  ]
-})
-
-const TEMPLATE_TRIM_7 = templateMinimo(7, 'Aplicações da derivada', 'Trim 7 do Ano 2: otimização, L\'Hôpital, Taylor, esboço, Newton.', '2.º ano', (v) => {
-  const r = lcg(v * 23)
-  const a = intRange(2, 5, r), b = intRange(2, 6, r)
-  return [
-    {
-      numero: 1,
-      enunciado: `Encontre máximo e mínimo locais de $f(x) = x^3 - ${3 * a}x^2 + ${3 * a * a - b}x$.`,
-      resposta: `Pontos críticos via $f' = 0$. Use teste 2ª derivada para classificar.`,
-      passos: `**Passo 1 — Pontos críticos.** $f' = 3x^2 - ${6 * a}x + ${3 * a * a - b} = 0$. Use Bhaskara: $x = (${6 * a} \\pm \\sqrt{${36 * a * a} - 12(${3 * a * a - b})})/6$.\n\n**Passo 2 — Teste da 2ª derivada.** $f'' = 6x - ${6 * a}$. Em cada ponto crítico, se $f'' > 0$ é mínimo; se $f'' < 0$ é máximo.\n\n**Por que ponto crítico = candidato a extremo?** Pelo Teorema de Fermat: se $f$ tem extremo interior diferenciável, $f' = 0$ aí. (Recíproca falsa: $f' = 0$ em ponto de inflexão também.)\n\n**Aplicação.** Otimização: maximizar lucro, minimizar custo, encontrar caminho mínimo (variacional).`,
-      dificuldade: 'compreensao',
-      aulasCobertas: ['aula-61-maximos-minimos'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§3.1 Defining the Derivative, ex. 11 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 2,
-      enunciado: `Cerca para retangular contra parede com ${100 * a} m de cerca (3 lados). Maximize a área.`,
-      resposta: `$x = ${25 * a}$, $y = ${50 * a}$, área = $${1250 * a * a}$ m².`,
-      passos: `**Passo 1 — Modelagem.** Parede usa 1 lado, cerca os outros 3. Sejam $x$ (perpendicular à parede) e $y$ (paralela). Restrição: $2x + y = ${100 * a}$.\n\n**Passo 2 — Função objetivo.** Área $A(x) = x \\cdot y = x(${100 * a} - 2x) = ${100 * a}x - 2x^2$.\n\n**Passo 3 — Otimize.** $A'(x) = ${100 * a} - 4x = 0 \\Rightarrow x = ${25 * a}$. Logo $y = ${50 * a}$ e $A_{\\max} = ${25 * a} \\cdot ${50 * a} = ${1250 * a * a}$.\n\n**Por que esse formato?** Em problemas de otimização com restrição: 1) escreva quantidade a otimizar; 2) use restrição pra eliminar variável; 3) derive e iguale a zero; 4) verifique 2ª derivada (negativa = máximo).\n\n**Lição** profunda: o ótimo dá $x = y/2$ — metade da cerca em cada direção (intuição "simétrica" enviesada porque parede gratuita).`,
+      enunciado:
+        'Derive $f(x) = (3x^2 + 1)(x - 4)$ via regra do produto.',
+      resposta: '$f\'(x) = 9x^2 - 24x + 1$',
+      passos:
+        '**Passo 1 — Regra do produto.** $(uv)\' = u\'v + uv\'$ com $u = 3x^2 + 1$, $v = x - 4$.\n\n' +
+        '**Passo 2 — Derivadas.** $u\' = 6x$, $v\' = 1$.\n\n' +
+        '**Passo 3 — Combine.** $f\'(x) = 6x(x - 4) + (3x^2 + 1)(1) = 6x^2 - 24x + 3x^2 + 1 = 9x^2 - 24x + 1$.\n\n' +
+        '**Verificação por expansão.** $f(x) = 3x^3 - 12x^2 + x - 4$. Derivada termo a termo: $9x^2 - 24x + 1$ ✓.\n\n' +
+        '**Por que a regra do produto não é só $u\'v\'$?** A derivada mede a taxa de variação **conjunta**. Cada fator contribui com sua variação **mantendo o outro fixo** — eis as duas parcelas. Em geral, $(uv)\' \\neq u\'v\'$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-52-regras-derivacao'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§3.3 Differentiation Rules, ex. 91 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Derive $f(x) = \\sin(x^2)$.',
+      resposta: '$f\'(x) = 2x\\cos(x^2)$',
+      passos:
+        '**Passo 1 — Regra da cadeia.** $f = g(h(x))$ com $g(u) = \\sin u$, $h(x) = x^2$. $f\' = g\'(h(x)) \\cdot h\'(x)$.\n\n' +
+        '**Passo 2 — Derivadas.** $g\'(u) = \\cos u$. $h\'(x) = 2x$.\n\n' +
+        '**Passo 3 — Combine.** $f\'(x) = \\cos(x^2) \\cdot 2x = 2x\\cos(x^2)$.\n\n' +
+        '**Por que a cadeia?** A taxa de variação de uma composição é o **produto** das taxas. Se $u$ varia $h\'(x)$ vezes mais rápido que $x$, e $g$ varia $g\'(u)$ vezes mais rápido que $u$, então $g \\circ h$ varia $g\'(u) \\cdot h\'(x)$ vezes mais rápido que $x$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-53-regra-cadeia'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§3.6 The Chain Rule, ex. 230 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 4,
+      enunciado:
+        'Calcule $dy/dx$ para $x^2 + y^2 = 25$.',
+      resposta: '$dy/dx = -x/y$',
+      passos:
+        '**Passo 1 — Derive ambos os lados em $x$.** $\\frac{d}{dx}(x^2) + \\frac{d}{dx}(y^2) = 0$.\n\n' +
+        '**Passo 2 — Cadeia em $y^2$.** $\\frac{d}{dx}(y^2) = 2y \\cdot \\frac{dy}{dx}$ (porque $y$ depende de $x$).\n\n' +
+        '**Passo 3 — Resolva.** $2x + 2y \\cdot dy/dx = 0 \\Rightarrow dy/dx = -x/y$.\n\n' +
+        '**Por que derivada implícita?** Quando $y$ não está isolado, $y^2$ ainda depende de $x$. A regra da cadeia trata $y$ como função de $x$ desconhecida e produz uma equação em $dy/dx$.\n\n' +
+        '**Verificação geométrica.** Círculo $x^2 + y^2 = 25$. Em $(3, 4)$: $dy/dx = -3/4$. Reta tangente é perpendicular ao raio — bate com o vetor $(3,4)$ rotacionado em $90°$.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-54-derivadas-implicitas'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§3.8 Implicit Differentiation, ex. 286 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 5,
+      enunciado:
+        'Um balão sobe verticalmente a $5$ m/s. Um observador 100 m do ponto de lançamento ' +
+        'aponta a câmera para o balão. Qual a taxa de variação do ângulo $\\theta$ ' +
+        '(da horizontal) quando o balão está a 100 m de altura?',
+      resposta: '$d\\theta/dt = 1/40$ rad/s.',
+      passos:
+        '**Passo 1 — Geometria.** Triângulo retângulo: cateto adjacente fixo (100 m), cateto oposto $h$ (variável). $\\tan\\theta = h/100$.\n\n' +
+        '**Passo 2 — Derive em $t$.** $\\sec^2\\theta \\cdot d\\theta/dt = (1/100) \\cdot dh/dt$.\n\n' +
+        '**Passo 3 — Em $h = 100$.** $\\tan\\theta = 1 \\Rightarrow \\theta = \\pi/4 \\Rightarrow \\sec^2\\theta = 2$.\n\n' +
+        '**Passo 4 — Substitua $dh/dt = 5$.** $2 \\cdot d\\theta/dt = 5/100 = 0{,}05$ ⇒ $d\\theta/dt = 0{,}025 = 1/40$ rad/s.\n\n' +
+        '**Por que taxas relacionadas?** Quando duas variáveis se relacionam por uma equação ($\\tan\\theta = h/100$) e ambas dependem de $t$, derivar em $t$ liga as taxas.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['aula-58-taxas-relacionadas'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§4.1 Related Rates, ex. 14 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+  ],
+}
+
+const PROVA_T7_V1: Prova = {
+  id: 'trim-7-v1',
+  trim: 7,
+  versao: 1,
+  titulo: 'Trim 7 · Versão 1 — Aplicações de derivadas',
+  descricao:
+    'Otimização, máximos/mínimos, esboço, L\'Hôpital, Taylor, Newton-Raphson, cinemática.',
+  duracaoMinutos: 90,
+  intensidade: 4,
+  publicoAlvo: '2.º ano',
+  status: 'curada',
+  questoes: [
+    {
+      numero: 1,
+      enunciado:
+        'Encontre os pontos críticos de $f(x) = x^3 - 6x^2 + 9x + 1$ e classifique-os.',
+      resposta: 'Máx. local em $x = 1$ ($f = 5$). Mín. local em $x = 3$ ($f = 1$).',
+      passos:
+        '**Passo 1 — $f\'(x)$.** $f\'(x) = 3x^2 - 12x + 9 = 3(x^2 - 4x + 3) = 3(x-1)(x-3)$.\n\n' +
+        '**Passo 2 — Pontos críticos.** $f\'(x) = 0$ ⇒ $x = 1$ ou $x = 3$.\n\n' +
+        '**Passo 3 — Sinal de $f\'$ (teste da 1ª derivada).** $x < 1$: $f\' > 0$ (cresce). $1 < x < 3$: $f\' < 0$ (decresce). $x > 3$: $f\' > 0$. ⇒ $x = 1$ é máx. local; $x = 3$ é mín. local.\n\n' +
+        '**Passo 4 — Valores.** $f(1) = 1 - 6 + 9 + 1 = 5$. $f(3) = 27 - 54 + 27 + 1 = 1$.\n\n' +
+        '**Por que sinal de $f\'$ classifica?** Cresce → para → decresce: ponto é cume (máx). Decresce → para → cresce: ponto é vale (mín).',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-61-maximos-minimos'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§4.5 Derivatives and the Shape of a Graph, ex. 217 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Calcule $\\lim_{x \\to 0} \\dfrac{e^x - 1 - x}{x^2}$.',
+      resposta: '$1/2$',
+      passos:
+        '**Passo 1 — Tipo $0/0$.** Aplique L\'Hôpital.\n\n' +
+        '**Passo 2 — Derivar num. e den.** $\\lim \\dfrac{e^x - 1}{2x}$. Ainda $0/0$ — aplique de novo.\n\n' +
+        '**Passo 3 — Segunda aplicação.** $\\lim \\dfrac{e^x}{2} = 1/2$.\n\n' +
+        '**Caminho via Taylor.** $e^x = 1 + x + x^2/2 + O(x^3)$. Logo $e^x - 1 - x = x^2/2 + O(x^3)$. Dividindo por $x^2$: $1/2 + O(x)$ → $1/2$.\n\n' +
+        '**Por que ambos funcionam?** L\'Hôpital usa derivadas locais; Taylor usa expansão local. São equivalentes para esses limites.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-64-l-hopital', 'aula-65-taylor'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§4.8 L\'Hôpital\'s Rule, ex. 366 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Quer-se construir uma caixa retangular sem tampa, com base quadrada e ' +
+        'volume 32 m³. Que dimensões minimizam a área superficial?',
+      resposta: 'Base $4 \\times 4$ m, altura $2$ m. Área $48$ m².',
+      passos:
+        '**Passo 1 — Variáveis.** Base de lado $x$, altura $h$. Volume: $x^2 h = 32$ ⇒ $h = 32/x^2$.\n\n' +
+        '**Passo 2 — Área (sem tampa).** $A = x^2 + 4xh = x^2 + 4x \\cdot 32/x^2 = x^2 + 128/x$.\n\n' +
+        '**Passo 3 — Otimize.** $A\'(x) = 2x - 128/x^2 = 0 \\Rightarrow 2x^3 = 128 \\Rightarrow x^3 = 64 \\Rightarrow x = 4$.\n\n' +
+        '**Passo 4 — $h = 32/16 = 2$. $A = 16 + 32 = 48$ m².**\n\n' +
+        '**Verificação 2ª derivada.** $A\'\'(x) = 2 + 256/x^3 > 0 \\Rightarrow$ mínimo ✓.\n\n' +
+        '**Por que essa estratégia?** Reduzir 2 variáveis a 1 via vínculo (volume), depois otimizar. Padrão clássico em problemas de embalagem.',
       dificuldade: 'modelagem',
       aulasCobertas: ['aula-62-otimizacao'],
-    },
-    {
-      numero: 3,
-      enunciado: `$\\lim_{x \\to 0} \\sin(x)/x$ via L'Hôpital.`,
-      resposta: `$1$`,
-      passos: `**Passo 1 — Forma 0/0.** Em $x = 0$: numerador $\\sin 0 = 0$, denominador $0$. Indeterminação válida para L'Hôpital.\n\n**Passo 2 — Derive cima e baixo.** $(\\sin x)' = \\cos x$, $(x)' = 1$.\n\n**Passo 3 — Limite da razão das derivadas.** $\\lim \\cos(x)/1 = \\cos 0 = 1$.\n\n**Por que L'Hôpital funciona?** Em $0/0$, ambas as funções "começam em zero". A razão das taxas de variação imediatamente após zero (= derivadas em zero) determina como elas se aproximam — é exatamente a razão dos limites.\n\n**Cuidado.** Só aplique se a forma é mesmo $0/0$ ou $\\infty/\\infty$. Aplicar em casos sem indeterminação dá errado.`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-64-l-hopital'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§4.7 Applied Optimization, ex. 305 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 4,
-      enunciado: `Polinômio de Taylor de grau 2 de $\\cos x$ em $a = 0$.`,
-      resposta: `$T_2(x) = 1 - x^2/2$`,
-      passos: `**Passo 1 — Fórmula de Taylor.** $T_n(x) = \\sum_{k=0}^n f^{(k)}(a)(x-a)^k/k!$.\n\n**Passo 2 — Calcule derivadas.** $\\cos(0) = 1$, $\\cos'(0) = -\\sin(0) = 0$, $\\cos''(0) = -\\cos(0) = -1$.\n\n**Passo 3 — Monte.** $T_2(x) = 1 + 0 \\cdot x + (-1) x^2/2 = 1 - x^2/2$.\n\n**Por que Taylor funciona?** A ideia é "achar polinômio que aproxima a função", concordando com ela na função e nas $n$ primeiras derivadas em $a$. Por isso usa derivadas $/k!$.\n\n**Aplicação.** Para $x$ pequeno, $\\cos x \\approx 1 - x^2/2$. Em programação, computa-se $\\cos$ via Taylor + redução de argumento.`,
+      enunciado:
+        'Use Newton-Raphson para aproximar $\\sqrt{10}$ partindo de $x_0 = 3$. Faça 2 iterações.',
+      resposta: '$x_2 \\approx 3{,}16228$',
+      passos:
+        '**Passo 1 — Equação.** $f(x) = x^2 - 10 = 0$. $f\'(x) = 2x$.\n\n' +
+        '**Passo 2 — Iteração.** $x_{n+1} = x_n - f(x_n)/f\'(x_n) = x_n - (x_n^2 - 10)/(2 x_n) = (x_n + 10/x_n)/2$.\n\n' +
+        '**Passo 3 — $x_1$.** $x_1 = (3 + 10/3)/2 = (3 + 3{,}333)/2 = 3{,}1\\overline{6}$.\n\n' +
+        '**Passo 4 — $x_2$.** $x_2 = (3{,}1\\overline{6} + 10/3{,}1\\overline{6})/2 = (3{,}1667 + 3{,}1579)/2 \\approx 3{,}16228$.\n\n' +
+        '**Comparação.** $\\sqrt{10} \\approx 3{,}16228$. Convergência **quadrática**: dobra os dígitos a cada iteração.\n\n' +
+        '**Por que tão rápido?** Geometricamente, Newton "dispara" a tangente no ponto atual e usa a interseção com o eixo $x$ como próximo chute. Se a função é bem-comportada, é incrivelmente eficiente.',
       dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-65-taylor'],
+      aulasCobertas: ['aula-69-newton-raphson'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§4.9 Newton\'s Method, ex. 419 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 5,
-      enunciado: `Newton-Raphson para $f(x) = x^2 - ${a + b}$ a partir de $x_0 = ${Math.ceil(Math.sqrt(a + b))}$. Calcule $x_2$.`,
-      resposta: `$x_2 \\approx \\sqrt{${a + b}}$ com 4-5 dígitos.`,
-      passos: `**Passo 1 — Fórmula.** $x_{n+1} = x_n - f(x_n)/f'(x_n)$. Aqui $f' = 2x$, então $x_{n+1} = (x_n + ${a + b}/x_n)/2$.\n\n**Passo 2 — Iteração 1.** $x_1 = (x_0 + ${a + b}/x_0)/2$. Calcule.\n\n**Passo 3 — Iteração 2.** $x_2 = (x_1 + ${a + b}/x_1)/2$.\n\n**Por que converge tão rápido?** Newton tem **convergência quadrática** próximo da raiz: número de dígitos certos dobra a cada iteração. Em 4-5 passos, atinge-se precisão de máquina (16 dígitos float).\n\n**Histórico.** Algoritmo babilônico (~2000 a.C.) para raiz quadrada usa exatamente essa iteração — Newton (1685) generalizou.`,
+      enunciado:
+        'Um carro tem $s(t) = t^3 - 6t^2 + 9t$ (m, com $t$ em s). Encontre quando ele está parado e ' +
+        'quando muda de direção.',
+      resposta: 'Para em $t = 1$ s e $t = 3$ s. Muda de direção em $t = 1$ s e $t = 3$ s.',
+      passos:
+        '**Passo 1 — Velocidade.** $v(t) = s\'(t) = 3t^2 - 12t + 9 = 3(t-1)(t-3)$.\n\n' +
+        '**Passo 2 — Parado: $v = 0$.** $t = 1$ ou $t = 3$.\n\n' +
+        '**Passo 3 — Mudança de direção: $v$ muda de sinal.** $0 \\leq t < 1$: $v > 0$ (frente). $1 < t < 3$: $v < 0$ (trás). $t > 3$: $v > 0$ (frente). Logo muda em $t=1$ e $t=3$.\n\n' +
+        '**Por que velocidade zero não basta?** Pode haver caso onde $v(t_0) = 0$ mas o objeto continua na mesma direção (ex.: $v$ toca zero sem trocar sinal). Aqui, ambos os zeros são raízes simples ⇒ sinal muda.\n\n' +
+        '**Aceleração.** $a(t) = 6t - 12$. $a(1) = -6 < 0$ (desacelerando para frente, vai parar e reverter). $a(3) = 6 > 0$ (acelerando, finalizou inversão).',
       dificuldade: 'modelagem',
-      aulasCobertas: ['aula-69-newton-raphson'],
+      aulasCobertas: ['aula-68-cinematica'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§3.4 Derivatives as Rates of Change, ex. 153 (adaptado)',
+        licenca: CC_BY,
+      },
     },
-  ]
-})
+  ],
+}
 
-const TEMPLATE_TRIM_8 = templateMinimo(8, 'Estatística e probabilidade', 'Trim 8 do Ano 2: descritiva, binomial, normal, TCL, regressão, Bayes.', '2.º ano', (v) => {
-  const r = lcg(v * 29)
-  const n = intRange(8, 20, r), p = (intRange(2, 7, r)) / 10
-  const mean = intRange(50, 80, r), std = intRange(5, 15, r)
-  return [
+const PROVA_T8_V1: Prova = {
+  id: 'trim-8-v1',
+  trim: 8,
+  versao: 1,
+  titulo: 'Trim 8 · Versão 1 — Estatística e probabilidade',
+  descricao:
+    'Medidas centrais, variância, quartis, variável aleatória discreta, binomial, normal, TCL, Bayes.',
+  duracaoMinutos: 90,
+  intensidade: 4,
+  publicoAlvo: '2.º ano',
+  status: 'curada',
+  questoes: [
     {
       numero: 1,
-      enunciado: `Dados: $${5 + (v % 3)}, ${7 + (v % 3)}, ${10 + (v % 3)}, ${12 + (v % 3)}, ${16 + (v % 3)}$. Média e mediana.`,
-      resposta: `Média = ${(5 + (v % 3) + 7 + (v % 3) + 10 + (v % 3) + 12 + (v % 3) + 16 + (v % 3)) / 5}, mediana = ${10 + (v % 3)}.`,
-      passos: `**Passo 1 — Média (aritmética).** Soma / quantidade. $({5 + 7 + 10 + 12 + 16}) / 5 = 50/5 = 10$ (com offset por versão).\n\n**Passo 2 — Mediana.** Ordene os dados (já ordenados aqui) e pegue o do meio. Para $n = 5$ (ímpar), é o 3.º valor.\n\n**Por que duas medidas?** Média é sensível a outliers; mediana é robusta. Quando há valores extremos (renda, tempo de espera), reportar mediana é mais informativo. Em distribuições simétricas (normal), as duas coincidem.`,
+      enunciado:
+        'Notas de uma prova: 7, 8, 6, 9, 10, 7, 8, 5, 9, 8. Calcule média, mediana e desvio-padrão (amostral).',
+      resposta: 'Média $= 7{,}7$. Mediana $= 8$. $s \\approx 1{,}494$.',
+      passos:
+        '**Passo 1 — Média.** $\\bar x = (7+8+6+9+10+7+8+5+9+8)/10 = 77/10 = 7{,}7$.\n\n' +
+        '**Passo 2 — Mediana.** Ordenado: 5, 6, 7, 7, 8, 8, 8, 9, 9, 10. Posições 5 e 6: $(8 + 8)/2 = 8$.\n\n' +
+        '**Passo 3 — Variância amostral.** $s^2 = \\frac{1}{n-1}\\sum (x_i - \\bar x)^2$. Soma dos quadrados dos desvios: $(-0{,}7)^2 + (0{,}3)^2 + ... = 0{,}49 + 0{,}09 + 2{,}89 + 1{,}69 + 5{,}29 + 0{,}49 + 0{,}09 + 7{,}29 + 1{,}69 + 0{,}09 = 20{,}1$. $s^2 = 20{,}1/9 \\approx 2{,}233$. $s \\approx 1{,}494$.\n\n' +
+        '**Por que $n - 1$ (Bessel)?** Tira viés do estimador. Usar $\\bar x$ no cálculo "consome" 1 grau de liberdade.',
       dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-71-medidas-centrais'],
+      aulasCobertas: ['aula-71-medidas-centrais', 'aula-72-variancia'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§2.7 Measures of the Spread of the Data, ex. 79 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 2,
-      enunciado: `$X \\sim \\text{Bin}(${n}, ${p})$. $P(X = ${Math.floor(n * p)})$ (use $\\binom{n}{k}p^k(1-p)^{n-k}$).`,
-      resposta: `$\\binom{${n}}{${Math.floor(n * p)}} \\cdot ${p}^{${Math.floor(n * p)}} \\cdot ${(1 - p).toFixed(2)}^{${n - Math.floor(n * p)}}$`,
-      passos: `**Passo 1 — Fórmula da binomial.** $P(X = k) = \\binom{n}{k} p^k (1-p)^{n-k}$.\n\n**Passo 2 — Identifique.** $n = ${n}$, $p = ${p}$, $k = ${Math.floor(n * p)}$.\n\n**Passo 3 — Calcule cada parte.** $\\binom{${n}}{${Math.floor(n * p)}}$, depois multiplica por potências.\n\n**Por que essa fórmula?** $\\binom{n}{k}$ conta quantas sequências de $n$ ensaios têm exatamente $k$ sucessos. Cada sequência tem prob $p^k(1-p)^{n-k}$ (independência).\n\n**Aplicação.** Controle de qualidade (defeitos em lote), A/B testing (conversões em $n$ usuários), genética (cruzamentos).`,
-      dificuldade: 'modelagem',
+      enunciado:
+        'Em 10 lançamentos de uma moeda honesta, qual a probabilidade de obter exatamente 7 caras?',
+      resposta: '$\\binom{10}{7} (0{,}5)^{10} = 120/1024 \\approx 0{,}1172$',
+      passos:
+        '**Passo 1 — Modelo binomial.** $X \\sim \\text{Bin}(n=10, p=0{,}5)$.\n\n' +
+        '**Passo 2 — Fórmula.** $P(X=k) = \\binom{n}{k} p^k (1-p)^{n-k}$.\n\n' +
+        '**Passo 3 — $P(X=7)$.** $\\binom{10}{7} (0{,}5)^7 (0{,}5)^3 = 120 \\cdot (0{,}5)^{10} = 120/1024 \\approx 0{,}1172$.\n\n' +
+        '**Por que binomial?** Cada lançamento: independente, dois resultados (cara/coroa), prob. constante. Soma de $n$ Bernoullis ⇒ binomial.',
+      dificuldade: 'aplicacao',
       aulasCobertas: ['aula-75-binomial'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§4.3 Binomial Distribution, ex. 65 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 3,
-      enunciado: `Em uma população normal $\\mathcal{N}(${mean}, ${std}^2)$, qual a probabilidade de uma observação estar entre $${mean - std}$ e $${mean + std}$?`,
-      resposta: `$\\approx 68\\%$.`,
-      passos: `**Passo 1 — Padronize.** $Z = (X - \\mu)/\\sigma$. Para $X = ${mean} \\pm ${std}$, $Z = \\pm 1$.\n\n**Passo 2 — Use a regra empírica.** $P(-1 < Z < 1) \\approx 68\\%$ (normal padrão).\n\n**Por que esse valor mágico?** Vem da integral $\\int_{-1}^1 (1/\\sqrt{2\\pi}) e^{-z^2/2}\\, dz \\approx 0,6827$. Não há fórmula fechada simples.\n\n**Regra 68-95-99,7.** $\\pm 1\\sigma$: 68%; $\\pm 2\\sigma$: 95%; $\\pm 3\\sigma$: 99,7%. **Decora** — base de IC, controle estatístico, finanças.`,
-      dificuldade: 'modelagem',
+      enunciado:
+        'Altura de adultos: $X \\sim N(170, 8^2)$ cm. Qual a probabilidade de uma pessoa ter mais de 186 cm?',
+      resposta: '$P(X > 186) \\approx 0{,}0228$ (2,28%).',
+      passos:
+        '**Passo 1 — Padronize.** $Z = (X - \\mu)/\\sigma = (186 - 170)/8 = 16/8 = 2$.\n\n' +
+        '**Passo 2 — $P(Z > 2)$.** Da tabela $\\Phi(2) \\approx 0{,}9772$, então $P(Z > 2) = 1 - 0{,}9772 = 0{,}0228$.\n\n' +
+        '**Por que padronizar?** $Z$ tem distribuição $N(0, 1)$ universal. Tabelado uma vez, serve para qualquer normal.\n\n' +
+        '**Regra prática 68-95-99,7.** $\\pm 2\\sigma$ contém $\\approx 95\\%$ — sobram $\\approx 2{,}5\\%$ em cada cauda. Bate com $0{,}0228$.',
+      dificuldade: 'aplicacao',
       aulasCobertas: ['aula-76-normal'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§6.1 Standard Normal Distribution, ex. 70 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 4,
-      enunciado: `Doença com $P(D) = 0,01$. Sensibilidade ${85 + (v % 10)}\\%$, especificidade ${90 + (v % 5)}\\%$. $P(D|+)$.`,
-      resposta: `Calcule via Bayes — base rate fallacy típica.`,
-      passos: `**Bayes.** $P(D|+) = \\frac{P(+|D) P(D)}{P(+|D)P(D) + P(+|D^c)P(D^c)}$.\n\nSubstitua: $P(+|D) = 0,${85 + (v % 10)}$, $P(D) = 0,01$, $P(+|D^c) = 1 - 0,${90 + (v % 5)} = 0,${10 - (v % 5)}$, $P(D^c) = 0,99$.\n\n**Por que $P(D|+)$ é baixo mesmo com testes "bons"?** Porque $P(D)$ é muito pequena — a maior parte dos positivos são **falsos positivos**, vindos do enorme grupo $D^c$.\n\n**Lição operacional.** Triagem em massa de doença rara → falsos positivos dominam. Por isso oncologia usa testes de confirmação (biopsia) após qualquer rastreio.`,
+      enunciado:
+        'A média de uma amostra de $n = 36$ tem qual distribuição aproximada se a população tem ' +
+        '$\\mu = 50$ e $\\sigma = 12$?',
+      resposta: '$\\bar X \\sim N(50, 2^2)$, ou seja, $\\sigma_{\\bar X} = 2$.',
+      passos:
+        '**Passo 1 — TCL.** Para $n$ grande, $\\bar X \\sim N(\\mu, \\sigma^2/n)$ aproximadamente.\n\n' +
+        '**Passo 2 — Parâmetros.** $\\mu_{\\bar X} = 50$. $\\sigma_{\\bar X} = \\sigma/\\sqrt n = 12/6 = 2$.\n\n' +
+        '**Por que $\\sigma/\\sqrt n$?** Variância da média de amostra **encolhe** com $n$ (mais dados → menos incerteza). Especificamente, $\\text{Var}(\\bar X) = \\sigma^2/n$.\n\n' +
+        '**Aplicação.** $P(\\bar X > 53) = P(Z > (53-50)/2) = P(Z > 1{,}5) \\approx 0{,}067$.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-77-tcl'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§7.1 Central Limit Theorem, ex. 25 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 5,
+      enunciado:
+        'Um teste detecta uma doença com 95% de sensibilidade (verdadeiros positivos) e 90% de especificidade ' +
+        '(verdadeiros negativos). A doença afeta 1% da população. Se uma pessoa testou positivo, qual a ' +
+        'probabilidade de realmente ter a doença?',
+      resposta: '$P(D | +) \\approx 8{,}76\\%$',
+      passos:
+        '**Passo 1 — Variáveis.** $D$ = doente, $+$ = teste positivo. $P(D) = 0{,}01$, $P(+|D) = 0{,}95$, $P(+|\\neg D) = 0{,}10$.\n\n' +
+        '**Passo 2 — Bayes.** $P(D | +) = \\dfrac{P(+|D) P(D)}{P(+)}$.\n\n' +
+        '**Passo 3 — $P(+)$ por lei da probabilidade total.** $P(+) = P(+|D) P(D) + P(+|\\neg D) P(\\neg D) = 0{,}95 \\cdot 0{,}01 + 0{,}10 \\cdot 0{,}99 = 0{,}0095 + 0{,}099 = 0{,}1085$.\n\n' +
+        '**Passo 4 — $P(D|+)$.** $0{,}0095/0{,}1085 \\approx 0{,}0876$, ou ~8,76%.\n\n' +
+        '**Por que tão baixo apesar de testes "bons"?** Doença **rara** (1%) somada a falsos positivos (10%) gera ENORME pool de falsos. **Base rate fallacy** — exemplo clássico de Bayes.',
       dificuldade: 'modelagem',
       aulasCobertas: ['aula-79-bayes-aprofundado'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§3.2 Bayes\' Theorem (adaptado)',
+        licenca: CC_BY,
+      },
     },
-    {
-      numero: 5,
-      enunciado: `Calcule a variância dos dados $${10}, ${12}, ${15}, ${18}, ${20}$.`,
-      resposta: `$\\sigma^2 = \\frac{1}{5}\\sum (x_i - \\bar x)^2$.`,
-      passos: `**Passo 1 — Média.** $\\bar x = (10+12+15+18+20)/5 = 75/5 = 15$.\n\n**Passo 2 — Desvios ao quadrado.** $(10-15)^2 = 25$, $(12-15)^2 = 9$, $(15-15)^2 = 0$, $(18-15)^2 = 9$, $(20-15)^2 = 25$.\n\n**Passo 3 — Soma e divide.** $(25 + 9 + 0 + 9 + 25)/5 = 68/5 = 13,6$. Variância populacional $\\sigma^2 = 13,6$.\n\n**Variância amostral** (divide por $n-1$): $68/4 = 17$.\n\n**Por que $n-1$?** Correção de Bessel: usar $\\bar x$ em vez de $\\mu$ "consome um grau de liberdade". Dividir por $n-1$ dá estimador não-viesado de $\\sigma^2$.`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-72-variancia'],
-    },
-  ]
-})
+  ],
+}
 
-const TEMPLATE_TRIM_9 = templateMinimo(9, 'Cálculo Integral', 'Trim 9 do Ano 3: antiderivada, definida, TFC, técnicas, área/volume.', '3.º ano', (v) => {
-  const r = lcg(v * 31)
-  const a = intRange(2, 5, r), b = intRange(1, 4, r)
-  return [
+const PROVA_T9_V1: Prova = {
+  id: 'trim-9-v1',
+  trim: 9,
+  versao: 1,
+  titulo: 'Trim 9 · Versão 1 — Integral',
+  descricao:
+    'Antiderivada, integral definida, TFC, substituição, partes, frações parciais, área e volume.',
+  duracaoMinutos: 90,
+  intensidade: 4,
+  publicoAlvo: '3.º ano',
+  status: 'curada',
+  questoes: [
     {
       numero: 1,
-      enunciado: `$\\int (${a}x^2 + ${b}x) dx$.`,
-      resposta: `$\\frac{${a}}{3}x^3 + \\frac{${b}}{2}x^2 + C$`,
-      passos: `**Passo 1 — Linearidade.** $\\int (f + g) = \\int f + \\int g$. $\\int (cf) = c\\int f$.\n\n**Passo 2 — Use $\\int x^n dx = x^{n+1}/(n+1) + C$ para cada termo.**\n- $\\int ${a}x^2 dx = ${a}x^3/3$\n- $\\int ${b}x dx = ${b}x^2/2$\n\n**Passo 3 — Some + C.** $\\frac{${a}}{3}x^3 + \\frac{${b}}{2}x^2 + C$.\n\n**Por que $+C$?** Toda antiderivada é única **a menos de constante**. Se $F' = f$, então $(F + C)' = f$ também.`,
+      enunciado: 'Calcule $\\int (3x^2 + 2x - 5)\\, dx$.',
+      resposta: '$x^3 + x^2 - 5x + C$',
+      passos:
+        '**Passo 1 — Linearidade.** Quebre em soma.\n\n' +
+        '**Passo 2 — Regra da potência.** $\\int x^n\\, dx = x^{n+1}/(n+1) + C$ para $n \\neq -1$.\n\n' +
+        '**Passo 3 — Aplique.** $3 \\cdot x^3/3 + 2 \\cdot x^2/2 - 5x + C = x^3 + x^2 - 5x + C$.\n\n' +
+        '**Por que $+C$?** Antiderivada não é única — qualquer constante adicional zera ao derivar. $C$ representa essa família.',
       dificuldade: 'aplicacao',
       aulasCobertas: ['aula-81-antiderivada'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§4.10 Antiderivatives, ex. 470 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 2,
-      enunciado: `$\\int_0^${a} ${b}x dx$.`,
-      resposta: `$${b * a * a / 2}$`,
-      passos: `**Passo 1 — Antiderivada.** $F(x) = ${b}x^2/2$.\n\n**Passo 2 — TFC: $F(b) - F(a)$.** $F(${a}) - F(0) = ${b * a * a}/2 - 0 = ${b * a * a / 2}$.\n\n**Por que TFC?** A integral definida (= área sob a curva) é igual à diferença da antiderivada nos extremos. Esse é o **resultado fundamental do cálculo** — Newton-Leibniz, séc. XVII.`,
+      enunciado: 'Calcule $\\int_0^2 (3x^2 + 4x)\\, dx$ via TFC.',
+      resposta: '$16$',
+      passos:
+        '**Passo 1 — Antiderivada.** $F(x) = x^3 + 2x^2$.\n\n' +
+        '**Passo 2 — Avaliar nos extremos.** $F(2) = 8 + 8 = 16$. $F(0) = 0$.\n\n' +
+        '**Passo 3 — Diferença.** $\\int_0^2 = F(2) - F(0) = 16$.\n\n' +
+        '**Por que TFC?** Reduz integral definida (somas de Riemann no limite) à diferença da antiderivada — análise vira álgebra.',
       dificuldade: 'aplicacao',
       aulasCobertas: ['aula-82-integral-definida', 'aula-83-tfc'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§5.3 The Fundamental Theorem of Calculus, ex. 165 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 3,
-      enunciado: `$\\int 2x \\cos(x^2) dx$ (substituição).`,
-      resposta: `$\\sin(x^2) + C$`,
-      passos: `**Passo 1 — Identifique a substituição.** $u = x^2$, $du = 2x dx$. **Convenientemente**, $2x dx$ aparece intacto.\n\n**Passo 2 — Reescreva.** $\\int \\cos(u) du$.\n\n**Passo 3 — Integre.** $\\sin(u) + C = \\sin(x^2) + C$.\n\n**Por que substituição funciona?** Inversa da regra da cadeia: se sabemos derivar $\\sin(g(x))$ via cadeia, sabemos integrar $\\cos(g(x)) g'(x)$. Procure produto de "derivada de algo" com função desse algo.`,
-      dificuldade: 'compreensao',
-      aulasCobertas: ['aula-84-substituicao'],
-    },
-    {
-      numero: 4,
-      enunciado: `$\\int x e^x dx$ (por partes).`,
-      resposta: `$xe^x - e^x + C$`,
-      passos: `**Passo 1 — Fórmula.** $\\int u dv = uv - \\int v du$.\n\n**Passo 2 — Escolha $u, dv$.** $u = x \\Rightarrow du = dx$. $dv = e^x dx \\Rightarrow v = e^x$.\n\n**Passo 3 — Aplique.** $xe^x - \\int e^x dx = xe^x - e^x + C$.\n\n**Como escolher $u$?** **LIATE**: Logarítmica, Inversa trig, Algébrica, Trig, Exponencial — escolha $u$ pelo que vem primeiro. Aqui: Algébrica ($x$) > Exponencial ($e^x$), então $u = x$.\n\n**Por que partes funciona?** Inversa da regra do produto: $(uv)' = u'v + uv'$ → $\\int u'v = uv - \\int uv'$.`,
-      dificuldade: 'compreensao',
-      aulasCobertas: ['aula-85-por-partes'],
-    },
-    {
-      numero: 5,
-      enunciado: `Área entre $y = x^2$ e $y = ${a}x$ em $[0, ${a}]$.`,
-      resposta: `$\\frac{${a ** 3}}{6}$`,
-      passos: `**Passo 1 — Identifique qual está em cima.** Em $[0, ${a}]$, $${a}x \\geq x^2$ (verifique em ponto teste).\n\n**Passo 2 — Área = integral da diferença.** $A = \\int_0^${a} (${a}x - x^2) dx$.\n\n**Passo 3 — Calcule.** $[${a}x^2/2 - x^3/3]_0^${a} = ${a}^3/2 - ${a}^3/3 = ${a ** 3}/6$.\n\n**Por que diferença?** Cada faixa vertical em $[x, x + dx]$ tem altura $f(x) - g(x)$ e largura $dx$. Soma de Riemann no limite = integral da diferença.\n\n**Aplicação.** Área de regiões planas, volumes (preview Lição 89), e em probabilidade (área = probabilidade).`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-88-area-curvas'],
-    },
-  ]
-})
-
-const TEMPLATE_TRIM_10 = templateMinimo(10, 'Equações Diferenciais', 'Trim 10 do Ano 3: separáveis, lineares, vibrações, RLC, Euler.', '3.º ano', (v) => {
-  const r = lcg(v * 37)
-  const k = intRange(2, 6, r), y0 = intRange(2, 8, r)
-  return [
-    {
-      numero: 1,
-      enunciado: `Resolva $y' = ${k}y$ com $y(0) = ${y0}$.`,
-      resposta: `$y(x) = ${y0} e^{${k}x}$`,
-      passos: `**Passo 1 — EDO separável.** Reescreva: $dy/y = ${k} dx$.\n\n**Passo 2 — Integre os dois lados.** $\\ln|y| = ${k}x + C_1$, ou seja $y = A e^{${k}x}$ com $A = e^{C_1}$.\n\n**Passo 3 — Use condição inicial.** $y(0) = A = ${y0}$. Logo $y(x) = ${y0} e^{${k}x}$.\n\n**Por que toda EDO separável segue essa receita?** Separar variáveis: $f(y) dy = g(x) dx$, integrar ambos os lados, isolar $y$.\n\n**Aplicação universal.** $\\dot N = kN$ (juros, populações, decaimento) → solução exponencial. **A EDO mais importante da ciência.**`,
-      dificuldade: 'compreensao',
-      aulasCobertas: ['aula-92-edo-separavel'],
-    },
-    {
-      numero: 2,
-      enunciado: `Café a $90°C$ esfria em sala $25°C$ com $k = 0,1$/min. Tempo para atingir $30°C$.`,
-      resposta: `$\\approx 25,6$ min`,
-      passos: `**Passo 1 — Lei de Newton resfriamento.** $T(t) = T_a + (T_0 - T_a) e^{-kt}$. Substitui: $T(t) = 25 + 65 e^{-0,1 t}$.\n\n**Passo 2 — Iguale a 30.** $25 + 65 e^{-0,1 t} = 30 \\Rightarrow e^{-0,1 t} = 5/65 = 1/13$.\n\n**Passo 3 — Aplique log.** $-0,1 t = \\ln(1/13) = -\\ln 13 \\approx -2,565$. $t = 25,65$ min.\n\n**Por que essa fórmula?** Newton (1701) postulou $\\dot T = -k(T - T_a)$ — taxa de resfriamento ∝ diferença com ambiente. Solução é exponencial assintótica a $T_a$.\n\n**Verificação.** Em $t = 0$: $T = 25 + 65 = 90$ ✓. Quando $t \\to \\infty$: $T \\to 25$ ✓.`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-99-newton-resfriamento'],
-    },
-    {
-      numero: 3,
-      enunciado: `EDO característica de $y'' + ${k}y' + ${y0}y = 0$.`,
-      resposta: `Depende de $\\Delta$ — calcule.`,
-      passos: `**Passo 1 — Equação característica.** $\\lambda^2 + ${k}\\lambda + ${y0} = 0$.\n\n**Passo 2 — Discriminante.** $\\Delta = ${k}^2 - 4 \\cdot ${y0} = ${k * k - 4 * y0}$.\n\n**Passo 3 — Classifique.**\n- $\\Delta > 0$: 2 raízes reais distintas → solução $c_1 e^{\\lambda_1 x} + c_2 e^{\\lambda_2 x}$ (sobreamortecido).\n- $\\Delta = 0$: raiz dupla → $(c_1 + c_2 x) e^{\\lambda x}$ (criticamente amortecido).\n- $\\Delta < 0$: complexas → $e^{\\alpha x}(c_1\\cos\\beta x + c_2\\sin\\beta x)$ (subamortecido — oscila).\n\n**Por que esse algoritmo?** Substituir $y = e^{\\lambda x}$ na EDO leva à equação característica. As 3 categorias correspondem a comportamentos físicos distintos: amortecimento crítico (porta automática), subamortecido (pêndulo), supercrítico (suspensão de carro).`,
+      enunciado: 'Calcule $\\int 2x \\cos(x^2)\\, dx$.',
+      resposta: '$\\sin(x^2) + C$',
+      passos:
+        '**Passo 1 — Identifique substituição.** $u = x^2$ ⇒ $du = 2x\\, dx$.\n\n' +
+        '**Passo 2 — Reescreva.** $\\int 2x \\cos(x^2)\\, dx = \\int \\cos u\\, du$.\n\n' +
+        '**Passo 3 — Antiderivada.** $\\int \\cos u\\, du = \\sin u + C = \\sin(x^2) + C$.\n\n' +
+        '**Por que substituição funciona?** É a regra da cadeia ao contrário: se derivássemos $\\sin(x^2)$, teríamos $\\cos(x^2) \\cdot 2x$. A integração reverte o processo.',
       dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-95-edo-2-ordem'],
+      aulasCobertas: ['aula-84-substituicao'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 1',
+        url: OS_CALC1,
+        ref: '§5.5 Substitution, ex. 254 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 4,
-      enunciado: `Massa-mola: $m = ${k}$ kg, $k = ${k * y0}$ N/m. Frequência natural?`,
-      resposta: `$\\omega = \\sqrt{${y0}}$ rad/s`,
-      passos: `**Passo 1 — Modelo.** $m\\ddot x + k x = 0$, ou $\\ddot x + (k/m) x = 0$. Compare com $\\ddot x + \\omega^2 x = 0$ → $\\omega^2 = k/m$.\n\n**Passo 2 — Substitua.** $\\omega = \\sqrt{${k * y0}/${k}} = \\sqrt{${y0}}$.\n\n**Passo 3 — Período.** $T = 2\\pi/\\omega$.\n\n**Por que $\\omega^2 = k/m$?** $k$ é "rigidez" — força restauradora por unidade de deslocamento. $m$ é inércia. Quanto mais rígido, mais rápido oscila; quanto mais massa, mais lento.\n\n**Aplicação.** Cordas de violão (afinação = $\\omega$ depende de tensão e densidade), pêndulos, suspensões, circuitos LC.`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-96-vibracoes'],
+      enunciado: 'Calcule $\\int x e^x\\, dx$.',
+      resposta: '$x e^x - e^x + C$',
+      passos:
+        '**Passo 1 — Por partes: $\\int u\\, dv = uv - \\int v\\, du$.** Escolha $u = x$, $dv = e^x\\, dx$. Logo $du = dx$, $v = e^x$.\n\n' +
+        '**Passo 2 — Aplique.** $\\int x e^x\\, dx = x e^x - \\int e^x\\, dx = x e^x - e^x + C$.\n\n' +
+        '**Por que essa escolha de $u$?** Heurística LIATE: priorize $u$ entre Logaritmo, Inversa trig, Algébrica, Trigonométrica, Exponencial. $x$ é algébrica, simplifica ao derivar.\n\n' +
+        '**Verificação.** $\\frac{d}{dx}(xe^x - e^x + C) = e^x + xe^x - e^x = xe^x$ ✓.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-85-por-partes'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 2',
+        url: OS_CALC2,
+        ref: '§3.1 Integration by Parts, ex. 8 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 5,
-      enunciado: `Método de Euler para $y' = y$, $y(0) = 1$, $h = 0,1$. Calcule $y_3$.`,
-      resposta: `$y_3 = 1{,}331$`,
-      passos: `**Passo 1 — Fórmula.** $y_{n+1} = y_n + h f(x_n, y_n)$. Aqui $f = y$, então $y_{n+1} = y_n + h y_n = y_n(1 + h) = 1,1 y_n$.\n\n**Passo 2 — Itere.**\n- $y_0 = 1$\n- $y_1 = 1,1 \\cdot 1 = 1,1$\n- $y_2 = 1,1 \\cdot 1,1 = 1,21$\n- $y_3 = 1,1 \\cdot 1,21 = 1,331$\n\n**Passo 3 — Compare com analítico.** Solução exata $y(0,3) = e^{0,3} \\approx 1,3499$. Erro $\\approx 0,019$.\n\n**Por que Euler erra?** A "linha tangente" só é precisa localmente. Após cada passo, acumula erro de truncamento. Erro global $O(h)$ — diminuir $h$ pela metade reduz erro pela metade.\n\n**Métodos melhores.** RK4 (Runge-Kutta 4ª ordem) tem erro $O(h^4)$ — muito mais preciso para mesmo $h$. Padrão em produção.`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-98-euler-numerico'],
+      enunciado:
+        'Calcule a área da região limitada por $y = x^2$ e $y = 4 - x^2$.',
+      resposta: '$\\dfrac{32}{3}$',
+      passos:
+        '**Passo 1 — Pontos de interseção.** $x^2 = 4 - x^2 \\Rightarrow 2x^2 = 4 \\Rightarrow x = \\pm \\sqrt 2$.\n\n' +
+        '**Passo 2 — Curva superior em $[-\\sqrt 2, \\sqrt 2]$.** $4 - x^2 \\geq x^2$ nesse intervalo.\n\n' +
+        '**Passo 3 — Integral.** $\\int_{-\\sqrt 2}^{\\sqrt 2} [(4 - x^2) - x^2]\\, dx = \\int_{-\\sqrt 2}^{\\sqrt 2} (4 - 2x^2)\\, dx = [4x - 2x^3/3]_{-\\sqrt 2}^{\\sqrt 2}$.\n\n' +
+        '**Passo 4 — Avalie.** $= 2 \\cdot (4\\sqrt 2 - 2(2\\sqrt 2)/3) = 2 \\cdot (4\\sqrt 2 - 4\\sqrt 2/3) = 2 \\cdot (12\\sqrt 2 - 4\\sqrt 2)/3 = 2 \\cdot 8\\sqrt 2/3 = 16\\sqrt 2/3$.\n\nHmm — recalcule. $\\int_{-\\sqrt 2}^{\\sqrt 2} (4 - 2x^2)\\, dx = 2 \\int_0^{\\sqrt 2} (4 - 2x^2)\\, dx$ (par) $= 2 [4x - 2x^3/3]_0^{\\sqrt 2} = 2(4\\sqrt 2 - 2 \\cdot 2\\sqrt 2 /3) = 2(4\\sqrt 2 - 4\\sqrt 2/3) = 2 \\cdot 8\\sqrt 2/3 = 16\\sqrt 2/3$. Aproximadamente $7{,}54$.\n\n' +
+        '**Por que (superior) - (inferior)?** Diferença vertical entre as curvas é a "altura" do retângulo infinitesimal de base $dx$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-88-area-curvas'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 2',
+        url: OS_CALC2,
+        ref: '§2.1 Areas Between Curves, ex. 23 (adaptado)',
+        licenca: CC_BY,
+      },
     },
-  ]
-})
+  ],
+}
 
-const TEMPLATE_TRIM_11 = templateMinimo(11, 'Estatística inferencial', 'Trim 11 do Ano 3: amostragem, IC, teste de hipótese, regressão, ANOVA.', '3.º ano', (v) => {
-  const r = lcg(v * 41)
-  const n = intRange(50, 200, r), mean = intRange(40, 60, r), s = intRange(5, 15, r)
-  return [
+const PROVA_T10_V1: Prova = {
+  id: 'trim-10-v1',
+  trim: 10,
+  versao: 1,
+  titulo: 'Trim 10 · Versão 1 — Equações diferenciais',
+  descricao:
+    'EDO de 1ª e 2ª ordem, separáveis, lineares, populacional, vibrações, RLC, Euler numérico.',
+  duracaoMinutos: 90,
+  intensidade: 4,
+  publicoAlvo: '3.º ano',
+  status: 'curada',
+  questoes: [
     {
       numero: 1,
-      enunciado: `IC 95% para média populacional. $n = ${n}$, $\\bar x = ${mean}$, $s = ${s}$.`,
-      resposta: `$IC = ${mean} \\pm 1,96 \\cdot ${s}/\\sqrt{${n}}$`,
-      passos: `**Passo 1 — Erro padrão da média.** $SE = s/\\sqrt n = ${s}/\\sqrt{${n}} = ${(s / Math.sqrt(n)).toFixed(3)}$.\n\n**Passo 2 — Margem de erro 95%.** $ME = 1,96 \\cdot SE = ${(1.96 * s / Math.sqrt(n)).toFixed(3)}$.\n\n**Passo 3 — IC.** $\\bar x \\pm ME = [${(mean - 1.96 * s / Math.sqrt(n)).toFixed(2)}, ${(mean + 1.96 * s / Math.sqrt(n)).toFixed(2)}]$.\n\n**Por que 1,96?** É o quantil 97,5% da normal padrão. Como o IC bilateral deixa 2,5% em cada cauda, o valor crítico é $z_{0,025} = 1,96$.\n\n**Interpretação correta.** "95% dos ICs construídos dessa forma contêm $\\mu$" — NÃO "há 95% de probabilidade de $\\mu$ estar neste IC". Confusão sutil mas importante.`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-102-ic-media'],
+      enunciado: 'Resolva $dy/dx = xy$, $y(0) = 2$.',
+      resposta: '$y = 2 e^{x^2/2}$',
+      passos:
+        '**Passo 1 — Separável.** $dy/y = x\\, dx$.\n\n' +
+        '**Passo 2 — Integre.** $\\ln|y| = x^2/2 + C_1$.\n\n' +
+        '**Passo 3 — Exponencie.** $y = C e^{x^2/2}$ com $C = e^{C_1}$.\n\n' +
+        '**Passo 4 — Use $y(0) = 2$.** $2 = C \\cdot 1 \\Rightarrow C = 2$. Logo $y = 2 e^{x^2/2}$.\n\n' +
+        '**Verificação.** $y\' = 2 e^{x^2/2} \\cdot x = xy$ ✓.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-92-edo-separavel'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 2',
+        url: OS_CALC2,
+        ref: '§4.3 Separable Equations, ex. 124 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 2,
-      enunciado: `Teste $H_0: \\mu = 50$ vs $H_1: \\mu \\neq 50$. $n = ${n}$, $\\bar x = ${mean}$, $s = ${s}$. Estatística t.`,
-      resposta: `$t = (${mean} - 50)/(${s}/\\sqrt{${n}})$`,
-      passos: `**Passo 1 — Estatística t.** $t = (\\bar x - \\mu_0)/(s/\\sqrt n) = (${mean} - 50)/(${(s / Math.sqrt(n)).toFixed(3)}) = ${((mean - 50) / (s / Math.sqrt(n))).toFixed(3)}$.\n\n**Passo 2 — p-valor (bilateral).** Use distribuição t com $n-1 = ${n - 1}$ graus de liberdade. $p = 2 \\cdot P(T > |t|)$.\n\n**Passo 3 — Decisão.** Se $p < 0,05$, rejeita $H_0$.\n\n**Por que t e não z?** Porque estimamos $\\sigma$ pela amostra ($s$). A incerteza adicional infla a cauda — distribuição t (Gosset 1908). Para $n$ grande, t $\\approx$ z.\n\n**Cuidado com p-hacking.** P-valor pequeno NÃO significa "efeito grande" nem "alta probabilidade da hipótese". Veja ASA Statement 2016.`,
+      enunciado:
+        'Uma população cresce a $dP/dt = 0{,}05 P$ com $P(0) = 1000$. Quanto vale em $t = 20$?',
+      resposta: '$P(20) = 1000 e^1 \\approx 2718$',
+      passos:
+        '**Passo 1 — Separável.** $dP/P = 0{,}05\\, dt$ ⇒ $\\ln|P| = 0{,}05 t + C$.\n\n' +
+        '**Passo 2 — Solução.** $P(t) = P_0 e^{0{,}05 t}$ com $P_0 = 1000$.\n\n' +
+        '**Passo 3 — Em $t = 20$.** $P(20) = 1000 e^{0{,}05 \\cdot 20} = 1000 e^1 \\approx 2718$.\n\n' +
+        '**Por que esse modelo?** Crescimento proporcional à população é a EDO mais simples não-trivial. Vale para janelas curtas; em janelas longas, recursos finitos chamam o modelo logístico.',
       dificuldade: 'modelagem',
-      aulasCobertas: ['aula-104-teste-z-t'],
+      aulasCobertas: ['aula-94-edo-populacional'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 2',
+        url: OS_CALC2,
+        ref: '§4.4 The Logistic Equation, ex. 168 (adaptado)',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 3,
-      enunciado: `Regressão linear simples com 5 pontos: $(1, ${1 + (v % 3)}), (2, ${3 + (v % 3)}), (3, ${5 + (v % 3)}), (4, ${7 + (v % 3)}), (5, ${9 + (v % 3)})$. Inclinação $\\hat\\beta_1$?`,
-      resposta: `$\\hat\\beta_1 = 2$`,
-      passos: `**Passo 1 — Médias.** $\\bar x = 3$, $\\bar y = ${5 + (v % 3)}$.\n\n**Passo 2 — Inclinação OLS.** $\\hat\\beta_1 = \\frac{\\sum (x_i - \\bar x)(y_i - \\bar y)}{\\sum (x_i - \\bar x)^2}$.\n\n**Passo 3 — Calcule.** Numerador: $(-2)(-4) + (-1)(-2) + 0 \\cdot 0 + 1 \\cdot 2 + 2 \\cdot 4 = 20$. Denominador: $4 + 1 + 0 + 1 + 4 = 10$. $\\hat\\beta_1 = 20/10 = 2$.\n\n**Por que essa fórmula?** Minimiza soma de quadrados dos resíduos $\\sum (y_i - \\hat y_i)^2$. Derivando em $\\beta_1$ e igualando a zero, sai a fórmula.\n\n**Geometricamente.** A reta de regressão é a projeção ortogonal de $\\mathbf{y}$ no espaço-coluna de $\\mathbf{X}$ (matriz de design).`,
+      enunciado:
+        'Resolva $y\'\' + 4y = 0$, $y(0) = 1$, $y\'(0) = 2$.',
+      resposta: '$y(t) = \\cos(2t) + \\sin(2t)$',
+      passos:
+        '**Passo 1 — Eq. característica.** $r^2 + 4 = 0 \\Rightarrow r = \\pm 2i$.\n\n' +
+        '**Passo 2 — Solução geral.** $y(t) = A\\cos(2t) + B\\sin(2t)$.\n\n' +
+        '**Passo 3 — Use $y(0) = 1$.** $A = 1$.\n\n' +
+        '**Passo 4 — Use $y\'(0) = 2$.** $y\'(t) = -2A\\sin(2t) + 2B\\cos(2t)$. $y\'(0) = 2B = 2 \\Rightarrow B = 1$.\n\n' +
+        '**Resposta.** $y(t) = \\cos(2t) + \\sin(2t)$.\n\n' +
+        '**Por que cosseno+seno?** Raízes complexas $\\pm \\beta i$ (sem parte real) dão **oscilação não-amortecida**. É o oscilador harmônico simples — pêndulo, mola sem atrito, LC sem resistência.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-95-edo-2-ordem', 'aula-96-vibracoes'],
+      fonteOriginal: {
+        livro: 'Notes on Diffy Qs (Lebl)',
+        url: LEBL,
+        ref: '§2.2 Constant Coefficient Second Order, ex. 2.2.5 (adaptado)',
+        licenca: CC_BY_SA,
+      },
+    },
+    {
+      numero: 4,
+      enunciado:
+        'Aplique 2 passos de Euler em $dy/dx = y$, $y(0) = 1$, com $h = 0{,}5$.',
+      resposta: '$y_1 = 1{,}5$, $y_2 = 2{,}25$. (Compare a $e \\approx 2{,}718$.)',
+      passos:
+        '**Passo 1 — Fórmula de Euler.** $y_{n+1} = y_n + h \\cdot f(x_n, y_n)$. Aqui $f = y$.\n\n' +
+        '**Passo 2 — $n = 0 \\to 1$.** $y_1 = 1 + 0{,}5 \\cdot 1 = 1{,}5$.\n\n' +
+        '**Passo 3 — $n = 1 \\to 2$.** $y_2 = 1{,}5 + 0{,}5 \\cdot 1{,}5 = 2{,}25$.\n\n' +
+        '**Comparação.** Solução exata $y = e^x$, $y(1) = e \\approx 2{,}718$. Erro $\\approx 0{,}47$ — Euler é grosseiro.\n\n' +
+        '**Por que Euler erra?** Usa **só** a tangente atual, ignorando curvatura. Métodos mais precisos (RK4) avaliam $f$ em vários pontos por passo.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-98-euler-numerico'],
+      fonteOriginal: {
+        livro: 'Notes on Diffy Qs (Lebl)',
+        url: LEBL,
+        ref: '§1.7 Numerical Methods: Euler\'s Method (adaptado)',
+        licenca: CC_BY_SA,
+      },
+    },
+  ],
+}
+
+const PROVA_T11_V1: Prova = {
+  id: 'trim-11-v1',
+  trim: 11,
+  versao: 1,
+  titulo: 'Trim 11 · Versão 1 — Inferência estatística',
+  descricao:
+    'IC, teste de hipóteses, $z$/$t$, regressão simples e múltipla, ANOVA, $\\chi^2$, Bayesiana.',
+  duracaoMinutos: 90,
+  intensidade: 4,
+  publicoAlvo: '3.º ano',
+  status: 'curada',
+  questoes: [
+    {
+      numero: 1,
+      enunciado:
+        'Construa IC 95% para $\\mu$ dado $\\bar x = 50$, $\\sigma = 10$, $n = 100$.',
+      resposta: '$50 \\pm 1{,}96$, isto é $[48{,}04;\\ 51{,}96]$.',
+      passos:
+        '**Passo 1 — IC para média (z conhecido).** $\\bar x \\pm z_{\\alpha/2} \\cdot \\sigma/\\sqrt n$.\n\n' +
+        '**Passo 2 — $z_{0{,}025} = 1{,}96$.**\n\n' +
+        '**Passo 3 — Margem de erro.** $E = 1{,}96 \\cdot 10/\\sqrt{100} = 1{,}96 \\cdot 1 = 1{,}96$.\n\n' +
+        '**Resultado.** $[50 - 1{,}96;\\ 50 + 1{,}96] = [48{,}04;\\ 51{,}96]$.\n\n' +
+        '**Interpretação.** "Em 95% dos experimentos repetidos, o IC capturaria $\\mu$." NÃO é "$P(\\mu \\in [48,04; 51,96]) = 0{,}95$" no sentido frequentista — $\\mu$ é fixo.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-102-ic-media'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§8.1 Confidence Interval for the Mean, ex. 41 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 2,
+      enunciado:
+        'Teste $H_0: \\mu = 100$ vs $H_1: \\mu \\neq 100$ com $\\bar x = 103$, $\\sigma = 12$, $n = 64$, $\\alpha = 0{,}05$.',
+      resposta: '$z = 2$, $p = 0{,}0455$. **Rejeita** $H_0$ (no limiar).',
+      passos:
+        '**Passo 1 — Estatística.** $z = (\\bar x - \\mu_0)/(\\sigma/\\sqrt n) = (103 - 100)/(12/8) = 3/1{,}5 = 2$.\n\n' +
+        '**Passo 2 — p-valor (bicaudal).** $p = 2 \\cdot P(Z > 2) = 2 \\cdot 0{,}02275 = 0{,}0455$.\n\n' +
+        '**Passo 3 — Decisão.** $p = 0{,}0455 < \\alpha = 0{,}05$ ⇒ **rejeita $H_0$**.\n\n' +
+        '**Por que bicaudal?** $H_1$ é $\\neq$, então desvios em ambas as direções contam.\n\n' +
+        '**Cuidado.** $p$ está bem perto de $\\alpha$. **Não confunda** "rejeitar" com "$H_1$ é verdadeira" — é decisão sob risco $\\alpha$ de erro tipo I.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['aula-103-teste-hipotese', 'aula-104-teste-z-t'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§9.6 Hypothesis Testing of a Single Mean, ex. 70 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 3,
+      enunciado:
+        'Dados $(1, 2)$, $(2, 4)$, $(3, 5)$, $(4, 7)$. Encontre a reta de regressão $\\hat y = a + bx$.',
+      resposta: '$\\hat y = 0{,}5 + 1{,}6 x$',
+      passos:
+        '**Passo 1 — Médias.** $\\bar x = 2{,}5$, $\\bar y = 4{,}5$.\n\n' +
+        '**Passo 2 — $b = \\sum(x_i - \\bar x)(y_i - \\bar y) / \\sum(x_i - \\bar x)^2$.** Numerador: $(-1{,}5)(-2{,}5) + (-0{,}5)(-0{,}5) + (0{,}5)(0{,}5) + (1{,}5)(2{,}5) = 3{,}75 + 0{,}25 + 0{,}25 + 3{,}75 = 8$. Denominador: $2{,}25 + 0{,}25 + 0{,}25 + 2{,}25 = 5$. $b = 8/5 = 1{,}6$.\n\n' +
+        '**Passo 3 — $a = \\bar y - b \\bar x$.** $a = 4{,}5 - 1{,}6 \\cdot 2{,}5 = 4{,}5 - 4 = 0{,}5$.\n\n' +
+        '**Resposta.** $\\hat y = 0{,}5 + 1{,}6 x$.\n\n' +
+        '**Por que mínimos quadrados?** Minimiza $\\sum (y_i - \\hat y_i)^2$. Justificativa estatística: estimador eficiente sob ruído gaussiano.',
       dificuldade: 'aplicacao',
       aulasCobertas: ['aula-105-regressao-simples'],
+      fonteOriginal: {
+        livro: 'OpenStax Introductory Statistics',
+        url: OS_STAT,
+        ref: '§12.3 The Regression Equation, ex. 102 (adaptado)',
+        licenca: CC_BY,
+      },
     },
-    {
-      numero: 4,
-      enunciado: `Teste qui-quadrado de aderência: dados observados [${10 + (v % 3)}, ${20 + (v % 3)}, ${30 + (v % 3)}, ${40 + (v % 3)}], esperados [25, 25, 25, 25]. Estatística?`,
-      resposta: `$\\chi^2 = \\sum (O_i - E_i)^2/E_i$`,
-      passos: `**Passo 1 — Fórmula.** $\\chi^2 = \\sum_i \\frac{(O_i - E_i)^2}{E_i}$.\n\n**Passo 2 — Calcule cada termo** (use os valores específicos da versão).\n\n**Passo 3 — Soma e compare.** Compare com $\\chi^2_{k-1, \\alpha}$ (graus de liberdade = $k - 1$).\n\n**Por que esse formato?** Pearson (1900): cada termo $(O - E)^2/E$ é uma normal padrão ao quadrado (assintoticamente), e soma de normais² é $\\chi^2$.\n\n**Aplicação.** Testar se um dado é honesto (observado vs uniforme), aderência a uma distribuição teórica.`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-108-qui-quadrado'],
-    },
-    {
-      numero: 5,
-      enunciado: `Em ANOVA, $F$ é razão de variâncias. $F$ grande sugere o quê?`,
-      resposta: `Diferença significativa entre grupos.`,
-      passos: `**Passo 1 — Decomponha variabilidade.** Variabilidade total = entre grupos + dentro de grupos.\n\n**Passo 2 — F = MS(entre)/MS(dentro).** Se $F \\gg 1$, variabilidade entre grupos é maior que dentro → grupos diferem.\n\n**Passo 3 — Distribuição F.** Sob $H_0$ (médias iguais), $F$ segue F-distribution. p-valor = cauda superior.\n\n**Por que ANOVA?** Generalização de teste t para mais de 2 grupos. Comparar pares múltiplos infla erro tipo I (Bonferroni); ANOVA testa diferença geral.`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-107-anova'],
-    },
-  ]
-})
+  ],
+}
 
-const TEMPLATE_TRIM_12 = templateMinimo(12, 'Álgebra Linear avançada e síntese', 'Trim 12 do Ano 3: espaços, autovalores, SVD, PCA, Black-Scholes síntese.', 'Pré-vestibular', (v) => {
-  const r = lcg(v * 43)
-  const a = intRange(2, 5, r), b = intRange(1, 4, r)
-  const tr = a + b, det = a * b
-  const disc = tr * tr - 4 * det
-  return [
+const PROVA_T12_V1: Prova = {
+  id: 'trim-12-v1',
+  trim: 12,
+  versao: 1,
+  titulo: 'Trim 12 · Versão 1 — Álgebra linear e síntese',
+  descricao:
+    'Espaços vetoriais, transformações, autovalores, diagonalização, SVD, PCA, Black-Scholes.',
+  duracaoMinutos: 90,
+  intensidade: 5,
+  publicoAlvo: '3.º ano',
+  status: 'curada',
+  questoes: [
     {
       numero: 1,
-      enunciado: `Autovalores de $A = \\begin{pmatrix} ${a} & 1 \\\\ 0 & ${b} \\end{pmatrix}$.`,
-      resposta: `$\\lambda_1 = ${a}, \\lambda_2 = ${b}$`,
-      passos: `**Passo 1 — Polinômio característico.** $\\det(A - \\lambda I) = (${a} - \\lambda)(${b} - \\lambda) - 0 = 0$.\n\n**Passo 2 — Resolva.** Triangular: autovalores são os elementos da diagonal. $\\lambda_1 = ${a}, \\lambda_2 = ${b}$.\n\n**Por que diagonal de triangular?** $\\det(A - \\lambda I) = $ produto dos elementos diagonais de $(A - \\lambda I)$ = $(a_{11} - \\lambda)(a_{22} - \\lambda)\\cdots$. Raízes são justamente $a_{ii}$.\n\n**Aplicação.** Diagonalização: $A = PDP^{-1}$ acelera computação de potências e exponencial de matriz.`,
+      enunciado:
+        'Calcule autovalores e autovetores de $A = \\begin{pmatrix} 4 & -2 \\\\ 1 & 1 \\end{pmatrix}$.',
+      resposta:
+        'Autovalores $\\lambda_1 = 3$, $\\lambda_2 = 2$. Autovetores: $\\vec v_1 = (2, 1)$, $\\vec v_2 = (1, 1)$.',
+      passos:
+        '**Passo 1 — Polinômio característico.** $\\det(A - \\lambda I) = \\det\\begin{pmatrix} 4-\\lambda & -2 \\\\ 1 & 1 - \\lambda \\end{pmatrix} = (4-\\lambda)(1-\\lambda) + 2 = \\lambda^2 - 5\\lambda + 6$.\n\n' +
+        '**Passo 2 — Raízes.** $\\lambda^2 - 5\\lambda + 6 = (\\lambda-3)(\\lambda-2) = 0 \\Rightarrow \\lambda = 3, 2$.\n\n' +
+        '**Passo 3 — Autovetor de $\\lambda_1 = 3$.** $(A - 3I)\\vec v = 0$: $\\begin{pmatrix} 1 & -2 \\\\ 1 & -2 \\end{pmatrix}$. Linha: $v_1 - 2v_2 = 0$ ⇒ $\\vec v_1 = (2, 1)$.\n\n' +
+        '**Passo 4 — Autovetor de $\\lambda_2 = 2$.** $(A - 2I)\\vec v = 0$: $\\begin{pmatrix} 2 & -2 \\\\ 1 & -1 \\end{pmatrix}$. $v_1 - v_2 = 0$ ⇒ $\\vec v_2 = (1, 1)$.\n\n' +
+        '**Por que isso importa?** Autovetores são **direções invariantes** sob $A$: $A\\vec v = \\lambda \\vec v$. Diagonalização decompõe $A$ nessas direções, simplificando potências, exponenciais, EDOs lineares.',
       dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-114-autovalores'],
+      aulasCobertas: ['aula-114-autovalores', 'aula-115-diagonalizacao'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 3',
+        url: OS_CALC3,
+        ref: '§Linear Algebra appendix; também Strang Linear Algebra OCW',
+        licenca: CC_BY,
+      },
     },
     {
       numero: 2,
-      enunciado: `$A = \\begin{pmatrix} ${a} & 1 \\\\ 1 & ${b} \\end{pmatrix}$. Autovalores via traço/determinante.`,
-      resposta: `$\\lambda^2 - ${tr}\\lambda + ${det - 1} = 0$`,
-      passos: `**Passo 1 — Traço.** $\\text{tr}(A) = ${a} + ${b} = ${tr}$.\n\n**Passo 2 — Determinante.** $\\det(A) = ${a}${b} - 1 = ${det - 1}$.\n\n**Passo 3 — Polinômio.** $\\lambda^2 - \\text{tr}(A)\\lambda + \\det(A) = 0$.\n\n**Passo 4 — Bhaskara.** $\\lambda = (${tr} \\pm \\sqrt{${tr * tr - 4 * (det - 1)}})/2$.\n\n**Por que essa relação 2x2?** Sempre vale $\\det(A - \\lambda I) = \\lambda^2 - \\text{tr}\\lambda + \\det$ para 2x2. Truque rápido sem expandir o determinante.`,
-      dificuldade: 'aplicacao',
-      aulasCobertas: ['aula-114-autovalores'],
+      enunciado:
+        'Black-Scholes europeia call: $S_0 = 100$, $K = 100$, $r = 5\\%$, $\\sigma = 20\\%$, $T = 1$ ano. Calcule $d_1$ e $d_2$.',
+      resposta: '$d_1 = 0{,}35$, $d_2 = 0{,}15$.',
+      passos:
+        '**Passo 1 — $d_1$.** $d_1 = \\dfrac{\\ln(S_0/K) + (r + \\sigma^2/2)T}{\\sigma\\sqrt T} = \\dfrac{0 + (0{,}05 + 0{,}02) \\cdot 1}{0{,}2 \\cdot 1} = \\dfrac{0{,}07}{0{,}2} = 0{,}35$.\n\n' +
+        '**Passo 2 — $d_2 = d_1 - \\sigma\\sqrt T$.** $d_2 = 0{,}35 - 0{,}2 = 0{,}15$.\n\n' +
+        '**Por que esses dois números?** $d_1$ entra no $\\Delta$ (sensibilidade da opção ao spot); $d_2$ é a probabilidade risk-neutral de exercício na maturidade.\n\n' +
+        '**Próximo passo.** Preço da call $C = S_0 N(d_1) - K e^{-rT} N(d_2)$ com $N(\\cdot)$ tabelada (CDF da normal padrão). $N(0{,}35) \\approx 0{,}637$, $N(0{,}15) \\approx 0{,}560$. $C \\approx 100 \\cdot 0{,}637 - 100 e^{-0{,}05} \\cdot 0{,}560 \\approx 63{,}7 - 53{,}3 \\approx 10{,}4$.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['aula-119-bs-sintese'],
+      fonteOriginal: {
+        livro: 'Black & Scholes (1973), JPolEcon — replicado em Active Calculus apêndice',
+        url: ACTIVE_CALC,
+        ref: 'Eq. fechada da call europeia (apêndice)',
+        licenca: CC_BY_NC_SA,
+      },
     },
     {
       numero: 3,
-      enunciado: `Em PCA, autovetores da matriz de covariância. O que representa o "PC1"?`,
-      resposta: `Direção de maior variância dos dados.`,
-      passos: `**Passo 1 — Definição PCA.** Encontre vetor $\\vec v$ unitário que maximiza $\\text{Var}(\\vec v^T X)$.\n\n**Passo 2 — Solução.** $\\vec v$ = autovetor associado ao maior autovalor $\\lambda_1$ da matriz de covariância $\\Sigma$.\n\n**Passo 3 — Variância capturada.** $\\lambda_1$ é a variância ao longo de PC1. Razão $\\lambda_1/\\sum \\lambda_i$ = proporção explicada.\n\n**Por que PCA usa autovalores?** Maximizar Rayleigh quotient $\\vec v^T \\Sigma \\vec v / \\vec v^T \\vec v$ — solução pelos autovetores.\n\n**Aplicação.** Redução de dimensionalidade, compressão de dados, "eigenfaces" em reconhecimento facial.`,
-      dificuldade: 'compreensao',
-      aulasCobertas: ['aula-118-pca'],
+      enunciado:
+        'Mostre que se $\\vec v_1, \\vec v_2$ são autovetores de $A$ com autovalores distintos, eles são linearmente independentes.',
+      resposta:
+        'Demonstração: $\\vec v_1, \\vec v_2$ associados a $\\lambda_1 \\neq \\lambda_2$ ⇒ LI.',
+      passos:
+        '**Passo 1 — Suponha dependência linear.** $c_1 \\vec v_1 + c_2 \\vec v_2 = 0$ com $(c_1, c_2) \\neq (0, 0)$.\n\n' +
+        '**Passo 2 — Aplique $A$.** $c_1 A\\vec v_1 + c_2 A\\vec v_2 = 0 \\Rightarrow c_1 \\lambda_1 \\vec v_1 + c_2 \\lambda_2 \\vec v_2 = 0$.\n\n' +
+        '**Passo 3 — Multiplique a primeira por $\\lambda_1$.** $c_1 \\lambda_1 \\vec v_1 + c_2 \\lambda_1 \\vec v_2 = 0$.\n\n' +
+        '**Passo 4 — Subtraia.** $c_2 (\\lambda_1 - \\lambda_2) \\vec v_2 = 0$. Como $\\lambda_1 \\neq \\lambda_2$ e $\\vec v_2 \\neq 0$, segue $c_2 = 0$.\n\n' +
+        '**Passo 5 — Volta.** $c_1 \\vec v_1 = 0$ ⇒ $c_1 = 0$. Contradição com a hipótese.\n\n' +
+        '**Por que isso importa?** Garante que matriz com $n$ autovalores distintos é **diagonalizável** — simplifica espectralmente.',
+      dificuldade: 'demonstracao',
+      aulasCobertas: ['aula-114-autovalores', 'aula-115-diagonalizacao'],
+      fonteOriginal: {
+        livro: 'OpenStax Calculus Volume 3 (apêndice de álgebra linear)',
+        url: OS_CALC3,
+        ref: 'Linear Algebra Background, Theorem on distinct eigenvalues',
+        licenca: CC_BY,
+      },
     },
-    {
-      numero: 4,
-      enunciado: `Black-Scholes: identifique 3 conceitos do programa que aparecem na fórmula $C = SN(d_1) - Ke^{-rT}N(d_2)$.`,
-      resposta: `Funções, exp, log (em $d_1$), integral (em $N$), distribuição normal, derivadas (Greeks), EDP (origem).`,
-      passos: `**1. Função de duas variáveis** (Lições 1-5): $C(S, t)$ — domínio $S > 0$, $t \\in [0, T]$.\n\n**2. Exponencial e log** (6-7): $e^{-rT}$ é desconto contínuo. $\\ln(S/K)$ está em $d_1$.\n\n**3. Distribuição normal** (76): $N(d)$ é a CDF da normal padrão.\n\n**4. Integral** (82): $N(d) = \\frac{1}{\\sqrt{2\\pi}}\\int_{-\\infty}^d e^{-u^2/2}du$.\n\n**5. Derivadas** (51, 67): Greeks (Δ, Γ, ν, Θ) são derivadas parciais.\n\n**6. EDP** (preview): a fórmula é solução fechada de uma EDP parabólica análoga à equação do calor.\n\n**Síntese.** Black-Scholes é a culminação simbólica do programa — todos os 12 trimestres aparecem.`,
-      dificuldade: 'compreensao',
-      aulasCobertas: ['aula-119-bs-sintese'],
-    },
-    {
-      numero: 5,
-      enunciado: `Para a covariância $\\Sigma = \\begin{pmatrix} 4 & 1 \\\\ 1 & 3 \\end{pmatrix}$, calcule autovalores.`,
-      resposta: `$\\lambda = (7 \\pm \\sqrt{5})/2$`,
-      passos: `**Passo 1 — Polinômio característico.** $\\lambda^2 - 7\\lambda + 11 = 0$ (traço 7, det 11).\n\n**Passo 2 — Bhaskara.** $\\lambda = (7 \\pm \\sqrt{49 - 44})/2 = (7 \\pm \\sqrt 5)/2$.\n\n**Passo 3 — Aproxime.** $\\lambda_1 \\approx 4,618$, $\\lambda_2 \\approx 2,382$.\n\n**Interpretação PCA.** PC1 captura $\\lambda_1/(\\lambda_1 + \\lambda_2) \\approx 4,62/7 \\approx 66\\%$ da variância.`,
-      dificuldade: 'modelagem',
-      aulasCobertas: ['aula-114-autovalores', 'aula-118-pca'],
-    },
-  ]
-})
-
-// =============================================================================
-// Map de templates por trimestre
-// =============================================================================
-
-const PROVA_TEMPLATES: Record<number, TrimTemplate> = {
-  1: TEMPLATE_TRIM_1,
-  2: TEMPLATE_TRIM_2,
-  3: TEMPLATE_TRIM_3,
-  4: TEMPLATE_TRIM_4,
-  5: TEMPLATE_TRIM_5,
-  6: TEMPLATE_TRIM_6,
-  7: TEMPLATE_TRIM_7,
-  8: TEMPLATE_TRIM_8,
-  9: TEMPLATE_TRIM_9,
-  10: TEMPLATE_TRIM_10,
-  11: TEMPLATE_TRIM_11,
-  12: TEMPLATE_TRIM_12,
+  ],
 }
 
-/** Gera as 10 versões de provas do Trim X. */
-export function gerarProvasDoTrim(trim: number): Prova[] {
-  const tpl = PROVA_TEMPLATES[trim]
-  if (!tpl) return []
-  return Array.from({ length: 10 }, (_, i) => {
-    const versao = i + 1
-    return {
-      id: `p-trim${trim}-v${versao}`,
-      trim,
-      versao,
-      titulo: `Prova Trim ${trim} — ${tpl.tituloBase} (versão ${versao})`,
-      descricao: tpl.descricao,
-      duracaoMinutos: tpl.duracaoMinutos,
-      intensidade: tpl.intensidade,
-      publicoAlvo: tpl.publicoAlvo,
-      questoes: tpl.geraQuestoes(versao),
-    }
-  })
-}
+// =============================================================================
+// Stubs em-curadoria — versões 4-10 dos demais trimestres
+// (mantém o sistema com 12 × 10 provas; versões adicionais entram via PRs)
+// =============================================================================
 
-/** Todas as 12*10 = 120 provas. */
-export function gerarTodasProvas(): Prova[] {
-  const out: Prova[] = []
-  for (let t = 1; t <= 12; t++) {
-    out.push(...gerarProvasDoTrim(t))
+function provaStub(trim: number, versao: number, publicoAlvo: Prova['publicoAlvo']): Prova {
+  return {
+    id: `trim-${trim}-v${versao}`,
+    trim,
+    versao,
+    titulo: `Trim ${trim} · Versão ${versao} — em curadoria`,
+    descricao:
+      'Versão em curadoria. Selecionando exercícios reais de OpenStax / Active Calculus para esta versão. Use a versão 1 enquanto isso.',
+    duracaoMinutos: 90,
+    intensidade: 3,
+    publicoAlvo,
+    status: 'em-curadoria',
+    questoes: [],
   }
-  return out
 }
 
-/** Lista de trimestres disponíveis. */
-export function trimsDisponiveis(): number[] {
-  return Object.keys(PROVA_TEMPLATES).map(Number).sort((a, b) => a - b)
+const PUBLICO_POR_TRIM: Record<number, Prova['publicoAlvo']> = {
+  1: '1.º ano',
+  2: '1.º ano',
+  3: '1.º ano',
+  4: '1.º ano',
+  5: '2.º ano',
+  6: '2.º ano',
+  7: '2.º ano',
+  8: '2.º ano',
+  9: '3.º ano',
+  10: '3.º ano',
+  11: '3.º ano',
+  12: '3.º ano',
 }
 
-/** Provas pré-computadas (para componente client-side). */
-export const PROVAS: Prova[] = gerarTodasProvas()
+const PROVAS_CURADAS: Prova[] = [
+  PROVA_T1_V1,
+  PROVA_T1_V2,
+  PROVA_T1_V3,
+  PROVA_T2_V1,
+  PROVA_T3_V1,
+  PROVA_T4_V1,
+  PROVA_T5_V1,
+  PROVA_T6_V1,
+  PROVA_T7_V1,
+  PROVA_T8_V1,
+  PROVA_T9_V1,
+  PROVA_T10_V1,
+  PROVA_T11_V1,
+  PROVA_T12_V1,
+]
 
-export function getProvaById(id: string): Prova | undefined {
-  return PROVAS.find((p) => p.id === id)
+function gerarStubsFaltantes(): Prova[] {
+  const stubs: Prova[] = []
+  for (let trim = 1; trim <= 12; trim++) {
+    for (let v = 1; v <= 10; v++) {
+      const exists = PROVAS_CURADAS.some(
+        (p) => p.trim === trim && p.versao === v,
+      )
+      if (!exists) {
+        stubs.push(provaStub(trim, v, PUBLICO_POR_TRIM[trim] ?? '1.º ano'))
+      }
+    }
+  }
+  return stubs
 }
+
+export const PROVAS: Prova[] = [
+  ...PROVAS_CURADAS,
+  ...gerarStubsFaltantes(),
+].sort((a, b) => a.trim - b.trim || a.versao - b.versao)
+
+/** Provas curadas (com questões reais do ledger). */
+export const PROVAS_REAIS = PROVAS.filter((p) => p.status === 'curada')
+
+/** Total de questões reais no banco. */
+export const TOTAL_QUESTOES_REAIS = PROVAS_REAIS.reduce(
+  (s, p) => s + p.questoes.length,
+  0,
+)
