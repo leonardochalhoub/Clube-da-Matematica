@@ -1,26 +1,32 @@
 /**
  * Banner de patrocínio da Amazing School.
  * Pequeno, elegante; não compete com o conteúdo.
- * Smile icon + nome + link.
+ * Usa identidade visual oficial do projeto Amazing School:
+ *   - Emoji 🎓 (graduation cap) + smile complementar
+ *   - Gradient violet→blue (paleta Amazing School)
+ *   - URL oficial: https://amazing-school-app.vercel.app/
  */
 export function AmazingSchoolSponsor() {
   return (
     <a
-      href="https://amazingschool.com.br"
+      href="https://amazing-school-app.vercel.app/"
       target="_blank"
       rel="noopener noreferrer"
-      className="group not-prose inline-flex items-center gap-2.5 rounded-full border border-clube-gold-deep/30 bg-clube-gold/10 px-4 py-2 text-xs text-clube-ink/85 no-underline transition-all hover:-translate-y-0.5 hover:border-clube-gold-deep/60 hover:bg-clube-gold/15 hover:no-underline hover:shadow-sm"
-      aria-label="Amazing School — plataforma grátis de inglês — apoiadora do Clube da Matemática"
+      className="group not-prose inline-flex items-center gap-2.5 rounded-full border border-violet-400/40 bg-gradient-to-r from-violet-500/10 to-blue-500/10 px-4 py-2 text-xs text-clube-ink/85 no-underline transition-all hover:-translate-y-0.5 hover:border-violet-500/70 hover:from-violet-500/20 hover:to-blue-500/20 hover:no-underline hover:shadow-sm"
+      aria-label="Amazing School — plataforma grátis de inglês com IA — apoiadora do Clube da Matemática"
     >
+      <span className="text-base leading-none" aria-hidden>🎓</span>
       <SmileIcon />
       <span>
         <span className="text-clube-mist">apoio:</span>{' '}
-        <strong className="text-clube-gold-deep">Amazing School</strong>{' '}
-        <span className="text-clube-mist">· inglês grátis</span>
+        <strong className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+          Amazing School
+        </strong>{' '}
+        <span className="text-clube-mist">· inglês grátis com IA</span>
       </span>
       <span
         aria-hidden
-        className="text-clube-gold-deep/60 transition-transform group-hover:translate-x-0.5"
+        className="text-violet-500/70 transition-transform group-hover:translate-x-0.5"
       >
         →
       </span>
@@ -38,10 +44,10 @@ function SmileIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      width="16"
-      height="16"
+      width="14"
+      height="14"
       aria-hidden="true"
-      className="text-clube-gold-deep"
+      className="text-violet-500"
     >
       <circle cx="12" cy="12" r="10" />
       <path d="M8 14s1.5 2 4 2 4-2 4-2" />
