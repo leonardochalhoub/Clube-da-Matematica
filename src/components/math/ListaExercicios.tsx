@@ -237,86 +237,247 @@ export function ListaExercicios({
 }
 
 /**
- * Mapa LaTeX → notação que Wolfram entende (linguagem natural ou ASCII math).
- * Lista incremental — adicione conforme necessário.
+ * Conversões LaTeX → ASCII math que Wolfram Alpha entende.
+ * Wolfram engole bem ASCII com spelled-out keywords ("union", "subset of",
+ * "implies"), e mal com Unicode ("∪", "⊆") ou texto duplicado pelo KaTeX.
  */
 const LATEX_TO_WOLFRAM: Array<[RegExp, string]> = [
-  [/\\subseteq/g, ' subset of or equal to '],
-  [/\\subset/g, ' proper subset of '],
-  [/\\supseteq/g, ' superset of or equal to '],
-  [/\\supset/g, ' proper superset of '],
+  // Set theory — Wolfram entende keywords explícitas
+  [/\\subseteq/g, ' subset of '],
+  [/\\subset\b/g, ' subset of '],
+  [/\\supseteq/g, ' superset of '],
+  [/\\supset\b/g, ' superset of '],
   [/\\cup/g, ' union '],
   [/\\cap/g, ' intersection '],
-  [/\\setminus/g, ' minus '],
-  [/\\in\b/g, ' element of '],
-  [/\\notin/g, ' not element of '],
-  [/\\emptyset/g, ' empty set '],
+  [/\\setminus/g, ' setminus '],
+  [/\\in\b/g, ' in '],
+  [/\\notin/g, ' not in '],
+  [/\\emptyset|\\varnothing/g, ' {} '],
+  // Logic / quantifiers
   [/\\forall/g, ' for all '],
   [/\\exists/g, ' there exists '],
   [/\\implies|\\Rightarrow/g, ' implies '],
-  [/\\iff|\\Leftrightarrow/g, ' if and only if '],
-  [/\\neq|\\ne/g, ' != '],
-  [/\\leq|\\le/g, ' <= '],
-  [/\\geq|\\ge/g, ' >= '],
-  [/\\cdot/g, ' * '],
-  [/\\times/g, ' * '],
-  [/\\div/g, ' / '],
-  [/\\pm/g, ' +- '],
-  [/\\infty/g, ' infinity '],
-  [/\\to|\\rightarrow/g, ' -> '],
-  [/\\sqrt\{([^}]+)\}/g, ' sqrt($1) '],
-  [/\\frac\{([^}]+)\}\{([^}]+)\}/g, ' ($1)/($2) '],
-  [/\\dfrac\{([^}]+)\}\{([^}]+)\}/g, ' ($1)/($2) '],
-  [/\\int/g, ' integrate '],
-  [/\\sum/g, ' sum '],
-  [/\\prod/g, ' product '],
-  [/\\lim/g, ' limit '],
-  [/\\sin/g, 'sin'],
-  [/\\cos/g, 'cos'],
-  [/\\tan/g, 'tan'],
+  [/\\iff|\\Leftrightarrow/g, ' iff '],
+  [/\\wedge|\\land/g, ' and '],
+  [/\\vee|\\lor/g, ' or '],
+  [/\\neg|\\lnot/g, ' not '],
+  // Comparações
+  [/\\neq|\\ne\b/g, ' != '],
+  [/\\leq|\\le\b/g, ' <= '],
+  [/\\geq|\\ge\b/g, ' >= '],
+  [/\\approx/g, ' approximately equals '],
+  // Operadores
+  [/\\cdot|\\times/g, '*'],
+  [/\\div/g, '/'],
+  [/\\pm/g, '+/-'],
+  [/\\mp/g, '-/+'],
+  // Limites e funções
+  [/\\infty/g, 'infinity'],
+  [/\\to\b|\\rightarrow|\\longrightarrow/g, '->'],
+  [/\\sqrt\{([^}]+)\}/g, 'sqrt($1)'],
+  [/\\sqrt\[([^\]]+)\]\{([^}]+)\}/g, '($2)^(1/($1))'],
+  [/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)'],
+  [/\\dfrac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)'],
+  [/\\tfrac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)'],
+  // Integrais com limites: aceita {a}^{b}, _a^b sem braces, e sem limites
+  [/\\int_\{([^}]+)\}\^\{([^}]+)\}/g, 'integrate from $1 to $2 of '],
+  [/\\int_(\w+)\^\{([^}]+)\}/g, 'integrate from $1 to $2 of '],
+  [/\\int_\{([^}]+)\}\^(\w+)/g, 'integrate from $1 to $2 of '],
+  [/\\int_(\w+)\^(\w+)/g, 'integrate from $1 to $2 of '],
+  [/\\int/g, 'integrate '],
+  [/\\sum_\{([^}]+)\}\^\{([^}]+)\}/g, 'sum from $1 to $2 of '],
+  [/\\sum_(\w+)\^(\w+)/g, 'sum from $1 to $2 of '],
+  [/\\sum/g, 'sum '],
+  [/\\prod/g, 'product '],
+  [/\\lim_\{([^}]+)\}/g, 'limit as $1 of '],
+  [/\\lim/g, 'limit '],
+  // Matrizes: \begin{pmatrix}a & b \\ c & d\end{pmatrix} → {{a, b}, {c, d}}
+  // Usamos sentinelas (❴, ❵, ❦) para sobreviver ao cleanup
+  // final que strippa braces. Convertidos de volta ao final.
+  [/\\begin\{(?:p|b|v|V)?matrix\}/g, '❴❴'],
+  [/\\end\{(?:p|b|v|V)?matrix\}/g, '❵❵'],
+  // & dentro de matriz vira separador de coluna; \\ vira separador de linha.
+  // Assumimos que enunciados de exercícios não usam & literal fora de matriz.
+  [/\s*&\s*/g, ', '],
+  // \\\\ separa linhas de matriz: vira "}, {" → mas com sentinelas.
+  [/\\\\\s*/g, '❵, ❴'],
+  // Trig / log
+  [/\\(arc)?(sin|cos|tan|sec|csc|cot)/g, '$1$2'],
   [/\\log/g, 'log'],
   [/\\ln/g, 'ln'],
   [/\\exp/g, 'exp'],
-  [/\\pi\b/g, ' pi '],
-  [/\\alpha\b/g, ' alpha '],
-  [/\\beta\b/g, ' beta '],
-  [/\\theta\b/g, ' theta '],
-  [/\\lambda\b/g, ' lambda '],
-  [/\\mu\b/g, ' mu '],
-  [/\\sigma\b/g, ' sigma '],
-  [/\\Delta\b/g, ' Delta '],
-  [/\\partial/g, ' d '],
+  [/\\sinh/g, 'sinh'],
+  [/\\cosh/g, 'cosh'],
+  [/\\tanh/g, 'tanh'],
+  // Letras gregas (mantém nomes)
+  [/\\alpha\b/g, 'alpha'],
+  [/\\beta\b/g, 'beta'],
+  [/\\gamma\b/g, 'gamma'],
+  [/\\delta\b/g, 'delta'],
+  [/\\Delta\b/g, 'Delta'],
+  [/\\epsilon\b|\\varepsilon\b/g, 'epsilon'],
+  [/\\eta\b/g, 'eta'],
+  [/\\theta\b/g, 'theta'],
+  [/\\Theta\b/g, 'Theta'],
+  [/\\lambda\b/g, 'lambda'],
+  [/\\Lambda\b/g, 'Lambda'],
+  [/\\mu\b/g, 'mu'],
+  [/\\nu\b/g, 'nu'],
+  [/\\xi\b/g, 'xi'],
+  [/\\pi\b/g, 'pi'],
+  [/\\Pi\b/g, 'Pi'],
+  [/\\rho\b/g, 'rho'],
+  [/\\sigma\b/g, 'sigma'],
+  [/\\Sigma\b/g, 'Sigma'],
+  [/\\tau\b/g, 'tau'],
+  [/\\phi\b|\\varphi\b/g, 'phi'],
+  [/\\Phi\b/g, 'Phi'],
+  [/\\chi\b/g, 'chi'],
+  [/\\psi\b/g, 'psi'],
+  [/\\Psi\b/g, 'Psi'],
+  [/\\omega\b/g, 'omega'],
+  [/\\Omega\b/g, 'Omega'],
+  // Derivadas / diferenciais
+  [/\\partial/g, 'd'],
+  // Expoentes / índices: {^{n}} → ^(n), _{i} → _i
   [/\^\{([^}]+)\}/g, '^($1)'],
   [/\^(\w)/g, '^$1'],
   [/_\{([^}]+)\}/g, '_($1)'],
   [/_(\w)/g, '_$1'],
-  // Limpa chaves remanescentes
+  // Pontos e elipses
+  [/\\ldots|\\dots|\\cdots/g, '...'],
+  // Limpa decoradores e espaçamentos
   [/\\(left|right|big|Big|bigg|Bigg)/g, ''],
-  [/\\\\/g, ' '],
+  // \\\\ já tratado acima como separador de matriz; aqui pega any leftover.
   [/\\,|\\;|\\:|\\!|\\quad|\\qquad/g, ' '],
+  [/\\(text|mathrm|mathbf|mathit|mathbb|mathcal|operatorname)\{([^}]+)\}/g, '$2'],
+  // Desenrola chaves remanescentes
   [/\{|\}/g, ''],
+]
+
+/**
+ * Strippa imperativos PT-BR e converte termos técnicos para inglês.
+ * Wolfram não fala português, mas entende ótimo "critical points of f(x)".
+ */
+const PT_TO_EN_PHRASES: Array<[RegExp, string]> = [
+  // ---- Imperativos no início (case insensitive) ----
+  [/^\s*(demonstre|demonstrar|prove|provar|mostre|mostrar)(\s+que)?\s*/i, ''],
+  [/^\s*(calcule|calcular|determine|determinar|encontre|encontrar|ache|achar)\s*/i, ''],
+  [/^\s*(verifique|verificar|conferir|confira)\s*/i, ''],
+  [/^\s*(resolva|resolver|simplifique|simplificar)\s*/i, ''],
+  [/^\s*(considere|suponha|assuma|seja|sejam)\s+/i, 'let '],
+  [/^\s*(integre|integrar|derive|derivar)\s*/i, ''],
+  [/^\s*(esboce|esboçar|trace|tracar)\s*/i, 'sketch '],
+
+  // ---- Termos técnicos compostos (rodam ANTES de conectivos isolados) ----
+  [/\bpontos?\s+cr[ií]ticos?\s+de\b/gi, 'critical points of'],
+  [/\bm[áa]ximos?\s+(local|globais?|absolutos?)?\s*de\b/gi, 'maximum of'],
+  [/\bm[íi]nimos?\s+(local|globais?|absolutos?)?\s*de\b/gi, 'minimum of'],
+  [/\bra[íi]zes?\s+de\b/gi, 'roots of'],
+  [/\bzeros?\s+de\b/gi, 'roots of'],
+  [/\bderivada\s+de\b/gi, 'derivative of'],
+  [/\bderivada\s+parcial\s+de\b/gi, 'partial derivative of'],
+  [/\bintegral\s+(definida|indefinida)?\s*de\b/gi, 'integral of'],
+  [/\blimite\s+de\b/gi, 'limit of'],
+  [/\bdom[íi]nio\s+de\b/gi, 'domain of'],
+  [/\bimagem\s+de\b/gi, 'range of'],
+  [/\bautovalores?\s+de\b/gi, 'eigenvalues of'],
+  [/\bautovetores?\s+de\b/gi, 'eigenvectors of'],
+  [/\bdeterminante\s+de\b/gi, 'determinant of'],
+  [/\binversa\s+de\b/gi, 'inverse of'],
+  [/\btransposta\s+de\b/gi, 'transpose of'],
+  [/\bs[ée]rie\s+de\b/gi, 'series of'],
+  [/\bs[ée]rie\s+de\s+Taylor\s+de\b/gi, 'Taylor series of'],
+  [/\bgr[áa]fico\s+de\b/gi, 'plot of'],
+  [/\báa]rea\s+entre\b/gi, 'area between'],
+  [/\bvolume\s+de\b/gi, 'volume of'],
+  [/\bm[ée]dia\s+de\b/gi, 'mean of'],
+  [/\bvari[âa]ncia\s+de\b/gi, 'variance of'],
+  [/\bdesvio\s+padr[ãa]o\s+de\b/gi, 'standard deviation of'],
+  [/\bprobabilidade\s+de\b/gi, 'probability of'],
+  [/\bmatriz\s+identidade\b/gi, 'identity matrix'],
+  [/\bequa[çc][ãa]o\b/gi, 'equation'],
+  [/\bsistema\s+linear\b/gi, 'linear system'],
+  [/\bfun[çc][ãa]o\b/gi, 'function'],
+
+  // ---- Intervalos PT-BR "de X a Y" → "from X to Y" ----
+  [/\bde\s+(-?\d+(?:[.,]\d+)?)\s+a\s+(-?\d+(?:[.,]\d+)?)\b/gi, 'from $1 to $2'],
+  [/\bentre\s+(-?\d+(?:[.,]\d+)?)\s+e\s+(-?\d+(?:[.,]\d+)?)\b/gi, 'from $1 to $2'],
+
+  // ---- Conectivos lógicos comuns ----
+  [/\bse\s+e\s+somente\s+se\b/gi, ' iff '],
+  [/\bse\s+/gi, ' if '],
+  [/\bent[ãa]o\b/gi, ' then '],
+  [/\bportanto\b|\blogo\b/gi, ' therefore '],
+  [/\bonde\b/gi, ' where '],
+  [/\bpara\s+todo\b/gi, ' for all '],
+  [/\bexiste\b/gi, ' there exists '],
+  [/\btal\s+que\b/gi, ' such that '],
+  [/\bisto\s+[ée]\b/gi, ' i.e. '],
+
+  // ---- "e" entre cláusulas (com cuidado pra não destruir variáveis) ----
+  [/\s+e\s+(?=[A-Za-z(])/g, ' and '],
+
+  // ---- Artigos PT-BR órfãos (após stripping de termos técnicos) ----
+  // Cuidado: só remove quando isolados, no início do que sobrou.
+  [/^\s*(a|o|as|os|um|uma|uns|umas|de|do|da|dos|das)\s+/gi, ''],
+
+  // ---- Pontuação final ----
+  [/\s*\.\s*$/, ''],
 ]
 
 function latexToWolfram(latex: string): string {
   let out = latex
   for (const [pat, sub] of LATEX_TO_WOLFRAM) {
+    out = out.replace(pat, sub as string)
+  }
+  // Converte sentinelas de matriz de volta pra braces.
+  out = out.replace(/❴/g, '{').replace(/❵/g, '}')
+  return out.replace(/\s+/g, ' ').trim()
+}
+
+function ptToEn(texto: string): string {
+  let out = texto
+  for (const [pat, sub] of PT_TO_EN_PHRASES) {
     out = out.replace(pat, sub)
   }
+  // Dedup quando word PT-BR sobrevive antes do equivalente convertido do LaTeX
+  // (ex.: "Calcule a integral \int" → "integral integrate").
+  out = out.replace(/\bintegral\s+integrate\b/gi, 'integrate')
+  out = out.replace(/\bderivada\s+(derivative|d)\b/gi, '$1')
+  out = out.replace(/\blimite\s+limit\b/gi, 'limit')
+  out = out.replace(/\bsoma\s+sum\b/gi, 'sum')
   return out.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * Heurística: enunciados que são PROOFS (Demonstre, Prove, Mostre que) o Wolfram
+ * Alpha não sabe responder — Wolfram resolve cálculos, não teoremas.
+ *
+ * Para esses, retornamos `null` e o componente esconde o botão.
+ */
+function eDemonstracao(enunciado: string): boolean {
+  return /^\s*(demonstre|prove|mostre)\b/i.test(enunciado)
 }
 
 /**
  * Constrói URL do Wolfram Alpha para resolver o exercício online.
  *
- * Estratégia:
- *   1. `nodeToString` extrai só o LaTeX cru das anotações KaTeX (ignora
+ * Pipeline (todas as etapas só ocorrem em strings de cálculo, não em provas):
+ *   1. `nodeToString` extrai LaTeX puro da annotation MathML (ignora
  *      o `katex-html` visível, que duplica conteúdo).
- *   2. Marca os trechos que estavam em $...$ pra preservar contexto.
- *   3. Converte LaTeX → natural language Wolfram entende.
+ *   2. `latexToWolfram`: \subseteq → "subset of", \cup → "union", \frac → /, etc.
+ *   3. `ptToEn`: stripa imperativos PT-BR ("Calcule", "Encontre"…) e
+ *      converte conectivos ("se"→"if", "então"→"then").
+ *
+ * Retorna null se o enunciado for prova/demonstração (Wolfram não prova).
  */
-function wolframUrl(enunciadoTexto: string): string {
-  const clean = latexToWolfram(enunciadoTexto).slice(0, 500)
-  return `https://www.wolframalpha.com/input?i=${encodeURIComponent(clean)}`
+function wolframUrl(enunciadoTexto: string): string | null {
+  if (eDemonstracao(enunciadoTexto)) return null
+  const semLatex = latexToWolfram(enunciadoTexto)
+  const final = ptToEn(semLatex).slice(0, 400)
+  if (!final) return null
+  return `https://www.wolframalpha.com/input?i=${encodeURIComponent(final)}`
 }
 
 /**
@@ -589,15 +750,21 @@ function ItemExercicio({
 
       {/* Botão "Resolver online" + fonte */}
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-clube-mist-soft/30 pt-3 text-[11px]">
-        <a
-          href={wolframUrl(enunciadoTexto)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 rounded-full border border-clube-mist-soft/60 bg-clube-cream px-2.5 py-1 font-medium text-clube-teal hover:border-clube-teal hover:bg-clube-teal/5 hover:no-underline"
-          aria-label="Resolver este exercício online no Wolfram Alpha"
-        >
-          <CalcIcon /> Resolver online
-        </a>
+        {(() => {
+          const urlWolfram = wolframUrl(enunciadoTexto)
+          if (!urlWolfram) return null
+          return (
+            <a
+              href={urlWolfram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-full border border-clube-mist-soft/60 bg-clube-cream px-2.5 py-1 font-medium text-clube-teal hover:border-clube-teal hover:bg-clube-teal/5 hover:no-underline"
+              aria-label="Resolver este exercício online no Wolfram Alpha"
+            >
+              <CalcIcon /> Resolver online
+            </a>
+          )
+        })()}
         {fonte && (
           <a
             href={fonte.url}
