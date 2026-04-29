@@ -4639,9 +4639,24 @@ const PROVA_T12_V8: Prova = {
       dificuldade: 'aplicacao', aulasCobertas: ['aula-111-espacos-vetoriais'],
       fonteOriginal: { livro: 'OpenStax Calc 3', url: OS_CALC3, ref: 'Dimension, ex. 3 (adaptado)', licenca: CC_BY } },
     { numero: 2, enunciado: 'Núcleo de $A = \\begin{pmatrix} 1 & 2 \\\\ 2 & 4 \\end{pmatrix}$.', resposta: '$\\{t(2, -1) : t \\in \\mathbb R\\}$',
-      passos: '**Passo 1.** $A\\vec v = 0 \\Rightarrow x + 2y = 0 \\Rightarrow x = -2y$. Linha gerada por $(-2, 1)$ ou $(2, -1)$.',
+      passos:
+        '**Passo 1 — O que é "núcleo" (kernel) de uma matriz?** O núcleo de $A$ é o conjunto de TODOS os vetores $\\vec v$ que $A$ "mata", isto é, vetores tais que $A\\vec v = \\vec 0$. Em linguagem de transformação linear: o núcleo é o subespaço que vai parar na origem.\n\n' +
+        '**Passo 2 — Por que isso importa?** O núcleo mede o quanto uma matriz "perde informação". Se núcleo $= \\{\\vec 0\\}$ (apenas o vetor zero), $A$ é injetora — não funde dois vetores num só. Se o núcleo é maior, vetores diferentes mapeiam para o mesmo lugar (perda de informação).\n\n' +
+        '**Passo 3 — Escrever $A\\vec v = \\vec 0$ explicitamente.** Seja $\\vec v = (x, y)$. Então:\n\n$\\begin{pmatrix} 1 & 2 \\\\ 2 & 4 \\end{pmatrix}\\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} x + 2y \\\\ 2x + 4y \\end{pmatrix} = \\begin{pmatrix} 0 \\\\ 0 \\end{pmatrix}$\n\nIsso gera o sistema: $x + 2y = 0$ e $2x + 4y = 0$.\n\n' +
+        '**Passo 4 — Detectar redundância.** Olhe as duas equações. A segunda é exatamente $2 \\times$ a primeira: $2x + 4y = 2(x + 2y)$. Logo elas dão a MESMA informação. Sobra uma única equação efetiva: $x + 2y = 0$.\n\n' +
+        '**Passo 5 — Por que há redundância?** Porque as LINHAS de $A$ são linearmente dependentes — segunda linha $= 2 \\times $ primeira. Isso significa $\\text{posto}(A) = 1$, não 2. **Quando posto $<$ dimensão do espaço, o núcleo é não-trivial** (tem mais que só o vetor zero).\n\n' +
+        '**Passo 6 — Resolver $x + 2y = 0$.** Isolando: $x = -2y$. Para CADA valor escolhido de $y$, há um $x$ determinado. Logo $y$ é "parâmetro livre" e $x$ é "variável dependente".\n\n' +
+        '**Passo 7 — Parametrizar a solução.** Chame $y = t$ (qualquer real). Então $x = -2t$. Logo $\\vec v = (x, y) = (-2t, t) = t \\cdot (-2, 1)$.\n\n' +
+        '**Passo 8 — Forma equivalente $(2, -1)$.** Multiplique por $-1$: $t \\cdot (-2, 1) = (-t) \\cdot (2, -1)$. Como $t$ varia em todo $\\mathbb R$, $(-t)$ também varia em todo $\\mathbb R$. Logo os conjuntos $\\{t(-2, 1)\\}$ e $\\{t(2, -1)\\}$ são IDÊNTICOS — apenas reparametrizados. Convencionalmente usamos $(2, -1)$ (primeira coordenada positiva).\n\n' +
+        '**Passo 9 — Interpretação geométrica.** O núcleo é uma **reta** que passa pela origem com vetor diretor $(2, -1)$. A equação dessa reta é $y = -x/2$. Geometricamente, $A$ "achata" o plano $\\mathbb R^2$ inteiro nessa reta — qualquer vetor sobre ela é mapeado para o vetor zero.\n\n' +
+        '**Passo 10 — Confirmação numérica.** Tome $t = 1$: $\\vec v = (2, -1)$. Calcule:\n\n$A\\vec v = \\begin{pmatrix} 1 \\cdot 2 + 2 \\cdot (-1) \\\\ 2 \\cdot 2 + 4 \\cdot (-1) \\end{pmatrix} = \\begin{pmatrix} 0 \\\\ 0 \\end{pmatrix}$ ✓\n\nTome $t = 3$: $\\vec v = (6, -3)$. $A\\vec v = (6 - 6, 12 - 12) = (0, 0)$ ✓. Funciona para qualquer $t$.\n\n' +
+        '**Passo 11 — Dimensão do núcleo (nulidade).** O núcleo tem 1 grau de liberdade (parâmetro $t$). Sua dimensão, chamada **nulidade**, é $\\dim(\\text{núcleo}) = 1$.\n\n' +
+        '**Passo 12 — Teorema posto-nulidade.** Para qualquer matriz $n \\times n$:\n\n$\\text{posto}(A) + \\text{nulidade}(A) = n$\n\nAqui: posto $= 1$ (uma linha LI), nulidade $= 1$. Soma $= 2 = \\dim(\\mathbb R^2)$. ✓\n\n' +
+        '**Passo 13 — Conexão com determinante.** Núcleo não-trivial $\\Leftrightarrow$ $A$ não é invertível $\\Leftrightarrow$ $\\det(A) = 0$. Conferindo: $\\det = 1 \\cdot 4 - 2 \\cdot 2 = 0$ ✓.\n\n' +
+        '**Passo 14 — Aplicação prática (estatística/PCA).** Em PCA, o núcleo da matriz de covariância indica direções de variância **zero** — features redundantes que podem ser removidas sem perda. Em sistemas dinâmicos, vetores no núcleo são "modos absorventes" — direções onde o sistema colapsa para origem.\n\n' +
+        '**Passo 15 — Resposta final.** $\\text{núcleo}(A) = \\{t \\cdot (2, -1) : t \\in \\mathbb R\\}$. Geometricamente: a reta $y = -x/2$ passando pela origem.',
       dificuldade: 'aplicacao', aulasCobertas: ['aula-113-nucleo-imagem'],
-      fonteOriginal: { livro: 'OpenStax Calc 3', url: OS_CALC3, ref: 'Kernel, ex. 19 (adaptado)', licenca: CC_BY } },
+      fonteOriginal: { livro: 'OpenStax College Algebra 2e (apêndice álgebra linear)', url: OS_CA, ref: '§9.5 Matrix Operations + Strang LA OCW MIT 18.06 §3', licenca: CC_BY } },
     { numero: 3, enunciado: 'Matriz $A$ é diagonalizável se tem $n$ autovetores LI. Justifique.', resposta: 'Demonstração.',
       passos: '**Passo 1.** $A\\vec v_i = \\lambda_i \\vec v_i$. Coloque $\\vec v_i$ como colunas de $P$.\n\n**Passo 2.** $AP = P\\text{diag}(\\lambda_i)$. Como $\\vec v_i$ LI, $P$ inversível ⇒ $A = P\\Lambda P^{-1}$. ∎',
       dificuldade: 'demonstracao', aulasCobertas: ['aula-115-diagonalizacao'],
