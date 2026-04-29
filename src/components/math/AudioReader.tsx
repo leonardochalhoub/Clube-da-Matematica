@@ -8,82 +8,10 @@ import { AUDIO_TRANSLATIONS } from '@/content/audio-translations.generated'
 interface AudioReaderProps {
   /** Texto principal (PT-BR — versão original). */
   texto: string
-  /** Versões traduzidas (chave = código do locale). Tem prioridade sobre tradução automática. */
+  /** Versões traduzidas inline (chave = código do locale). Tem prioridade sobre AUDIO_TRANSLATIONS. */
   textosI18n?: Partial<Record<string, string>>
   /** Rótulo do botão. Default: t('audio.read'). */
   label?: string
-}
-
-const TRANSLATION_CACHE_KEY = 'clube_audio_translation_cache_v1'
-
-function loadCache(): Record<string, string> {
-  if (typeof window === 'undefined') return {}
-  try {
-    const raw = window.localStorage.getItem(TRANSLATION_CACHE_KEY)
-    return raw ? (JSON.parse(raw) as Record<string, string>) : {}
-  } catch {
-    return {}
-  }
-}
-
-function saveCache(cache: Record<string, string>) {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(TRANSLATION_CACHE_KEY, JSON.stringify(cache))
-  } catch {
-    // localStorage cheio ou bloqueado — ignora
-  }
-}
-
-/**
- * MyMemory translation API:
- *   - free, no key, supports CORS browser-side
- *   - 5000 chars/dia/IP anônimo (suficiente porque cacheamos)
- *   - retorna PT-BR → qualquer idioma alvo
- *
- * Mapeamento speechLang → MyMemory langpair (BCP-47 simples).
- */
-function speechLangToMyMemory(speechLang: string): string {
-  // MyMemory aceita "es-ES", "de-DE", etc. Mas alguns valores precisam ajuste.
-  const map: Record<string, string> = {
-    'pt-BR': 'pt-BR',
-    'en-US': 'en-US',
-    'es-ES': 'es-ES',
-    'zh-CN': 'zh-CN',
-    'ja-JP': 'ja-JP',
-    'de-DE': 'de-DE',
-    'fr-FR': 'fr-FR',
-    'it-IT': 'it-IT',
-    'ru-RU': 'ru-RU',
-    'ko-KR': 'ko-KR',
-    'vi-VN': 'vi-VN',
-    'pl-PL': 'pl-PL',
-    'sw-KE': 'sw-KE',
-    'ar-SA': 'ar-SA',
-    'hi-IN': 'hi-IN',
-    'et-EE': 'et-EE',
-  }
-  return map[speechLang] ?? speechLang
-}
-
-async function traduzirViaMyMemory(texto: string, alvoLang: string): Promise<string | null> {
-  const langpair = `pt-BR|${speechLangToMyMemory(alvoLang)}`
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(texto)}&langpair=${encodeURIComponent(langpair)}&de=clube@clube-da-matematica.dev`
-  try {
-    const res = await fetch(url, { method: 'GET' })
-    if (!res.ok) return null
-    const data = (await res.json()) as {
-      responseData?: { translatedText?: string; match?: number }
-      responseStatus?: number
-    }
-    const traduzido = data?.responseData?.translatedText
-    if (typeof traduzido !== 'string' || traduzido.length === 0) return null
-    // MyMemory às vezes devolve "MYMEMORY WARNING:" ou "INVALID..." em texto — filtra.
-    if (/^(MYMEMORY|INVALID|PLEASE|QUERY LENGTH)/i.test(traduzido.trim())) return null
-    return traduzido
-  } catch {
-    return null
-  }
 }
 
 async function obterVoicesAsync(): Promise<SpeechSynthesisVoice[]> {
@@ -106,17 +34,19 @@ async function obterVoicesAsync(): Promise<SpeechSynthesisVoice[]> {
 /**
  * Botão de áudio multilíngue.
  *
- * Pipeline:
+ * Pipeline (todo offline, zero requisições de rede):
  *   1. Se há tradução manual (`textosI18n[locale]`) → usa ela.
- *   2. Se locale é PT-BR → usa o `texto` original.
- *   3. Caso contrário → traduz via MyMemory (cache em localStorage).
+ *   2. Se há entrada em AUDIO_TRANSLATIONS[texto][speechLang] (gerado em
+ *      build-time pelo Claude Opus 4.7) → usa ela.
+ *   3. Senão → fala o texto PT-BR original com voz PT-BR (mesmo idioma do
+ *      texto, evitando "PT-BR com sotaque alemão").
  *
- * Voz: sempre do locale ativo. Se navegador não tem voz nativa do idioma,
- * tenta voz com mesmo prefixo (ex.: "de" sem "-DE").
+ * Quando cair em (3), o botão sinaliza com bandeira 🇧🇷 + tooltip
+ * "tradução pendente".
  */
 export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   const { locale, t } = useLocale()
-  const [estado, setEstado] = useState<'idle' | 'traduzindo' | 'falando' | 'indisponivel'>('idle')
+  const [estado, setEstado] = useState<'idle' | 'falando' | 'indisponivel'>('idle')
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   useEffect(() => {
@@ -133,33 +63,16 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   const speechLang = LOCALES[locale].speechLang
   const labelFinal = label ?? t('audio.read', 'Ouvir')
 
-  async function obterTextoFinal(): Promise<string> {
-    // 1. Tradução manual no MDX (textosI18n) tem prioridade absoluta.
-    const traducaoManual = textosI18n?.[locale]
-    if (traducaoManual) return traducaoManual
-
-    // 2. PT-BR usa texto original.
-    if (locale === 'pt-BR') return texto
-
-    // 3. Pre-tradução de build-time (commitada — instantânea, offline-friendly).
-    const preBuild = AUDIO_TRANSLATIONS[texto]?.[speechLang]
-    if (preBuild) return preBuild
-
-    // 4. Fallback runtime: cache localStorage.
-    const cache = loadCache()
-    const cacheKey = `${speechLang}::${texto}`
-    if (cache[cacheKey]) return cache[cacheKey]!
-
-    // 5. Último recurso: chama MyMemory na hora.
-    setEstado('traduzindo')
-    const traduzido = await traduzirViaMyMemory(texto, speechLang)
-    if (traduzido) {
-      cache[cacheKey] = traduzido
-      saveCache(cache)
-      return traduzido
-    }
-    return texto
-  }
+  // Determina texto e idioma de forma síncrona — sem promise, sem rede.
+  const traducaoManual = textosI18n?.[locale]
+  const traducaoPreBuild = AUDIO_TRANSLATIONS[texto]?.[speechLang]
+  const traducao = traducaoManual ?? traducaoPreBuild
+  const temTraducao = !!traducao || locale === 'pt-BR'
+  const textoFalado = traducao ?? texto
+  const langFalado = temTraducao ? speechLang : 'pt-BR'
+  const bandeiraFalada = temTraducao
+    ? LOCALES[locale].bandeira
+    : LOCALES['pt-BR'].bandeira
 
   async function falar() {
     if (estado === 'indisponivel') return
@@ -168,19 +81,17 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
       setEstado('idle')
       return
     }
-    if (estado === 'traduzindo') return
 
-    const textoFinal = await obterTextoFinal()
-    const u = new SpeechSynthesisUtterance(textoFinal)
-    u.lang = speechLang
+    const u = new SpeechSynthesisUtterance(textoFalado)
+    u.lang = langFalado
     u.rate = 0.95
     u.pitch = 1
     u.volume = 1
 
     const vozes = await obterVoicesAsync()
-    const exatas = vozes.filter((v) => v.lang === speechLang)
+    const exatas = vozes.filter((v) => v.lang === langFalado)
     const prefixo = vozes.filter((v) => {
-      const head = speechLang.split('-')[0]
+      const head = langFalado.split('-')[0]
       return v.lang.toLowerCase().startsWith(`${head}-`) || v.lang.toLowerCase() === head
     })
     const candidatas = exatas.length > 0 ? exatas : prefixo
@@ -200,34 +111,32 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   if (estado === 'indisponivel') return null
 
   const falando = estado === 'falando'
-  const traduzindo = estado === 'traduzindo'
+  const titulo = falando
+    ? t('audio.stop', 'Parar')
+    : temTraducao
+      ? `${labelFinal} — ${LOCALES[locale].bandeira}`
+      : `${labelFinal} (${t('audio.pendingTranslation', 'tradução pendente — falando em PT-BR')})`
 
   return (
     <button
       type="button"
       onClick={falar}
-      disabled={traduzindo}
       aria-label={falando ? t('audio.stop', 'Parar') : `${labelFinal} (${LOCALES[locale].nome})`}
       aria-pressed={falando}
-      title={falando ? t('audio.stop', 'Parar') : `${labelFinal} — ${LOCALES[locale].bandeira}`}
-      className="inline-flex items-center gap-2 rounded-full border border-clube-mist-soft/60 bg-clube-surface px-3 py-1.5 text-xs font-medium text-clube-ink transition-all hover:border-clube-teal hover:text-clube-teal disabled:opacity-60"
+      title={titulo}
+      className="inline-flex items-center gap-2 rounded-full border border-clube-mist-soft/60 bg-clube-surface px-3 py-1.5 text-xs font-medium text-clube-ink transition-all hover:border-clube-teal hover:text-clube-teal"
     >
       {falando ? (
         <>
           <StopIcon />
           <span>{t('audio.stop', 'Parar')}</span>
         </>
-      ) : traduzindo ? (
-        <>
-          <SpinnerIcon />
-          <span>{t('audio.translating', 'Traduzindo…')}</span>
-        </>
       ) : (
         <>
           <SpeakerIcon />
           <span>{labelFinal}</span>
           <span aria-hidden className="opacity-70">
-            {LOCALES[locale].bandeira}
+            {bandeiraFalada}
           </span>
         </>
       )}
@@ -267,33 +176,6 @@ function StopIcon() {
       aria-hidden="true"
     >
       <rect x="6" y="6" width="12" height="12" rx="1" />
-    </svg>
-  )
-}
-
-function SpinnerIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      width="14"
-      height="14"
-      aria-hidden="true"
-      className="animate-spin"
-    >
-      <path d="M12 2v4" />
-      <path d="M12 18v4" />
-      <path d="m4.93 4.93 2.83 2.83" />
-      <path d="m16.24 16.24 2.83 2.83" />
-      <path d="M2 12h4" />
-      <path d="M18 12h4" />
-      <path d="m4.93 19.07 2.83-2.83" />
-      <path d="m16.24 7.76 2.83-2.83" />
     </svg>
   )
 }

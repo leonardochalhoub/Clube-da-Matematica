@@ -86,21 +86,76 @@ async function loadExisting(): Promise<TranslationMap> {
   }
 }
 
-async function traduzir(texto: string, langPair: string): Promise<string | null> {
+/** Quebra texto em chunks <= maxLen, preferindo break em "." ou ". ". */
+function chunkByPeriod(texto: string, maxLen = 480): string[] {
+  if (texto.length <= maxLen) return [texto]
+  const sentences = texto.split(/(?<=\.)\s+/)
+  const chunks: string[] = []
+  let buf = ''
+  for (const s of sentences) {
+    if ((buf + ' ' + s).trim().length <= maxLen) {
+      buf = (buf + ' ' + s).trim()
+    } else {
+      if (buf) chunks.push(buf)
+      // Se uma sentença sozinha é > maxLen, força split por palavra
+      if (s.length > maxLen) {
+        const words = s.split(/\s+/)
+        let wbuf = ''
+        for (const w of words) {
+          if ((wbuf + ' ' + w).trim().length > maxLen) {
+            chunks.push(wbuf)
+            wbuf = w
+          } else {
+            wbuf = (wbuf + ' ' + w).trim()
+          }
+        }
+        if (wbuf) buf = wbuf
+        else buf = ''
+      } else {
+        buf = s
+      }
+    }
+  }
+  if (buf) chunks.push(buf)
+  return chunks
+}
+
+/**
+ * Tradução via MyMemory (utility script — fallback caso o dono prefira API).
+ * NOTA: Em geral as traduções no arquivo gerado vêm direto do Claude Opus 4.7
+ * (qualidade superior). Este script existe só pra preencher strings novas
+ * quando alguém prefere automatizar.
+ */
+async function traduzirChunk(texto: string, langPair: string): Promise<string | null> {
   const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(texto)}&langpair=pt-BR|${langPair}&de=clube@clube-da-matematica.dev`
   try {
     const res = await fetch(url)
     if (!res.ok) return null
     const data = (await res.json()) as {
       responseData?: { translatedText?: string }
+      responseStatus?: number | string
     }
     const t = data?.responseData?.translatedText
     if (typeof t !== 'string' || t.length === 0) return null
-    if (/^(MYMEMORY|INVALID|PLEASE|QUERY LENGTH)/i.test(t.trim())) return null
+    if (/^(MYMEMORY|INVALID|PLEASE|QUERY LENGTH|YOU USED)/i.test(t.trim())) return null
+    if (data.responseStatus && Number(data.responseStatus) >= 400) return null
     return t
   } catch {
     return null
   }
+}
+
+async function traduzir(texto: string, langPair: string): Promise<string | null> {
+  const chunks = chunkByPeriod(texto)
+  if (chunks.length === 1) return traduzirChunk(chunks[0]!, langPair)
+  const out: string[] = []
+  for (const c of chunks) {
+    const r = await traduzirChunk(c, langPair)
+    if (!r) return null
+    out.push(r)
+    await sleep(220)
+  }
+  return out.join(' ')
 }
 
 function sleep(ms: number) {

@@ -30,6 +30,24 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Перевожу…', ko: '번역 중…', vi: 'Đang dịch…', pl: 'Tłumaczę…',
     sw: 'Inatafsiri…', ar: 'يترجم…', hi: 'अनुवाद हो रहा है…', et: 'Tõlgin…',
   },
+  'audio.pendingTranslation': {
+    'pt-BR': 'tradução pendente — falando em PT-BR',
+    en: 'translation pending — speaking in Portuguese',
+    es: 'traducción pendiente — hablando en portugués',
+    zh: '翻译未完成 — 用葡萄牙语播放',
+    ja: '翻訳待ち — ポルトガル語で読み上げ',
+    de: 'Übersetzung ausstehend — spreche auf Portugiesisch',
+    fr: 'traduction en attente — lu en portugais',
+    it: 'traduzione in corso — letto in portoghese',
+    ru: 'перевод в процессе — читаю на португальском',
+    ko: '번역 대기 중 — 포르투갈어로 읽음',
+    vi: 'bản dịch đang chờ — đọc bằng tiếng Bồ Đào Nha',
+    pl: 'oczekuje na tłumaczenie — czytam po portugalsku',
+    sw: 'tafsiri inasubiri — inasoma kwa Kireno',
+    ar: 'الترجمة قيد الانتظار — يُقرأ بالبرتغالية',
+    hi: 'अनुवाद लंबित — पुर्तगाली में पढ़ा जा रहा है',
+    et: 'tõlge ootel — loetakse portugali keeles',
+  },
 
   // ===== NAVIGATION =====
   'nav.middleSchool': {
