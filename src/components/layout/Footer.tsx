@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Logo } from '@/components/brand/Logo'
 import { AmazingSchoolSponsor } from './AmazingSchoolSponsor'
+import { BuiltWithClaude } from './BuiltWithClaude'
 
 export function Footer() {
   return (
@@ -119,6 +120,7 @@ export function Footer() {
             </p>
             <AmazingSchoolSponsor />
           </div>
+          <BuiltWithClaude />
           <p className="max-w-2xl text-clube-mist">
             Não competimos com Khan — Khan ensina conta. Competimos com o silêncio entre saber a
             fórmula e entender o que ela diz sobre o mundo.
