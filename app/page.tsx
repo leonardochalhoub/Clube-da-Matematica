@@ -4,6 +4,23 @@ import { CATEGORIAS_LABEL } from '@/content/schema'
 import { MainCounters } from '@/components/layout/MainCounters'
 import { PROGRAMA_EM, HORAS_TOTAIS } from '@/content/programa-em'
 import { PROVAS_REAIS, TOTAL_QUESTOES_REAIS } from '@/content/provas-data'
+import {
+  TOP_20,
+  PRE_CALCULO,
+  CALCULO,
+  ALGEBRA_LINEAR,
+  EDO_EDP,
+  ANALISE,
+  PROBABILIDADE,
+  METODOS_NUMERICOS,
+  LOGICA_PROVA,
+  FISICA,
+  PT_BR,
+  CLASSICOS,
+  MULTILINGUE,
+  ML_CD,
+} from '@/content/livros-data'
+import { SearchDiscovery } from '@/components/layout/SearchDiscovery'
 
 /** Conta exercícios em arquivos MDX via regex (extraído em build time). */
 function contarExercicios(): number {
@@ -15,11 +32,20 @@ function contarExercicios(): number {
   return 2706
 }
 
-/** Contagem aproximada de livros únicos citados como fonte. */
-const LIVROS_NO_LEDGER = 8 // OpenStax CA 2e, A&T 2e, Calc 1/2/3, Intro Stat, Lebl, Active Calc
+/** Contagem total do catálogo de livros públicos curados em /livros. */
+const LIVROS_NO_LEDGER =
+  TOP_20.length + PRE_CALCULO.length + CALCULO.length + ALGEBRA_LINEAR.length +
+  EDO_EDP.length + ANALISE.length + PROBABILIDADE.length + METODOS_NUMERICOS.length +
+  LOGICA_PROVA.length + FISICA.length + PT_BR.length + CLASSICOS.length +
+  MULTILINGUE.length + ML_CD.length
+
+const TODOS_LIVROS = [
+  ...TOP_20, ...PRE_CALCULO, ...CALCULO, ...ALGEBRA_LINEAR, ...EDO_EDP,
+  ...ANALISE, ...PROBABILIDADE, ...METODOS_NUMERICOS, ...LOGICA_PROVA,
+  ...FISICA, ...PT_BR, ...CLASSICOS, ...MULTILINGUE, ...ML_CD,
+]
 
 export default function HomePage() {
-  const conteudos = publicadosApenas()
   const todos = carregarTodosConteudos()
   const aulasMdx = todos.filter((c) => c.meta.categoria === 'aulas')
   const licoesPublicadas = aulasMdx.length
@@ -27,6 +53,8 @@ export default function HomePage() {
     (acc, ano) => acc + ano.trimestres.reduce((a, t) => a + t.aulas.length, 0),
     0,
   )
+  const slugToCaminho: Record<string, string> = {}
+  for (const c of aulasMdx) slugToCaminho[c.meta.slug] = c.caminho
 
   return (
     <>
@@ -96,69 +124,8 @@ export default function HomePage() {
         livrosNoLedger={LIVROS_NO_LEDGER}
       />
 
-      {/* O que tem aqui */}
-      <section className="container-clube py-16 sm:py-20">
-        <div className="mb-10 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-hero font-bold text-clube-teal-deep">
-              O que está pronto pra ler
-            </h2>
-            <p className="mt-2 max-w-prose text-clube-mist">
-              Lições e peças já publicadas. O programa completo está em{' '}
-              <Link href="/ensino-medio" className="font-semibold text-clube-teal">
-                Ensino Médio
-              </Link>
-              .
-            </p>
-          </div>
-          <Link
-            href="/ensino-medio"
-            className="hidden whitespace-nowrap text-sm font-semibold text-clube-teal hover:text-clube-teal-deep sm:inline"
-          >
-            Ver programa →
-          </Link>
-        </div>
-
-        {conteudos.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-clube-mist-soft p-10 text-center text-clube-mist">
-            Conteúdos sendo escritos. Volte em breve — ou{' '}
-            <a
-              href="https://github.com/leonardochalhoub/Clube-da-Matematica"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-clube-teal"
-            >
-              contribua no GitHub
-            </a>
-            .
-          </div>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {conteudos.map(({ meta, caminho }) => (
-              <Link
-                key={meta.slug}
-                href={`/${caminho}/`}
-                className="card-clube group flex flex-col gap-3 no-underline hover:no-underline"
-              >
-                <span className="inline-block self-start rounded-full bg-clube-cream-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-clube-teal">
-                  {CATEGORIAS_LABEL[meta.categoria]}
-                </span>
-                <h3 className="text-xl font-semibold leading-tight text-clube-teal-deep group-hover:text-clube-teal">
-                  {meta.titulo}
-                </h3>
-                <p className="text-sm leading-relaxed text-clube-mist">
-                  {meta.descricao}
-                </p>
-                {meta.usadoEm.length > 0 && (
-                  <div className="mt-auto pt-3 text-xs text-clube-mist/80">
-                    Usado em: {meta.usadoEm.join(' · ')}
-                  </div>
-                )}
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
+      {/* Descoberta dinâmica — substitui antiga listagem estática */}
+      <SearchDiscovery slugToCaminho={slugToCaminho} livros={TODOS_LIVROS} />
 
       {/* Filosofia */}
       <section className="border-y border-clube-mist-soft/30 bg-clube-cream-soft py-16">
