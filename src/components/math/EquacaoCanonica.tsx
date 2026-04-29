@@ -48,7 +48,7 @@ export function EquacaoCanonica({
     <section
       role="math"
       aria-label={ariaLabel ?? formula}
-      className="not-prose my-10 overflow-hidden rounded-2xl border-2 border-clube-gold/30 bg-gradient-to-b from-clube-cream-soft to-clube-surface px-6 py-10 shadow-sm"
+      className="not-prose my-8 overflow-hidden rounded-2xl border-2 border-clube-gold/30 bg-gradient-to-b from-clube-cream-soft to-clube-surface px-4 py-8 shadow-sm sm:my-10 sm:px-6 sm:py-10"
     >
       <div
         className="canonica-katex overflow-x-auto text-center"

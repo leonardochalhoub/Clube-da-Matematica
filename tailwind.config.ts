@@ -34,8 +34,8 @@ const config: Config = {
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace'],
       },
       fontSize: {
-        'display': ['clamp(2.5rem, 5vw, 4.5rem)', { lineHeight: '1.05', letterSpacing: '-0.03em' }],
-        'hero': ['clamp(1.875rem, 3.5vw, 3rem)', { lineHeight: '1.15', letterSpacing: '-0.02em' }],
+        'display': ['clamp(1.875rem, 5vw + 1rem, 4.5rem)', { lineHeight: '1.1', letterSpacing: '-0.03em' }],
+        'hero': ['clamp(1.5rem, 3.5vw + 0.5rem, 3rem)', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
       },
       maxWidth: {
         'prose-wide': '72ch',

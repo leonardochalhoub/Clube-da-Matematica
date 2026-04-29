@@ -117,9 +117,9 @@ export function ProvaViewer() {
       </div>
 
       {/* Cabeçalho da prova */}
-      <header className="mb-8 rounded-2xl border-2 border-clube-gold/30 bg-gradient-to-b from-clube-cream-soft to-clube-surface p-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-2xl font-extrabold text-clube-teal-deep">
+      <header className="mb-8 rounded-2xl border-2 border-clube-gold/30 bg-gradient-to-b from-clube-cream-soft to-clube-surface p-4 sm:p-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
+          <h2 className="text-xl font-extrabold text-clube-teal-deep sm:text-2xl">
             {prova.titulo}
           </h2>
           <div className="flex flex-wrap gap-2 text-xs">

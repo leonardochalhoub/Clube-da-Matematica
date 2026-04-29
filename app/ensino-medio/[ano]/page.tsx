@@ -96,27 +96,27 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
         </p>
       </header>
 
-      <section className="mb-10 grid gap-3 sm:grid-cols-4">
-        <div className="card-clube text-center">
-          <div className="text-2xl font-extrabold text-clube-teal-deep">
+      <section className="mb-10 grid gap-3 grid-cols-2 sm:grid-cols-4">
+        <div className="card-clube !p-4 text-center sm:!p-6">
+          <div className="text-xl font-extrabold text-clube-teal-deep sm:text-2xl">
             {totalLicoes}
           </div>
           <div className="mt-1 text-xs text-clube-mist">lições no ano</div>
         </div>
-        <div className="card-clube text-center">
-          <div className="text-2xl font-extrabold text-clube-leaf">
+        <div className="card-clube !p-4 text-center sm:!p-6">
+          <div className="text-xl font-extrabold text-clube-leaf sm:text-2xl">
             {publicadas}
           </div>
           <div className="mt-1 text-xs text-clube-mist">lições publicadas</div>
         </div>
-        <div className="card-clube text-center">
-          <div className="text-2xl font-extrabold text-clube-gold-deep">
+        <div className="card-clube !p-4 text-center sm:!p-6">
+          <div className="text-xl font-extrabold text-clube-gold-deep sm:text-2xl">
             {materias.length}
           </div>
           <div className="mt-1 text-xs text-clube-mist">matérias cobertas</div>
         </div>
-        <div className="card-clube text-center">
-          <div className="text-2xl font-extrabold text-clube-clay">
+        <div className="card-clube !p-4 text-center sm:!p-6">
+          <div className="text-xl font-extrabold text-clube-clay sm:text-2xl">
             ~{HORAS_POR_ANO}h
           </div>
           <div className="mt-1 text-xs text-clube-mist">

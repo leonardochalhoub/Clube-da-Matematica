@@ -61,30 +61,30 @@ export default function EnsinoMedioPage() {
         </p>
       </header>
 
-      <section className="mb-12 grid gap-4 sm:grid-cols-4">
-        <div className="card-clube text-center">
-          <div className="text-3xl font-extrabold text-clube-teal-deep">
+      <section className="mb-12 grid gap-3 grid-cols-2 sm:gap-4 sm:grid-cols-4">
+        <div className="card-clube !p-4 text-center sm:!p-6">
+          <div className="text-2xl font-extrabold text-clube-teal-deep sm:text-3xl">
             {totalLicoes}
           </div>
-          <div className="mt-1 text-sm text-clube-mist">lições planejadas</div>
+          <div className="mt-1 text-xs text-clube-mist sm:text-sm">lições planejadas</div>
         </div>
-        <div className="card-clube text-center">
-          <div className="text-3xl font-extrabold text-clube-leaf">
+        <div className="card-clube !p-4 text-center sm:!p-6">
+          <div className="text-2xl font-extrabold text-clube-leaf sm:text-3xl">
             {aulasPublicadas.size}
           </div>
-          <div className="mt-1 text-sm text-clube-mist">lições publicadas</div>
+          <div className="mt-1 text-xs text-clube-mist sm:text-sm">lições publicadas</div>
         </div>
-        <div className="card-clube text-center">
-          <div className="text-3xl font-extrabold text-clube-gold-deep">~6.000</div>
-          <div className="mt-1 text-sm text-clube-mist">
+        <div className="card-clube !p-4 text-center sm:!p-6">
+          <div className="text-2xl font-extrabold text-clube-gold-deep sm:text-3xl">~6.000</div>
+          <div className="mt-1 text-xs text-clube-mist sm:text-sm">
             exercícios totais
           </div>
         </div>
-        <div className="card-clube text-center">
-          <div className="text-3xl font-extrabold text-clube-clay">
+        <div className="card-clube !p-4 text-center sm:!p-6">
+          <div className="text-2xl font-extrabold text-clube-clay sm:text-3xl">
             ~{HORAS_TOTAIS}h
           </div>
-          <div className="mt-1 text-sm text-clube-mist">
+          <div className="mt-1 text-xs text-clube-mist sm:text-sm">
             estudo total ({HORAS_POR_ANO}h/ano · {HORAS_POR_TRIMESTRE}h/trim)
           </div>
         </div>
