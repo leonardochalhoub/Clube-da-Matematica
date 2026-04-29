@@ -1,27 +1,39 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { carregarTodosConteudos, carregarPorSlug } from '@/lib/content/loader'
+import {
+  carregarTodosConteudos,
+  carregarPorSlug,
+} from '@/lib/content/loader'
 import { carregarMdx } from '@/lib/content/manifest'
 import { CATEGORIAS_LABEL } from '@/content/schema'
 
 interface Props {
-  params: Promise<{ categoria: string; subcategoria: string; slug: string }>
+  params: Promise<{ categoria: string; caminho: string[] }>
 }
 
 export function generateStaticParams() {
-  return carregarTodosConteudos().map(({ meta, caminho }) => {
+  return carregarTodosConteudos().map(({ caminho }) => {
     const partes = caminho.split('/')
+    const [categoria, ...rest] = partes
     return {
-      categoria: partes[0]!,
-      subcategoria: partes[1]!,
-      slug: meta.slug,
+      categoria: categoria!,
+      caminho: rest,
     }
   })
 }
 
+function caminhoCompleto(categoria: string, caminho: string[]): string {
+  return [categoria, ...caminho].join('/')
+}
+
+function slugDoCaminho(caminho: string[]): string {
+  return caminho[caminho.length - 1] ?? ''
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+  const { caminho } = await params
+  const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
   if (!conteudo) return { title: 'Não encontrado' }
   return {
@@ -31,36 +43,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ConteudoPage({ params }: Props) {
-  const { categoria, subcategoria, slug } = await params
+  const { categoria, caminho } = await params
+  const completo = caminhoCompleto(categoria, caminho)
+  const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
-  if (!conteudo) notFound()
+  if (!conteudo || conteudo.caminho !== completo) notFound()
 
-  const partes = conteudo.caminho.split('/')
-  if (partes[0] !== categoria || partes[1] !== subcategoria) notFound()
-
-  // Importa o MDX via manifesto estático (build-time)
-  const mod = await carregarMdx(`${categoria}/${subcategoria}/${slug}`)
+  const mod = await carregarMdx(completo)
   if (!mod) notFound()
   const MDXContent = mod.default
 
+  // Para breadcrumb na seção certa
+  const isAula = categoria === 'aulas'
+  const isFinancas = categoria === 'financas-quantitativas'
+
   return (
     <article className="container-clube max-w-prose-wide py-12 sm:py-16">
-      {/* Breadcrumb */}
       <nav aria-label="Navegação" className="mb-6 text-sm text-clube-mist">
         <Link href="/" className="hover:text-clube-teal">
           Início
         </Link>
         <span className="mx-2">/</span>
-        <Link href="/conteudos" className="hover:text-clube-teal">
-          Conteúdos
-        </Link>
+        {isAula ? (
+          <Link href="/ensino-medio" className="hover:text-clube-teal">
+            Ensino Médio
+          </Link>
+        ) : isFinancas ? (
+          <Link href="/financas" className="hover:text-clube-teal">
+            Finanças
+          </Link>
+        ) : (
+          <span className="text-clube-ink/70">
+            {CATEGORIAS_LABEL[conteudo.meta.categoria]}
+          </span>
+        )}
         <span className="mx-2">/</span>
-        <span className="text-clube-ink/70">
-          {CATEGORIAS_LABEL[conteudo.meta.categoria]}
-        </span>
+        <span className="text-clube-ink/70">{conteudo.meta.titulo}</span>
       </nav>
 
-      {/* Header */}
       <header className="mb-10 border-b border-clube-mist-soft/40 pb-8">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
           {CATEGORIAS_LABEL[conteudo.meta.categoria]}
@@ -77,12 +97,10 @@ export default async function ConteudoPage({ params }: Props) {
         )}
       </header>
 
-      {/* Conteúdo MDX renderizado */}
       <div className="prose prose-clube max-w-none">
         <MDXContent />
       </div>
 
-      {/* Rodapé editorial */}
       <footer className="mt-16 border-t border-clube-mist-soft/40 pt-6 text-sm text-clube-mist">
         <p>
           Atualizado em {conteudo.meta.atualizadoEm} · Autor(es):{' '}

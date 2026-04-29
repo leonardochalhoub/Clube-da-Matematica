@@ -4,6 +4,7 @@ import { DuasPortas, Porta } from '@/components/math/DuasPortas'
 import { Equation, Eq } from '@/components/math/Equation'
 import { EquacaoCanonica } from '@/components/math/EquacaoCanonica'
 import { PayoffChart } from '@/components/math/PayoffChart'
+import { ListaExercicios, Exercicio } from '@/components/math/ListaExercicios'
 import {
   Definicao,
   Teorema,
@@ -35,6 +36,8 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Eq,
     EquacaoCanonica,
     PayoffChart,
+    ListaExercicios,
+    Exercicio,
     Definicao,
     Teorema,
     Exemplo,

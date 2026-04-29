@@ -22,10 +22,18 @@ export function Header() {
             <ul className="flex items-center gap-1 sm:gap-2">
               <li>
                 <Link
-                  href="/conteudos"
+                  href="/ensino-medio"
                   className="rounded-md px-3 py-2 text-sm font-medium text-clube-ink/80 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal hover:no-underline"
                 >
-                  Conteúdos
+                  Ensino Médio
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/financas"
+                  className="rounded-md px-3 py-2 text-sm font-medium text-clube-ink/80 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal hover:no-underline"
+                >
+                  Finanças
                 </Link>
               </li>
               <li>

@@ -14,6 +14,7 @@ export const conteudoSchema = z.object({
   titulo: z.string().min(3),
   slug: z.string().regex(/^[a-z0-9-]+$/),
   categoria: z.enum([
+    'aulas',
     'calculo-1',
     'calculo-2',
     'calculo-3',
@@ -43,6 +44,7 @@ export const conteudoSchema = z.object({
 export type Conteudo = z.infer<typeof conteudoSchema>
 
 export const CATEGORIAS_LABEL: Record<Conteudo['categoria'], string> = {
+  aulas: 'Aulas (Programa)',
   'calculo-1': 'Cálculo 1',
   'calculo-2': 'Cálculo 2',
   'calculo-3': 'Cálculo 3',
@@ -59,6 +61,7 @@ export const CATEGORIAS_LABEL: Record<Conteudo['categoria'], string> = {
 }
 
 export const CATEGORIAS_DESCRICAO: Record<Conteudo['categoria'], string> = {
+  aulas: 'Programa de estudos Japão + Alemanha + Singapura, 12 trimestres.',
   'calculo-1': 'Limites, derivadas, integrais — uma variável real.',
   'calculo-2': 'Derivadas parciais, gradiente, integrais múltiplas.',
   'calculo-3': 'Cálculo vetorial — Green, Stokes, divergência.',

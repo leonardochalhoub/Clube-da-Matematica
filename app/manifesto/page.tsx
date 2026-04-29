@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Manifesto',
@@ -38,6 +39,73 @@ export default function ManifestoPage() {
           <strong>interessado de verdade</strong> — esse site é seu.
         </p>
 
+        <h2 className="!mt-12">Nosso primeiro objetivo: Ensino Médio brasileiro otimizado</h2>
+
+        <p>
+          A maior dor do sistema educacional brasileiro está no{' '}
+          <strong>ensino médio</strong>. É onde aluno bom desiste de matemática,
+          é onde aluno mediano reprova em Cálculo I na faculdade no semestre
+          seguinte, é onde a curiosidade vira trauma. Por isso nosso{' '}
+          <strong>primeiro objetivo é construir um currículo otimizado de
+          matemática para o ensino médio brasileiro</strong> — 12 trimestres,
+          120 aulas, calibrado pelos modelos de{' '}
+          <strong>Japão</strong> (Math I/II/III), <strong>Alemanha</strong>{' '}
+          (Klasse 10/11/12 Leistungskurs) e <strong>Singapura</strong> (Sec 4
+          + JC H2 Math) — os três sistemas que mais consistentemente formam
+          alunos prontos para engenharia de fronteira.
+        </p>
+
+        <p>
+          Não é tradução de livro estrangeiro. É <strong>currículo brasileiro
+          calibrado pelos melhores do mundo</strong>: nomenclatura BNCC,
+          exemplos com PETR4, IBOVESPA, ENEM, ITA, IME, Olimpíada Brasileira de
+          Matemática. Cada aula traz <strong>40 a 80 exercícios</strong> no
+          estilo de engenharia mecânica brasileira (USP, ITA, Poli) — 25%
+          gabaritados em desenvolvimento formal, o restante com resposta para
+          conferência. Sem afrouxamento.
+        </p>
+
+        <h2 className="!mt-12">Como o site cresce a partir daqui</h2>
+
+        <p>
+          Depois do ensino médio bem servido, vem o resto. Em ordem:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Hoje (em construção)</strong> ·{' '}
+            <Link href="/ensino-medio" className="text-clube-teal">
+              Ensino Médio Otimizado
+            </Link>{' '}
+            · 12 trimestres × 10 aulas. Matemática completa: cálculo, álgebra,
+            geometria analítica, trigonometria, vetores, matrizes, combinatória,
+            probabilidade, estatística, álgebra linear introdutória.
+          </li>
+          <li>
+            <strong>Próximo passo (futuro próximo)</strong> · <em>Física do
+            ensino médio</em> · mesma metodologia, mesmas 6+1 portas.
+            Cinemática, dinâmica, eletromagnetismo, ondas, óptica, termodinâmica
+            — conectando matemática com aplicação concreta.
+          </li>
+          <li>
+            <strong>Visão de longo prazo</strong> · <em>Faculdade de
+            Engenharia</em> · disciplinas das engenharias mecânica, elétrica,
+            civil, naval. Continuação natural para quem cursou a base. Cálculo
+            I-IV, EDOs, Mecânica dos Sólidos, Sinais e Sistemas, Termodinâmica
+            Aplicada — sem o silêncio que tantos sentem em sala de aula.
+          </li>
+        </ol>
+
+        <p>
+          Além disso, mantemos uma <Link href="/financas" className="text-clube-teal">
+          seção de Finanças Quantitativas</Link> — Black-Scholes em destaque —
+          como demonstração viva de que a matemática que vamos ensinar é{' '}
+          <strong>a mesma</strong> que opera mesa de derivativos em São Paulo,
+          Tóquio e Londres. Não é teoria descolada. É a régua do mundo.
+        </p>
+
+        <h2 className="!mt-12">Como cada aula é construída</h2>
+
         <p>
           Aqui matemática não começa pela fórmula. Começa por{' '}
           <strong>um problema que ninguém sabe resolver fácil</strong> — e
@@ -54,7 +122,9 @@ export default function ManifestoPage() {
           federal exige. As outras cinco são versões pra criança de 5, 10,
           jovem de 15, estudante de 25, profissional de 40. Todas certas.
           Todas conectadas. <strong>Você escolhe a porta — e troca de porta
-          quando quiser</strong>.
+          quando quiser</strong>. Toda equação central tem ainda um botão{' '}
+          <strong>"Ler em voz alta"</strong> em PT-BR — acessibilidade
+          embutida, não enxertada.
         </p>
 
         <p>

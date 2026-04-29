@@ -15,32 +15,48 @@ export default function HomePage() {
               Open source · gratuito · em português
             </p>
             <h1 className="font-sans text-display font-extrabold text-clube-teal-deep">
-              Aprenda matemática
+              Ensino Médio brasileiro
               <br />
-              <span className="text-clube-teal">de verdade.</span>
+              <span className="text-clube-teal">otimizado.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-clube-ink/80 sm:text-xl">
-              Toda equação tem <strong className="text-clube-teal-deep">6 portas</strong>:
-              a derivação formal e versões facilitadas para criança de 5,
-              jovem de 15 e profissional de 40. Você escolhe a porta. Antes
-              de ver a resposta, você prevê — erra, recebe correção, tenta
-              de novo.
+              <strong>3 anos · 12 trimestres · 120 aulas</strong>, calibrado
+              pelos currículos de <strong>Japão</strong>,{' '}
+              <strong>Alemanha</strong> e <strong>Singapura</strong>. Toda
+              equação tem 6 portas (formal · 5 · 10 · 15 · 25 · 40), botão
+              de leitura em voz alta, e <strong>40-80 exercícios por aula</strong>{' '}
+              tirados dos melhores livros públicos do mundo.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
-                href="/conteudos"
+                href="/ensino-medio"
                 className="inline-flex items-center gap-2 rounded-full bg-clube-teal px-5 py-2.5 font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-clube-teal-deep hover:no-underline hover:shadow"
               >
-                Ver todos os conteúdos
+                Começar pelo Ensino Médio
                 <span aria-hidden>→</span>
               </Link>
               <Link
-                href="/manifesto"
+                href="/financas"
                 className="inline-flex items-center gap-2 rounded-full border border-clube-mist-soft/60 bg-clube-surface px-5 py-2.5 font-semibold text-clube-ink transition-all hover:-translate-y-0.5 hover:border-clube-teal hover:text-clube-teal hover:no-underline"
               >
-                Ler o manifesto
+                Ver Black-Scholes (Finanças)
               </Link>
+              <a
+                href="/clube-da-matematica-paper.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-clube-gold-deep/50 bg-clube-gold/10 px-5 py-2.5 font-semibold text-clube-gold-deep transition-all hover:-translate-y-0.5 hover:bg-clube-gold/20 hover:no-underline"
+                aria-label="Abrir o working paper em PDF em uma nova aba"
+              >
+                <PdfIcon />
+                Ler o working paper (PDF)
+              </a>
             </div>
+            <p className="mt-4 text-xs text-clube-mist">
+              <Link href="/manifesto" className="hover:text-clube-teal">
+                Manifesto →
+              </Link>
+            </p>
           </div>
         </div>
       </section>
@@ -50,19 +66,21 @@ export default function HomePage() {
         <div className="mb-10 flex items-end justify-between gap-4">
           <div>
             <h2 className="text-hero font-bold text-clube-teal-deep">
-              O que tem aqui
+              O que está pronto pra ler
             </h2>
             <p className="mt-2 max-w-prose text-clube-mist">
-              Disciplinas que aparecem nas grades de engenharia das melhores
-              federais brasileiras (USP, ITA, UFRGS) e internacionais (MIT,
-              Tsinghua, ETH).
+              Aulas e peças já publicadas. O programa completo está em{' '}
+              <Link href="/ensino-medio" className="font-semibold text-clube-teal">
+                Ensino Médio
+              </Link>
+              .
             </p>
           </div>
           <Link
-            href="/conteudos"
+            href="/ensino-medio"
             className="hidden whitespace-nowrap text-sm font-semibold text-clube-teal hover:text-clube-teal-deep sm:inline"
           >
-            Ver todos →
+            Ver programa →
           </Link>
         </div>
 
@@ -126,20 +144,43 @@ export default function HomePage() {
             <p className="mt-3 text-sm leading-relaxed text-clube-ink/80">
               Formal, 5, 10, 15, 25, 40 — você escolhe a porta. Não importa
               se você reprovou em Cálculo ou ainda não viu derivada na
-              escola.
+              escola. Toda equação central tem botão "Ler em voz alta".
             </p>
           </div>
           <div>
             <h3 className="text-lg font-bold text-clube-teal-deep">
-              Open source pra sempre
+              Caderno e dúzias de exercícios
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-clube-ink/80">
-              Sem login. Sem paywall. Conhecimento que muda a cabeça das
-              pessoas não pode ter porteiro.
+              Cada aula traz 40-80 exercícios extraídos dos melhores livros
+              públicos (OpenStax, Active Calculus, Stitz-Zeager, livros do JP/DE/SG).
+              Senta com o caderno e vai resolvendo. Sem milagre.
             </p>
           </div>
         </div>
       </section>
     </>
+  )
+}
+
+function PdfIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      width="16"
+      height="16"
+      aria-hidden="true"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <path d="M9 13h2a1.5 1.5 0 0 1 0 3H9zM9 17v-4" />
+      <path d="M14 13v4M14 13h2.5" />
+    </svg>
   )
 }
