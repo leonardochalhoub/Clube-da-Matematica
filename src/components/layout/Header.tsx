@@ -38,6 +38,14 @@ export function Header() {
               </li>
               <li>
                 <Link
+                  href="/livros"
+                  className="rounded-md px-3 py-2 text-sm font-medium text-clube-ink/80 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal hover:no-underline"
+                >
+                  Livros
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/manifesto"
                   className="rounded-md px-3 py-2 text-sm font-medium text-clube-ink/80 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal hover:no-underline"
                 >
