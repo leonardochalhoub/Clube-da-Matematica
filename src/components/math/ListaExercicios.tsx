@@ -50,13 +50,24 @@ interface ExercicioProps {
 }
 
 /**
+ * Marker symbol único para identificar elementos `<Exercicio>` mesmo
+ * após cruzar o boundary `'use client'` do Next.js (que pode re-empacotar
+ * `displayName`). O símbolo é serializável como ref e propaga corretamente.
+ */
+const EXERCICIO_MARKER = '__clube_exercicio__'
+
+/**
  * Item individual da lista de exercícios. NÃO renderiza diretamente — o
  * pai `<ListaExercicios>` consome os filhos e decide o que mostrar.
+ *
+ * Carrega `__exercicio` no objeto props pra detecção robusta no pai.
  */
 export function Exercicio(_props: ExercicioProps): null {
   return null // Render delegado ao pai
 }
 Exercicio.displayName = 'Exercicio'
+// Anexa flag estável que sobrevive a wrapping do Next.js
+;(Exercicio as unknown as { [k: string]: unknown })[EXERCICIO_MARKER] = true
 
 interface ListaExerciciosProps {
   /** Seed determinística para sorteio dos 25% gabaritados.
@@ -105,9 +116,16 @@ export function ListaExercicios({
   fracaoGabaritada = 0.25,
   children,
 }: ListaExerciciosProps) {
+  // Identifica filhos que são Exercicio. Usa dois critérios resilientes ao
+  // boundary 'use client' do Next.js: (1) prop `dificuldade` presente
+  // (todo Exercicio tem); (2) componente real referencialmente igual.
   const exercicios = Children.toArray(children).filter(
-    (c): c is ReactElement<ExercicioProps> =>
-      isValidElement(c) && (c.type as { displayName?: string }).displayName === 'Exercicio',
+    (c): c is ReactElement<ExercicioProps> => {
+      if (!isValidElement(c)) return false
+      const props = (c as ReactElement<unknown>).props as Partial<ExercicioProps> | null
+      if (!props || typeof props !== 'object') return false
+      return typeof props.dificuldade === 'string'
+    },
   )
 
   // Sorteia índices que terão solução visível, com seed determinística
