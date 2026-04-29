@@ -65,6 +65,77 @@ export default function ManifestoPage() {
           conferência. Sem afrouxamento.
         </p>
 
+        <h3 className="!mt-8 !mb-3">Documentos oficiais usados como referência</h3>
+        <p>
+          Todos os links abaixo apontam para os documentos oficiais
+          disponibilizados pelos respectivos ministérios. Você pode clicar e
+          consultar diretamente:
+        </p>
+        <ul>
+          <li>
+            <strong>🇯🇵 Japão — MEXT (Ministry of Education):</strong>{' '}
+            <a
+              href="https://www.mext.go.jp/a_menu/shotou/new-cs/youryou/eiyaku/__icsFiles/afieldfile/2019/03/28/1407196_22_1_1_2.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Course of Study for Senior High School (em inglês oficial, 2018, PDF)
+            </a>{' '}
+            — currículo nacional vigente, com Math I/II/III + Math A/B/C
+            detalhados.
+          </li>
+          <li>
+            <strong>🇩🇪 Alemanha — KMK (Conferência Permanente dos Ministros):</strong>{' '}
+            <a
+              href="https://www.kmk.org/fileadmin/Dateien/veroeffentlichungen_beschluesse/2012/2012_10_18-Bildungsstandards-Mathe-Abi.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Bildungsstandards im Fach Mathematik für die Allgemeine Hochschulreife (Abitur, 2012, PDF)
+            </a>{' '}
+            — padrão nacional para o Abitur (Klasse 11–12 LK), referência
+            usada nas Aulas de cálculo e álgebra linear.
+          </li>
+          <li>
+            <strong>🇸🇬 Singapura — MOE (Ministry of Education):</strong>{' '}
+            <a
+              href="https://www.moe.gov.sg/-/media/files/secondary/syllabuses/maths/2020-express_na-maths_syllabuses.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              O-Level Mathematics Syllabus (Express/E-Math, 2020, PDF)
+            </a>{' '}
+            +{' '}
+            <a
+              href="https://www.moe.gov.sg/-/media/files/post-secondary/2025-pre-u-h2-math.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              H2 Mathematics (JC1/JC2, 2025, PDF)
+            </a>{' '}
+            — referências para Trim 1-4 e para o Cálculo do Ano 2-3.
+          </li>
+          <li>
+            <strong>🇧🇷 Brasil — MEC/CONSED (BNCC):</strong>{' '}
+            <a
+              href="http://basenacionalcomum.mec.gov.br/images/historico/BNCC_EnsinoMedio_embaixa_site_110518.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Base Nacional Comum Curricular — Ensino Médio (PDF)
+            </a>{' '}
+            — base de comparação e calibração para o público brasileiro.
+          </li>
+        </ul>
+        <p className="!mt-3">
+          Carga horária comparada:{' '}
+          <strong>JP ~140h/ano</strong>,{' '}
+          <strong>DE Klasse 10 LK ~120h/ano</strong>,{' '}
+          <strong>SG E-Math ~135h/ano</strong>. Nosso programa: 12 trimestres ×
+          ~30h ≈ <strong>360h totais</strong> (3 anos), compatível com a média
+          dos três sistemas.
+        </p>
+
         <h2 className="!mt-12">Como o site cresce a partir daqui</h2>
 
         <p>

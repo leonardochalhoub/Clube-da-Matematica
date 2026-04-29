@@ -6,6 +6,8 @@ import {
   PROGRAMA_EM,
   materiasDoAno,
   aulasPorMateria,
+  HORAS_POR_TRIMESTRE,
+  HORAS_POR_ANO,
   type MateriaEM,
   type Aula,
 } from '@/content/programa-em'
@@ -94,7 +96,7 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
         </p>
       </header>
 
-      <section className="mb-10 grid gap-3 sm:grid-cols-3">
+      <section className="mb-10 grid gap-3 sm:grid-cols-4">
         <div className="card-clube text-center">
           <div className="text-2xl font-extrabold text-clube-teal-deep">
             {totalAulas}
@@ -112,6 +114,14 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
             {materias.length}
           </div>
           <div className="mt-1 text-xs text-clube-mist">matérias cobertas</div>
+        </div>
+        <div className="card-clube text-center">
+          <div className="text-2xl font-extrabold text-clube-clay">
+            ~{HORAS_POR_ANO}h
+          </div>
+          <div className="mt-1 text-xs text-clube-mist">
+            estudo no ano ({HORAS_POR_TRIMESTRE}h/trim)
+          </div>
         </div>
       </section>
 
@@ -135,7 +145,7 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
               </h3>
               <p className="mt-1 text-xs italic text-clube-mist">{t.foco}</p>
               <p className="mt-2 text-xs text-clube-mist/85">
-                {t.aulas.length} aulas
+                {t.aulas.length} aulas · ~{HORAS_POR_TRIMESTRE}h de estudo
               </p>
             </div>
           ))}

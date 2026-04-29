@@ -42,7 +42,7 @@ export default function HomePage() {
                 Ver Black-Scholes (Finanças)
               </Link>
               <a
-                href="/clube-da-matematica-paper.pdf"
+                href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/clube-da-matematica-paper.pdf`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-clube-gold-deep/50 bg-clube-gold/10 px-5 py-2.5 font-semibold text-clube-gold-deep transition-all hover:-translate-y-0.5 hover:bg-clube-gold/20 hover:no-underline"

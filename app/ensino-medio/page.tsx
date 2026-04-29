@@ -1,7 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { carregarTodosConteudos } from '@/lib/content/loader'
-import { PROGRAMA_EM } from '@/content/programa-em'
+import {
+  PROGRAMA_EM,
+  HORAS_POR_TRIMESTRE,
+  HORAS_POR_ANO,
+  HORAS_TOTAIS,
+} from '@/content/programa-em'
+import { AulasSearch } from '@/components/layout/AulasSearch'
 
 export const metadata: Metadata = {
   title: 'Ensino Médio',
@@ -11,9 +17,10 @@ export const metadata: Metadata = {
 
 export default function EnsinoMedioPage() {
   const todos = carregarTodosConteudos()
-  const aulasPublicadas = new Set(
-    todos.filter((c) => c.meta.categoria === 'aulas').map((c) => c.meta.slug),
-  )
+  const aulasMdx = todos.filter((c) => c.meta.categoria === 'aulas')
+  const aulasPublicadas = new Set(aulasMdx.map((c) => c.meta.slug))
+  const slugToCaminho: Record<string, string> = {}
+  for (const c of aulasMdx) slugToCaminho[c.meta.slug] = c.caminho
 
   const totalAulas = PROGRAMA_EM.reduce(
     (acc, ano) => acc + ano.trimestres.reduce((a, t) => a + t.aulas.length, 0),
@@ -54,7 +61,7 @@ export default function EnsinoMedioPage() {
         </p>
       </header>
 
-      <section className="mb-12 grid gap-4 sm:grid-cols-3">
+      <section className="mb-12 grid gap-4 sm:grid-cols-4">
         <div className="card-clube text-center">
           <div className="text-3xl font-extrabold text-clube-teal-deep">
             {totalAulas}
@@ -70,9 +77,34 @@ export default function EnsinoMedioPage() {
         <div className="card-clube text-center">
           <div className="text-3xl font-extrabold text-clube-gold-deep">~6.000</div>
           <div className="mt-1 text-sm text-clube-mist">
-            exercícios totais (~50/aula)
+            exercícios totais
           </div>
         </div>
+        <div className="card-clube text-center">
+          <div className="text-3xl font-extrabold text-clube-clay">
+            ~{HORAS_TOTAIS}h
+          </div>
+          <div className="mt-1 text-sm text-clube-mist">
+            estudo total ({HORAS_POR_ANO}h/ano · {HORAS_POR_TRIMESTRE}h/trim)
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-10 rounded-2xl border border-clube-mist-soft/40 bg-clube-surface p-5">
+        <AulasSearch caminhos={slugToCaminho} />
+      </section>
+
+      <section className="mb-10 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-4 text-sm text-clube-ink/85">
+        <p>
+          <strong>Carga horária comparada:</strong> JP Math I ~140h/ano · DE
+          Klasse 10 LK ~120h/ano · SG E-Math ~135h/ano. Nosso programa{' '}
+          {HORAS_POR_ANO}h/ano está dentro da janela compatível. Cada{' '}
+          <em>aula</em> equivale a ~3h de estudo + exercícios. Veja{' '}
+          <Link href="/manifesto" className="text-clube-teal">
+            referências oficiais no Manifesto
+          </Link>
+          .
+        </p>
       </section>
 
       <section className="grid gap-6 md:grid-cols-3">

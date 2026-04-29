@@ -101,6 +101,19 @@ export interface Trimestre {
   aulas: Aula[]
 }
 
+/**
+ * Carga horária estimada por trimestre (em horas-aula).
+ * Calibrada por:
+ *  - JP MEXT Math I: ~140h/ano = ~35h/trim
+ *  - DE KMK Klasse 10 LK: ~120h/ano = ~30h/trim
+ *  - SG MOE E-Math: ~135h/ano = ~33h/trim
+ * Média ~32h/trim. Cada lição = ~3h (1h estudo + 2h exercícios).
+ */
+export const HORAS_POR_TRIMESTRE = 32
+export const HORAS_POR_AULA = 3.2 // 32h / 10 aulas
+export const HORAS_POR_ANO = HORAS_POR_TRIMESTRE * 4 // 128h/ano
+export const HORAS_TOTAIS = HORAS_POR_ANO * 3 // ~384h em 3 anos
+
 export interface Ano {
   num: 1 | 2 | 3
   titulo: string
