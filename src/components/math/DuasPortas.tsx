@@ -26,7 +26,7 @@ export function Porta({ children, titulo }: PortaProps) {
 Porta.displayName = 'Porta'
 
 interface DuasPortasProps {
-  /** Idade pré-selecionada. Default '25'. */
+  /** Idade pré-selecionada. Default 'formal' — todos abrem rigoroso. */
   idadeInicial?: Idade
   children: ReactNode
 }
@@ -37,7 +37,7 @@ interface DuasPortasProps {
  * Os filhos esperados são `<Porta nivel="..." />`. Idades extras (`8`, `60`,
  * etc.) são suportadas e aparecem como pills adicionais.
  */
-export function DuasPortas({ children, idadeInicial = '25' }: DuasPortasProps) {
+export function DuasPortas({ children, idadeInicial = 'formal' }: DuasPortasProps) {
   // Extrai todas as Portas dos filhos
   const portas = Children.toArray(children).filter(
     (child): child is ReactElement<PortaProps> =>

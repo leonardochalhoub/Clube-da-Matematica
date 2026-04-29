@@ -74,7 +74,7 @@ export const CATEGORIAS_DESCRICAO: Record<Conteudo['categoria'], string> = {
   'financas-quantitativas': 'Black-Scholes, derivativos, gestão de risco.',
 }
 
-export const IDADES_PADRAO = ['formal', '5', '10', '15', '25', '40'] as const
+export const IDADES_PADRAO = ['formal', '5', '10', '15', '25', '40', 'pratica'] as const
 export type Idade = (typeof IDADES_PADRAO)[number]
 
 export const IDADE_LABEL: Record<Idade, string> = {
@@ -84,6 +84,7 @@ export const IDADE_LABEL: Record<Idade, string> = {
   '15': '15 anos',
   '25': '25 anos',
   '40': '40 anos',
+  pratica: 'Prática',
 }
 
 export const IDADE_DESCRICAO: Record<Idade, string> = {
@@ -93,4 +94,5 @@ export const IDADE_DESCRICAO: Record<Idade, string> = {
   '15': 'Curiosidade jovem — fórmulas familiares, sem medo',
   '25': 'Estudante de engenharia — fórmula + intuição + cross-domínio',
   '40': 'Profissional — crítica do modelo + números reais + uso operacional',
+  pratica: 'Cenários reais com dados de mercado e cálculos passo a passo',
 }

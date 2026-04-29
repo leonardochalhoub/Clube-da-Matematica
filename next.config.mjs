@@ -1,4 +1,5 @@
 import createMDX from '@next/mdx'
+import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -16,7 +17,9 @@ delete macros._meta
 
 const withMDX = createMDX({
   options: {
-    remarkPlugins: [remarkGfm, remarkMath],
+    // remarkFrontmatter primeiro: reconhece e remove o YAML frontmatter
+    // (lido em paralelo via gray-matter no loader.ts)
+    remarkPlugins: [remarkFrontmatter, remarkGfm, remarkMath],
     rehypePlugins: [
       [rehypeKatex, { output: 'htmlAndMathml', macros, throwOnError: false, strict: false }],
       rehypeSlug,
