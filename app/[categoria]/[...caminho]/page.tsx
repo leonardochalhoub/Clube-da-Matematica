@@ -7,7 +7,6 @@ import {
 } from '@/lib/content/loader'
 import { carregarMdx } from '@/lib/content/manifest'
 import { CATEGORIAS_LABEL } from '@/content/schema'
-import { LocalizedMdx } from '@/components/layout/LocalizedMdx'
 
 interface Props {
   params: Promise<{ categoria: string; caminho: string[] }>
@@ -99,7 +98,9 @@ export default async function ConteudoPage({ params }: Props) {
       </header>
 
       <div className="prose prose-clube max-w-none">
-        <LocalizedMdx caminho={completo} fallback={<MDXContent />} />
+        {/* TODO: re-enable LocalizedMdx quando manifest tiver mais cobertura
+            e build for testado em CI sem timeout. */}
+        <MDXContent />
       </div>
 
       <footer className="mt-16 border-t border-clube-mist-soft/40 pt-6 text-sm text-clube-mist">
