@@ -24,6 +24,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Stopp', fr: 'Arrêter', it: 'Ferma', ru: 'Стоп', ko: '정지',
     vi: 'Dừng', pl: 'Stop', sw: 'Simama', ar: 'إيقاف', hi: 'रोकें', et: 'Peata',
   },
+  'audio.translating': {
+    'pt-BR': 'Traduzindo…', en: 'Translating…', es: 'Traduciendo…', zh: '翻译中…',
+    ja: '翻訳中…', de: 'Übersetze…', fr: 'Traduction…', it: 'Traduzione…',
+    ru: 'Перевожу…', ko: '번역 중…', vi: 'Đang dịch…', pl: 'Tłumaczę…',
+    sw: 'Inatafsiri…', ar: 'يترجم…', hi: 'अनुवाद हो रहा है…', et: 'Tõlgin…',
+  },
 
   // ===== NAVIGATION =====
   'nav.middleSchool': {
