@@ -125,23 +125,26 @@ export function MainCounters({
   return (
     <section
       aria-label="Contadores da plataforma"
-      className="border-y border-clube-mist-soft/30 bg-clube-cream-soft py-10 sm:py-14"
+      className="border-y-2 border-clube-gold/40 bg-gradient-to-b from-clube-cream-soft via-clube-surface to-clube-cream-soft py-12 sm:py-16"
     >
       <div className="container-clube">
-        <div className="mb-6 text-center">
-          <p className="text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-            Em números
+        <div className="mb-8 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-clube-gold-deep">
+            ◆ Em números ◆
           </p>
-          <h2 className="mt-1 text-hero font-bold text-clube-teal-deep">
+          <h2 className="mt-2 text-hero font-extrabold text-clube-teal-deep">
             O que tem aqui dentro
           </h2>
+          <p className="mt-2 text-sm text-clube-mist">
+            Métricas reais da plataforma — atualizadas em tempo real
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {cards.map((c, i) => (
             <div
               key={i}
-              className="rounded-2xl border border-clube-mist-soft/40 bg-clube-surface p-4 text-center sm:p-5"
+              className="rounded-2xl border-2 border-clube-mist-soft/40 bg-clube-surface p-4 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:border-clube-gold/60 hover:shadow-md sm:p-5"
             >
               <div
                 className={`text-2xl font-extrabold tabular-nums sm:text-3xl ${COR_CLASSES[c.cor]}`}

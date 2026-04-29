@@ -6,7 +6,7 @@ export function Footer() {
   return (
     <footer className="mt-24 border-t border-clube-mist-soft/30 bg-clube-cream-soft">
       <div className="container-clube py-10">
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">
               <Logo size={28} />
@@ -15,6 +15,43 @@ export function Footer() {
             <p className="mt-3 max-w-xs text-sm text-clube-mist">
               Aprenda matemática de verdade. Open source, gratuito, em português — sempre.
             </p>
+          </div>
+
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-clube-mist">
+              Autoria
+            </h4>
+            <ul className="mt-3 space-y-3 text-sm">
+              <li>
+                <div className="font-semibold text-clube-ink">
+                  Leonardo Chalhoub
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/leonardo-chalhoub/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-clube-mist hover:text-clube-teal"
+                >
+                  LinkedIn ↗
+                </a>
+              </li>
+              <li>
+                <div className="font-semibold text-clube-ink">
+                  Jefferson Korte Junior
+                </div>
+                <div className="text-[11px] italic text-clube-mist/80">
+                  UTFPR · jefferson.2024@alunos.utfpr.br
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/jefferson-korte-dev/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-clube-mist hover:text-clube-teal"
+                >
+                  LinkedIn ↗
+                </a>
+              </li>
+            </ul>
           </div>
 
           <div>
@@ -31,6 +68,16 @@ export function Footer() {
                 <Link href="/manifesto" className="text-clube-ink/80 hover:text-clube-teal">
                   Manifesto
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="https://leonardochalhoub.github.io/mirante-dos-dados-br/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-clube-ink/80 hover:text-clube-teal"
+                >
+                  Mirante dos Dados ↗
+                </a>
               </li>
             </ul>
           </div>
