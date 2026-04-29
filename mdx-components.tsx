@@ -1,3 +1,4 @@
+import type { ComponentPropsWithoutRef } from 'react'
 import type { MDXComponents } from 'mdx/types'
 import { DuasPortas, Porta } from '@/components/math/DuasPortas'
 import { Equation, Eq } from '@/components/math/Equation'
@@ -11,6 +12,16 @@ import {
   Cuidado,
   Leituras,
 } from '@/components/math/Callouts'
+
+/**
+ * `<th>` acessível: garante `scope="col"` se o autor não definiu.
+ * Tabelas MDX em GFM geram `<th>` puro, sem `scope` — leitor de tela
+ * fica perdido em tabelas com mais de 1 coluna. Com `scope="col"`
+ * cada célula é narrada com seu cabeçalho.
+ */
+function MdxTh({ scope, ...rest }: ComponentPropsWithoutRef<'th'>) {
+  return <th scope={scope ?? 'col'} {...rest} />
+}
 
 /**
  * Componentes globais disponíveis em qualquer arquivo .mdx do projeto.
@@ -30,6 +41,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Insight,
     Cuidado,
     Leituras,
+    th: MdxTh,
     ...components,
   }
 }

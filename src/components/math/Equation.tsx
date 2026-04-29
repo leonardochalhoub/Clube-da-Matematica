@@ -1,4 +1,5 @@
 import katex from 'katex'
+import { AudioReader } from './AudioReader'
 
 interface EquationProps {
   /** LaTeX da equação (sem delimitadores `$$`). */
@@ -11,6 +12,10 @@ interface EquationProps {
   inline?: boolean
   /** Rótulo curto pra leitor de tela (sobrescreve o LaTeX bruto). */
   ariaLabel?: string
+  /** Prosa em PT-BR para o botão "Ler equação" (Web Speech API).
+   *  Quando presente, o bloco mostra um botão que narra a fórmula em
+   *  voz alta — essencial para usuários cegos / baixa visão. */
+  audioTexto?: string
 }
 
 const macros: Record<string, string> = {
@@ -37,6 +42,9 @@ const macros: Record<string, string> = {
  * envolto em `<figure role="math">` e com **explicação obrigatória abaixo**
  * — que é a regra editorial central: toda equação é apresentada com sua
  * tradução em prosa para leitor humano.
+ *
+ * Quando `audioTexto` é passado, exibe botão "Ler equação" (Web Speech API)
+ * — acessível para usuários com deficiência visual.
  */
 export function Equation({
   children,
@@ -44,6 +52,7 @@ export function Equation({
   numero,
   inline = false,
   ariaLabel,
+  audioTexto,
 }: EquationProps) {
   const html = katex.renderToString(children, {
     output: 'htmlAndMathml',
@@ -74,11 +83,12 @@ export function Equation({
           className="flex-1 overflow-x-auto py-1"
           dangerouslySetInnerHTML={{ __html: html }}
         />
-        {numero && (
-          <div className="shrink-0 self-center font-mono text-sm text-clube-mist">
-            ({numero})
-          </div>
-        )}
+        <div className="flex shrink-0 items-center gap-3 self-center">
+          {audioTexto && <AudioReader texto={audioTexto} label="Ler" />}
+          {numero && (
+            <div className="font-mono text-sm text-clube-mist">({numero})</div>
+          )}
+        </div>
       </div>
       {explicacao && (
         <figcaption className="mt-3 border-t border-clube-mist-soft/40 pt-3 text-sm leading-relaxed text-clube-mist">

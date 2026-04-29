@@ -1,6 +1,14 @@
 'use client'
 
-import { useState, Children, isValidElement, type ReactElement, type ReactNode } from 'react'
+import {
+  useState,
+  useRef,
+  Children,
+  isValidElement,
+  type KeyboardEvent,
+  type ReactElement,
+  type ReactNode,
+} from 'react'
 import { IDADES_PADRAO, IDADE_LABEL, IDADE_DESCRICAO, type Idade } from '@/content/schema'
 
 interface PortaProps {
@@ -34,11 +42,15 @@ interface DuasPortasProps {
 /**
  * Seletor de porta — mostra UMA porta por vez baseada na idade selecionada.
  *
- * Os filhos esperados são `<Porta nivel="..." />`. Idades extras (`8`, `60`,
- * etc.) são suportadas e aparecem como pills adicionais.
+ * Acessibilidade (WAI-ARIA Tabs Pattern):
+ * - role="tablist" com aria-label
+ * - cada botão é role="tab" com id, aria-selected, aria-controls
+ * - painel é role="tabpanel" com aria-labelledby + tabIndex={0}
+ * - teclas Home/End/← /→ navegam entre tabs (foco circular)
+ * - aria-live="polite" não é usado aqui porque o foco do tabpanel já
+ *   sinaliza a mudança ao leitor de tela.
  */
 export function DuasPortas({ children, idadeInicial = 'formal' }: DuasPortasProps) {
-  // Extrai todas as Portas dos filhos
   const portas = Children.toArray(children).filter(
     (child): child is ReactElement<PortaProps> =>
       isValidElement(child) &&
@@ -47,7 +59,6 @@ export function DuasPortas({ children, idadeInicial = 'formal' }: DuasPortasProp
       'nivel' in child.props,
   )
 
-  // Idades disponíveis: as padrão sempre + extras na ordem que aparecem
   const idadesPadrao = new Set<string>(IDADES_PADRAO)
   const portasMap = new Map<string, ReactElement<PortaProps>>()
   portas.forEach((p) => portasMap.set(String(p.props.nivel), p))
@@ -64,40 +75,94 @@ export function DuasPortas({ children, idadeInicial = 'formal' }: DuasPortasProp
   const [idade, setIdade] = useState<string>(inicialFinal)
   const portaAtiva = portasMap.get(idade)
 
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+
   const labelDe = (id: string): string =>
     id in IDADE_LABEL ? IDADE_LABEL[id as Idade] : `${id} anos`
   const descDe = (id: string): string =>
     id in IDADE_DESCRICAO ? IDADE_DESCRICAO[id as Idade] : ''
 
+  const tabId = (id: string) => `porta-tab-${id}`
+  const panelId = (id: string) => `porta-panel-${id}`
+
+  function onKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
+    const idx = idadesPresentes.indexOf(idade)
+    let nextIdx = idx
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        e.preventDefault()
+        nextIdx = (idx + 1) % idadesPresentes.length
+        break
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        e.preventDefault()
+        nextIdx = (idx - 1 + idadesPresentes.length) % idadesPresentes.length
+        break
+      case 'Home':
+        e.preventDefault()
+        nextIdx = 0
+        break
+      case 'End':
+        e.preventDefault()
+        nextIdx = idadesPresentes.length - 1
+        break
+      default:
+        return
+    }
+    const next = idadesPresentes[nextIdx]
+    if (next) {
+      setIdade(next)
+      requestAnimationFrame(() => tabRefs.current[next]?.focus())
+    }
+  }
+
   return (
     <div className="my-8">
-      {/* Seletor de idade */}
-      <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-clube-mist">
+      <div
+        className="mb-1 text-xs font-semibold uppercase tracking-wider text-clube-mist"
+        id="porta-tablist-label"
+      >
         Escolha sua porta
       </div>
       <div
         className="-mx-1 flex flex-wrap items-center gap-1.5 py-2"
         role="tablist"
-        aria-label="Selecionar nível de explicação"
+        aria-labelledby="porta-tablist-label"
       >
-        {idadesPresentes.map((id) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={idade === id}
-            data-active={idade === id ? 'true' : 'false'}
-            onClick={() => setIdade(id)}
-            className="porta-pill"
-          >
-            {labelDe(id)}
-          </button>
-        ))}
+        {idadesPresentes.map((id) => {
+          const ativo = idade === id
+          return (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              id={tabId(id)}
+              aria-selected={ativo}
+              aria-controls={panelId(id)}
+              tabIndex={ativo ? 0 : -1}
+              data-active={ativo ? 'true' : 'false'}
+              onClick={() => setIdade(id)}
+              onKeyDown={onKeyDown}
+              ref={(el) => {
+                tabRefs.current[id] = el
+              }}
+              className="porta-pill"
+            >
+              {labelDe(id)}
+            </button>
+          )
+        })}
       </div>
       <p className="mt-1 text-xs text-clube-mist">{descDe(idade)}</p>
 
-      {/* Conteúdo da porta */}
-      <div className="mt-6 rounded-2xl border border-clube-mist-soft/40 bg-clube-surface p-6 sm:p-8">
+      <div
+        role="tabpanel"
+        id={panelId(idade)}
+        aria-labelledby={tabId(idade)}
+        tabIndex={0}
+        className="mt-6 rounded-2xl border border-clube-mist-soft/40 bg-clube-surface p-6 sm:p-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-clube-gold"
+      >
         {portaAtiva ?? (
           <p className="text-clube-mist">Nenhum conteúdo para esta idade ainda.</p>
         )}

@@ -1,3 +1,5 @@
+import { AudioReader } from './AudioReader'
+
 interface PayoffChartProps {
   /** Tipo da posição. */
   tipo: 'long-call' | 'short-call' | 'long-put' | 'short-put' | 'covered-call'
@@ -16,12 +18,30 @@ interface PayoffChartProps {
   legenda?: string
 }
 
+const TIPO_LABEL: Record<PayoffChartProps['tipo'], string> = {
+  'long-call': 'compra de call (long call)',
+  'short-call': 'venda de call (short call)',
+  'long-put': 'compra de put (long put)',
+  'short-put': 'venda de put (short put)',
+  'covered-call': 'covered call (long ações + short call)',
+}
+
+function fmtBRL(v: number): string {
+  return v.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+
 /**
  * Diagrama de payoff de opção no vencimento.
- * Eixo X: preço do ativo no vencimento (S_T). Eixo Y: lucro/prejuízo em R$.
  *
- * SVG puro, sem dependência de chart lib. Adapta a dark mode via tokens
- * CSS variables (currentColor).
+ * Acessibilidade:
+ * - SVG com role="img", <title> e <desc> descritivos.
+ * - Tabela visualmente oculta (.sr-only) com pontos-chave (S, K, prêmio,
+ *   breakeven, lucro/prejuízo máx) — leitores de tela leem números reais.
+ * - Botão "Ouvir descrição" que narra a curva via Web Speech API (PT-BR).
+ * - aria-describedby liga o SVG à descrição estendida.
  */
 export function PayoffChart({
   tipo,
@@ -36,7 +56,6 @@ export function PayoffChart({
   const xMin = rangeMin ?? Math.min(S, K) * 0.75
   const xMax = rangeMax ?? Math.max(S, K) * 1.25
 
-  // Função de payoff por tipo. Retorna LUCRO total (já com prêmio).
   function payoff(St: number): number {
     switch (tipo) {
       case 'long-call':
@@ -48,12 +67,10 @@ export function PayoffChart({
       case 'short-put':
         return premio - Math.max(K - St, 0)
       case 'covered-call':
-        // Long ação a S0 + short call. Payoff = (St - S) + premio - max(St - K, 0)
         return St - S + premio - Math.max(St - K, 0)
     }
   }
 
-  // Amostra 64 pontos
   const N = 64
   const pontos: { x: number; y: number }[] = []
   for (let i = 0; i <= N; i++) {
@@ -61,7 +78,6 @@ export function PayoffChart({
     pontos.push({ x, y: payoff(x) })
   }
 
-  // Range Y com padding
   const yValores = pontos.map((p) => p.y)
   const yMinRaw = Math.min(...yValores, 0)
   const yMaxRaw = Math.max(...yValores, 0)
@@ -69,7 +85,6 @@ export function PayoffChart({
   const yMin = yMinRaw - yPad
   const yMax = yMaxRaw + yPad
 
-  // Dimensões
   const W = 560
   const H = 280
   const padL = 56
@@ -87,28 +102,22 @@ export function PayoffChart({
     return padT + ((yMax - y) / (yMax - yMin)) * innerH
   }
 
-  // Path do payoff (linha)
   const pathLinha = pontos
     .map((p, i) => `${i === 0 ? 'M' : 'L'} ${xToSvg(p.x).toFixed(2)} ${yToSvg(p.y).toFixed(2)}`)
     .join(' ')
 
-  // Áreas: sombreado verde no lucro, vermelho no prejuízo (terra-cota)
-  // Constrói paths separados acima/abaixo de y=0
   const y0 = yToSvg(0)
 
   const lucroPathPts: string[] = []
-  const prejuizoPathPts: string[] = []
   for (const p of pontos) {
     if (p.y >= 0) {
       lucroPathPts.push(`${xToSvg(p.x).toFixed(2)},${yToSvg(p.y).toFixed(2)}`)
-    } else {
-      prejuizoPathPts.push(`${xToSvg(p.x).toFixed(2)},${yToSvg(p.y).toFixed(2)}`)
     }
   }
 
-  // Breakeven: onde payoff = 0
   function breakeven(): number | null {
-    if (tipo === 'long-call' || tipo === 'short-call') return K + premio * (tipo === 'long-call' ? 1 : -1)
+    if (tipo === 'long-call' || tipo === 'short-call')
+      return K + premio * (tipo === 'long-call' ? 1 : -1)
     if (tipo === 'long-put') return K - premio
     if (tipo === 'short-put') return K - premio
     if (tipo === 'covered-call') return S - premio
@@ -116,26 +125,62 @@ export function PayoffChart({
   }
   const be = breakeven()
 
-  // Ticks do eixo X (5 ticks)
+  // Pontos extremos do payoff no range visualizado
+  const lucroMax = Math.max(...yValores)
+  const prejMax = Math.min(...yValores)
+
   const xTicks: number[] = []
   for (let i = 0; i <= 4; i++) xTicks.push(xMin + (i / 4) * (xMax - xMin))
   const yTicks: number[] = []
   const yStep = (yMax - yMin) / 4
   for (let i = 0; i <= 4; i++) yTicks.push(yMin + i * yStep)
 
+  // ────────────────────────────────────────────────
+  // Texto narrativo (para leitores de tela e áudio)
+  // ────────────────────────────────────────────────
+  const tipoLabel = TIPO_LABEL[tipo]
+
+  const desc = [
+    `Diagrama de payoff de uma ${tipoLabel} no vencimento.`,
+    `Eixo horizontal: preço do ativo no vencimento, em reais, de ${fmtBRL(xMin)} a ${fmtBRL(xMax)}.`,
+    `Eixo vertical: lucro ou prejuízo, em reais.`,
+    `Preço atual do ativo (spot): ${fmtBRL(S)} reais.`,
+    `Preço de exercício (strike): ${fmtBRL(K)} reais.`,
+    `Prêmio: ${fmtBRL(premio)} reais.`,
+    be !== null ? `Ponto de equilíbrio (breakeven): ${fmtBRL(be)} reais.` : '',
+    `Lucro máximo no intervalo mostrado: ${fmtBRL(lucroMax)} reais.`,
+    `Prejuízo máximo no intervalo mostrado: ${fmtBRL(prejMax)} reais.`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const idBase = `payoff-${tipo}-${K}-${premio}`.replace(/\./g, '_')
+  const titleId = `${idBase}-title`
+  const descId = `${idBase}-desc`
+
   return (
     <figure className="not-prose my-6 overflow-hidden rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
       {titulo && (
-        <figcaption className="mb-2 px-1 text-sm font-semibold text-clube-teal-deep">
-          {titulo}
+        <figcaption
+          id={`${idBase}-caption`}
+          className="mb-2 flex items-center justify-between gap-3 px-1 text-sm font-semibold text-clube-teal-deep"
+        >
+          <span>{titulo}</span>
+          <AudioReader texto={desc} label="Ouvir descrição" />
         </figcaption>
       )}
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full"
         role="img"
-        aria-label={`Payoff ${tipo}, strike ${K}, prêmio ${premio}`}
+        aria-labelledby={titulo ? `${idBase}-caption ${titleId}` : titleId}
+        aria-describedby={descId}
       >
+        <title id={titleId}>
+          Payoff de {tipoLabel}, strike R$ {fmtBRL(K)}, prêmio R$ {fmtBRL(premio)}
+        </title>
+        <desc id={descId}>{desc}</desc>
+
         {/* Grid horizontal */}
         {yTicks.map((t, i) => (
           <line
@@ -195,7 +240,7 @@ export function PayoffChart({
           strokeDasharray="3 3"
         />
 
-        {/* Áreas de lucro (verde) e prejuízo (terra-cota) */}
+        {/* Área de lucro */}
         {lucroPathPts.length > 0 && (
           <polyline
             points={`${lucroPathPts[0]?.split(',')[0]},${y0} ${lucroPathPts.join(' ')} ${lucroPathPts.at(-1)?.split(',')[0]},${y0}`}
@@ -249,7 +294,6 @@ export function PayoffChart({
           K = {K.toFixed(2)}
         </text>
 
-        {/* Linha de breakeven */}
         {be !== null && be > xMin && be < xMax && (
           <>
             <circle
@@ -274,7 +318,6 @@ export function PayoffChart({
           </>
         )}
 
-        {/* Linha do payoff */}
         <path
           d={pathLinha}
           fill="none"
@@ -285,7 +328,6 @@ export function PayoffChart({
           className="dark:stroke-clube-teal"
         />
 
-        {/* Eixo X linha */}
         <line
           x1={padL}
           x2={W - padR}
@@ -296,7 +338,6 @@ export function PayoffChart({
           strokeWidth={1}
         />
 
-        {/* Label X axis */}
         <text
           x={W / 2}
           y={H - 4}
@@ -309,7 +350,6 @@ export function PayoffChart({
           Preço no vencimento (R$)
         </text>
 
-        {/* Label Y axis (rotated) */}
         <text
           x={14}
           y={H / 2}
@@ -323,6 +363,26 @@ export function PayoffChart({
           Lucro / Prejuízo (R$)
         </text>
       </svg>
+
+      {/* Resumo numérico — versão visualmente oculta lida pelo leitor de tela.
+         Provê os mesmos dados do gráfico em forma textual estruturada. */}
+      <div className="sr-only">
+        <h4>Resumo do diagrama de payoff</h4>
+        <ul>
+          <li>Tipo de posição: {tipoLabel}.</li>
+          <li>Preço atual do ativo (S): R$ {fmtBRL(S)}.</li>
+          <li>Strike (K): R$ {fmtBRL(K)}.</li>
+          <li>Prêmio: R$ {fmtBRL(premio)}.</li>
+          {be !== null && <li>Breakeven (lucro zero): R$ {fmtBRL(be)}.</li>}
+          <li>Lucro máximo no intervalo mostrado: R$ {fmtBRL(lucroMax)}.</li>
+          <li>Prejuízo máximo no intervalo mostrado: R$ {fmtBRL(prejMax)}.</li>
+          <li>
+            Faixa do eixo X (preço do ativo no vencimento): R$ {fmtBRL(xMin)} a R${' '}
+            {fmtBRL(xMax)}.
+          </li>
+        </ul>
+      </div>
+
       {legenda && (
         <p className="mt-2 px-1 text-xs leading-relaxed text-clube-mist">{legenda}</p>
       )}
