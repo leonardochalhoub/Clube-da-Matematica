@@ -93,6 +93,28 @@ export const manifesto: Record<string, MdxLoader> = {
     import('@/../content/aulas/ano-1/trim-3/aula-29-sistemas-lineares.mdx'),
   'aulas/ano-1/trim-3/aula-30-consolidacao-trim-3': () =>
     import('@/../content/aulas/ano-1/trim-3/aula-30-consolidacao-trim-3.mdx'),
+
+  // Aulas — Ano 1, Trimestre 4
+  'aulas/ano-1/trim-4/aula-31-matrizes': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-31-matrizes.mdx'),
+  'aulas/ano-1/trim-4/aula-32-operacoes-matrizes': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-32-operacoes-matrizes.mdx'),
+  'aulas/ano-1/trim-4/aula-33-transposta-inversa': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-33-transposta-inversa.mdx'),
+  'aulas/ano-1/trim-4/aula-34-determinantes': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-34-determinantes.mdx'),
+  'aulas/ano-1/trim-4/aula-35-sistemas-via-matrizes': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-35-sistemas-via-matrizes.mdx'),
+  'aulas/ano-1/trim-4/aula-36-pfc': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-36-pfc.mdx'),
+  'aulas/ano-1/trim-4/aula-37-permutacoes-arranjos': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-37-permutacoes-arranjos.mdx'),
+  'aulas/ano-1/trim-4/aula-38-combinacoes': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-38-combinacoes.mdx'),
+  'aulas/ano-1/trim-4/aula-39-probabilidade': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-39-probabilidade.mdx'),
+  'aulas/ano-1/trim-4/aula-40-consolidacao-anual': () =>
+    import('@/../content/aulas/ano-1/trim-4/aula-40-consolidacao-anual.mdx'),
 }
 
 export async function carregarMdx(caminho: string) {
