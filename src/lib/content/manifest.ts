@@ -1,12 +1,5 @@
 /**
  * Manifesto estático de todos os conteúdos MDX do projeto.
- *
- * Mapeia caminhos relativos em `content/` para componentes MDX importados
- * dinamicamente. Necessário porque dynamic import com template string em
- * Next.js força webpack a bundlear TODOS os arquivos matching, esgotando
- * memória em projetos com muitos MDX e KaTeX.
- *
- * Quando adicionar um novo conteúdo, registre-o aqui.
  */
 
 import type { ComponentType } from 'react'
@@ -24,7 +17,7 @@ export const manifesto: Record<string, MdxLoader> = {
   'financas-quantitativas/opcoes/black-scholes': () =>
     import('@/../content/financas-quantitativas/opcoes/black-scholes.mdx'),
 
-  // Cálculo 1 (legado, fora do programa EM mas mantido)
+  // Cálculo 1 (legado)
   'calculo-1/derivadas/o-que-e-derivada': () =>
     import('@/../content/calculo-1/derivadas/o-que-e-derivada.mdx'),
 
@@ -115,6 +108,183 @@ export const manifesto: Record<string, MdxLoader> = {
     import('@/../content/aulas/ano-1/trim-4/aula-39-probabilidade.mdx'),
   'aulas/ano-1/trim-4/aula-40-consolidacao-anual': () =>
     import('@/../content/aulas/ano-1/trim-4/aula-40-consolidacao-anual.mdx'),
+
+  // Aulas — Ano 2, Trimestre 5
+  'aulas/ano-2/trim-5/aula-41-limite-formal': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-41-limite-formal.mdx'),
+  'aulas/ano-2/trim-5/aula-42-propriedades-limites': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-42-propriedades-limites.mdx'),
+  'aulas/ano-2/trim-5/aula-43-continuidade': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-43-continuidade.mdx'),
+  'aulas/ano-2/trim-5/aula-44-limites-laterais': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-44-limites-laterais.mdx'),
+  'aulas/ano-2/trim-5/aula-45-limites-fundamentais': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-45-limites-fundamentais.mdx'),
+  'aulas/ano-2/trim-5/aula-46-tvi-tvm': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-46-tvi-tvm.mdx'),
+  'aulas/ano-2/trim-5/aula-47-assintotas': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-47-assintotas.mdx'),
+  'aulas/ano-2/trim-5/aula-48-limites-funcoes-trig': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-48-limites-funcoes-trig.mdx'),
+  'aulas/ano-2/trim-5/aula-49-limite-sequencias': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-49-limite-sequencias.mdx'),
+  'aulas/ano-2/trim-5/aula-50-consolidacao-trim-5': () =>
+    import('@/../content/aulas/ano-2/trim-5/aula-50-consolidacao-trim-5.mdx'),
+
+  // Aulas — Ano 2, Trimestre 6
+  'aulas/ano-2/trim-6/aula-51-derivada-definicao': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-51-derivada-definicao.mdx'),
+  'aulas/ano-2/trim-6/aula-52-regras-derivacao': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-52-regras-derivacao.mdx'),
+  'aulas/ano-2/trim-6/aula-53-regra-cadeia': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-53-regra-cadeia.mdx'),
+  'aulas/ano-2/trim-6/aula-54-derivadas-implicitas': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-54-derivadas-implicitas.mdx'),
+  'aulas/ano-2/trim-6/aula-55-derivadas-superiores': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-55-derivadas-superiores.mdx'),
+  'aulas/ano-2/trim-6/aula-56-derivadas-inversas': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-56-derivadas-inversas.mdx'),
+  'aulas/ano-2/trim-6/aula-57-aproximacao-linear': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-57-aproximacao-linear.mdx'),
+  'aulas/ano-2/trim-6/aula-58-taxas-relacionadas': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-58-taxas-relacionadas.mdx'),
+  'aulas/ano-2/trim-6/aula-59-diferenciabilidade': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-59-diferenciabilidade.mdx'),
+  'aulas/ano-2/trim-6/aula-60-consolidacao-trim-6': () =>
+    import('@/../content/aulas/ano-2/trim-6/aula-60-consolidacao-trim-6.mdx'),
+
+  // Aulas — Ano 2, Trimestre 7
+  'aulas/ano-2/trim-7/aula-61-maximos-minimos': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-61-maximos-minimos.mdx'),
+  'aulas/ano-2/trim-7/aula-62-otimizacao': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-62-otimizacao.mdx'),
+  'aulas/ano-2/trim-7/aula-63-esboco-graficos': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-63-esboco-graficos.mdx'),
+  'aulas/ano-2/trim-7/aula-64-l-hopital': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-64-l-hopital.mdx'),
+  'aulas/ano-2/trim-7/aula-65-taylor': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-65-taylor.mdx'),
+  'aulas/ano-2/trim-7/aula-66-concavidade': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-66-concavidade.mdx'),
+  'aulas/ano-2/trim-7/aula-67-economia-derivadas': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-67-economia-derivadas.mdx'),
+  'aulas/ano-2/trim-7/aula-68-cinematica': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-68-cinematica.mdx'),
+  'aulas/ano-2/trim-7/aula-69-newton-raphson': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-69-newton-raphson.mdx'),
+  'aulas/ano-2/trim-7/aula-70-consolidacao-trim-7': () =>
+    import('@/../content/aulas/ano-2/trim-7/aula-70-consolidacao-trim-7.mdx'),
+
+  // Aulas — Ano 2, Trimestre 8
+  'aulas/ano-2/trim-8/aula-71-medidas-centrais': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-71-medidas-centrais.mdx'),
+  'aulas/ano-2/trim-8/aula-72-variancia': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-72-variancia.mdx'),
+  'aulas/ano-2/trim-8/aula-73-quartis': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-73-quartis.mdx'),
+  'aulas/ano-2/trim-8/aula-74-va-discreta': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-74-va-discreta.mdx'),
+  'aulas/ano-2/trim-8/aula-75-binomial': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-75-binomial.mdx'),
+  'aulas/ano-2/trim-8/aula-76-normal': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-76-normal.mdx'),
+  'aulas/ano-2/trim-8/aula-77-tcl': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-77-tcl.mdx'),
+  'aulas/ano-2/trim-8/aula-78-correlacao': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-78-correlacao.mdx'),
+  'aulas/ano-2/trim-8/aula-79-bayes-aprofundado': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-79-bayes-aprofundado.mdx'),
+  'aulas/ano-2/trim-8/aula-80-consolidacao-trim-8': () =>
+    import('@/../content/aulas/ano-2/trim-8/aula-80-consolidacao-trim-8.mdx'),
+
+  // Aulas — Ano 3, Trimestre 10
+  'aulas/ano-3/trim-10/aula-100-consolidacao-trim-10': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-100-consolidacao-trim-10.mdx'),
+  'aulas/ano-3/trim-10/aula-91-edo-intro': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-91-edo-intro.mdx'),
+  'aulas/ano-3/trim-10/aula-92-edo-separavel': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-92-edo-separavel.mdx'),
+  'aulas/ano-3/trim-10/aula-93-edo-linear-1': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-93-edo-linear-1.mdx'),
+  'aulas/ano-3/trim-10/aula-94-edo-populacional': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-94-edo-populacional.mdx'),
+  'aulas/ano-3/trim-10/aula-95-edo-2-ordem': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-95-edo-2-ordem.mdx'),
+  'aulas/ano-3/trim-10/aula-96-vibracoes': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-96-vibracoes.mdx'),
+  'aulas/ano-3/trim-10/aula-97-rlc': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-97-rlc.mdx'),
+  'aulas/ano-3/trim-10/aula-98-euler-numerico': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-98-euler-numerico.mdx'),
+  'aulas/ano-3/trim-10/aula-99-newton-resfriamento': () =>
+    import('@/../content/aulas/ano-3/trim-10/aula-99-newton-resfriamento.mdx'),
+
+  // Aulas — Ano 3, Trimestre 11
+  'aulas/ano-3/trim-11/aula-101-amostragem': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-101-amostragem.mdx'),
+  'aulas/ano-3/trim-11/aula-102-ic-media': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-102-ic-media.mdx'),
+  'aulas/ano-3/trim-11/aula-103-teste-hipotese': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-103-teste-hipotese.mdx'),
+  'aulas/ano-3/trim-11/aula-104-teste-z-t': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-104-teste-z-t.mdx'),
+  'aulas/ano-3/trim-11/aula-105-regressao-simples': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-105-regressao-simples.mdx'),
+  'aulas/ano-3/trim-11/aula-106-regressao-multipla': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-106-regressao-multipla.mdx'),
+  'aulas/ano-3/trim-11/aula-107-anova': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-107-anova.mdx'),
+  'aulas/ano-3/trim-11/aula-108-qui-quadrado': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-108-qui-quadrado.mdx'),
+  'aulas/ano-3/trim-11/aula-109-bayesiana-intro': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-109-bayesiana-intro.mdx'),
+  'aulas/ano-3/trim-11/aula-110-consolidacao-trim-11': () =>
+    import('@/../content/aulas/ano-3/trim-11/aula-110-consolidacao-trim-11.mdx'),
+
+  // Aulas — Ano 3, Trimestre 12
+  'aulas/ano-3/trim-12/aula-111-espacos-vetoriais': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-111-espacos-vetoriais.mdx'),
+  'aulas/ano-3/trim-12/aula-112-transformacoes-lineares': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-112-transformacoes-lineares.mdx'),
+  'aulas/ano-3/trim-12/aula-113-nucleo-imagem': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-113-nucleo-imagem.mdx'),
+  'aulas/ano-3/trim-12/aula-114-autovalores': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-114-autovalores.mdx'),
+  'aulas/ano-3/trim-12/aula-115-diagonalizacao': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-115-diagonalizacao.mdx'),
+  'aulas/ano-3/trim-12/aula-116-matrizes-especiais': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-116-matrizes-especiais.mdx'),
+  'aulas/ano-3/trim-12/aula-117-svd': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-117-svd.mdx'),
+  'aulas/ano-3/trim-12/aula-118-pca': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-118-pca.mdx'),
+  'aulas/ano-3/trim-12/aula-119-bs-sintese': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-119-bs-sintese.mdx'),
+  'aulas/ano-3/trim-12/aula-120-workshop-final': () =>
+    import('@/../content/aulas/ano-3/trim-12/aula-120-workshop-final.mdx'),
+
+  // Aulas — Ano 3, Trimestre 9
+  'aulas/ano-3/trim-9/aula-81-antiderivada': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-81-antiderivada.mdx'),
+  'aulas/ano-3/trim-9/aula-82-integral-definida': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-82-integral-definida.mdx'),
+  'aulas/ano-3/trim-9/aula-83-tfc': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-83-tfc.mdx'),
+  'aulas/ano-3/trim-9/aula-84-substituicao': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-84-substituicao.mdx'),
+  'aulas/ano-3/trim-9/aula-85-por-partes': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-85-por-partes.mdx'),
+  'aulas/ano-3/trim-9/aula-86-fracoes-parciais': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-86-fracoes-parciais.mdx'),
+  'aulas/ano-3/trim-9/aula-87-integrais-trig': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-87-integrais-trig.mdx'),
+  'aulas/ano-3/trim-9/aula-88-area-curvas': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-88-area-curvas.mdx'),
+  'aulas/ano-3/trim-9/aula-89-volume': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-89-volume.mdx'),
+  'aulas/ano-3/trim-9/aula-90-consolidacao-trim-9': () =>
+    import('@/../content/aulas/ano-3/trim-9/aula-90-consolidacao-trim-9.mdx'),
+
 }
 
 export async function carregarMdx(caminho: string) {
