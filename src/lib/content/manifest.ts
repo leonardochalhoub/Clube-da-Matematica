@@ -71,6 +71,28 @@ export const manifesto: Record<string, MdxLoader> = {
     import('@/../content/aulas/ano-1/trim-2/aula-19-limite-intuitivo.mdx'),
   'aulas/ano-1/trim-2/aula-20-consolidacao-trim-2': () =>
     import('@/../content/aulas/ano-1/trim-2/aula-20-consolidacao-trim-2.mdx'),
+
+  // Aulas — Ano 1, Trimestre 3
+  'aulas/ano-1/trim-3/aula-21-plano-cartesiano': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-21-plano-cartesiano.mdx'),
+  'aulas/ano-1/trim-3/aula-22-equacao-reta': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-22-equacao-reta.mdx'),
+  'aulas/ano-1/trim-3/aula-23-posicao-relativa-retas': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-23-posicao-relativa-retas.mdx'),
+  'aulas/ano-1/trim-3/aula-24-circunferencia': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-24-circunferencia.mdx'),
+  'aulas/ano-1/trim-3/aula-25-conicas': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-25-conicas.mdx'),
+  'aulas/ano-1/trim-3/aula-26-vetores-plano': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-26-vetores-plano.mdx'),
+  'aulas/ano-1/trim-3/aula-27-produto-escalar': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-27-produto-escalar.mdx'),
+  'aulas/ano-1/trim-3/aula-28-aplicacoes-vetores-fisica': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-28-aplicacoes-vetores-fisica.mdx'),
+  'aulas/ano-1/trim-3/aula-29-sistemas-lineares': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-29-sistemas-lineares.mdx'),
+  'aulas/ano-1/trim-3/aula-30-consolidacao-trim-3': () =>
+    import('@/../content/aulas/ano-1/trim-3/aula-30-consolidacao-trim-3.mdx'),
 }
 
 export async function carregarMdx(caminho: string) {
