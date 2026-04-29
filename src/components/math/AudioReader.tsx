@@ -38,9 +38,13 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     }
   }, [])
 
-  // Texto a ser falado: tradução se houver, senão original
-  const textoFinal = textosI18n?.[locale] ?? texto
-  const speechLang = LOCALES[locale].speechLang
+  // CRÍTICO: só usa idioma do locale ativo se HÁ tradução pra ele.
+  // Se não há tradução pro locale, fala em PT-BR (texto original) com voz PT-BR.
+  // Evita o bug "Português com sotaque alemão" — não tem como o navegador
+  // ler PT-BR de um locale alemão de forma natural; melhor cair pra PT-BR puro.
+  const temTraducao = !!textosI18n?.[locale]
+  const textoFinal = temTraducao ? textosI18n![locale]! : texto
+  const speechLang = temTraducao ? LOCALES[locale].speechLang : 'pt-BR'
   const labelFinal = label ?? t('audio.read', 'Ouvir')
 
   function falar() {
@@ -57,13 +61,17 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     u.pitch = 1
     u.volume = 1
 
-    // Escolhe voz randomicamente entre as do idioma
+    // Escolhe voz aleatória ESTRITAMENTE do idioma certo. Se não há
+    // voz nativa, deixa o navegador escolher (vai falhar com som ruim,
+    // mas pelo menos não usa voz do idioma errado).
     const vozes = window.speechSynthesis.getVoices()
-    const vozesDoIdioma = vozes.filter(
-      (v) => v.lang === speechLang || v.lang.startsWith(speechLang.split('-')[0]!),
+    const vozesDoIdiomaExato = vozes.filter((v) => v.lang === speechLang)
+    const vozesDoPrefixo = vozes.filter(
+      (v) => v.lang.startsWith(speechLang.split('-')[0] + '-') || v.lang === speechLang.split('-')[0],
     )
-    if (vozesDoIdioma.length > 0) {
-      const random = vozesDoIdioma[Math.floor(Math.random() * vozesDoIdioma.length)]!
+    const candidatas = vozesDoIdiomaExato.length > 0 ? vozesDoIdiomaExato : vozesDoPrefixo
+    if (candidatas.length > 0) {
+      const random = candidatas[Math.floor(Math.random() * candidatas.length)]!
       u.voice = random
     }
 
