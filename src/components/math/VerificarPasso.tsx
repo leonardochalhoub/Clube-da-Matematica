@@ -15,6 +15,27 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
+import katex from 'katex'
+
+const KATEX_MACROS: Record<string, string> = {
+  '\\R': '\\mathbb{R}',
+  '\\e': '\\mathrm{e}',
+}
+
+/** Renderiza string com $...$ → KaTeX inline. */
+function renderInline(text: string): string {
+  return text.replace(/\$([^$]+)\$/g, (_, expr) => {
+    try {
+      return katex.renderToString(expr, {
+        throwOnError: false,
+        strict: false,
+        macros: KATEX_MACROS,
+      })
+    } catch {
+      return `<code>${expr}</code>`
+    }
+  })
+}
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
@@ -171,7 +192,10 @@ export function VerificarPasso({
       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
         ✍️ Verificar passo (SymPy)
       </p>
-      <p className="mb-3 text-sm text-clube-ink">{prompt}</p>
+      <p
+        className="mb-3 text-sm text-clube-ink"
+        dangerouslySetInnerHTML={{ __html: renderInline(prompt) }}
+      />
       <p className="mb-3 text-xs text-clube-mist">
         Variáveis aceitas: <code>{variaveis}</code>. Use sintaxe Python:{' '}
         <code>**</code> pra potência, <code>*</code> pra multiplicação,{' '}

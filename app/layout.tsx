@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { LocaleProvider } from '@/components/layout/LocaleProvider'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -93,14 +94,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-screen flex-col bg-clube-cream text-clube-ink antialiased">
-        <a href="#conteudo" className="skip-link">
-          Pular para o conteúdo principal
-        </a>
-        <Header />
-        <main id="conteudo" tabIndex={-1} className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <LocaleProvider>
+          <a href="#conteudo" className="skip-link">
+            Pular para o conteúdo principal
+          </a>
+          <Header />
+          <main id="conteudo" tabIndex={-1} className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </LocaleProvider>
       </body>
     </html>
   )

@@ -1,24 +1,29 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useLocale } from '@/components/layout/LocaleProvider'
+import { LOCALES } from '@/lib/i18n/locales'
 
 interface AudioReaderProps {
-  /** Prosa em PT-BR que o navegador deve ler. Idealmente uma versão
-   *  audível da equação (ex.: "C igual a S vezes N de d um..."). */
+  /** Texto principal (PT-BR — versão original). */
   texto: string
-  /** Rótulo do botão. Default: "Ler equação". */
+  /** Versões traduzidas. Chave = código do locale. Se ausente, usa `texto`. */
+  textosI18n?: Partial<Record<string, string>>
+  /** Rótulo do botão. Default: "Ler". */
   label?: string
 }
 
 /**
- * Botão "🔊 Ler equação" — usa a Web Speech API nativa do navegador
- * (speechSynthesis). Zero dependências externas, zero API key, zero custo.
- * Funciona offline, em qualquer host estático (GitHub Pages compatível).
+ * Botão de áudio que respeita o idioma globalmente selecionado.
  *
- * Para PT-BR, o navegador escolhe a voz portuguesa-brasil mais natural
- * disponível no SO (Google PT-BR no Android/Chrome, Luciana no macOS, etc.).
+ * - Se há tradução no `textosI18n` para o locale ativo, usa ela.
+ * - Senão, usa o `texto` original (PT-BR).
+ * - A `lang` da utterance é sempre o speechLang do locale ativo —
+ *   o navegador escolhe a melhor voz disponível pra esse idioma.
+ * - Voz aleatória dentro das disponíveis pro idioma (mais natural).
  */
-export function AudioReader({ texto, label = 'Ler equação' }: AudioReaderProps) {
+export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
+  const { locale, t } = useLocale()
   const [estado, setEstado] = useState<'idle' | 'falando' | 'indisponivel'>('idle')
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
 
@@ -33,6 +38,11 @@ export function AudioReader({ texto, label = 'Ler equação' }: AudioReaderProps
     }
   }, [])
 
+  // Texto a ser falado: tradução se houver, senão original
+  const textoFinal = textosI18n?.[locale] ?? texto
+  const speechLang = LOCALES[locale].speechLang
+  const labelFinal = label ?? t('audio.read', 'Ouvir')
+
   function falar() {
     if (estado === 'indisponivel') return
     if (estado === 'falando') {
@@ -41,16 +51,21 @@ export function AudioReader({ texto, label = 'Ler equação' }: AudioReaderProps
       return
     }
 
-    const u = new SpeechSynthesisUtterance(texto)
-    u.lang = 'pt-BR'
-    u.rate = 0.95 // levemente devagar pra clareza em fórmulas
+    const u = new SpeechSynthesisUtterance(textoFinal)
+    u.lang = speechLang
+    u.rate = 0.95
     u.pitch = 1
     u.volume = 1
 
-    // Tenta escolher uma voz PT-BR explícita
+    // Escolhe voz randomicamente entre as do idioma
     const vozes = window.speechSynthesis.getVoices()
-    const vozPtBr = vozes.find((v) => v.lang === 'pt-BR') ?? vozes.find((v) => v.lang.startsWith('pt'))
-    if (vozPtBr) u.voice = vozPtBr
+    const vozesDoIdioma = vozes.filter(
+      (v) => v.lang === speechLang || v.lang.startsWith(speechLang.split('-')[0]!),
+    )
+    if (vozesDoIdioma.length > 0) {
+      const random = vozesDoIdioma[Math.floor(Math.random() * vozesDoIdioma.length)]!
+      u.voice = random
+    }
 
     u.onstart = () => setEstado('falando')
     u.onend = () => setEstado('idle')
@@ -68,20 +83,23 @@ export function AudioReader({ texto, label = 'Ler equação' }: AudioReaderProps
     <button
       type="button"
       onClick={falar}
-      aria-label={falando ? 'Parar leitura' : `${label} em voz alta`}
+      aria-label={falando ? t('audio.stop', 'Parar') : `${labelFinal} (${LOCALES[locale].nome})`}
       aria-pressed={falando}
-      title={falando ? 'Parar' : label}
+      title={falando ? t('audio.stop', 'Parar') : `${labelFinal} — ${LOCALES[locale].bandeira}`}
       className="inline-flex items-center gap-2 rounded-full border border-clube-mist-soft/60 bg-clube-surface px-3 py-1.5 text-xs font-medium text-clube-ink transition-all hover:border-clube-teal hover:text-clube-teal"
     >
       {falando ? (
         <>
           <StopIcon />
-          <span>Parar</span>
+          <span>{t('audio.stop', 'Parar')}</span>
         </>
       ) : (
         <>
           <SpeakerIcon />
-          <span>{label}</span>
+          <span>{labelFinal}</span>
+          <span aria-hidden className="opacity-70">
+            {LOCALES[locale].bandeira}
+          </span>
         </>
       )}
     </button>

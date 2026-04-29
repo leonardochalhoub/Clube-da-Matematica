@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Logo } from '@/components/brand/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { LocaleSwitcher } from './LocaleSwitcher'
 
 const NAV_LINKS = [
   { href: '/ensino-medio', label: 'Ensino Médio' },
@@ -70,6 +71,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
+          <LocaleSwitcher />
           <ThemeToggle />
           {/* Mobile hamburger */}
           <button
