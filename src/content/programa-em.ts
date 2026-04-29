@@ -85,7 +85,19 @@ export const MATERIAS_DESCRICAO: Record<MateriaEM, string> = {
     'Espaços vetoriais, autovalores, PCA — síntese final do programa.',
 }
 
-export interface Aula {
+/**
+ * Vocabulário oficial:
+ *   - Lição: unidade pequena (~3h estudo, 1 conceito principal). É o que o
+ *     aluno encontra como conteúdo MDX individual no site.
+ *   - Aula: agrupamento didático de 3-5 lições temáticas dentro de um
+ *     trimestre (~10-15h totais). Representa "uma matéria coberta em sala".
+ *   - Trimestre: 8-12 lições agrupadas em 2-3 Aulas. ~30h.
+ *   - Ano: 4 trimestres. ~128h.
+ *
+ * Os arquivos MDX são as **Lições** (mantidos como `aula-NN.mdx` por
+ * compatibilidade de URL).
+ */
+export interface Licao {
   num: number
   titulo: string
   topicos: string
@@ -94,11 +106,30 @@ export interface Aula {
   slug?: string
 }
 
+/** Compatibilidade: código antigo importa `Aula` mas semanticamente é Lição. */
+export type Aula = Licao
+
+export interface AulaAgrupada {
+  /** Identificador estável (ex.: "funcoes-elementares"). */
+  id: string
+  titulo: string
+  /** Lições agrupadas (referenciadas por número). */
+  licoesNums: number[]
+  /** Carga horária estimada (~3h por lição agrupada). */
+  cargaHoraria: number
+}
+
 export interface Trimestre {
   num: number
   titulo: string
   foco: string
-  aulas: Aula[]
+  /** Lições do trimestre (10 por padrão). */
+  aulas: Licao[]
+  /**
+   * Agrupamento opcional em "Aulas" (no sentido didático).
+   * Quando presente, a UI exibe as Aulas como nível primário.
+   */
+  agrupamento?: AulaAgrupada[]
 }
 
 /**
@@ -148,6 +179,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 8, titulo: 'Crescimento e decaimento', topicos: 'População, decaimento radioativo, juros compostos', materia: 'funcoes', slug: 'aula-08-crescimento' },
           { num: 9, titulo: 'TAXA DE VARIAÇÃO MÉDIA', topicos: 'Δy/Δx, interpretação geométrica e física — porta de entrada do cálculo', materia: 'pre-calculo', slug: 'aula-09-taxa-variacao' },
           { num: 10, titulo: 'Consolidação Trim 1', topicos: 'Workshop integrador, problemas estilo ENEM/EJU/Abitur', materia: 'pre-calculo', slug: 'aula-10-consolidacao-trim-1' },
+        ],
+        agrupamento: [
+          { id: 'fundamentos-linguagem', titulo: 'Aula A — Fundamentos da linguagem matemática', licoesNums: [1, 2], cargaHoraria: 6 },
+          { id: 'familias-de-funcoes', titulo: 'Aula B — Famílias de funções elementares', licoesNums: [3, 4, 5], cargaHoraria: 9 },
+          { id: 'exp-log-modelos', titulo: 'Aula C — Exponencial, logaritmo e modelos de crescimento', licoesNums: [6, 7, 8], cargaHoraria: 9 },
+          { id: 'taxa-variacao-bridge', titulo: 'Aula D — Taxa de variação média (ponte para o Cálculo)', licoesNums: [9, 10], cargaHoraria: 6 },
         ],
       },
       {

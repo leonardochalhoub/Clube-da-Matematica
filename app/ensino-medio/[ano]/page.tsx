@@ -131,7 +131,8 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
           Cronograma por trimestre
         </h2>
         <p className="mt-1 text-sm text-clube-mist">
-          Como as 40 aulas se distribuem ao longo do ano letivo. Use as abas
+          Como as 40 lições se distribuem ao longo do ano. Lições agrupadas em
+          <strong> Aulas</strong> didáticas (3-5 lições por Aula). Use as abas
           abaixo para navegar por matéria.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -145,8 +146,26 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
               </h3>
               <p className="mt-1 text-xs italic text-clube-mist">{t.foco}</p>
               <p className="mt-2 text-xs text-clube-mist/85">
-                {t.aulas.length} aulas · ~{HORAS_POR_TRIMESTRE}h de estudo
+                {t.aulas.length} lições · ~{HORAS_POR_TRIMESTRE}h de estudo
               </p>
+              {t.agrupamento && t.agrupamento.length > 0 && (
+                <ul className="mt-3 space-y-1 border-t border-clube-mist-soft/40 pt-3">
+                  {t.agrupamento.map((g) => (
+                    <li
+                      key={g.id}
+                      className="flex items-baseline gap-2 text-[11px]"
+                    >
+                      <span className="rounded-full bg-clube-gold/15 px-2 py-0.5 font-mono uppercase tracking-wider text-clube-gold-deep">
+                        ~{g.cargaHoraria}h
+                      </span>
+                      <span className="text-clube-ink/85">{g.titulo}</span>
+                      <span className="ml-auto text-clube-mist/70">
+                        ({g.licoesNums.length} lições)
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </div>

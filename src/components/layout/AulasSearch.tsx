@@ -95,7 +95,7 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
                   const Inner = (
                     <div className="flex items-baseline gap-2">
                       <span className="rounded-full bg-clube-cream-soft px-2 py-0.5 font-mono text-[10px] font-bold text-clube-teal-deep">
-                        Aula {a.num}
+                        Lição {a.num}
                       </span>
                       <span className="text-sm font-semibold text-clube-ink">
                         {a.titulo}

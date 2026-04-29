@@ -119,8 +119,8 @@ export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
                       key={aula.num}
                       className="flex items-start gap-3 rounded-lg border border-clube-mist-soft/30 bg-clube-surface px-3 py-2 text-sm"
                     >
-                      <span className="mt-0.5 inline-block min-w-[2.5rem] rounded-full bg-clube-cream-soft px-2 py-0.5 text-center font-mono text-xs font-bold text-clube-teal-deep">
-                        {aula.num}
+                      <span className="mt-0.5 inline-block min-w-[3rem] rounded-full bg-clube-cream-soft px-2 py-0.5 text-center font-mono text-[10px] font-bold text-clube-teal-deep">
+                        Lição {aula.num}
                       </span>
                       <div className="flex-1">
                         <div className="font-semibold text-clube-ink">
