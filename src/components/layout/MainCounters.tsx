@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLocale } from './LocaleProvider'
 
 interface CounterCard {
   numero: string | number
@@ -56,6 +57,7 @@ export function MainCounters({
   cargaHorariaH,
   livrosNoLedger,
 }: MainCountersProps) {
+  const { t } = useLocale()
   const [visitas, setVisitas] = useState<number | null>(null)
   const [erroVisitas, setErroVisitas] = useState(false)
 
@@ -86,37 +88,35 @@ export function MainCounters({
   const cards: CounterCard[] = [
     {
       numero: visitas ?? (erroVisitas ? '—' : '...'),
-      label: 'visitas',
-      sublabel: 'desde o lançamento',
+      label: t('counters.visits'),
       cor: 'teal',
     },
     {
       numero: licoesPublicadas,
-      label: 'lições publicadas',
-      sublabel: `de ${licoesPlanejadas} planejadas`,
+      label: t('counters.lessons.published'),
+      sublabel: `${licoesPlanejadas}`,
       cor: 'leaf',
     },
     {
-      numero: exerciciosTotal.toLocaleString('pt-BR'),
-      label: 'exercícios',
-      sublabel: 'com fonte declarada',
+      numero: exerciciosTotal.toLocaleString(),
+      label: t('counters.exercises'),
       cor: 'gold',
     },
     {
       numero: provasVersoes,
-      label: 'versões de prova',
-      sublabel: `${questoesProvasReais} questões reais`,
+      label: t('counters.exam.versions'),
+      sublabel: `${questoesProvasReais}+`,
       cor: 'clay',
     },
     {
       numero: `~${cargaHorariaH}h`,
-      label: 'estudo total',
-      sublabel: '128h por ano',
+      label: t('counters.study.total'),
+      sublabel: '128h/ano',
       cor: 'teal',
     },
     {
       numero: livrosNoLedger,
-      label: 'livros no ledger',
+      label: t('counters.books.ledger'),
       sublabel: 'OpenStax, Lebl, Active Calc',
       cor: 'mist',
     },
@@ -130,13 +130,13 @@ export function MainCounters({
       <div className="container-clube">
         <div className="mb-8 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-clube-gold-deep">
-            ◆ Em números ◆
+            {t('counters.eyebrow')}
           </p>
           <h2 className="mt-2 text-hero font-extrabold text-clube-teal-deep">
-            O que tem aqui dentro
+            {t('counters.title')}
           </h2>
           <p className="mt-2 text-sm text-clube-mist">
-            Métricas reais da plataforma — atualizadas em tempo real
+            {t('counters.subtitle')}
           </p>
         </div>
 

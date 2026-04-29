@@ -7,6 +7,7 @@ import {
   PROGRAMA_EM,
   type Aula,
 } from '@/content/programa-em'
+import { useLocale } from './LocaleProvider'
 
 interface AulaResult {
   num: number
@@ -57,6 +58,7 @@ function flatLicoes(slugToCaminho: Record<string, string>): AulaResult[] {
  * em ordem (Ano/Trim/lição número), com cards clicáveis.
  */
 export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps) {
+  const { t } = useLocale()
   const [q, setQ] = useState('')
   const todasLicoes = useMemo(() => flatLicoes(slugToCaminho), [slugToCaminho])
 
@@ -96,24 +98,20 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
     <section className="container-clube py-16 sm:py-20">
       <div className="mx-auto max-w-3xl text-center">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-          Descobrir
+          {t('search.eyebrow')}
         </p>
         <h2 className="text-hero font-bold text-clube-teal-deep">
-          O que você quer estudar hoje?
+          {t('search.title')}
         </h2>
-        <p className="mt-3 text-sm text-clube-mist sm:text-base">
-          Digite um tema:{' '}
-          <em className="text-clube-ink/85">trigonometria, derivada, vetores, Bayes...</em>
-        </p>
 
         <div className="relative mx-auto mt-6 max-w-2xl">
           <input
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Ex.: trigonometria, álgebra linear, integrais"
+            placeholder={t('search.placeholder')}
             className="w-full rounded-full border-2 border-clube-mist-soft/60 bg-clube-surface px-5 py-3 pr-12 text-base text-clube-ink shadow-sm focus:border-clube-teal focus:outline-none focus:ring-2 focus:ring-clube-gold/40"
-            aria-label="Buscar tópicos, lições e livros"
+            aria-label={t('common.search')}
           />
           <span
             className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-clube-mist"
@@ -133,7 +131,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
       {q.trim().length < 2 && (
         <div className="mx-auto mt-10 max-w-3xl rounded-2xl border-2 border-dashed border-clube-mist-soft/60 bg-clube-cream-soft/50 p-8 text-center text-sm text-clube-mist">
           <p className="text-base">
-            Comece pela busca. Lições e livros aparecem quando você digita.
+            {t('search.empty.invite')}
           </p>
           <p className="mt-2 text-xs italic">
             Ou explore o programa completo em{' '}
@@ -152,7 +150,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
       {licoes.length > 0 && (
         <div className="mt-10">
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-clube-gold-deep">
-            Lições ({licoes.length})
+            {t('search.lessons.label')} ({licoes.length})
           </h3>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {licoes.map((l) => {
@@ -192,7 +190,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
       {livrosFiltrados.length > 0 && (
         <div className="mt-10">
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-clube-gold-deep">
-            Livros ({livrosFiltrados.length})
+            {t('search.books.label')} ({livrosFiltrados.length})
           </h3>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {livrosFiltrados.map((b, i) => (
@@ -227,8 +225,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
         licoes.length === 0 &&
         livrosFiltrados.length === 0 && (
           <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-clube-clay/30 bg-clube-clay/5 p-6 text-center text-sm text-clube-clay">
-            Nenhum resultado para "{q}". Tente sinônimos: derivada, integral,
-            limite, vetor, matriz, probabilidade...
+            {t('search.no.results')} "{q}".
           </div>
         )}
     </section>
