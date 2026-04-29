@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '@/components/layout/LocaleProvider'
 import { LOCALES } from '@/lib/i18n/locales'
+import { AUDIO_TRANSLATIONS } from '@/content/audio-translations.generated'
 
 interface AudioReaderProps {
   /** Texto principal (PT-BR — versão original). */
@@ -133,14 +134,23 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   const labelFinal = label ?? t('audio.read', 'Ouvir')
 
   async function obterTextoFinal(): Promise<string> {
+    // 1. Tradução manual no MDX (textosI18n) tem prioridade absoluta.
     const traducaoManual = textosI18n?.[locale]
     if (traducaoManual) return traducaoManual
+
+    // 2. PT-BR usa texto original.
     if (locale === 'pt-BR') return texto
 
+    // 3. Pre-tradução de build-time (commitada — instantânea, offline-friendly).
+    const preBuild = AUDIO_TRANSLATIONS[texto]?.[speechLang]
+    if (preBuild) return preBuild
+
+    // 4. Fallback runtime: cache localStorage.
     const cache = loadCache()
     const cacheKey = `${speechLang}::${texto}`
     if (cache[cacheKey]) return cache[cacheKey]!
 
+    // 5. Último recurso: chama MyMemory na hora.
     setEstado('traduzindo')
     const traduzido = await traduzirViaMyMemory(texto, speechLang)
     if (traduzido) {

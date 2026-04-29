@@ -237,28 +237,118 @@ export function ListaExercicios({
 }
 
 /**
+ * Mapa LaTeX → notação que Wolfram entende (linguagem natural ou ASCII math).
+ * Lista incremental — adicione conforme necessário.
+ */
+const LATEX_TO_WOLFRAM: Array<[RegExp, string]> = [
+  [/\\subseteq/g, ' subset of or equal to '],
+  [/\\subset/g, ' proper subset of '],
+  [/\\supseteq/g, ' superset of or equal to '],
+  [/\\supset/g, ' proper superset of '],
+  [/\\cup/g, ' union '],
+  [/\\cap/g, ' intersection '],
+  [/\\setminus/g, ' minus '],
+  [/\\in\b/g, ' element of '],
+  [/\\notin/g, ' not element of '],
+  [/\\emptyset/g, ' empty set '],
+  [/\\forall/g, ' for all '],
+  [/\\exists/g, ' there exists '],
+  [/\\implies|\\Rightarrow/g, ' implies '],
+  [/\\iff|\\Leftrightarrow/g, ' if and only if '],
+  [/\\neq|\\ne/g, ' != '],
+  [/\\leq|\\le/g, ' <= '],
+  [/\\geq|\\ge/g, ' >= '],
+  [/\\cdot/g, ' * '],
+  [/\\times/g, ' * '],
+  [/\\div/g, ' / '],
+  [/\\pm/g, ' +- '],
+  [/\\infty/g, ' infinity '],
+  [/\\to|\\rightarrow/g, ' -> '],
+  [/\\sqrt\{([^}]+)\}/g, ' sqrt($1) '],
+  [/\\frac\{([^}]+)\}\{([^}]+)\}/g, ' ($1)/($2) '],
+  [/\\dfrac\{([^}]+)\}\{([^}]+)\}/g, ' ($1)/($2) '],
+  [/\\int/g, ' integrate '],
+  [/\\sum/g, ' sum '],
+  [/\\prod/g, ' product '],
+  [/\\lim/g, ' limit '],
+  [/\\sin/g, 'sin'],
+  [/\\cos/g, 'cos'],
+  [/\\tan/g, 'tan'],
+  [/\\log/g, 'log'],
+  [/\\ln/g, 'ln'],
+  [/\\exp/g, 'exp'],
+  [/\\pi\b/g, ' pi '],
+  [/\\alpha\b/g, ' alpha '],
+  [/\\beta\b/g, ' beta '],
+  [/\\theta\b/g, ' theta '],
+  [/\\lambda\b/g, ' lambda '],
+  [/\\mu\b/g, ' mu '],
+  [/\\sigma\b/g, ' sigma '],
+  [/\\Delta\b/g, ' Delta '],
+  [/\\partial/g, ' d '],
+  [/\^\{([^}]+)\}/g, '^($1)'],
+  [/\^(\w)/g, '^$1'],
+  [/_\{([^}]+)\}/g, '_($1)'],
+  [/_(\w)/g, '_$1'],
+  // Limpa chaves remanescentes
+  [/\\(left|right|big|Big|bigg|Bigg)/g, ''],
+  [/\\\\/g, ' '],
+  [/\\,|\\;|\\:|\\!|\\quad|\\qquad/g, ' '],
+  [/\{|\}/g, ''],
+]
+
+function latexToWolfram(latex: string): string {
+  let out = latex
+  for (const [pat, sub] of LATEX_TO_WOLFRAM) {
+    out = out.replace(pat, sub)
+  }
+  return out.replace(/\s+/g, ' ').trim()
+}
+
+/**
  * Constrói URL do Wolfram Alpha para resolver o exercício online.
- * Usa o enunciado como query (sem o KaTeX wrapper).
+ *
+ * Estratégia:
+ *   1. `nodeToString` extrai só o LaTeX cru das anotações KaTeX (ignora
+ *      o `katex-html` visível, que duplica conteúdo).
+ *   2. Marca os trechos que estavam em $...$ pra preservar contexto.
+ *   3. Converte LaTeX → natural language Wolfram entende.
  */
 function wolframUrl(enunciadoTexto: string): string {
-  // Tira $...$ wrapping mas mantém o LaTeX dentro
-  const clean = enunciadoTexto
-    .replace(/\$([^$]+)\$/g, '$1')
-    .replace(/\\\\/g, ' ')
-    .trim()
-    .slice(0, 500)
+  const clean = latexToWolfram(enunciadoTexto).slice(0, 500)
   return `https://www.wolframalpha.com/input?i=${encodeURIComponent(clean)}`
 }
 
-/** Extrai texto puro de um ReactNode (best-effort, para query Wolfram). */
+/**
+ * Extrai texto de um ReactNode evitando duplicação do KaTeX.
+ *
+ * KaTeX (default `htmlAndMathml`) emite tanto `katex-mathml` (com a fonte
+ * LaTeX dentro de `<annotation encoding="application/x-tex">`) quanto
+ * `katex-html` (visual com Unicode). Sem filtro, virariam concatenados em
+ * "A \subseteq BA⊆B" — quebra Wolfram, leitor de tela e i18n.
+ *
+ * Aqui pegamos a `<annotation>` (LaTeX puro) e ignoramos `katex-html`.
+ */
 function nodeToString(node: ReactNode): string {
   if (typeof node === 'string') return node
   if (typeof node === 'number') return String(node)
   if (Array.isArray(node)) return node.map(nodeToString).join('')
   if (isValidElement(node)) {
-    const children = (node as ReactElement<{ children?: ReactNode }>).props
-      ?.children
-    return nodeToString(children ?? '')
+    const el = node as ReactElement<{
+      children?: ReactNode
+      className?: string
+    }>
+    const cls = typeof el.props.className === 'string' ? el.props.className : ''
+    // Visual KaTeX duplicado — pular.
+    if (cls.includes('katex-html')) return ''
+    // Annotation com a fonte LaTeX original.
+    if (
+      typeof el.type === 'string' &&
+      (el.type === 'annotation' || el.type.endsWith(':annotation'))
+    ) {
+      return ` ${nodeToString(el.props.children)} `
+    }
+    return nodeToString(el.props.children ?? '')
   }
   return ''
 }
