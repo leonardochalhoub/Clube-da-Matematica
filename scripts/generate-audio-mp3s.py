@@ -205,8 +205,15 @@ def main():
         return ok
 
     if tasks:
-        with ThreadPoolExecutor(max_workers=20) as ex:
-            list(ex.map(work, tasks))
+        # 5 workers, throttle 1s entre chamadas — evita rate-limit do gTTS
+        import time
+        with ThreadPoolExecutor(max_workers=5) as ex:
+            futures = []
+            for task in tasks:
+                futures.append(ex.submit(work, task))
+                time.sleep(1.0)  # 1s between submissions = ~5 req/s combined
+            for f in futures:
+                f.result()
 
     feitos = counters['feitos']
     falhas = counters['falhas']
