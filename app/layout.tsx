@@ -44,7 +44,12 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
   },
   icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    icon: [
+      {
+        url: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/favicon.svg`,
+        type: 'image/svg+xml',
+      },
+    ],
   },
 }
 
@@ -75,6 +80,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
+        <link
+          rel="icon"
+          type="image/svg+xml"
+          href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/favicon.svg`}
+        />
+        <link
+          rel="shortcut icon"
+          type="image/svg+xml"
+          href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/favicon.svg`}
+        />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-screen flex-col bg-clube-cream text-clube-ink antialiased">

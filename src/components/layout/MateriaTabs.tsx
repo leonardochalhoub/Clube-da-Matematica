@@ -108,7 +108,7 @@ export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
 
             {aulas.length === 0 ? (
               <p className="rounded-lg bg-clube-cream-soft px-4 py-3 text-sm italic text-clube-mist">
-                Sem aulas registradas nesta matéria para este ano.
+                Sem lições registradas nesta matéria para este ano.
               </p>
             ) : (
               <ol className="space-y-2">

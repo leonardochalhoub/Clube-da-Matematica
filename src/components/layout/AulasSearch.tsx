@@ -66,7 +66,7 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
         htmlFor="aulas-search"
         className="mb-2 block text-xs font-semibold uppercase tracking-wider text-clube-gold-deep"
       >
-        🔍 Buscar aula por nome, tópico ou matéria
+        🔍 Buscar lição por nome, tópico ou matéria
       </label>
       <input
         id="aulas-search"
@@ -81,7 +81,7 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
         <div className="mt-4">
           {filtered.length === 0 ? (
             <p className="rounded-lg bg-clube-cream-soft px-4 py-3 text-sm italic text-clube-mist">
-              Nenhuma aula encontrada para "{query}". Tente outro termo —
+              Nenhuma lição encontrada para "{query}". Tente outro termo —
               palavras-chave funcionam melhor que frases inteiras.
             </p>
           ) : (

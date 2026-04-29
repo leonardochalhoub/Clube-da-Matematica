@@ -12,7 +12,7 @@ import { AulasSearch } from '@/components/layout/AulasSearch'
 export const metadata: Metadata = {
   title: 'Ensino Médio',
   description:
-    'Ensino Médio brasileiro otimizado — 12 trimestres, 120 aulas, calibrado pelos currículos oficiais de Japão, Alemanha e Singapura.',
+    'Ensino Médio brasileiro otimizado — 12 trimestres, 120 lições, calibrado pelos currículos oficiais de Japão, Alemanha e Singapura.',
 }
 
 export default function EnsinoMedioPage() {
@@ -22,7 +22,7 @@ export default function EnsinoMedioPage() {
   const slugToCaminho: Record<string, string> = {}
   for (const c of aulasMdx) slugToCaminho[c.meta.slug] = c.caminho
 
-  const totalAulas = PROGRAMA_EM.reduce(
+  const totalLicoes = PROGRAMA_EM.reduce(
     (acc, ano) => acc + ano.trimestres.reduce((a, t) => a + t.aulas.length, 0),
     0,
   )
@@ -46,15 +46,15 @@ export default function EnsinoMedioPage() {
           Ensino Médio Otimizado
         </h1>
         <p className="mt-6 max-w-prose text-lg leading-relaxed text-clube-mist">
-          <strong>3 anos · 12 trimestres · 120 aulas</strong>. Currículo
-          brasileiro calibrado pelos sistemas que mais consistentemente formam
-          alunos prontos para engenharia de fronteira:{' '}
-          <strong>Japão</strong> (Math I/II/III),{' '}
+          <strong>3 anos · 12 trimestres · 120 lições</strong> agrupadas em{' '}
+          <strong>48 aulas</strong>. Currículo brasileiro calibrado pelos
+          sistemas que mais consistentemente formam alunos prontos para
+          engenharia de fronteira: <strong>Japão</strong> (Math I/II/III),{' '}
           <strong>Alemanha</strong> (Klasse 10/11/12 Leistungskurs) e{' '}
           <strong>Singapura</strong> (Sec 4 + JC 1/2 H2 Math).
         </p>
         <p className="mt-4 max-w-prose text-base text-clube-mist/85">
-          Cada aula traz <strong>40-80 exercícios</strong> no estilo de
+          Cada lição traz <strong>40-80 exercícios</strong> no estilo de
           engenharia mecânica brasileira, com <strong>25% gabaritados</strong>{' '}
           em desenvolvimento formal. Cada equação central tem botão{' '}
           <strong>"Ler em voz alta"</strong> — acessibilidade nativa.
@@ -64,15 +64,15 @@ export default function EnsinoMedioPage() {
       <section className="mb-12 grid gap-4 sm:grid-cols-4">
         <div className="card-clube text-center">
           <div className="text-3xl font-extrabold text-clube-teal-deep">
-            {totalAulas}
+            {totalLicoes}
           </div>
-          <div className="mt-1 text-sm text-clube-mist">aulas planejadas</div>
+          <div className="mt-1 text-sm text-clube-mist">lições planejadas</div>
         </div>
         <div className="card-clube text-center">
           <div className="text-3xl font-extrabold text-clube-leaf">
             {aulasPublicadas.size}
           </div>
-          <div className="mt-1 text-sm text-clube-mist">aulas publicadas</div>
+          <div className="mt-1 text-sm text-clube-mist">lições publicadas</div>
         </div>
         <div className="card-clube text-center">
           <div className="text-3xl font-extrabold text-clube-gold-deep">~6.000</div>
@@ -99,7 +99,8 @@ export default function EnsinoMedioPage() {
           <strong>Carga horária comparada:</strong> JP Math I ~140h/ano · DE
           Klasse 10 LK ~120h/ano · SG E-Math ~135h/ano. Nosso programa{' '}
           {HORAS_POR_ANO}h/ano está dentro da janela compatível. Cada{' '}
-          <em>aula</em> equivale a ~3h de estudo + exercícios. Veja{' '}
+          <em>lição</em> equivale a ~3h de estudo + exercícios; cada{' '}
+          <em>aula</em> agrupa 3-5 lições didáticas. Veja{' '}
           <Link href="/manifesto" className="text-clube-teal">
             referências oficiais no Manifesto
           </Link>
@@ -135,7 +136,7 @@ export default function EnsinoMedioPage() {
               </p>
               <div className="mt-auto pt-3 text-xs text-clube-mist/80">
                 <div>
-                  <strong>{publicadas}</strong> de {total} aulas publicadas
+                  <strong>{publicadas}</strong> de {total} lições publicadas
                   {' '}({percent}%)
                 </div>
                 <div className="mt-1 italic">{ano.equivalencia}</div>
@@ -184,8 +185,8 @@ export default function EnsinoMedioPage() {
       <footer className="mt-12 rounded-2xl bg-clube-cream-soft p-6 text-sm text-clube-mist">
         <h3 className="text-base font-bold text-clube-teal-deep">Como contribuir</h3>
         <p className="mt-2">
-          Aulas são arquivos MDX em <code>content/aulas/ano-N/trim-T/aula-NN.mdx</code>.
-          Cada aula segue o template canônico (6+1 portas: formal/5/10/15/25/40/prática)
+          Lições são arquivos MDX em <code>content/aulas/ano-N/trim-T/aula-NN.mdx</code>.
+          Cada lição segue o template canônico (6+1 portas: formal/5/10/15/25/40/prática)
           com lista de exercícios usando <code>&lt;ListaExercicios seed=&quot;aula-NN&quot;&gt;</code>{' '}
           para gabarito determinístico de 25%. Pull requests bem-vindos.
         </p>

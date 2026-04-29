@@ -100,9 +100,9 @@ export function ProvaViewer({ initialId }: ProvaViewerProps) {
         </div>
         <p className="mt-2 text-sm text-clube-mist">{prova.descricao}</p>
         <p className="mt-1 text-xs italic text-clube-mist/70">
-          Cobre: {prova.trimestresAlvo.join(', ')} · {totalQuestoes} questões ·{' '}
-          {totalReveladas} resolução{totalReveladas === 1 ? '' : 'ões'} revelada
-          {totalReveladas === 1 ? '' : 's'}
+          Trim {prova.trim} · versão {prova.versao} · {totalQuestoes} questões
+          · {totalReveladas} resolução{totalReveladas === 1 ? '' : 'ões'}{' '}
+          revelada{totalReveladas === 1 ? '' : 's'}
         </p>
       </header>
 

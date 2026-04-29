@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Logo } from '@/components/brand/Logo'
+import { AmazingSchoolSponsor } from './AmazingSchoolSponsor'
 
 export function Footer() {
   return (
@@ -63,8 +64,15 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-clube-mist-soft/30 pt-6 text-center text-xs text-clube-mist">
-          <p>
+        <div className="mt-10 flex flex-col items-center gap-4 border-t border-clube-mist-soft/30 pt-6 text-center text-xs text-clube-mist">
+          <div>
+            <p className="mb-3 text-[11px] uppercase tracking-wider text-clube-mist/80">
+              a Amazing School, plataforma grátis de inglês, apoia o Clube
+              da Matemática
+            </p>
+            <AmazingSchoolSponsor />
+          </div>
+          <p className="max-w-2xl text-clube-mist">
             Não competimos com Khan — Khan ensina conta. Competimos com o silêncio entre saber a
             fórmula e entender o que ela diz sobre o mundo.
           </p>

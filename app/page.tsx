@@ -20,12 +20,13 @@ export default function HomePage() {
               <span className="text-clube-teal">otimizado.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-clube-ink/80 sm:text-xl">
-              <strong>3 anos · 12 trimestres · 120 aulas</strong>, calibrado
-              pelos currículos de <strong>Japão</strong>,{' '}
-              <strong>Alemanha</strong> e <strong>Singapura</strong>. Toda
-              equação tem 6 portas (formal · 5 · 10 · 15 · 25 · 40), botão
-              de leitura em voz alta, e <strong>40-80 exercícios por aula</strong>{' '}
-              tirados dos melhores livros públicos do mundo.
+              <strong>3 anos · 12 trimestres · 120 lições</strong> agrupadas
+              em <strong>48 aulas</strong>, calibrado pelos currículos de{' '}
+              <strong>Japão</strong>, <strong>Alemanha</strong> e{' '}
+              <strong>Singapura</strong>. Toda equação tem 6 portas (formal ·
+              5 · 10 · 15 · 25 · 40), botão de leitura em voz alta, e{' '}
+              <strong>40-80 exercícios por lição</strong> tirados dos melhores
+              livros públicos do mundo.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
@@ -69,7 +70,7 @@ export default function HomePage() {
               O que está pronto pra ler
             </h2>
             <p className="mt-2 max-w-prose text-clube-mist">
-              Aulas e peças já publicadas. O programa completo está em{' '}
+              Lições e peças já publicadas. O programa completo está em{' '}
               <Link href="/ensino-medio" className="font-semibold text-clube-teal">
                 Ensino Médio
               </Link>
@@ -152,7 +153,7 @@ export default function HomePage() {
               Caderno e dúzias de exercícios
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-clube-ink/80">
-              Cada aula traz 40-80 exercícios extraídos dos melhores livros
+              Cada lição traz 40-80 exercícios extraídos dos melhores livros
               públicos (OpenStax, Active Calculus, Stitz-Zeager, livros do JP/DE/SG).
               Senta com o caderno e vai resolvendo. Sem milagre.
             </p>

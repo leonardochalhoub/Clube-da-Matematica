@@ -59,7 +59,7 @@ export default function ManifestoPage() {
           Não é tradução de livro estrangeiro. É <strong>currículo brasileiro
           calibrado pelos melhores do mundo</strong>: nomenclatura BNCC,
           exemplos com PETR4, IBOVESPA, ENEM, ITA, IME, Olimpíada Brasileira de
-          Matemática. Cada aula traz <strong>40 a 80 exercícios</strong> no
+          Matemática. Cada lição traz <strong>40 a 80 exercícios</strong> no
           estilo de engenharia mecânica brasileira (USP, ITA, Poli) — 25%
           gabaritados em desenvolvimento formal, o restante com resposta para
           conferência. Sem afrouxamento.
@@ -175,7 +175,7 @@ export default function ManifestoPage() {
           Tóquio e Londres. Não é teoria descolada. É a régua do mundo.
         </p>
 
-        <h2 className="!mt-12">Como cada aula é construída</h2>
+        <h2 className="!mt-12">Como cada lição é construída</h2>
 
         <p>
           Aqui matemática não começa pela fórmula. Começa por{' '}

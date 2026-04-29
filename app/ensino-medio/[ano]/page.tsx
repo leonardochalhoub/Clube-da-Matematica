@@ -65,7 +65,7 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
     }))
   }
 
-  const totalAulas = ano.trimestres.reduce((acc, t) => acc + t.aulas.length, 0)
+  const totalLicoes = ano.trimestres.reduce((acc, t) => acc + t.aulas.length, 0)
   const publicadas = ano.trimestres.reduce(
     (acc, t) =>
       acc + t.aulas.filter((a) => a.slug && slugToCaminho.has(a.slug)).length,
@@ -99,15 +99,15 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
       <section className="mb-10 grid gap-3 sm:grid-cols-4">
         <div className="card-clube text-center">
           <div className="text-2xl font-extrabold text-clube-teal-deep">
-            {totalAulas}
+            {totalLicoes}
           </div>
-          <div className="mt-1 text-xs text-clube-mist">aulas no ano</div>
+          <div className="mt-1 text-xs text-clube-mist">lições no ano</div>
         </div>
         <div className="card-clube text-center">
           <div className="text-2xl font-extrabold text-clube-leaf">
             {publicadas}
           </div>
-          <div className="mt-1 text-xs text-clube-mist">já publicadas</div>
+          <div className="mt-1 text-xs text-clube-mist">lições publicadas</div>
         </div>
         <div className="card-clube text-center">
           <div className="text-2xl font-extrabold text-clube-gold-deep">
@@ -125,25 +125,32 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Calendario por trimestre — mais sintético */}
+      {/* Calendario por trimestre — clicáveis */}
       <section className="mb-12">
         <h2 className="text-xl font-bold text-clube-teal-deep">
           Cronograma por trimestre
         </h2>
         <p className="mt-1 text-sm text-clube-mist">
-          Como as 40 lições se distribuem ao longo do ano. Lições agrupadas em
-          <strong> Aulas</strong> didáticas (3-5 lições por Aula). Use as abas
-          abaixo para navegar por matéria.
+          <strong>Clique num trimestre</strong> para ver as Aulas e Lições
+          (cada Lição abre o conteúdo). Lições agrupadas em <strong>Aulas</strong>{' '}
+          didáticas (3-5 lições por Aula). Ou use as abas abaixo para
+          navegar por matéria.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {ano.trimestres.map((t) => (
-            <div
+            <Link
               key={t.num}
-              className="rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4"
+              href={`/ensino-medio/ano-${ano.num}/trim-${t.num}/`}
+              className="group rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4 no-underline transition-all hover:border-clube-teal hover:shadow-sm hover:no-underline"
             >
-              <h3 className="text-sm font-bold text-clube-teal-deep">
-                {t.titulo}
-              </h3>
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className="text-sm font-bold text-clube-teal-deep group-hover:text-clube-teal">
+                  {t.titulo}
+                </h3>
+                <span className="text-xs text-clube-teal opacity-0 group-hover:opacity-100">
+                  abrir →
+                </span>
+              </div>
               <p className="mt-1 text-xs italic text-clube-mist">{t.foco}</p>
               <p className="mt-2 text-xs text-clube-mist/85">
                 {t.aulas.length} lições · ~{HORAS_POR_TRIMESTRE}h de estudo
@@ -166,14 +173,14 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
                   ))}
                 </ul>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       </section>
 
       <section>
         <h2 className="mb-4 text-xl font-bold text-clube-teal-deep">
-          Aulas organizadas por matéria
+          Lições organizadas por matéria
         </h2>
         <MateriaTabs materias={materias} aulasPorMateria={indexMaterias} />
       </section>
