@@ -70,11 +70,25 @@ export function ProvaViewer() {
       {/* Filtro por trimestre */}
       <div className="mb-4 rounded-2xl border border-clube-mist-soft/40 bg-clube-cream-soft p-4">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-          Trimestre
+          Trimestre — <span className="text-clube-mist normal-case tracking-normal">borda <strong className="text-[#a97142]">bronze</strong> = ano 1, <strong className="text-[#9ca3af]">prata</strong> = ano 2, <strong className="text-[#c9a35f]">ouro</strong> = ano 3</span>
         </p>
         <div className="flex flex-wrap gap-1.5">
           {Array.from({ length: 12 }, (_, i) => i + 1).map((t) => {
             const ativo = t === trimFiltro
+            // T1-T4 = ano 1 (bronze); T5-T8 = ano 2 (prata); T9-T12 = ano 3 (ouro)
+            const ano = t <= 4 ? 1 : t <= 8 ? 2 : 3
+            const corBordaInativa =
+              ano === 1
+                ? 'border-[#a97142]/60 hover:border-[#a97142] hover:text-[#a97142]'
+                : ano === 2
+                  ? 'border-[#9ca3af]/70 hover:border-[#9ca3af] hover:text-[#6b7280]'
+                  : 'border-[#c9a35f]/70 hover:border-[#c9a35f] hover:text-[#9c7c3a]'
+            const corAtiva =
+              ano === 1
+                ? 'bg-[#a97142] text-white shadow-sm border-2 border-[#a97142]'
+                : ano === 2
+                  ? 'bg-[#6b7280] text-white shadow-sm border-2 border-[#6b7280]'
+                  : 'bg-[#9c7c3a] text-white shadow-sm border-2 border-[#9c7c3a]'
             return (
               <button
                 key={t}
@@ -83,9 +97,10 @@ export function ProvaViewer() {
                 className={
                   'rounded-full px-3 py-1 font-mono text-xs font-semibold transition-all ' +
                   (ativo
-                    ? 'bg-clube-teal text-white shadow-sm'
-                    : 'border border-clube-mist-soft/60 bg-clube-surface text-clube-ink/85 hover:border-clube-teal hover:text-clube-teal')
+                    ? corAtiva
+                    : `border-2 bg-clube-surface text-clube-ink/85 ${corBordaInativa}`)
                 }
+                aria-label={`Trimestre ${t} (ano ${ano})`}
               >
                 T{t}
               </button>

@@ -38,9 +38,8 @@ export function Header() {
         >
           <Logo size={28} className="transition-transform group-hover:rotate-6 sm:hidden" />
           <Logo size={32} className="transition-transform group-hover:rotate-6 hidden sm:block" />
-          <span className="font-sans text-base font-semibold tracking-tight text-clube-ink sm:text-lg">
-            <span className="hidden sm:inline">Clube <span className="text-clube-mist">da</span> Matemática</span>
-            <span className="sm:hidden">Clube</span>
+          <span className="font-sans text-sm font-semibold tracking-tight text-clube-ink sm:text-lg">
+            Clube <span className="text-clube-mist">da</span> Matemática
           </span>
         </Link>
 
