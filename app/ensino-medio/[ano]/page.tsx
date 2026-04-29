@@ -16,18 +16,27 @@ interface AulaPath extends Aula {
 }
 
 interface PageProps {
-  params: Promise<{ num: string }>
+  params: Promise<{ ano: string }>
+}
+
+/** Aceita slug como "ano-1", "ano-2", "ano-3". */
+function numFromSlug(slug: string): number | null {
+  const match = slug.match(/^ano-(\d+)$/)
+  if (!match) return null
+  const n = Number(match[1])
+  return Number.isInteger(n) ? n : null
 }
 
 export function generateStaticParams() {
-  return PROGRAMA_EM.map((a) => ({ num: String(a.num) }))
+  return PROGRAMA_EM.map((a) => ({ ano: `ano-${a.num}` }))
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { num } = await params
-  const ano = PROGRAMA_EM.find((a) => String(a.num) === num)
+  const { ano: anoSlug } = await params
+  const num = numFromSlug(anoSlug)
+  const ano = PROGRAMA_EM.find((a) => a.num === num)
   if (!ano) return { title: 'Ensino Médio' }
   return {
     title: ano.titulo,
@@ -36,8 +45,9 @@ export async function generateMetadata({
 }
 
 export default async function AnoEnsinoMedioPage({ params }: PageProps) {
-  const { num } = await params
-  const ano = PROGRAMA_EM.find((a) => String(a.num) === num)
+  const { ano: anoSlug } = await params
+  const num = numFromSlug(anoSlug)
+  const ano = PROGRAMA_EM.find((a) => a.num === num)
   if (!ano) notFound()
 
   const todos = carregarTodosConteudos()
