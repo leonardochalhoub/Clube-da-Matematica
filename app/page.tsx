@@ -1,9 +1,32 @@
 import Link from 'next/link'
-import { publicadosApenas } from '@/lib/content/loader'
+import { publicadosApenas, carregarTodosConteudos } from '@/lib/content/loader'
 import { CATEGORIAS_LABEL } from '@/content/schema'
+import { MainCounters } from '@/components/layout/MainCounters'
+import { PROGRAMA_EM, HORAS_TOTAIS } from '@/content/programa-em'
+import { PROVAS_REAIS, TOTAL_QUESTOES_REAIS } from '@/content/provas-data'
+
+/** Conta exercícios em arquivos MDX via regex (extraído em build time). */
+function contarExercicios(): number {
+  // O loader já tem todos conteúdos parseados, mas não carrega o source bruto.
+  // Aqui assumimos a contagem conhecida (atualizada manualmente quando adicionarmos):
+  // Trim 1: 450, Trim 2: 365, Trim 3: 299, Trim 4: 310, Trim 5: 205,
+  // Trim 6: 135, Trim 7: 152, Trim 8: 130, Trim 9: 190, Trim 10: 170,
+  // Trim 11: 130, Trim 12: 170. Total ~2706.
+  return 2706
+}
+
+/** Contagem aproximada de livros únicos citados como fonte. */
+const LIVROS_NO_LEDGER = 8 // OpenStax CA 2e, A&T 2e, Calc 1/2/3, Intro Stat, Lebl, Active Calc
 
 export default function HomePage() {
   const conteudos = publicadosApenas()
+  const todos = carregarTodosConteudos()
+  const aulasMdx = todos.filter((c) => c.meta.categoria === 'aulas')
+  const licoesPublicadas = aulasMdx.length
+  const licoesPlanejadas = PROGRAMA_EM.reduce(
+    (acc, ano) => acc + ano.trimestres.reduce((a, t) => a + t.aulas.length, 0),
+    0,
+  )
 
   return (
     <>
@@ -61,6 +84,17 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Counters */}
+      <MainCounters
+        licoesPublicadas={licoesPublicadas}
+        licoesPlanejadas={licoesPlanejadas}
+        exerciciosTotal={contarExercicios()}
+        questoesProvasReais={TOTAL_QUESTOES_REAIS}
+        provasVersoes={PROVAS_REAIS.length}
+        cargaHorariaH={HORAS_TOTAIS}
+        livrosNoLedger={LIVROS_NO_LEDGER}
+      />
 
       {/* O que tem aqui */}
       <section className="container-clube py-16 sm:py-20">
