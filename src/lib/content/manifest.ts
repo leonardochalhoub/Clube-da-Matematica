@@ -49,6 +49,28 @@ export const manifesto: Record<string, MdxLoader> = {
     import('@/../content/aulas/ano-1/trim-1/aula-09-taxa-variacao.mdx'),
   'aulas/ano-1/trim-1/aula-10-consolidacao-trim-1': () =>
     import('@/../content/aulas/ano-1/trim-1/aula-10-consolidacao-trim-1.mdx'),
+
+  // Aulas — Ano 1, Trimestre 2
+  'aulas/ano-1/trim-2/aula-11-trig-triangulo': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-11-trig-triangulo.mdx'),
+  'aulas/ano-1/trim-2/aula-12-circulo-trigonometrico': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-12-circulo-trigonometrico.mdx'),
+  'aulas/ano-1/trim-2/aula-13-funcoes-trigonometricas': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-13-funcoes-trigonometricas.mdx'),
+  'aulas/ano-1/trim-2/aula-14-equacoes-trigonometricas': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-14-equacoes-trigonometricas.mdx'),
+  'aulas/ano-1/trim-2/aula-15-leis-senos-cossenos': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-15-leis-senos-cossenos.mdx'),
+  'aulas/ano-1/trim-2/aula-16-sequencias': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-16-sequencias.mdx'),
+  'aulas/ano-1/trim-2/aula-17-pa': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-17-pa.mdx'),
+  'aulas/ano-1/trim-2/aula-18-pg': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-18-pg.mdx'),
+  'aulas/ano-1/trim-2/aula-19-limite-intuitivo': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-19-limite-intuitivo.mdx'),
+  'aulas/ano-1/trim-2/aula-20-consolidacao-trim-2': () =>
+    import('@/../content/aulas/ano-1/trim-2/aula-20-consolidacao-trim-2.mdx'),
 }
 
 export async function carregarMdx(caminho: string) {
