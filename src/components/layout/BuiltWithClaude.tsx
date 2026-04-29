@@ -1,23 +1,25 @@
+'use client'
+
+import { useLocale } from './LocaleProvider'
+
 /**
  * Pequeno badge "Built with Claude Code" para o rodapé.
  * Usa logo SVG light/dark do Claude Code (originalmente do Mirante dos Dados).
- *
- * Light: claude-code-logo.svg (texto escuro pro tema claro)
- * Dark : claude-code-logo-rev.svg (texto branco pro tema escuro)
  */
 export function BuiltWithClaude() {
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+  const { t } = useLocale()
   return (
     <a
       href="https://www.anthropic.com/claude-code"
       target="_blank"
       rel="noopener noreferrer"
-      title="Plataforma construída com Claude Code (Anthropic)"
+      title={`${t('footer.builtWith')} Claude Code (Anthropic)`}
       className="group inline-flex items-center gap-2 rounded-full border border-clube-mist-soft/40 bg-clube-surface/70 px-3 py-1.5 text-[11px] text-clube-mist transition-all hover:border-clube-gold-deep/50 hover:bg-clube-cream-soft hover:no-underline"
-      aria-label="Plataforma construída com Claude Code"
+      aria-label={`${t('footer.builtWith')} Claude Code`}
     >
       <span className="text-[10px] uppercase tracking-wider text-clube-mist/80">
-        construído com
+        {t('footer.builtWith')}
       </span>
       {/* Logo light (visível no tema claro) */}
       <img

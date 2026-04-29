@@ -5,18 +5,20 @@ import { useState, useEffect } from 'react'
 import { Logo } from '@/components/brand/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LocaleSwitcher } from './LocaleSwitcher'
+import { useLocale } from './LocaleProvider'
 
 const NAV_LINKS = [
-  { href: '/ensino-medio', label: 'Ensino Médio' },
-  { href: '/financas', label: 'Finanças' },
-  { href: '/livros', label: 'Livros' },
-  { href: '/videos', label: 'Vídeos' },
-  { href: '/provas', label: 'Provas' },
-  { href: '/manifesto', label: 'Manifesto' },
+  { href: '/ensino-medio', tKey: 'nav.middleSchool' },
+  { href: '/financas', tKey: 'nav.finance' },
+  { href: '/livros', tKey: 'nav.books' },
+  { href: '/videos', tKey: 'nav.videos' },
+  { href: '/provas', tKey: 'nav.exams' },
+  { href: '/manifesto', tKey: 'nav.manifesto' },
 ] as const
 
 export function Header() {
   const [open, setOpen] = useState(false)
+  const { t } = useLocale()
 
   useEffect(() => {
     if (open) {
@@ -53,7 +55,7 @@ export function Header() {
                   href={link.href}
                   className="rounded-md px-3 py-2 text-sm font-medium text-clube-ink/80 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal hover:no-underline"
                 >
-                  {link.label}
+                  {t(link.tKey)}
                 </Link>
               </li>
             ))}
@@ -119,7 +121,7 @@ export function Header() {
                     onClick={() => setOpen(false)}
                     className="block rounded-md px-3 py-3 text-base font-medium text-clube-ink/85 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal hover:no-underline"
                   >
-                    {link.label}
+                    {t(link.tKey)}
                   </Link>
                 </li>
               ))}
