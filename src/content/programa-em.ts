@@ -204,6 +204,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 19, titulo: 'LIMITE INTUITIVO DE SEQUÊNCIA', topicos: '"Para onde vai 1/n?" — ponte explícita pra Trim 5', materia: 'sequencias', slug: 'aula-19-limite-intuitivo' },
           { num: 20, titulo: 'Consolidação Trim 2', topicos: 'Problemas integrados', materia: 'sequencias', slug: 'aula-20-consolidacao-trim-2' },
         ],
+        agrupamento: [
+          { id: 'trig-triangulo', titulo: 'Aula A — Trigonometria do triângulo', licoesNums: [11, 12], cargaHoraria: 6 },
+          { id: 'funcoes-trig', titulo: 'Aula B — Funções trigonométricas e equações', licoesNums: [13, 14, 15], cargaHoraria: 9 },
+          { id: 'sequencias-pa-pg', titulo: 'Aula C — Sequências, PA, PG', licoesNums: [16, 17, 18], cargaHoraria: 9 },
+          { id: 'limite-intuitivo', titulo: 'Aula D — Limite intuitivo de sequência', licoesNums: [19, 20], cargaHoraria: 6 },
+        ],
       },
       {
         num: 3,
@@ -222,6 +228,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 29, titulo: 'Sistemas lineares 2x2 e 3x3', topicos: 'Substituição, escalonamento básico', materia: 'vetores', slug: 'aula-29-sistemas-lineares' },
           { num: 30, titulo: 'Consolidação Trim 3', topicos: 'Síntese geométrica + analítica', materia: 'vetores', slug: 'aula-30-consolidacao-trim-3' },
         ],
+        agrupamento: [
+          { id: 'plano-cartesiano', titulo: 'Aula A — Plano cartesiano e retas', licoesNums: [21, 22, 23], cargaHoraria: 9 },
+          { id: 'circunferencia-conicas', titulo: 'Aula B — Circunferência e cônicas', licoesNums: [24, 25], cargaHoraria: 6 },
+          { id: 'vetores-fisica', titulo: 'Aula C — Vetores no plano e produto escalar', licoesNums: [26, 27, 28], cargaHoraria: 9 },
+          { id: 'sistemas-sintese', titulo: 'Aula D — Sistemas lineares + síntese', licoesNums: [29, 30], cargaHoraria: 6 },
+        ],
       },
       {
         num: 4,
@@ -238,6 +250,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 38, titulo: 'Combinações', topicos: 'C(n,p), triângulo de Pascal', materia: 'combinatoria', slug: 'aula-38-combinacoes' },
           { num: 39, titulo: 'Probabilidade discreta básica', topicos: 'P(A) = casos favoráveis / casos possíveis', materia: 'probabilidade', slug: 'aula-39-probabilidade' },
           { num: 40, titulo: 'Consolidação anual', topicos: 'Workshop integrador Ano 1', materia: 'probabilidade', slug: 'aula-40-consolidacao-anual' },
+        ],
+        agrupamento: [
+          { id: 'matrizes-estrutura', titulo: 'Aula A — Matrizes: definição e operações', licoesNums: [31, 32], cargaHoraria: 6 },
+          { id: 'matrizes-determinantes', titulo: 'Aula B — Inversa, determinantes, sistemas', licoesNums: [33, 34, 35], cargaHoraria: 9 },
+          { id: 'combinatoria', titulo: 'Aula C — Combinatória: PFC, permutação, combinação', licoesNums: [36, 37, 38], cargaHoraria: 9 },
+          { id: 'probabilidade-anual', titulo: 'Aula D — Probabilidade + síntese anual', licoesNums: [39, 40], cargaHoraria: 6 },
         ],
       },
     ],
@@ -266,6 +284,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 49, titulo: 'Limite formal de sequências', topicos: 'ε-N, monótona limitada, Bolzano-Weierstrass', materia: 'limites', slug: 'aula-49-limite-sequencias' },
           { num: 50, titulo: 'Consolidação Trim 5', topicos: 'Workshop integrador', materia: 'limites', slug: 'aula-50-consolidacao-trim-5' },
         ],
+        agrupamento: [
+          { id: 'limite-formal', titulo: 'Aula A — Limite formal e propriedades', licoesNums: [41, 42], cargaHoraria: 6 },
+          { id: 'continuidade-laterais', titulo: 'Aula B — Continuidade e limites laterais', licoesNums: [43, 44], cargaHoraria: 6 },
+          { id: 'limites-fundamentais', titulo: 'Aula C — Limites fundamentais e TVI', licoesNums: [45, 46, 47, 48], cargaHoraria: 12 },
+          { id: 'limite-sequencias-sintese', titulo: 'Aula D — Limite de sequência + síntese', licoesNums: [49, 50], cargaHoraria: 6 },
+        ],
       },
       {
         num: 6,
@@ -283,6 +307,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 58, titulo: 'Taxas relacionadas', topicos: 'dy/dt = f\'(x)·dx/dt', materia: 'derivadas', slug: 'aula-58-taxas-relacionadas' },
           { num: 59, titulo: 'Diferenciabilidade e suavidade', topicos: 'C^k, pontos de bico, cúspides', materia: 'derivadas', slug: 'aula-59-diferenciabilidade' },
           { num: 60, titulo: 'Consolidação Trim 6', topicos: 'Workshop integrador', materia: 'derivadas', slug: 'aula-60-consolidacao-trim-6' },
+        ],
+        agrupamento: [
+          { id: 'derivada-conceito', titulo: 'Aula A — Definição da derivada e regras básicas', licoesNums: [51, 52], cargaHoraria: 6 },
+          { id: 'derivada-cadeia-implicita', titulo: 'Aula B — Regra da cadeia e derivada implícita', licoesNums: [53, 54], cargaHoraria: 6 },
+          { id: 'derivadas-superiores', titulo: 'Aula C — Ordem superior, inversa e aproximação linear', licoesNums: [55, 56, 57], cargaHoraria: 9 },
+          { id: 'taxas-suavidade', titulo: 'Aula D — Taxas relacionadas + suavidade', licoesNums: [58, 59, 60], cargaHoraria: 9 },
         ],
       },
       {
@@ -302,6 +332,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 69, titulo: 'Newton-Raphson', topicos: 'Iteração via derivada', materia: 'aplicacoes-derivada', slug: 'aula-69-newton-raphson' },
           { num: 70, titulo: 'Consolidação Trim 7', topicos: 'Workshop integrador', materia: 'aplicacoes-derivada', slug: 'aula-70-consolidacao-trim-7' },
         ],
+        agrupamento: [
+          { id: 'maximos-otimizacao', titulo: 'Aula A — Máximos, mínimos e otimização', licoesNums: [61, 62, 63], cargaHoraria: 9 },
+          { id: 'l-hopital-taylor', titulo: 'Aula B — L\'Hôpital e Taylor', licoesNums: [64, 65, 66], cargaHoraria: 9 },
+          { id: 'aplicacoes-economia', titulo: 'Aula C — Análise marginal e cinemática', licoesNums: [67, 68], cargaHoraria: 6 },
+          { id: 'newton-sintese', titulo: 'Aula D — Newton-Raphson + síntese', licoesNums: [69, 70], cargaHoraria: 6 },
+        ],
       },
       {
         num: 8,
@@ -319,6 +355,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 78, titulo: 'Correlação e regressão linear', topicos: 'r, OLS', materia: 'estatistica-descritiva', slug: 'aula-78-correlacao' },
           { num: 79, titulo: 'Probabilidade condicional + Bayes (aprofund.)', topicos: 'Diagnóstico, filtro', materia: 'estatistica-descritiva', slug: 'aula-79-bayes-aprofundado' },
           { num: 80, titulo: 'Consolidação Trim 8', topicos: 'Workshop integrador', materia: 'estatistica-descritiva', slug: 'aula-80-consolidacao-trim-8' },
+        ],
+        agrupamento: [
+          { id: 'estatistica-descritiva', titulo: 'Aula A — Estatística descritiva', licoesNums: [71, 72, 73], cargaHoraria: 9 },
+          { id: 'va-binomial', titulo: 'Aula B — Variável aleatória e distribuição binomial', licoesNums: [74, 75], cargaHoraria: 6 },
+          { id: 'normal-tcl', titulo: 'Aula C — Normal e Teorema Central do Limite', licoesNums: [76, 77], cargaHoraria: 6 },
+          { id: 'correlacao-bayes', titulo: 'Aula D — Correlação, regressão, Bayes + síntese', licoesNums: [78, 79, 80], cargaHoraria: 9 },
         ],
       },
     ],
@@ -348,6 +390,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 89, titulo: 'Aplicações: volume por discos', topicos: 'Sólidos de revolução', materia: 'integral', slug: 'aula-89-volume' },
           { num: 90, titulo: 'Consolidação Trim 9', topicos: 'Workshop integrador', materia: 'integral', slug: 'aula-90-consolidacao-trim-9' },
         ],
+        agrupamento: [
+          { id: 'antiderivada-tfc', titulo: 'Aula A — Antiderivada, integral definida e TFC', licoesNums: [81, 82, 83], cargaHoraria: 9 },
+          { id: 'tecnicas-integracao', titulo: 'Aula B — Substituição, partes, frações parciais', licoesNums: [84, 85, 86], cargaHoraria: 9 },
+          { id: 'integrais-trig', titulo: 'Aula C — Integrais trigonométricas', licoesNums: [87], cargaHoraria: 3 },
+          { id: 'aplicacoes-integral', titulo: 'Aula D — Área, volume + síntese', licoesNums: [88, 89, 90], cargaHoraria: 9 },
+        ],
       },
       {
         num: 10,
@@ -365,6 +413,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 98, titulo: 'Método de Euler (numérico)', topicos: 'Implementação Python', materia: 'edo', slug: 'aula-98-euler-numerico' },
           { num: 99, titulo: 'Lei de Newton resfriamento', topicos: 'Modelo exponencial', materia: 'edo', slug: 'aula-99-newton-resfriamento' },
           { num: 100, titulo: 'Consolidação Trim 10', topicos: 'Workshop integrador', materia: 'edo', slug: 'aula-100-consolidacao-trim-10' },
+        ],
+        agrupamento: [
+          { id: 'edo-introducao', titulo: 'Aula A — Introdução e EDOs separáveis/lineares 1ª ordem', licoesNums: [91, 92, 93], cargaHoraria: 9 },
+          { id: 'edo-modelos', titulo: 'Aula B — Crescimento, decaimento, Newton', licoesNums: [94, 99], cargaHoraria: 6 },
+          { id: 'edo-2-ordem', titulo: 'Aula C — EDOs 2ª ordem: vibrações e RLC', licoesNums: [95, 96, 97], cargaHoraria: 9 },
+          { id: 'numerico-sintese', titulo: 'Aula D — Método de Euler + síntese', licoesNums: [98, 100], cargaHoraria: 6 },
         ],
       },
       {
@@ -384,6 +438,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 109, titulo: 'Estatística bayesiana intro', topicos: 'Prior, posterior, MAP', materia: 'inferencia', slug: 'aula-109-bayesiana-intro' },
           { num: 110, titulo: 'Consolidação Trim 11', topicos: 'Workshop integrador', materia: 'inferencia', slug: 'aula-110-consolidacao-trim-11' },
         ],
+        agrupamento: [
+          { id: 'amostragem-ic', titulo: 'Aula A — Amostragem e intervalo de confiança', licoesNums: [101, 102], cargaHoraria: 6 },
+          { id: 'teste-hipotese', titulo: 'Aula B — Teste de hipótese (z, t)', licoesNums: [103, 104], cargaHoraria: 6 },
+          { id: 'regressao-anova', titulo: 'Aula C — Regressão linear simples e múltipla, ANOVA', licoesNums: [105, 106, 107], cargaHoraria: 9 },
+          { id: 'qui-bayes-sintese', titulo: 'Aula D — Qui-quadrado, Bayes intro + síntese', licoesNums: [108, 109, 110], cargaHoraria: 9 },
+        ],
       },
       {
         num: 12,
@@ -401,6 +461,12 @@ export const PROGRAMA_EM: Ano[] = [
           { num: 118, titulo: 'PCA', topicos: 'Redução de dimensionalidade', materia: 'algebra-linear', slug: 'aula-118-pca' },
           { num: 119, titulo: 'Síntese: Black-Scholes revisited', topicos: 'EM converge', materia: 'algebra-linear', slug: 'aula-119-bs-sintese' },
           { num: 120, titulo: 'Workshop final do Programa', topicos: '40 problemas Anos 1-3', materia: 'algebra-linear', slug: 'aula-120-workshop-final' },
+        ],
+        agrupamento: [
+          { id: 'espacos-vetoriais', titulo: 'Aula A — Espaços vetoriais e transformações', licoesNums: [111, 112, 113], cargaHoraria: 9 },
+          { id: 'autovalores-diagonalizacao', titulo: 'Aula B — Autovalores, diagonalização, simétricas/ortogonais', licoesNums: [114, 115, 116], cargaHoraria: 9 },
+          { id: 'svd-pca', titulo: 'Aula C — SVD e PCA', licoesNums: [117, 118], cargaHoraria: 6 },
+          { id: 'sintese-final', titulo: 'Aula D — Síntese (Black-Scholes) + Workshop final', licoesNums: [119, 120], cargaHoraria: 6 },
         ],
       },
     ],
