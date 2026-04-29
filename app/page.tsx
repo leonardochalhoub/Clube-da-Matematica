@@ -21,6 +21,7 @@ import {
   ML_CD,
 } from '@/content/livros-data'
 import { SearchDiscovery } from '@/components/layout/SearchDiscovery'
+import { HomeHero } from '@/components/layout/HomeHero'
 
 /** Conta exercícios em arquivos MDX via regex (extraído em build time). */
 function contarExercicios(): number {
@@ -58,60 +59,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-clube-mist-soft/30 bg-gradient-to-b from-clube-cream to-clube-cream-soft">
-        <div className="container-clube py-20 sm:py-28">
-          <div className="max-w-3xl">
-            <p className="mb-4 inline-block rounded-full border border-clube-gold-deep/40 bg-clube-gold/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-              Open source · gratuito · em português
-            </p>
-            <h1 className="font-sans text-display font-extrabold text-clube-teal-deep">
-              Ensino Médio brasileiro
-              <br />
-              <span className="text-clube-teal">otimizado.</span>
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-clube-ink/80 sm:text-xl">
-              <strong>3 anos · 12 trimestres · 120 lições</strong> agrupadas
-              em <strong>48 aulas</strong>, calibrado pelos currículos de{' '}
-              <strong>Japão</strong>, <strong>Alemanha</strong> e{' '}
-              <strong>Singapura</strong>. Toda equação tem 6 portas (formal ·
-              5 · 10 · 15 · 25 · 40), botão de leitura em voz alta, e{' '}
-              <strong>40-80 exercícios por lição</strong> tirados dos melhores
-              livros públicos do mundo.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                href="/ensino-medio"
-                className="inline-flex items-center gap-2 rounded-full bg-clube-teal px-5 py-2.5 font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-clube-teal-deep hover:no-underline hover:shadow"
-              >
-                Começar pelo Ensino Médio
-                <span aria-hidden>→</span>
-              </Link>
-              <Link
-                href="/financas"
-                className="inline-flex items-center gap-2 rounded-full border border-clube-mist-soft/60 bg-clube-surface px-5 py-2.5 font-semibold text-clube-ink transition-all hover:-translate-y-0.5 hover:border-clube-teal hover:text-clube-teal hover:no-underline"
-              >
-                Ver Black-Scholes (Finanças)
-              </Link>
-              <a
-                href="https://leonardochalhoub.github.io/mirante-dos-dados-br/articles/calculo-ensino-medio-internacional.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-clube-gold-deep/50 bg-clube-gold/10 px-5 py-2.5 font-semibold text-clube-gold-deep transition-all hover:-translate-y-0.5 hover:bg-clube-gold/20 hover:no-underline"
-                aria-label="Abrir o working paper em PDF em uma nova aba (Mirante dos Dados)"
-              >
-                <PdfIcon />
-                Ler o working paper (PDF)
-              </a>
-            </div>
-            <p className="mt-4 text-xs text-clube-mist">
-              <Link href="/manifesto" className="hover:text-clube-teal">
-                Manifesto →
-              </Link>
-            </p>
-          </div>
-        </div>
-      </section>
+      <HomeHero />
 
       {/* Counters */}
       <MainCounters

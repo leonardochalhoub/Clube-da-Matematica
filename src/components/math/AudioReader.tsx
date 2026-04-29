@@ -38,13 +38,13 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     }
   }, [])
 
-  // CRÍTICO: só usa idioma do locale ativo se HÁ tradução pra ele.
-  // Se não há tradução pro locale, fala em PT-BR (texto original) com voz PT-BR.
-  // Evita o bug "Português com sotaque alemão" — não tem como o navegador
-  // ler PT-BR de um locale alemão de forma natural; melhor cair pra PT-BR puro.
-  const temTraducao = !!textosI18n?.[locale]
-  const textoFinal = temTraducao ? textosI18n![locale]! : texto
-  const speechLang = temTraducao ? LOCALES[locale].speechLang : 'pt-BR'
+  // SEMPRE usa idioma e voz do locale ativo. Se há tradução do texto,
+  // usa ela (qualidade alta). Se não, usa o texto PT-BR mas com a voz
+  // do locale escolhido — pronúncia imperfeita mas mantém a expectativa
+  // do usuário ("escolhi alemão, vou ouvir voz alemã").
+  const traducao = textosI18n?.[locale]
+  const textoFinal = traducao ?? texto
+  const speechLang = LOCALES[locale].speechLang
   const labelFinal = label ?? t('audio.read', 'Ouvir')
 
   function falar() {
