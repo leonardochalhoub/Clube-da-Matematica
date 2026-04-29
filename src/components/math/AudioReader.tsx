@@ -83,12 +83,10 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
       return
     }
 
-    const u = new SpeechSynthesisUtterance(textoFalado)
-    u.lang = langFalado
-    u.rate = 0.95
-    u.pitch = 1
-    u.volume = 1
-
+    // Verifica se o navegador tem voz pro idioma alvo. Hebraico, suaíli,
+    // estoniano, vietnamita são raros em Windows/Chrome. Se não tem voz,
+    // tenta voz por prefixo. Se ainda nada, fala texto PT-BR com voz PT-BR
+    // pra evitar voz robotizada lendo caracteres estranhos.
     const vozes = await obterVoicesAsync()
     const exatas = vozes.filter((v) => v.lang === langFalado)
     const prefixo = vozes.filter((v) => {
@@ -96,10 +94,30 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
       return v.lang.toLowerCase().startsWith(`${head}-`) || v.lang.toLowerCase() === head
     })
     const candidatas = exatas.length > 0 ? exatas : prefixo
-    if (candidatas.length > 0) {
-      const random = candidatas[Math.floor(Math.random() * candidatas.length)]!
-      u.voice = random
+
+    let textoEfetivo = textoFalado
+    let langEfetivo = langFalado
+    let vozEscolhida: SpeechSynthesisVoice | null =
+      candidatas.length > 0
+        ? candidatas[Math.floor(Math.random() * candidatas.length)]!
+        : null
+
+    if (!vozEscolhida && langFalado !== 'pt-BR') {
+      // Sem voz nativa do idioma → fall back pra PT-BR (texto + voz)
+      textoEfetivo = texto
+      langEfetivo = 'pt-BR'
+      const vozesPt = vozes.filter((v) => v.lang === 'pt-BR' || v.lang.startsWith('pt-'))
+      if (vozesPt.length > 0) {
+        vozEscolhida = vozesPt[Math.floor(Math.random() * vozesPt.length)]!
+      }
     }
+
+    const u = new SpeechSynthesisUtterance(textoEfetivo)
+    u.lang = langEfetivo
+    u.rate = 0.95
+    u.pitch = 1
+    u.volume = 1
+    if (vozEscolhida) u.voice = vozEscolhida
 
     u.onstart = () => setEstado('falando')
     u.onend = () => setEstado('idle')

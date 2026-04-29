@@ -11,6 +11,7 @@ import {
 import {
   detectLocale,
   saveLocale,
+  LOCALES,
   type Locale,
   DEFAULT_LOCALE,
 } from '@/lib/i18n/locales'
@@ -32,6 +33,16 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const detected = detectLocale()
     if (detected !== locale) setLocaleState(detected)
+    // Aplica RTL/LTR e lang HTML também na detecção inicial,
+    // não só no setLocale manual — RTL precisa funcionar mesmo
+    // pra usuário que abre o site em hebraico/árabe direto.
+    try {
+      const info = LOCALES[detected]
+      document.documentElement.dir = info.dir
+      document.documentElement.lang = info.speechLang
+    } catch {
+      /* noop */
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
