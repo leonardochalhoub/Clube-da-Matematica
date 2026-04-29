@@ -16,6 +16,7 @@ usadoEm: ["1.º ano EM", "Física (decaimento)", "Economia (juros compostos)"]
 <EquacaoCanonica
   formula="N(t) = N_0 \cdot e^{kt}"
   legenda={<><strong>Modelo exponencial fundamental</strong>: a taxa de variação é proporcional à quantidade presente. <em>k &gt; 0</em>: crescimento. <em>k &lt; 0</em>: decaimento. Aparece em demografia, finanças, química nuclear e termodinâmica.</>}
+  audioTexto="Modelo exponencial fundamental. N de t igual a N zero vezes e elevado a k vezes t. Onde N zero é a quantidade inicial, k é a taxa de crescimento ou decaimento, e t é o tempo. Quando k é positivo, a quantidade cresce; quando k é negativo, decai."
 />
 
 <DuasPortas>
@@ -43,6 +44,55 @@ A equação $N(t) = N_0 e^{kt}$ é solução de:
 <Equation explicacao="Meia-vida τ é o tempo para reduzir à metade. Tempo de duplicação é análogo para crescimento.">
 {`\\tau_{1/2} = \\frac{\\ln 2}{|k|} \\approx \\frac{0{,}693}{|k|}`}
 </Equation>
+
+</Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Você pega uma folha de papel e dobra ela ao meio. Agora tem 2 partes. Dobra de novo: 4 partes. Mais uma dobra: 8 partes.
+
+Cada dobra **dobra** a quantidade. Em 10 dobras seriam **mil partes**. Em 20 dobras, mais de **um milhão**. Em 42 dobras (se você conseguisse — ninguém consegue), a folha seria **maior que a Lua**.
+
+É assim que coisa cresce muito rápido. Os matemáticos chamam isso de **exponencial**.
+
+Tem coisa que cresce assim no mundo: bactérias, vírus, dinheiro com juros, pessoas falando uma fofoca pra duas amigas, cada uma falando pra mais duas...
+
+Tem coisa que **encolhe** assim também: água quente esfriando, remédio saindo do corpo, areia escorrendo do balde furado.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+**Modelo de crescimento exponencial**: cada coisa cria mais cópias dela mesma. Tipo bactérias, que dividem ao meio:
+
+| Hora | Quantidade |
+|---:|---:|
+| 0 | 100 |
+| 1 | 200 |
+| 2 | 400 |
+| 3 | 800 |
+| 4 | 1.600 |
+| ... | ... |
+| 24 | 1.677.721.600 |
+
+Em **um dia**, 100 bactérias viram **1,7 bilhão**. É por isso que comida estragada estraga rápido — basta uma bactéria sobreviver e em horas você tem milhões.
+
+A fórmula é $N(t) = N_0 \cdot 2^t$ (quando dobra a cada hora). Se a base não for 2 (digamos triplica a cada 2 horas), a fórmula muda: $N(t) = N_0 \cdot 3^{t/2}$.
+
+**Decaimento** é o contrário. Imagine que toda hora **morre metade** das bactérias (numa droga que mata elas):
+
+| Hora | Quantidade |
+|---:|---:|
+| 0 | 1.000 |
+| 1 | 500 |
+| 2 | 250 |
+| 3 | 125 |
+| 4 | 62 |
+| ... | ... |
+
+A fórmula é $N(t) = N_0 \cdot (1/2)^t$. A "**meia-vida**" é o tempo que leva pra cair pela metade. No exemplo acima, é 1 hora.
+
+Carbono-14 (datação fóssil) tem meia-vida de **5.730 anos**. Por isso dá pra datar fósseis até ~50.000 anos.
 
 </Porta>
 
@@ -85,6 +135,70 @@ Crescimento exponencial puro é **insustentável**: implica $N \to \infty$. Mode
 - **Allee effect**: incorpora taxa decrescente em populações pequenas
 
 Conhecer as limitações é mais importante que decorar a fórmula.
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+Em prática, o modelo $\dot N = rN$ é o **null model** — primeira aproximação. Toda análise séria parte daí e adiciona termos de correção.
+
+### Identificação de modelo a partir de dados
+
+Se você tem série temporal $N_1, N_2, \ldots, N_n$ e suspeita ser exponencial:
+
+1. Plotar em **escala log-y**.
+2. Se vira reta, é exponencial. Inclinação = $r$.
+3. Se curva pra baixo, é logística. Use ajuste não-linear.
+4. Se vira reta com **break** (mudança de inclinação), é regime-shift — duas exponenciais.
+
+### Gráfico vivo: vol implícita = volatility surface
+
+Em volatilidade implícita (Black-Scholes), a evolução temporal das opções segue um **GBM** (geometric Brownian motion): $dS = \mu S \, dt + \sigma S \, dW$. Solução: $S_t = S_0 \exp((\mu - \sigma^2/2)t + \sigma W_t)$. **Movimento exponencial com ruído gaussiano no expoente.**
+
+### Identificação econométrica
+
+Crescimento de PIB, M1, dívida — todos modelados como exponencial em primeira aproximação. Mas:
+- $\hat r$ obtido por OLS sobre $\log N$ vs $t$ é viesado quando os erros têm autocorrelação.
+- Use **Hamilton filter** ou **Kalman filter** se há regime-shifts.
+- Para crescimento populacional, **logística** com sondagem demográfica.
+
+### Cuidado: log de sucessivas pequenas mudanças
+
+Em finanças, **log-return** $r_t = \log(P_t/P_{t-1}) \approx \Delta P/P$ para pequenas variações. Por que log? Porque retornos somam (em vez de multiplicar): $P_T/P_0 = \prod(P_t/P_{t-1}) \Rightarrow \log(P_T/P_0) = \sum r_t$. **Soma de variáveis aleatórias é tratável; produto não.**
+
+### Modelos de espalhamento (epidemia, inovação, viral)
+
+Bass diffusion model ($\dot N = (p + qN/K)(K - N)$) — Frank Bass 1969 — generaliza logístico com 2 parâmetros (inovação $p$ + imitação $q$). Usado em previsão de adoção de produtos novos (smartphone, EV, vacina). Ajustado a 100+ produtos com sucesso.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Prática — 3 cenários reais com dados brasileiros">
+
+### Cenário 1: Inflação e poder de compra (Brasil 2019-2026)
+
+IPCA acumulado 2019-2025: ~36% (média ~5,3% a.a.). Para um salário de R\$ 5.000 em 2019:
+
+$$\text{poder de compra real}(t) = 5.000 \cdot \e^{-0{,}053 t}$$
+
+Em 2026 ($t = 7$): poder de compra ≈ R\$ 3.450. **Perda real de 31%** em 7 anos sem reajuste.
+
+**Implicação operacional**: salário fixo perde poder rapidamente. Para manter $5.000$ reais reais, em 7 anos o salário nominal precisa ser $5.000 \cdot \e^{0{,}053 \cdot 7} = 7.246$. Quem não negociou reajustes anuais de pelo menos 5,3%, **empobreceu sem perceber**.
+
+### Cenário 2: COVID-19 no Brasil (modelo SIR-Like)
+
+Casos brasileiros de março/2020 a maio/2020 cresceram com $r \approx 0{,}28$/dia. Tempo de duplicação: $\ln 2 / 0{,}28 \approx 2{,}5$ dias.
+
+Sem intervenção, projeção em 60 dias: $1 \cdot \e^{0{,}28 \cdot 60} \approx 18 \text{ milhões}$ — claramente impossível, sinaliza que o modelo exponencial puro saturou.
+
+**Lição**: o modelo exponencial **só vale enquanto $N \ll K$** (capacidade do sistema). Após maio/2020, o crescimento ficou logístico, depois oscilatório (segunda onda).
+
+### Cenário 3: Decaimento de Netflix (lifetime customer value)
+
+Modelagem clássica de churn: $S(t) = S_0 \cdot \e^{-c t}$ com $c$ = taxa de churn. Para Netflix BR (estimado), $c \approx 0{,}02$/mês (2% de cancelamento mensal).
+
+**Lifetime estimado**: $\E[T] = 1/c = 50$ meses ≈ 4,2 anos. Com mensalidade R\$ 50, LTV = R\$ 2.500 por cliente.
+
+**Custo de aquisição (CAC)** aceitável: até ~30% do LTV ≈ R\$ 750 por cliente novo. Acima disso, modelo de negócio quebra. **Toda startup SaaS tem essa conta no slide 1 do pitch**.
 
 </Porta>
 
@@ -283,13 +397,13 @@ Em economia, regra dos 72: tempo de duplicação $T \approx 72/r\%$. Compare com
 
 </ListaExercicios>
 
-## Fontes Públicas
+## Fontes desta aula
 
-- [**Active Calculus**](https://activecalculus.org/single/) — Matt Boelkins (2024, ed. 2.0, EN, CC-BY-NC-SA) · §6.5 — modelos exponenciais.
-- [**Calculus (Volume 2)**](https://openstax.org/details/books/calculus-volume-2) — OpenStax (2016, EN, CC-BY-NC-SA) · §8 — EDOs e modelagem. **Fonte do bloco D.**
-- [**Notes on Diffy Qs**](https://www.jirka.org/diffyqs/) — Jiří Lebl (2024, v6.6, EN, CC-BY-SA) · §1.4 — modelos exponenciais.
-- [**College Algebra**](https://openstax.org/details/books/college-algebra-2e) — OpenStax (2022, 2nd ed, EN, CC-BY) · §6.7 — aplicações exponenciais.
-- [**University Physics (Volume 3)**](https://openstax.org/details/books/university-physics-volume-3) — OpenStax (2016, EN, CC-BY) · §10 — radiação e meia-vida. **Fonte do bloco E.**
-- [**Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — REAMAT UFRGS (2024, PT-BR, CC-BY-SA) — solução numérica de modelos.
+> Apenas livros que **alimentaram diretamente** o texto e os exercícios. Catálogo geral em [**/livros**](/livros).
 
-> Catálogo completo em [**/livros**](/livros).
+- [**Notes on Diffy Qs**](https://www.jirka.org/diffyqs/) — Jiří Lebl · 2024, v6.6 · EN · CC-BY-SA · §1.4: modelos exponenciais como solução de $\dot N = kN$. **Fonte primária.**
+- [**Calculus (Volume 2)**](https://openstax.org/details/books/calculus-volume-2) — OpenStax · 2016 · EN · CC-BY-NC-SA · §8: equações diferenciais e modelagem populacional. **Fonte do bloco D.**
+- [**College Algebra**](https://openstax.org/details/books/college-algebra-2e) — OpenStax · 2022, 2ª ed · EN · CC-BY · §6.7: aplicações de exponencial e logaritmo (juros, decaimento, datação).
+- [**University Physics (Volume 3)**](https://openstax.org/details/books/university-physics-volume-3) — OpenStax · 2016 · EN · CC-BY · §10: radiação e meia-vida. **Fonte do bloco E.**
+- [**Active Calculus**](https://activecalculus.org/single/) — Matt Boelkins · 2024, ed. 2.0 · EN · CC-BY-NC-SA · §6.5: equações separáveis e modelos exponenciais.
+- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019, 4ª ed · EN · CC-BY-SA · cap. 4: distribuição exponencial, modelos de tempo até falha.

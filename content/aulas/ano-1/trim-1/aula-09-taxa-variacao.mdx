@@ -16,6 +16,7 @@ usadoEm: ["1.º ano EM", "porta de entrada para Cálculo (Trim 5-6)"]
 <EquacaoCanonica
   formula="\text{Taxa média} = \frac{\Delta y}{\Delta x} = \frac{f(b) - f(a)}{b - a}"
   legenda={<><strong>Taxa de variação média</strong>: o quanto <em>y</em> mudou dividido pelo quanto <em>x</em> mudou. Geometricamente, é a inclinação da <strong>reta secante</strong> que passa pelos pontos <em>(a, f(a))</em> e <em>(b, f(b))</em> do gráfico.</>}
+  audioTexto="Taxa de variação média. Delta y dividido por delta x, igual a, f de b menos f de a, dividido por b menos a. É a inclinação da reta secante que passa pelos pontos a, f de a, e b, f de b, no gráfico de f. Quando o intervalo encolhe a um ponto, a secante vira tangente — e a taxa média vira a derivada."
 />
 
 <DuasPortas>
@@ -74,6 +75,32 @@ Isso é o tema dos Trim 5 (limites) e Trim 6 (derivadas). Esta aula é a antessa
 
 </Porta>
 
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Você sai de casa pra escola. A escola fica a **600 metros** da sua casa. Você gasta **10 minutos** caminhando.
+
+Em **média**, você andou $600 / 10 = 60$ metros por minuto. Isso é a **velocidade média**.
+
+Mas no caminho você teve que esperar 2 minutos no semáforo. Aí ficou parado, andou 0 metros nesses 2 minutos. Em outros momentos andou rápido pra recuperar tempo, andando 80 ou 90 m/min.
+
+A velocidade **na média** foi 60 m/min. Mas a velocidade **em cada instante** mudou o tempo todo.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+Você sobe de elevador do andar 0 ao andar 20. Demora 30 segundos.
+
+**Velocidade média** = (20 andares) / (30 s) = 0,667 andares/segundo.
+
+Mas no começo o elevador acelera (velocidade pequena), no meio fica em velocidade alta, e no final desacelera. A velocidade **muda o tempo todo**.
+
+A taxa de variação média é a velocidade que vale **na média**. Ela responde a pergunta "quanto andei dividido por quanto tempo levei". Ignora todos os detalhes do meio.
+
+A "**velocidade instantânea**" — a do velocímetro do carro num instante — é o que você ganha quando o intervalo de tempo se torna **infinitamente curto**. Esse cálculo se chama **derivada**, e é o que essa matéria toda do ensino médio está construindo. Por enquanto, taxa **média** é o caminho.
+
+</Porta>
+
 <Porta nivel="15" titulo="Pra adolescente de 15 anos">
 
 Esta aula é diferente. **Aqui é onde o cálculo começa.**
@@ -115,6 +142,70 @@ Para $f$ contínua em $[a,b]$ e diferenciável em $(a,b)$, existe $c \in (a,b)$ 
 $$f'(c) = \frac{f(b) - f(a)}{b - a}$$
 
 Ou seja: a derivada em algum ponto interior é exatamente igual à TVM. Resultado **não-trivial** que você prova no Trim 6 ou Análise. Note: TVM (teorema) e TVM (taxa de variação média) compartilham acrônimo; o teorema garante a existência de um ponto onde a tangente é paralela à secante.
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+A TVM é a **discretização** universal de derivada. Em qualquer aplicação onde você calcula derivada **a partir de dados**, você está calculando TVM.
+
+### Diferenças finitas em métodos numéricos
+
+Para resolver EDO numericamente, aproxima-se $\dot y(t) \approx (y(t+h) - y(t))/h$ — **diferença para frente**, primeira ordem. Ou $\dot y(t) \approx (y(t+h) - y(t-h))/(2h)$ — **diferença central**, segunda ordem mais precisa.
+
+Estes esquemas formam a base de Euler, Runge-Kutta, Crank-Nicolson — toda integração numérica de equações diferenciais (REAMAT cap. 5).
+
+### Estimação de derivadas a partir de dados ruidosos
+
+Em laboratório, você tem $\{(t_i, y_i)\}$ com ruído. Calcular $(y_{i+1} - y_i)/(t_{i+1} - t_i)$ amplifica o ruído (derivada é "filtro passa-alto"). Soluções:
+
+- **Suavização** (filtro Savitzky-Golay): ajusta polinômio local antes de derivar.
+- **Regressão local** (LOESS): linha de regressão móvel.
+- **Filtro de Kalman**: estima derivada e estado simultaneamente.
+
+### TVM em finanças
+
+**Retorno simples** $r_t = (P_t - P_{t-1})/P_{t-1}$ é exatamente a TVM do preço. **Retorno log** $\log(P_t/P_{t-1})$ é uma TVM no espaço log. Em prática, log-retornos são preferidos: somam, são tratáveis sob normalidade, e $\log(1+r) \approx r$ para $r$ pequeno.
+
+### TVM em ML/DL
+
+**Gradiente numérico**: $\nabla f \approx (f(x + h) - f(x))/h$. Usado em verificação de back-propagation. Sempre comparar gradiente analítico (autograd) vs numérico antes de confiar.
+
+**Adversarial gradient**: para gerar exemplos adversariais, calcular gradiente da loss em relação aos pixels da entrada — TVM da função de classificação no espaço da imagem.
+
+### Cuidado: precisão de máquina
+
+Para $h$ muito pequeno, $f(x+h) - f(x)$ sofre **cancelamento catastrófico** em float64. Erro de truncamento ($O(h)$) decresce com $h$, mas erro de arredondamento ($\sim \epsilon_\text{machine}/h$) cresce. Ótimo: $h \approx \sqrt{\epsilon} \approx 10^{-8}$. Abaixo disso, ruído numérico domina.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Prática — 3 cenários reais">
+
+### Cenário 1: Velocidade média de carro com radar
+
+Pedágio em SP marca passagem em km 50 às 14:30 e km 200 às 15:50. Distância 150 km, tempo 1h20min = 4/3 h. Velocidade média:
+
+$$v_\text{média} = \frac{150}{4/3} = 112{,}5 \text{ km/h}$$
+
+Limite da rodovia: 110 km/h. **Multado**, mesmo sem radar pegando ele em movimento — é a **TVM da posição** que prova a infração.
+
+### Cenário 2: Variação anualizada do PIB Brasil
+
+PIB BR (em valores reais constantes 2025): R\$ 5,5 trilhões em 2010, R\$ 8,3 trilhões em 2020. Crescimento composto:
+
+$$r = \left(\frac{8{,}3}{5{,}5}\right)^{1/10} - 1 = 1{,}0413 - 1 = 0{,}0413 = 4{,}13\% \text{ a.a.}$$
+
+**Crescimento anualizado real médio: 4,13%.** Use este valor pra comparar com inflação, taxa de juros real, salário mínimo real. **Não use TVM linear** $(8{,}3 - 5{,}5)/10 = 0{,}28$ trilhão/ano — esse número não é taxa, é variação absoluta.
+
+### Cenário 3: Custo marginal aproximado
+
+Empresa tem $C(q) = 0{,}5 q^2 + 30 q + 200$ (R\$). Calcule custo de produzir mais uma unidade quando já produz 100.
+
+**Método 1: TVM em $[100, 101]$.** $C(100) = 5.000 + 3.000 + 200 = 8.200$. $C(101) = 5.100{,}5 + 3.030 + 200 = 8.330{,}5$. TVM = 130,5 R\$/unidade.
+
+**Método 2: derivada (preview)**. $C'(q) = q + 30$. $C'(100) = 130$ R\$/unidade.
+
+**Comparação**: a TVM (130,5) é uma **boa estimativa** do custo marginal (130). A diferença vem do termo quadrático. Para $\Delta q$ menor, a TVM se aproxima ainda mais. Esta é a essência do conceito de derivada.
 
 </Porta>
 
@@ -318,13 +409,15 @@ Em meteorologia, a temperatura desceu de 28°C às 14h para 20°C às 22h. TVM (
 
 </ListaExercicios>
 
-## Fontes Públicas
+## Fontes desta aula
 
-- [**Active Calculus**](https://activecalculus.org/single/) — Matt Boelkins (2024, ed. 2.0, EN, CC-BY-NC-SA) · §1.5 — taxa de variação como motivação para derivada. **Fonte primária.**
-- [**Calculus (Volume 1)**](https://openstax.org/details/books/calculus-volume-1) — OpenStax (2016, EN, CC-BY-NC-SA) · §2.1 — taxa de variação e secantes.
-- [**Cálculo (Volume 1)**](https://pt.wikibooks.org/wiki/C%C3%A1lculo_(Volume_1)) — Wikilivros (vivo, PT-BR, CC-BY-SA) · capítulo introdutório.
-- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman et al. (2024, v5, EN, CC-BY-NC) · §2.1 — definição de taxa.
-- [**CLP Calculus**](https://textbooks.aimath.org/textbooks/approved-textbooks/clp-calculus/) — Feldman, Rechnitzer, Yeager (2023, EN, CC-BY-NC-SA) · §1.1 — secantes.
-- [**Modeling, Functions, and Graphs**](https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/) — Yoshiwara (2020, EN, livre) — TVM em modelagem.
+> Apenas livros que **alimentaram diretamente** o texto e os exercícios. Catálogo geral em [**/livros**](/livros).
 
-> Catálogo completo em [**/livros**](/livros). Esta aula é a **porta de entrada do Cálculo** — a TVM aparecerá novamente nas Aulas 41-50 (Trim 5-6, Ano 2) sob o nome "derivada".
+- [**Active Calculus**](https://activecalculus.org/single/) — Matt Boelkins · 2024, ed. 2.0 · EN · CC-BY-NC-SA · §1.5: taxa de variação como motivação para a derivada. **Fonte primária.**
+- [**Calculus (Volume 1)**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · 2016 · EN · CC-BY-NC-SA · §2.1: taxa de variação e secantes.
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman et al. · 2024, v5 · EN · CC-BY-NC · §2.1: definição de taxa.
+- [**CLP Calculus**](https://textbooks.aimath.org/textbooks/approved-textbooks/clp-calculus/) — Feldman, Rechnitzer, Yeager (UBC) · 2023 · EN · CC-BY-NC-SA · §1.1: secantes e tangentes. **Fonte do bloco D.**
+- [**Modeling, Functions, and Graphs**](https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/) — Yoshiwara · 2020 · EN · livre · cap. 5: TVM em modelagem.
+- [**Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — REAMAT UFRGS · 2024 · PT-BR · CC-BY-SA · cap. 5: diferenças finitas. **Fonte da Porta 40.**
+
+> Esta aula é a **porta de entrada do Cálculo** — a TVM aparecerá novamente nas Aulas 41-50 (Trim 5-6, Ano 2) sob o nome "derivada".
