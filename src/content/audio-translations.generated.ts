@@ -9,10 +9,38 @@
 
 export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
   'Antiderivada. Integral indefinida de f de x, d x, igual a F de x mais C, se e somente se F linha de x é igual a f de x. A constante C aparece porque qualquer constante zera ao derivar.': {
-
+    'ar-LB': 'المشتقة العكسية. التكامل غير المحدد لـ f من x، d x، يساوي F من x زائد C، إذا وفقط إذا كانت F شرطة من x تساوي f من x. الثابت C يظهر لأن أي ثابت يصبح صفرًا عند الاشتقاق.',
+    'de-DE': 'Stammfunktion. Das unbestimmte Integral von f von x, d x, ist gleich F von x plus C, genau dann wenn F Strich von x gleich f von x ist. Die Konstante C erscheint, weil jede Konstante beim Ableiten zu null wird.',
+    'en-US': 'Antiderivative. The indefinite integral of f of x, d x, equals F of x plus C, if and only if F prime of x equals f of x. The constant C appears because any constant becomes zero when differentiated.',
+    'es-ES': 'Antiderivada. La integral indefinida de f de x, d x, es igual a F de x más C, si y solo si F prima de x es igual a f de x. La constante C aparece porque cualquier constante se anula al derivar.',
+    'et-EE': 'Algfunktsioon. f-i määramata integraal x-i järgi, d x, võrdub F-iga x-i järgi pluss C, parajasti siis kui F kriipsuga x-i järgi võrdub f-iga x-i järgi. Konstant C ilmub, sest iga konstant muutub diferentseerimisel nulliks.',
+    'fr-FR': 'Primitive. L\'intégrale indéfinie de f de x, d x, est égale à F de x plus C, si et seulement si F prime de x est égale à f de x. La constante C apparaît parce que toute constante s\'annule à la dérivation.',
+    'hi-IN': 'प्रतिअवकलज। f का x का अनिश्चित समाकलन, d x, F का x जोड़ C के बराबर है, यदि और केवल यदि F डैश का x, f के x के बराबर हो। स्थिरांक C इसलिए आता है क्योंकि कोई भी स्थिरांक अवकलन पर शून्य हो जाता है।',
+    'it-IT': 'Primitiva. L\'integrale indefinito di f di x, d x, è uguale a F di x più C, se e solo se F primo di x è uguale a f di x. La costante C compare perché qualsiasi costante si annulla derivando.',
+    'ja-JP': '原始関数。エフ・エックスの不定積分、ディーエックスは、大文字エフ・エックス・プラス・シーに等しい。これはエフ・プライム・エックスがエフ・エックスに等しい場合に限る。定数シーは微分すると消えるため出現する。',
+    'ko-KR': '역도함수. 에프 엑스의 부정적분, 디 엑스는, 대문자 에프 엑스 더하기 시와 같다, 단 대문자 에프 프라임 엑스가 에프 엑스와 같을 때에 한해서만. 상수 시는 어떤 상수든 미분하면 영이 되기 때문에 나타난다.',
+    'pl-PL': 'Funkcja pierwotna. Całka nieoznaczona z f od x, d x, jest równa F od x plus C, wtedy i tylko wtedy gdy F prim od x równa się f od x. Stała C pojawia się, ponieważ każda stała znika przy różniczkowaniu.',
+    'ru-RU': 'Первообразная. Неопределённый интеграл от эф от икс, дэ икс, равен эф большое от икс плюс цэ, тогда и только тогда, когда эф штрих от икс равно эф от икс. Константа цэ появляется, потому что любая константа обнуляется при дифференцировании.',
+    'sw-KE': 'Antiderivative. Kiunganishi kisicho na mipaka cha f cha x, d x, ni sawa na F cha x ongeza C, ikiwa na ikiwa tu F mstari cha x ni sawa na f cha x. Konstanti C inaonekana kwa sababu konstanti yoyote inakuwa sifuri inapotofautishwa.',
+    'vi-VN': 'Nguyên hàm. Tích phân bất định của f của x, d x, bằng F của x cộng C, khi và chỉ khi F phẩy của x bằng f của x. Hằng số C xuất hiện vì bất kỳ hằng số nào đều triệt tiêu khi đạo hàm.',
+    'zh-CN': '反导数。f 关于 x 的不定积分，d x，等于 F 关于 x 加 C，当且仅当 F 撇关于 x 等于 f 关于 x。常数 C 出现是因为任何常数求导后都变为零。',
   },
   'Aproximação linear. F de x aproximadamente igual a, f de a, mais f linha de a, vezes parêntese, x menos a, fecha.': {
-
+    'ar-LB': 'التقريب الخطي. f من x يساوي تقريبًا، f من a، زائد f شرطة من a، مضروبًا في قوس، x ناقص a، يُغلق.',
+    'de-DE': 'Lineare Approximation. f von x ist näherungsweise gleich f von a plus f Strich von a mal Klammer auf, x minus a, Klammer zu.',
+    'en-US': 'Linear approximation. f of x is approximately equal to, f of a, plus f prime of a, times open parenthesis, x minus a, close parenthesis.',
+    'es-ES': 'Aproximación lineal. f de x es aproximadamente igual a, f de a, más f prima de a, por paréntesis, x menos a, cierra paréntesis.',
+    'et-EE': 'Lineaarne lähendus. f x-ist on ligikaudu võrdne f a-ist pluss f kriipsuga a-ist korda sulg lahti, x miinus a, sulg kinni.',
+    'fr-FR': 'Approximation linéaire. f de x approximativement égal à, f de a, plus f prime de a, fois parenthèse, x moins a, fermez la parenthèse.',
+    'hi-IN': 'रैखिक सन्निकटन। f का x लगभग बराबर है, f का a, जोड़ f डैश का a, गुणा कोष्ठक, x घटा a, कोष्ठक बंद।',
+    'it-IT': 'Approssimazione lineare. f di x circa uguale a, f di a, più f primo di a, per parentesi, x meno a, chiusa parentesi.',
+    'ja-JP': '一次近似。エフ・エックスはおよそ、エフ・エーに、エフ・プライム・エーに、丸かっこ、エックス引くエー、丸かっこ閉じ、を掛けたものを足したものに等しい。',
+    'ko-KR': '일차 근사. 에프 엑스는 근사적으로, 에프 에이 더하기 에프 프라임 에이 곱하기 괄호 열고, 엑스 빼기 에이, 괄호 닫고와 같다.',
+    'pl-PL': 'Przybliżenie liniowe. f od x w przybliżeniu równa się, f od a, plus f prim od a, razy nawias otwarty, x minus a, nawias zamknięty.',
+    'ru-RU': 'Линейное приближение. эф от икс приближённо равно эф от а плюс эф штрих от а умножить на открывающую скобку, икс минус а, закрывающая скобка.',
+    'sw-KE': 'Ukadirio wa mstari. f cha x ni takriban sawa na, f cha a, ongeza f mstari cha a, mara mabano, x toa a, funga mabano.',
+    'vi-VN': 'Xấp xỉ tuyến tính. f của x xấp xỉ bằng, f của a, cộng f phẩy của a, nhân với dấu ngoặc, x trừ a, đóng ngoặc.',
+    'zh-CN': '线性近似。f 关于 x 约等于，f 关于 a，加 f 撇关于 a，乘以左括号，x 减 a，右括号。',
   },
   'Assíntotas. Vertical em x igual a, quando f tende a infinito perto de a. Horizontal y igual a L, limite no infinito. Oblíqua y igual a m x mais b, com inclinação não-nula no infinito.': {
 
@@ -186,7 +214,7 @@ export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
 
   },
   'Composição e inversa. F composta com g de x igual a, f de g de x. E f composta com sua inversa, f menos um, é a função identidade x. A inversa só existe quando f é bijetora — injetora e sobrejetora ao mesmo tempo.': {
-    'ar-SA': 'التركيب والعكس. F مركب مع g من x يساوي a، f من g من x. E f مركب مع معكوسه، f ناقص واحد، هو دالة الوحدة x. يوجد المعكوس فقط عندما تكون f عبارة عن حاقن bijector و surjector في نفس الوقت.',
+    'ar-LB': 'التركيب والعكس. F مركب مع g من x يساوي a، f من g من x. E f مركب مع معكوسه، f ناقص واحد، هو دالة الوحدة x. يوجد المعكوس فقط عندما تكون f عبارة عن حاقن bijector و surjector في نفس الوقت.',
     'de-DE': 'Zusammensetzung und Inverse. F zusammengesetzt mit g von x ist gleich a, f von g von x. E f zusammengesetzt mit seiner Inverse, f minus eins, ist die Identitätsfunktion x. Die Inverse existiert nur, wenn f gleichzeitig Bijektor-Injektor und Surjektor ist.',
     'en-US': 'Composition and inverse. F compounded with g of x equals a, f of g of x. E f compounded with its inverse, f minus one, is the identity function x. The inverse only exists when f is bijector-injector and surjector at the same time.',
     'es-ES': 'Composición e inversa. F compuesto con g de x es igual a a, f de g de x. E f compuesto con su inversa, f menos uno, es la función de identidad x. La inversa solo existe cuando f es biyector-inyector y suryector al mismo tiempo.',
@@ -272,7 +300,7 @@ export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
 
   },
   'Equação um. F de x dois menos f de x um, dividido por x dois menos x um, igual a, a. A taxa de variação entre dois pontos quaisquer de uma função afim é constante e igual ao coeficiente angular.': {
-    'ar-SA': 'المعادلة أ. F في x اثنين ناقص f في x واحد، مقسومًا على x اثنين ناقص x واحد، يساوي، أ. معدل التغير بين أي نقطتين لدالة خطية ثابت ويساوي المعامل الزاوي.',
+    'ar-LB': 'المعادلة أ. F في x اثنين ناقص f في x واحد، مقسومًا على x اثنين ناقص x واحد، يساوي، أ. معدل التغير بين أي نقطتين لدالة خطية ثابت ويساوي المعامل الزاوي.',
     'de-DE': 'Gleichung a. F von x zwei minus f von x eins, geteilt durch x zwei minus x eins, gleich, a. Die Änderungsrate zwischen zwei beliebigen Punkten einer affinen Funktion ist konstant und gleich dem Winkelkoeffizienten.',
     'en-US': 'Equation a. F of x two minus f of x one, divided by x two minus x one, equal to, a. The rate of change between any two points of an affine function is constant and equal to the angular coefficient.',
     'es-ES': 'Ecuación a. F de x dos menos f de x uno, dividido por x dos menos x uno, igual a, a. La tasa de cambio entre dos puntos cualesquiera de una función afín es constante e igual al coeficiente angular.',
@@ -298,7 +326,7 @@ export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
 
   },
   'Função afim. F de x igual a, a vezes x, mais b. Onde a é o coeficiente angular, ou taxa de variação, e b é o coeficiente linear, o valor de f em zero.': {
-    'ar-SA': 'الاقتران. الدالة f في المتغير x تساوي a، a في x، زائد b. حيث a هو الميل، أو معدل التغير، و b هو المعامل الخطي، قيمة f عند الصفر.',
+    'ar-LB': 'الاقتران. الدالة f في المتغير x تساوي a، a في x، زائد b. حيث a هو الميل، أو معدل التغير، و b هو المعامل الخطي، قيمة f عند الصفر.',
     'de-DE': 'Affine Funktion. f von x ist gleich a, a mal x, plus b. Dabei ist a die Steigung oder Änderungsrate und b der lineare Koeffizient, der Wert von f bei Null.',
     'en-US': 'Affine function. f of x equals a, a times x, plus b. Where a is the slope, or rate of change, and b is the linear coefficient, the value of f at zero.',
     'es-ES': 'Función afín. f de x es igual a a, a veces x, más b. Donde a es la pendiente, o tasa de cambio, y b es el coeficiente lineal, el valor de f en cero.',
@@ -315,7 +343,7 @@ export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
     'zh-CN': '仿射函数。x的f等于a ， a乘以x ，加上b。其中a是斜率或变化率， b是线性系数， f的值为零。',
   },
   'Função exponencial. F de x igual a, a elevado a x, com a maior que zero e diferente de um. Quando a é maior que um, a função cresce; quando a está entre zero e um, ela decai. O caso especial é o número de Euler, e, aproximadamente dois ponto sete um oito.': {
-    'ar-SA': 'الدالة الأسية. الدالة F في المتغير x تساوي، a مرفوعة للقوة الأسية x، مع أكبر من صفر ومختلفة عن واحد. عندما تكون a أكبر من واحد، تنمو الدالة ؛ عندما تكون a بين صفر وواحد، فإنها تتحلل. الحالة الخاصة هي رقم أويلر، وحوالي نقطتين وسبعة وثمانية.',
+    'ar-LB': 'الدالة الأسية. الدالة F في المتغير x تساوي، a مرفوعة للقوة الأسية x، مع أكبر من صفر ومختلفة عن واحد. عندما تكون a أكبر من واحد، تنمو الدالة ؛ عندما تكون a بين صفر وواحد، فإنها تتحلل. الحالة الخاصة هي رقم أويلر، وحوالي نقطتين وسبعة وثمانية.',
     'de-DE': 'Exponentialfunktion. F von x ist gleich, a hoch x, mit a größer als Null und verschieden von eins. Wenn a größer als eins ist, wächst die Funktion; wenn a zwischen null und eins liegt, fällt sie ab. Der Sonderfall ist Eulers Zahl, und ungefähr zwei Komma sieben eins acht.',
     'en-US': 'Exponential function. F of x equals, a to the power of x, with a greater than zero and different from one. When a is greater than one, the function grows; when a is between zero and one, it decays. The special case is Euler\'s number, and, approximately two point seven one eight.',
     'es-ES': 'Función exponencial. F de x es igual a, a a la potencia de x, con un mayor que cero y diferente de uno. Cuando a es mayor que uno, la función crece; cuando a está entre cero y uno, decae. El caso especial es el número de Euler, y, aproximadamente dos punto siete uno ocho.',
@@ -332,7 +360,7 @@ export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
     'zh-CN': '指数函数。x的F等于x的幂， a大于零且不同于1。当a大于1时，函数增长；当a在0和1之间时，函数衰减。特殊情况是欧拉数，大约是2点7 1 8。',
   },
   'Função quadrática. F de x igual a, a vezes x ao quadrado, mais b vezes x, mais c, com a diferente de zero. O gráfico é uma parábola, com concavidade para cima se a é positivo e para baixo se a é negativo.': {
-    'ar-SA': 'الدالة التربيعية. الدالة F في المتغير x تساوي a، a في x تربيع، زائد b في x، زائد c، مع عدم الصفر. الرسم البياني هو قطع مكافئ، مع تقعر لأعلى إذا كان a موجبًا ولأسفل إذا كان a سالبًا.',
+    'ar-LB': 'الدالة التربيعية. الدالة F في المتغير x تساوي a، a في x تربيع، زائد b في x، زائد c، مع عدم الصفر. الرسم البياني هو قطع مكافئ، مع تقعر لأعلى إذا كان a موجبًا ولأسفل إذا كان a سالبًا.',
     'de-DE': 'Quadratische Funktion. F von x ist gleich a, a mal x quadratisch, plus b mal x, plus c, mit einem ungleich Null. Der Graph ist eine Parabel, mit Konkavität nach oben, wenn a positiv ist, und nach unten, wenn a negativ ist.',
     'en-US': 'Quadratic function. F of x equals a, a times x squared, plus b times x, plus c, with a non-zero. The graph is a parabola, with concavity up if a is positive and down if a is negative.',
     'es-ES': 'Función cuadrática. F de x es igual a a, a veces x al cuadrado, más b veces x, más c, con un valor distinto de cero. La gráfica es una parábola, con concavidad hacia arriba si a es positiva y hacia abajo si a es negativa.',
@@ -352,7 +380,7 @@ export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
 
   },
   'Função. F de A em B, x mapeia em f de x. Uma função é uma regra que associa cada elemento do domínio A a exatamente um elemento do contradomínio B. A imagem é o subconjunto de B que de fato é atingido pela regra f.': {
-    'ar-SA': 'الدالة. F لـ A في B، x تعين إلى f لـ x. الدالة هي قاعدة تربط كل عنصر من عناصر المجال A بعنصر واحد بالضبط من المجال المشترك B. الصورة هي المجموعة الفرعية لـ B التي تم الوصول إليها في الواقع بواسطة القاعدة f.',
+    'ar-LB': 'الدالة. F لـ A في B، x تعين إلى f لـ x. الدالة هي قاعدة تربط كل عنصر من عناصر المجال A بعنصر واحد بالضبط من المجال المشترك B. الصورة هي المجموعة الفرعية لـ B التي تم الوصول إليها في الواقع بواسطة القاعدة f.',
     'de-DE': 'Funktion. F von A in B, x wird in f von x abgebildet. Eine Funktion ist eine Regel, die jedes Element der Domäne A mit genau einem Element der Codomäne B verknüpft. Das Bild ist die Teilmenge von B, die tatsächlich von der Regel f erreicht wird.',
     'en-US': 'Function. F of A in B, x maps into f of x. A function is a rule that associates each element of the domain A with exactly one element of the codomain B. The image is the subset of B that is in fact reached by the rule f.',
     'es-ES': 'Función. F de A en B, x se mapea en f de x. Una función es una regla que asocia cada elemento del dominio A con exactamente un elemento del codominio B. La imagen es el subconjunto de B que, de hecho, alcanza la regla f.',
@@ -387,7 +415,7 @@ export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
 
   },
   'Logaritmo. Log de x na base a igual a y, se e somente se a elevado a y igual a x. O logaritmo responde a pergunta: a base a, elevada a quanto, dá o número x?': {
-    'ar-SA': 'لوغاريتم. لوغاريتم x في الأساس a يساوي y، إذا وفقط إذا كان a مرفوعًا للقوة y يساوي x. يجيب اللوغاريتم على السؤال: هل يعطي الأساس a، مرفوعًا للقوة، العدد x ؟',
+    'ar-LB': 'لوغاريتم. لوغاريتم x في الأساس a يساوي y، إذا وفقط إذا كان a مرفوعًا للقوة y يساوي x. يجيب اللوغاريتم على السؤال: هل يعطي الأساس a، مرفوعًا للقوة، العدد x ؟',
     'de-DE': 'Logarithmus. Log von x in der Basis a ist gleich y, wenn und nur wenn a bis y gleich x ist. Der Logarithmus beantwortet die Frage: Gibt die Basis a, wie viel, die Zahl x?',
     'en-US': 'Logarithm. Log of x in the base a equals y, if and only if a to the y equals x. The logarithm answers the question: does the base a, to the how much, give the number x?',
     'es-ES': 'Logaritmo. Log de x en la base a es igual a y, si y solo si a a la y es igual a x. El logaritmo responde a la pregunta: ¿la base a, a la cuánto, da el número x?',
@@ -419,7 +447,7 @@ export const AUDIO_TRANSLATIONS: Record<string, Record<string, string>> = {
 
   },
   'Os naturais estão contidos nos inteiros, que estão contidos nos racionais, que estão contidos nos reais. É a hierarquia dos conjuntos numéricos.': {
-    'ar-SA': 'وترد الطبيعية في الأعداد الصحيحة، التي ترد في الأعداد العقلانية، التي ترد في الأعداد الحقيقية. إنه التسلسل الهرمي لمجموعات الأعداد.',
+    'ar-LB': 'وترد الطبيعية في الأعداد الصحيحة، التي ترد في الأعداد العقلانية، التي ترد في الأعداد الحقيقية. إنه التسلسل الهرمي لمجموعات الأعداد.',
     'de-DE': 'Die natürlichen sind in den ganzen Zahlen enthalten, die in den rationalen enthalten sind, die in den realen enthalten sind. Es ist die Hierarchie der Zahlensätze.',
     'en-US': 'The natural ones are contained in the integers, which are contained in the rational ones, which are contained in the real ones. It is the hierarchy of number sets.',
     'es-ES': 'Los naturales están contenidos en los enteros, que están contenidos en los racionales, que están contenidos en los reales. Es la jerarquía de conjuntos numéricos.',

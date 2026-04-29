@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '@/components/layout/LocaleProvider'
 import { LOCALES } from '@/lib/i18n/locales'
 import { AUDIO_TRANSLATIONS } from '@/content/audio-translations.generated'
+import { Flag } from '@/components/layout/Flag'
 
 interface AudioReaderProps {
   /** Texto principal (PT-BR — versão original). */
@@ -135,9 +136,7 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
         <>
           <SpeakerIcon />
           <span>{labelFinal}</span>
-          <span aria-hidden className="opacity-70">
-            {bandeiraFalada}
-          </span>
+          <Flag emoji={bandeiraFalada} size={14} className="opacity-90" />
         </>
       )}
     </button>

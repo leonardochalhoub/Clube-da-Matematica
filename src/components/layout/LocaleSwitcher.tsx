@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocale } from './LocaleProvider'
 import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import { Flag } from './Flag'
 
 /**
  * Botão de idioma com dropdown. Mostra bandeira + nome no idioma.
@@ -43,9 +44,7 @@ export function LocaleSwitcher() {
         aria-haspopup="listbox"
         className="inline-flex h-10 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-clube-ink/80 hover:bg-clube-cream-soft hover:text-clube-teal"
       >
-        <span aria-hidden className="text-base leading-none">
-          {current.bandeira}
-        </span>
+        <Flag emoji={current.bandeira} size={20} />
         <span className="hidden sm:inline text-xs font-mono uppercase tracking-wider">
           {current.code}
         </span>
@@ -85,9 +84,7 @@ export function LocaleSwitcher() {
                     : 'text-clube-ink/85 hover:bg-clube-cream-soft hover:text-clube-teal')
                 }
               >
-                <span aria-hidden className="text-lg leading-none">
-                  {info.bandeira}
-                </span>
+                <Flag emoji={info.bandeira} size={22} />
                 <span className="flex-1 truncate">{info.nome}</span>
                 {ativo && (
                   <span aria-hidden className="text-clube-teal">
