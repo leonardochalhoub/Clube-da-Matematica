@@ -246,6 +246,161 @@ const PROVA_T1_V1: Prova = {
         licenca: CC_BY,
       },
     },
+    {
+      numero: 8,
+      enunciado: 'Determine se $f(x) = x^3$ é par, ímpar ou nenhum dos dois.',
+      resposta: 'Ímpar.',
+      passos:
+        '**Passo 1 — Definições.** $f$ é **par** se $f(-x) = f(x)$ para todo $x$ (gráfico simétrico ao eixo $y$). $f$ é **ímpar** se $f(-x) = -f(x)$ (gráfico simétrico à origem).\n\n' +
+        '**Passo 2 — Calcular $f(-x)$.** $f(-x) = (-x)^3 = -x^3 = -f(x)$.\n\n' +
+        '**Passo 3 — Conclusão.** Como $f(-x) = -f(x)$, $f$ é ímpar.\n\n' +
+        '**Por que isso importa?** Funções ímpares integradas em intervalo simétrico $[-a, a]$ dão zero (cancelam). Funções pares dobram. É simetria que economiza cálculo.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-02-funcoes'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.3 Even and Odd Functions, ex. 8 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 9,
+      enunciado: 'Resolva a inequação $|2x - 1| < 5$.',
+      resposta: '$x \\in (-2, 3)$',
+      passos:
+        '**Passo 1 — Definição de módulo.** $|y| < 5 \\Leftrightarrow -5 < y < 5$.\n\n' +
+        '**Passo 2 — Aplicar à expressão.** $-5 < 2x - 1 < 5$.\n\n' +
+        '**Passo 3 — Adicionar 1 a tudo.** $-4 < 2x < 6$.\n\n' +
+        '**Passo 4 — Dividir por 2.** $-2 < x < 3$.\n\n' +
+        '**Passo 5 — Resposta em intervalo.** $x \\in (-2, 3)$.\n\n' +
+        '**Por que essa regra?** $|y| = $ distância de $y$ até 0. $|y| < 5$ significa "$y$ dista de 0 menos que 5" ⇒ $y$ está entre $-5$ e $5$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-01-conjuntos-intervalos'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§2.7 Absolute Value Inequalities, ex. 14 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 10,
+      enunciado: 'Encontre o ponto de interseção das retas $y = 2x + 3$ e $y = -x + 6$.',
+      resposta: '$(1, 5)$',
+      passos:
+        '**Passo 1 — Igualar as expressões.** Onde se cruzam, $y$ é igual nas duas: $2x + 3 = -x + 6$.\n\n' +
+        '**Passo 2 — Resolver para $x$.** $3x = 3 \\Rightarrow x = 1$.\n\n' +
+        '**Passo 3 — Substituir em qualquer uma.** $y = 2(1) + 3 = 5$.\n\n' +
+        '**Passo 4 — Verificar na outra.** $y = -1 + 6 = 5$ ✓.\n\n' +
+        '**Por que igualar as $y$?** No ponto de interseção, ambas as retas passam pelo mesmo $(x, y)$. Logo $y_1 = y_2$ nesse ponto. É o método mais direto.\n\n' +
+        '**Geometricamente.** Duas retas não-paralelas em $\\mathbb{R}^2$ se cruzam em **exatamente um** ponto.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-03-afim'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§9.1 Systems of Linear Equations, ex. 6 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 11,
+      enunciado: 'Soma e produto das raízes de $x^2 - 7x + 12 = 0$.',
+      resposta: 'Soma $= 7$, produto $= 12$. Raízes: $3$ e $4$.',
+      passos:
+        '**Passo 1 — Relações de Girard.** Para $ax^2 + bx + c = 0$ com raízes $x_1, x_2$: soma $= -b/a$ e produto $= c/a$.\n\n' +
+        '**Passo 2 — Aplicar.** Aqui $a = 1$, $b = -7$, $c = 12$. Soma $= 7$, produto $= 12$.\n\n' +
+        '**Passo 3 — Encontrar raízes mentalmente.** Procuro dois números que somam 7 e multiplicam 12: 3 e 4.\n\n' +
+        '**Passo 4 — Verificar.** $(x - 3)(x - 4) = x^2 - 7x + 12$ ✓.\n\n' +
+        '**Por que Girard funciona?** Vem de fatorar $x^2 + bx + c = (x - x_1)(x - x_2) = x^2 - (x_1+x_2)x + x_1 x_2$. Comparação direta dos coeficientes.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['aula-04-quadratica'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§5.1 Quadratics — Vieta\'s, ex. 41 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 12,
+      enunciado: 'Se $f(x) = 2x + 1$, encontre $f^{-1}(x)$.',
+      resposta: '$f^{-1}(x) = (x - 1)/2$',
+      passos:
+        '**Passo 1 — Escrever $y = f(x)$.** $y = 2x + 1$.\n\n' +
+        '**Passo 2 — Trocar $x$ e $y$.** $x = 2y + 1$. Esse swap reflete o gráfico pelo eixo $y = x$, que é exatamente o que a inversa faz geometricamente.\n\n' +
+        '**Passo 3 — Isolar $y$.** $x - 1 = 2y \\Rightarrow y = (x - 1)/2$.\n\n' +
+        '**Passo 4 — Verificar $f(f^{-1}(x)) = x$.** $f((x-1)/2) = 2 \\cdot (x-1)/2 + 1 = x - 1 + 1 = x$ ✓.\n\n' +
+        '**Passo 5 — Verificar $f^{-1}(f(x)) = x$.** $f^{-1}(2x + 1) = (2x + 1 - 1)/2 = x$ ✓.\n\n' +
+        '**Por que isso funciona?** Inversa "desfaz" $f$. Se $f$ multiplica por 2 e soma 1, $f^{-1}$ subtrai 1 e divide por 2 — operações inversas, ordem inversa.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-05-composicao-inversa'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.7 Inverse Functions, ex. 9 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 13,
+      enunciado: 'Calcule $\\log_2 32$.',
+      resposta: '$5$',
+      passos:
+        '**Passo 1 — Definição.** $\\log_b a = c$ significa $b^c = a$. Aqui: que potência de 2 dá 32?\n\n' +
+        '**Passo 2 — Reconhecer potência.** $32 = 2^5$.\n\n' +
+        '**Passo 3 — Aplicar.** $\\log_2 32 = \\log_2(2^5) = 5$.\n\n' +
+        '**Conferência mental.** $2^1 = 2$, $2^2 = 4$, $2^3 = 8$, $2^4 = 16$, $2^5 = 32$ ✓.\n\n' +
+        '**Por que log é importante?** É a operação inversa da exponenciação. Onde exponencial cresce explosivamente, log cresce **lentamente** — comprime escalas (Richter, pH, decibel).',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-07-logaritmo'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.3 Logarithmic Functions, ex. 13 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 14,
+      enunciado: 'Calcule a taxa média de variação de $f(x) = x^2 + 1$ no intervalo $[1, 4]$.',
+      resposta: '$5$',
+      passos:
+        '**Passo 1 — Fórmula.** TMV $= \\dfrac{f(b) - f(a)}{b - a}$.\n\n' +
+        '**Passo 2 — Calcular $f(1)$ e $f(4)$.** $f(1) = 2$, $f(4) = 17$.\n\n' +
+        '**Passo 3 — Aplicar.** TMV $= (17 - 2)/(4 - 1) = 15/3 = 5$.\n\n' +
+        '**Interpretação.** Em média, $f$ aumenta 5 unidades por unidade de $x$ nesse intervalo.\n\n' +
+        '**Conexão futura.** Quando $b \\to a$, TMV $\\to f\'(a)$ — derivada (Trim 5/6). Aqui, com $a = 2$ e $b \\to 2$: TMV $\\to 4 = f\'(2) = 2 \\cdot 2$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['aula-09-taxa-variacao'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§3.3 Average Rate of Change, ex. 11 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 15,
+      enunciado: 'Modelagem: depreciação de um carro segue $V(t) = 50000 \\cdot (0,85)^t$ (R\\$, t em anos). Valor após 5 anos.',
+      resposta: '$\\approx R\\$ 22\\,185{,}66$',
+      passos:
+        '**Passo 1 — Identificar modelo.** Decaimento exponencial: a cada ano, valor cai 15% (multiplicador 0,85).\n\n' +
+        '**Passo 2 — Substituir $t = 5$.** $V(5) = 50000 \\cdot (0{,}85)^5$.\n\n' +
+        '**Passo 3 — Calcular potência.** $0{,}85^5 = 0{,}85 \\cdot 0{,}85 \\cdot 0{,}85 \\cdot 0{,}85 \\cdot 0{,}85$. Por etapas: $0{,}85^2 = 0{,}7225$. $0{,}85^4 = 0{,}7225^2 \\approx 0{,}522$. $0{,}85^5 \\approx 0{,}522 \\cdot 0{,}85 \\approx 0{,}4437$.\n\n' +
+        '**Passo 4 — Multiplicar.** $V(5) \\approx 50000 \\cdot 0{,}4437 \\approx 22\\,185{,}66$.\n\n' +
+        '**Por que o carro perde mais valor no início?** Modelo exponencial: 15% de R\\$ 50000 = R\\$ 7500 no 1º ano, mas 15% de R\\$ 42500 = R\\$ 6375 no 2º ano. **Perda absoluta diminui**, mas percentual é constante.\n\n' +
+        '**Aplicação prática.** Esse modelo é base do cálculo de IPVA, contratos de leasing, e seguros automotivos.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['aula-08-crescimento'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: OS_CA,
+        ref: '§6.7 Exponential Decay, ex. 22 (adaptado para BR)',
+        licenca: CC_BY,
+      },
+    },
   ],
 }
 
