@@ -98,9 +98,9 @@ export default async function ConteudoPage({ params }: Props) {
       </header>
 
       <div className="prose prose-clube max-w-none">
-        {/* TODO: re-enable LocalizedMdx quando manifest tiver < 100 entries
-            ou quando build for movido pra Vercel com mais RAM. Build CI
-            (4GB heap) explodiu em OOM com 451 lazy imports. */}
+        {/* TODO: re-enable LocalizedMdx — OOM em CI mesmo com 6GB heap.
+            Próxima tentativa: bundle por idioma (não por path × idioma)
+            ou migrar build pra Vercel (mais RAM). */}
         <MDXContent />
       </div>
 

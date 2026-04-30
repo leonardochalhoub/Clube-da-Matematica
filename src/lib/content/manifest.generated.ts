@@ -312,6 +312,7 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
     'ko-KR': () => import('@/../content/i18n/ko-KR/aulas/ano-1/trim-3/aula-26-vetores-plano.mdx'),
     'pl-PL': () => import('@/../content/i18n/pl-PL/aulas/ano-1/trim-3/aula-26-vetores-plano.mdx'),
     'ru-RU': () => import('@/../content/i18n/ru-RU/aulas/ano-1/trim-3/aula-26-vetores-plano.mdx'),
+    'vi-VN': () => import('@/../content/i18n/vi-VN/aulas/ano-1/trim-3/aula-26-vetores-plano.mdx'),
     'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-1/trim-3/aula-26-vetores-plano.mdx'),
   },
   'aulas/ano-1/trim-3/aula-27-produto-escalar': {
@@ -360,6 +361,7 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
     'ko-KR': () => import('@/../content/i18n/ko-KR/aulas/ano-1/trim-3/aula-29-sistemas-lineares.mdx'),
     'pl-PL': () => import('@/../content/i18n/pl-PL/aulas/ano-1/trim-3/aula-29-sistemas-lineares.mdx'),
     'ru-RU': () => import('@/../content/i18n/ru-RU/aulas/ano-1/trim-3/aula-29-sistemas-lineares.mdx'),
+    'sw-KE': () => import('@/../content/i18n/sw-KE/aulas/ano-1/trim-3/aula-29-sistemas-lineares.mdx'),
     'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-1/trim-3/aula-29-sistemas-lineares.mdx'),
   },
   'aulas/ano-1/trim-3/aula-30-consolidacao-trim-3': {
