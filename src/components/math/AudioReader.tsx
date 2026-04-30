@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '@/components/layout/LocaleProvider'
 import { LOCALES } from '@/lib/i18n/locales'
 import { AUDIO_TRANSLATIONS } from '@/content/audio-translations.generated'
+import audioMp3He from '@/content/audio-mp3-he.generated.json'
 import { Flag } from '@/components/layout/Flag'
+
+// Hebrew-only MP3 manifest. Outros idiomas usam Web Speech API.
+const HE_MP3_MANIFEST = audioMp3He as Record<string, string>
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 interface AudioReaderProps {
   /** Texto principal (PT-BR — versão original). */
@@ -75,14 +80,37 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     ? LOCALES[locale].bandeira
     : LOCALES['pt-BR'].bandeira
 
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
   async function falar() {
     if (estado === 'indisponivel') return
     if (estado === 'falando') {
       window.speechSynthesis.cancel()
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
       setEstado('idle')
       return
     }
 
+    // PRIORIDADE 1: Hebrew → MP3 pré-renderizado (browsers raramente têm voz he)
+    if (locale === 'he' && HE_MP3_MANIFEST[texto]) {
+      const url = `${BASE_PATH}${HE_MP3_MANIFEST[texto]}`
+      const audio = new Audio(url)
+      audio.onplay = () => setEstado('falando')
+      audio.onended = () => setEstado('idle')
+      audio.onerror = () => setEstado('idle')
+      audioRef.current = audio
+      try {
+        await audio.play()
+      } catch {
+        setEstado('idle')
+      }
+      return
+    }
+
+    // PRIORIDADE 2: Web Speech API pra outros idiomas
     const vozes = await obterVoicesAsync()
     const exatas = vozes.filter((v) => v.lang === langFalado)
     const prefixo = vozes.filter((v) => {
@@ -91,12 +119,7 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     })
     const candidatas = exatas.length > 0 ? exatas : prefixo
 
-    // Estratégia de voz/texto:
-    // - Se há voz pro idioma alvo: fala texto traduzido com voz nativa.
-    // - Se não há voz E é PT-BR: usa default browser (geralmente ok).
-    // - Se não há voz e idioma é estrangeiro: NÃO fala português com sotaque.
-    //   Avisa o usuário via alert + bandeira PT no botão indicando fallback.
-    //   Quem quiser ouvir pode trocar pra PT-BR ou instalar voz no OS.
+    // Sem voz e idioma estrangeiro: alert pra instalar voz no OS.
     if (candidatas.length === 0 && langFalado !== 'pt-BR') {
       const nomeIdioma = LOCALES[locale].nome
       alert(
