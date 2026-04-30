@@ -22,6 +22,9 @@ export interface ConteudoCarregado {
 function* walkMdx(dir: string, prefixo = ''): Generator<{ full: string; rel: string }> {
   if (!existsSync(dir)) return
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    // Pula /content/i18n/ — traduções não viram rotas independentes,
+    // são consumidas via LocalizedMdx (client-side swap).
+    if (entry.name === 'i18n' && !prefixo) continue
     const full = join(dir, entry.name)
     const rel = prefixo ? `${prefixo}/${entry.name}` : entry.name
     if (entry.isDirectory()) {
