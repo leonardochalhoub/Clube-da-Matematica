@@ -91,29 +91,33 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     })
     const candidatas = exatas.length > 0 ? exatas : prefixo
 
-    let textoEfetivo = textoFalado
-    let langEfetivo = langFalado
-    let vozEscolhida: SpeechSynthesisVoice | null =
-      candidatas.length > 0
-        ? candidatas[Math.floor(Math.random() * candidatas.length)]!
-        : null
-
-    if (!vozEscolhida && langFalado !== 'pt-BR') {
-      // Sem voz nativa → fala PT-BR com voz PT-BR
-      textoEfetivo = texto
-      langEfetivo = 'pt-BR'
-      const vozesPt = vozes.filter((v) => v.lang === 'pt-BR' || v.lang.startsWith('pt-'))
-      if (vozesPt.length > 0) {
-        vozEscolhida = vozesPt[Math.floor(Math.random() * vozesPt.length)]!
-      }
+    // Estratégia de voz/texto:
+    // - Se há voz pro idioma alvo: fala texto traduzido com voz nativa.
+    // - Se não há voz E é PT-BR: usa default browser (geralmente ok).
+    // - Se não há voz e idioma é estrangeiro: NÃO fala português com sotaque.
+    //   Avisa o usuário via alert + bandeira PT no botão indicando fallback.
+    //   Quem quiser ouvir pode trocar pra PT-BR ou instalar voz no OS.
+    if (candidatas.length === 0 && langFalado !== 'pt-BR') {
+      const nomeIdioma = LOCALES[locale].nome
+      alert(
+        `${nomeIdioma}: voz TTS não instalada no navegador. ` +
+        `Instale uma voz ${nomeIdioma} no seu sistema operacional ` +
+        `(em Windows: Configurações > Hora e Idioma > Voz) ` +
+        `ou troque pra PT-BR pra ouvir.`,
+      )
+      setEstado('idle')
+      return
     }
 
-    const u = new SpeechSynthesisUtterance(textoEfetivo)
-    u.lang = langEfetivo
+    const u = new SpeechSynthesisUtterance(textoFalado)
+    u.lang = langFalado
     u.rate = 0.95
     u.pitch = 1
     u.volume = 1
-    if (vozEscolhida) u.voice = vozEscolhida
+    if (candidatas.length > 0) {
+      const random = candidatas[Math.floor(Math.random() * candidatas.length)]!
+      u.voice = random
+    }
 
     u.onstart = () => setEstado('falando')
     u.onend = () => setEstado('idle')
