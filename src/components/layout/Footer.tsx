@@ -45,7 +45,7 @@ export function Footer() {
                   Jefferson Korte Junior
                 </div>
                 <div className="text-[11px] italic text-clube-mist/80">
-                  UTFPR · jefferson.2024@alunos.utfpr.br
+                  UTFPR · jeffersonkorte@gmail.com
                 </div>
                 <a
                   href="https://www.linkedin.com/in/jefferson-korte-dev/"
