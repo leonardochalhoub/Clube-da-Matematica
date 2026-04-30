@@ -248,6 +248,7 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
     'ko-KR': () => import('@/../content/i18n/ko-KR/aulas/ano-1/trim-3/aula-22-equacao-reta.mdx'),
     'pl-PL': () => import('@/../content/i18n/pl-PL/aulas/ano-1/trim-3/aula-22-equacao-reta.mdx'),
     'ru-RU': () => import('@/../content/i18n/ru-RU/aulas/ano-1/trim-3/aula-22-equacao-reta.mdx'),
+    'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-1/trim-3/aula-22-equacao-reta.mdx'),
   },
   'aulas/ano-1/trim-3/aula-23-posicao-relativa-retas': {
     'pt-BR': () => import('@/../content/aulas/ano-1/trim-3/aula-23-posicao-relativa-retas.mdx'),
@@ -263,6 +264,7 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
     'ko-KR': () => import('@/../content/i18n/ko-KR/aulas/ano-1/trim-3/aula-23-posicao-relativa-retas.mdx'),
     'pl-PL': () => import('@/../content/i18n/pl-PL/aulas/ano-1/trim-3/aula-23-posicao-relativa-retas.mdx'),
     'ru-RU': () => import('@/../content/i18n/ru-RU/aulas/ano-1/trim-3/aula-23-posicao-relativa-retas.mdx'),
+    'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-1/trim-3/aula-23-posicao-relativa-retas.mdx'),
   },
   'aulas/ano-1/trim-3/aula-24-circunferencia': {
     'pt-BR': () => import('@/../content/aulas/ano-1/trim-3/aula-24-circunferencia.mdx'),
@@ -448,6 +450,7 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
     'ko-KR': () => import('@/../content/i18n/ko-KR/aulas/ano-1/trim-4/aula-35-sistemas-via-matrizes.mdx'),
     'pl-PL': () => import('@/../content/i18n/pl-PL/aulas/ano-1/trim-4/aula-35-sistemas-via-matrizes.mdx'),
     'ru-RU': () => import('@/../content/i18n/ru-RU/aulas/ano-1/trim-4/aula-35-sistemas-via-matrizes.mdx'),
+    'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-1/trim-4/aula-35-sistemas-via-matrizes.mdx'),
   },
   'aulas/ano-1/trim-4/aula-36-pfc': {
     'pt-BR': () => import('@/../content/aulas/ano-1/trim-4/aula-36-pfc.mdx'),
