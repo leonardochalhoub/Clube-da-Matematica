@@ -321,6 +321,7 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
     'en-US': () => import('@/../content/i18n/en-US/aulas/ano-1/trim-3/aula-27-produto-escalar.mdx'),
     'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-1/trim-3/aula-27-produto-escalar.mdx'),
     'fr-FR': () => import('@/../content/i18n/fr-FR/aulas/ano-1/trim-3/aula-27-produto-escalar.mdx'),
+    'he-IL': () => import('@/../content/i18n/he-IL/aulas/ano-1/trim-3/aula-27-produto-escalar.mdx'),
     'hi-IN': () => import('@/../content/i18n/hi-IN/aulas/ano-1/trim-3/aula-27-produto-escalar.mdx'),
     'it-IT': () => import('@/../content/i18n/it-IT/aulas/ano-1/trim-3/aula-27-produto-escalar.mdx'),
     'ja-JP': () => import('@/../content/i18n/ja-JP/aulas/ano-1/trim-3/aula-27-produto-escalar.mdx'),
