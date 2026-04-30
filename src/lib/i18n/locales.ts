@@ -21,13 +21,10 @@ export type Locale =
   | 'it'    // italiano
   | 'ru'    // russo
   | 'ko'    // coreano
-  | 'vi'    // vietnamita
   | 'pl'    // polonês
-  | 'sw'    // swahili (África Oriental)
   | 'ar'    // árabe (libanês — bandeira do Líbano com o cedro)
-  | 'he'    // hebraico (Israel)
+  | 'he'    // hebraico (Israel — usa MP3 pré-renderizados, não Web Speech)
   | 'hi'    // hindi (Índia)
-  | 'et'    // estoniano
 
 export interface LocaleInfo {
   code: Locale
@@ -52,13 +49,10 @@ export const LOCALES: Record<Locale, LocaleInfo> = {
   it:      { code: 'it',    nome: 'Italiano',            bandeira: '🇮🇹', speechLang: 'it-IT', dir: 'ltr' },
   ru:      { code: 'ru',    nome: 'Русский',             bandeira: '🇷🇺', speechLang: 'ru-RU', dir: 'ltr' },
   ko:      { code: 'ko',    nome: '한국어',                 bandeira: '🇰🇷', speechLang: 'ko-KR', dir: 'ltr' },
-  vi:      { code: 'vi',    nome: 'Tiếng Việt',          bandeira: '🇻🇳', speechLang: 'vi-VN', dir: 'ltr' },
   pl:      { code: 'pl',    nome: 'Polski',              bandeira: '🇵🇱', speechLang: 'pl-PL', dir: 'ltr' },
-  sw:      { code: 'sw',    nome: 'Kiswahili',           bandeira: '🇰🇪', speechLang: 'sw-KE', dir: 'ltr' },
   ar:      { code: 'ar',    nome: 'العربية اللبنانية',     bandeira: '🇱🇧', speechLang: 'ar-LB', dir: 'rtl' },
   he:      { code: 'he',    nome: 'עברית',                bandeira: '🇮🇱', speechLang: 'he-IL', dir: 'rtl' },
   hi:      { code: 'hi',    nome: 'हिन्दी',                  bandeira: '🇮🇳', speechLang: 'hi-IN', dir: 'ltr' },
-  et:      { code: 'et',    nome: 'Eesti',               bandeira: '🇪🇪', speechLang: 'et-EE', dir: 'ltr' },
 }
 
 export const DEFAULT_LOCALE: Locale = 'en'
@@ -78,12 +72,9 @@ const COUNTRY_TO_LOCALE: Record<string, Locale> = {
   IT: 'it', SM: 'it', VA: 'it',
   RU: 'ru', BY: 'ru',
   KR: 'ko', KP: 'ko',
-  VN: 'vi',
   PL: 'pl',
-  KE: 'sw', TZ: 'sw', UG: 'sw', RW: 'sw',
   LB: 'ar', SY: 'ar', JO: 'ar', PS: 'ar', SA: 'ar', AE: 'ar', EG: 'ar', QA: 'ar', KW: 'ar',
   IL: 'he',
-  EE: 'et',
 }
 
 /**
