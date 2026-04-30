@@ -16,16 +16,16 @@ export const TRANSLATIONS: Record<string, Translations> = {
   // ===== AUDIO =====
   'audio.read': {
     'pt-BR': 'Ouvir', en: 'Listen', es: 'Escuchar', zh: '听', ja: '聞く',
-    de: 'Anhören', fr: 'Écouter', it: 'Ascolta', ru: 'Слушать', ko: '듣기', pl: 'Słuchaj', ar: 'استمع', he: 'הקשב', hi: 'सुनें',
+    de: 'Anhören', fr: 'Écouter', it: 'Ascolta', ru: 'Слушать', ko: '듣기', pl: 'Słuchaj', ar: 'استمع', hi: 'सुनें',
   },
   'audio.stop': {
     'pt-BR': 'Parar', en: 'Stop', es: 'Detener', zh: '停', ja: '停止',
-    de: 'Stopp', fr: 'Arrêter', it: 'Ferma', ru: 'Стоп', ko: '정지', pl: 'Stop', ar: 'إيقاف', he: 'עצור', hi: 'रोकें',
+    de: 'Stopp', fr: 'Arrêter', it: 'Ferma', ru: 'Стоп', ko: '정지', pl: 'Stop', ar: 'إيقاف', hi: 'रोकें',
   },
   'audio.translating': {
     'pt-BR': 'Traduzindo…', en: 'Translating…', es: 'Traduciendo…', zh: '翻译中…',
     ja: '翻訳中…', de: 'Übersetze…', fr: 'Traduction…', it: 'Traduzione…',
-    ru: 'Перевожу…', ko: '번역 중…', pl: 'Tłumaczę…', ar: 'يترجم…', he: 'מתרגם…', hi: 'अनुवाद हो रहा है…',
+    ru: 'Перевожу…', ko: '번역 중…', pl: 'Tłumaczę…', ar: 'يترجم…', hi: 'अनुवाद हो रहा है…',
   },
   'audio.pendingTranslation': {
     'pt-BR': 'tradução pendente — falando em PT-BR',
@@ -40,7 +40,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '번역 대기 중 — 포르투갈어로 읽음',
     pl: 'oczekuje na tłumaczenie — czytam po portugalsku',
     ar: 'الترجمة قيد الانتظار — يُقرأ بالبرتغالية',
-    he: 'תרגום ממתין — מקריא בפורטוגזית',
     hi: 'अनुवाद लंबित — पुर्तगाली में पढ़ा जा रहा है',
   },
 
@@ -48,33 +47,33 @@ export const TRANSLATIONS: Record<string, Translations> = {
   'nav.middleSchool': {
     'pt-BR': 'Ensino Médio', en: 'High School', es: 'Bachillerato', zh: '高中',
     ja: '高校', de: 'Gymnasium', fr: 'Lycée', it: 'Scuola superiore',
-    ru: 'Старшая школа', ko: '고등학교', pl: 'Liceum', ar: 'الثانوية', he: 'תיכון', hi: 'हाई स्कूल',
+    ru: 'Старшая школа', ko: '고등학교', pl: 'Liceum', ar: 'الثانوية', hi: 'हाई स्कूल',
   },
   'nav.finance': {
     'pt-BR': 'Finanças', en: 'Finance', es: 'Finanzas', zh: '金融', ja: '金融',
-    de: 'Finanzen', fr: 'Finance', it: 'Finanza', ru: 'Финансы', ko: '금융', pl: 'Finanse', ar: 'مالية', he: 'פיננסים', hi: 'वित्त',
+    de: 'Finanzen', fr: 'Finance', it: 'Finanza', ru: 'Финансы', ko: '금융', pl: 'Finanse', ar: 'مالية', hi: 'वित्त',
   },
   'nav.books': {
     'pt-BR': 'Livros', en: 'Books', es: 'Libros', zh: '书籍', ja: '書籍',
-    de: 'Bücher', fr: 'Livres', it: 'Libri', ru: 'Книги', ko: '도서', pl: 'Książki', ar: 'كتب', he: 'ספרים', hi: 'पुस्तकें',
+    de: 'Bücher', fr: 'Livres', it: 'Libri', ru: 'Книги', ko: '도서', pl: 'Książki', ar: 'كتب', hi: 'पुस्तकें',
   },
   'nav.videos': {
     'pt-BR': 'Vídeos', en: 'Videos', es: 'Videos', zh: '视频', ja: '動画',
-    de: 'Videos', fr: 'Vidéos', it: 'Video', ru: 'Видео', ko: '비디오', pl: 'Filmy', ar: 'فيديوهات', he: 'סרטונים', hi: 'वीडियो',
+    de: 'Videos', fr: 'Vidéos', it: 'Video', ru: 'Видео', ko: '비디오', pl: 'Filmy', ar: 'فيديوهات', hi: 'वीडियो',
   },
   'nav.exams': {
     'pt-BR': 'Provas', en: 'Exams', es: 'Exámenes', zh: '考试', ja: '試験',
-    de: 'Prüfungen', fr: 'Examens', it: 'Esami', ru: 'Экзамены', ko: '시험', pl: 'Egzaminy', ar: 'امتحانات', he: 'מבחנים', hi: 'परीक्षा',
+    de: 'Prüfungen', fr: 'Examens', it: 'Esami', ru: 'Экзамены', ko: '시험', pl: 'Egzaminy', ar: 'امتحانات', hi: 'परीक्षा',
   },
   'nav.manifesto': {
     'pt-BR': 'Manifesto', en: 'Manifesto', es: 'Manifiesto', zh: '宣言', ja: 'マニフェスト',
-    de: 'Manifest', fr: 'Manifeste', it: 'Manifesto', ru: 'Манифест', ko: '선언문', pl: 'Manifest', ar: 'بيان', he: 'מניפסט', hi: 'घोषणापत्र',
+    de: 'Manifest', fr: 'Manifeste', it: 'Manifesto', ru: 'Манифест', ko: '선언문', pl: 'Manifest', ar: 'بيان', hi: 'घोषणापत्र',
   },
 
   // ===== LOCALE =====
   'locale.label': {
     'pt-BR': 'Idioma', en: 'Language', es: 'Idioma', zh: '语言', ja: '言語',
-    de: 'Sprache', fr: 'Langue', it: 'Lingua', ru: 'Язык', ko: '언어', pl: 'Język', ar: 'اللغة', he: 'שפה', hi: 'भाषा',
+    de: 'Sprache', fr: 'Langue', it: 'Lingua', ru: 'Язык', ko: '언어', pl: 'Język', ar: 'اللغة', hi: 'भाषा',
   },
 
   // ===== HOME HERO =====
@@ -91,7 +90,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '오픈소스 · 무료 · 다국어',
     pl: 'Open source · darmowy · wielojęzyczny',
     ar: 'مفتوح المصدر · مجاني · متعدد اللغات',
-    he: 'קוד פתוח · חינם · רב־לשוני',
     hi: 'ओपन सोर्स · मुफ्त · बहुभाषी',
   },
   'home.title.line1': {
@@ -107,7 +105,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '브라질 고등학교',
     pl: 'Brazylijskie liceum',
     ar: 'الثانوية البرازيلية',
-    he: 'תיכון ברזילאי',
     hi: 'ब्राज़ीलियन हाई स्कूल',
   },
   'home.title.line2': {
@@ -123,7 +120,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '최적화.',
     pl: 'zoptymalizowane.',
     ar: 'الأمثل.',
-    he: 'מותאם.',
     hi: 'अनुकूलित।',
   },
   'home.cta.start': {
@@ -139,7 +135,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '고등학교부터 시작',
     pl: 'Zacznij od liceum',
     ar: 'ابدأ بالثانوية',
-    he: 'התחל מהתיכון',
     hi: 'हाई स्कूल से शुरू करें',
   },
   'home.cta.bs': {
@@ -155,7 +150,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: 'Black-Scholes 보기 (금융)',
     pl: 'Zobacz Black-Scholes (Finanse)',
     ar: 'انظر بلاك-شولز (مالية)',
-    he: 'ראה בלאק-שולס (פיננסים)',
     hi: 'Black-Scholes देखें (वित्त)',
   },
   'home.cta.pdf': {
@@ -171,7 +165,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '워킹 페이퍼 읽기 (PDF)',
     pl: 'Przeczytaj working paper (PDF)',
     ar: 'اقرأ ورقة العمل (PDF)',
-    he: 'קרא את המאמר (PDF)',
     hi: 'वर्किंग पेपर पढ़ें (PDF)',
   },
 
@@ -189,7 +182,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '◆ 숫자로 보기 ◆',
     pl: '◆ W liczbach ◆',
     ar: '◆ بالأرقام ◆',
-    he: '◆ במספרים ◆',
     hi: '◆ संख्याओं में ◆',
   },
   'counters.title': {
@@ -205,7 +197,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '내부에 무엇이 있는지',
     pl: 'Co znajdziesz w środku',
     ar: 'ما هو بالداخل',
-    he: 'מה יש בפנים',
     hi: 'अंदर क्या है',
   },
   'counters.subtitle': {
@@ -221,46 +212,45 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '실시간 플랫폼 지표',
     pl: 'Rzeczywiste metryki — w czasie rzeczywistym',
     ar: 'مقاييس حقيقية — محدثة في الوقت الفعلي',
-    he: 'מדדים אמיתיים — מתעדכנים בזמן אמת',
     hi: 'वास्तविक मेट्रिक्स — रीयल-टाइम अपडेट',
   },
   'counters.visits': {
     'pt-BR': 'visitas', en: 'visits', es: 'visitas', zh: '访问', ja: '訪問',
-    de: 'Besuche', fr: 'visites', it: 'visite', ru: 'посещений', ko: '방문', pl: 'odwiedzin', ar: 'زيارات', he: 'ביקורים', hi: 'विज़िट',
+    de: 'Besuche', fr: 'visites', it: 'visite', ru: 'посещений', ko: '방문', pl: 'odwiedzin', ar: 'زيارات', hi: 'विज़िट',
   },
   'counters.lessons.published': {
     'pt-BR': 'lições publicadas', en: 'lessons published', es: 'lecciones publicadas',
     zh: '已发布课程', ja: '公開済みレッスン', de: 'veröffentlichte Lektionen',
     fr: 'leçons publiées', it: 'lezioni pubblicate', ru: 'опубликованных уроков',
-    ko: '게시된 수업', pl: 'opublikowane lekcje', ar: 'دروس منشورة', he: 'שיעורים שפורסמו', hi: 'प्रकाशित पाठ',
+    ko: '게시된 수업', pl: 'opublikowane lekcje', ar: 'دروس منشورة', hi: 'प्रकाशित पाठ',
   },
   'counters.exercises': {
     'pt-BR': 'exercícios', en: 'exercises', es: 'ejercicios', zh: '练习', ja: '演習',
-    de: 'Übungen', fr: 'exercices', it: 'esercizi', ru: 'упражнений', ko: '연습', pl: 'ćwiczeń', ar: 'تمارين', he: 'תרגילים', hi: 'अभ्यास',
+    de: 'Übungen', fr: 'exercices', it: 'esercizi', ru: 'упражнений', ko: '연습', pl: 'ćwiczeń', ar: 'تمارين', hi: 'अभ्यास',
   },
   'counters.exam.versions': {
     'pt-BR': 'versões de prova', en: 'exam versions', es: 'versiones de examen',
     zh: '考试版本', ja: '試験バージョン', de: 'Prüfungsversionen',
     fr: 'versions d\'examen', it: 'versioni d\'esame', ru: 'версий экзамена',
-    ko: '시험 버전', pl: 'wersji egzaminu', ar: 'إصدارات الامتحان', he: 'גרסאות מבחן', hi: 'परीक्षा संस्करण',
+    ko: '시험 버전', pl: 'wersji egzaminu', ar: 'إصدارات الامتحان', hi: 'परीक्षा संस्करण',
   },
   'counters.study.total': {
     'pt-BR': 'estudo total', en: 'total study', es: 'estudio total',
     zh: '总学习', ja: '総学習', de: 'Gesamt-Lernzeit',
     fr: 'étude totale', it: 'studio totale', ru: 'всего обучения',
-    ko: '총 학습', pl: 'łączna nauka', ar: 'إجمالي الدراسة', he: 'סך הלימוד', hi: 'कुल अध्ययन',
+    ko: '총 학습', pl: 'łączna nauka', ar: 'إجمالي الدراسة', hi: 'कुल अध्ययन',
   },
   'counters.books.ledger': {
     'pt-BR': 'livros no ledger', en: 'books in ledger', es: 'libros en ledger',
     zh: '书籍目录', ja: '蔵書', de: 'Bücher im Verzeichnis',
     fr: 'livres au catalogue', it: 'libri nel catalogo', ru: 'книг в каталоге',
-    ko: '도서 목록', pl: 'książek w katalogu', ar: 'كتب في السجل', he: 'ספרים בקטלוג', hi: 'सूची में पुस्तकें',
+    ko: '도서 목록', pl: 'książek w katalogu', ar: 'كتب في السجل', hi: 'सूची में पुस्तकें',
   },
 
   // ===== SEARCH DISCOVERY =====
   'search.eyebrow': {
     'pt-BR': 'Descobrir', en: 'Discover', es: 'Descubrir', zh: '探索', ja: '探す',
-    de: 'Entdecken', fr: 'Découvrir', it: 'Scopri', ru: 'Найти', ko: '찾아보기', pl: 'Odkryj', ar: 'اكتشف', he: 'גלה', hi: 'खोजें',
+    de: 'Entdecken', fr: 'Découvrir', it: 'Scopri', ru: 'Найти', ko: '찾아보기', pl: 'Odkryj', ar: 'اكتشف', hi: 'खोजें',
   },
   'search.title': {
     'pt-BR': 'O que você quer estudar hoje?',
@@ -275,7 +265,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '오늘 무엇을 공부하고 싶으세요?',
     pl: 'Czego chcesz się dziś nauczyć?',
     ar: 'ماذا تريد أن تدرس اليوم؟',
-    he: 'מה תרצה ללמוד היום?',
     hi: 'आज आप क्या पढ़ना चाहते हैं?',
   },
   'search.placeholder': {
@@ -291,7 +280,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '예: 삼각법, 선형 대수, 적분',
     pl: 'Np.: trygonometria, algebra liniowa, całki',
     ar: 'مثال: علم المثلثات، الجبر الخطي، التكاملات',
-    he: 'למשל: טריגונומטריה, אלגברה ליניארית, אינטגרלים',
     hi: 'उदा.: त्रिकोणमिति, रेखीय बीजगणित, समाकलन',
   },
   'search.empty.invite': {
@@ -307,16 +295,15 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '검색으로 시작하세요. 입력하면 수업과 도서가 나타납니다.',
     pl: 'Zacznij od wyszukiwania. Lekcje i książki pojawią się podczas pisania.',
     ar: 'ابدأ بالبحث. تظهر الدروس والكتب أثناء الكتابة.',
-    he: 'התחל בחיפוש. שיעורים וספרים יופיעו תוך כדי הקלדה.',
     hi: 'खोज से शुरू करें। टाइप करने पर पाठ और पुस्तकें दिखाई देंगी।',
   },
   'search.lessons.label': {
     'pt-BR': 'Lições', en: 'Lessons', es: 'Lecciones', zh: '课程', ja: 'レッスン',
-    de: 'Lektionen', fr: 'Leçons', it: 'Lezioni', ru: 'Уроки', ko: '수업', pl: 'Lekcje', ar: 'دروس', he: 'שיעורים', hi: 'पाठ',
+    de: 'Lektionen', fr: 'Leçons', it: 'Lezioni', ru: 'Уроки', ko: '수업', pl: 'Lekcje', ar: 'دروس', hi: 'पाठ',
   },
   'search.books.label': {
     'pt-BR': 'Livros', en: 'Books', es: 'Libros', zh: '书籍', ja: '書籍',
-    de: 'Bücher', fr: 'Livres', it: 'Libri', ru: 'Книги', ko: '도서', pl: 'Książki', ar: 'كتب', he: 'ספרים', hi: 'पुस्तकें',
+    de: 'Bücher', fr: 'Livres', it: 'Libri', ru: 'Книги', ko: '도서', pl: 'Książki', ar: 'كتب', hi: 'पुस्तकें',
   },
   'search.no.results': {
     'pt-BR': 'Nenhum resultado para',
@@ -331,7 +318,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '검색 결과 없음:',
     pl: 'Brak wyników dla',
     ar: 'لا توجد نتائج لـ',
-    he: 'אין תוצאות עבור',
     hi: 'के लिए कोई परिणाम नहीं',
   },
 
@@ -349,37 +335,36 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '진짜 수학을 배우세요. 오픈소스, 무료, 다국어 — 항상.',
     pl: 'Naucz się prawdziwej matematyki. Open source, darmowe, wielojęzyczne — zawsze.',
     ar: 'تعلم الرياضيات الحقيقية. مفتوح المصدر، مجاني، متعدد اللغات — دائماً.',
-    he: 'למד מתמטיקה אמיתית. קוד פתוח, חינם, רב־לשוני — תמיד.',
     hi: 'असली गणित सीखें। ओपन सोर्स, मुफ्त, बहुभाषी — हमेशा।',
   },
   'footer.authorship': {
     'pt-BR': 'Autoria', en: 'Authors', es: 'Autoría', zh: '作者', ja: '著者',
-    de: 'Autoren', fr: 'Auteurs', it: 'Autori', ru: 'Авторы', ko: '저자', pl: 'Autorzy', ar: 'المؤلفون', he: 'מחברים', hi: 'लेखक',
+    de: 'Autoren', fr: 'Auteurs', it: 'Autori', ru: 'Авторы', ko: '저자', pl: 'Autorzy', ar: 'المؤلفون', hi: 'लेखक',
   },
   'footer.navigation': {
     'pt-BR': 'Navegação', en: 'Navigation', es: 'Navegación', zh: '导航', ja: 'ナビゲーション',
-    de: 'Navigation', fr: 'Navigation', it: 'Navigazione', ru: 'Навигация', ko: '탐색', pl: 'Nawigacja', ar: 'تصفح', he: 'ניווט', hi: 'नेविगेशन',
+    de: 'Navigation', fr: 'Navigation', it: 'Navigazione', ru: 'Навигация', ko: '탐색', pl: 'Nawigacja', ar: 'تصفح', hi: 'नेविगेशन',
   },
   'footer.allContent': {
     'pt-BR': 'Todos os conteúdos', en: 'All content', es: 'Todos los contenidos',
     zh: '全部内容', ja: 'すべてのコンテンツ', de: 'Alle Inhalte',
     fr: 'Tous les contenus', it: 'Tutti i contenuti', ru: 'Весь контент',
-    ko: '모든 콘텐츠', pl: 'Cała treść', ar: 'كل المحتوى', he: 'כל התוכן', hi: 'सभी सामग्री',
+    ko: '모든 콘텐츠', pl: 'Cała treść', ar: 'كل المحتوى', hi: 'सभी सामग्री',
   },
   'footer.openSource': {
     'pt-BR': 'Open source', en: 'Open source', es: 'Código abierto', zh: '开源', ja: 'オープンソース',
-    de: 'Open Source', fr: 'Open source', it: 'Open source', ru: 'Открытый код', ko: '오픈소스', pl: 'Open source', ar: 'مفتوح المصدر', he: 'קוד פתוח', hi: 'ओपन सोर्स',
+    de: 'Open Source', fr: 'Open source', it: 'Open source', ru: 'Открытый код', ko: '오픈소스', pl: 'Open source', ar: 'مفتوح المصدر', hi: 'ओपन सोर्स',
   },
   'footer.repo': {
     'pt-BR': 'Repositório no GitHub', en: 'GitHub repository', es: 'Repositorio en GitHub',
     zh: 'GitHub 代码库', ja: 'GitHub リポジトリ', de: 'GitHub-Repository',
     fr: 'Dépôt GitHub', it: 'Repository GitHub', ru: 'Репозиторий GitHub',
-    ko: 'GitHub 저장소', pl: 'Repozytorium GitHub', ar: 'مستودع GitHub', he: 'מאגר GitHub', hi: 'GitHub रिपॉजिटरी',
+    ko: 'GitHub 저장소', pl: 'Repozytorium GitHub', ar: 'مستودع GitHub', hi: 'GitHub रिपॉजिटरी',
   },
   'footer.license': {
     'pt-BR': 'Licença MIT', en: 'MIT License', es: 'Licencia MIT', zh: 'MIT 许可证',
     ja: 'MIT ライセンス', de: 'MIT-Lizenz', fr: 'Licence MIT', it: 'Licenza MIT',
-    ru: 'Лицензия MIT', ko: 'MIT 라이선스', pl: 'Licencja MIT', ar: 'رخصة MIT', he: 'רישיון MIT', hi: 'MIT लाइसेंस',
+    ru: 'Лицензия MIT', ko: 'MIT 라이선스', pl: 'Licencja MIT', ar: 'رخصة MIT', hi: 'MIT लाइसेंस',
   },
   'footer.sponsor.label': {
     'pt-BR': 'a Amazing School, plataforma grátis de inglês, apoia o Clube da Matemática',
@@ -394,15 +379,13 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: 'Amazing School, 무료 영어 플랫폼, Clube da Matemática 지원',
     pl: 'Amazing School, darmowa platforma angielskiego, wspiera Clube da Matemática',
     ar: 'Amazing School، منصة إنجليزية مجانية، تدعم Clube da Matemática',
-    he: 'Amazing School, פלטפורמת אנגלית חינמית, תומכת ב־Clube da Matemática',
     hi: 'Amazing School, मुफ्त अंग्रेजी प्लेटफॉर्म, Clube da Matemática का समर्थन करता है',
   },
   'footer.builtWith': {
     'pt-BR': 'construído com', en: 'built with', es: 'construido con',
     zh: '构建用', ja: '構築:', de: 'gebaut mit', fr: 'construit avec',
     it: 'costruito con', ru: 'построено с', ko: '제작:',
-    pl: 'zbudowane z', ar: 'تم بناؤه باستخدام',
-    he: 'נבנה עם', hi: 'से बनाया गया',
+    pl: 'zbudowane z', ar: 'تم بناؤه باستخدام', hi: 'से बनाया गया',
   },
   'footer.khan': {
     'pt-BR': 'Não competimos com Khan — Khan ensina conta. Competimos com o silêncio entre saber a fórmula e entender o que ela diz sobre o mundo.',
@@ -417,14 +400,13 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: 'Khan과 경쟁하지 않습니다 — Khan은 계산을 가르칩니다. 우리는 공식을 아는 것과 그것이 세상에 대해 말하는 것을 이해하는 것 사이의 침묵과 경쟁합니다.',
     pl: 'Nie konkurujemy z Khan — Khan uczy obliczeń. Walczymy z ciszą między znajomością wzoru a zrozumieniem, co mówi o świecie.',
     ar: 'نحن لا ننافس Khan — Khan يعلم الحساب. نحن نواجه الصمت بين معرفة المعادلة وفهم ما تقوله عن العالم.',
-    he: 'אנחנו לא מתחרים עם Khan — Khan מלמד חישוב. אנחנו מתחרים בשתיקה שבין לדעת את הנוסחה לבין להבין מה היא אומרת על העולם.',
     hi: 'हम Khan से प्रतिस्पर्धा नहीं करते — Khan गणना सिखाता है। हम सूत्र जानने और वह दुनिया के बारे में क्या कहता है, इसके बीच के सन्नाटे से लड़ते हैं।',
   },
 
   // ===== COMMON =====
   'common.search': {
     'pt-BR': 'Buscar', en: 'Search', es: 'Buscar', zh: '搜索', ja: '検索',
-    de: 'Suchen', fr: 'Rechercher', it: 'Cerca', ru: 'Поиск', ko: '검색', pl: 'Szukaj', ar: 'بحث', he: 'חפש', hi: 'खोजें',
+    de: 'Suchen', fr: 'Rechercher', it: 'Cerca', ru: 'Поиск', ko: '검색', pl: 'Szukaj', ar: 'بحث', hi: 'खोजें',
   },
   'common.skipToContent': {
     'pt-BR': 'Pular para o conteúdo principal',
@@ -439,7 +421,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '본문으로 건너뛰기',
     pl: 'Przejdź do treści głównej',
     ar: 'تخطي إلى المحتوى الرئيسي',
-    he: 'דלג לתוכן הראשי',
     hi: 'मुख्य सामग्री पर जाएं',
   },
 }

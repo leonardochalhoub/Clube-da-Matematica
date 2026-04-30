@@ -4,12 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '@/components/layout/LocaleProvider'
 import { LOCALES } from '@/lib/i18n/locales'
 import { AUDIO_TRANSLATIONS } from '@/content/audio-translations.generated'
-import audioMp3He from '@/content/audio-mp3-he.generated.json'
 import { Flag } from '@/components/layout/Flag'
-
-// Hebrew-only MP3 manifest. Outros idiomas usam Web Speech API.
-const HE_MP3_MANIFEST = audioMp3He as Record<string, string>
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 interface AudioReaderProps {
   /** Texto principal (PT-BR — versão original). */
@@ -47,9 +42,8 @@ async function obterVoicesAsync(): Promise<SpeechSynthesisVoice[]> {
  *   4. Não há tradução? Fala texto PT-BR com voz PT-BR (sem mais "PT-BR
  *      com sotaque alemão").
  *
- * Voz: do locale alvo. Se navegador não tem voz pro idioma (Hebrew,
- * Vietnamita em Windows etc), cai pra texto+voz PT-BR pra evitar
- * silêncio ou robô lendo caracteres errados.
+ * Voz: do locale alvo. Se navegador não tem voz pro idioma instalada,
+ * mostra alert pedindo pro usuário instalar a voz no SO.
  */
 export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   const { locale, t } = useLocale()
@@ -80,37 +74,14 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     ? LOCALES[locale].bandeira
     : LOCALES['pt-BR'].bandeira
 
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-
   async function falar() {
     if (estado === 'indisponivel') return
     if (estado === 'falando') {
       window.speechSynthesis.cancel()
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current.currentTime = 0
-      }
       setEstado('idle')
       return
     }
 
-    // PRIORIDADE 1: Hebrew → MP3 pré-renderizado (browsers raramente têm voz he)
-    if (locale === 'he' && HE_MP3_MANIFEST[texto]) {
-      const url = `${BASE_PATH}${HE_MP3_MANIFEST[texto]}`
-      const audio = new Audio(url)
-      audio.onplay = () => setEstado('falando')
-      audio.onended = () => setEstado('idle')
-      audio.onerror = () => setEstado('idle')
-      audioRef.current = audio
-      try {
-        await audio.play()
-      } catch {
-        setEstado('idle')
-      }
-      return
-    }
-
-    // PRIORIDADE 2: Web Speech API pra outros idiomas
     const vozes = await obterVoicesAsync()
     const exatas = vozes.filter((v) => v.lang === langFalado)
     const prefixo = vozes.filter((v) => {

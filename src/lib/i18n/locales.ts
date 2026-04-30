@@ -23,7 +23,6 @@ export type Locale =
   | 'ko'    // coreano
   | 'pl'    // polonês
   | 'ar'    // árabe (libanês — bandeira do Líbano com o cedro)
-  | 'he'    // hebraico (Israel — usa MP3 pré-renderizados, não Web Speech)
   | 'hi'    // hindi (Índia)
 
 export interface LocaleInfo {
@@ -51,7 +50,6 @@ export const LOCALES: Record<Locale, LocaleInfo> = {
   ko:      { code: 'ko',    nome: '한국어',                 bandeira: '🇰🇷', speechLang: 'ko-KR', dir: 'ltr' },
   pl:      { code: 'pl',    nome: 'Polski',              bandeira: '🇵🇱', speechLang: 'pl-PL', dir: 'ltr' },
   ar:      { code: 'ar',    nome: 'العربية اللبنانية',     bandeira: '🇱🇧', speechLang: 'ar-LB', dir: 'rtl' },
-  he:      { code: 'he',    nome: 'עברית',                bandeira: '🇮🇱', speechLang: 'he-IL', dir: 'rtl' },
   hi:      { code: 'hi',    nome: 'हिन्दी',                  bandeira: '🇮🇳', speechLang: 'hi-IN', dir: 'ltr' },
 }
 
@@ -74,7 +72,6 @@ const COUNTRY_TO_LOCALE: Record<string, Locale> = {
   KR: 'ko', KP: 'ko',
   PL: 'pl',
   LB: 'ar', SY: 'ar', JO: 'ar', PS: 'ar', SA: 'ar', AE: 'ar', EG: 'ar', QA: 'ar', KW: 'ar',
-  IL: 'he',
 }
 
 /**
