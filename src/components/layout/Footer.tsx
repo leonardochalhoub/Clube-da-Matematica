@@ -15,7 +15,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2">
               <Logo size={28} />
-              <span className="font-semibold text-clube-ink">Clube da Matemática</span>
+              <span className="font-semibold text-clube-ink">{t('brand.name')}</span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-clube-mist">
               {t('footer.tagline')}

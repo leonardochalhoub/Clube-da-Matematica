@@ -37,12 +37,12 @@ export function Header() {
         <Link
           href="/"
           className="group flex items-center gap-2 no-underline hover:no-underline sm:gap-3"
-          aria-label="Página inicial do Clube da Matemática"
+          aria-label={t('brand.tagline')}
         >
           <Logo size={28} className="transition-transform group-hover:rotate-6 sm:hidden" />
           <Logo size={32} className="transition-transform group-hover:rotate-6 hidden sm:block" />
           <span className="font-sans text-sm font-semibold tracking-tight text-clube-ink sm:text-lg">
-            Clube <span className="text-clube-mist">da</span> Matemática
+            {t('brand.name')}
           </span>
         </Link>
 

@@ -13,6 +13,38 @@ import type { Locale } from './locales'
 type Translations = Partial<Record<Locale, string>>
 
 export const TRANSLATIONS: Record<string, Translations> = {
+  // ===== BRAND =====
+  'brand.name': {
+    'pt-BR': 'Clube da Matemática',
+    en: 'Math Club',
+    es: 'Club de Matemáticas',
+    zh: '数学俱乐部',
+    ja: '数学クラブ',
+    de: 'Mathematik-Club',
+    fr: 'Club de Mathématiques',
+    it: 'Club di Matematica',
+    ru: 'Математический клуб',
+    ko: '수학 클럽',
+    pl: 'Klub Matematyczny',
+    ar: 'نادي الرياضيات',
+    hi: 'गणित क्लब',
+  },
+  'brand.tagline': {
+    'pt-BR': 'Página inicial do Clube da Matemática',
+    en: 'Math Club home',
+    es: 'Inicio del Club de Matemáticas',
+    zh: '数学俱乐部主页',
+    ja: '数学クラブのホーム',
+    de: 'Startseite des Mathematik-Clubs',
+    fr: 'Accueil du Club de Mathématiques',
+    it: 'Home del Club di Matematica',
+    ru: 'Главная Математического клуба',
+    ko: '수학 클럽 홈',
+    pl: 'Strona główna Klubu Matematycznego',
+    ar: 'الصفحة الرئيسية لنادي الرياضيات',
+    hi: 'गणित क्लब का होम',
+  },
+
   // ===== AUDIO =====
   'audio.read': {
     'pt-BR': 'Ouvir', en: 'Listen', es: 'Escuchar', zh: '听', ja: '聞く',
