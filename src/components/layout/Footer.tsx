@@ -32,7 +32,7 @@ export function Footer() {
                   Leonardo Chalhoub
                 </div>
                 <a
-                  href="https://www.linkedin.com/in/leonardo-chalhoub/"
+                  href="https://www.linkedin.com/in/leonardochalhoub/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-clube-mist hover:text-clube-teal"
