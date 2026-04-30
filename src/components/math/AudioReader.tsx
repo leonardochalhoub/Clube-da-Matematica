@@ -4,11 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '@/components/layout/LocaleProvider'
 import { LOCALES } from '@/lib/i18n/locales'
 import { AUDIO_TRANSLATIONS } from '@/content/audio-translations.generated'
-import audioMp3Manifest from '@/content/audio-mp3-manifest.generated.json'
 import { Flag } from '@/components/layout/Flag'
-
-const MP3_MANIFEST = audioMp3Manifest as Record<string, Record<string, string>>
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 interface AudioReaderProps {
   /** Texto principal (PT-BR — versão original). */
@@ -37,35 +33,31 @@ async function obterVoicesAsync(): Promise<SpeechSynthesisVoice[]> {
 }
 
 /**
- * Botão de áudio multilíngue.
+ * Botão de áudio multilíngue — só Web Speech API, zero arquivos.
  *
- * Pipeline (todo offline, zero requisições de rede):
- *   1. Se há tradução manual (`textosI18n[locale]`) → usa ela.
- *   2. Se há entrada em AUDIO_TRANSLATIONS[texto][speechLang] (gerado em
- *      build-time pelo Claude Opus 4.7) → usa ela.
- *   3. Senão → fala o texto PT-BR original com voz PT-BR (mesmo idioma do
- *      texto, evitando "PT-BR com sotaque alemão").
+ * Pipeline:
+ *   1. Há tradução manual (`textosI18n[locale]`)? Use ela.
+ *   2. Há tradução em AUDIO_TRANSLATIONS (gerado pelo Opus)? Use ela.
+ *   3. Locale é PT-BR? Use texto original.
+ *   4. Não há tradução? Fala texto PT-BR com voz PT-BR (sem mais "PT-BR
+ *      com sotaque alemão").
  *
- * Quando cair em (3), o botão sinaliza com bandeira 🇧🇷 + tooltip
- * "tradução pendente".
+ * Voz: do locale alvo. Se navegador não tem voz pro idioma (Hebrew,
+ * Vietnamita em Windows etc), cai pra texto+voz PT-BR pra evitar
+ * silêncio ou robô lendo caracteres errados.
  */
 export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   const { locale, t } = useLocale()
   const [estado, setEstado] = useState<'idle' | 'falando' | 'indisponivel'>('idle')
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       setEstado('indisponivel')
     }
     return () => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel()
-      }
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current = null
       }
     }
   }, [])
@@ -73,12 +65,10 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   const speechLang = LOCALES[locale].speechLang
   const labelFinal = label ?? t('audio.read', 'Ouvir')
 
-  // Resolve fonte do áudio (preferência: MP3 pré-renderizado → Web Speech)
   const traducaoManual = textosI18n?.[locale]
   const traducaoPreBuild = AUDIO_TRANSLATIONS[texto]?.[speechLang]
   const traducao = traducaoManual ?? traducaoPreBuild
-  const mp3Url = MP3_MANIFEST[texto]?.[speechLang] // pode ser undefined
-  const temTraducao = !!traducao || locale === 'pt-BR' || !!mp3Url
+  const temTraducao = !!traducao || locale === 'pt-BR'
   const textoFalado = traducao ?? texto
   const langFalado = temTraducao ? speechLang : 'pt-BR'
   const bandeiraFalada = temTraducao
@@ -88,45 +78,8 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   async function falar() {
     if (estado === 'indisponivel') return
     if (estado === 'falando') {
-      // Para qualquer fonte ativa
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-      }
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current.currentTime = 0
-      }
+      window.speechSynthesis.cancel()
       setEstado('idle')
-      return
-    }
-
-    // PRIORIDADE 1: MP3 pré-renderizado (gTTS — qualidade alta, todo browser/OS)
-    if (mp3Url) {
-      const audio = new Audio(`${BASE_PATH}${mp3Url}`)
-      audio.onplay = () => setEstado('falando')
-      audio.onended = () => setEstado('idle')
-      audio.onerror = () => {
-        setEstado('idle')
-        // Fallback: tenta Web Speech API se MP3 falhou
-        falarViaWebSpeech()
-      }
-      audioRef.current = audio
-      try {
-        await audio.play()
-      } catch {
-        setEstado('idle')
-        falarViaWebSpeech()
-      }
-      return
-    }
-
-    // PRIORIDADE 2: Web Speech API
-    falarViaWebSpeech()
-  }
-
-  async function falarViaWebSpeech() {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      setEstado('indisponivel')
       return
     }
 
@@ -146,7 +99,7 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
         : null
 
     if (!vozEscolhida && langFalado !== 'pt-BR') {
-      // Sem voz nativa → fala PT-BR (texto + voz) em vez de voz robotizada
+      // Sem voz nativa → fala PT-BR com voz PT-BR
       textoEfetivo = texto
       langEfetivo = 'pt-BR'
       const vozesPt = vozes.filter((v) => v.lang === 'pt-BR' || v.lang.startsWith('pt-'))
