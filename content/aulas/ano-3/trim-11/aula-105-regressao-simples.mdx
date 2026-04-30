@@ -3,48 +3,368 @@ titulo: "Lição 105 — Regressão linear simples"
 slug: "aula-105-regressao-simples"
 categoria: "aulas"
 subcategoria: "ano-3-trim-11"
-descricao: "Mínimos quadrados. R², resíduos."
+descricao: "Mínimos quadrados, R², resíduos, OLS, interpretação."
 ordem: 105
 publicado: true
 tags: ["estatística inferencial", "ano-3", "trim-11"]
 prerrequisitos: ["aula-104"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-29"
+atualizadoEm: "2026-04-30"
 ---
 
 <EquacaoCanonica
-  formula="\\hat y = \\hat\\beta_0 + \\hat\\beta_1 x"
-  legenda={<>Conceito central: Mínimos quadrados. R², resíduos.</>}
-  audioTexto="Aula sobre Regressão linear simples. Mínimos quadrados. R², resíduos."
+  formula="\hat\beta_1 = \frac{\text{Cov}(X,Y)}{\text{Var}(X)}, \quad \hat\beta_0 = \bar Y - \hat\beta_1 \bar X"
+  legenda={<>A <strong>regressão linear simples</strong> ajusta a reta que minimiza a soma de quadrados dos resíduos. O coeficiente angular é a covariância sobre a variância de <span>$X$</span>; o intercepto sai forçando a reta a passar pelo centroide.</>}
+  audioTexto="Regressão linear simples. Beta um chapéu igual à covariância de equis e ípsilon, dividido pela variância de equis. Beta zero chapéu igual à média de ípsilon menos beta um chapéu vezes média de equis. Reta de mínimos quadrados."
 />
 
 <DuasPortas>
-<Porta nivel="formal" titulo="Regressão linear simples">
 
-Mínimos quadrados. R², resíduos. Aplicações em pesquisa científica, ensaios clínicos, A/B testing, ML.
+<Porta nivel="formal" titulo="Definição formal">
+
+### Modelo
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad \varepsilon_i \sim \mathcal{N}(0, \sigma^2) \text{ i.i.d.}$$
+
+### Estimadores OLS
+
+$$\hat\beta_1 = \frac{\sum (X_i - \bar X)(Y_i - \bar Y)}{\sum (X_i - \bar X)^2} = \frac{S_{xy}}{S_{xx}}$$
+
+$$\hat\beta_0 = \bar Y - \hat\beta_1 \bar X$$
+
+### Decomposição da variância
+
+$$\underbrace{\sum (Y_i - \bar Y)^2}_{SST} = \underbrace{\sum (\hat Y_i - \bar Y)^2}_{SSR} + \underbrace{\sum (Y_i - \hat Y_i)^2}_{SSE}$$
+
+### Coeficiente de determinação
+
+$$R^2 = \frac{SSR}{SST} = 1 - \frac{SSE}{SST}$$
+
+Para regressão simples, $R^2 = r^2$ (correlação ao quadrado).
+
+### Inferência sobre $\beta_1$
+
+$$\hat\beta_1 \sim \mathcal{N}\!\left(\beta_1, \frac{\sigma^2}{S_{xx}}\right)$$
+
+$$T = \frac{\hat\beta_1 - \beta_1^0}{\widehat{SE}(\hat\beta_1)} \sim t_{n-2}$$
 
 </Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Você tem **bolinhas espalhadas** em uma folha. Quer desenhar uma **linha reta** que passa "no meio" delas, mais perto possível de todas.
+
+A reta dos **mínimos quadrados** é a linha que tem a menor soma dos **quadradinhos** entre cada bolinha e a linha. Quanto mais juntas estão as bolinhas da reta, melhor a reta é.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+### O problema
+
+Você anotou idade ($X$) e altura ($Y$) de 20 amigos:
+
+| Idade | Altura |
+|---|---|
+| 8 | 1{,}30 |
+| 10 | 1{,}40 |
+| 12 | 1{,}50 |
+
+Quer uma **fórmula** que, dado idade, prevê a altura. Tipo: $Y = 1{,}05 + 0{,}05 X$.
+
+### Como achar a fórmula
+
+A reta tem dois parâmetros: **intercepto** ($\beta_0$, onde corta o eixo $Y$) e **inclinação** ($\beta_1$, quanto sobe por unidade de $X$).
+
+A regra de **mínimos quadrados** escolhe os dois pra que o erro total seja o menor possível.
+
+### O $R^2$
+
+Diz o quanto da variação de $Y$ a sua reta explica.
+
+- $R^2 = 1$: reta perfeita.
+- $R^2 = 0$: reta inútil.
+- $R^2 = 0{,}8$: reta explica 80% da variação. Bom.
+
+</Porta>
+
+<Porta nivel="15" titulo="Pra adolescente de 15 anos">
+
+### Ideia: minimizar SQE
+
+A reta $\hat Y = \hat\beta_0 + \hat\beta_1 X$ é escolhida para minimizar:
+
+$$S(\beta_0, \beta_1) = \sum_{i=1}^n (Y_i - \beta_0 - \beta_1 X_i)^2$$
+
+Derivando e igualando a zero (sistema 2x2), obtém:
+
+$$\hat\beta_1 = \frac{S_{xy}}{S_{xx}}, \quad \hat\beta_0 = \bar Y - \hat\beta_1 \bar X$$
+
+### Interpretação
+
+- $\hat\beta_1$: variação esperada em $Y$ para 1 unidade de $X$.
+- $\hat\beta_0$: $Y$ esperado quando $X=0$ (cuidado: nem sempre faz sentido).
+
+### Resíduos
+
+$$e_i = Y_i - \hat Y_i$$
+
+A **diagnostic** mais importante: plote $e_i$ vs $\hat Y_i$. Se vê padrão (curvatura, leque), o modelo está mal especificado.
+
+### $R^2$ é correlação ao quadrado
+
+Para regressão simples, $R^2 = r_{xy}^2$. Logo $R^2 = 0{,}81$ significa $r = \pm 0{,}9$.
+
+### Limitações
+
+- **Linearidade**: assume relação linear. Para curvas, transforme ($\log X$, $X^2$, etc.).
+- **Outliers**: 1 ponto extremo pode distorcer toda reta.
+- **Causa vs correlação**: $\hat\beta_1 \neq 0$ não prova causalidade.
+
+### Exemplo
+
+Salário ($Y$) vs anos de experiência ($X$). $n=50$. $\bar X = 8$, $\bar Y = 5000$. $S_{xy}=24000$, $S_{xx}=400$.
+
+$\hat\beta_1 = 60$ R\$/ano. $\hat\beta_0 = 5000 - 60 \cdot 8 = 4520$.
+
+Modelo: $\widehat{\text{salário}} = 4520 + 60 \cdot \text{anos}$.
+
+</Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia">
+
+### Demonstração via cálculo
+
+$\partial S / \partial \beta_0 = 0 \Rightarrow \sum (Y_i - \beta_0 - \beta_1 X_i) = 0$, daí $\hat\beta_0 = \bar Y - \hat\beta_1 \bar X$.
+
+$\partial S / \partial \beta_1 = 0 \Rightarrow \sum X_i (Y_i - \beta_0 - \beta_1 X_i) = 0$, daí $\hat\beta_1 = S_{xy}/S_{xx}$.
+
+### Propriedades dos OLS
+
+**Gauss-Markov**: sob (1) linearidade, (2) $E[\varepsilon|X]=0$, (3) homocedasticidade, (4) não-correlação dos erros, OLS é **BLUE** (Best Linear Unbiased Estimator).
+
+- $E[\hat\beta_1] = \beta_1$ (não-viesado)
+- $\text{Var}(\hat\beta_1) = \sigma^2/S_{xx}$
+- Cov entre $\hat\beta_0$ e $\hat\beta_1$: depende de $\bar X$.
+
+### Estimativa de $\sigma^2$
+
+$$s^2 = \hat\sigma^2 = \frac{SSE}{n-2} = \frac{\sum e_i^2}{n-2}$$
+
+$n-2$ porque perdemos 2 graus de liberdade (estimar $\beta_0$ e $\beta_1$).
+
+### Inferência sobre $\beta_1$
+
+IC 95%:
+
+$$\hat\beta_1 \pm t_{\alpha/2,n-2} \cdot \frac{s}{\sqrt{S_{xx}}}$$
+
+Teste $H_0: \beta_1 = 0$:
+
+$$T = \frac{\hat\beta_1}{s/\sqrt{S_{xx}}}$$
+
+### Predição vs IC para média condicional
+
+- **IC para $E[Y|X=x_0]$**: $\hat Y_0 \pm t \cdot s\sqrt{1/n + (x_0-\bar X)^2/S_{xx}}$
+- **IC de predição** (mais largo): $\hat Y_0 \pm t \cdot s\sqrt{1 + 1/n + (x_0-\bar X)^2/S_{xx}}$
+
+A diferença é o $1$ extra na predição: incerteza sobre $Y_0$ específico, não a média.
+
+### Diagnóstico de regressão
+
+1. **Resíduos vs $\hat Y$**: linearidade e variância constante.
+2. **Q-Q plot dos resíduos**: normalidade.
+3. **Cook's distance**: pontos influentes.
+4. **Leverage** $h_{ii}$: distância de $X_i$ ao $\bar X$.
+
+### Aplicações
+
+- **Engenharia**: calibração de sensor (resposta vs estímulo).
+- **Economia**: modelo de Phillips (inflação vs desemprego).
+- **Física**: lei de Hooke ($F = kx$).
+- **Marketing**: vendas vs gasto em ads.
+
+### Implementação
+
+```python
+import statsmodels.api as sm
+X = sm.add_constant(x)  # adiciona intercepto
+model = sm.OLS(y, X).fit()
+print(model.summary())  # tudo: betas, EP, t, p, R², F
+```
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+### Visão matricial
+
+$$\hat{\boldsymbol\beta} = (X^TX)^{-1}X^TY$$
+
+Para regressão simples, $X = [\mathbf{1}, x]$, $2 \times 2$ system. Generaliza ao múltiplo (Aula 106).
+
+### Geometria
+
+OLS projeta $Y$ no espaço coluna de $X$. $\hat Y = HY$, $H = X(X^TX)^{-1}X^T$ é matriz **hat**, projeção ortogonal. $H$ é simétrica, idempotente, $\text{tr}(H) = p$.
+
+### Heterocedasticidade
+
+Se $\text{Var}(\varepsilon_i) = \sigma_i^2$, OLS continua não-viesado mas **não eficiente**. Usar:
+
+- **WLS** (Weighted Least Squares): pesos $1/\sigma_i^2$.
+- **HC robust standard errors** (White, sandwich).
+
+### Endogeneidade
+
+Se $\text{Cov}(X, \varepsilon) \neq 0$, $\hat\beta_1$ é **viesado**. Causa: variável omitida, erro de medida, simultaneidade. Solução: variáveis instrumentais (IV/2SLS).
+
+### Regularização
+
+Quando $X$ tem alta dimensão ou colinearidade:
+
+- **Ridge**: $\hat\beta = (X^TX + \lambda I)^{-1}X^TY$. Vies pequeno, variância muito menor.
+- **Lasso**: penaliza L1, faz seleção automática de variáveis.
+- **Elastic Net**: combina ambos.
+
+### Bootstrap para inferência robusta
+
+```python
+from sklearn.utils import resample
+betas = [fit(resample(X, y))[1] for _ in range(10000)]
+ci = np.percentile(betas, [2.5, 97.5])
+```
+
+Funciona mesmo com erros não-normais.
+
+### Modelos lineares generalizados (GLM)
+
+Quando $Y$ não é contínuo/normal:
+
+- **Logística** ($Y$ binário): logit link.
+- **Poisson** ($Y$ contagem): log link.
+- **Gamma** ($Y$ positivo, cauda): inverse link.
+
+Tudo via maximum likelihood.
+
+### Causalidade
+
+$\hat\beta_1$ é **associação**, não causalidade. Para causal: design experimental (RCT) ou métodos quasi-experimentais (DiD, RDD, IV, propensity score).
+
+### Limites do OLS
+
+- Resposta não-linear → splines ou GAM.
+- Heterocedasticidade severa → WLS ou GLM.
+- Alto-dimensional → Lasso/Ridge.
+- Cauda pesada → quantile regression.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicação prática">
+
+**Receita: regressão linear bem feita.**
+
+1. **Visualize antes**: scatter plot. Se não é linear, **não use linear**.
+2. **Ajuste o modelo** via OLS.
+3. **Diagnóstico**: resíduos vs $\hat Y$, Q-Q plot, Cook's distance.
+4. **Inferência**: IC para $\beta_1$, $R^2$, $F$-teste global.
+5. **Predição** com IC de predição (não só IC da média).
+6. **Reporte**: $\hat\beta_0$, $\hat\beta_1$, EP, IC, $R^2$, $n$, premissas testadas.
+
+### Erros comuns
+
+- **Ajustar reta em dados curvos** — viola linearidade.
+- **Reportar só $R^2$ alto** — pode ter outliers que dominam.
+- **Extrapolar fora do range** — modelo não vale lá.
+- **Confundir associação com causa**.
+
+### Exemplo de relatório
+
+"Idade prediz altura: $\widehat{\text{altura}} = 0{,}9 + 0{,}06 \cdot \text{idade}$ ($\hat\beta_1$ EP = 0{,}004; IC 95%: 0{,}052 a 0{,}068; $t(48)=15{,}0$; $p<0{,}001$; $R^2 = 0{,}82$; $n=50$)."
+
+### Quando R² é enganador
+
+- $n$ enorme: $R^2$ pequeno mas teste significativo.
+- Range estreito de $X$: $R^2$ artificialmente baixo.
+- Outliers infláveis: $R^2$ artificialmente alto.
+
+Sempre olhe scatter + diagnóstico, não só $R^2$.
+
+### Workflow real
+
+```python
+import pandas as pd
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("data.csv")
+X = sm.add_constant(df["x"])
+model = sm.OLS(df["y"], X).fit()
+
+# Diagnóstico
+resid = model.resid
+fitted = model.fittedvalues
+plt.scatter(fitted, resid); plt.show()
+sm.qqplot(resid, line='45'); plt.show()
+
+print(model.summary())
+```
+
+### Cuidado com séries temporais
+
+Não use OLS em series temporais sem checar autocorrelação dos resíduos (Durbin-Watson). Use ARIMA ou modelos de regressão com erro AR.
+
+</Porta>
+
 </DuasPortas>
 
 <ListaExercicios seed="aula-105-regressao-simples">
 
-<Exercicio numero="105.1" dificuldade="aplicacao">Cálculo direto.</Exercicio>
-<Exercicio numero="105.2" dificuldade="aplicacao">Estimar parâmetro.</Exercicio>
-<Exercicio numero="105.3" dificuldade="aplicacao">Construir intervalo / teste.</Exercicio>
-<Exercicio numero="105.4" dificuldade="aplicacao">Interpretar p-valor.</Exercicio>
-<Exercicio numero="105.5" dificuldade="aplicacao">Caso prático com dados reais.</Exercicio>
-<Exercicio numero="105.6" dificuldade="compreensao">Justifique premissas (normalidade, etc).</Exercicio>
-<Exercicio numero="105.7" dificuldade="compreensao">Mostre propriedade estatística.</Exercicio>
-<Exercicio numero="105.8" dificuldade="modelagem">A/B testing em e-commerce.</Exercicio>
-<Exercicio numero="105.9" dificuldade="modelagem">Ensaio clínico simplificado.</Exercicio>
-<Exercicio numero="105.10" dificuldade="modelagem">Pesquisa de opinião + erro amostral.</Exercicio>
-<Exercicio numero="105.11" dificuldade="modelagem">Análise causal preliminar.</Exercicio>
-<Exercicio numero="105.12" dificuldade="desafio">Compare dois métodos (paramétrico vs não-paramétrico).</Exercicio>
-<Exercicio numero="105.13" dificuldade="demonstracao">Demonstre teorema central da aula.</Exercicio>
+<Exercicio numero="105.1" dificuldade="aplicacao">$\bar X = 5$, $\bar Y = 10$, $S_{xy}=20$, $S_{xx}=10$. $\hat\beta_1$ e $\hat\beta_0$. (Resp: $\hat\beta_1=2$, $\hat\beta_0=0$.)</Exercicio>
+<Exercicio numero="105.2" dificuldade="aplicacao">Compute $\hat Y$ para $X=8$ no modelo acima.</Exercicio>
+<Exercicio numero="105.3" dificuldade="aplicacao">Resíduo de $(X=4, Y=8)$ no modelo acima.</Exercicio>
+<Exercicio numero="105.4" dificuldade="aplicacao">$r = 0{,}9$. Calcule $R^2$. (Resp: 0{,}81.)</Exercicio>
+<Exercicio numero="105.5" dificuldade="aplicacao">$SST=100$, $SSE=20$. $R^2$ e $SSR$.</Exercicio>
+<Exercicio numero="105.6" dificuldade="aplicacao">$\sum (X_i - \bar X)^2 = 50$, $\sigma=2$. $\text{Var}(\hat\beta_1)$.</Exercicio>
+<Exercicio numero="105.7" dificuldade="aplicacao">$\hat\beta_1 = 3$, $SE(\hat\beta_1) = 0{,}5$. IC 95%, $df=18$.</Exercicio>
+<Exercicio numero="105.8" dificuldade="aplicacao">Teste $H_0: \beta_1=0$ com $\hat\beta_1 = 2$, $SE = 0{,}8$, $df = 28$. Conclusão.</Exercicio>
+<Exercicio numero="105.9" dificuldade="aplicacao">Em $\hat Y = 5 + 2X$, predição em $X=10$.</Exercicio>
+<Exercicio numero="105.10" dificuldade="aplicacao">$X = (1,2,3,4,5)$, $Y = (2,4,5,4,5)$. Calcule $\hat\beta_1$.</Exercicio>
+<Exercicio numero="105.11" dificuldade="aplicacao">Calcule $\bar X$, $\bar Y$, $S_{xx}$, $S_{xy}$ para o exercício anterior.</Exercicio>
+<Exercicio numero="105.12" dificuldade="aplicacao">$\hat\beta_0$ no exercício 105.10.</Exercicio>
+<Exercicio numero="105.13" dificuldade="aplicacao">Resíduos do modelo 105.10. Soma deve ser zero.</Exercicio>
+<Exercicio numero="105.14" dificuldade="aplicacao">$R^2$ no modelo 105.10.</Exercicio>
+<Exercicio numero="105.15" dificuldade="aplicacao">$df$ para SSE na regressão simples com $n=20$. (Resp: 18.)</Exercicio>
+<Exercicio numero="105.16" dificuldade="aplicacao">Por que perdemos 2 graus de liberdade na regressão simples?</Exercicio>
+<Exercicio numero="105.17" dificuldade="aplicacao">Em $\hat Y = 10 - 0{,}5 X$, $\hat\beta_1$ negativo significa o quê?</Exercicio>
+<Exercicio numero="105.18" dificuldade="aplicacao">Se $r=0$, então $\hat\beta_1$ é? (Resp: 0.)</Exercicio>
+<Exercicio numero="105.19" dificuldade="aplicacao">$F$-teste global na regressão simples se relaciona com qual teste $T$?</Exercicio>
+<Exercicio numero="105.20" dificuldade="aplicacao">Como $\hat\beta_0$ se relaciona com $\bar X$, $\bar Y$, $\hat\beta_1$?</Exercicio>
+<Exercicio numero="105.21" dificuldade="aplicacao">$X = (10, 20, 30, 40)$, $Y = (15, 25, 32, 40)$. $\hat\beta_1$.</Exercicio>
+<Exercicio numero="105.22" dificuldade="aplicacao">Modelo do 105.21: predizer $Y$ em $X=25$.</Exercicio>
+<Exercicio numero="105.23" dificuldade="aplicacao">Quando o intercepto $\hat\beta_0$ não é interpretável?</Exercicio>
+<Exercicio numero="105.24" dificuldade="aplicacao">$R^2 = 0{,}5$. Quantos % da variabilidade de $Y$ a reta explica?</Exercicio>
+<Exercicio numero="105.25" dificuldade="aplicacao">$\hat\beta_1 = 4$, $S_{xx}=100$, $\sigma^2=16$. $SE(\hat\beta_1)$. (Resp: 0{,}4.)</Exercicio>
+<Exercicio numero="105.26" dificuldade="aplicacao">$T = 2{,}5$, $df = 18$. $p$-valor bilateral aproximado.</Exercicio>
+<Exercicio numero="105.27" dificuldade="aplicacao">Por que $\hat\beta_0$ tem variância maior quando $\bar X$ está longe de zero?</Exercicio>
+<Exercicio numero="105.28" dificuldade="aplicacao">Compare IC de predição com IC para média condicional. Qual mais largo?</Exercicio>
+<Exercicio numero="105.29" dificuldade="aplicacao">Resíduo padronizado $> 3$. O que indica?</Exercicio>
+<Exercicio numero="105.30" dificuldade="aplicacao">Cook's distance: para que serve?</Exercicio>
+<Exercicio numero="105.31" dificuldade="modelagem">Vendas (R\$ mil) vs gasto em ads (R\$ mil) em 30 meses. $\hat\beta_1=2{,}5$, $SE=0{,}4$, $R^2=0{,}65$. Interprete.</Exercicio>
+<Exercicio numero="105.32" dificuldade="modelagem">Lei de Hooke: deslocamento ($x$) vs força ($F$). Calcule constante $k$ via OLS de pontos $(0{,}1; 1{,}1), (0{,}2; 2{,}0), (0{,}3; 3{,}1), (0{,}4; 4{,}0)$.</Exercicio>
+<Exercicio numero="105.33" dificuldade="modelagem">Salário vs experiência: $\hat\beta_1 = 800$ R\$/ano. Funcionário com 5 anos a mais ganha quanto a mais (esperado)?</Exercicio>
+<Exercicio numero="105.34" dificuldade="modelagem">Calibração de termômetro: leitura ($Y$) vs temperatura real ($X$). $\hat Y = 0{,}5 + 1{,}02 X$. O termômetro tem viés?</Exercicio>
+<Exercicio numero="105.35" dificuldade="modelagem">Tempo de execução (s) vs tamanho de input ($n$, em milhares). $\hat\beta_1 = 0{,}3$. Quanto tempo extra para input dobrar de 100k para 200k?</Exercicio>
+<Exercicio numero="105.36" dificuldade="compreensao">Justifique o método dos mínimos quadrados via maximum likelihood com erro normal.</Exercicio>
+<Exercicio numero="105.37" dificuldade="compreensao">Mostre que a soma dos resíduos é sempre zero quando há intercepto.</Exercicio>
+<Exercicio numero="105.38" dificuldade="compreensao">Por que $R^2 \in [0,1]$ na regressão simples?</Exercicio>
+<Exercicio numero="105.39" dificuldade="compreensao">Por que correlação não implica causa? Dê exemplo.</Exercicio>
+<Exercicio numero="105.40" dificuldade="desafio">Mostre que adicionar $c$ a todos os $X_i$ muda $\hat\beta_0$ mas não $\hat\beta_1$.</Exercicio>
+<Exercicio numero="105.41" dificuldade="desafio">Derive Gauss-Markov: por que $\hat\beta_1$ tem menor variância entre estimadores lineares não-viesados?</Exercicio>
+<Exercicio numero="105.42" dificuldade="demonstracao">Demonstre $E[\hat\beta_1] = \beta_1$ sob suposições do modelo.</Exercicio>
 
 </ListaExercicios>
 
-## Fontes desta aula
-
-- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019 · 4ª ed · EN · CC-BY-SA. **Fonte primária.**
-- [**An Introduction to Statistical Learning**](https://www.statlearning.com/) — James, Witten, Hastie, Tibshirani · 2023 · 2nd ed · EN · gratuito.
+## Fontes
+- [**An Introduction to Statistical Learning**](https://www.statlearning.com/) — James, Witten, Hastie, Tibshirani · 2023 · 2nd ed · §3.1. **Fonte primária.**
+- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019 · 4ª ed · §8.
+- [**The Elements of Statistical Learning**](https://hastie.su.domains/ElemStatLearn/) — Hastie, Tibshirani, Friedman · 2009 · §3.2.

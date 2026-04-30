@@ -9,7 +9,7 @@ publicado: true
 tags: ["EDO", "modelagem", "ano-3", "trim-10"]
 prerrequisitos: ["aula-83-tfc"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-29"
+atualizadoEm: "2026-04-30"
 ---
 
 <EquacaoCanonica
@@ -52,6 +52,34 @@ $y' = ky$ — crescimento/decaimento exponencial. Solução: $y(x) = y_0 e^{kx}$
 
 </Porta>
 
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Imagine um balde sob uma chuva fininha. **Quanta água tem dentro depois de um tempo?**
+
+A "regra" é: cada minuto, a altura da água sobe um pouquinho. Se você sabe **a regra de como a coisa cresce**, dá pra descobrir quanto tem em qualquer momento.
+
+Equação diferencial é só isso: uma **regra de mudança** (em vez de uma fórmula direta). E o objetivo é descobrir a fórmula direta a partir da regra.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+Uma equação **comum** te diz: "$y$ vale $3x + 2$". Já sabe a resposta direta.
+
+Uma equação **diferencial** te diz: "a velocidade de $y$ é $2x$". Aí você precisa **integrar** pra descobrir $y$.
+
+**Exemplo**: $y' = 2x$. Quem é $y$?
+
+Pensa: derivada de $x^2$ é $2x$. Então $y = x^2$ resolve. Mas $y = x^2 + 5$ também! Toda constante "se perde" na derivada.
+
+A **solução geral** é $y = x^2 + C$, com $C$ qualquer.
+
+Pra **fixar** $C$: você precisa de uma **condição inicial**. Por exemplo, "em $x = 0$, $y$ vale $3$" → $C = 3$ → $y = x^2 + 3$.
+
+EDOs são a "linguagem da mudança" usada em **toda ciência**: como populações crescem, como medicamento sai do corpo, como capacitor descarrega.
+
+</Porta>
+
 <Porta nivel="15" titulo="Pra adolescente de 15 anos">
 
 EDO é uma equação que envolve uma função e sua derivada. Tipo "**a velocidade de algo é proporcional à própria coisa**". Em matemática:
@@ -69,6 +97,17 @@ A **solução** dessa equação é $y(t) = y_0 e^{kt}$ (você já viu na Aula 8)
 **Exemplo concreto**: imagine uma chuva caindo num balde. A altura da água sobe a 0,5 cm/min. EDO: $h'(t) = 0{,}5$. Resolvendo: $h(t) = 0{,}5 t + h_0$.
 
 Tudo na física, química, biologia, economia que evolui no tempo é descrito por uma EDO. **A linguagem da mudança contínua**.
+
+### Reconhecendo EDOs no mundo real
+
+| Frase comum | EDO |
+|---|---|
+| "cresce a 5\% ao ano" | $y' = 0{,}05 y$ |
+| "esfria proporcional à diferença" | $T' = -k(T - T_a)$ |
+| "freia com força proporcional à velocidade" | $\dot v = -bv$ |
+| "oscila sem amortecimento" | $y'' + \omega^2 y = 0$ |
+
+Aprender a **traduzir português → EDO** é metade do jogo da física e engenharia.
 
 </Porta>
 
@@ -101,6 +140,15 @@ $$\frac{\partial V}{\partial t} + \frac{1}{2}\sigma^2 S^2 \frac{\partial^2 V}{\p
 
 EDP, não EDO — porque tem múltiplas variáveis ($S$ e $t$). Mas a **filosofia** é a mesma: relação entre função e derivadas.
 
+### Pipeline padrão de modelagem
+
+1. **Identifique a quantidade** $y$ que evolui.
+2. **Escreva a regra de variação**: derivadas em função de $y$ e $x/t$.
+3. **Estabeleça condições iniciais** de problema concreto.
+4. **Resolva** (analítica ou numericamente).
+5. **Valide** com dados reais.
+6. **Itere**: ajuste o modelo se predições falham.
+
 </Porta>
 
 <Porta nivel="40" titulo="Pra profissional sênior">
@@ -124,6 +172,68 @@ $dX = \mu(X, t) dt + \sigma(X, t) dW_t$ — termo de ruído browniano. Base de f
 ### Cuidado: EDOs sem unicidade
 
 $y' = \sqrt{|y|}$, $y(0) = 0$ tem **infinitas soluções** em $\mathbb{R}$ — todas que ficam em zero por algum tempo e depois saem como $y = (x-c)^2/4$. O Lipschitz local de Picard-Lindelöf é violado em $y = 0$. Lição: **sempre verifique pré-requisitos do teorema** antes de afirmar unicidade.
+
+### Sistemas dinâmicos modernos
+
+- **Strogatz** (1994): "Nonlinear Dynamics and Chaos".
+- **Guckenheimer-Holmes**: bifurcações e formas normais.
+- **Arnol'd**: geometria de equações diferenciais.
+
+### Equações com retardo (DDE)
+
+$y'(t) = f(t, y(t), y(t - \tau))$. Aparecem em controle (delay no sensor), epidemiologia (período de incubação), economia (defasagem). Espaço de fase é infinito-dimensional.
+
+### Conexão com física teórica
+
+Equação de Schrödinger ($\partial_t \psi = -i H \psi/\hbar$) é EDO no espaço de Hilbert. Mecânica quântica é "EDO operatorial".
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicação prática">
+
+### Receita
+
+1. **Leia o problema**. Identifique a quantidade que muda no tempo (ou outro parâmetro).
+2. **Escreva a regra**: traduza "taxa de mudança" → derivada.
+3. **Identifique tipo** (separável? linear? exponencial?).
+4. **Resolva** ou **simule** (se modelo complexo, use SciPy).
+5. **Aplique condições iniciais** pra fixar constantes.
+6. **Valide** com casos extremos (limite quando $t \to 0$, $t \to \infty$).
+
+### Em Python (SciPy)
+
+```python
+from scipy.integrate import solve_ivp
+import numpy as np
+
+def edo(t, y):
+    return -0.1 * y  # decaimento
+
+sol = solve_ivp(edo, t_span=(0, 50), y0=[100], t_eval=np.linspace(0,50,100))
+import matplotlib.pyplot as plt
+plt.plot(sol.t, sol.y[0])
+```
+
+### Em SymPy (analítico)
+
+```python
+import sympy as sp
+t = sp.symbols('t')
+y = sp.Function('y')
+sp.dsolve(y(t).diff(t) - 2*y(t), y(t))
+# Out: y(t) = C1 * exp(2*t)
+```
+
+### Erros comuns
+
+- Esquecer da constante $C$ ao integrar.
+- Confundir "solução geral" e "solução particular".
+- Ignorar condições iniciais.
+- Aplicar Picard-Lindelöf sem verificar continuidade.
+
+### Faça os 35 exercícios
+
+EDOs são portal pro resto do ensino superior em matemática aplicada. Internalize agora.
 
 </Porta>
 
@@ -151,28 +261,28 @@ $y' = \sqrt{|y|}$, $y(0) = 0$ tem **infinitas soluções** em $\mathbb{R}$ — t
 
 ### Bloco B — Resolução com condição inicial (91.11 a 91.20)
 
-<Exercicio numero="91.11" dificuldade="aplicacao">$y' = 3x^2$, $y(0) = 5$. Solução.</Exercicio>
+<Exercicio numero="91.11" dificuldade="aplicacao">$y' = 3x^2$, $y(0) = 5$. Solução. (Resp: $y = x^3 + 5$.)</Exercicio>
 <Exercicio numero="91.12" dificuldade="aplicacao">$y' = \sin x$, $y(0) = 1$. Solução.</Exercicio>
 <Exercicio numero="91.13" dificuldade="aplicacao">$y'' = 6x$, $y(0) = 1$, $y'(0) = 2$. Solução.</Exercicio>
 <Exercicio numero="91.14" dificuldade="aplicacao">$y' = ky$, $y(0) = y_0$. Solução geral em termos de $k, y_0$.</Exercicio>
-<Exercicio numero="91.15" dificuldade="aplicacao">$y' = 2y$, $y(0) = 5$. $y(3)$.</Exercicio>
+<Exercicio numero="91.15" dificuldade="aplicacao">$y' = 2y$, $y(0) = 5$. $y(3)$. (Resp: $5 e^6 \approx 2017$.)</Exercicio>
 <Exercicio numero="91.16" dificuldade="aplicacao">$y' = -0,1 y$, $y(0) = 100$. $y(20)$.</Exercicio>
 <Exercicio numero="91.17" dificuldade="aplicacao">$y' = e^x$, $y(0) = 0$. Solução.</Exercicio>
 <Exercicio numero="91.18" dificuldade="aplicacao">$y'' = 0$, $y(0) = 1$, $y'(0) = -3$. Solução.</Exercicio>
-<Exercicio numero="91.19" dificuldade="aplicacao">$y' = 1/x$, $y(1) = 0$ ($x > 0$). Solução.</Exercicio>
+<Exercicio numero="91.19" dificuldade="aplicacao">$y' = 1/x$, $y(1) = 0$ ($x > 0$). Solução. (Resp: $y = \ln x$.)</Exercicio>
 <Exercicio numero="91.20" dificuldade="aplicacao">$y'' = -y$, $y(0) = 1$, $y'(0) = 0$. Solução. (Cosseno.)</Exercicio>
 
 ### Bloco C — Modelagem (91.21 a 91.30)
 
-<Exercicio numero="91.21" dificuldade="modelagem">População de bactérias dobra a cada hora. Modele com EDO. Inicial 100. População em 5h.</Exercicio>
+<Exercicio numero="91.21" dificuldade="modelagem">População de bactérias dobra a cada hora. Modele com EDO. Inicial 100. População em 5h. (Resp: 3200.)</Exercicio>
 <Exercicio numero="91.22" dificuldade="modelagem">Investimento R\$ 1000 a 5\% a.a. juros contínuos. EDO + solução.</Exercicio>
-<Exercicio numero="91.23" dificuldade="modelagem">Café a 90°C em sala 25°C esfria com $k = 0,1$/min. EDO + solução.</Exercicio>
+<Exercicio numero="91.23" dificuldade="modelagem">Café a 90°C em sala 25°C esfria com $k = 0{,}1$/min. EDO + solução.</Exercicio>
 <Exercicio numero="91.24" dificuldade="modelagem">Iodo-131 ($\tau_{1/2} = 8$ dias). EDO + solução com $N(0) = 100$ g.</Exercicio>
 <Exercicio numero="91.25" dificuldade="modelagem">Capacitor descarrega: $V' = -V/RC$. Para $V_0 = 12$, $RC = 1$, $V$ em 2s.</Exercicio>
-<Exercicio numero="91.26" dificuldade="modelagem">Carbono-14 ($\tau_{1/2} = 5730$ anos). EDO. Idade de fóssil com 25\% do C-14 inicial.</Exercicio>
+<Exercicio numero="91.26" dificuldade="modelagem">Carbono-14 ($\tau_{1/2} = 5730$ anos). EDO. Idade de fóssil com 25\% do C-14 inicial. (Resp: $\approx 11460$ anos.)</Exercicio>
 <Exercicio numero="91.27" dificuldade="modelagem">Spread de doença simplificado: $I' = \beta I (N - I)/N$. Equação logística — analise.</Exercicio>
 <Exercicio numero="91.28" dificuldade="modelagem">Drogagem: meia-vida 6h, dose 200 mg. EDO + solução.</Exercicio>
-<Exercicio numero="91.29" dificuldade="modelagem">Em finanças, taxa selic é 14\% a.a. Aplicação $\dot S = 0,14 S$. Tempo pra dobrar.</Exercicio>
+<Exercicio numero="91.29" dificuldade="modelagem">Em finanças, taxa selic é 14\% a.a. Aplicação $\dot S = 0{,}14 S$. Tempo pra dobrar.</Exercicio>
 <Exercicio numero="91.30" dificuldade="modelagem">Em mecânica, queda livre com resistência do ar: $m\dot v = mg - kv$. Velocidade terminal $v_\infty$.</Exercicio>
 
 ### Bloco D — Compreensão e desafios (91.31 a 91.35)

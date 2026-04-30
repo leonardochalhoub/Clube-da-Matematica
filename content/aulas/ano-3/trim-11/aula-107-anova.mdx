@@ -3,48 +3,383 @@ titulo: "Lição 107 — ANOVA"
 slug: "aula-107-anova"
 categoria: "aulas"
 subcategoria: "ano-3-trim-11"
-descricao: "Análise de variância. Comparar médias de grupos."
+descricao: "Análise de variância. Decomposição entre/dentro. F. Post-hoc."
 ordem: 107
 publicado: true
 tags: ["estatística inferencial", "ano-3", "trim-11"]
 prerrequisitos: ["aula-106"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-29"
+atualizadoEm: "2026-04-30"
 ---
 
 <EquacaoCanonica
-  formula="F = \\frac{MS_{entre}}{MS_{dentro}}"
-  legenda={<>Conceito central: Análise de variância. Comparar médias de grupos.</>}
-  audioTexto="Aula sobre ANOVA. Análise de variância. Comparar médias de grupos."
+  formula="F = \frac{MS_{\text{entre}}}{MS_{\text{dentro}}}"
+  legenda={<>A <strong>ANOVA</strong> compara <span>$k$</span> médias de grupos via decomposição da variância: a variância <em>entre</em> grupos contra a variância <em>dentro</em> dos grupos. Quando entre é muito maior, há evidência de que pelo menos um grupo difere.</>}
+  audioTexto="Análise de variância. Efe igual à variância média entre grupos dividida pela variância média dentro dos grupos. Ideia central: comparar a dispersão das médias dos grupos contra a dispersão dos pontos dentro de cada grupo."
 />
 
 <DuasPortas>
-<Porta nivel="formal" titulo="ANOVA">
 
-Análise de variância. Comparar médias de grupos. Aplicações em pesquisa científica, ensaios clínicos, A/B testing, ML.
+<Porta nivel="formal" titulo="Definição formal">
+
+### Modelo one-way ANOVA
+
+$$Y_{ij} = \mu_i + \varepsilon_{ij}, \quad i = 1, \dots, k; \quad j = 1, \dots, n_i; \quad \varepsilon_{ij} \sim \mathcal{N}(0, \sigma^2)$$
+
+ou equivalentemente $Y_{ij} = \mu + \alpha_i + \varepsilon_{ij}$, com $\sum n_i \alpha_i = 0$.
+
+### Hipóteses
+
+$$H_0: \mu_1 = \mu_2 = \dots = \mu_k$$
+
+$$H_1: \exists\, i, j: \mu_i \neq \mu_j$$
+
+### Decomposição da variância
+
+$$SST = SSB + SSW$$
+
+- $SST = \sum_{i,j}(Y_{ij} - \bar Y)^2$ — variância total.
+- $SSB = \sum_i n_i(\bar Y_i - \bar Y)^2$ — entre grupos.
+- $SSW = \sum_{i,j}(Y_{ij} - \bar Y_i)^2$ — dentro dos grupos.
+
+### Estatística F
+
+$$F = \frac{SSB/(k-1)}{SSW/(N-k)} = \frac{MS_{\text{entre}}}{MS_{\text{dentro}}} \sim F_{k-1,\,N-k} \text{ sob } H_0$$
+
+onde $N = \sum n_i$.
+
+### Tabela ANOVA
+
+| Fonte | SS | df | MS | F |
+|---|---|---|---|---|
+| Entre | $SSB$ | $k-1$ | $MS_B$ | $MS_B/MS_W$ |
+| Dentro | $SSW$ | $N-k$ | $MS_W$ | — |
+| Total | $SST$ | $N-1$ | — | — |
+
+### Tamanho de efeito
+
+$$\eta^2 = \frac{SSB}{SST}$$
 
 </Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Você tem **três sabores de sorvete** — chocolate, morango, baunilha. Quer saber se um deles é mais querido pelas crianças.
+
+Pede para 30 crianças darem nota. Olha a **média** de cada sabor.
+
+A ANOVA pergunta: **as três médias são realmente diferentes**, ou foi sorte?
+
+Se as crianças deram notas muito diferentes **dentro do mesmo sabor**, é difícil saber. Se as notas dentro são parecidas mas as médias entre são distantes, daí dá pra dizer com confiança.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+### Por que não fazer vários testes t?
+
+Você tem 4 grupos. Comparações: $\binom{4}{2} = 6$ testes t. Se cada um tem $\alpha=0{,}05$, a chance de algum dar falso positivo cresce muito (cerca de 26%).
+
+ANOVA faz **um único teste** que pergunta: "alguma média é diferente?". Mantém $\alpha$ controlado.
+
+### Ideia da ANOVA
+
+Compare:
+
+- **Variação entre grupos** (quão diferentes são as médias)
+- **Variação dentro dos grupos** (quão espalhados são os pontos)
+
+Se entre $\gg$ dentro: grupos são realmente diferentes.
+
+A estatística $F$ é a razão. $F$ grande → rejeita $H_0$.
+
+### Receita
+
+1. Calcule média de cada grupo.
+2. Calcule média geral.
+3. $SSB$ = soma das distâncias das médias do grupo até a média geral, ponderado.
+4. $SSW$ = soma dos quadrados dentro de cada grupo.
+5. $F = (SSB/(k-1)) / (SSW/(N-k))$.
+6. Compare com tabela $F$.
+
+</Porta>
+
+<Porta nivel="15" titulo="Pra adolescente de 15 anos">
+
+### Intuição da decomposição
+
+Para cada ponto $Y_{ij}$:
+
+$$Y_{ij} - \bar Y = \underbrace{(Y_{ij} - \bar Y_i)}_{\text{erro intra-grupo}} + \underbrace{(\bar Y_i - \bar Y)}_{\text{efeito do grupo}}$$
+
+Elevando ao quadrado e somando, os termos cruzados cancelam. Daí $SST = SSW + SSB$.
+
+### Quando rejeitar $H_0$?
+
+Sob $H_0$, $F$ tem média $\approx 1$. Sob $H_1$ (alguma média difere), $F$ aumenta. Rejeita se $F > F_{\alpha; k-1, N-k}$.
+
+### Exemplo
+
+3 dietas, 10 pessoas cada. Perda de peso (kg):
+
+- Dieta A: $\bar Y_A = 3$
+- Dieta B: $\bar Y_B = 4$
+- Dieta C: $\bar Y_C = 5$
+- $\bar Y = 4$
+
+$SSB = 10 \cdot (1)^2 + 10 \cdot 0^2 + 10 \cdot 1^2 = 20$, $df_B = 2$.
+$SSW = $ soma dos $\sum (Y_{ij} - \bar Y_i)^2 = 90$, $df_W = 27$.
+
+$F = (20/2)/(90/27) = 10/3{,}33 = 3{,}0$
+
+Crítico $F_{0{,}05; 2, 27} \approx 3{,}35$. Não rejeita por pouco.
+
+### ANOVA rejeita: e agora?
+
+ANOVA diz "alguma" média difere. Para saber **qual**, faça **post-hoc**:
+
+- **Tukey HSD**: comparações pareadas com correção FWER.
+- **Bonferroni**: simples, conservador.
+- **Scheffé**: para qualquer contraste linear.
+
+### Suposições
+
+1. Independência entre grupos.
+2. Normalidade dentro de cada grupo (ou $n$ grande).
+3. Homocedasticidade ($\sigma_1 = \dots = \sigma_k$).
+
+Se 3 falha, use Welch's ANOVA ou Kruskal-Wallis.
+
+</Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia">
+
+### Conexão com regressão
+
+ANOVA é regressão com **dummies** para grupos. Modelo:
+
+$$Y_{ij} = \mu + \alpha_i + \varepsilon_{ij}$$
+
+equivalente a regressão com $k-1$ variáveis dummy. F-teste global da regressão = $F$ da ANOVA.
+
+### Por que F e não t?
+
+$F$ é razão de variâncias estimadas — distribuição $F_{df_1, df_2}$. Para $k=2$, $F = T^2$.
+
+### ANOVA fatorial (two-way)
+
+Dois fatores $A$ e $B$:
+
+$$Y_{ijk} = \mu + \alpha_i + \beta_j + (\alpha\beta)_{ij} + \varepsilon_{ijk}$$
+
+Decompõe variância em: $A$, $B$, interação $A \times B$, residual. Permite testar **efeitos principais** e **interação**.
+
+### Efeito de tamanho
+
+| Medida | Fórmula | Convenção |
+|---|---|---|
+| $\eta^2$ | $SSB/SST$ | 0{,}01 pequeno; 0{,}06 médio; 0{,}14 grande |
+| $\omega^2$ | menos viesado | similar |
+| Cohen's $f$ | $\sqrt{\eta^2/(1-\eta^2)}$ | 0{,}10/0{,}25/0{,}40 |
+
+### Power analysis
+
+Para detectar efeito $f$ com poder $1-\beta$ a $\alpha$:
+
+```python
+from statsmodels.stats.power import FTestAnovaPower
+analysis = FTestAnovaPower()
+n_per_group = analysis.solve_power(effect_size=0.25, alpha=0.05, power=0.80, k_groups=4)
+```
+
+### Verificação de suposições
+
+- **Levene's test**: homocedasticidade.
+- **Shapiro-Wilk**: normalidade dentro de cada grupo.
+- **Visualização**: boxplot, Q-Q plot.
+
+Se falha: Welch's ANOVA (ajusta $df$); Kruskal-Wallis (não-paramétrico).
+
+### Implementação
+
+```python
+from scipy import stats
+F, p = stats.f_oneway(group1, group2, group3, group4)
+
+# Post-hoc Tukey
+import statsmodels.stats.multicomp as mc
+tukey = mc.pairwise_tukeyhsd(data, groups, alpha=0.05)
+print(tukey)
+```
+
+### Aplicações cross-domínio
+
+- **Engenharia de qualidade**: Taguchi DOE, comparação de máquinas.
+- **Agricultura**: rendimento de cultivares (Fisher inventou ANOVA aqui!).
+- **Medicina**: comparar 4 dosagens.
+- **Marketing**: 5 versões de banner.
+
+### MANOVA
+
+Múltiplas variáveis dependentes simultaneamente. Wilks' lambda, Pillai's trace.
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+### ANOVA como GLM
+
+ANOVA é caso particular do **modelo linear**: contrastes de coeficientes em regressão com fatores. Tudo unificado em GLM (general linear model).
+
+### Random effects
+
+Quando os grupos são amostra de uma população (escolas, sujeitos):
+
+$$Y_{ij} = \mu + u_i + \varepsilon_{ij}, \quad u_i \sim \mathcal{N}(0, \sigma_u^2)$$
+
+Mixed effects models. Pacote `lme4` em R, `statsmodels.MixedLM` em Python.
+
+### ANOVA repeated measures
+
+Mesmo sujeito medido em múltiplas condições. Estrutura de correlação intra-sujeito. Sphericity (Mauchly's test).
+
+### Welch's ANOVA
+
+Quando variâncias diferem entre grupos:
+
+$$F^* = \frac{\sum w_i (\bar Y_i - \bar Y^*)^2 / (k-1)}{1 + \frac{2(k-2)}{k^2-1} \sum (1-w_i/W)^2/(n_i-1)}$$
+
+Recomendado por padrão (Delacre et al. 2019).
+
+### ANOVA bayesiana
+
+Bayes factor para modelos com e sem efeito do grupo. Pacote `BayesFactor` em R.
+
+### Permutation ANOVA
+
+Reembaralha rótulos, computa $F$ empírico. Sem suposições paramétricas. Pacote `permute` em Python.
+
+### Tukey HSD vs Bonferroni vs Scheffé
+
+| Método | Controle | Poder |
+|---|---|---|
+| LSD (sem correção) | nenhum | máximo (mas inválido) |
+| Bonferroni | FWER | baixo |
+| Tukey HSD | FWER pareadas | bom |
+| Scheffé | FWER qualquer contraste | conservador |
+| BH | FDR | máximo entre os controlados |
+
+### Não-paramétrico
+
+- **Kruskal-Wallis**: $H = (12/N(N+1)) \sum R_i^2/n_i - 3(N+1)$, $\sim \chi^2_{k-1}$.
+- **Friedman**: para repeated measures.
+- **Mood's median test**: alternativa robusta.
+
+### Crítica moderna
+
+ANOVA com $H_0$ pontual quase nunca é exatamente verdade. Em $n$ grande, qualquer diferença é "significativa". Foque em **tamanho de efeito** e **utilidade prática**, não só $p<0{,}05$.
+
+### Multifatorial DOE
+
+Para muitos fatores, design fatorial completo é exponencial. Use:
+
+- **Fracionado**: $2^{k-p}$ designs (Box, Hunter).
+- **Latin squares**: bloqueio.
+- **Response surface methodology**.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicação prática">
+
+**Receita: ANOVA bem feita.**
+
+1. **Defina hipóteses**: comparar $k$ grupos.
+2. **Verifique suposições**: independência, normalidade, homocedasticidade.
+3. **Visualize**: boxplot por grupo.
+4. **Calcule** ANOVA. Se $F$ grande e $p$ pequeno, rejeita $H_0$.
+5. **Post-hoc**: Tukey HSD para identificar quais grupos diferem.
+6. **Tamanho de efeito**: $\eta^2$, $\omega^2$.
+7. **Reporte tudo**: $F$, $df_1$, $df_2$, $p$, $\eta^2$, post-hoc, $n$ por grupo.
+
+### Erros frequentes
+
+- **Múltiplos t-tests sem correção**: infla erro tipo I.
+- **Pular post-hoc**: ANOVA sozinha só diz "alguma é diferente".
+- **Ignorar suposições**: heterocedasticidade severa invalida $F$.
+- **Desbalanceamento extremo**: complica interpretação.
+
+### Reportando
+
+"Houve diferença significativa entre as 4 dietas (one-way ANOVA: $F(3, 116) = 8{,}45$; $p < 0{,}001$; $\eta^2 = 0{,}18$). Tukey HSD: dieta C diferiu de A ($p=0{,}002$) e B ($p=0{,}008$); demais comparações não-significativas."
+
+### Quando ANOVA não dá
+
+- $k=2$: use teste t (mesma resposta, mais simples).
+- Variâncias desiguais: Welch's ANOVA.
+- Não-normalidade severa: Kruskal-Wallis.
+- Repeated measures: ANOVA RM ou mixed model.
+- Múltiplos fatores: ANOVA fatorial.
+
+### Exemplo: A/B/C/D testing
+
+4 versões de landing page, métrica: conversão (binária). Não é ANOVA tradicional — use **regressão logística** com dummy de versão. Ou teste qui-quadrado.
+
+### Power para ANOVA
+
+Detectar $f=0{,}25$ (médio) entre 4 grupos a $\alpha=0{,}05$, poder 80%: $n \approx 45$ por grupo. Total 180.
+
+</Porta>
+
 </DuasPortas>
 
 <ListaExercicios seed="aula-107-anova">
 
-<Exercicio numero="107.1" dificuldade="aplicacao">Cálculo direto.</Exercicio>
-<Exercicio numero="107.2" dificuldade="aplicacao">Estimar parâmetro.</Exercicio>
-<Exercicio numero="107.3" dificuldade="aplicacao">Construir intervalo / teste.</Exercicio>
-<Exercicio numero="107.4" dificuldade="aplicacao">Interpretar p-valor.</Exercicio>
-<Exercicio numero="107.5" dificuldade="aplicacao">Caso prático com dados reais.</Exercicio>
-<Exercicio numero="107.6" dificuldade="compreensao">Justifique premissas (normalidade, etc).</Exercicio>
-<Exercicio numero="107.7" dificuldade="compreensao">Mostre propriedade estatística.</Exercicio>
-<Exercicio numero="107.8" dificuldade="modelagem">A/B testing em e-commerce.</Exercicio>
-<Exercicio numero="107.9" dificuldade="modelagem">Ensaio clínico simplificado.</Exercicio>
-<Exercicio numero="107.10" dificuldade="modelagem">Pesquisa de opinião + erro amostral.</Exercicio>
-<Exercicio numero="107.11" dificuldade="modelagem">Análise causal preliminar.</Exercicio>
-<Exercicio numero="107.12" dificuldade="desafio">Compare dois métodos (paramétrico vs não-paramétrico).</Exercicio>
-<Exercicio numero="107.13" dificuldade="demonstracao">Demonstre teorema central da aula.</Exercicio>
+<Exercicio numero="107.1" dificuldade="aplicacao">3 grupos de 10. $df_B$ e $df_W$. (Resp: 2 e 27.)</Exercicio>
+<Exercicio numero="107.2" dificuldade="aplicacao">$SSB=40$, $SSW=80$, $df_B=3$, $df_W=36$. Calcule $F$.</Exercicio>
+<Exercicio numero="107.3" dificuldade="aplicacao">$F = 4{,}5$, $df=(2, 30)$. Crítico $\alpha=0{,}05 \approx 3{,}32$. Conclusão.</Exercicio>
+<Exercicio numero="107.4" dificuldade="aplicacao">$SST=200$, $SSB=80$. $\eta^2$. (Resp: 0{,}40.)</Exercicio>
+<Exercicio numero="107.5" dificuldade="aplicacao">$N=50$, $k=5$. $df_W$. (Resp: 45.)</Exercicio>
+<Exercicio numero="107.6" dificuldade="aplicacao">$SSW = 90$, $df_W=27$. $MS_W$.</Exercicio>
+<Exercicio numero="107.7" dificuldade="aplicacao">3 grupos: médias 10, 12, 14. Tamanhos iguais $n=20$. $\bar Y$ geral.</Exercicio>
+<Exercicio numero="107.8" dificuldade="aplicacao">$SSB$ no exercício anterior.</Exercicio>
+<Exercicio numero="107.9" dificuldade="aplicacao">Por que não fazer múltiplos t-tests para $k>2$?</Exercicio>
+<Exercicio numero="107.10" dificuldade="aplicacao">Sob $H_0$, $E[F] \approx ?$ (Resp: $\approx 1$.)</Exercicio>
+<Exercicio numero="107.11" dificuldade="aplicacao">Quando $k=2$, $F$ se relaciona com $T^2$. Verifique.</Exercicio>
+<Exercicio numero="107.12" dificuldade="aplicacao">$\eta^2 = 0{,}06$. Convencionalmente, qual tamanho de efeito? (Resp: médio.)</Exercicio>
+<Exercicio numero="107.13" dificuldade="aplicacao">3 fertilizantes, 5 plantas cada. Rendimentos médios: 20, 22, 25. Variância dentro $\sigma^2 \approx 4$. $F$.</Exercicio>
+<Exercicio numero="107.14" dificuldade="aplicacao">Conclusão para o exercício anterior a $\alpha=0{,}05$.</Exercicio>
+<Exercicio numero="107.15" dificuldade="aplicacao">Se rejeita ANOVA, próximo passo?</Exercicio>
+<Exercicio numero="107.16" dificuldade="aplicacao">Levene's test serve para?</Exercicio>
+<Exercicio numero="107.17" dificuldade="aplicacao">Welch's ANOVA usa quando?</Exercicio>
+<Exercicio numero="107.18" dificuldade="aplicacao">Kruskal-Wallis: análogo não-paramétrico de qual teste?</Exercicio>
+<Exercicio numero="107.19" dificuldade="aplicacao">$F$-distribution: parâmetros.</Exercicio>
+<Exercicio numero="107.20" dificuldade="aplicacao">$\omega^2$ vs $\eta^2$: qual é menos viesado?</Exercicio>
+<Exercicio numero="107.21" dificuldade="aplicacao">$F = 7{,}1$, $df=(3, 56)$, $p = ?$ aprox. Conclua a 1%.</Exercicio>
+<Exercicio numero="107.22" dificuldade="aplicacao">Power: detectar $f=0{,}25$, $k=4$, poder 80%. $n$ por grupo aprox. (Resp: $\sim 45$.)</Exercicio>
+<Exercicio numero="107.23" dificuldade="aplicacao">Tukey HSD vs Bonferroni: qual mais poderoso para comparações pareadas?</Exercicio>
+<Exercicio numero="107.24" dificuldade="aplicacao">Tabela ANOVA: complete $F$ se $MS_B=10$, $MS_W=2$. (Resp: 5.)</Exercicio>
+<Exercicio numero="107.25" dificuldade="aplicacao">$SST = 300$, $\eta^2 = 0{,}5$. $SSB$ e $SSW$.</Exercicio>
+<Exercicio numero="107.26" dificuldade="aplicacao">Two-way ANOVA: quantos efeitos analisar?</Exercicio>
+<Exercicio numero="107.27" dificuldade="aplicacao">Interação significativa em two-way: como interpretar?</Exercicio>
+<Exercicio numero="107.28" dificuldade="aplicacao">Repeated measures ANOVA: quando usar?</Exercicio>
+<Exercicio numero="107.29" dificuldade="aplicacao">Cohen's $f = 0{,}40$. Tamanho de efeito? (Resp: grande.)</Exercicio>
+<Exercicio numero="107.30" dificuldade="aplicacao">$df_W = N - k$. Por quê esse valor?</Exercicio>
+<Exercicio numero="107.31" dificuldade="modelagem">4 dietas, 25 pessoas cada. Perda peso (kg): 3 4 5 4{,}5 (médias). Decida via ANOVA.</Exercicio>
+<Exercicio numero="107.32" dificuldade="modelagem">Comparar 3 algoritmos de ML em 30 datasets. Acurácia média: 0{,}85, 0{,}87, 0{,}88. ANOVA apropriado?</Exercicio>
+<Exercicio numero="107.33" dificuldade="modelagem">3 catalisadores, 12 reações cada. Rendimento. Modele e teste.</Exercicio>
+<Exercicio numero="107.34" dificuldade="modelagem">5 lojas, vendas semanais por 30 semanas. Diferenças significativas?</Exercicio>
+<Exercicio numero="107.35" dificuldade="modelagem">A/B/C/D testing: tempo na página em 4 versões. Esboce análise.</Exercicio>
+<Exercicio numero="107.36" dificuldade="compreensao">Justifique a decomposição $SST = SSB + SSW$.</Exercicio>
+<Exercicio numero="107.37" dificuldade="compreensao">Mostre que termos cruzados na decomposição cancelam.</Exercicio>
+<Exercicio numero="107.38" dificuldade="compreensao">Por que $E[MS_W] = \sigma^2$ sob $H_0$ e $H_1$?</Exercicio>
+<Exercicio numero="107.39" dificuldade="compreensao">Por que $E[MS_B] = \sigma^2$ sob $H_0$ mas $> \sigma^2$ sob $H_1$?</Exercicio>
+<Exercicio numero="107.40" dificuldade="desafio">Implemente ANOVA do zero em pseudocódigo (entrada: lista de listas). Compare com `scipy.stats.f_oneway`.</Exercicio>
+<Exercicio numero="107.41" dificuldade="desafio">Mostre que ANOVA com $k=2$ equivale a teste t pooled.</Exercicio>
+<Exercicio numero="107.42" dificuldade="demonstracao">Demonstre que $F = MS_B/MS_W \sim F_{k-1, N-k}$ sob $H_0$.</Exercicio>
 
 </ListaExercicios>
 
-## Fontes desta aula
-
-- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019 · 4ª ed · EN · CC-BY-SA. **Fonte primária.**
-- [**An Introduction to Statistical Learning**](https://www.statlearning.com/) — James, Witten, Hastie, Tibshirani · 2023 · 2nd ed · EN · gratuito.
+## Fontes
+- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019 · 4ª ed · §7.5. **Fonte primária.**
+- [**Design and Analysis of Experiments**](https://www.wiley.com/en-us/Design+and+Analysis+of+Experiments%2C+10th+Edition-p-9781119492443) — Montgomery · 2019 · 10ª ed · §3.
+- [**Statistical Methods for Psychology**](https://www.cengage.com/c/statistical-methods-for-psychology-8e-howell/) — Howell · 2012 · §11.

@@ -3,48 +3,416 @@ titulo: "Lição 109 — Estatística bayesiana introdutória"
 slug: "aula-109-bayesiana-intro"
 categoria: "aulas"
 subcategoria: "ano-3-trim-11"
-descricao: "Prior, likelihood, posterior. MAP vs MLE."
+descricao: "Bayes rule. Prior, likelihood, posterior. Beta-Bernoulli. MAP vs MLE."
 ordem: 109
 publicado: true
 tags: ["estatística inferencial", "ano-3", "trim-11"]
 prerrequisitos: ["aula-108"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-29"
+atualizadoEm: "2026-04-30"
 ---
 
 <EquacaoCanonica
-  formula="P(\\theta | D) \\propto P(D | \\theta) P(\\theta)"
-  legenda={<>Conceito central: Prior, likelihood, posterior. MAP vs MLE.</>}
-  audioTexto="Aula sobre Estatística bayesiana introdutória. Prior, likelihood, posterior. MAP vs MLE."
+  formula="P(\theta \mid D) \propto P(D \mid \theta)\, P(\theta)"
+  legenda={<>O <strong>teorema de Bayes</strong> atualiza nossa crença sobre <span>$\theta$</span> ao observar dados <span>$D$</span>: o posterior é proporcional à verossimilhança vezes o prior. Toda inferência bayesiana é variação desta regra.</>}
+  audioTexto="Estatística bayesiana. Pê de teta dado dê é proporcional a pê de dê dado teta vezes pê de teta. O posterior é a verossimilhança vezes o prior, normalizado. Toda atualização de crença passa por essa regra."
 />
 
 <DuasPortas>
-<Porta nivel="formal" titulo="Estatística bayesiana introdutória">
 
-Prior, likelihood, posterior. MAP vs MLE. Aplicações em pesquisa científica, ensaios clínicos, A/B testing, ML.
+<Porta nivel="formal" titulo="Definição formal">
+
+### Teorema de Bayes
+
+$$P(\theta \mid D) = \frac{P(D \mid \theta) P(\theta)}{P(D)} \propto P(D \mid \theta) P(\theta)$$
+
+- $P(\theta)$: **prior** (crença antes dos dados).
+- $P(D \mid \theta)$: **verossimilhança** (likelihood).
+- $P(\theta \mid D)$: **posterior** (crença atualizada).
+- $P(D)$: **evidência**, $\int P(D \mid \theta) P(\theta) d\theta$.
+
+### Beta-Bernoulli
+
+Para $X_i \sim \text{Bernoulli}(\theta)$, prior conjugado é Beta:
+
+$$\theta \sim \text{Beta}(\alpha, \beta)$$
+
+Posterior após $s$ sucessos em $n$ tentativas:
+
+$$\theta \mid D \sim \text{Beta}(\alpha + s, \beta + n - s)$$
+
+### Estimadores pontuais
+
+- **MAP** (maximum a posteriori): $\hat\theta_{\text{MAP}} = \arg\max P(\theta \mid D)$.
+- **MLE** (maximum likelihood): $\hat\theta_{\text{MLE}} = \arg\max P(D \mid \theta)$.
+- **Média posterior**: $E[\theta \mid D]$.
+
+Com prior uniforme, MAP = MLE.
+
+### Intervalo credível
+
+$(1-\alpha)$ HPD (highest posterior density) ou central:
+
+$$P(\theta \in I \mid D) = 1 - \alpha$$
+
+Diferente do IC frequentista — probabilidade direta sobre $\theta$.
+
+### Bayes factor
+
+$$BF_{10} = \frac{P(D \mid H_1)}{P(D \mid H_0)}$$
+
+Razão de evidência. $> 10$ forte para $H_1$; $< 0{,}1$ forte para $H_0$.
 
 </Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Você está com sua mãe procurando o seu **brinquedo**. Você acha que ele está no quarto. Mas mãe diz que provavelmente está na sala.
+
+Você vai à sala e **encontra a caixa do brinquedo aberta**. Agora você acredita mais que está na sala. Você **mudou sua opinião** com base na evidência.
+
+Bayes é exatamente isso: você tem uma crença, vê uma pista, atualiza a crença.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+### A grande ideia
+
+Bayesiano usa **probabilidade pra crenças**, não só pra eventos aleatórios.
+
+**Exemplo**: você acha que uma moeda **provavelmente** é justa. Mas joga 10 vezes e sai cara 9 vezes. Agora você acha que **provavelmente é viciada**.
+
+Bayes te dá a fórmula exata pra essa atualização.
+
+### Receita
+
+1. **Prior**: o que você acha **antes** de ver dados.
+2. **Likelihood**: como os dados se comportariam para cada possível valor de $\theta$.
+3. Multiplica os dois.
+4. Normaliza (pra somar 1).
+5. **Posterior**: nova crença.
+
+### Exemplo: 6 caras em 10 lançamentos
+
+Sob "moeda justa" ($\theta=0{,}5$): probabilidade de 6/10 = 0{,}21.
+Sob "moeda viciada cara" ($\theta=0{,}7$): probabilidade = 0{,}20.
+
+Os dados favorecem ligeiramente a viciada, mas não muito. O posterior depende do prior.
+
+### Bayes vs frequentista
+
+- **Frequentista**: $\theta$ é fixo desconhecido. Usamos $p$-valores.
+- **Bayesiano**: $\theta$ é variável aleatória. Atualizamos $P(\theta)$.
+
+</Porta>
+
+<Porta nivel="15" titulo="Pra adolescente de 15 anos">
+
+### Beta-Bernoulli detalhado
+
+Você quer estimar a probabilidade $\theta$ de uma moeda dar cara.
+
+**Prior**: $\theta \sim \text{Beta}(\alpha, \beta)$. Média $\alpha/(\alpha+\beta)$.
+
+- $\text{Beta}(1,1)$ = uniforme: total ignorância.
+- $\text{Beta}(10, 10)$: acho que é justa, mas posso estar errado.
+- $\text{Beta}(50, 1)$: forte crença que é cara sempre.
+
+**Likelihood**: $n$ lançamentos, $s$ caras. $P(D|\theta) = \theta^s (1-\theta)^{n-s}$.
+
+**Posterior**: $\text{Beta}(\alpha + s, \beta + n - s)$. Média:
+
+$$E[\theta | D] = \frac{\alpha + s}{\alpha + \beta + n}$$
+
+Para $n \to \infty$, posterior $\to s/n$ (MLE). Prior é "abafado" pelos dados.
+
+### Conjugados
+
+Para muitas famílias, prior + likelihood produz posterior na mesma família. Lista:
+
+| Likelihood | Prior conjugado | Posterior |
+|---|---|---|
+| Bernoulli/Binomial | Beta | Beta |
+| Poisson | Gamma | Gamma |
+| Normal (média) | Normal | Normal |
+| Normal (variância) | Inverse-Gamma | Inverse-Gamma |
+| Multinomial | Dirichlet | Dirichlet |
+
+### MAP vs MLE
+
+- MLE maximiza $P(D|\theta)$ — só dados.
+- MAP maximiza $P(\theta|D)$ — dados + prior.
+
+Com prior uniforme, MAP = MLE. Com prior informativo, MAP "puxa" para o prior.
+
+### Exemplo
+
+Prior $\text{Beta}(2, 2)$, observa 7 caras em 10.
+
+Posterior: $\text{Beta}(9, 5)$. Média $= 9/14 = 0{,}643$.
+
+MLE seria $7/10 = 0{,}7$. Posterior puxou para a média do prior (0{,}5).
+
+### IC credível 95%
+
+Quantis 2{,}5% e 97{,}5% da posterior. Para $\text{Beta}(9, 5)$: $[0{,}40; 0{,}85]$ aprox.
+
+Interpretação: $P(0{,}40 \leq \theta \leq 0{,}85 \mid D) = 0{,}95$. Direto, não condicionado a "amostra hipotética".
+
+</Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia">
+
+### Por que bayesiano?
+
+1. **Incorpora conhecimento prévio** explicitamente.
+2. **Probabilidade direta sobre $\theta$**: mais natural.
+3. **Inferência sequencial automática**: posterior de hoje = prior de amanhã.
+4. **Não viola "stopping rule"**: pode olhar os dados a qualquer hora.
+5. **Hierarquia natural**: modelos multi-nível.
+
+### Trade-offs
+
+1. **Prior é subjetivo** — controverso.
+2. **Computação**: posteriores não-conjugados exigem MCMC.
+3. **Sensibilidade ao prior**: pode dominar com $n$ pequeno.
+4. **Comunicação**: leitor precisa entender prior.
+
+### MCMC (markov chain monte carlo)
+
+Quando posterior não tem forma fechada, amostre dela via:
+
+- **Metropolis-Hastings**: proposta + aceitação/rejeição.
+- **Gibbs sampling**: amostra condicionais.
+- **HMC** (Hamiltonian Monte Carlo): para alta dimensão. **Stan**, **PyMC**.
+
+### Exemplo: A/B test bayesiano
+
+Versão A: $s_A=80$ conversões em $n_A=1000$.
+Versão B: $s_B=110$ em $n_B=1000$.
+
+Prior: $\theta_A, \theta_B \sim \text{Beta}(1, 1)$.
+
+Posteriors:
+- $\theta_A \mid D \sim \text{Beta}(81, 921)$
+- $\theta_B \mid D \sim \text{Beta}(111, 891)$
+
+$P(\theta_B > \theta_A \mid D) = ?$ via Monte Carlo:
+
+```python
+import numpy as np
+A = np.random.beta(81, 921, 100000)
+B = np.random.beta(111, 891, 100000)
+prob_B_better = (B > A).mean()  # ~0.99
+```
+
+Reportável: "B é melhor com probabilidade 99%". Direto, sem $p$-hacking.
+
+### Crítica de Box
+
+"Todos modelos são errados, alguns úteis." Vale também para priors. Use **prior predictive checks** e **posterior predictive checks** para diagnóstico.
+
+### Empirical Bayes
+
+Estima prior dos próprios dados (não totalmente puro). Útil em hierarquias com pouco dado por grupo.
+
+### Aplicações
+
+- **A/B testing**: probabilidade direta de B > A.
+- **Ensaios clínicos**: BAYES designs adaptativos.
+- **Astronomia**: estimar parâmetros de modelos cosmológicos.
+- **Machine learning**: regularização (Ridge = MAP gaussiano).
+- **Filtros de spam**: Naive Bayes.
+
+### Implementação rápida
+
+```python
+import pymc as pm
+import numpy as np
+
+with pm.Model() as model:
+    theta = pm.Beta("theta", alpha=1, beta=1)
+    likelihood = pm.Bernoulli("y", p=theta, observed=data)
+    trace = pm.sample(2000)
+
+print(pm.summary(trace))
+```
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+### Hierarchical Bayes
+
+Modelos multi-nível:
+
+$$y_{ij} \sim \mathcal{N}(\mu_j, \sigma^2), \quad \mu_j \sim \mathcal{N}(\mu_0, \tau^2)$$
+
+Compartilha informação entre grupos via $\mu_0, \tau$. **Partial pooling** — entre fully pooled (média global) e no pooling (cada grupo isolado).
+
+### Variational Inference
+
+Aproxima $P(\theta|D)$ por família tractável $q_\phi(\theta)$, minimizando KL. Mais rápido que MCMC. **ADVI**, **mean-field**, **normalizing flows**.
+
+### Posterior predictive
+
+Para predição:
+
+$$P(\tilde y \mid D) = \int P(\tilde y \mid \theta) P(\theta \mid D)\, d\theta$$
+
+Integra incerteza de $\theta$. Difere de plug-in $P(\tilde y | \hat\theta)$.
+
+### WAIC e LOO-CV
+
+- **WAIC**: widely applicable IC. Generalização de AIC para hierarquias.
+- **LOO**: leave-one-out via Pareto-smoothed importance sampling. Melhor diagnostic.
+
+### Bayesian model averaging
+
+Em vez de escolher um modelo, pondere por $P(M_i \mid D)$. Robusto a model uncertainty.
+
+### Improper priors
+
+$\int P(\theta) d\theta = \infty$. OK se posterior é próprio. Jeffreys prior, reference prior. Cuidado: nem sempre bem definidos.
+
+### Stein paradox
+
+James-Stein dominator de MLE em $p \geq 3$ — argumento bayesiano via empirical Bayes.
+
+### Exchangeability vs i.i.d.
+
+De Finetti's theorem: sequências infinitas exchangeable são misturas de i.i.d. Justifica priors em mistura.
+
+### Crítica frequentista
+
+- Subjetividade do prior.
+- Computação cara.
+- Interpretação de "probabilidade subjetiva" disputada.
+
+### Crítica bayesiana ao frequentismo
+
+- p-valor não responde pergunta natural.
+- Stopping rules importam frequentista, não bayesiano.
+- Incorporação de prior é honesta.
+
+### Bridges
+
+- Lasso = MAP com prior Laplace.
+- Ridge = MAP com prior gaussiano.
+- Dropout em NNs = aproximação bayesiana.
+
+### Pioneiro: Thomas Bayes (1763), formalização: Laplace (1812). Renascimento computacional: Geman & Geman (1984).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicação prática">
+
+**Receita: análise bayesiana decente.**
+
+1. **Especifique modelo**: likelihood + prior.
+2. **Justifique prior**: weakly informative é boa default.
+3. **Compute posterior**: conjugado se possível, MCMC se não.
+4. **Diagnóstico**: convergência ($\hat R$), efective sample size.
+5. **Posterior predictive checks**: dados simulados batem com observados?
+6. **Reporte**: posterior summary, IC credível, decisão.
+
+### Erros frequentes
+
+- **Prior sem justificativa**: "$\text{Beta}(1,1)$ uniforme!" mas pode ser informativo em problemas escalonados.
+- **Não checar convergência MCMC**.
+- **Confundir IC credível com IC frequentista**.
+- **Bayes factor sem sensibilidade analysis**.
+
+### Reportando
+
+"$\theta_B$ posterior média 0{,}11 (IC credível 95%: 0{,}091 a 0{,}131); $P(\theta_B > \theta_A \mid D) = 0{,}99$; modelo: $\theta \sim \text{Beta}(1,1)$, $y \sim \text{Bernoulli}(\theta)$."
+
+### Frequentista vs bayesiano: quando usar?
+
+| Cenário | Recomendação |
+|---|---|
+| $n$ enorme, sem prior info | Frequentista (mais rápido) |
+| $n$ pequeno + prior info | Bayesiano |
+| Predição com incerteza | Bayesiano (posterior predictive) |
+| Hierarquia natural | Bayesiano |
+| Decisão sob risco | Bayesiano (Bayes risk) |
+| A/B test online | Bayesiano (early stopping ok) |
+
+### Workflow PyMC
+
+```python
+import pymc as pm
+
+with pm.Model():
+    theta_A = pm.Beta("theta_A", 1, 1)
+    theta_B = pm.Beta("theta_B", 1, 1)
+    obs_A = pm.Binomial("obs_A", n=1000, p=theta_A, observed=80)
+    obs_B = pm.Binomial("obs_B", n=1000, p=theta_B, observed=110)
+    diff = pm.Deterministic("diff", theta_B - theta_A)
+    trace = pm.sample(4000, tune=1000)
+
+print(pm.summary(trace))
+```
+
+### Quando MCMC dá errado
+
+- Posterior multimodal: HMC pode ficar preso.
+- Funil bayesiano (hierarchical): use non-centered parameterization.
+- $\hat R > 1{,}05$: rodadas mais longas, repare modelo.
+
+</Porta>
+
 </DuasPortas>
 
 <ListaExercicios seed="aula-109-bayesiana-intro">
 
-<Exercicio numero="109.1" dificuldade="aplicacao">Cálculo direto.</Exercicio>
-<Exercicio numero="109.2" dificuldade="aplicacao">Estimar parâmetro.</Exercicio>
-<Exercicio numero="109.3" dificuldade="aplicacao">Construir intervalo / teste.</Exercicio>
-<Exercicio numero="109.4" dificuldade="aplicacao">Interpretar p-valor.</Exercicio>
-<Exercicio numero="109.5" dificuldade="aplicacao">Caso prático com dados reais.</Exercicio>
-<Exercicio numero="109.6" dificuldade="compreensao">Justifique premissas (normalidade, etc).</Exercicio>
-<Exercicio numero="109.7" dificuldade="compreensao">Mostre propriedade estatística.</Exercicio>
-<Exercicio numero="109.8" dificuldade="modelagem">A/B testing em e-commerce.</Exercicio>
-<Exercicio numero="109.9" dificuldade="modelagem">Ensaio clínico simplificado.</Exercicio>
-<Exercicio numero="109.10" dificuldade="modelagem">Pesquisa de opinião + erro amostral.</Exercicio>
-<Exercicio numero="109.11" dificuldade="modelagem">Análise causal preliminar.</Exercicio>
-<Exercicio numero="109.12" dificuldade="desafio">Compare dois métodos (paramétrico vs não-paramétrico).</Exercicio>
-<Exercicio numero="109.13" dificuldade="demonstracao">Demonstre teorema central da aula.</Exercicio>
+<Exercicio numero="109.1" dificuldade="aplicacao">Prior $\text{Beta}(2, 2)$. Média e variância.</Exercicio>
+<Exercicio numero="109.2" dificuldade="aplicacao">Posterior após 7 sucessos em 10 com prior $\text{Beta}(2, 2)$. (Resp: $\text{Beta}(9, 5)$.)</Exercicio>
+<Exercicio numero="109.3" dificuldade="aplicacao">Média do posterior acima.</Exercicio>
+<Exercicio numero="109.4" dificuldade="aplicacao">MLE no exercício acima. (Resp: 0{,}7.)</Exercicio>
+<Exercicio numero="109.5" dificuldade="aplicacao">Quando MAP = MLE? (Resp: prior uniforme.)</Exercicio>
+<Exercicio numero="109.6" dificuldade="aplicacao">Prior $\text{Beta}(1, 1)$: o que representa?</Exercicio>
+<Exercicio numero="109.7" dificuldade="aplicacao">Prior $\text{Beta}(50, 50)$ vs $\text{Beta}(2, 2)$: qual mais informativo?</Exercicio>
+<Exercicio numero="109.8" dificuldade="aplicacao">Posterior conjugado para Poisson likelihood. (Resp: Gamma.)</Exercicio>
+<Exercicio numero="109.9" dificuldade="aplicacao">$P(D)$ no teorema de Bayes: nome e papel.</Exercicio>
+<Exercicio numero="109.10" dificuldade="aplicacao">Por que dizemos "$\propto$" em vez de "="?</Exercicio>
+<Exercicio numero="109.11" dificuldade="aplicacao">Prior Normal + likelihood Normal = posterior?</Exercicio>
+<Exercicio numero="109.12" dificuldade="aplicacao">Dirichlet é prior conjugado de qual likelihood?</Exercicio>
+<Exercicio numero="109.13" dificuldade="aplicacao">Bayes factor $BF_{10} = 12$. Forte para $H_0$ ou $H_1$?</Exercicio>
+<Exercicio numero="109.14" dificuldade="aplicacao">$BF_{10} = 0{,}05$. Conclusão.</Exercicio>
+<Exercicio numero="109.15" dificuldade="aplicacao">Prior $\text{Beta}(20, 80)$. Média.</Exercicio>
+<Exercicio numero="109.16" dificuldade="aplicacao">Após observar 50 sucessos em 100, posterior. (Resp: $\text{Beta}(70, 130)$.)</Exercicio>
+<Exercicio numero="109.17" dificuldade="aplicacao">Para $n \to \infty$, posterior média $\to$? (Resp: MLE.)</Exercicio>
+<Exercicio numero="109.18" dificuldade="aplicacao">Prior fortíssimo + dados poucos: posterior se parece com?</Exercicio>
+<Exercicio numero="109.19" dificuldade="aplicacao">IC credível: como calcular?</Exercicio>
+<Exercicio numero="109.20" dificuldade="aplicacao">HPD vs central: diferença.</Exercicio>
+<Exercicio numero="109.21" dificuldade="aplicacao">Diferença filosófica entre IC e IC credível.</Exercicio>
+<Exercicio numero="109.22" dificuldade="aplicacao">MCMC: o que é?</Exercicio>
+<Exercicio numero="109.23" dificuldade="aplicacao">Quando precisamos de MCMC vs solução fechada?</Exercicio>
+<Exercicio numero="109.24" dificuldade="aplicacao">$\hat R$ converge para 1: o que indica?</Exercicio>
+<Exercicio numero="109.25" dificuldade="aplicacao">Naive Bayes: aplicação prática.</Exercicio>
+<Exercicio numero="109.26" dificuldade="aplicacao">Spam filter: Bayes em qual passo?</Exercicio>
+<Exercicio numero="109.27" dificuldade="aplicacao">Prior weakly informative: ideia.</Exercicio>
+<Exercicio numero="109.28" dificuldade="aplicacao">Prior predictive check: para que serve?</Exercicio>
+<Exercicio numero="109.29" dificuldade="aplicacao">Posterior predictive check: idem.</Exercicio>
+<Exercicio numero="109.30" dificuldade="aplicacao">Inferência sequencial: posterior de hoje vira prior de amanhã. Justifique.</Exercicio>
+<Exercicio numero="109.31" dificuldade="modelagem">A/B testing: $A$ converte 80/1000, $B$ 110/1000. Calcule $P(\theta_B > \theta_A | D)$ via simulação.</Exercicio>
+<Exercicio numero="109.32" dificuldade="modelagem">Detector de spam: $P(\text{spam}|texto)$ via Bayes. Esboce equação.</Exercicio>
+<Exercicio numero="109.33" dificuldade="modelagem">Diagnóstico médico: sensibilidade 99%, especificidade 95%, prevalência 1%. $P(\text{doente}|+)$. (Resp: $\sim 17\%$.)</Exercicio>
+<Exercicio numero="109.34" dificuldade="modelagem">Ensaio clínico bayesiano: prior cético sobre droga. Atualize com dados $\bar X = 5$ em $n=20$.</Exercicio>
+<Exercicio numero="109.35" dificuldade="modelagem">Predição de esporte: time A ganhou 7 de 10 contra B. Prior fraco. Probabilidade de vencer próximo.</Exercicio>
+<Exercicio numero="109.36" dificuldade="compreensao">Justifique por que Beta é conjugado de Bernoulli.</Exercicio>
+<Exercicio numero="109.37" dificuldade="compreensao">Mostre que com prior uniforme, MAP coincide com MLE.</Exercicio>
+<Exercicio numero="109.38" dificuldade="compreensao">Por que IC credível responde pergunta diferente do IC frequentista?</Exercicio>
+<Exercicio numero="109.39" dificuldade="compreensao">Explique por que stopping rule não afeta inferência bayesiana.</Exercicio>
+<Exercicio numero="109.40" dificuldade="desafio">Implemente Metropolis-Hastings em pseudocódigo para amostrar de uma distribuição não-conjugada.</Exercicio>
+<Exercicio numero="109.41" dificuldade="desafio">Demonstre $\text{Beta}(\alpha, \beta) \cdot \theta^s(1-\theta)^{n-s} \propto \text{Beta}(\alpha+s, \beta+n-s)$.</Exercicio>
+<Exercicio numero="109.42" dificuldade="demonstracao">Demonstre o teorema de Bayes a partir da definição de probabilidade condicional.</Exercicio>
 
 </ListaExercicios>
 
-## Fontes desta aula
-
-- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019 · 4ª ed · EN · CC-BY-SA. **Fonte primária.**
-- [**An Introduction to Statistical Learning**](https://www.statlearning.com/) — James, Witten, Hastie, Tibshirani · 2023 · 2nd ed · EN · gratuito.
+## Fontes
+- [**Bayesian Data Analysis (3rd ed.)**](http://www.stat.columbia.edu/~gelman/book/) — Gelman, Carlin, Stern, Dunson, Vehtari, Rubin · 2013 · §1-3. **Fonte primária.**
+- [**Statistical Rethinking**](https://xcelab.net/rm/statistical-rethinking/) — McElreath · 2020 · 2ª ed · §2-3.
+- [**Probabilistic Programming and Bayesian Methods for Hackers**](https://github.com/CamDavidsonPilon/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers) — Davidson-Pilon · gratuito.
