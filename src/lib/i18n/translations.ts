@@ -26,8 +26,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Математический клуб',
     ko: '수학 클럽',
     pl: 'Klub Matematyczny',
-    ar: 'نادي الرياضيات',
-    hi: 'गणित क्लब',
   },
   'brand.tagline': {
     'pt-BR': 'Página inicial do Clube da Matemática',
@@ -41,23 +39,21 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Главная Математического клуба',
     ko: '수학 클럽 홈',
     pl: 'Strona główna Klubu Matematycznego',
-    ar: 'الصفحة الرئيسية لنادي الرياضيات',
-    hi: 'गणित क्लब का होम',
   },
 
   // ===== AUDIO =====
   'audio.read': {
     'pt-BR': 'Ouvir', en: 'Listen', es: 'Escuchar', zh: '听', ja: '聞く',
-    de: 'Anhören', fr: 'Écouter', it: 'Ascolta', ru: 'Слушать', ko: '듣기', pl: 'Słuchaj', ar: 'استمع', hi: 'सुनें',
+    de: 'Anhören', fr: 'Écouter', it: 'Ascolta', ru: 'Слушать', ko: '듣기', pl: 'Słuchaj',
   },
   'audio.stop': {
     'pt-BR': 'Parar', en: 'Stop', es: 'Detener', zh: '停', ja: '停止',
-    de: 'Stopp', fr: 'Arrêter', it: 'Ferma', ru: 'Стоп', ko: '정지', pl: 'Stop', ar: 'إيقاف', hi: 'रोकें',
+    de: 'Stopp', fr: 'Arrêter', it: 'Ferma', ru: 'Стоп', ko: '정지', pl: 'Stop',
   },
   'audio.translating': {
     'pt-BR': 'Traduzindo…', en: 'Translating…', es: 'Traduciendo…', zh: '翻译中…',
     ja: '翻訳中…', de: 'Übersetze…', fr: 'Traduction…', it: 'Traduzione…',
-    ru: 'Перевожу…', ko: '번역 중…', pl: 'Tłumaczę…', ar: 'يترجم…', hi: 'अनुवाद हो रहा है…',
+    ru: 'Перевожу…', ko: '번역 중…', pl: 'Tłumaczę…',
   },
   'audio.pendingTranslation': {
     'pt-BR': 'tradução pendente — falando em PT-BR',
@@ -71,41 +67,39 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'перевод в процессе — читаю на португальском',
     ko: '번역 대기 중 — 포르투갈어로 읽음',
     pl: 'oczekuje na tłumaczenie — czytam po portugalsku',
-    ar: 'الترجمة قيد الانتظار — يُقرأ بالبرتغالية',
-    hi: 'अनुवाद लंबित — पुर्तगाली में पढ़ा जा रहा है',
   },
 
   // ===== NAVIGATION =====
   'nav.middleSchool': {
     'pt-BR': 'Ensino Médio', en: 'High School', es: 'Bachillerato', zh: '高中',
     ja: '高校', de: 'Gymnasium', fr: 'Lycée', it: 'Scuola superiore',
-    ru: 'Старшая школа', ko: '고등학교', pl: 'Liceum', ar: 'الثانوية', hi: 'हाई स्कूल',
+    ru: 'Старшая школа', ko: '고등학교', pl: 'Liceum',
   },
   'nav.finance': {
     'pt-BR': 'Finanças', en: 'Finance', es: 'Finanzas', zh: '金融', ja: '金融',
-    de: 'Finanzen', fr: 'Finance', it: 'Finanza', ru: 'Финансы', ko: '금융', pl: 'Finanse', ar: 'مالية', hi: 'वित्त',
+    de: 'Finanzen', fr: 'Finance', it: 'Finanza', ru: 'Финансы', ko: '금융', pl: 'Finanse',
   },
   'nav.books': {
     'pt-BR': 'Livros', en: 'Books', es: 'Libros', zh: '书籍', ja: '書籍',
-    de: 'Bücher', fr: 'Livres', it: 'Libri', ru: 'Книги', ko: '도서', pl: 'Książki', ar: 'كتب', hi: 'पुस्तकें',
+    de: 'Bücher', fr: 'Livres', it: 'Libri', ru: 'Книги', ko: '도서', pl: 'Książki',
   },
   'nav.videos': {
     'pt-BR': 'Vídeos', en: 'Videos', es: 'Videos', zh: '视频', ja: '動画',
-    de: 'Videos', fr: 'Vidéos', it: 'Video', ru: 'Видео', ko: '비디오', pl: 'Filmy', ar: 'فيديوهات', hi: 'वीडियो',
+    de: 'Videos', fr: 'Vidéos', it: 'Video', ru: 'Видео', ko: '비디오', pl: 'Filmy',
   },
   'nav.exams': {
     'pt-BR': 'Provas', en: 'Exams', es: 'Exámenes', zh: '考试', ja: '試験',
-    de: 'Prüfungen', fr: 'Examens', it: 'Esami', ru: 'Экзамены', ko: '시험', pl: 'Egzaminy', ar: 'امتحانات', hi: 'परीक्षा',
+    de: 'Prüfungen', fr: 'Examens', it: 'Esami', ru: 'Экзамены', ko: '시험', pl: 'Egzaminy',
   },
   'nav.manifesto': {
     'pt-BR': 'Manifesto', en: 'Manifesto', es: 'Manifiesto', zh: '宣言', ja: 'マニフェスト',
-    de: 'Manifest', fr: 'Manifeste', it: 'Manifesto', ru: 'Манифест', ko: '선언문', pl: 'Manifest', ar: 'بيان', hi: 'घोषणापत्र',
+    de: 'Manifest', fr: 'Manifeste', it: 'Manifesto', ru: 'Манифест', ko: '선언문', pl: 'Manifest',
   },
 
   // ===== LOCALE =====
   'locale.label': {
     'pt-BR': 'Idioma', en: 'Language', es: 'Idioma', zh: '语言', ja: '言語',
-    de: 'Sprache', fr: 'Langue', it: 'Lingua', ru: 'Язык', ko: '언어', pl: 'Język', ar: 'اللغة', hi: 'भाषा',
+    de: 'Sprache', fr: 'Langue', it: 'Lingua', ru: 'Язык', ko: '언어', pl: 'Język',
   },
 
   // ===== HOME HERO =====
@@ -121,8 +115,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Открытый код · бесплатно · многоязычный',
     ko: '오픈소스 · 무료 · 다국어',
     pl: 'Open source · darmowy · wielojęzyczny',
-    ar: 'مفتوح المصدر · مجاني · متعدد اللغات',
-    hi: 'ओपन सोर्स · मुफ्त · बहुभाषी',
   },
   'home.title.line1': {
     'pt-BR': 'Ensino Médio brasileiro',
@@ -136,8 +128,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Бразильская старшая школа',
     ko: '브라질 고등학교',
     pl: 'Brazylijskie liceum',
-    ar: 'الثانوية البرازيلية',
-    hi: 'ब्राज़ीलियन हाई स्कूल',
   },
   'home.title.line2': {
     'pt-BR': 'otimizado.',
@@ -151,8 +141,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'оптимизирована.',
     ko: '최적화.',
     pl: 'zoptymalizowane.',
-    ar: 'الأمثل.',
-    hi: 'अनुकूलित।',
   },
   'home.cta.start': {
     'pt-BR': 'Começar pelo Ensino Médio',
@@ -166,8 +154,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Начать со старшей школы',
     ko: '고등학교부터 시작',
     pl: 'Zacznij od liceum',
-    ar: 'ابدأ بالثانوية',
-    hi: 'हाई स्कूल से शुरू करें',
   },
   'home.cta.bs': {
     'pt-BR': 'Ver Black-Scholes (Finanças)',
@@ -181,8 +167,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Посмотреть Блэк-Шоулз (Финансы)',
     ko: 'Black-Scholes 보기 (금융)',
     pl: 'Zobacz Black-Scholes (Finanse)',
-    ar: 'انظر بلاك-شولز (مالية)',
-    hi: 'Black-Scholes देखें (वित्त)',
   },
   'home.cta.pdf': {
     'pt-BR': 'Ler o working paper (PDF)',
@@ -196,8 +180,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Читать рабочий документ (PDF)',
     ko: '워킹 페이퍼 읽기 (PDF)',
     pl: 'Przeczytaj working paper (PDF)',
-    ar: 'اقرأ ورقة العمل (PDF)',
-    hi: 'वर्किंग पेपर पढ़ें (PDF)',
   },
 
   // ===== COUNTERS (main page stats) =====
@@ -213,8 +195,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '◆ В цифрах ◆',
     ko: '◆ 숫자로 보기 ◆',
     pl: '◆ W liczbach ◆',
-    ar: '◆ بالأرقام ◆',
-    hi: '◆ संख्याओं में ◆',
   },
   'counters.title': {
     'pt-BR': 'O que tem aqui dentro',
@@ -228,8 +208,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Что внутри',
     ko: '내부에 무엇이 있는지',
     pl: 'Co znajdziesz w środku',
-    ar: 'ما هو بالداخل',
-    hi: 'अंदर क्या है',
   },
   'counters.subtitle': {
     'pt-BR': 'Métricas reais da plataforma — atualizadas em tempo real',
@@ -243,46 +221,44 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Реальные метрики — в реальном времени',
     ko: '실시간 플랫폼 지표',
     pl: 'Rzeczywiste metryki — w czasie rzeczywistym',
-    ar: 'مقاييس حقيقية — محدثة في الوقت الفعلي',
-    hi: 'वास्तविक मेट्रिक्स — रीयल-टाइम अपडेट',
   },
   'counters.visits': {
     'pt-BR': 'visitas', en: 'visits', es: 'visitas', zh: '访问', ja: '訪問',
-    de: 'Besuche', fr: 'visites', it: 'visite', ru: 'посещений', ko: '방문', pl: 'odwiedzin', ar: 'زيارات', hi: 'विज़िट',
+    de: 'Besuche', fr: 'visites', it: 'visite', ru: 'посещений', ko: '방문', pl: 'odwiedzin',
   },
   'counters.lessons.published': {
     'pt-BR': 'lições publicadas', en: 'lessons published', es: 'lecciones publicadas',
     zh: '已发布课程', ja: '公開済みレッスン', de: 'veröffentlichte Lektionen',
     fr: 'leçons publiées', it: 'lezioni pubblicate', ru: 'опубликованных уроков',
-    ko: '게시된 수업', pl: 'opublikowane lekcje', ar: 'دروس منشورة', hi: 'प्रकाशित पाठ',
+    ko: '게시된 수업', pl: 'opublikowane lekcje',
   },
   'counters.exercises': {
     'pt-BR': 'exercícios', en: 'exercises', es: 'ejercicios', zh: '练习', ja: '演習',
-    de: 'Übungen', fr: 'exercices', it: 'esercizi', ru: 'упражнений', ko: '연습', pl: 'ćwiczeń', ar: 'تمارين', hi: 'अभ्यास',
+    de: 'Übungen', fr: 'exercices', it: 'esercizi', ru: 'упражнений', ko: '연습', pl: 'ćwiczeń',
   },
   'counters.exam.versions': {
     'pt-BR': 'versões de prova', en: 'exam versions', es: 'versiones de examen',
     zh: '考试版本', ja: '試験バージョン', de: 'Prüfungsversionen',
     fr: 'versions d\'examen', it: 'versioni d\'esame', ru: 'версий экзамена',
-    ko: '시험 버전', pl: 'wersji egzaminu', ar: 'إصدارات الامتحان', hi: 'परीक्षा संस्करण',
+    ko: '시험 버전', pl: 'wersji egzaminu',
   },
   'counters.study.total': {
     'pt-BR': 'estudo total', en: 'total study', es: 'estudio total',
     zh: '总学习', ja: '総学習', de: 'Gesamt-Lernzeit',
     fr: 'étude totale', it: 'studio totale', ru: 'всего обучения',
-    ko: '총 학습', pl: 'łączna nauka', ar: 'إجمالي الدراسة', hi: 'कुल अध्ययन',
+    ko: '총 학습', pl: 'łączna nauka',
   },
   'counters.books.ledger': {
     'pt-BR': 'livros no ledger', en: 'books in ledger', es: 'libros en ledger',
     zh: '书籍目录', ja: '蔵書', de: 'Bücher im Verzeichnis',
     fr: 'livres au catalogue', it: 'libri nel catalogo', ru: 'книг в каталоге',
-    ko: '도서 목록', pl: 'książek w katalogu', ar: 'كتب في السجل', hi: 'सूची में पुस्तकें',
+    ko: '도서 목록', pl: 'książek w katalogu',
   },
 
   // ===== SEARCH DISCOVERY =====
   'search.eyebrow': {
     'pt-BR': 'Descobrir', en: 'Discover', es: 'Descubrir', zh: '探索', ja: '探す',
-    de: 'Entdecken', fr: 'Découvrir', it: 'Scopri', ru: 'Найти', ko: '찾아보기', pl: 'Odkryj', ar: 'اكتشف', hi: 'खोजें',
+    de: 'Entdecken', fr: 'Découvrir', it: 'Scopri', ru: 'Найти', ko: '찾아보기', pl: 'Odkryj',
   },
   'search.title': {
     'pt-BR': 'O que você quer estudar hoje?',
@@ -296,8 +272,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Что вы хотите изучать сегодня?',
     ko: '오늘 무엇을 공부하고 싶으세요?',
     pl: 'Czego chcesz się dziś nauczyć?',
-    ar: 'ماذا تريد أن تدرس اليوم؟',
-    hi: 'आज आप क्या पढ़ना चाहते हैं?',
   },
   'search.placeholder': {
     'pt-BR': 'Ex.: trigonometria, álgebra linear, integrais',
@@ -311,8 +285,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Например: тригонометрия, линейная алгебра, интегралы',
     ko: '예: 삼각법, 선형 대수, 적분',
     pl: 'Np.: trygonometria, algebra liniowa, całki',
-    ar: 'مثال: علم المثلثات، الجبر الخطي، التكاملات',
-    hi: 'उदा.: त्रिकोणमिति, रेखीय बीजगणित, समाकलन',
   },
   'search.empty.invite': {
     'pt-BR': 'Comece pela busca. Lições e livros aparecem quando você digita.',
@@ -326,16 +298,14 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Начните с поиска. Уроки и книги появятся при вводе.',
     ko: '검색으로 시작하세요. 입력하면 수업과 도서가 나타납니다.',
     pl: 'Zacznij od wyszukiwania. Lekcje i książki pojawią się podczas pisania.',
-    ar: 'ابدأ بالبحث. تظهر الدروس والكتب أثناء الكتابة.',
-    hi: 'खोज से शुरू करें। टाइप करने पर पाठ और पुस्तकें दिखाई देंगी।',
   },
   'search.lessons.label': {
     'pt-BR': 'Lições', en: 'Lessons', es: 'Lecciones', zh: '课程', ja: 'レッスン',
-    de: 'Lektionen', fr: 'Leçons', it: 'Lezioni', ru: 'Уроки', ko: '수업', pl: 'Lekcje', ar: 'دروس', hi: 'पाठ',
+    de: 'Lektionen', fr: 'Leçons', it: 'Lezioni', ru: 'Уроки', ko: '수업', pl: 'Lekcje',
   },
   'search.books.label': {
     'pt-BR': 'Livros', en: 'Books', es: 'Libros', zh: '书籍', ja: '書籍',
-    de: 'Bücher', fr: 'Livres', it: 'Libri', ru: 'Книги', ko: '도서', pl: 'Książki', ar: 'كتب', hi: 'पुस्तकें',
+    de: 'Bücher', fr: 'Livres', it: 'Libri', ru: 'Книги', ko: '도서', pl: 'Książki',
   },
   'search.no.results': {
     'pt-BR': 'Nenhum resultado para',
@@ -349,8 +319,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Нет результатов для',
     ko: '검색 결과 없음:',
     pl: 'Brak wyników dla',
-    ar: 'لا توجد نتائج لـ',
-    hi: 'के लिए कोई परिणाम नहीं',
   },
 
   // ===== FOOTER =====
@@ -366,37 +334,35 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Изучайте настоящую математику. Открытый код, бесплатно, многоязычный — всегда.',
     ko: '진짜 수학을 배우세요. 오픈소스, 무료, 다국어 — 항상.',
     pl: 'Naucz się prawdziwej matematyki. Open source, darmowe, wielojęzyczne — zawsze.',
-    ar: 'تعلم الرياضيات الحقيقية. مفتوح المصدر، مجاني، متعدد اللغات — دائماً.',
-    hi: 'असली गणित सीखें। ओपन सोर्स, मुफ्त, बहुभाषी — हमेशा।',
   },
   'footer.authorship': {
     'pt-BR': 'Autoria', en: 'Authors', es: 'Autoría', zh: '作者', ja: '著者',
-    de: 'Autoren', fr: 'Auteurs', it: 'Autori', ru: 'Авторы', ko: '저자', pl: 'Autorzy', ar: 'المؤلفون', hi: 'लेखक',
+    de: 'Autoren', fr: 'Auteurs', it: 'Autori', ru: 'Авторы', ko: '저자', pl: 'Autorzy',
   },
   'footer.navigation': {
     'pt-BR': 'Navegação', en: 'Navigation', es: 'Navegación', zh: '导航', ja: 'ナビゲーション',
-    de: 'Navigation', fr: 'Navigation', it: 'Navigazione', ru: 'Навигация', ko: '탐색', pl: 'Nawigacja', ar: 'تصفح', hi: 'नेविगेशन',
+    de: 'Navigation', fr: 'Navigation', it: 'Navigazione', ru: 'Навигация', ko: '탐색', pl: 'Nawigacja',
   },
   'footer.allContent': {
     'pt-BR': 'Todos os conteúdos', en: 'All content', es: 'Todos los contenidos',
     zh: '全部内容', ja: 'すべてのコンテンツ', de: 'Alle Inhalte',
     fr: 'Tous les contenus', it: 'Tutti i contenuti', ru: 'Весь контент',
-    ko: '모든 콘텐츠', pl: 'Cała treść', ar: 'كل المحتوى', hi: 'सभी सामग्री',
+    ko: '모든 콘텐츠', pl: 'Cała treść',
   },
   'footer.openSource': {
     'pt-BR': 'Open source', en: 'Open source', es: 'Código abierto', zh: '开源', ja: 'オープンソース',
-    de: 'Open Source', fr: 'Open source', it: 'Open source', ru: 'Открытый код', ko: '오픈소스', pl: 'Open source', ar: 'مفتوح المصدر', hi: 'ओपन सोर्स',
+    de: 'Open Source', fr: 'Open source', it: 'Open source', ru: 'Открытый код', ko: '오픈소스', pl: 'Open source',
   },
   'footer.repo': {
     'pt-BR': 'Repositório no GitHub', en: 'GitHub repository', es: 'Repositorio en GitHub',
     zh: 'GitHub 代码库', ja: 'GitHub リポジトリ', de: 'GitHub-Repository',
     fr: 'Dépôt GitHub', it: 'Repository GitHub', ru: 'Репозиторий GitHub',
-    ko: 'GitHub 저장소', pl: 'Repozytorium GitHub', ar: 'مستودع GitHub', hi: 'GitHub रिपॉजिटरी',
+    ko: 'GitHub 저장소', pl: 'Repozytorium GitHub',
   },
   'footer.license': {
     'pt-BR': 'Licença MIT', en: 'MIT License', es: 'Licencia MIT', zh: 'MIT 许可证',
     ja: 'MIT ライセンス', de: 'MIT-Lizenz', fr: 'Licence MIT', it: 'Licenza MIT',
-    ru: 'Лицензия MIT', ko: 'MIT 라이선스', pl: 'Licencja MIT', ar: 'رخصة MIT', hi: 'MIT लाइसेंस',
+    ru: 'Лицензия MIT', ko: 'MIT 라이선스', pl: 'Licencja MIT',
   },
   'footer.sponsor.label': {
     'pt-BR': 'a Amazing School, plataforma grátis de inglês, apoia o Clube da Matemática',
@@ -410,14 +376,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Amazing School, бесплатная платформа английского, поддерживает Clube da Matemática',
     ko: 'Amazing School, 무료 영어 플랫폼, Clube da Matemática 지원',
     pl: 'Amazing School, darmowa platforma angielskiego, wspiera Clube da Matemática',
-    ar: 'Amazing School، منصة إنجليزية مجانية، تدعم Clube da Matemática',
-    hi: 'Amazing School, मुफ्त अंग्रेजी प्लेटफॉर्म, Clube da Matemática का समर्थन करता है',
   },
   'footer.builtWith': {
     'pt-BR': 'construído com', en: 'built with', es: 'construido con',
     zh: '构建用', ja: '構築:', de: 'gebaut mit', fr: 'construit avec',
     it: 'costruito con', ru: 'построено с', ko: '제작:',
-    pl: 'zbudowane z', ar: 'تم بناؤه باستخدام', hi: 'से बनाया गया',
+    pl: 'zbudowane z',
   },
   'footer.khan': {
     'pt-BR': 'Não competimos com Khan — Khan ensina conta. Competimos com o silêncio entre saber a fórmula e entender o que ela diz sobre o mundo.',
@@ -431,14 +395,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Мы не конкурируем с Khan — Khan учит вычислять. Мы противостоим тишине между знанием формулы и пониманием, что она говорит о мире.',
     ko: 'Khan과 경쟁하지 않습니다 — Khan은 계산을 가르칩니다. 우리는 공식을 아는 것과 그것이 세상에 대해 말하는 것을 이해하는 것 사이의 침묵과 경쟁합니다.',
     pl: 'Nie konkurujemy z Khan — Khan uczy obliczeń. Walczymy z ciszą między znajomością wzoru a zrozumieniem, co mówi o świecie.',
-    ar: 'نحن لا ننافس Khan — Khan يعلم الحساب. نحن نواجه الصمت بين معرفة المعادلة وفهم ما تقوله عن العالم.',
-    hi: 'हम Khan से प्रतिस्पर्धा नहीं करते — Khan गणना सिखाता है। हम सूत्र जानने और वह दुनिया के बारे में क्या कहता है, इसके बीच के सन्नाटे से लड़ते हैं।',
   },
 
   // ===== COMMON =====
   'common.search': {
     'pt-BR': 'Buscar', en: 'Search', es: 'Buscar', zh: '搜索', ja: '検索',
-    de: 'Suchen', fr: 'Rechercher', it: 'Cerca', ru: 'Поиск', ko: '검색', pl: 'Szukaj', ar: 'بحث', hi: 'खोजें',
+    de: 'Suchen', fr: 'Rechercher', it: 'Cerca', ru: 'Поиск', ko: '검색', pl: 'Szukaj',
   },
   'common.skipToContent': {
     'pt-BR': 'Pular para o conteúdo principal',
@@ -452,8 +414,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Перейти к основному содержимому',
     ko: '본문으로 건너뛰기',
     pl: 'Przejdź do treści głównej',
-    ar: 'تخطي إلى المحتوى الرئيسي',
-    hi: 'मुख्य सामग्री पर जाएं',
   },
 
   // ===== HEADER =====
@@ -461,25 +421,25 @@ export const TRANSLATIONS: Record<string, Translations> = {
     'pt-BR': 'Navegação principal', en: 'Main navigation', es: 'Navegación principal',
     zh: '主导航', ja: 'メインナビゲーション', de: 'Hauptnavigation',
     fr: 'Navigation principale', it: 'Navigazione principale', ru: 'Главная навигация',
-    ko: '주 탐색', pl: 'Nawigacja główna', ar: 'التنقل الرئيسي', hi: 'मुख्य नेविगेशन',
+    ko: '주 탐색', pl: 'Nawigacja główna',
   },
   'header.nav.mobile': {
     'pt-BR': 'Navegação mobile', en: 'Mobile navigation', es: 'Navegación móvil',
     zh: '移动导航', ja: 'モバイルナビゲーション', de: 'Mobile Navigation',
     fr: 'Navigation mobile', it: 'Navigazione mobile', ru: 'Мобильная навигация',
-    ko: '모바일 탐색', pl: 'Nawigacja mobilna', ar: 'تنقل الجوال', hi: 'मोबाइल नेविगेशन',
+    ko: '모바일 탐색', pl: 'Nawigacja mobilna',
   },
   'header.menu.open': {
     'pt-BR': 'Abrir menu', en: 'Open menu', es: 'Abrir menú',
     zh: '打开菜单', ja: 'メニューを開く', de: 'Menü öffnen',
     fr: 'Ouvrir le menu', it: 'Apri menu', ru: 'Открыть меню',
-    ko: '메뉴 열기', pl: 'Otwórz menu', ar: 'فتح القائمة', hi: 'मेनू खोलें',
+    ko: '메뉴 열기', pl: 'Otwórz menu',
   },
   'header.menu.close': {
     'pt-BR': 'Fechar menu', en: 'Close menu', es: 'Cerrar menú',
     zh: '关闭菜单', ja: 'メニューを閉じる', de: 'Menü schließen',
     fr: 'Fermer le menu', it: 'Chiudi menu', ru: 'Закрыть меню',
-    ko: '메뉴 닫기', pl: 'Zamknij menu', ar: 'إغلاق القائمة', hi: 'मेनू बंद करें',
+    ko: '메뉴 닫기', pl: 'Zamknij menu',
   },
 
   // ===== HOME HERO EXTRAS =====
@@ -495,23 +455,19 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '3 года · 12 четвертей · 120 уроков',
     ko: '3년 · 12분기 · 120강',
     pl: '3 lata · 12 trymestrów · 120 lekcji',
-    ar: '3 سنوات · 12 فصلاً · 120 درساً',
-    hi: '3 वर्ष · 12 तिमाहियाँ · 120 पाठ',
   },
   'home.stats.features': {
-    'pt-BR': '13 idiomas · 7 portas (formal, 5/10/15/25/40, prática) · áudio nativo · 40-80 exercícios por lição',
-    en: '13 languages · 7 doors (formal, 5/10/15/25/40, practical) · native audio · 40-80 exercises per lesson',
-    es: '13 idiomas · 7 puertas (formal, 5/10/15/25/40, práctica) · audio nativo · 40-80 ejercicios por lección',
-    zh: '13 种语言 · 7 道门（正式、5/10/15/25/40、实践）· 母语音频 · 每课 40-80 道练习',
-    ja: '13言語 · 7つの扉（正式、5/10/15/25/40、実践）· ネイティブ音声 · レッスンごとに40-80問',
-    de: '13 Sprachen · 7 Türen (formal, 5/10/15/25/40, praktisch) · native Audio · 40-80 Übungen pro Lektion',
-    fr: '13 langues · 7 portes (formel, 5/10/15/25/40, pratique) · audio natif · 40-80 exercices par leçon',
-    it: '13 lingue · 7 porte (formale, 5/10/15/25/40, pratica) · audio nativo · 40-80 esercizi per lezione',
-    ru: '13 языков · 7 дверей (формальная, 5/10/15/25/40, практическая) · родное аудио · 40-80 упражнений за урок',
-    ko: '13개 언어 · 7개 문 (정식, 5/10/15/25/40, 실습) · 원어민 오디오 · 강의당 40-80개 연습',
-    pl: '13 języków · 7 drzwi (formalne, 5/10/15/25/40, praktyczne) · natywne audio · 40-80 ćwiczeń na lekcję',
-    ar: '13 لغة · 7 أبواب (رسمي، 5/10/15/25/40، عملي) · صوت أصلي · 40-80 تمريناً لكل درس',
-    hi: '13 भाषाएँ · 7 द्वार (औपचारिक, 5/10/15/25/40, व्यावहारिक) · मूल ऑडियो · प्रति पाठ 40-80 अभ्यास',
+    'pt-BR': '{n} idiomas · 7 portas (formal, 5/10/15/25/40, prática) · áudio nativo · 40-80 exercícios por lição',
+    en: '{n} languages · 7 doors (formal, 5/10/15/25/40, practical) · native audio · 40-80 exercises per lesson',
+    es: '{n} idiomas · 7 puertas (formal, 5/10/15/25/40, práctica) · audio nativo · 40-80 ejercicios por lección',
+    zh: '{n} 种语言 · 7 道门（正式、5/10/15/25/40、实践）· 母语音频 · 每课 40-80 道练习',
+    ja: '{n}言語 · 7つの扉（正式、5/10/15/25/40、実践）· ネイティブ音声 · レッスンごとに40-80問',
+    de: '{n} Sprachen · 7 Türen (formal, 5/10/15/25/40, praktisch) · native Audio · 40-80 Übungen pro Lektion',
+    fr: '{n} langues · 7 portes (formel, 5/10/15/25/40, pratique) · audio natif · 40-80 exercices par leçon',
+    it: '{n} lingue · 7 porte (formale, 5/10/15/25/40, pratica) · audio nativo · 40-80 esercizi per lezione',
+    ru: '{n} языков · 7 дверей (формальная, 5/10/15/25/40, практическая) · родное аудио · 40-80 упражнений за урок',
+    ko: '{n}개 언어 · 7개 문 (정식, 5/10/15/25/40, 실습) · 원어민 오디오 · 강의당 40-80개 연습',
+    pl: '{n} języków · 7 drzwi (formalne, 5/10/15/25/40, praktyczne) · natywne audio · 40-80 ćwiczeń na lekcję',
   },
 
   // ===== AMAZING SCHOOL SPONSOR =====
@@ -527,13 +483,11 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Amazing School — бесплатная платформа английского с ИИ — поддерживает Математический клуб',
     ko: 'Amazing School — 무료 AI 영어 플랫폼 — 수학 클럽 후원자',
     pl: 'Amazing School — darmowa platforma angielskiego z AI — wspierający Klub Matematyczny',
-    ar: 'Amazing School — منصة إنجليزية مجانية بالذكاء الاصطناعي — داعم لنادي الرياضيات',
-    hi: 'Amazing School — मुफ्त AI अंग्रेजी प्लेटफॉर्म — गणित क्लब का समर्थक',
   },
   'sponsor.amazing.support': {
     'pt-BR': 'apoio:', en: 'sponsor:', es: 'apoyo:', zh: '支持：', ja: '支援：',
     de: 'Unterstützung:', fr: 'soutien :', it: 'sostegno:', ru: 'поддержка:',
-    ko: '후원:', pl: 'wsparcie:', ar: 'دعم:', hi: 'समर्थन:',
+    ko: '후원:', pl: 'wsparcie:',
   },
   'sponsor.amazing.tagline': {
     'pt-BR': '· inglês grátis com IA',
@@ -547,8 +501,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '· бесплатный английский с ИИ',
     ko: '· 무료 AI 영어',
     pl: '· darmowy angielski z AI',
-    ar: '· إنجليزية مجانية بالذكاء الاصطناعي',
-    hi: '· मुफ्त AI अंग्रेजी',
   },
 
   // ===== COUNTERS aria =====
@@ -564,8 +516,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Счётчики платформы',
     ko: '플랫폼 카운터',
     pl: 'Liczniki platformy',
-    ar: 'عدادات المنصة',
-    hi: 'प्लेटफ़ॉर्म काउंटर',
   },
 
   // ===== MATERIA TABS =====
@@ -581,8 +531,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Нет зарегистрированных предметов.',
     ko: '등록된 과목이 없습니다.',
     pl: 'Brak zarejestrowanych przedmiotów.',
-    ar: 'لا توجد مواد مسجلة.',
-    hi: 'कोई विषय पंजीकृत नहीं।',
   },
   'materia.tablist.aria': {
     'pt-BR': 'Matérias do ano',
@@ -596,8 +544,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Предметы года',
     ko: '연도의 과목',
     pl: 'Przedmioty roku',
-    ar: 'مواد السنة',
-    hi: 'वर्ष के विषय',
   },
   'materia.empty.lessons': {
     'pt-BR': 'Sem lições registradas nesta matéria para este ano.',
@@ -611,22 +557,20 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Нет зарегистрированных уроков для этого предмета в этом году.',
     ko: '올해 이 과목에 등록된 수업이 없습니다.',
     pl: 'Brak zarejestrowanych lekcji dla tego przedmiotu w tym roku.',
-    ar: 'لا توجد دروس مسجلة لهذه المادة في هذه السنة.',
-    hi: 'इस वर्ष इस विषय में कोई पाठ पंजीकृत नहीं है।',
   },
   'materia.lesson.label': {
     'pt-BR': 'Lição', en: 'Lesson', es: 'Lección', zh: '课', ja: 'レッスン',
-    de: 'Lektion', fr: 'Leçon', it: 'Lezione', ru: 'Урок', ko: '수업', pl: 'Lekcja', ar: 'درس', hi: 'पाठ',
+    de: 'Lektion', fr: 'Leçon', it: 'Lezione', ru: 'Урок', ko: '수업', pl: 'Lekcja',
   },
   'materia.status.published': {
     'pt-BR': 'publicada', en: 'published', es: 'publicada', zh: '已发布', ja: '公開済み',
     de: 'veröffentlicht', fr: 'publiée', it: 'pubblicata', ru: 'опубликовано',
-    ko: '게시됨', pl: 'opublikowana', ar: 'منشور', hi: 'प्रकाशित',
+    ko: '게시됨', pl: 'opublikowana',
   },
   'materia.status.planned': {
     'pt-BR': 'planejada', en: 'planned', es: 'planificada', zh: '计划中', ja: '計画中',
     de: 'geplant', fr: 'prévue', it: 'pianificata', ru: 'запланировано',
-    ko: '계획됨', pl: 'planowana', ar: 'مخطط', hi: 'नियोजित',
+    ko: '계획됨', pl: 'planowana',
   },
 
   // ===== SEARCH DISCOVERY EXTRAS =====
@@ -642,8 +586,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'введите не менее 2 букв…',
     ko: '2자 이상 입력하세요…',
     pl: 'wpisz co najmniej 2 litery…',
-    ar: 'اكتب حرفين على الأقل…',
-    hi: 'कम से कम 2 अक्षर लिखें…',
   },
   'search.exploreOr': {
     'pt-BR': 'Ou explore o programa completo em',
@@ -657,8 +599,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Или изучите полную программу на',
     ko: '또는 전체 프로그램 살펴보기:',
     pl: 'Lub przeglądaj pełny program w',
-    ar: 'أو استكشف البرنامج الكامل في',
-    hi: 'या पूरा कार्यक्रम देखें:',
   },
   'search.andCatalog': {
     'pt-BR': 'e o catálogo de livros em',
@@ -672,20 +612,18 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'и каталог книг в',
     ko: '및 도서 카탈로그:',
     pl: 'i katalog książek w',
-    ar: 'وكتالوج الكتب في',
-    hi: 'और पुस्तक सूची:',
   },
   'search.tag.year': {
     'pt-BR': 'Ano', en: 'Year', es: 'Año', zh: '年', ja: '学年',
-    de: 'Jahr', fr: 'Année', it: 'Anno', ru: 'Год', ko: '학년', pl: 'Rok', ar: 'سنة', hi: 'वर्ष',
+    de: 'Jahr', fr: 'Année', it: 'Anno', ru: 'Год', ko: '학년', pl: 'Rok',
   },
   'search.tag.term': {
     'pt-BR': 'Trim', en: 'Term', es: 'Trim', zh: '学期', ja: '学期',
-    de: 'Trim', fr: 'Trim', it: 'Trim', ru: 'Чет', ko: '학기', pl: 'Trym', ar: 'فصل', hi: 'त्रै',
+    de: 'Trim', fr: 'Trim', it: 'Trim', ru: 'Чет', ko: '학기', pl: 'Trym',
   },
   'search.tag.lesson': {
     'pt-BR': 'Lição', en: 'Lesson', es: 'Lección', zh: '课', ja: 'レッスン',
-    de: 'Lektion', fr: 'Leçon', it: 'Lezione', ru: 'Урок', ko: '수업', pl: 'Lekcja', ar: 'درس', hi: 'पाठ',
+    de: 'Lektion', fr: 'Leçon', it: 'Lezione', ru: 'Урок', ko: '수업', pl: 'Lekcja',
   },
 
   // ===== VISITOR MAP =====
@@ -701,8 +639,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Загрузка данных посетителей…',
     ko: '방문자 데이터 로딩 중…',
     pl: 'Ładowanie danych odwiedzających…',
-    ar: 'جاري تحميل بيانات الزوار…',
-    hi: 'विज़िटर डेटा लोड हो रहा है…',
   },
   'visitor.empty.title': {
     'pt-BR': 'Ainda sem visitas registradas — seja o primeiro!',
@@ -716,8 +652,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Посещений пока нет — будьте первым!',
     ko: '아직 방문 기록이 없습니다 — 첫 방문자가 되세요!',
     pl: 'Brak odwiedzin — bądź pierwszy!',
-    ar: 'لا توجد زيارات مسجلة بعد — كن الأول!',
-    hi: 'अभी तक कोई विज़िट दर्ज नहीं — पहले बनें!',
   },
   'visitor.empty.note': {
     'pt-BR': '(As contagens aparecem após o primeiro acesso de cada país.)',
@@ -731,8 +665,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '(Счётчики появляются после первого посещения из каждой страны.)',
     ko: '(각 국가에서 첫 방문 후 카운트가 표시됩니다.)',
     pl: '(Liczniki pojawiają się po pierwszym wejściu z każdego kraju.)',
-    ar: '(تظهر الأعداد بعد أول زيارة من كل دولة.)',
-    hi: '(प्रत्येक देश से पहली विज़िट के बाद गणना दिखाई देती है।)',
   },
   'visitor.summary.from': {
     'pt-BR': 'Visitantes vindos de',
@@ -746,16 +678,14 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Посетители из',
     ko: '방문자 출처:',
     pl: 'Odwiedzający z',
-    ar: 'زوار من',
-    hi: 'विज़िटर इनसे:',
   },
   'visitor.summary.countries': {
     'pt-BR': 'países', en: 'countries', es: 'países', zh: '个国家', ja: 'カ国',
-    de: 'Ländern', fr: 'pays', it: 'paesi', ru: 'стран', ko: '개국', pl: 'krajów', ar: 'دول', hi: 'देशों',
+    de: 'Ländern', fr: 'pays', it: 'paesi', ru: 'стран', ko: '개국', pl: 'krajów',
   },
   'visitor.summary.total': {
     'pt-BR': 'total', en: 'total', es: 'total', zh: '总计', ja: '合計',
-    de: 'insgesamt', fr: 'au total', it: 'totale', ru: 'всего', ko: '총합', pl: 'łącznie', ar: 'الإجمالي', hi: 'कुल',
+    de: 'insgesamt', fr: 'au total', it: 'totale', ru: 'всего', ko: '총합', pl: 'łącznie',
   },
   'visitor.footer.note': {
     'pt-BR': 'Dados anônimos · Geolocalização aproximada via IP · Atualizado a cada acesso',
@@ -769,8 +699,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Анонимные данные · Приблизительная геолокация по IP · Обновляется при каждом посещении',
     ko: '익명 데이터 · IP 기반 대략적 위치 · 방문마다 업데이트',
     pl: 'Dane anonimowe · Przybliżona geolokalizacja IP · Aktualizowane przy każdej wizycie',
-    ar: 'بيانات مجهولة · تحديد موقع تقريبي عبر IP · يتم التحديث عند كل زيارة',
-    hi: 'गुमनाम डेटा · अनुमानित IP जियोलोकेशन · प्रत्येक विज़िट पर अपडेट',
   },
 
   // ===== THEME TOGGLE =====
@@ -786,8 +714,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Переключить светлую/тёмную тему',
     ko: '밝은/어두운 테마 전환',
     pl: 'Przełącz motyw jasny/ciemny',
-    ar: 'تبديل المظهر الفاتح/الداكن',
-    hi: 'हल्का/गहरा थीम बदलें',
   },
   'theme.toggle.title': {
     'pt-BR': 'Alternar tema',
@@ -801,35 +727,33 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Переключить тему',
     ko: '테마 전환',
     pl: 'Przełącz motyw',
-    ar: 'تبديل المظهر',
-    hi: 'थीम बदलें',
   },
 
   // ===== EXERCISE DIFFICULTY LABELS =====
   'difficulty.aplicacao': {
     'pt-BR': 'Aplicação', en: 'Application', es: 'Aplicación', zh: '应用',
     ja: '応用', de: 'Anwendung', fr: 'Application', it: 'Applicazione',
-    ru: 'Применение', ko: '응용', pl: 'Zastosowanie', ar: 'تطبيق', hi: 'अनुप्रयोग',
+    ru: 'Применение', ko: '응용', pl: 'Zastosowanie',
   },
   'difficulty.compreensao': {
     'pt-BR': 'Compreensão', en: 'Understanding', es: 'Comprensión', zh: '理解',
     ja: '理解', de: 'Verständnis', fr: 'Compréhension', it: 'Comprensione',
-    ru: 'Понимание', ko: '이해', pl: 'Zrozumienie', ar: 'فهم', hi: 'समझ',
+    ru: 'Понимание', ko: '이해', pl: 'Zrozumienie',
   },
   'difficulty.modelagem': {
     'pt-BR': 'Modelagem', en: 'Modeling', es: 'Modelado', zh: '建模',
     ja: 'モデル化', de: 'Modellierung', fr: 'Modélisation', it: 'Modellazione',
-    ru: 'Моделирование', ko: '모델링', pl: 'Modelowanie', ar: 'نمذجة', hi: 'मॉडलिंग',
+    ru: 'Моделирование', ko: '모델링', pl: 'Modelowanie',
   },
   'difficulty.desafio': {
     'pt-BR': 'Desafio', en: 'Challenge', es: 'Desafío', zh: '挑战',
     ja: 'チャレンジ', de: 'Herausforderung', fr: 'Défi', it: 'Sfida',
-    ru: 'Вызов', ko: '도전', pl: 'Wyzwanie', ar: 'تحدٍّ', hi: 'चुनौती',
+    ru: 'Вызов', ko: '도전', pl: 'Wyzwanie',
   },
   'difficulty.demonstracao': {
     'pt-BR': 'Demonstração', en: 'Proof', es: 'Demostración', zh: '证明',
     ja: '証明', de: 'Beweis', fr: 'Démonstration', it: 'Dimostrazione',
-    ru: 'Доказательство', ko: '증명', pl: 'Dowód', ar: 'برهان', hi: 'प्रमाण',
+    ru: 'Доказательство', ko: '증명', pl: 'Dowód',
   },
 
   // ===== EXERCISE LIST =====
@@ -837,12 +761,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     'pt-BR': 'Lista de exercícios', en: 'Exercise list', es: 'Lista de ejercicios',
     zh: '习题列表', ja: '演習リスト', de: 'Übungsliste',
     fr: 'Liste d\'exercices', it: 'Elenco di esercizi', ru: 'Список упражнений',
-    ko: '연습 문제 목록', pl: 'Lista ćwiczeń', ar: 'قائمة التمارين', hi: 'अभ्यास सूची',
+    ko: '연습 문제 목록', pl: 'Lista ćwiczeń',
   },
   'exercise.countExercises': {
     'pt-BR': 'exercícios', en: 'exercises', es: 'ejercicios', zh: '道练习',
     ja: '問', de: 'Übungen', fr: 'exercices', it: 'esercizi',
-    ru: 'упражнений', ko: '문제', pl: 'ćwiczeń', ar: 'تمارين', hi: 'अभ्यास',
+    ru: 'упражнений', ko: '문제', pl: 'ćwiczeń',
   },
   'exercise.withSolution': {
     'pt-BR': 'com solução desenvolvida',
@@ -856,19 +780,17 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'с подробным решением',
     ko: '풀이 포함',
     pl: 'z rozwiązaniem',
-    ar: 'مع حل مفصّل',
-    hi: 'विस्तृत हल के साथ',
   },
   'exercise.exShort': {
     'pt-BR': 'Ex.', en: 'Ex.', es: 'Ej.', zh: '例', ja: '例',
     de: 'Üb.', fr: 'Ex.', it: 'Es.', ru: 'Упр.', ko: '문제',
-    pl: 'Ćw.', ar: 'تمرين', hi: 'अभ्यास',
+    pl: 'Ćw.',
   },
   'exercise.answerKey': {
     'pt-BR': 'Gabarito', en: 'Answer key', es: 'Solucionario',
     zh: '答案', ja: '解答', de: 'Lösungsschlüssel',
     fr: 'Corrigé', it: 'Soluzioni', ru: 'Ответы',
-    ko: '정답', pl: 'Klucz odpowiedzi', ar: 'مفتاح الإجابات', hi: 'उत्तर कुंजी',
+    ko: '정답', pl: 'Klucz odpowiedzi',
   },
   'exercise.selectCorrect': {
     'pt-BR': 'Selecione a alternativa correta',
@@ -882,19 +804,17 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Выберите правильный вариант',
     ko: '정답을 선택하세요',
     pl: 'Wybierz prawidłową odpowiedź',
-    ar: 'اختر البديل الصحيح',
-    hi: 'सही विकल्प चुनें',
   },
   'exercise.check': {
     'pt-BR': 'Conferir', en: 'Check', es: 'Comprobar', zh: '检查',
     ja: '確認', de: 'Prüfen', fr: 'Vérifier', it: 'Verifica',
-    ru: 'Проверить', ko: '확인', pl: 'Sprawdź', ar: 'تحقق', hi: 'जाँचें',
+    ru: 'Проверить', ko: '확인', pl: 'Sprawdź',
   },
   'exercise.correct': {
     'pt-BR': '✓ Correto.', en: '✓ Correct.', es: '✓ Correcto.',
     zh: '✓ 正确。', ja: '✓ 正解。', de: '✓ Richtig.',
     fr: '✓ Correct.', it: '✓ Corretto.', ru: '✓ Верно.',
-    ko: '✓ 정답.', pl: '✓ Poprawnie.', ar: '✓ صحيح.', hi: '✓ सही।',
+    ko: '✓ 정답.', pl: '✓ Poprawnie.',
   },
   'exercise.tryAgain': {
     'pt-BR': '✗ Tente novamente — escolha outra alternativa.',
@@ -908,20 +828,18 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '✗ Попробуйте ещё раз — выберите другой вариант.',
     ko: '✗ 다시 시도 — 다른 선택지를 고르세요.',
     pl: '✗ Spróbuj ponownie — wybierz inną odpowiedź.',
-    ar: '✗ حاول مرة أخرى — اختر بديلاً آخر.',
-    hi: '✗ पुनः प्रयास करें — कोई दूसरा विकल्प चुनें।',
   },
   'exercise.answerPlaceholder': {
     'pt-BR': 'sua resposta', en: 'your answer', es: 'tu respuesta',
     zh: '你的答案', ja: 'あなたの答え', de: 'deine Antwort',
     fr: 'votre réponse', it: 'la tua risposta', ru: 'ваш ответ',
-    ko: '당신의 답', pl: 'twoja odpowiedź', ar: 'إجابتك', hi: 'आपका उत्तर',
+    ko: '당신의 답', pl: 'twoja odpowiedź',
   },
   'exercise.askHint': {
     'pt-BR': 'Pedir dica', en: 'Ask for a hint', es: 'Pedir pista',
     zh: '请求提示', ja: 'ヒントを見る', de: 'Hinweis anfordern',
     fr: 'Demander un indice', it: 'Chiedi un suggerimento', ru: 'Подсказка',
-    ko: '힌트 요청', pl: 'Poproś o podpowiedź', ar: 'طلب تلميح', hi: 'संकेत माँगें',
+    ko: '힌트 요청', pl: 'Poproś o podpowiedź',
   },
   'exercise.revealedAnswer': {
     'pt-BR': 'Resposta revelada ↓',
@@ -935,14 +853,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Ответ показан ↓',
     ko: '정답 공개됨 ↓',
     pl: 'Odpowiedź pokazana ↓',
-    ar: 'الإجابة معروضة ↓',
-    hi: 'उत्तर प्रकट ↓',
   },
   'exercise.seeAnswer': {
     'pt-BR': 'Ver resposta', en: 'See answer', es: 'Ver respuesta',
     zh: '查看答案', ja: '解答を見る', de: 'Antwort anzeigen',
     fr: 'Voir la réponse', it: 'Vedi risposta', ru: 'Показать ответ',
-    ko: '정답 보기', pl: 'Zobacz odpowiedź', ar: 'عرض الإجابة', hi: 'उत्तर देखें',
+    ko: '정답 보기', pl: 'Zobacz odpowiedź',
   },
   'exercise.expectedAnswer': {
     'pt-BR': '✗ Resposta esperada: ',
@@ -956,24 +872,22 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '✗ Ожидаемый ответ: ',
     ko: '✗ 정답: ',
     pl: '✗ Oczekiwana odpowiedź: ',
-    ar: '✗ الإجابة المتوقعة: ',
-    hi: '✗ अपेक्षित उत्तर: ',
   },
   'exercise.answerLabel': {
     'pt-BR': 'Resposta', en: 'Answer', es: 'Respuesta', zh: '答案',
     ja: '解答', de: 'Antwort', fr: 'Réponse', it: 'Risposta',
-    ru: 'Ответ', ko: '정답', pl: 'Odpowiedź', ar: 'الإجابة', hi: 'उत्तर',
+    ru: 'Ответ', ko: '정답', pl: 'Odpowiedź',
   },
   'exercise.hintLabel': {
     'pt-BR': 'Dica', en: 'Hint', es: 'Pista', zh: '提示',
     ja: 'ヒント', de: 'Hinweis', fr: 'Indice', it: 'Suggerimento',
-    ru: 'Подсказка', ko: '힌트', pl: 'Podpowiedź', ar: 'تلميح', hi: 'संकेत',
+    ru: 'Подсказка', ko: '힌트', pl: 'Podpowiedź',
   },
   'exercise.solveOnline': {
     'pt-BR': 'Resolver online', en: 'Solve online', es: 'Resolver en línea',
     zh: '在线求解', ja: 'オンラインで解く', de: 'Online lösen',
     fr: 'Résoudre en ligne', it: 'Risolvi online', ru: 'Решить онлайн',
-    ko: '온라인으로 풀기', pl: 'Rozwiąż online', ar: 'حلّ عبر الإنترنت', hi: 'ऑनलाइन हल करें',
+    ko: '온라인으로 풀기', pl: 'Rozwiąż online',
   },
   'exercise.solveOnlineAria': {
     'pt-BR': 'Resolver este exercício online no Wolfram Alpha',
@@ -987,18 +901,16 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Решить это упражнение онлайн в Wolfram Alpha',
     ko: 'Wolfram Alpha로 이 문제를 온라인에서 풀기',
     pl: 'Rozwiąż to ćwiczenie online w Wolfram Alpha',
-    ar: 'حلّ هذا التمرين عبر الإنترنت في Wolfram Alpha',
-    hi: 'Wolfram Alpha में इस अभ्यास को ऑनलाइन हल करें',
   },
   'exercise.correctAria': {
     'pt-BR': 'correta', en: 'correct', es: 'correcta', zh: '正确',
     ja: '正解', de: 'richtig', fr: 'correcte', it: 'corretta',
-    ru: 'правильно', ko: '정답', pl: 'poprawna', ar: 'صحيحة', hi: 'सही',
+    ru: 'правильно', ko: '정답', pl: 'poprawna',
   },
   'exercise.refLabel': {
     'pt-BR': 'ref:', en: 'ref:', es: 'ref:', zh: '参考：',
     ja: '参考:', de: 'Ref.:', fr: 'réf. :', it: 'rif.:',
-    ru: 'ист.:', ko: '참고:', pl: 'odn.:', ar: 'مرجع:', hi: 'सं.:',
+    ru: 'ист.:', ko: '참고:', pl: 'odn.:',
   },
   'exercise.hideStepByStep': {
     'pt-BR': 'Ocultar passo a passo',
@@ -1012,8 +924,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Скрыть пошаговое решение',
     ko: '단계별 풀이 숨기기',
     pl: 'Ukryj krok po kroku',
-    ar: 'إخفاء الحل خطوة بخطوة',
-    hi: 'चरण-दर-चरण छुपाएँ',
   },
   'exercise.showStepByStep': {
     'pt-BR': 'Ver passo a passo (com o porquê)',
@@ -1027,8 +937,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Показать пошаговое решение (с обоснованием)',
     ko: '단계별 풀이 보기 (이유 포함)',
     pl: 'Zobacz krok po kroku (z uzasadnieniem)',
-    ar: 'عرض الحل خطوة بخطوة (مع السبب)',
-    hi: 'चरण-दर-चरण देखें (कारण सहित)',
   },
 
   // ===== DUAS PORTAS (door selector) =====
@@ -1044,8 +952,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Выберите свою дверь',
     ko: '문을 선택하세요',
     pl: 'Wybierz swoje drzwi',
-    ar: 'اختر بابك',
-    hi: 'अपना द्वार चुनें',
   },
   'duasPortas.empty': {
     'pt-BR': 'Nenhum conteúdo para esta idade ainda.',
@@ -1059,42 +965,40 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Для этого возраста пока нет контента.',
     ko: '이 연령대의 콘텐츠가 아직 없습니다.',
     pl: 'Brak treści dla tego wieku.',
-    ar: 'لا يوجد محتوى لهذا العمر بعد.',
-    hi: 'इस आयु के लिए अभी तक कोई सामग्री नहीं।',
   },
   'duasPortas.years': {
     'pt-BR': 'anos', en: 'years', es: 'años', zh: '岁', ja: '歳',
-    de: 'Jahre', fr: 'ans', it: 'anni', ru: 'лет', ko: '세', pl: 'lat', ar: 'سنوات', hi: 'वर्ष',
+    de: 'Jahre', fr: 'ans', it: 'anni', ru: 'лет', ko: '세', pl: 'lat',
   },
 
   // ===== IDADE LABELS =====
   'idade.formal.label': {
     'pt-BR': 'Formal', en: 'Formal', es: 'Formal', zh: '正式', ja: '正式',
-    de: 'Formal', fr: 'Formel', it: 'Formale', ru: 'Формально', ko: '정식', pl: 'Formalnie', ar: 'رسمي', hi: 'औपचारिक',
+    de: 'Formal', fr: 'Formel', it: 'Formale', ru: 'Формально', ko: '정식', pl: 'Formalnie',
   },
   'idade.5.label': {
     'pt-BR': '5 anos', en: '5 years', es: '5 años', zh: '5 岁', ja: '5歳',
-    de: '5 Jahre', fr: '5 ans', it: '5 anni', ru: '5 лет', ko: '5세', pl: '5 lat', ar: '5 سنوات', hi: '5 वर्ष',
+    de: '5 Jahre', fr: '5 ans', it: '5 anni', ru: '5 лет', ko: '5세', pl: '5 lat',
   },
   'idade.10.label': {
     'pt-BR': '10 anos', en: '10 years', es: '10 años', zh: '10 岁', ja: '10歳',
-    de: '10 Jahre', fr: '10 ans', it: '10 anni', ru: '10 лет', ko: '10세', pl: '10 lat', ar: '10 سنوات', hi: '10 वर्ष',
+    de: '10 Jahre', fr: '10 ans', it: '10 anni', ru: '10 лет', ko: '10세', pl: '10 lat',
   },
   'idade.15.label': {
     'pt-BR': '15 anos', en: '15 years', es: '15 años', zh: '15 岁', ja: '15歳',
-    de: '15 Jahre', fr: '15 ans', it: '15 anni', ru: '15 лет', ko: '15세', pl: '15 lat', ar: '15 سنة', hi: '15 वर्ष',
+    de: '15 Jahre', fr: '15 ans', it: '15 anni', ru: '15 лет', ko: '15세', pl: '15 lat',
   },
   'idade.25.label': {
     'pt-BR': '25 anos', en: '25 years', es: '25 años', zh: '25 岁', ja: '25歳',
-    de: '25 Jahre', fr: '25 ans', it: '25 anni', ru: '25 лет', ko: '25세', pl: '25 lat', ar: '25 سنة', hi: '25 वर्ष',
+    de: '25 Jahre', fr: '25 ans', it: '25 anni', ru: '25 лет', ko: '25세', pl: '25 lat',
   },
   'idade.40.label': {
     'pt-BR': '40 anos', en: '40 years', es: '40 años', zh: '40 岁', ja: '40歳',
-    de: '40 Jahre', fr: '40 ans', it: '40 anni', ru: '40 лет', ko: '40세', pl: '40 lat', ar: '40 سنة', hi: '40 वर्ष',
+    de: '40 Jahre', fr: '40 ans', it: '40 anni', ru: '40 лет', ko: '40세', pl: '40 lat',
   },
   'idade.pratica.label': {
     'pt-BR': 'Prática', en: 'Practical', es: 'Práctica', zh: '实践', ja: '実践',
-    de: 'Praxis', fr: 'Pratique', it: 'Pratica', ru: 'Практика', ko: '실전', pl: 'Praktyka', ar: 'عملي', hi: 'व्यावहारिक',
+    de: 'Praxis', fr: 'Pratique', it: 'Pratica', ru: 'Практика', ko: '실전', pl: 'Praktyka',
   },
 
   // ===== IDADE DESCRICOES =====
@@ -1110,8 +1014,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Строгая нотация, полный вывод, гипотезы',
     ko: '엄격한 표기, 완전한 유도, 가설',
     pl: 'Rygorystyczna notacja, pełne wyprowadzenie, hipotezy',
-    ar: 'ترميز دقيق، اشتقاق كامل، فرضيات',
-    hi: 'कठोर संकेतन, पूर्ण व्युत्पत्ति, परिकल्पनाएँ',
   },
   'idade.5.desc': {
     'pt-BR': 'Analogia concreta — figurinhas, brinquedos',
@@ -1125,8 +1027,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Конкретная аналогия — наклейки, игрушки',
     ko: '구체적인 비유 — 스티커, 장난감',
     pl: 'Konkretna analogia — naklejki, zabawki',
-    ar: 'تشبيه ملموس — ملصقات، ألعاب',
-    hi: 'ठोस उपमा — स्टिकर, खिलौने',
   },
   'idade.10.desc': {
     'pt-BR': 'Exemplo cotidiano — jogos, mesada',
@@ -1140,8 +1040,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Бытовой пример — игры, карманные деньги',
     ko: '일상 예시 — 게임, 용돈',
     pl: 'Codzienny przykład — gry, kieszonkowe',
-    ar: 'مثال يومي — ألعاب، مصروف',
-    hi: 'दैनिक उदाहरण — खेल, जेबखर्च',
   },
   'idade.15.desc': {
     'pt-BR': 'Curiosidade jovem — fórmulas familiares, sem medo',
@@ -1155,8 +1053,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Юношеское любопытство — знакомые формулы, без страха',
     ko: '청소년의 호기심 — 익숙한 공식, 두려움 없이',
     pl: 'Młodzieńcza ciekawość — znane wzory, bez strachu',
-    ar: 'فضول الشباب — صيغ مألوفة، دون خوف',
-    hi: 'किशोर जिज्ञासा — परिचित सूत्र, बिना डर',
   },
   'idade.25.desc': {
     'pt-BR': 'Estudante de engenharia — fórmula + intuição + cross-domínio',
@@ -1170,8 +1066,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Студент инженерии — формула + интуиция + междисциплинарность',
     ko: '공학도 — 공식 + 직관 + 분야 횡단',
     pl: 'Student inżynierii — wzór + intuicja + międzydziedzinowo',
-    ar: 'طالب هندسة — صيغة + حدس + متعدد المجالات',
-    hi: 'अभियांत्रिकी छात्र — सूत्र + अंतर्ज्ञान + अंतर-डोमेन',
   },
   'idade.40.desc': {
     'pt-BR': 'Profissional — crítica do modelo + números reais + uso operacional',
@@ -1185,8 +1079,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Профессионал — критика модели + реальные числа + операционное использование',
     ko: '전문가 — 모델 비판 + 실제 수치 + 운영 사용',
     pl: 'Profesjonalista — krytyka modelu + rzeczywiste liczby + użycie operacyjne',
-    ar: 'محترف — نقد النموذج + أرقام حقيقية + استخدام تشغيلي',
-    hi: 'पेशेवर — मॉडल समीक्षा + वास्तविक संख्याएँ + परिचालन उपयोग',
   },
   'idade.pratica.desc': {
     'pt-BR': 'Cenários reais com dados de mercado e cálculos passo a passo',
@@ -1200,8 +1092,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Реальные сценарии с рыночными данными и пошаговыми расчётами',
     ko: '시장 데이터와 단계별 계산이 포함된 실제 시나리오',
     pl: 'Realne scenariusze z danymi rynkowymi i obliczeniami krok po kroku',
-    ar: 'سيناريوهات حقيقية ببيانات السوق وحسابات خطوة بخطوة',
-    hi: 'बाज़ार डेटा और चरण-दर-चरण गणनाओं के साथ वास्तविक परिदृश्य',
   },
 
   // ===== EQUACAO CANONICA =====
@@ -1217,35 +1107,33 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Каноническое уравнение',
     ko: '정준 방정식',
     pl: 'Równanie kanoniczne',
-    ar: 'المعادلة القانونية',
-    hi: 'विहित समीकरण',
   },
 
   // ===== CALLOUTS =====
   'callout.definicao': {
     'pt-BR': 'Definição', en: 'Definition', es: 'Definición', zh: '定义', ja: '定義',
     de: 'Definition', fr: 'Définition', it: 'Definizione', ru: 'Определение',
-    ko: '정의', pl: 'Definicja', ar: 'تعريف', hi: 'परिभाषा',
+    ko: '정의', pl: 'Definicja',
   },
   'callout.teorema': {
     'pt-BR': 'Teorema', en: 'Theorem', es: 'Teorema', zh: '定理', ja: '定理',
     de: 'Theorem', fr: 'Théorème', it: 'Teorema', ru: 'Теорема',
-    ko: '정리', pl: 'Twierdzenie', ar: 'نظرية', hi: 'प्रमेय',
+    ko: '정리', pl: 'Twierdzenie',
   },
   'callout.exemplo': {
     'pt-BR': 'Exemplo', en: 'Example', es: 'Ejemplo', zh: '示例', ja: '例',
     de: 'Beispiel', fr: 'Exemple', it: 'Esempio', ru: 'Пример',
-    ko: '예시', pl: 'Przykład', ar: 'مثال', hi: 'उदाहरण',
+    ko: '예시', pl: 'Przykład',
   },
   'callout.observacao': {
     'pt-BR': 'Observação', en: 'Insight', es: 'Observación', zh: '观察', ja: '注目',
     de: 'Beobachtung', fr: 'Observation', it: 'Osservazione', ru: 'Наблюдение',
-    ko: '관찰', pl: 'Obserwacja', ar: 'ملاحظة', hi: 'अवलोकन',
+    ko: '관찰', pl: 'Obserwacja',
   },
   'callout.cuidado': {
     'pt-BR': 'Cuidado', en: 'Warning', es: 'Cuidado', zh: '注意', ja: '注意',
     de: 'Achtung', fr: 'Attention', it: 'Attenzione', ru: 'Внимание',
-    ko: '주의', pl: 'Uwaga', ar: 'تنبيه', hi: 'सावधान',
+    ko: '주의', pl: 'Uwaga',
   },
   'callout.leituras': {
     'pt-BR': 'Para continuar',
@@ -1259,14 +1147,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Чтобы продолжить',
     ko: '더 읽어보기',
     pl: 'Aby kontynuować',
-    ar: 'للمتابعة',
-    hi: 'जारी रखने के लिए',
   },
 
   // ===== PROVA VIEWER =====
   'prova.term.label': {
     'pt-BR': 'Trimestre', en: 'Term', es: 'Trimestre', zh: '学期', ja: '学期',
-    de: 'Trimester', fr: 'Trimestre', it: 'Trimestre', ru: 'Триместр', ko: '학기', pl: 'Trymestr', ar: 'فصل', hi: 'त्रैमासिक',
+    de: 'Trimester', fr: 'Trimestre', it: 'Trimestre', ru: 'Триместр', ko: '학기', pl: 'Trymestr',
   },
   'prova.term.legend': {
     'pt-BR': 'borda <strong class="text-[#a97142]">bronze</strong> = ano 1, <strong class="text-[#9ca3af]">prata</strong> = ano 2, <strong class="text-[#c9a35f]">ouro</strong> = ano 3',
@@ -1280,8 +1166,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'рамка <strong class="text-[#a97142]">бронза</strong> = 1 год, <strong class="text-[#9ca3af]">серебро</strong> = 2 год, <strong class="text-[#c9a35f]">золото</strong> = 3 год',
     ko: '<strong class="text-[#a97142]">청동</strong> 테두리 = 1학년, <strong class="text-[#9ca3af]">은</strong> = 2학년, <strong class="text-[#c9a35f]">금</strong> = 3학년',
     pl: 'obramowanie <strong class="text-[#a97142]">brąz</strong> = rok 1, <strong class="text-[#9ca3af]">srebro</strong> = rok 2, <strong class="text-[#c9a35f]">złoto</strong> = rok 3',
-    ar: 'إطار <strong class="text-[#a97142]">برونزي</strong> = السنة 1، <strong class="text-[#9ca3af]">فضي</strong> = السنة 2، <strong class="text-[#c9a35f]">ذهبي</strong> = السنة 3',
-    hi: '<strong class="text-[#a97142]">कांस्य</strong> बॉर्डर = वर्ष 1, <strong class="text-[#9ca3af]">रजत</strong> = वर्ष 2, <strong class="text-[#c9a35f]">स्वर्ण</strong> = वर्ष 3',
   },
   'prova.term.aria': {
     'pt-BR': 'Trimestre {t} (ano {ano})',
@@ -1295,8 +1179,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Триместр {t} (год {ano})',
     ko: '학기 {t} ({ano}학년)',
     pl: 'Trymestr {t} (rok {ano})',
-    ar: 'الفصل {t} (السنة {ano})',
-    hi: 'त्रैमासिक {t} (वर्ष {ano})',
   },
   'prova.version.label': {
     'pt-BR': 'Versão da prova',
@@ -1310,8 +1192,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Версия экзамена',
     ko: '시험 버전',
     pl: 'Wersja egzaminu',
-    ar: 'إصدار الامتحان',
-    hi: 'परीक्षा संस्करण',
   },
   'prova.status.curating': {
     'pt-BR': 'em curadoria',
@@ -1325,24 +1205,22 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'в подготовке',
     ko: '큐레이션 중',
     pl: 'w opracowaniu',
-    ar: 'قيد الإعداد',
-    hi: 'क्यूरेशन में',
   },
   'prova.minutes': {
     'pt-BR': 'min', en: 'min', es: 'min', zh: '分钟', ja: '分',
-    de: 'Min', fr: 'min', it: 'min', ru: 'мин', ko: '분', pl: 'min', ar: 'دقيقة', hi: 'मिनट',
+    de: 'Min', fr: 'min', it: 'min', ru: 'мин', ko: '분', pl: 'min',
   },
   'prova.meta.term': {
     'pt-BR': 'Trim', en: 'Term', es: 'Trim', zh: '学期', ja: '学期',
-    de: 'Trim', fr: 'Trim', it: 'Trim', ru: 'Чет', ko: '학기', pl: 'Trym', ar: 'فصل', hi: 'त्रै',
+    de: 'Trim', fr: 'Trim', it: 'Trim', ru: 'Чет', ko: '학기', pl: 'Trym',
   },
   'prova.meta.version': {
     'pt-BR': 'versão', en: 'version', es: 'versión', zh: '版本', ja: 'バージョン',
-    de: 'Version', fr: 'version', it: 'versione', ru: 'версия', ko: '버전', pl: 'wersja', ar: 'إصدار', hi: 'संस्करण',
+    de: 'Version', fr: 'version', it: 'versione', ru: 'версия', ko: '버전', pl: 'wersja',
   },
   'prova.meta.questions': {
     'pt-BR': 'questões', en: 'questions', es: 'preguntas', zh: '题', ja: '問題',
-    de: 'Fragen', fr: 'questions', it: 'domande', ru: 'вопросов', ko: '문항', pl: 'pytań', ar: 'أسئلة', hi: 'प्रश्न',
+    de: 'Fragen', fr: 'questions', it: 'domande', ru: 'вопросов', ko: '문항', pl: 'pytań',
   },
   'prova.meta.revealedSingular': {
     'pt-BR': 'resolução revelada',
@@ -1356,8 +1234,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'решение показано',
     ko: '해설 공개',
     pl: 'rozwiązanie pokazane',
-    ar: 'حل معروض',
-    hi: 'समाधान प्रकट',
   },
   'prova.meta.revealedPlural': {
     'pt-BR': 'resoluções reveladas',
@@ -1371,8 +1247,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'решений показано',
     ko: '해설 공개',
     pl: 'rozwiązań pokazanych',
-    ar: 'حلول معروضة',
-    hi: 'समाधान प्रकट',
   },
   'prova.curating.text': {
     'pt-BR': 'Esta versão está sendo curada. As questões saem de OpenStax, Active Calculus e outros livros públicos — escrever cada questão com passo a passo profundo leva tempo.',
@@ -1386,8 +1260,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Эта версия готовится. Вопросы взяты из OpenStax, Active Calculus и других публичных книг — на написание каждого вопроса с глубоким пошаговым решением нужно время.',
     ko: '이 버전은 큐레이션 중입니다. 문제는 OpenStax, Active Calculus 등 공개 교재에서 가져옵니다 — 각 문제에 심층 단계별 해설을 작성하는 데는 시간이 걸립니다.',
     pl: 'Ta wersja jest w trakcie opracowywania. Pytania pochodzą z OpenStax, Active Calculus i innych publicznych książek — napisanie każdego pytania z głębokim rozwiązaniem krok po kroku zajmuje czas.',
-    ar: 'هذه النسخة قيد الإعداد. الأسئلة مأخوذة من OpenStax وActive Calculus وكتب عامة أخرى — كتابة كل سؤال بحل خطوة بخطوة عميق يستغرق وقتاً.',
-    hi: 'यह संस्करण क्यूरेट किया जा रहा है। प्रश्न OpenStax, Active Calculus और अन्य सार्वजनिक पुस्तकों से आते हैं — प्रत्येक प्रश्न को गहन चरणबद्ध हल के साथ लिखने में समय लगता है।',
   },
   'prova.curating.fallback': {
     'pt-BR': 'Use a versão 1 deste trimestre por enquanto.',
@@ -1401,12 +1273,10 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Пока используйте версию 1 этого триместра.',
     ko: '당분간 이 학기의 버전 1을 사용하세요.',
     pl: 'Na razie użyj wersji 1 tego trymestru.',
-    ar: 'استخدم الإصدار 1 من هذا الفصل في الوقت الحالي.',
-    hi: 'फिलहाल इस त्रैमासिक के संस्करण 1 का उपयोग करें।',
   },
   'prova.source.label': {
     'pt-BR': 'fonte:', en: 'source:', es: 'fuente:', zh: '来源：', ja: '出典：',
-    de: 'Quelle:', fr: 'source :', it: 'fonte:', ru: 'источник:', ko: '출처:', pl: 'źródło:', ar: 'المصدر:', hi: 'स्रोत:',
+    de: 'Quelle:', fr: 'source :', it: 'fonte:', ru: 'источник:', ko: '출처:', pl: 'źródło:',
   },
   'prova.hideSolution': {
     'pt-BR': 'Esconder resolução',
@@ -1420,8 +1290,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Скрыть решение',
     ko: '해설 숨기기',
     pl: 'Ukryj rozwiązanie',
-    ar: 'إخفاء الحل',
-    hi: 'समाधान छिपाएं',
   },
   'prova.revealSolution': {
     'pt-BR': 'Revelar passo a passo',
@@ -1435,12 +1303,10 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Показать пошагово',
     ko: '단계별 보기',
     pl: 'Pokaż krok po kroku',
-    ar: 'إظهار خطوة بخطوة',
-    hi: 'चरण-दर-चरण दिखाएं',
   },
   'prova.answer': {
     'pt-BR': 'Resposta', en: 'Answer', es: 'Respuesta', zh: '答案', ja: '答え',
-    de: 'Antwort', fr: 'Réponse', it: 'Risposta', ru: 'Ответ', ko: '정답', pl: 'Odpowiedź', ar: 'الإجابة', hi: 'उत्तर',
+    de: 'Antwort', fr: 'Réponse', it: 'Risposta', ru: 'Ответ', ko: '정답', pl: 'Odpowiedź',
   },
   'prova.stepByStep': {
     'pt-BR': 'Passo a passo',
@@ -1454,8 +1320,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Пошагово',
     ko: '단계별 해설',
     pl: 'Krok po kroku',
-    ar: 'خطوة بخطوة',
-    hi: 'चरण-दर-चरण',
   },
 
   // ===== AULAS SEARCH =====
@@ -1471,8 +1335,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '🔍 Поиск урока по названию, теме или предмету',
     ko: '🔍 이름, 주제 또는 과목으로 수업 검색',
     pl: '🔍 Szukaj lekcji po nazwie, temacie lub przedmiocie',
-    ar: '🔍 ابحث عن درس بالاسم أو الموضوع أو المادة',
-    hi: '🔍 नाम, विषय या मुख्य विषय से पाठ खोजें',
   },
   'aulasSearch.placeholder': {
     'pt-BR': 'ex.: "derivada", "Bayes", "matriz inversa", "trigonometria"',
@@ -1486,8 +1348,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'напр.: "производная", "Байес", "обратная матрица", "тригонометрия"',
     ko: '예: "미분", "베이즈", "역행렬", "삼각법"',
     pl: 'np.: "pochodna", "Bayes", "macierz odwrotna", "trygonometria"',
-    ar: 'مثال: "مشتقة"، "بايز"، "مصفوفة عكسية"، "علم المثلثات"',
-    hi: 'उदा.: "अवकलज", "बेयस", "व्युत्क्रम आव्यूह", "त्रिकोणमिति"',
   },
   'aulasSearch.noResultsPrefix': {
     'pt-BR': 'Nenhuma lição encontrada para',
@@ -1501,8 +1361,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Урок не найден для',
     ko: '수업을 찾을 수 없습니다:',
     pl: 'Nie znaleziono lekcji dla',
-    ar: 'لم يتم العثور على درس لـ',
-    hi: 'के लिए कोई पाठ नहीं मिला',
   },
   'aulasSearch.noResultsHint': {
     'pt-BR': 'Tente outro termo — palavras-chave funcionam melhor que frases inteiras.',
@@ -1516,28 +1374,26 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Попробуйте другой термин — ключевые слова работают лучше целых фраз.',
     ko: '다른 용어를 시도해 보세요 — 전체 문장보다 키워드가 더 잘 작동합니다.',
     pl: 'Spróbuj innego terminu — słowa kluczowe działają lepiej niż całe zdania.',
-    ar: 'جرب مصطلحاً آخر — الكلمات المفتاحية تعمل أفضل من الجمل الكاملة.',
-    hi: 'दूसरा शब्द आज़माएं — पूरी वाक्य की तुलना में कीवर्ड बेहतर काम करते हैं।',
   },
   'aulasSearch.resultsSingular': {
     'pt-BR': 'resultado', en: 'result', es: 'resultado', zh: '个结果', ja: '件',
-    de: 'Ergebnis', fr: 'résultat', it: 'risultato', ru: 'результат', ko: '개 결과', pl: 'wynik', ar: 'نتيجة', hi: 'परिणाम',
+    de: 'Ergebnis', fr: 'résultat', it: 'risultato', ru: 'результат', ko: '개 결과', pl: 'wynik',
   },
   'aulasSearch.resultsPlural': {
     'pt-BR': 'resultados', en: 'results', es: 'resultados', zh: '个结果', ja: '件',
-    de: 'Ergebnisse', fr: 'résultats', it: 'risultati', ru: 'результатов', ko: '개 결과', pl: 'wyników', ar: 'نتائج', hi: 'परिणाम',
+    de: 'Ergebnisse', fr: 'résultats', it: 'risultati', ru: 'результатов', ko: '개 결과', pl: 'wyników',
   },
   'aulasSearch.lesson': {
     'pt-BR': 'Lição', en: 'Lesson', es: 'Lección', zh: '课', ja: 'レッスン',
-    de: 'Lektion', fr: 'Leçon', it: 'Lezione', ru: 'Урок', ko: '수업', pl: 'Lekcja', ar: 'درس', hi: 'पाठ',
+    de: 'Lektion', fr: 'Leçon', it: 'Lezione', ru: 'Урок', ko: '수업', pl: 'Lekcja',
   },
   'aulasSearch.year': {
     'pt-BR': 'Ano', en: 'Year', es: 'Año', zh: '年', ja: '学年',
-    de: 'Jahr', fr: 'Année', it: 'Anno', ru: 'Год', ko: '학년', pl: 'Rok', ar: 'سنة', hi: 'वर्ष',
+    de: 'Jahr', fr: 'Année', it: 'Anno', ru: 'Год', ko: '학년', pl: 'Rok',
   },
   'aulasSearch.term': {
     'pt-BR': 'Trim', en: 'Term', es: 'Trim', zh: '学期', ja: '学期',
-    de: 'Trim', fr: 'Trim', it: 'Trim', ru: 'Чет', ko: '학기', pl: 'Trym', ar: 'فصل', hi: 'त्रै',
+    de: 'Trim', fr: 'Trim', it: 'Trim', ru: 'Чет', ko: '학기', pl: 'Trym',
   },
   'aulasSearch.plannedNote': {
     'pt-BR': '(planejada — ainda não publicada)',
@@ -1551,8 +1407,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '(запланировано — ещё не опубликовано)',
     ko: '(계획됨 — 아직 게시되지 않음)',
     pl: '(planowana — jeszcze nieopublikowana)',
-    ar: '(مخطط — لم يُنشر بعد)',
-    hi: '(नियोजित — अभी प्रकाशित नहीं)',
   },
 
   // ===== MAPA (visitor map page) =====
@@ -1568,8 +1422,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '◆ Откуда наши люди ◆',
     ko: '◆ 우리 동료들은 어디서 오는가 ◆',
     pl: '◆ Skąd pochodzi nasza ekipa ◆',
-    ar: '◆ من أين يأتي رفاقنا ◆',
-    hi: '◆ हमारी टीम कहाँ से आती है ◆',
   },
   'mapa.title': {
     'pt-BR': 'Mapa do mundo',
@@ -1583,8 +1435,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Карта мира',
     ko: '세계 지도',
     pl: 'Mapa świata',
-    ar: 'خريطة العالم',
-    hi: 'विश्व मानचित्र',
   },
   'mapa.intro': {
     'pt-BR': 'Cada acesso ao Clube é registrado de forma anônima — só país e cidade aproximada (via IP). Nada de IP guardado, nada de cookie de tracking, nada de venda de dados.',
@@ -1598,8 +1448,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Каждое посещение Clube записывается анонимно — только страна и приблизительный город (по IP). IP не сохраняется, без трекинг-cookie, без продажи данных.',
     ko: 'Clube의 모든 방문은 익명으로 기록됩니다 — 국가와 대략적인 도시만(IP 기반). IP 저장 없음, 추적 쿠키 없음, 데이터 판매 없음.',
     pl: 'Każde wejście do Clube jest rejestrowane anonimowo — tylko kraj i przybliżone miasto (po IP). Bez zapisu IP, bez ciasteczek śledzących, bez sprzedaży danych.',
-    ar: 'يتم تسجيل كل زيارة لـ Clube بشكل مجهول — البلد والمدينة التقريبية فقط (عبر IP). لا تخزين لـ IP، ولا ملفات تعريف ارتباط للتتبع، ولا بيع بيانات.',
-    hi: 'Clube की हर विज़िट गुमनाम रूप से दर्ज की जाती है — केवल देश और अनुमानित शहर (IP द्वारा)। कोई IP सहेजा नहीं जाता, कोई ट्रैकिंग कुकी नहीं, कोई डेटा बिक्री नहीं।',
   },
   'mapa.curiosity': {
     'pt-BR': 'Curiosidade pura: queremos saber quem está estudando.',
@@ -1613,8 +1461,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Чистое любопытство: мы хотим знать, кто учится.',
     ko: '순수한 호기심입니다: 누가 공부하고 있는지 알고 싶습니다.',
     pl: 'Czysta ciekawość: chcemy wiedzieć, kto się uczy.',
-    ar: 'فضول خالص: نريد أن نعرف من الذي يدرس.',
-    hi: 'शुद्ध जिज्ञासा: हम जानना चाहते हैं कि कौन पढ़ रहा है।',
   },
   'mapa.how.title': {
     'pt-BR': 'Como funciona',
@@ -1628,8 +1474,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Как это работает',
     ko: '작동 방식',
     pl: 'Jak to działa',
-    ar: 'كيف يعمل',
-    hi: 'यह कैसे काम करता है',
   },
   'mapa.how.step1.before': {
     'pt-BR': 'Quando você abre o site, fazemos uma requisição para',
@@ -1643,8 +1487,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Когда вы открываете сайт, мы отправляем запрос к',
     ko: '사이트를 열면',
     pl: 'Kiedy otwierasz stronę, wysyłamy zapytanie do',
-    ar: 'عند فتح الموقع، نرسل طلباً إلى',
-    hi: 'जब आप साइट खोलते हैं, हम',
   },
   'mapa.how.step1.after': {
     'pt-BR': '(serviço gratuito) que devolve seu país aproximado pelo IP.',
@@ -1658,8 +1500,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '(бесплатный сервис), который возвращает ваш приблизительный регион по IP.',
     ko: '(무료 서비스)에 요청을 보내고, IP로 대략적인 국가를 반환합니다.',
     pl: '(usługa bezpłatna), która zwraca przybliżony kraj na podstawie IP.',
-    ar: '(خدمة مجانية) تعيد بلدك التقريبي عبر IP.',
-    hi: 'को अनुरोध भेजते हैं (मुफ्त सेवा), जो IP द्वारा आपका अनुमानित देश लौटाती है।',
   },
   'mapa.how.step2.before': {
     'pt-BR': 'Incrementamos um contador anônimo no',
@@ -1673,8 +1513,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Мы увеличиваем анонимный счётчик на',
     ko: '익명 카운터를',
     pl: 'Zwiększamy anonimowy licznik w',
-    ar: 'نحن نزيد عداداً مجهولاً على',
-    hi: 'हम एक गुमनाम काउंटर',
   },
   'mapa.how.step2.after': {
     'pt-BR': 'tipo',
@@ -1688,8 +1526,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'вида',
     ko: '에서 증가시킵니다. 예:',
     pl: 'typu',
-    ar: 'مثل',
-    hi: 'पर बढ़ाते हैं, जैसे',
   },
   'mapa.how.step2.etc': {
     'pt-BR': 'etc.',
@@ -1703,8 +1539,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'и т.д.',
     ko: '등.',
     pl: 'itd.',
-    ar: 'إلخ.',
-    hi: 'आदि।',
   },
   'mapa.how.step3.before': {
     'pt-BR': 'Esta página lê esses contadores e mostra o agregado.',
@@ -1718,8 +1552,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Эта страница читает эти счётчики и показывает агрегат.',
     ko: '이 페이지는 이러한 카운터를 읽고 집계를 표시합니다.',
     pl: 'Ta strona odczytuje te liczniki i pokazuje zagregowane dane.',
-    ar: 'تقرأ هذه الصفحة تلك العدادات وتعرض المجموع.',
-    hi: 'यह पृष्ठ उन काउंटरों को पढ़ता है और सकल दिखाता है।',
   },
   'mapa.how.step3.bold': {
     'pt-BR': 'Nenhum dado pessoal é armazenado em momento algum.',
@@ -1733,8 +1565,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Никакие персональные данные не сохраняются ни в какой момент.',
     ko: '어떠한 개인 정보도 저장되지 않습니다.',
     pl: 'Żadne dane osobowe nie są przechowywane w żadnym momencie.',
-    ar: 'لا يتم تخزين أي بيانات شخصية في أي وقت.',
-    hi: 'किसी भी समय कोई व्यक्तिगत डेटा संग्रहीत नहीं किया जाता।',
   },
   'mapa.how.step4.before': {
     'pt-BR': 'Cada sessão de navegador conta uma vez (controle por',
@@ -1748,8 +1578,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Каждая сессия браузера учитывается один раз (контроль через',
     ko: '각 브라우저 세션은 한 번만 카운트됩니다(',
     pl: 'Każda sesja przeglądarki liczy się raz (kontrolowana przez',
-    ar: 'كل جلسة متصفح تُحسب مرة واحدة (يتم التحكم عبر',
-    hi: 'प्रत्येक ब्राउज़र सत्र एक बार गिना जाता है (',
   },
   'mapa.how.step4.after': {
     'pt-BR': ').',
@@ -1763,35 +1591,33 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ').',
     ko: '으로 제어).',
     pl: ').',
-    ar: ').',
-    hi: 'द्वारा नियंत्रित)।',
   },
 
   // ===== LESSON PAGE (template de cada lição) =====
   'lesson.nav.aria': {
     'pt-BR': 'Navegação', en: 'Navigation', es: 'Navegación', zh: '导航', ja: 'ナビゲーション',
     de: 'Navigation', fr: 'Navigation', it: 'Navigazione', ru: 'Навигация',
-    ko: '탐색', pl: 'Nawigacja', ar: 'تصفح', hi: 'नेविगेशन',
+    ko: '탐색', pl: 'Nawigacja',
   },
   'lesson.breadcrumb.home': {
     'pt-BR': 'Início', en: 'Home', es: 'Inicio', zh: '首页', ja: 'ホーム',
     de: 'Start', fr: 'Accueil', it: 'Home', ru: 'Главная',
-    ko: '홈', pl: 'Strona główna', ar: 'الرئيسية', hi: 'होम',
+    ko: '홈', pl: 'Strona główna',
   },
   'lesson.usedIn': {
     'pt-BR': 'Usado em:', en: 'Used in:', es: 'Usado en:', zh: '用于：', ja: '使用先：',
     de: 'Verwendet in:', fr: 'Utilisé dans :', it: 'Usato in:', ru: 'Используется в:',
-    ko: '사용처:', pl: 'Używane w:', ar: 'يُستخدم في:', hi: 'इसमें उपयोग:',
+    ko: '사용처:', pl: 'Używane w:',
   },
   'lesson.updated': {
     'pt-BR': 'Atualizado em', en: 'Updated on', es: 'Actualizado el', zh: '更新于',
     ja: '更新日:', de: 'Aktualisiert am', fr: 'Mis à jour le', it: 'Aggiornato il',
-    ru: 'Обновлено', ko: '업데이트:', pl: 'Zaktualizowano', ar: 'تم التحديث في', hi: 'अद्यतन:',
+    ru: 'Обновлено', ko: '업데이트:', pl: 'Zaktualizowano',
   },
   'lesson.authors': {
     'pt-BR': 'Autor(es):', en: 'Author(s):', es: 'Autor(es):', zh: '作者：',
     ja: '著者：', de: 'Autor(en):', fr: 'Auteur(s) :', it: 'Autore/i:',
-    ru: 'Автор(ы):', ko: '저자:', pl: 'Autor(zy):', ar: 'المؤلف(ون):', hi: 'लेखक:',
+    ru: 'Автор(ы):', ko: '저자:', pl: 'Autor(zy):',
   },
   'lesson.error.title': {
     'pt-BR': 'Achou um erro?',
@@ -1805,8 +1631,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Нашли ошибку?',
     ko: '오류를 발견하셨나요?',
     pl: 'Znalazłeś błąd?',
-    ar: 'هل وجدت خطأ؟',
-    hi: 'त्रुटि मिली?',
   },
   'lesson.error.linkIssue': {
     'pt-BR': 'Abra uma issue no GitHub',
@@ -1820,8 +1644,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Откройте issue на GitHub',
     ko: 'GitHub에서 issue 열기',
     pl: 'Otwórz issue na GitHubie',
-    ar: 'افتح issue على GitHub',
-    hi: 'GitHub पर issue खोलें',
   },
   'lesson.error.body': {
     'pt-BR': 'ou submeta um PR — open source pra sempre.',
@@ -1835,8 +1657,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'или отправьте PR — открытый код навсегда.',
     ko: '또는 PR 제출 — 영원히 오픈소스.',
     pl: 'lub wyślij PR — open source na zawsze.',
-    ar: 'أو أرسل PR — مفتوح المصدر إلى الأبد.',
-    hi: 'या PR सबमिट करें — हमेशा के लिए ओपन सोर्स।',
   },
   'lesson.notFound': {
     'pt-BR': 'Não encontrado',
@@ -1850,8 +1670,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Не найдено',
     ko: '찾을 수 없음',
     pl: 'Nie znaleziono',
-    ar: 'غير موجود',
-    hi: 'नहीं मिला',
   },
 
   // ===== AUDIO READER (extras) =====
@@ -1867,14 +1685,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '{lang}: голос TTS не установлен в браузере. Установите голос {lang} в вашей операционной системе (Windows: Параметры > Время и язык > Речь) или переключитесь на PT-BR.',
     ko: '{lang}: 브라우저에 TTS 음성이 설치되지 않았습니다. 운영 체제에 {lang} 음성을 설치하거나(Windows: 설정 > 시간 및 언어 > 음성) PT-BR로 전환하여 들으세요.',
     pl: '{lang}: głos TTS nie jest zainstalowany w przeglądarce. Zainstaluj głos {lang} w systemie operacyjnym (Windows: Ustawienia > Godzina i język > Mowa) lub przełącz na PT-BR.',
-    ar: '{lang}: صوت TTS غير مثبت في المتصفح. قم بتثبيت صوت {lang} على نظام التشغيل (Windows: الإعدادات > الوقت واللغة > الصوت) أو قم بالتبديل إلى PT-BR للاستماع.',
-    hi: '{lang}: ब्राउज़र में TTS आवाज़ इंस्टॉल नहीं है। अपने ऑपरेटिंग सिस्टम में {lang} आवाज़ इंस्टॉल करें (Windows: सेटिंग्स > समय और भाषा > भाषण) या PT-BR पर स्विच करें।',
   },
 
   // ===== EQUATION =====
   'equation.audioLabel': {
     'pt-BR': 'Ler', en: 'Read', es: 'Leer', zh: '读', ja: '読む',
-    de: 'Lesen', fr: 'Lire', it: 'Leggi', ru: 'Читать', ko: '읽기', pl: 'Czytaj', ar: 'اقرأ', hi: 'पढ़ें',
+    de: 'Lesen', fr: 'Lire', it: 'Leggi', ru: 'Читать', ko: '읽기', pl: 'Czytaj',
   },
   'equation.meaningLabel': {
     'pt-BR': 'o que isso quer dizer · ',
@@ -1888,8 +1704,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'что это значит · ',
     ko: '의미하는 바 · ',
     pl: 'co to znaczy · ',
-    ar: 'ما يعنيه هذا · ',
-    hi: 'इसका क्या अर्थ है · ',
   },
 
   // ===== VERIFICAR PASSO (SymPy) =====
@@ -1905,8 +1719,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '✍️ Проверить шаг (SymPy)',
     ko: '✍️ 단계 확인 (SymPy)',
     pl: '✍️ Sprawdź krok (SymPy)',
-    ar: '✍️ تحقق من الخطوة (SymPy)',
-    hi: '✍️ चरण सत्यापित करें (SymPy)',
   },
   'verificar.variables': {
     'pt-BR': 'Variáveis aceitas:',
@@ -1920,8 +1732,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Принимаемые переменные:',
     ko: '허용된 변수:',
     pl: 'Akceptowane zmienne:',
-    ar: 'المتغيرات المقبولة:',
-    hi: 'स्वीकृत चर:',
   },
   'verificar.syntax': {
     'pt-BR': 'Use sintaxe Python: <code>**</code> pra potência, <code>*</code> pra multiplicação, <code>sin(x)</code>, <code>cos(x)</code>, <code>exp(x)</code>, <code>log(x)</code>, <code>sqrt(x)</code>, <code>pi</code>, <code>E</code>.',
@@ -1935,8 +1745,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Используйте синтаксис Python: <code>**</code> для степени, <code>*</code> для умножения, <code>sin(x)</code>, <code>cos(x)</code>, <code>exp(x)</code>, <code>log(x)</code>, <code>sqrt(x)</code>, <code>pi</code>, <code>E</code>.',
     ko: 'Python 구문 사용: 거듭제곱은 <code>**</code>, 곱셈은 <code>*</code>, <code>sin(x)</code>, <code>cos(x)</code>, <code>exp(x)</code>, <code>log(x)</code>, <code>sqrt(x)</code>, <code>pi</code>, <code>E</code>.',
     pl: 'Użyj składni Python: <code>**</code> dla potęgi, <code>*</code> dla mnożenia, <code>sin(x)</code>, <code>cos(x)</code>, <code>exp(x)</code>, <code>log(x)</code>, <code>sqrt(x)</code>, <code>pi</code>, <code>E</code>.',
-    ar: 'استخدم بناء جملة Python: <code>**</code> للأس، <code>*</code> للضرب، <code>sin(x)</code>، <code>cos(x)</code>، <code>exp(x)</code>، <code>log(x)</code>، <code>sqrt(x)</code>، <code>pi</code>، <code>E</code>.',
-    hi: 'Python सिंटैक्स का उपयोग करें: घात के लिए <code>**</code>, गुणन के लिए <code>*</code>, <code>sin(x)</code>, <code>cos(x)</code>, <code>exp(x)</code>, <code>log(x)</code>, <code>sqrt(x)</code>, <code>pi</code>, <code>E</code>।',
   },
   'verificar.placeholder': {
     'pt-BR': 'ex.: 2*x + 3',
@@ -1950,12 +1758,10 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'напр.: 2*x + 3',
     ko: '예: 2*x + 3',
     pl: 'np.: 2*x + 3',
-    ar: 'مثال: 2*x + 3',
-    hi: 'उदा.: 2*x + 3',
   },
   'verificar.button': {
     'pt-BR': 'Verificar', en: 'Verify', es: 'Verificar', zh: '验证', ja: '確認',
-    de: 'Prüfen', fr: 'Vérifier', it: 'Verifica', ru: 'Проверить', ko: '확인', pl: 'Sprawdź', ar: 'تحقق', hi: 'सत्यापित करें',
+    de: 'Prüfen', fr: 'Vérifier', it: 'Verifica', ru: 'Проверить', ko: '확인', pl: 'Sprawdź',
   },
   'verificar.loading': {
     'pt-BR': 'Carregando SymPy…',
@@ -1969,8 +1775,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Загрузка SymPy…',
     ko: 'SymPy 로딩 중…',
     pl: 'Ładowanie SymPy…',
-    ar: 'جاري تحميل SymPy…',
-    hi: 'SymPy लोड हो रहा है…',
   },
   'verificar.idleHint': {
     'pt-BR': 'Primeira verificação carrega o motor (~10 MB, ~3s). Depois fica rápido.',
@@ -1984,8 +1788,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Первая проверка загружает движок (~10 МБ, ~3с). Потом быстро.',
     ko: '첫 확인 시 엔진 로딩 (~10 MB, ~3초). 이후엔 빠릅니다.',
     pl: 'Pierwsza weryfikacja ładuje silnik (~10 MB, ~3s). Potem jest szybko.',
-    ar: 'يقوم التحقق الأول بتحميل المحرك (~10 ميغابايت، ~3 ثوانٍ). بعدها يكون سريعاً.',
-    hi: 'पहली जांच इंजन लोड करती है (~10 MB, ~3s)। उसके बाद तेज़ है।',
   },
   'verificar.errorLoad': {
     'pt-BR': 'Falha ao carregar o motor de verificação. Verifique sua conexão.',
@@ -1999,8 +1801,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Не удалось загрузить движок проверки. Проверьте соединение.',
     ko: '검증 엔진 로드 실패. 연결을 확인하세요.',
     pl: 'Nie udało się załadować silnika weryfikacji. Sprawdź połączenie.',
-    ar: 'فشل في تحميل محرك التحقق. تحقق من اتصالك.',
-    hi: 'सत्यापन इंजन लोड करने में विफल। अपना कनेक्शन जांचें।',
   },
   'verificar.engineUnavailable': {
     'pt-BR': 'Motor de verificação não disponível.',
@@ -2014,8 +1814,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Движок проверки недоступен.',
     ko: '검증 엔진을 사용할 수 없습니다.',
     pl: 'Silnik weryfikacji niedostępny.',
-    ar: 'محرك التحقق غير متاح.',
-    hi: 'सत्यापन इंजन उपलब्ध नहीं है।',
   },
   'verificar.equivalent': {
     'pt-BR': 'Equivalente à resposta esperada (simbolicamente).',
@@ -2029,8 +1827,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Эквивалентно ожидаемому ответу (символически).',
     ko: '예상 답과 동등합니다 (기호적으로).',
     pl: 'Równoważne oczekiwanej odpowiedzi (symbolicznie).',
-    ar: 'مكافئ للإجابة المتوقعة (رمزياً).',
-    hi: 'अपेक्षित उत्तर के बराबर (प्रतीकात्मक रूप से)।',
   },
   'verificar.differentDiff': {
     'pt-BR': 'Diferente da resposta. Diferença simplificada:',
@@ -2044,8 +1840,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Отличается от ответа. Упрощённая разница:',
     ko: '답과 다릅니다. 단순화된 차이:',
     pl: 'Różne od odpowiedzi. Uproszczona różnica:',
-    ar: 'مختلف عن الإجابة. الفرق المبسط:',
-    hi: 'उत्तर से अलग। सरलीकृत अंतर:',
   },
   'verificar.parseError': {
     'pt-BR': 'Erro ao analisar:',
@@ -2059,12 +1853,10 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Ошибка разбора:',
     ko: '구문 분석 오류:',
     pl: 'Błąd analizy:',
-    ar: 'خطأ في التحليل:',
-    hi: 'पार्स त्रुटि:',
   },
   'verificar.unknown': {
     'pt-BR': 'desconhecido', en: 'unknown', es: 'desconocido', zh: '未知', ja: '不明',
-    de: 'unbekannt', fr: 'inconnu', it: 'sconosciuto', ru: 'неизвестно', ko: '알 수 없음', pl: 'nieznany', ar: 'غير معروف', hi: 'अज्ञात',
+    de: 'unbekannt', fr: 'inconnu', it: 'sconosciuto', ru: 'неизвестно', ko: '알 수 없음', pl: 'nieznany',
   },
   'verificar.yourLatex': {
     'pt-BR': 'Sua resposta em LaTeX:',
@@ -2078,8 +1870,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Ваш ответ в LaTeX:',
     ko: 'LaTeX 답:',
     pl: 'Twoja odpowiedź w LaTeX:',
-    ar: 'إجابتك بصيغة LaTeX:',
-    hi: 'आपका LaTeX उत्तर:',
   },
 
   // ===== PAYOFF CHART =====
@@ -2095,8 +1885,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'покупка колла (long call)',
     ko: '콜 매수 (long call)',
     pl: 'zakup call (long call)',
-    ar: 'شراء كول (long call)',
-    hi: 'कॉल खरीद (long call)',
   },
   'payoff.tipo.short-call': {
     'pt-BR': 'venda de call (short call)',
@@ -2110,8 +1898,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'продажа колла (short call)',
     ko: '콜 매도 (short call)',
     pl: 'sprzedaż call (short call)',
-    ar: 'بيع كول (short call)',
-    hi: 'कॉल बिक्री (short call)',
   },
   'payoff.tipo.long-put': {
     'pt-BR': 'compra de put (long put)',
@@ -2125,8 +1911,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'покупка пута (long put)',
     ko: '풋 매수 (long put)',
     pl: 'zakup put (long put)',
-    ar: 'شراء بوت (long put)',
-    hi: 'पुट खरीद (long put)',
   },
   'payoff.tipo.short-put': {
     'pt-BR': 'venda de put (short put)',
@@ -2140,8 +1924,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'продажа пута (short put)',
     ko: '풋 매도 (short put)',
     pl: 'sprzedaż put (short put)',
-    ar: 'بيع بوت (short put)',
-    hi: 'पुट बिक्री (short put)',
   },
   'payoff.tipo.covered-call': {
     'pt-BR': 'covered call (long ações + short call)',
@@ -2155,8 +1937,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'покрытый колл (long акции + short call)',
     ko: '커버드 콜 (주식 매수 + 콜 매도)',
     pl: 'covered call (długie akcje + krótki call)',
-    ar: 'كول مغطى (شراء أسهم + بيع كول)',
-    hi: 'कवर्ड कॉल (लॉन्ग शेयर + शॉर्ट कॉल)',
   },
   'payoff.audioLabel': {
     'pt-BR': 'Ouvir descrição',
@@ -2170,8 +1950,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Слушать описание',
     ko: '설명 듣기',
     pl: 'Słuchaj opisu',
-    ar: 'استمع للوصف',
-    hi: 'विवरण सुनें',
   },
   'payoff.desc.title': {
     'pt-BR': 'Diagrama de payoff de uma {tipo} no vencimento.',
@@ -2185,8 +1963,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Диаграмма выплат {tipo} на момент истечения.',
     ko: '만기 시 {tipo}의 페이오프 다이어그램.',
     pl: 'Diagram wypłaty {tipo} w terminie wygaśnięcia.',
-    ar: 'مخطط العائد لـ {tipo} عند الاستحقاق.',
-    hi: 'समाप्ति पर {tipo} का पेऑफ डायग्राम।',
   },
   'payoff.desc.xAxis': {
     'pt-BR': 'Eixo horizontal: preço do ativo no vencimento, em reais, de {min} a {max}.',
@@ -2200,8 +1976,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Горизонтальная ось: цена актива на момент истечения, в реалах, от {min} до {max}.',
     ko: '가로축: 만기 시 자산 가격, 헤알, {min}부터 {max}까지.',
     pl: 'Oś pozioma: cena aktywa w terminie wygaśnięcia, w realach, od {min} do {max}.',
-    ar: 'المحور الأفقي: سعر الأصل عند الاستحقاق، بالريال، من {min} إلى {max}.',
-    hi: 'क्षैतिज अक्ष: समाप्ति पर परिसंपत्ति मूल्य, रियाल में, {min} से {max} तक।',
   },
   'payoff.desc.yAxis': {
     'pt-BR': 'Eixo vertical: lucro ou prejuízo, em reais.',
@@ -2215,8 +1989,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Вертикальная ось: прибыль или убыток, в реалах.',
     ko: '세로축: 손익, 헤알.',
     pl: 'Oś pionowa: zysk lub strata, w realach.',
-    ar: 'المحور الرأسي: ربح أو خسارة، بالريال.',
-    hi: 'ऊर्ध्वाधर अक्ष: लाभ या हानि, रियाल में।',
   },
   'payoff.desc.spot': {
     'pt-BR': 'Preço atual do ativo (spot): {value} reais.',
@@ -2230,8 +2002,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Текущая цена актива (спот): {value} реалов.',
     ko: '현재 자산 가격 (스폿): {value} 헤알.',
     pl: 'Aktualna cena aktywa (spot): {value} reali.',
-    ar: 'السعر الحالي للأصل (الفوري): {value} ريال.',
-    hi: 'वर्तमान परिसंपत्ति मूल्य (स्पॉट): {value} रियाल।',
   },
   'payoff.desc.strike': {
     'pt-BR': 'Preço de exercício (strike): {value} reais.',
@@ -2245,8 +2015,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Цена исполнения (страйк): {value} реалов.',
     ko: '행사가 (스트라이크): {value} 헤알.',
     pl: 'Cena wykonania (strike): {value} reali.',
-    ar: 'سعر التنفيذ (الإضراب): {value} ريال.',
-    hi: 'स्ट्राइक मूल्य: {value} रियाल।',
   },
   'payoff.desc.premio': {
     'pt-BR': 'Prêmio: {value} reais.',
@@ -2260,8 +2028,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Премия: {value} реалов.',
     ko: '프리미엄: {value} 헤알.',
     pl: 'Premia: {value} reali.',
-    ar: 'القسط: {value} ريال.',
-    hi: 'प्रीमियम: {value} रियाल।',
   },
   'payoff.desc.breakeven': {
     'pt-BR': 'Ponto de equilíbrio (breakeven): {value} reais.',
@@ -2275,8 +2041,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Точка безубыточности: {value} реалов.',
     ko: '손익분기점: {value} 헤알.',
     pl: 'Próg rentowności (breakeven): {value} reali.',
-    ar: 'نقطة التعادل: {value} ريال.',
-    hi: 'ब्रेकईवन बिंदु: {value} रियाल।',
   },
   'payoff.desc.lucroMax': {
     'pt-BR': 'Lucro máximo no intervalo mostrado: {value} reais.',
@@ -2290,8 +2054,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Максимальная прибыль в показанном диапазоне: {value} реалов.',
     ko: '표시된 범위에서 최대 이익: {value} 헤알.',
     pl: 'Maksymalny zysk w pokazanym zakresie: {value} reali.',
-    ar: 'أقصى ربح في النطاق المعروض: {value} ريال.',
-    hi: 'दिखाई गई सीमा में अधिकतम लाभ: {value} रियाल।',
   },
   'payoff.desc.prejMax': {
     'pt-BR': 'Prejuízo máximo no intervalo mostrado: {value} reais.',
@@ -2305,8 +2067,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Максимальный убыток в показанном диапазоне: {value} реалов.',
     ko: '표시된 범위에서 최대 손실: {value} 헤알.',
     pl: 'Maksymalna strata w pokazanym zakresie: {value} reali.',
-    ar: 'أقصى خسارة في النطاق المعروض: {value} ريال.',
-    hi: 'दिखाई गई सीमा में अधिकतम हानि: {value} रियाल।',
   },
   'payoff.title.aria': {
     'pt-BR': 'Payoff de {tipo}, strike R$ {strike}, prêmio R$ {premio}',
@@ -2320,8 +2080,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Выплата {tipo}, страйк R$ {strike}, премия R$ {premio}',
     ko: '{tipo}의 페이오프, 스트라이크 R$ {strike}, 프리미엄 R$ {premio}',
     pl: 'Payoff {tipo}, strike R$ {strike}, premia R$ {premio}',
-    ar: 'عائد {tipo}، الإضراب R$ {strike}، القسط R$ {premio}',
-    hi: '{tipo} का पेऑफ, स्ट्राइक R$ {strike}, प्रीमियम R$ {premio}',
   },
   'payoff.xAxisLabel': {
     'pt-BR': 'Preço no vencimento (R$)',
@@ -2335,8 +2093,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Цена на момент истечения (R$)',
     ko: '만기 가격 (R$)',
     pl: 'Cena w terminie wygaśnięcia (R$)',
-    ar: 'السعر عند الاستحقاق (R$)',
-    hi: 'समाप्ति पर मूल्य (R$)',
   },
   'payoff.yAxisLabel': {
     'pt-BR': 'Lucro / Prejuízo (R$)',
@@ -2350,8 +2106,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Прибыль / Убыток (R$)',
     ko: '손익 (R$)',
     pl: 'Zysk / Strata (R$)',
-    ar: 'الربح / الخسارة (R$)',
-    hi: 'लाभ / हानि (R$)',
   },
   'payoff.summary.title': {
     'pt-BR': 'Resumo do diagrama de payoff',
@@ -2365,8 +2119,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Сводка диаграммы выплат',
     ko: '페이오프 다이어그램 요약',
     pl: 'Podsumowanie diagramu payoff',
-    ar: 'ملخص مخطط العائد',
-    hi: 'पेऑफ डायग्राम सारांश',
   },
   'payoff.summary.tipo': {
     'pt-BR': 'Tipo de posição:',
@@ -2380,8 +2132,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Тип позиции:',
     ko: '포지션 유형:',
     pl: 'Typ pozycji:',
-    ar: 'نوع المركز:',
-    hi: 'पोजीशन प्रकार:',
   },
   'payoff.summary.spot': {
     'pt-BR': 'Preço atual do ativo (S):',
@@ -2395,8 +2145,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Текущая цена актива (S):',
     ko: '현재 자산 가격 (S):',
     pl: 'Aktualna cena aktywa (S):',
-    ar: 'السعر الحالي للأصل (S):',
-    hi: 'वर्तमान परिसंपत्ति मूल्य (S):',
   },
   'payoff.summary.strike': {
     'pt-BR': 'Strike (K):',
@@ -2410,8 +2158,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Страйк (K):',
     ko: '스트라이크 (K):',
     pl: 'Strike (K):',
-    ar: 'الإضراب (K):',
-    hi: 'स्ट्राइक (K):',
   },
   'payoff.summary.premio': {
     'pt-BR': 'Prêmio:',
@@ -2425,8 +2171,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Премия:',
     ko: '프리미엄:',
     pl: 'Premia:',
-    ar: 'القسط:',
-    hi: 'प्रीमियम:',
   },
   'payoff.summary.breakeven': {
     'pt-BR': 'Breakeven (lucro zero):',
@@ -2440,8 +2184,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Безубыточность (нулевая прибыль):',
     ko: '손익분기점 (이익 0):',
     pl: 'Próg rentowności (zerowy zysk):',
-    ar: 'نقطة التعادل (ربح صفر):',
-    hi: 'ब्रेकईवन (शून्य लाभ):',
   },
   'payoff.summary.lucroMax': {
     'pt-BR': 'Lucro máximo no intervalo mostrado:',
@@ -2455,8 +2197,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Максимальная прибыль в показанном диапазоне:',
     ko: '표시된 범위에서 최대 이익:',
     pl: 'Maksymalny zysk w pokazanym zakresie:',
-    ar: 'أقصى ربح في النطاق المعروض:',
-    hi: 'दिखाई गई सीमा में अधिकतम लाभ:',
   },
   'payoff.summary.prejMax': {
     'pt-BR': 'Prejuízo máximo no intervalo mostrado:',
@@ -2470,8 +2210,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Максимальный убыток в показанном диапазоне:',
     ko: '표시된 범위에서 최대 손실:',
     pl: 'Maksymalna strata w pokazanym zakresie:',
-    ar: 'أقصى خسارة في النطاق المعروض:',
-    hi: 'दिखाई गई सीमा में अधिकतम हानि:',
   },
   'payoff.summary.xRange': {
     'pt-BR': 'Faixa do eixo X (preço do ativo no vencimento): R$ {min} a R$ {max}.',
@@ -2485,8 +2223,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Диапазон оси X (цена актива на момент истечения): R$ {min} до R$ {max}.',
     ko: 'X축 범위 (만기 시 자산 가격): R$ {min}부터 R$ {max}까지.',
     pl: 'Zakres osi X (cena aktywa w terminie wygaśnięcia): R$ {min} do R$ {max}.',
-    ar: 'نطاق المحور X (سعر الأصل عند الاستحقاق): من R$ {min} إلى R$ {max}.',
-    hi: 'X-अक्ष सीमा (समाप्ति पर परिसंपत्ति मूल्य): R$ {min} से R$ {max}।',
   },
 
   // ===== PAGE: BOOKS / LIVROS =====
@@ -2494,7 +2230,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     'pt-BR': 'Fontes Públicas', en: 'Public Sources', es: 'Fuentes Públicas',
     zh: '公开资源', ja: '公開ソース', de: 'Öffentliche Quellen',
     fr: 'Sources Publiques', it: 'Fonti Pubbliche', ru: 'Публичные источники',
-    ko: '공개 자료', pl: 'Źródła publiczne', ar: 'مصادر عامة', hi: 'सार्वजनिक स्रोत',
+    ko: '공개 자료', pl: 'Źródła publiczne',
   },
   'page.books.metaDescription': {
     'pt-BR': 'Catálogo curado de livros de matemática gratuitos e legais — Active Calculus, OpenStax, Wikilivros (PT-BR), Stitz-Zeager, Lebl, Axler, Hammack, REAMAT, Battaia (IT), Kyoto Calculus (JP) e mais. Todos com licença aberta ou disponibilização gratuita oficial.',
@@ -2508,21 +2244,18 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Подборка бесплатных и легальных книг по математике — Active Calculus, OpenStax, Wikilivros (PT-BR), Stitz-Zeager, Lebl, Axler, Hammack, REAMAT, Battaia (IT), Kyoto Calculus (JP) и другие. Все с открытой лицензией или официальной бесплатной публикацией.',
     ko: '무료이며 합법적인 수학 도서 큐레이션 — Active Calculus, OpenStax, Wikilivros (PT-BR), Stitz-Zeager, Lebl, Axler, Hammack, REAMAT, Battaia (IT), Kyoto Calculus (JP) 외. 모두 오픈 라이선스 또는 공식 무료 공개.',
     pl: 'Wybrany katalog darmowych i legalnych książek matematycznych — Active Calculus, OpenStax, Wikilivros (PT-BR), Stitz-Zeager, Lebl, Axler, Hammack, REAMAT, Battaia (IT), Kyoto Calculus (JP) i inne. Wszystkie na otwartej licencji lub oficjalnie udostępnione za darmo.',
-    ar: 'كتالوج مختار من كتب الرياضيات المجانية والقانونية — Active Calculus وOpenStax وWikilivros (PT-BR) وStitz-Zeager وLebl وAxler وHammack وREAMAT وBattaia (IT) وKyoto Calculus (JP) وغيرها. جميعها بترخيص مفتوح أو إتاحة مجانية رسمية.',
-    hi: 'मुफ्त और कानूनी गणित पुस्तकों का चयनित कैटलॉग — Active Calculus, OpenStax, Wikilivros (PT-BR), Stitz-Zeager, Lebl, Axler, Hammack, REAMAT, Battaia (IT), Kyoto Calculus (JP) और अधिक। सभी ओपन लाइसेंस या आधिकारिक मुफ्त रिलीज़ के साथ।',
   },
   'page.books.eyebrow': {
     'pt-BR': 'Fontes Públicas', en: 'Public Sources', es: 'Fuentes Públicas',
     zh: '公开资源', ja: '公開ソース', de: 'Öffentliche Quellen',
     fr: 'Sources Publiques', it: 'Fonti Pubbliche', ru: 'Публичные источники',
-    ko: '공개 자료', pl: 'Źródła publiczne', ar: 'مصادر عامة', hi: 'सार्वजनिक स्रोत',
+    ko: '공개 자료', pl: 'Źródła publiczne',
   },
   'page.books.title': {
     'pt-BR': 'Os livros que usamos', en: 'The books we use', es: 'Los libros que usamos',
     zh: '我们使用的书籍', ja: '私たちが使う書籍', de: 'Die Bücher, die wir verwenden',
     fr: 'Les livres que nous utilisons', it: 'I libri che usiamo', ru: 'Книги, которые мы используем',
     ko: '우리가 사용하는 도서', pl: 'Książki, których używamy',
-    ar: 'الكتب التي نستخدمها', hi: 'वे पुस्तकें जो हम उपयोग करते हैं',
   },
   'page.books.intro1.before': {
     'pt-BR': 'Todos os livros listados abaixo são',
@@ -2536,15 +2269,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Все перечисленные ниже книги',
     ko: '아래에 나열된 모든 도서는',
     pl: 'Wszystkie wymienione poniżej książki są',
-    ar: 'جميع الكتب المدرجة أدناه',
-    hi: 'नीचे सूचीबद्ध सभी पुस्तकें',
   },
   'page.books.intro1.strong1': {
     'pt-BR': 'gratuitos e legais', en: 'free and legal', es: 'gratuitos y legales',
     zh: '免费且合法', ja: '無料かつ合法', de: 'kostenlos und legal',
     fr: 'gratuits et légaux', it: 'gratuiti e legali', ru: 'бесплатные и легальные',
     ko: '무료이며 합법적', pl: 'darmowe i legalne',
-    ar: 'مجانية وقانونية', hi: 'मुफ्त और कानूनी',
   },
   'page.books.intro1.middle1': {
     'pt-BR': '. Cada um tem',
@@ -2558,15 +2288,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '. Каждая имеет',
     ko: '. 각각',
     pl: '. Każda ma',
-    ar: '. لكل منها',
-    hi: '। प्रत्येक के पास',
   },
   'page.books.intro1.strong2': {
     'pt-BR': 'licença aberta', en: 'open license', es: 'licencia abierta',
     zh: '开放许可', ja: 'オープンライセンス', de: 'offene Lizenz',
     fr: 'licence ouverte', it: 'licenza aperta', ru: 'открытую лицензию',
     ko: '오픈 라이선스', pl: 'otwartą licencję',
-    ar: 'ترخيصاً مفتوحاً', hi: 'ओपन लाइसेंस',
   },
   'page.books.intro1.middle2': {
     'pt-BR': '(Creative Commons, GNU FDL, domínio público)',
@@ -2580,13 +2307,11 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '(Creative Commons, GNU FDL, общественное достояние)',
     ko: '(Creative Commons, GNU FDL, 퍼블릭 도메인)',
     pl: '(Creative Commons, GNU FDL, domena publiczna)',
-    ar: '(Creative Commons، GNU FDL، الملكية العامة)',
-    hi: '(Creative Commons, GNU FDL, सार्वजनिक डोमेन)',
   },
   'page.books.intro1.or': {
     'pt-BR': 'OU', en: 'OR', es: 'O', zh: '或', ja: 'または',
     de: 'ODER', fr: 'OU', it: 'O', ru: 'ИЛИ',
-    ko: '또는', pl: 'LUB', ar: 'أو', hi: 'या',
+    ko: '또는', pl: 'LUB',
   },
   'page.books.intro1.middle3': {
     'pt-BR': 'está disponibilizado',
@@ -2600,15 +2325,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'предоставляется',
     ko: '제공됩니다',
     pl: 'jest udostępniona',
-    ar: 'متاحة',
-    hi: 'उपलब्ध है',
   },
   'page.books.intro1.strong3': {
     'pt-BR': 'gratuitamente', en: 'free of charge', es: 'gratuitamente',
     zh: '免费提供', ja: '無料で公開', de: 'kostenlos zur Verfügung gestellt',
     fr: 'gratuitement', it: 'gratuitamente', ru: 'бесплатно',
     ko: '무료로', pl: 'bezpłatnie',
-    ar: 'مجاناً', hi: 'मुफ्त',
   },
   'page.books.intro1.after': {
     'pt-BR': 'pelos próprios autores ou editoras. Clique em qualquer título — abre direto no site oficial em outra aba.',
@@ -2622,8 +2344,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'самими авторами или издателями. Нажмите на любое название — оно откроется на официальном сайте в новой вкладке.',
     ko: '저자 또는 출판사가 직접 공개합니다. 제목을 클릭하면 공식 사이트가 새 탭에서 열립니다.',
     pl: 'przez samych autorów lub wydawców. Kliknij dowolny tytuł — otworzy się bezpośrednio na oficjalnej stronie w nowej karcie.',
-    ar: 'من قبل المؤلفين أو الناشرين أنفسهم. انقر على أي عنوان — سيُفتح مباشرة على الموقع الرسمي في تبويب جديد.',
-    hi: 'स्वयं लेखकों या प्रकाशकों द्वारा। किसी भी शीर्षक पर क्लिक करें — यह नए टैब में सीधे आधिकारिक साइट पर खुलता है।',
   },
   'page.books.intro2.before': {
     'pt-BR': 'Esta é a base bibliográfica das aulas do',
@@ -2637,15 +2357,13 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Это библиографическая основа уроков',
     ko: '다음 강의의 참고 문헌입니다:',
     pl: 'To jest podstawa bibliograficzna lekcji w',
-    ar: 'هذه القائمة المرجعية لدروس',
-    hi: 'यह निम्नलिखित पाठों का संदर्भ-आधार है:',
   },
   'page.books.intro2.linkText': {
     'pt-BR': 'Ensino Médio Otimizado', en: 'Optimized High School',
     es: 'Bachillerato Optimizado', zh: '优化高中课程', ja: '最適化高校カリキュラム',
     de: 'Optimiertes Gymnasium', fr: 'Lycée Optimisé', it: 'Scuola Superiore Ottimizzata',
     ru: 'Оптимизированной старшей школы', ko: '최적화된 고등학교 과정',
-    pl: 'Zoptymalizowane Liceum', ar: 'الثانوية المُحسَّنة', hi: 'ऑप्टिमाइज़्ड हाई स्कूल',
+    pl: 'Zoptymalizowane Liceum',
   },
   'page.books.intro2.after': {
     'pt-BR': '. Quando uma aula cita "Stitz-Zeager §1.3" ou "Active Calculus §0", é destes livros que estamos falando — e eles estão aqui, ao seu alcance, sem paywall.',
@@ -2659,29 +2377,24 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '. Когда в уроке цитируется "Stitz-Zeager §1.3" или "Active Calculus §0", речь идёт именно об этих книгах — и они прямо здесь, в пределах досягаемости, без платного доступа.',
     ko: '. 강의에서 "Stitz-Zeager §1.3" 또는 "Active Calculus §0"이 인용될 때, 바로 이 도서들을 의미합니다 — 페이월 없이 손닿는 곳에 있습니다.',
     pl: '. Gdy lekcja cytuje "Stitz-Zeager §1.3" lub "Active Calculus §0", chodzi właśnie o te książki — i są one tutaj, na wyciągnięcie ręki, bez paywalla.',
-    ar: '. عندما يستشهد الدرس بـ"Stitz-Zeager §1.3" أو "Active Calculus §0"، فإن هذه هي الكتب المقصودة — وهي هنا في متناول يدك، دون جدار دفع.',
-    hi: '। जब कोई पाठ "Stitz-Zeager §1.3" या "Active Calculus §0" का उल्लेख करता है, तो यही किताबें मतलब हैं — और ये यहीं हैं, आपकी पहुँच में, बिना पेवॉल के।',
   },
   'page.books.stats.booksHere': {
     'pt-BR': 'livros aqui', en: 'books here', es: 'libros aquí',
     zh: '本书在此', ja: '冊の書籍', de: 'Bücher hier',
     fr: 'livres ici', it: 'libri qui', ru: 'книг здесь',
     ko: '권의 도서', pl: 'książek tutaj',
-    ar: 'كتاب هنا', hi: 'पुस्तकें यहाँ',
   },
   'page.books.stats.languages': {
     'pt-BR': 'idiomas cobertos', en: 'languages covered', es: 'idiomas cubiertos',
     zh: '种语言覆盖', ja: '言語をカバー', de: 'abgedeckte Sprachen',
     fr: 'langues couvertes', it: 'lingue coperte', ru: 'языков охвачено',
     ko: '개 언어 지원', pl: 'objętych języków',
-    ar: 'لغات مغطاة', hi: 'भाषाएँ कवर',
   },
   'page.books.stats.freeAndLegal': {
     'pt-BR': 'grátis e legal', en: 'free and legal', es: 'gratis y legal',
     zh: '免费且合法', ja: '無料・合法', de: 'kostenlos und legal',
     fr: 'gratuit et légal', it: 'gratis e legale', ru: 'бесплатно и легально',
     ko: '무료 및 합법', pl: 'darmowe i legalne',
-    ar: 'مجاني وقانوني', hi: 'मुफ्त और कानूनी',
   },
   'page.books.howWeKnow.title': {
     'pt-BR': 'Como sabemos que são gratuitos?',
@@ -2695,8 +2408,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Откуда мы знаем, что они бесплатны?',
     ko: '무료라는 것을 어떻게 알 수 있나요?',
     pl: 'Skąd wiemy, że są darmowe?',
-    ar: 'كيف نعلم أنها مجانية؟',
-    hi: 'हम कैसे जानते हैं कि वे मुफ्त हैं?',
   },
   'page.books.howWeKnow.intro': {
     'pt-BR': 'Cada licença foi conferida individualmente em 2026-04-29:',
@@ -2710,8 +2421,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Каждая лицензия проверена индивидуально 29.04.2026:',
     ko: '각 라이선스는 2026-04-29에 개별 확인되었습니다:',
     pl: 'Każda licencja została indywidualnie zweryfikowana 29-04-2026:',
-    ar: 'تم التحقق من كل ترخيص بشكل فردي في 29-04-2026:',
-    hi: 'प्रत्येक लाइसेंस को 2026-04-29 को व्यक्तिगत रूप से सत्यापित किया गया:',
   },
   'page.books.howWeKnow.cc': {
     'pt-BR': '— Creative Commons. Redistribuição livre com atribuição (e limitações na variante NC = uso não-comercial).',
@@ -2725,8 +2434,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '— Creative Commons. Свободное распространение с указанием авторства (и ограничениями в варианте NC = некоммерческое использование).',
     ko: '— Creative Commons. 출처 표시 시 자유로운 재배포 가능(NC 변형은 비상업적 사용으로 제한).',
     pl: '— Creative Commons. Wolna redystrybucja z uznaniem autorstwa (i ograniczenia w wariancie NC = użytek niekomercyjny).',
-    ar: '— Creative Commons. إعادة التوزيع مجانية مع نسب العمل (وقيود في صيغة NC = استخدام غير تجاري).',
-    hi: '— Creative Commons। एट्रिब्यूशन के साथ मुफ्त पुनर्वितरण (और NC वैरिएंट = गैर-वाणिज्यिक उपयोग पर सीमाएँ)।',
   },
   'page.books.howWeKnow.gfdl': {
     'pt-BR': '(GNU Free Documentation License) — similar ao copyleft do software livre.',
@@ -2740,8 +2447,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '(GNU Free Documentation License) — аналогично копилефту свободного ПО.',
     ko: '(GNU Free Documentation License) — 자유 소프트웨어의 copyleft와 유사.',
     pl: '(GNU Free Documentation License) — podobny do copyleft wolnego oprogramowania.',
-    ar: '(GNU Free Documentation License) — مشابه لـ copyleft البرمجيات الحرة.',
-    hi: '(GNU Free Documentation License) — फ्री सॉफ्टवेयर के copyleft के समान।',
   },
   'page.books.howWeKnow.cc0': {
     'pt-BR': '— domínio público explícito (CC0) ou por idade da obra (autor falecido há mais de 70 anos).',
@@ -2755,15 +2460,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '— явное общественное достояние (CC0) или по возрасту произведения (автор умер более 70 лет назад).',
     ko: '— 명시적 퍼블릭 도메인(CC0) 또는 작품 연령(저자 사후 70년 이상).',
     pl: '— jawna domena publiczna (CC0) lub ze względu na wiek dzieła (autor zmarł ponad 70 lat temu).',
-    ar: '— ملكية عامة صريحة (CC0) أو بسبب قِدم العمل (وفاة المؤلف منذ أكثر من 70 عاماً).',
-    hi: '— स्पष्ट सार्वजनिक डोमेन (CC0) या कृति की आयु (लेखक की मृत्यु 70 वर्ष से अधिक पहले)।',
   },
   'page.books.howWeKnow.authorFreeLabel': {
     'pt-BR': '"gratuito (autor)"', en: '"free (author)"', es: '"gratuito (autor)"',
     zh: '"免费（作者）"', ja: '「無料（著者）」', de: '„kostenlos (Autor)"',
     fr: '« gratuit (auteur) »', it: '"gratuito (autore)"', ru: '«бесплатно (автор)»',
     ko: '"무료(저자)"', pl: '„darmowe (autor)"',
-    ar: '"مجاني (المؤلف)"', hi: '"मुफ्त (लेखक)"',
   },
   'page.books.howWeKnow.authorFreeBody': {
     'pt-BR': '— autor disponibiliza pessoalmente o PDF/HTML, sem ônus, embora reservando direitos autorais (não pode redistribuir sem permissão, mas pode ler e citar livremente).',
@@ -2777,8 +2479,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '— автор лично предоставляет PDF/HTML бесплатно, сохраняя за собой авторские права (нельзя распространять без разрешения, но можно свободно читать и цитировать).',
     ko: '— 저자가 직접 PDF/HTML을 무료로 제공하지만 저작권은 보유합니다(허가 없이 재배포 불가, 하지만 자유롭게 읽고 인용 가능).',
     pl: '— autor osobiście udostępnia PDF/HTML bezpłatnie, zachowując prawa autorskie (nie można redystrybuować bez zgody, ale wolno czytać i cytować).',
-    ar: '— يوفر المؤلف ملف PDF/HTML شخصياً مجاناً مع الاحتفاظ بحقوق التأليف (لا يجوز إعادة التوزيع دون إذن، لكن يمكن القراءة والاقتباس بحرية).',
-    hi: '— लेखक स्वयं PDF/HTML को मुफ्त उपलब्ध कराता है, लेकिन कॉपीराइट सुरक्षित रखता है (बिना अनुमति पुनर्वितरण नहीं, लेकिन पढ़ना और उद्धरण देना मुफ्त)।',
   },
   'page.books.howWeKnow.catalogBefore': {
     'pt-BR': 'O catálogo completo (243 livros + 20 agregadores em 12 idiomas) vive em',
@@ -2792,8 +2492,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Полный каталог (243 книги + 20 агрегаторов на 12 языках) находится по адресу',
     ko: '전체 카탈로그(243권 + 20개 애그리게이터, 12개 언어)는 다음에 있습니다:',
     pl: 'Pełny katalog (243 książki + 20 agregatorów w 12 językach) znajduje się w',
-    ar: 'الكتالوج الكامل (243 كتاباً + 20 مُجمِّعاً بـ12 لغة) موجود في',
-    hi: 'पूरा कैटलॉग (243 पुस्तकें + 20 एग्रीगेटर, 12 भाषाओं में) यहाँ है:',
   },
   'page.books.howWeKnow.catalogAfter': {
     'pt-BR': 'no repositório.', en: 'in the repository.',
@@ -2801,7 +2499,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'im Repository.', fr: 'dans le dépôt.',
     it: 'nel repository.', ru: 'в репозитории.',
     ko: '저장소 내.', pl: 'w repozytorium.',
-    ar: 'في المستودع.', hi: 'रिपॉजिटरी में।',
   },
   'page.books.jumpTo.label': {
     'pt-BR': 'Atalhos para seções', en: 'Section shortcuts',
@@ -2809,15 +2506,13 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: 'セクションショートカット', de: 'Abschnitts-Shortcuts',
     fr: 'Raccourcis des sections', it: 'Scorciatoie alle sezioni',
     ru: 'Ссылки на разделы', ko: '섹션 바로가기',
-    pl: 'Skróty do sekcji', ar: 'اختصارات الأقسام',
-    hi: 'अनुभाग शॉर्टकट',
+    pl: 'Skróty do sekcji',
   },
   'page.books.jumpTo.title': {
     'pt-BR': 'Pular para', en: 'Jump to', es: 'Saltar a',
     zh: '跳转到', ja: '移動先:', de: 'Springe zu',
     fr: 'Aller à', it: 'Vai a', ru: 'Перейти к',
     ko: '바로가기:', pl: 'Przejdź do',
-    ar: 'انتقل إلى', hi: 'पर जाएँ',
   },
   'page.books.section.booksInSection': {
     'pt-BR': 'livros nesta seção', en: 'books in this section',
@@ -2825,7 +2520,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Bücher in diesem Abschnitt', fr: 'livres dans cette section',
     it: 'libri in questa sezione', ru: 'книг в этом разделе',
     ko: '이 섹션의 도서', pl: 'książek w tej sekcji',
-    ar: 'كتب في هذا القسم', hi: 'इस अनुभाग में पुस्तकें',
   },
   'page.books.contribute.title': {
     'pt-BR': 'Encontrou um link quebrado? Conhece um livro que falta?',
@@ -2839,8 +2533,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Нашли неработающую ссылку? Знаете отсутствующую книгу?',
     ko: '깨진 링크를 찾았나요? 누락된 책을 알고 있나요?',
     pl: 'Znalazłeś zepsuty link? Znasz brakującą książkę?',
-    ar: 'وجدت رابطاً معطلاً؟ تعرف كتاباً ناقصاً؟',
-    hi: 'टूटी कड़ी मिली? कोई किताब गायब है?',
   },
   'page.books.contribute.before': {
     'pt-BR': 'Abra uma issue ou pull request em',
@@ -2854,8 +2546,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Откройте issue или pull request на',
     ko: '다음에서 이슈 또는 풀 리퀘스트를 등록하세요:',
     pl: 'Otwórz issue lub pull request na',
-    ar: 'افتح قضية أو طلب سحب على',
-    hi: 'यहाँ issue या pull request खोलें:',
   },
   'page.books.contribute.after': {
     'pt-BR': '. Quando adicionar um livro, verifique a licença oficial (CC, GFDL, domínio público ou disponibilização explícita do autor) — só listamos material legalmente livre.',
@@ -2869,8 +2559,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '. При добавлении книги проверьте официальную лицензию (CC, GFDL, общественное достояние или явный релиз автора) — мы перечисляем только юридически свободные материалы.',
     ko: '. 책을 추가할 때 공식 라이선스를 확인하세요(CC, GFDL, 퍼블릭 도메인 또는 저자의 명시적 공개) — 법적으로 자유로운 자료만 게재합니다.',
     pl: '. Dodając książkę, sprawdź oficjalną licencję (CC, GFDL, domena publiczna lub wyraźne udostępnienie autora) — listujemy tylko prawnie wolne materiały.',
-    ar: '. عند إضافة كتاب، تحقق من الترخيص الرسمي (CC، GFDL، الملكية العامة، أو إصدار صريح من المؤلف) — لا ندرج سوى المواد الحرة قانونياً.',
-    hi: '। पुस्तक जोड़ते समय आधिकारिक लाइसेंस जाँचें (CC, GFDL, सार्वजनिक डोमेन या लेखक का स्पष्ट जारी) — हम केवल कानूनी रूप से मुफ्त सामग्री सूचीबद्ध करते हैं।',
   },
 
   // ===== PAGE: VIDEOS =====
@@ -2878,7 +2566,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     'pt-BR': 'Vídeos públicos', en: 'Public videos', es: 'Videos públicos',
     zh: '公开视频', ja: '公開動画', de: 'Öffentliche Videos',
     fr: 'Vidéos publiques', it: 'Video pubblici', ru: 'Публичные видео',
-    ko: '공개 비디오', pl: 'Filmy publiczne', ar: 'فيديوهات عامة', hi: 'सार्वजनिक वीडियो',
+    ko: '공개 비디오', pl: 'Filmy publiczne',
   },
   'page.videos.title': {
     'pt-BR': 'Vídeos curados do YouTube', en: 'Curated YouTube videos',
@@ -2886,7 +2574,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Kuratierte YouTube-Videos', fr: 'Vidéos YouTube sélectionnées',
     it: 'Video YouTube selezionati', ru: 'Подборка видео с YouTube',
     ko: '엄선된 YouTube 비디오', pl: 'Wybrane filmy z YouTube',
-    ar: 'فيديوهات YouTube مختارة', hi: 'चयनित YouTube वीडियो',
   },
   'page.videos.metaTitle': {
     'pt-BR': 'Vídeos públicos curados', en: 'Curated public videos',
@@ -2894,7 +2581,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Kuratierte öffentliche Videos', fr: 'Vidéos publiques sélectionnées',
     it: 'Video pubblici selezionati', ru: 'Подборка публичных видео',
     ko: '엄선된 공개 비디오', pl: 'Wybrane filmy publiczne',
-    ar: 'فيديوهات عامة مختارة', hi: 'चयनित सार्वजनिक वीडियो',
   },
   'page.videos.metaDescription': {
     'pt-BR': 'Playlists do YouTube curadas para apoiar o programa do Clube da Matemática — em português, inglês, e outros idiomas. Tudo gratuito.',
@@ -2908,8 +2594,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Подборки плейлистов YouTube в поддержку программы Математического клуба — на португальском, английском и других языках. Всё бесплатно.',
     ko: 'Math Club 프로그램을 지원하기 위해 엄선된 YouTube 재생목록 — 포르투갈어, 영어 및 기타 언어. 모두 무료.',
     pl: 'Wybrane playlisty YouTube wspierające program Klubu Matematycznego — po portugalsku, angielsku i innych językach. Wszystko za darmo.',
-    ar: 'قوائم تشغيل YouTube مختارة لدعم برنامج نادي الرياضيات — بالبرتغالية والإنجليزية ولغات أخرى. كل شيء مجاني.',
-    hi: 'गणित क्लब कार्यक्रम का समर्थन करने के लिए चयनित YouTube प्लेलिस्ट — पुर्तगाली, अंग्रेज़ी और अन्य भाषाओं में। सब कुछ मुफ्त।',
   },
   'page.videos.intro1.before': {
     'pt-BR': 'Playlists e vídeos públicos do YouTube selecionados como',
@@ -2923,14 +2607,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Публичные плейлисты и видео YouTube, отобранные как',
     ko: '다음으로 선정된 공개 YouTube 재생목록 및 비디오:',
     pl: 'Publiczne playlisty i filmy z YouTube wybrane jako',
-    ar: 'قوائم تشغيل وفيديوهات YouTube العامة المختارة كـ',
-    hi: 'YouTube की सार्वजनिक प्लेलिस्ट और वीडियो, जो',
   },
   'page.videos.intro1.strong': {
     'pt-BR': 'apoio ao programa', en: 'program support', es: 'apoyo al programa',
     zh: '课程辅助', ja: 'プログラム支援', de: 'Programm-Unterstützung',
     fr: 'soutien au programme', it: 'supporto al programma', ru: 'поддержка программы',
-    ko: '프로그램 지원', pl: 'wsparcie programu', ar: 'دعم البرنامج', hi: 'कार्यक्रम सहायता',
+    ko: '프로그램 지원', pl: 'wsparcie programu',
   },
   'page.videos.intro1.after': {
     'pt-BR': '. Não substituem as aulas e exercícios — complementam com explicações visuais e narrativas alternativas.',
@@ -2944,19 +2626,17 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '. Они не заменяют уроки и упражнения — дополняют их визуальными объяснениями и альтернативными повествованиями.',
     ko: '. 강의와 연습을 대체하지 않으며 — 시각적 설명과 대안적 서사로 보완합니다.',
     pl: '. Nie zastępują lekcji i ćwiczeń — uzupełniają je wizualnymi wyjaśnieniami i alternatywnymi narracjami.',
-    ar: '. لا تحل محل الدروس والتمارين — بل تكملها بشروحات بصرية وروايات بديلة.',
-    hi: '। ये पाठ और अभ्यासों का स्थान नहीं लेते — दृश्य व्याख्याओं और वैकल्पिक कथाओं से पूरक करते हैं।',
   },
   'page.videos.intro2.curatedBy': {
     'pt-BR': 'Curadoria do', en: 'Curated by the', es: 'Curaduría del',
     zh: '由', ja: 'キュレーション:', de: 'Kuratiert vom',
     fr: 'Curation du', it: 'A cura del', ru: 'Кураторство от',
-    ko: '큐레이션:', pl: 'Kuratorzy:', ar: 'بإشراف', hi: 'क्यूरेशन:',
+    ko: '큐레이션:', pl: 'Kuratorzy:',
   },
   'page.videos.intro2.clubLink': {
     'pt-BR': 'Clube', en: 'Club', es: 'Club', zh: '俱乐部', ja: 'クラブ',
     de: 'Club', fr: 'Club', it: 'Club', ru: 'Клуба', ko: '클럽',
-    pl: 'Klub', ar: 'النادي', hi: 'क्लब',
+    pl: 'Klub',
   },
   'page.videos.intro2.middle': {
     'pt-BR': '. Tudo grátis, no canal do criador. Para adicionar uma sugestão,',
@@ -2970,8 +2650,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '. Всё бесплатно, на канале создателя. Чтобы добавить предложение,',
     ko: '. 모두 무료, 크리에이터 채널에서 제공. 제안하려면',
     pl: '. Wszystko za darmo, na kanale twórcy. Aby dodać sugestię,',
-    ar: '. كل شيء مجاني، على قناة المنشئ. لإضافة اقتراح،',
-    hi: '। सब मुफ्त, क्रिएटर के चैनल पर। सुझाव जोड़ने के लिए,',
   },
   'page.videos.intro2.openIssue': {
     'pt-BR': 'abra uma issue no GitHub', en: 'open an issue on GitHub',
@@ -2979,25 +2657,24 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: 'GitHubでissueを作成', de: 'öffne ein Issue auf GitHub',
     fr: 'ouvrez un ticket sur GitHub', it: 'apri una issue su GitHub',
     ru: 'откройте issue на GitHub', ko: 'GitHub에 이슈를 등록하세요',
-    pl: 'otwórz issue na GitHubie', ar: 'افتح قضية على GitHub',
-    hi: 'GitHub पर issue खोलें',
+    pl: 'otwórz issue na GitHubie',
   },
   'page.videos.thumb.alt': {
     'pt-BR': 'Miniatura de', en: 'Thumbnail of', es: 'Miniatura de',
     zh: '缩略图：', ja: 'サムネイル:', de: 'Vorschaubild von',
     fr: 'Miniature de', it: 'Anteprima di', ru: 'Миниатюра:',
-    ko: '썸네일:', pl: 'Miniatura:', ar: 'صورة مصغرة لـ', hi: 'थंबनेल:',
+    ko: '썸네일:', pl: 'Miniatura:',
   },
   'page.videos.covers': {
     'pt-BR': 'Cobre:', en: 'Covers:', es: 'Cubre:', zh: '涵盖：', ja: 'カバー範囲:',
     de: 'Umfasst:', fr: 'Couvre :', it: 'Copre:', ru: 'Охватывает:',
-    ko: '커버 범위:', pl: 'Obejmuje:', ar: 'يغطي:', hi: 'कवर करता है:',
+    ko: '커버 범위:', pl: 'Obejmuje:',
   },
   'page.videos.contribute.title': {
     'pt-BR': 'Como contribuir', en: 'How to contribute', es: 'Cómo contribuir',
     zh: '如何贡献', ja: '貢献する方法', de: 'Wie du beitragen kannst',
     fr: 'Comment contribuer', it: 'Come contribuire', ru: 'Как внести вклад',
-    ko: '기여하는 방법', pl: 'Jak współtworzyć', ar: 'كيفية المساهمة', hi: 'योगदान कैसे करें',
+    ko: '기여하는 방법', pl: 'Jak współtworzyć',
   },
   'page.videos.contribute.before': {
     'pt-BR': 'Para sugerir uma playlist ou vídeo, abra uma issue ou pull request em',
@@ -3011,8 +2688,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Чтобы предложить плейлист или видео, откройте issue или pull request на',
     ko: '재생목록이나 비디오를 제안하려면 다음에서 이슈 또는 풀 리퀘스트를 등록하세요:',
     pl: 'Aby zaproponować playlistę lub film, otwórz issue albo pull request na',
-    ar: 'لاقتراح قائمة تشغيل أو فيديو، افتح قضية أو طلب سحب على',
-    hi: 'प्लेलिस्ट या वीडियो सुझाने के लिए, यहाँ issue या pull request खोलें:',
   },
   'page.videos.contribute.after': {
     'pt-BR': '. Critérios de curadoria: (a) público no YouTube, (b) qualidade pedagógica, (c) cobertura de tópico do programa, (d) preferência por PT-BR ou EN.',
@@ -3026,15 +2701,13 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '. Критерии отбора: (a) общедоступно на YouTube, (b) педагогическое качество, (c) покрытие темы программы, (d) предпочтение PT-BR или EN.',
     ko: '. 큐레이션 기준: (a) YouTube에 공개, (b) 교육적 품질, (c) 프로그램 주제 커버리지, (d) PT-BR 또는 EN 우선.',
     pl: '. Kryteria selekcji: (a) publiczne na YouTube, (b) jakość pedagogiczna, (c) pokrycie tematu programu, (d) preferowane PT-BR lub EN.',
-    ar: '. معايير الاختيار: (أ) عام على YouTube، (ب) الجودة التربوية، (ج) تغطية موضوع البرنامج، (د) تفضيل PT-BR أو EN.',
-    hi: '। क्यूरेशन मानदंड: (a) YouTube पर सार्वजनिक, (b) शैक्षणिक गुणवत्ता, (c) कार्यक्रम विषय का कवरेज, (d) PT-BR या EN को प्राथमिकता।',
   },
 
   // ===== PAGE: EXAMS / PROVAS =====
   'page.exams.metaTitle': {
     'pt-BR': 'Provas', en: 'Exams', es: 'Exámenes', zh: '考试', ja: '試験',
     de: 'Prüfungen', fr: 'Examens', it: 'Esami', ru: 'Экзамены',
-    ko: '시험', pl: 'Egzaminy', ar: 'امتحانات', hi: 'परीक्षा',
+    ko: '시험', pl: 'Egzaminy',
   },
   'page.exams.metaDescription': {
     'pt-BR': 'Banco de provas integradas — questões REAIS de OpenStax, Active Calculus e outros livros públicos. Cada questão tem fonte declarada + passo a passo profundo com o porquê.',
@@ -3048,32 +2721,30 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Интегрированный банк экзаменов — НАСТОЯЩИЕ задачи из OpenStax, Active Calculus и других открытых учебников. У каждой задачи есть указанный источник и глубокое пошаговое объяснение.',
     ko: '통합 시험 은행 — OpenStax, Active Calculus 및 기타 공개 도서의 실제 문제. 각 문제마다 출처 명시 + 심층 단계별 풀이.',
     pl: 'Zintegrowany bank egzaminów — PRAWDZIWE pytania z OpenStax, Active Calculus i innych publicznych książek. Każde pytanie ma podane źródło + szczegółowe krok po kroku z uzasadnieniem.',
-    ar: 'بنك امتحانات متكامل — أسئلة حقيقية من OpenStax وActive Calculus وكتب عامة أخرى. كل سؤال يحمل مصدراً معلناً وشرحاً تفصيلياً عميقاً.',
-    hi: 'एकीकृत परीक्षा बैंक — OpenStax, Active Calculus और अन्य सार्वजनिक पुस्तकों के असली प्रश्न। प्रत्येक प्रश्न का घोषित स्रोत + गहन चरण-दर-चरण समाधान।',
   },
   'page.exams.eyebrow': {
     'pt-BR': 'Provas', en: 'Exams', es: 'Exámenes', zh: '考试', ja: '試験',
     de: 'Prüfungen', fr: 'Examens', it: 'Esami', ru: 'Экзамены',
-    ko: '시험', pl: 'Egzaminy', ar: 'امتحانات', hi: 'परीक्षा',
+    ko: '시험', pl: 'Egzaminy',
   },
   'page.exams.title': {
     'pt-BR': 'Provas integradas', en: 'Integrated exams', es: 'Exámenes integrados',
     zh: '综合考试', ja: '統合試験', de: 'Integrierte Prüfungen',
     fr: 'Examens intégrés', it: 'Esami integrati', ru: 'Интегрированные экзамены',
-    ko: '통합 시험', pl: 'Zintegrowane egzaminy', ar: 'الامتحانات المتكاملة', hi: 'एकीकृत परीक्षाएँ',
+    ko: '통합 시험', pl: 'Zintegrowane egzaminy',
   },
   'page.exams.intro1.before': {
     'pt-BR': 'Cada questão tem', en: 'Each question has a',
     es: 'Cada pregunta tiene', zh: '每道题都有', ja: '各問題には',
     de: 'Jede Frage hat eine', fr: 'Chaque question a une',
     it: 'Ogni domanda ha una', ru: 'У каждой задачи есть',
-    ko: '각 문제마다', pl: 'Każde pytanie ma', ar: 'لكل سؤال', hi: 'प्रत्येक प्रश्न का',
+    ko: '각 문제마다', pl: 'Każde pytanie ma',
   },
   'page.exams.intro1.strong1': {
     'pt-BR': 'fonte declarada', en: 'declared source', es: 'fuente declarada',
     zh: '明确出处', ja: '明示された出典', de: 'angegebene Quelle',
     fr: 'source déclarée', it: 'fonte dichiarata', ru: 'указанный источник',
-    ko: '출처 명시', pl: 'podane źródło', ar: 'مصدر معلن', hi: 'घोषित स्रोत',
+    ko: '출처 명시', pl: 'podane źródło',
   },
   'page.exams.intro1.middle': {
     'pt-BR': '(livro · seção · número do exercício) e',
@@ -3087,8 +2758,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '(книга · раздел · номер упражнения) и',
     ko: '(책 · 섹션 · 연습 번호)와',
     pl: '(książka · sekcja · numer zadania) oraz',
-    ar: '(الكتاب · القسم · رقم التمرين) و',
-    hi: '(पुस्तक · अनुभाग · अभ्यास संख्या) और',
   },
   'page.exams.intro1.strong2': {
     'pt-BR': 'passo a passo profundo', en: 'deep step-by-step',
@@ -3096,7 +2765,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'tiefgehende Schritt-für-Schritt-Erklärung', fr: 'pas à pas approfondi',
     it: 'passo passo approfondito', ru: 'глубокое пошаговое объяснение',
     ko: '심층 단계별 풀이', pl: 'szczegółowe krok po kroku',
-    ar: 'شرح تفصيلي عميق', hi: 'गहन चरण-दर-चरण',
   },
   'page.exams.intro1.after': {
     'pt-BR': 'com o porquê de cada operação.',
@@ -3109,8 +2777,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'с обоснованием каждого шага.',
     ko: '각 연산의 이유를 함께 설명합니다.',
     pl: 'z uzasadnieniem każdej operacji.',
-    ar: 'مع توضيح سبب كل عملية.',
-    hi: 'जिसमें हर ऑपरेशन का कारण बताया गया है।',
   },
   'page.exams.intro2.before': {
     'pt-BR': 'O ledger são os livros:', en: 'The ledger consists of these books:',
@@ -3118,7 +2784,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Das Verzeichnis besteht aus den Büchern:', fr: 'Le registre comprend les livres :',
     it: 'Il registro è composto dai libri:', ru: 'В реестр входят книги:',
     ko: '원장 도서:', pl: 'Rejestr obejmuje książki:',
-    ar: 'يتكون السجل من الكتب:', hi: 'लेजर में पुस्तकें:',
   },
   'page.exams.intro2.openstaxList': {
     'pt-BR': '(College Algebra 2e, Algebra & Trig 2e, Calculus Vol 1/2/3, Introductory Statistics — todos CC-BY 4.0),',
@@ -3132,15 +2797,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '(College Algebra 2e, Algebra & Trig 2e, Calculus Vol 1/2/3, Introductory Statistics — все CC-BY 4.0),',
     ko: '(College Algebra 2e, Algebra & Trig 2e, Calculus Vol 1/2/3, Introductory Statistics — 모두 CC-BY 4.0),',
     pl: '(College Algebra 2e, Algebra & Trig 2e, Calculus Vol 1/2/3, Introductory Statistics — wszystkie CC-BY 4.0),',
-    ar: '(College Algebra 2e، Algebra & Trig 2e، Calculus Vol 1/2/3، Introductory Statistics — جميعها CC-BY 4.0)،',
-    hi: '(College Algebra 2e, Algebra & Trig 2e, Calculus Vol 1/2/3, Introductory Statistics — सभी CC-BY 4.0),',
   },
   'page.exams.intro2.lebl': {
     'pt-BR': '(Lebl, CC-BY-SA),', en: '(Lebl, CC-BY-SA),', es: '(Lebl, CC-BY-SA),',
     zh: '（Lebl，CC-BY-SA），', ja: '(Lebl、CC-BY-SA)、', de: '(Lebl, CC-BY-SA),',
     fr: '(Lebl, CC-BY-SA),', it: '(Lebl, CC-BY-SA),', ru: '(Лебл, CC-BY-SA),',
     ko: '(Lebl, CC-BY-SA),', pl: '(Lebl, CC-BY-SA),',
-    ar: '(Lebl، CC-BY-SA)،', hi: '(Lebl, CC-BY-SA),',
   },
   'page.exams.intro2.boelkins': {
     'pt-BR': '(Boelkins, CC-BY-NC-SA).', en: '(Boelkins, CC-BY-NC-SA).',
@@ -3148,8 +2810,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '(Boelkins、CC-BY-NC-SA)。', de: '(Boelkins, CC-BY-NC-SA).',
     fr: '(Boelkins, CC-BY-NC-SA).', it: '(Boelkins, CC-BY-NC-SA).',
     ru: '(Боелкинс, CC-BY-NC-SA).', ko: '(Boelkins, CC-BY-NC-SA).',
-    pl: '(Boelkins, CC-BY-NC-SA).', ar: '(Boelkins، CC-BY-NC-SA).',
-    hi: '(Boelkins, CC-BY-NC-SA)।',
+    pl: '(Boelkins, CC-BY-NC-SA).',
   },
   'page.exams.intro2.after': {
     'pt-BR': 'Adaptamos apenas tradução pt-BR e contexto numérico (PETR4 em vez de Apple).',
@@ -3163,38 +2824,36 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Мы адаптируем только перевод на pt-BR и числовой контекст (PETR4 вместо Apple).',
     ko: '우리는 PT-BR 번역과 숫자 맥락(Apple 대신 PETR4)만 조정합니다.',
     pl: 'Adaptujemy jedynie tłumaczenie pt-BR i kontekst liczbowy (PETR4 zamiast Apple).',
-    ar: 'نقوم فقط بتكييف الترجمة إلى pt-BR والسياق العددي (PETR4 بدلاً من Apple).',
-    hi: 'हम केवल pt-BR अनुवाद और संख्यात्मक संदर्भ (Apple के बजाय PETR4) को अनुकूलित करते हैं।',
   },
   'page.exams.stats.examsInBank': {
     'pt-BR': 'provas no banco', en: 'exams in the bank', es: 'exámenes en el banco',
     zh: '题库中的考试', ja: '銀行の試験', de: 'Prüfungen im Bestand',
     fr: 'examens dans la banque', it: 'esami nella banca', ru: 'экзаменов в банке',
-    ko: '은행 내 시험', pl: 'egzaminów w banku', ar: 'امتحانات في البنك', hi: 'बैंक में परीक्षाएँ',
+    ko: '은행 내 시험', pl: 'egzaminów w banku',
   },
   'page.exams.stats.curatedVersions': {
     'pt-BR': 'versões curadas', en: 'curated versions', es: 'versiones curadas',
     zh: '精选版本', ja: '厳選バージョン', de: 'kuratierte Versionen',
     fr: 'versions sélectionnées', it: 'versioni selezionate', ru: 'отобранных версий',
-    ko: '엄선된 버전', pl: 'wybranych wersji', ar: 'إصدارات مختارة', hi: 'चयनित संस्करण',
+    ko: '엄선된 버전', pl: 'wybranych wersji',
   },
   'page.exams.stats.realQuestions': {
     'pt-BR': 'questões reais', en: 'real questions', es: 'preguntas reales',
     zh: '真实题目', ja: '実問題', de: 'echte Fragen',
     fr: 'questions réelles', it: 'domande reali', ru: 'реальных задач',
-    ko: '실제 문제', pl: 'prawdziwych pytań', ar: 'أسئلة حقيقية', hi: 'असली प्रश्न',
+    ko: '실제 문제', pl: 'prawdziwych pytań',
   },
   'page.exams.stats.termsCovered': {
     'pt-BR': 'trimestres cobertos', en: 'terms covered', es: 'trimestres cubiertos',
     zh: '已覆盖学期', ja: 'カバー学期', de: 'abgedeckte Trimester',
     fr: 'trimestres couverts', it: 'trimestri coperti', ru: 'покрытых триместров',
-    ko: '커버된 학기', pl: 'objętych trymestrów', ar: 'فصول مغطاة', hi: 'कवर की गई तिमाहियाँ',
+    ko: '커버된 학기', pl: 'objętych trymestrów',
   },
   'page.exams.howItWorks.title': {
     'pt-BR': 'Como funciona', en: 'How it works', es: 'Cómo funciona',
     zh: '如何使用', ja: '使い方', de: 'So funktioniert es',
     fr: 'Comment ça marche', it: 'Come funziona', ru: 'Как это работает',
-    ko: '작동 방식', pl: 'Jak to działa', ar: 'كيف يعمل', hi: 'यह कैसे काम करता है',
+    ko: '작동 방식', pl: 'Jak to działa',
   },
   'page.exams.howItWorks.step1': {
     'pt-BR': 'Escolha o trimestre e a versão.',
@@ -3203,7 +2862,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Wähle Trimester und Version.', fr: 'Choisissez le trimestre et la version.',
     it: 'Scegli il trimestre e la versione.', ru: 'Выберите триместр и версию.',
     ko: '학기와 버전을 선택하세요.', pl: 'Wybierz trymestr i wersję.',
-    ar: 'اختر الفصل والإصدار.', hi: 'तिमाही और संस्करण चुनें।',
   },
   'page.exams.howItWorks.step2': {
     'pt-BR': 'Reserve o tempo indicado e resolva no caderno.',
@@ -3217,8 +2875,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Выделите указанное время и решайте в тетради.',
     ko: '안내된 시간을 확보하고 노트에서 풀이하세요.',
     pl: 'Zarezerwuj wskazany czas i rozwiąż w zeszycie.',
-    ar: 'خصص الوقت المحدد وحل في دفترك.',
-    hi: 'दिए गए समय को रखें और कॉपी में हल करें।',
   },
   'page.exams.howItWorks.step3.before': {
     'pt-BR': 'Verifique cada questão: clique em',
@@ -3230,7 +2886,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     it: 'Verifica ogni domanda: clicca su',
     ru: 'Проверьте каждую задачу: нажмите на',
     ko: '각 문제를 확인:', pl: 'Sprawdź każde pytanie: kliknij',
-    ar: 'تحقق من كل سؤال: انقر على', hi: 'प्रत्येक प्रश्न जाँचें: क्लिक करें',
   },
   'page.exams.howItWorks.step3.em': {
     'pt-BR': 'Revelar passo a passo', en: 'Reveal step-by-step',
@@ -3238,7 +2893,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Schritt-für-Schritt anzeigen', fr: 'Afficher pas à pas',
     it: 'Mostra passo passo', ru: 'Показать пошаговое решение',
     ko: '단계별 풀이 보기', pl: 'Pokaż krok po kroku',
-    ar: 'إظهار الشرح خطوة بخطوة', hi: 'चरण-दर-चरण दिखाएँ',
   },
   'page.exams.howItWorks.step4': {
     'pt-BR': 'Anote os pontos onde errou e revisite a lição correspondente (badges com ID da lição abaixo de cada questão).',
@@ -3252,8 +2906,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Запишите места, где ошиблись, и вернитесь к соответствующему уроку (бейджи с ID урока под каждой задачей).',
     ko: '틀린 부분을 메모하고 해당 강의로 돌아가세요(각 문제 아래 강의 ID 배지).',
     pl: 'Zanotuj miejsca, gdzie popełniłeś błąd, i wróć do odpowiedniej lekcji (plakietki z ID lekcji pod każdym pytaniem).',
-    ar: 'دوّن النقاط التي أخطأت فيها، وراجع الدرس المقابل (شارات معرف الدرس أسفل كل سؤال).',
-    hi: 'जहाँ गलती हुई वहाँ नोट करें और संबंधित पाठ पर लौटें (हर प्रश्न के नीचे पाठ ID बैज)।',
   },
   'page.exams.howItWorks.step5': {
     'pt-BR': 'Curioso sobre a fonte? Clique no nome do livro e vá direto ao capítulo original.',
@@ -3267,8 +2919,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Интересно, откуда задача? Нажмите на название книги и перейдите прямо к оригинальной главе.',
     ko: '출처가 궁금하다면? 책 제목을 클릭하면 원문 챕터로 바로 이동합니다.',
     pl: 'Ciekawi cię źródło? Kliknij nazwę książki i przejdź wprost do oryginalnego rozdziału.',
-    ar: 'هل تتساءل عن المصدر؟ انقر اسم الكتاب لتنتقل مباشرة إلى الفصل الأصلي.',
-    hi: 'स्रोत के बारे में जानना चाहते हैं? पुस्तक का नाम क्लिक करें और सीधे मूल अध्याय पर जाएँ।',
   },
   // ===== HOME — PHILOSOPHY SECTION =====
   'home.philosophy.khan.title': {
@@ -3283,8 +2933,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Мы не конкурируем с Khan',
     ko: '우리는 Khan과 경쟁하지 않습니다',
     pl: 'Nie konkurujemy z Khanem',
-    ar: 'نحن لا ننافس خان',
-    hi: 'हम Khan से प्रतिस्पर्धा नहीं करते',
   },
   'home.philosophy.khan.body': {
     'pt-BR': 'Khan ensina conta. A gente ensina o que a conta diz sobre o mundo. São produtos de naturezas diferentes.',
@@ -3298,8 +2946,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Khan учит считать. Мы учим тому, что счёт говорит о мире. Это продукты разной природы.',
     ko: 'Khan은 계산을 가르칩니다. 우리는 그 계산이 세상에 대해 무엇을 말하는지 가르칩니다. 본질이 다른 제품입니다.',
     pl: 'Khan uczy rachunku. My uczymy, co rachunek mówi o świecie. To produkty o innej naturze.',
-    ar: 'يعلّم خان الحساب. نحن نعلّم ما يقوله الحساب عن العالم. إنهما منتجان من طبيعتين مختلفتين.',
-    hi: 'Khan गणना सिखाता है। हम सिखाते हैं कि वह गणना दुनिया के बारे में क्या कहती है। ये अलग प्रकृति के उत्पाद हैं।',
   },
   'home.philosophy.doors.title': {
     'pt-BR': '7 portas em todo conteúdo',
@@ -3313,8 +2959,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '7 дверей в каждом материале',
     ko: '모든 콘텐츠에 7개의 문',
     pl: '7 drzwi w każdej treści',
-    ar: '7 أبواب في كل محتوى',
-    hi: 'हर सामग्री में 7 द्वार',
   },
   'home.philosophy.doors.body': {
     'pt-BR': 'Formal, 5, 10, 15, 25, 40, prática — você escolhe a porta. Não importa se você reprovou em Cálculo ou ainda não viu derivada na escola. Toda equação central tem botão "Ler em voz alta".',
@@ -3328,8 +2972,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Формальная, 5, 10, 15, 25, 40, практическая — ты выбираешь дверь. Неважно, провалил ли ты математический анализ или ещё не видел производных в школе. У каждого ключевого уравнения есть кнопка «Прочесть вслух».',
     ko: '정식, 5, 10, 15, 25, 40, 실습 — 당신이 문을 고릅니다. 미적분에서 낙제했든 학교에서 아직 도함수를 못 봤든 상관없습니다. 모든 핵심 방정식에 "소리 내어 읽기" 버튼이 있습니다.',
     pl: 'Formalna, 5, 10, 15, 25, 40, praktyczna — sam wybierasz drzwi. Nie ma znaczenia, czy oblałeś analizę, czy jeszcze nie widziałeś pochodnych w szkole. Każde kluczowe równanie ma przycisk „Czytaj na głos".',
-    ar: 'رسمي، 5، 10، 15، 25، 40، عملي — أنت تختار الباب. لا يهم إذا رسبت في التفاضل والتكامل أو لم ترَ المشتقات في المدرسة بعد. كل معادلة مركزية لديها زر "اقرأ بصوت عالٍ".',
-    hi: 'औपचारिक, 5, 10, 15, 25, 40, व्यावहारिक — आप द्वार चुनते हैं। कोई फर्क नहीं पड़ता कि आप कैलकुलस में फेल हुए या अभी तक स्कूल में अवकलज नहीं देखा। हर केंद्रीय समीकरण में "ज़ोर से पढ़ें" बटन है।',
   },
   'home.philosophy.exercises.title': {
     'pt-BR': 'Caderno e dúzias de exercícios',
@@ -3343,8 +2985,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Тетрадь и десятки упражнений',
     ko: '공책과 수십 개의 연습 문제',
     pl: 'Zeszyt i dziesiątki ćwiczeń',
-    ar: 'دفتر وعشرات التمارين',
-    hi: 'नोटबुक और दर्जनों अभ्यास',
   },
   'home.philosophy.exercises.body': {
     'pt-BR': 'Cada lição traz 40-80 exercícios extraídos dos melhores livros públicos (OpenStax, Active Calculus, Stitz-Zeager, livros do JP/DE/SG). Senta com o caderno e vai resolvendo. Sem milagre.',
@@ -3358,8 +2998,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'В каждом уроке 40-80 упражнений из лучших публичных учебников (OpenStax, Active Calculus, Stitz-Zeager, книги из Японии/Германии/Сингапура). Садись с тетрадью и решай. Без чудес.',
     ko: '각 강의는 최고의 공개 교재(OpenStax, Active Calculus, Stitz-Zeager, 일본/독일/싱가포르의 책)에서 가져온 40-80개의 연습 문제를 포함합니다. 공책을 펼치고 풀어 나가세요. 기적은 없습니다.',
     pl: 'Każda lekcja zawiera 40-80 ćwiczeń zaczerpniętych z najlepszych książek publicznych (OpenStax, Active Calculus, Stitz-Zeager, książki z JP/DE/SG). Usiądź z zeszytem i rozwiązuj. Bez cudów.',
-    ar: 'كل درس يحتوي على 40-80 تمريناً مأخوذة من أفضل الكتب العامة (OpenStax وActive Calculus وStitz-Zeager وكتب من اليابان/ألمانيا/سنغافورة). اجلس مع الدفتر وابدأ الحل. بلا معجزات.',
-    hi: 'प्रत्येक पाठ में सर्वश्रेष्ठ सार्वजनिक पुस्तकों (OpenStax, Active Calculus, Stitz-Zeager, JP/DE/SG की पुस्तकें) से लिए गए 40-80 अभ्यास हैं। नोटबुक के साथ बैठें और हल करते जाएँ। कोई चमत्कार नहीं।',
   },
 
   'page.exams.howItWorks.note': {
@@ -3374,8 +3012,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Версии, помеченные как "в курировании", пока без задач. Версия 1 каждого триместра всегда готова. Хотите помочь курировать больше версий? Любой дополнительный PR приветствуется на GitHub.',
     ko: '"큐레이션 중"으로 표시된 버전에는 아직 문제가 없습니다. 각 학기의 버전 1은 항상 준비되어 있습니다. 더 많은 버전을 큐레이션하는 데 도움을 주고 싶다면 GitHub에서 추가 PR을 환영합니다.',
     pl: 'Wersje oznaczone jako „w kuratorowaniu" nie mają jeszcze załadowanych pytań. Wersja 1 każdego trymestru jest zawsze gotowa. Chcesz pomóc w kuratorowaniu kolejnych wersji? Każdy dodatkowy PR jest mile widziany na GitHubie.',
-    ar: 'الإصدارات الموسومة بـ"قيد الإعداد" لا تحتوي بعد على أسئلة محمّلة. الإصدار 1 لكل فصل جاهز دائمًا. هل تريد المساعدة في إعداد المزيد من الإصدارات؟ كل PR إضافي مرحب به على GitHub.',
-    hi: '"क्यूरेशन में" चिह्नित संस्करणों में अभी प्रश्न लोड नहीं हैं। प्रत्येक तिमाही का संस्करण 1 हमेशा तैयार है। और अधिक संस्करण क्यूरेट करने में मदद करना चाहते हैं? GitHub पर हर अतिरिक्त PR का स्वागत है।',
   },
 
   // ===== PAGE: ENSINO MÉDIO =====
@@ -3383,20 +3019,20 @@ export const TRANSLATIONS: Record<string, Translations> = {
     'pt-BR': 'Programa de Ensino', en: 'Teaching Program', es: 'Programa de Enseñanza',
     zh: '教学计划', ja: '教育プログラム', de: 'Lehrprogramm',
     fr: 'Programme d\'enseignement', it: 'Programma didattico', ru: 'Учебная программа',
-    ko: '교육 프로그램', pl: 'Program nauczania', ar: 'برنامج التعليم', hi: 'शिक्षण कार्यक्रम',
+    ko: '교육 프로그램', pl: 'Program nauczania',
   },
   'page.ensinoMedio.title': {
     'pt-BR': 'Ensino Médio Otimizado', en: 'Optimized High School',
     es: 'Bachillerato Optimizado', zh: '优化的高中', ja: '最適化された高校',
     de: 'Optimierte Oberstufe', fr: 'Lycée Optimisé', it: 'Liceo Ottimizzato',
     ru: 'Оптимизированная старшая школа', ko: '최적화된 고등학교',
-    pl: 'Zoptymalizowane Liceum', ar: 'الثانوية المُحسَّنة', hi: 'अनुकूलित हाई स्कूल',
+    pl: 'Zoptymalizowane Liceum',
   },
   'page.ensinoMedio.metaTitle': {
     'pt-BR': 'Ensino Médio', en: 'High School', es: 'Bachillerato',
     zh: '高中', ja: '高校', de: 'Oberstufe', fr: 'Lycée',
     it: 'Liceo', ru: 'Старшая школа', ko: '고등학교',
-    pl: 'Liceum', ar: 'الثانوية', hi: 'हाई स्कूल',
+    pl: 'Liceum',
   },
   'page.ensinoMedio.metaDescription': {
     'pt-BR': 'Ensino Médio brasileiro otimizado — 12 trimestres, 120 lições, calibrado pelos currículos oficiais de Japão, Alemanha e Singapura.',
@@ -3410,8 +3046,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Оптимизированная бразильская старшая школа — 12 триместров, 120 уроков, откалибровано по официальным программам Японии, Германии и Сингапура.',
     ko: '최적화된 브라질 고등학교 — 12학기, 120개 레슨, 일본·독일·싱가포르 공식 교육과정으로 보정.',
     pl: 'Zoptymalizowane brazylijskie liceum — 12 trymestrów, 120 lekcji, skalibrowane według oficjalnych programów Japonii, Niemiec i Singapuru.',
-    ar: 'الثانوية البرازيلية المُحسَّنة — 12 فصلًا، 120 درسًا، معايرة وفقًا للمناهج الرسمية لليابان وألمانيا وسنغافورة.',
-    hi: 'अनुकूलित ब्राज़ीलियाई हाई स्कूल — 12 तिमाहियाँ, 120 पाठ, जापान, जर्मनी और सिंगापुर के आधिकारिक पाठ्यक्रम के अनुसार समायोजित।',
   },
   'page.ensinoMedio.intro1.threeYears': {
     'pt-BR': '3 anos · 12 trimestres · 120 lições',
@@ -3425,20 +3059,18 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '3 года · 12 триместров · 120 уроков',
     ko: '3년 · 12학기 · 120개 레슨',
     pl: '3 lata · 12 trymestrów · 120 lekcji',
-    ar: '3 سنوات · 12 فصلًا · 120 درسًا',
-    hi: '3 वर्ष · 12 तिमाहियाँ · 120 पाठ',
   },
   'page.ensinoMedio.intro1.groupedInto': {
     'pt-BR': 'agrupadas em', en: 'grouped into', es: 'agrupadas en',
     zh: '分组为', ja: 'グループ化:', de: 'gruppiert in',
     fr: 'regroupées en', it: 'raggruppate in', ru: 'сгруппировано в',
-    ko: '다음으로 묶임:', pl: 'pogrupowanych w', ar: 'مجمَّعة في', hi: 'इसमें समूहीकृत:',
+    ko: '다음으로 묶임:', pl: 'pogrupowanych w',
   },
   'page.ensinoMedio.intro1.classes': {
     'pt-BR': '48 aulas', en: '48 classes', es: '48 clases',
     zh: '48 节大课', ja: '48の授業', de: '48 Unterrichtseinheiten',
     fr: '48 cours', it: '48 lezioni', ru: '48 занятий',
-    ko: '48개 수업', pl: '48 zajęć', ar: '48 درسًا', hi: '48 कक्षाएँ',
+    ko: '48개 수업', pl: '48 zajęć',
   },
   'page.ensinoMedio.intro1.middle': {
     'pt-BR': '. Currículo brasileiro calibrado pelos sistemas que mais consistentemente formam alunos prontos para engenharia de fronteira:',
@@ -3452,35 +3084,33 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '. Бразильская программа, откалиброванная системами, которые наиболее последовательно готовят учеников к передовой инженерии:',
     ko: '. 최첨단 공학에 준비된 학생을 가장 일관되게 길러내는 체계로 보정된 브라질 교육과정:',
     pl: '. Brazylijski program nauczania skalibrowany według systemów, które najbardziej konsekwentnie kształcą uczniów gotowych do inżynierii granicznej:',
-    ar: '. منهج برازيلي معاير وفقًا للأنظمة التي تخرّج باستمرار طلابًا مستعدين للهندسة المتقدمة:',
-    hi: '। ब्राज़ीलियाई पाठ्यक्रम उन प्रणालियों के अनुसार समायोजित जो सबसे लगातार सीमांत अभियांत्रिकी के लिए तैयार छात्र तैयार करती हैं:',
   },
   'page.ensinoMedio.intro1.japanLabel': {
     'pt-BR': 'Japão', en: 'Japan', es: 'Japón', zh: '日本', ja: '日本',
     de: 'Japan', fr: 'Japon', it: 'Giappone', ru: 'Япония', ko: '일본',
-    pl: 'Japonia', ar: 'اليابان', hi: 'जापान',
+    pl: 'Japonia',
   },
   'page.ensinoMedio.intro1.germanyLabel': {
     'pt-BR': 'Alemanha', en: 'Germany', es: 'Alemania', zh: '德国', ja: 'ドイツ',
     de: 'Deutschland', fr: 'Allemagne', it: 'Germania', ru: 'Германия', ko: '독일',
-    pl: 'Niemcy', ar: 'ألمانيا', hi: 'जर्मनी',
+    pl: 'Niemcy',
   },
   'page.ensinoMedio.intro1.singaporeLabel': {
     'pt-BR': 'Singapura', en: 'Singapore', es: 'Singapur', zh: '新加坡',
     ja: 'シンガポール', de: 'Singapur', fr: 'Singapour', it: 'Singapore',
-    ru: 'Сингапур', ko: '싱가포르', pl: 'Singapur', ar: 'سنغافورة', hi: 'सिंगापुर',
+    ru: 'Сингапур', ko: '싱가포르', pl: 'Singapur',
   },
   'page.ensinoMedio.intro2.before': {
     'pt-BR': 'Cada lição traz', en: 'Each lesson brings', es: 'Cada lección trae',
     zh: '每节课包含', ja: '各レッスンには', de: 'Jede Lektion bietet',
     fr: 'Chaque leçon propose', it: 'Ogni lezione porta', ru: 'Каждый урок содержит',
-    ko: '각 레슨에는', pl: 'Każda lekcja zawiera', ar: 'يحتوي كل درس على', hi: 'प्रत्येक पाठ में',
+    ko: '각 레슨에는', pl: 'Każda lekcja zawiera',
   },
   'page.ensinoMedio.intro2.exercises': {
     'pt-BR': '40-80 exercícios', en: '40-80 exercises', es: '40-80 ejercicios',
     zh: '40-80 道练习', ja: '40〜80の演習', de: '40–80 Übungen',
     fr: '40-80 exercices', it: '40-80 esercizi', ru: '40–80 упражнений',
-    ko: '40-80개 연습 문제', pl: '40-80 ćwiczeń', ar: '40-80 تمرينًا', hi: '40-80 अभ्यास',
+    ko: '40-80개 연습 문제', pl: '40-80 ćwiczeń',
   },
   'page.ensinoMedio.intro2.middle': {
     'pt-BR': 'no estilo de engenharia mecânica brasileira, com',
@@ -3494,8 +3124,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'в стиле бразильского машиностроения, с',
     ko: '브라질 기계공학 스타일로,',
     pl: 'w stylu brazylijskiej inżynierii mechanicznej, z',
-    ar: 'بأسلوب الهندسة الميكانيكية البرازيلية، مع',
-    hi: 'ब्राज़ीलियाई मैकेनिकल इंजीनियरिंग शैली में,',
   },
   'page.ensinoMedio.intro2.solved': {
     'pt-BR': '25% gabaritados', en: '25% with worked solutions',
@@ -3503,7 +3131,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: '25 % mit Musterlösungen', fr: '25 % avec corrigés',
     it: '25% con soluzioni svolte', ru: '25% с разбором',
     ko: '25%는 풀이 포함', pl: '25% z rozwiązaniami',
-    ar: '25% مع حلول مفصّلة', hi: '25% हल किए गए',
   },
   'page.ensinoMedio.intro2.middle2': {
     'pt-BR': 'em desenvolvimento formal. Cada equação central tem botão',
@@ -3517,8 +3144,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'в формальной проработке. У каждого центрального уравнения есть кнопка',
     ko: '형식적 전개로. 각 핵심 식에는 버튼이 있음:',
     pl: 'w formalnym rozwinięciu. Każde kluczowe równanie ma przycisk',
-    ar: 'بتطوير رسمي. لكل معادلة محورية زر',
-    hi: 'औपचारिक विकास में। हर केंद्रीय समीकरण पर एक बटन है',
   },
   'page.ensinoMedio.intro2.readAloud': {
     'pt-BR': '"Ler em voz alta"', en: '"Read aloud"',
@@ -3526,7 +3151,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '「音読」', de: '„Vorlesen"',
     fr: '« Lire à voix haute »', it: '"Leggi ad alta voce"',
     ru: '«Прочитать вслух»', ko: '"소리 내어 읽기"',
-    pl: '„Czytaj na głos"', ar: '"اقرأ بصوت عالٍ"', hi: '"ज़ोर से पढ़ें"',
+    pl: '„Czytaj na głos"',
   },
   'page.ensinoMedio.intro2.after': {
     'pt-BR': '— acessibilidade nativa.', en: '— native accessibility.',
@@ -3534,14 +3159,14 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '—ネイティブのアクセシビリティ。', de: '— native Barrierefreiheit.',
     fr: '— accessibilité native.', it: '— accessibilità nativa.',
     ru: '— нативная доступность.', ko: '— 네이티브 접근성.',
-    pl: '— natywna dostępność.', ar: '— إتاحة أصلية.', hi: '— मूल अभिगम्यता।',
+    pl: '— natywna dostępność.',
   },
   'page.ensinoMedio.stats.lessonsPlanned': {
     'pt-BR': 'lições planejadas', en: 'planned lessons',
     es: 'lecciones planificadas', zh: '计划课程', ja: '計画レッスン',
     de: 'geplante Lektionen', fr: 'leçons prévues', it: 'lezioni pianificate',
     ru: 'запланированных уроков', ko: '계획된 레슨',
-    pl: 'zaplanowanych lekcji', ar: 'دروس مخططة', hi: 'नियोजित पाठ',
+    pl: 'zaplanowanych lekcji',
   },
   'page.ensinoMedio.stats.lessonsPublished': {
     'pt-BR': 'lições publicadas', en: 'published lessons',
@@ -3549,20 +3174,19 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'veröffentlichte Lektionen', fr: 'leçons publiées',
     it: 'lezioni pubblicate', ru: 'опубликованных уроков',
     ko: '게시된 레슨', pl: 'opublikowanych lekcji',
-    ar: 'دروس منشورة', hi: 'प्रकाशित पाठ',
   },
   'page.ensinoMedio.stats.totalExercises': {
     'pt-BR': 'exercícios totais', en: 'total exercises',
     es: 'ejercicios totales', zh: '练习总数', ja: '総演習数',
     de: 'Übungen gesamt', fr: 'exercices au total', it: 'esercizi totali',
     ru: 'всего упражнений', ko: '총 연습 문제',
-    pl: 'ćwiczeń łącznie', ar: 'إجمالي التمارين', hi: 'कुल अभ्यास',
+    pl: 'ćwiczeń łącznie',
   },
   'page.ensinoMedio.stats.totalStudy': {
     'pt-BR': 'estudo total', en: 'total study', es: 'estudio total',
     zh: '总学时', ja: '総学習時間', de: 'Gesamtlernzeit',
     fr: 'étude totale', it: 'studio totale', ru: 'всего обучения',
-    ko: '총 학습', pl: 'łączna nauka', ar: 'إجمالي الدراسة', hi: 'कुल अध्ययन',
+    ko: '총 학습', pl: 'łączna nauka',
   },
   'page.ensinoMedio.stats.studyDetail': {
     'pt-BR': 'h/ano · {hPorTrim}h/trim',
@@ -3576,8 +3200,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'ч/год · {hPorTrim}ч/триместр',
     ko: '시간/년 · {hPorTrim}시간/학기',
     pl: 'godz./rok · {hPorTrim}godz./trym.',
-    ar: 'س/سنة · {hPorTrim}س/فصل',
-    hi: 'घंटे/वर्ष · {hPorTrim}घंटे/तिमाही',
   },
   'page.ensinoMedio.workload.before': {
     'pt-BR': 'Carga horária comparada:',
@@ -3591,8 +3213,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Сравнение нагрузки:',
     ko: '학습 시간 비교:',
     pl: 'Porównanie obciążenia:',
-    ar: 'مقارنة الحمل الدراسي:',
-    hi: 'तुलनात्मक कार्यभार:',
   },
   'page.ensinoMedio.workload.middle': {
     'pt-BR': 'JP Math I ~140h/ano · DE Klasse 10 LK ~120h/ano · SG E-Math ~135h/ano. Nosso programa',
@@ -3606,8 +3226,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'JP Math I ~140ч/год · DE Klasse 10 LK ~120ч/год · SG E-Math ~135ч/год. Наша программа',
     ko: 'JP Math I ~140시간/년 · DE Klasse 10 LK ~120시간/년 · SG E-Math ~135시간/년. 우리 프로그램',
     pl: 'JP Math I ~140godz./rok · DE Klasse 10 LK ~120godz./rok · SG E-Math ~135godz./rok. Nasz program',
-    ar: 'JP Math I ~140س/سنة · DE Klasse 10 LK ~120س/سنة · SG E-Math ~135س/سنة. برنامجنا',
-    hi: 'JP Math I ~140 घंटे/वर्ष · DE Klasse 10 LK ~120 घंटे/वर्ष · SG E-Math ~135 घंटे/वर्ष। हमारा कार्यक्रम',
   },
   'page.ensinoMedio.workload.middle2': {
     'pt-BR': 'h/ano está dentro da janela compatível. Cada',
@@ -3621,13 +3239,11 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'ч/год находится в совместимом диапазоне. Каждый',
     ko: '시간/년은 호환 범위 내. 각',
     pl: 'godz./rok mieści się w kompatybilnym oknie. Każda',
-    ar: 'س/سنة ضمن النطاق المتوافق. كل',
-    hi: 'घंटे/वर्ष संगत सीमा में है। प्रत्येक',
   },
   'page.ensinoMedio.workload.lesson': {
     'pt-BR': 'lição', en: 'lesson', es: 'lección', zh: '课', ja: 'レッスン',
     de: 'Lektion', fr: 'leçon', it: 'lezione', ru: 'урок', ko: '레슨',
-    pl: 'lekcja', ar: 'درس', hi: 'पाठ',
+    pl: 'lekcja',
   },
   'page.ensinoMedio.workload.equiv': {
     'pt-BR': 'equivale a ~3h de estudo + exercícios; cada',
@@ -3641,13 +3257,11 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'эквивалентен ~3ч обучения + упражнения; каждое',
     ko: '은 약 3시간 학습 + 연습에 해당. 각',
     pl: 'odpowiada ~3 godz. nauki + ćwiczenia; każda',
-    ar: 'يعادل ~3س من الدراسة + التمارين؛ كل',
-    hi: '~3 घंटे अध्ययन + अभ्यास के बराबर; प्रत्येक',
   },
   'page.ensinoMedio.workload.class': {
     'pt-BR': 'aula', en: 'class', es: 'clase', zh: '大课',
     ja: '授業', de: 'Unterrichtseinheit', fr: 'cours', it: 'lezione',
-    ru: 'занятие', ko: '수업', pl: 'zajęcia', ar: 'درس', hi: 'कक्षा',
+    ru: 'занятие', ko: '수업', pl: 'zajęcia',
   },
   'page.ensinoMedio.workload.groups': {
     'pt-BR': 'agrupa 3-5 lições didáticas. Veja',
@@ -3661,8 +3275,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'объединяет 3–5 дидактических уроков. См.',
     ko: '은 3-5개의 교수 레슨을 묶음. 참고:',
     pl: 'grupuje 3-5 lekcji dydaktycznych. Zobacz',
-    ar: 'يجمع 3-5 دروس تعليمية. انظر',
-    hi: 'में 3-5 उपदेशात्मक पाठ शामिल। देखें',
   },
   'page.ensinoMedio.workload.manifesto': {
     'pt-BR': 'referências oficiais no Manifesto',
@@ -3676,18 +3288,16 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'официальные источники в Манифесте',
     ko: '매니페스토의 공식 참고 자료',
     pl: 'oficjalne źródła w Manifeście',
-    ar: 'المراجع الرسمية في البيان',
-    hi: 'मेनिफेस्टो में आधिकारिक संदर्भ',
   },
   'page.ensinoMedio.year.label': {
     'pt-BR': 'Ano', en: 'Year', es: 'Año', zh: '年级', ja: '学年',
     de: 'Jahr', fr: 'Année', it: 'Anno', ru: 'Год', ko: '학년',
-    pl: 'Rok', ar: 'السنة', hi: 'वर्ष',
+    pl: 'Rok',
   },
   'page.ensinoMedio.year.publishedOf': {
     'pt-BR': 'de', en: 'of', es: 'de', zh: '/', ja: '/',
     de: 'von', fr: 'sur', it: 'di', ru: 'из', ko: '/',
-    pl: 'z', ar: 'من', hi: 'में से',
+    pl: 'z',
   },
   'page.ensinoMedio.year.lessonsPublished': {
     'pt-BR': 'lições publicadas', en: 'lessons published',
@@ -3695,7 +3305,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Lektionen veröffentlicht', fr: 'leçons publiées',
     it: 'lezioni pubblicate', ru: 'уроков опубликовано',
     ko: '레슨 게시됨', pl: 'lekcji opublikowanych',
-    ar: 'دروس منشورة', hi: 'पाठ प्रकाशित',
   },
   'page.ensinoMedio.year.openYear': {
     'pt-BR': 'Abrir plano de ensino do Ano',
@@ -3704,7 +3313,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Lehrplan öffnen für Jahr', fr: 'Ouvrir le plan d\'enseignement de l\'Année',
     it: 'Apri il piano didattico dell\'Anno', ru: 'Открыть учебный план Года',
     ko: '교육 계획 열기 — 학년', pl: 'Otwórz plan nauczania Roku',
-    ar: 'افتح خطة تعليم السنة', hi: 'वर्ष के लिए शिक्षण योजना खोलें',
   },
   'page.ensinoMedio.year.openYearSuffix': {
     'pt-BR': '→', en: '→', es: '→',
@@ -3712,7 +3320,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: '→', fr: '→',
     it: '→', ru: '→',
     ko: '→', pl: '→',
-    ar: '→', hi: '→',
   },
   'page.ensinoMedio.philosophy.title': {
     'pt-BR': 'Filosofia pedagógica', en: 'Pedagogical philosophy',
@@ -3720,7 +3327,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Pädagogische Philosophie', fr: 'Philosophie pédagogique',
     it: 'Filosofia pedagogica', ru: 'Педагогическая философия',
     ko: '교육 철학', pl: 'Filozofia pedagogiczna',
-    ar: 'الفلسفة التربوية', hi: 'शैक्षिक दर्शन',
   },
   'page.ensinoMedio.philosophy.bruner.label': {
     'pt-BR': 'Bruner — espiral', en: 'Bruner — spiral',
@@ -3728,7 +3334,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Bruner — Spirale', fr: 'Bruner — spirale',
     it: 'Bruner — spirale', ru: 'Брунер — спираль',
     ko: '브루너 — 나선형', pl: 'Bruner — spiralnie',
-    ar: 'برونر — حلزوني', hi: 'ब्रूनर — सर्पिल',
   },
   'page.ensinoMedio.philosophy.bruner.text': {
     'pt-BR': ': cada conceito revisitado em níveis crescentes (taxa de variação aos 15, derivada aos 16, operador linear aos 17).',
@@ -3742,8 +3347,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ': каждое понятие пересматривается на возрастающих уровнях (скорость изменения в 15, производная в 16, линейный оператор в 17).',
     ko: ': 각 개념을 점점 높은 수준에서 재방문 (15세에 변화율, 16세에 도함수, 17세에 선형 연산자).',
     pl: ': każde pojęcie ponownie omawiane na wyższych poziomach (szybkość zmian w wieku 15, pochodna w 16, operator liniowy w 17).',
-    ar: ': يُعاد تناول كل مفهوم بمستويات متزايدة (معدل التغير في 15، المشتقة في 16، المؤثر الخطي في 17).',
-    hi: ': प्रत्येक अवधारणा को बढ़ते स्तरों पर पुनः देखा जाता है (15 वर्ष में परिवर्तन दर, 16 में अवकलज, 17 में रैखिक संकारक)।',
   },
   'page.ensinoMedio.philosophy.vygotsky.label': {
     'pt-BR': 'Vygotsky — ZPD', en: 'Vygotsky — ZPD',
@@ -3751,7 +3354,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Wygotski — ZPD', fr: 'Vygotsky — ZPD',
     it: 'Vygotsky — ZPD', ru: 'Выготский — ЗБР',
     ko: '비고츠키 — ZPD', pl: 'Wygotski — SNR',
-    ar: 'فيغوتسكي — ZPD', hi: 'वायगोत्स्की — ZPD',
   },
   'page.ensinoMedio.philosophy.vygotsky.text': {
     'pt-BR': ': scaffolding declarado em cada aula. Tarefa difícil + suporte calibrado.',
@@ -3765,8 +3367,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ': скаффолдинг заявлен в каждом уроке. Сложная задача + калиброванная поддержка.',
     ko: ': 각 수업에서 스캐폴딩을 명시. 어려운 과제 + 보정된 지원.',
     pl: ': scaffolding deklarowany w każdej lekcji. Trudne zadanie + skalibrowane wsparcie.',
-    ar: ': السقالات المعلَنة في كل درس. مهمة صعبة + دعم معاير.',
-    hi: ': प्रत्येक कक्षा में स्कैफ़ोल्डिंग घोषित। कठिन कार्य + समायोजित सहायता।',
   },
   'page.ensinoMedio.philosophy.singapore.label': {
     'pt-BR': 'Singapura — CPA', en: 'Singapore — CPA',
@@ -3774,7 +3374,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Singapur — CPA', fr: 'Singapour — CPA',
     it: 'Singapore — CPA', ru: 'Сингапур — CPA',
     ko: '싱가포르 — CPA', pl: 'Singapur — CPA',
-    ar: 'سنغافورة — CPA', hi: 'सिंगापुर — CPA',
   },
   'page.ensinoMedio.philosophy.singapore.text': {
     'pt-BR': ': concrete → pictorial → abstract em todo conceito novo.',
@@ -3788,8 +3387,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ': конкретное → образное → абстрактное для каждой новой идеи.',
     ko: ': 모든 새 개념에서 구체 → 그림 → 추상.',
     pl: ': konkret → obrazowy → abstrakt dla każdego nowego pojęcia.',
-    ar: ': محسوس → تصويري → مجرد لكل مفهوم جديد.',
-    hi: ': प्रत्येक नई अवधारणा में मूर्त → चित्रात्मक → अमूर्त।',
   },
   'page.ensinoMedio.philosophy.japan.label': {
     'pt-BR': 'Japão — fewer concepts, greater detail',
@@ -3803,8 +3400,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Япония — меньше понятий, больше деталей',
     ko: '일본 — 개념은 적게, 세부는 깊게',
     pl: 'Japonia — mniej pojęć, więcej szczegółów',
-    ar: 'اليابان — مفاهيم أقل، تفصيل أعمق',
-    hi: 'जापान — कम अवधारणाएँ, अधिक विवरण',
   },
   'page.ensinoMedio.philosophy.japan.text': {
     'pt-BR': ': tópicos esgotados antes de avançar.',
@@ -3818,8 +3413,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ': темы исчерпываются до перехода дальше.',
     ko: ': 진도를 나가기 전에 주제를 끝까지 다룸.',
     pl: ': tematy wyczerpywane przed pójściem dalej.',
-    ar: ': تُستوفى المواضيع قبل الانتقال إلى غيرها.',
-    hi: ': आगे बढ़ने से पहले विषयों को पूरी तरह कवर।',
   },
   'page.ensinoMedio.philosophy.germany.label': {
     'pt-BR': 'Alemanha LK', en: 'Germany LK',
@@ -3827,7 +3420,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Deutschland LK', fr: 'Allemagne LK',
     it: 'Germania LK', ru: 'Германия LK',
     ko: '독일 LK', pl: 'Niemcy LK',
-    ar: 'ألمانيا LK', hi: 'जर्मनी LK',
   },
   'page.ensinoMedio.philosophy.germany.text': {
     'pt-BR': ': pelo menos uma demonstração formal por trimestre, calibrada à idade.',
@@ -3841,8 +3433,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ': как минимум одно формальное доказательство за триместр, откалиброванное по возрасту.',
     ko: ': 학기당 최소 한 번 형식적 증명, 연령에 맞춰 조정.',
     pl: ': przynajmniej jeden formalny dowód na trymestr, dopasowany do wieku.',
-    ar: ': برهان رسمي واحد على الأقل لكل فصل، معاير حسب العمر.',
-    hi: ': प्रति तिमाही कम से कम एक औपचारिक प्रमाण, आयु के अनुसार समायोजित।',
   },
   'page.ensinoMedio.philosophy.brazil.label': {
     'pt-BR': 'Brasil — porta 15 explícita',
@@ -3856,8 +3446,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Бразилия — явная «дверь 15»',
     ko: '브라질 — 명시적 도어 15',
     pl: 'Brazylia — jawne drzwi 15',
-    ar: 'البرازيل — البوابة 15 الصريحة',
-    hi: 'ब्राज़ील — स्पष्ट द्वार 15',
   },
   'page.ensinoMedio.philosophy.brazil.text': {
     'pt-BR': ': vocabulário e exemplos brasileiros (BNCC, ENEM, real). Não tradução de livro estrangeiro.',
@@ -3871,14 +3459,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ': бразильская терминология и примеры (BNCC, ENEM, реал). Не перевод иностранного учебника.',
     ko: ': 브라질 용어와 예시 (BNCC, ENEM, 헤알). 외국 교재의 번역이 아님.',
     pl: ': brazylijskie słownictwo i przykłady (BNCC, ENEM, real). Nie jest to tłumaczenie zagranicznej książki.',
-    ar: ': مفردات وأمثلة برازيلية (BNCC، ENEM، الريال). ليست ترجمة لكتاب أجنبي.',
-    hi: ': ब्राज़ीलियाई शब्दावली और उदाहरण (BNCC, ENEM, रियल)। यह किसी विदेशी पुस्तक का अनुवाद नहीं है।',
   },
   'page.ensinoMedio.contribute.title': {
     'pt-BR': 'Como contribuir', en: 'How to contribute', es: 'Cómo contribuir',
     zh: '如何贡献', ja: '貢献する方法', de: 'Wie du beitragen kannst',
     fr: 'Comment contribuer', it: 'Come contribuire', ru: 'Как внести вклад',
-    ko: '기여하는 방법', pl: 'Jak współtworzyć', ar: 'كيفية المساهمة', hi: 'योगदान कैसे करें',
+    ko: '기여하는 방법', pl: 'Jak współtworzyć',
   },
   'page.ensinoMedio.contribute.text.before': {
     'pt-BR': 'Lições são arquivos MDX em',
@@ -3892,8 +3478,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Уроки — это MDX-файлы в',
     ko: '레슨은 다음의 MDX 파일:',
     pl: 'Lekcje to pliki MDX w',
-    ar: 'الدروس ملفات MDX في',
-    hi: 'पाठ MDX फ़ाइलें हैं:',
   },
   'page.ensinoMedio.contribute.text.middle': {
     'pt-BR': 'Cada lição segue o template canônico (6+1 portas: formal/5/10/15/25/40/prática) com lista de exercícios usando',
@@ -3907,8 +3491,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Каждый урок следует каноническому шаблону (6+1 двери: formal/5/10/15/25/40/практика) со списком упражнений через',
     ko: '각 레슨은 표준 템플릿(6+1 도어: formal/5/10/15/25/40/실전)을 따르며 연습 목록은 다음 사용:',
     pl: 'Każda lekcja podąża za kanonicznym szablonem (6+1 drzwi: formal/5/10/15/25/40/praktyka) z listą ćwiczeń przez',
-    ar: 'يتبع كل درس القالب المرجعي (6+1 بوابات: formal/5/10/15/25/40/تطبيقية) مع قائمة تمارين باستخدام',
-    hi: 'प्रत्येक पाठ कैनोनिकल टेम्पलेट (6+1 द्वार: formal/5/10/15/25/40/व्यावहारिक) का पालन करता है, अभ्यास सूची उपयोग करती है',
   },
   'page.ensinoMedio.contribute.text.after': {
     'pt-BR': 'para gabarito determinístico de 25%. Pull requests bem-vindos.',
@@ -3922,8 +3504,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'для детерминированного ключа на 25%. Pull request\'ы приветствуются.',
     ko: '결정론적 25% 정답을 위해. Pull request 환영.',
     pl: 'dla deterministycznego klucza 25%. Pull request\'y mile widziane.',
-    ar: 'لمفتاح إجابات حتمي بنسبة 25%. طلبات السحب مرحب بها.',
-    hi: '25% नियतात्मक उत्तर कुंजी के लिए। Pull request स्वागत है।',
   },
 
   // ===== PAGE: FINANÇAS =====
@@ -3933,7 +3513,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Quantitative Finanzen', fr: 'Finance Quantitative',
     it: 'Finanza Quantitativa', ru: 'Количественные финансы',
     ko: '계량 금융', pl: 'Finanse Ilościowe',
-    ar: 'التمويل الكمي', hi: 'मात्रात्मक वित्त',
   },
   'page.financas.title': {
     'pt-BR': 'A matemática que opera derivativos',
@@ -3947,8 +3526,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Математика, которая двигает деривативы',
     ko: '파생상품을 움직이는 수학',
     pl: 'Matematyka, która napędza derywaty',
-    ar: 'الرياضيات التي تشغّل المشتقات',
-    hi: 'गणित जो डेरिवेटिव्स चलाता है',
   },
   'page.financas.metaTitle': {
     'pt-BR': 'Finanças Quantitativas', en: 'Quantitative Finance',
@@ -3956,7 +3533,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Quantitative Finanzen', fr: 'Finance Quantitative',
     it: 'Finanza Quantitativa', ru: 'Количественные финансы',
     ko: '계량 금융', pl: 'Finanse Ilościowe',
-    ar: 'التمويل الكمي', hi: 'मात्रात्मक वित्त',
   },
   'page.financas.metaDescription': {
     'pt-BR': 'Black-Scholes e a matemática que opera mesa de derivativos em São Paulo, Tóquio e Londres. Demonstração viva de para onde a matemática do ensino médio leva.',
@@ -3970,8 +3546,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Блэк-Шоулз и математика, которая работает на торговых столах деривативов в Сан-Паулу, Токио и Лондоне. Живая демонстрация того, к чему ведёт школьная математика.',
     ko: '블랙-숄즈와 상파울루·도쿄·런던의 파생상품 데스크를 움직이는 수학. 고등학교 수학이 어디로 이어지는지 보여주는 살아있는 실증.',
     pl: 'Black-Scholes i matematyka, która prowadzi biurka derywatów w São Paulo, Tokio i Londynie. Żywa demonstracja, dokąd prowadzi matematyka licealna.',
-    ar: 'بلاك-شولز والرياضيات التي تُشغّل مكاتب المشتقات في ساو باولو وطوكيو ولندن. عرض حيّ لما تؤول إليه رياضيات الثانوية.',
-    hi: 'ब्लैक-शोल्स और वह गणित जो साओ पाउलो, टोक्यो और लंदन में डेरिवेटिव डेस्क चलाता है। हाई स्कूल गणित कहाँ ले जाती है, इसका जीवंत प्रदर्शन।',
   },
   'page.financas.intro1.before': {
     'pt-BR': 'Aqui está o destino do programa de ensino médio. Toda matemática que ensinamos — funções, derivadas, integrais, logaritmos, probabilidade — converge em',
@@ -3985,8 +3559,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Вот цель программы старшей школы. Вся математика, которую мы преподаём — функции, производные, интегралы, логарифмы, вероятность — сходится в',
     ko: '이것이 고등학교 프로그램의 종착점. 우리가 가르치는 모든 수학 — 함수, 도함수, 적분, 로그, 확률 — 은 다음에 수렴:',
     pl: 'Oto cel programu liceum. Cała matematyka, której uczymy — funkcje, pochodne, całki, logarytmy, prawdopodobieństwo — zbiega się w',
-    ar: 'هذه وجهة برنامج الثانوية. كل الرياضيات التي نُدرّسها — الدوال، المشتقات، التكاملات، اللوغاريتمات، الاحتمال — تتلاقى في',
-    hi: 'यह हाई स्कूल कार्यक्रम की मंज़िल है। हम जो सारा गणित पढ़ाते हैं — फलन, अवकलज, समाकलन, लघुगणक, प्रायिकता — सब एक में मिल जाता है:',
   },
   'page.financas.intro1.bold': {
     'pt-BR': 'uma única equação', en: 'a single equation',
@@ -3994,7 +3566,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'eine einzige Gleichung', fr: 'une seule équation',
     it: 'una sola equazione', ru: 'единственное уравнение',
     ko: '단 하나의 식', pl: 'jednym równaniu',
-    ar: 'معادلة واحدة', hi: 'एक ही समीकरण',
   },
   'page.financas.intro1.after': {
     'pt-BR': 'que ganhou o Prêmio Nobel de Economia em 1997 e move bilhões de dólares por dia em mesa de derivativos do mundo inteiro.',
@@ -4008,8 +3579,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'которое получило Нобелевскую премию по экономике 1997 года и ежедневно движет миллиарды долларов на торговых столах деривативов по всему миру.',
     ko: '1997년 노벨 경제학상을 받았고, 전 세계 파생상품 데스크에서 매일 수십억 달러를 움직인다.',
     pl: 'które zdobyło Nagrodę Nobla z ekonomii w 1997 roku i przesuwa miliardy dolarów dziennie na biurkach derywatów na całym świecie.',
-    ar: 'التي فازت بجائزة نوبل في الاقتصاد عام 1997 وتُحرّك مليارات الدولارات يوميًا على مكاتب المشتقات حول العالم.',
-    hi: 'जिसने 1997 में अर्थशास्त्र का नोबेल पुरस्कार जीता और दुनिया भर के डेरिवेटिव डेस्क पर रोज़ अरबों डॉलर चलाता है।',
   },
   'page.financas.intro2.before': {
     'pt-BR': 'Esta seção não é prioridade de expansão (foco hoje é',
@@ -4023,8 +3592,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Этот раздел не в приоритете расширения (фокус сегодня —',
     ko: '이 섹션은 확장 우선순위가 아닙니다 (현재 초점은',
     pl: 'Ta sekcja nie jest priorytetem rozszerzeń (dzisiejszy fokus to',
-    ar: 'هذا القسم ليس أولوية للتوسع (التركيز اليوم على',
-    hi: 'यह अनुभाग विस्तार की प्राथमिकता नहीं है (आज का फ़ोकस है',
   },
   'page.financas.intro2.linkText': {
     'pt-BR': 'Ensino Médio Otimizado', en: 'Optimized High School',
@@ -4032,8 +3599,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '最適化された高校', de: 'Optimierte Oberstufe',
     fr: 'Lycée Optimisé', it: 'Liceo Ottimizzato',
     ru: 'Оптимизированная старшая школа', ko: '최적화된 고등학교',
-    pl: 'Zoptymalizowane Liceum', ar: 'الثانوية المُحسَّنة',
-    hi: 'अनुकूलित हाई स्कूल',
+    pl: 'Zoptymalizowane Liceum',
   },
   'page.financas.intro2.middle': {
     'pt-BR': '), mas serve como',
@@ -4047,8 +3613,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '), но служит',
     ko: '), 그러나 다음 역할을 함:',
     pl: '), ale służy jako',
-    ar: ')، لكنه يُستخدم كـ',
-    hi: '), लेकिन यह कार्य करता है',
   },
   'page.financas.intro2.bold': {
     'pt-BR': 'demonstração viva', en: 'a living demonstration',
@@ -4056,8 +3620,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '生きた実証', de: 'lebendige Demonstration',
     fr: 'démonstration vivante', it: 'dimostrazione viva',
     ru: 'живой демонстрацией', ko: '살아있는 실증',
-    pl: 'żywa demonstracja', ar: 'عرض حيّ',
-    hi: 'जीवंत प्रदर्शन',
+    pl: 'żywa demonstracja',
   },
   'page.financas.intro2.after': {
     'pt-BR': 'de que a matemática que vamos ensinar é real, é a mesma usada em São Paulo, Tóquio e Londres, e tem aplicação imediata.',
@@ -4071,8 +3634,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'что математика, которую мы будем преподавать, реальна, та же, что используется в Сан-Паулу, Токио и Лондоне, и имеет немедленное применение.',
     ko: '우리가 가르칠 수학은 실제이며, 상파울루·도쿄·런던에서 쓰는 것과 같고, 즉각적인 응용이 있다.',
     pl: 'że matematyka, której będziemy uczyć, jest realna, ta sama, której używa się w São Paulo, Tokio i Londynie, i ma natychmiastowe zastosowanie.',
-    ar: 'بأن الرياضيات التي سنُدرّسها حقيقية، وهي ذاتها المستخدمة في ساو باولو وطوكيو ولندن، ولها تطبيق فوري.',
-    hi: 'कि हम जो गणित पढ़ाएँगे, वह वास्तविक है, साओ पाउलो, टोक्यो और लंदन में उपयोग होने वाली ही है, और तुरंत लागू होती है।',
   },
   'page.financas.featured.eyebrow': {
     'pt-BR': 'Página em destaque', en: 'Featured page',
@@ -4080,7 +3641,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Hervorgehobene Seite', fr: 'Page en vedette',
     it: 'Pagina in evidenza', ru: 'Главная страница раздела',
     ko: '주요 페이지', pl: 'Wyróżniona strona',
-    ar: 'صفحة مميَّزة', hi: 'विशेष पृष्ठ',
   },
   'page.financas.featured.title': {
     'pt-BR': 'Equação de Black-Scholes', en: 'Black-Scholes Equation',
@@ -4088,8 +3648,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: 'ブラック・ショールズ方程式', de: 'Black-Scholes-Gleichung',
     fr: 'Équation de Black-Scholes', it: 'Equazione di Black-Scholes',
     ru: 'Уравнение Блэка-Шоулза', ko: '블랙-숄즈 방정식',
-    pl: 'Równanie Blacka-Scholesa', ar: 'معادلة بلاك-شولز',
-    hi: 'ब्लैक-शोल्स समीकरण',
+    pl: 'Równanie Blacka-Scholesa',
   },
   'page.financas.featured.body.before': {
     'pt-BR': 'A peça mais completa do site.',
@@ -4103,8 +3662,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Самая полная часть сайта.',
     ko: '사이트에서 가장 완성된 콘텐츠.',
     pl: 'Najbardziej kompletna część serwisu.',
-    ar: 'أكمل قطعة في الموقع.',
-    hi: 'साइट का सबसे पूर्ण लेख।',
   },
   'page.financas.featured.body.bold': {
     'pt-BR': '7 portas (formal + 5, 10, 15, 25, 40 anos + prática)', en: '7 doors (formal + 5, 10, 15, 25, 40 years + practical)',
@@ -4112,8 +3669,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '7つのドア（正式 + 5、10、15、25、40歳 + 実践）', de: '7 Türen (formal + 5, 10, 15, 25, 40 Jahre + praktisch)',
     fr: '7 portes (formelle + 5, 10, 15, 25, 40 ans + pratique)', it: '7 porte (formale + 5, 10, 15, 25, 40 anni + pratica)',
     ru: '7 дверей (формальная + 5, 10, 15, 25, 40 лет + практическая)', ko: '7개 문 (정식 + 5, 10, 15, 25, 40세 + 실습)',
-    pl: '7 drzwi (formalne + 5, 10, 15, 25, 40 lat + praktyczne)', ar: '7 أبواب (رسمي + 5، 10، 15، 25، 40 سنة + عملي)',
-    hi: '7 द्वार (औपचारिक + 5, 10, 15, 25, 40 वर्ष + व्यावहारिक)',
+    pl: '7 drzwi (formalne + 5, 10, 15, 25, 40 lat + praktyczne)',
   },
   'page.financas.featured.body.after': {
     'pt-BR': 'com 4 cenários reais usando dados de mercado da B3 (PETR4 em 24/04/2026). Inclui derivação via lema de Itô, paridade put-call, os 4 Greeks principais (Δ, Γ, ν, Θ) e diagramas de payoff interativos.',
@@ -4127,8 +3683,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'с 4 реальными сценариями на рыночных данных B3 (PETR4 на 24.04.2026). Включает вывод через лемму Ито, паритет пут-колл, 4 основных «грека» (Δ, Γ, ν, Θ) и интерактивные диаграммы выплат.',
     ko: 'B3 시장 데이터(2026/04/24 PETR4)를 사용한 4개의 실제 시나리오. 이토 보조정리를 통한 유도, 풋-콜 패리티, 주요 4개 그릭(Δ, Γ, ν, Θ), 인터랙티브 페이오프 다이어그램 포함.',
     pl: 'z 4 realnymi scenariuszami opartymi o dane rynkowe B3 (PETR4 z 24.04.2026). Zawiera wyprowadzenie przez lemat Itô, parytet put-call, 4 główne Greki (Δ, Γ, ν, Θ) oraz interaktywne wykresy payoff.',
-    ar: 'مع 4 سيناريوهات حقيقية باستخدام بيانات سوق B3 (PETR4 في 24/04/2026). يشمل الاشتقاق عبر مبرهنة إيتو، تكافؤ put-call، الأحرف الإغريقية الأربعة الرئيسية (Δ, Γ, ν, Θ) ومخططات payoff تفاعلية.',
-    hi: '4 वास्तविक परिदृश्यों के साथ B3 बाज़ार डेटा (PETR4, 24/04/2026) का उपयोग। इटो के लेमा द्वारा व्युत्पत्ति, put-call पैरिटी, 4 मुख्य ग्रीक्स (Δ, Γ, ν, Θ) और इंटरैक्टिव payoff आरेख शामिल।',
   },
   'page.financas.featured.openPage': {
     'pt-BR': 'Abrir página completa', en: 'Open full page',
@@ -4136,8 +3690,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '完全なページを開く', de: 'Vollständige Seite öffnen',
     fr: 'Ouvrir la page complète', it: 'Apri pagina completa',
     ru: 'Открыть полную страницу', ko: '전체 페이지 열기',
-    pl: 'Otwórz pełną stronę', ar: 'فتح الصفحة الكاملة',
-    hi: 'पूरा पृष्ठ खोलें',
+    pl: 'Otwórz pełną stronę',
   },
   'page.financas.featured.nobel': {
     'pt-BR': 'Nobel de Economia 1997 (oficial)',
@@ -4151,8 +3704,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Нобелевская премия по экономике 1997 (официально)',
     ko: '1997년 노벨 경제학상 (공식)',
     pl: 'Nagroda Nobla z ekonomii 1997 (oficjalna)',
-    ar: 'جائزة نوبل في الاقتصاد 1997 (رسمي)',
-    hi: '1997 का अर्थशास्त्र नोबेल पुरस्कार (आधिकारिक)',
   },
   'page.financas.published.title': {
     'pt-BR': 'Conteúdos publicados em Finanças',
@@ -4166,8 +3717,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Опубликованные материалы в разделе «Финансы»',
     ko: '금융 섹션의 게시 콘텐츠',
     pl: 'Opublikowane treści w sekcji Finanse',
-    ar: 'المحتوى المنشور في التمويل',
-    hi: 'वित्त में प्रकाशित सामग्री',
   },
   'page.financas.published.empty': {
     'pt-BR': 'Nenhum conteúdo de Finanças publicado ainda.',
@@ -4181,14 +3730,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Пока нет опубликованных материалов по финансам.',
     ko: '아직 게시된 금융 콘텐츠가 없습니다.',
     pl: 'Nie opublikowano jeszcze treści z sekcji Finanse.',
-    ar: 'لم يُنشر أي محتوى تمويلي بعد.',
-    hi: 'अभी तक कोई वित्त सामग्री प्रकाशित नहीं की गई है।',
   },
   'page.financas.published.usedIn': {
     'pt-BR': 'Usado em:', en: 'Used in:', es: 'Usado en:',
     zh: '用于：', ja: '使用先:', de: 'Verwendet in:',
     fr: 'Utilisé dans :', it: 'Usato in:', ru: 'Используется в:',
-    ko: '사용처:', pl: 'Używane w:', ar: 'مُستخدم في:', hi: 'उपयोग:',
+    ko: '사용처:', pl: 'Używane w:',
   },
   'page.financas.prereq.title': {
     'pt-BR': 'Pré-requisitos para entender Black-Scholes',
@@ -4202,8 +3749,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Что нужно знать, чтобы понять Блэка-Шоулза',
     ko: '블랙-숄즈를 이해하기 위한 선수 지식',
     pl: 'Wymagania wstępne, aby zrozumieć Black-Scholes',
-    ar: 'المتطلبات السابقة لفهم بلاك-شولز',
-    hi: 'ब्लैक-शोल्स समझने के लिए पूर्वापेक्षाएँ',
   },
   'page.financas.prereq.text.before': {
     'pt-BR': 'Para chegar na porta formal, você precisa do',
@@ -4217,8 +3762,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Чтобы добраться до формальной двери, нужен',
     ko: '형식 도어에 도달하려면 다음 필요:',
     pl: 'Aby dotrzeć do drzwi formalnych, potrzebujesz',
-    ar: 'للوصول إلى البوابة الرسمية، تحتاج',
-    hi: 'औपचारिक द्वार तक पहुँचने के लिए, आपको चाहिए',
   },
   'page.financas.prereq.text.linkText': {
     'pt-BR': 'Ano 3 do Ensino Médio', en: 'Year 3 of High School',
@@ -4226,8 +3769,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '高校3年生', de: 'Jahr 3 der Oberstufe',
     fr: 'Année 3 du Lycée', it: 'Anno 3 di Liceo',
     ru: '3-й год старшей школы', ko: '고등학교 3학년',
-    pl: 'Rok 3 Liceum', ar: 'السنة الثالثة من الثانوية',
-    hi: 'हाई स्कूल का वर्ष 3',
+    pl: 'Rok 3 Liceum',
   },
   'page.financas.prereq.text.middle': {
     'pt-BR': 'completo — em particular:',
@@ -4241,20 +3783,18 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'полностью — в частности:',
     ko: '완료 — 특히:',
     pl: 'ukończony — w szczególności:',
-    ar: 'مُكتملة — خصوصًا:',
-    hi: 'पूर्ण — विशेषतः:',
   },
   'page.financas.prereq.text.derivative': {
     'pt-BR': 'derivada', en: 'derivative', es: 'derivada',
     zh: '导数', ja: '導関数', de: 'Ableitung',
     fr: 'dérivée', it: 'derivata', ru: 'производная',
-    ko: '도함수', pl: 'pochodna', ar: 'المشتقة', hi: 'अवकलज',
+    ko: '도함수', pl: 'pochodna',
   },
   'page.financas.prereq.text.integral': {
     'pt-BR': 'integral', en: 'integral', es: 'integral',
     zh: '积分', ja: '積分', de: 'Integral',
     fr: 'intégrale', it: 'integrale', ru: 'интеграл',
-    ko: '적분', pl: 'całka', ar: 'التكامل', hi: 'समाकलन',
+    ko: '적분', pl: 'całka',
   },
   'page.financas.prereq.text.ln': {
     'pt-BR': 'logaritmo natural', en: 'natural logarithm',
@@ -4262,7 +3802,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'natürlicher Logarithmus', fr: 'logarithme naturel',
     it: 'logaritmo naturale', ru: 'натуральный логарифм',
     ko: '자연로그', pl: 'logarytm naturalny',
-    ar: 'اللوغاريتم الطبيعي', hi: 'प्राकृतिक लघुगणक',
   },
   'page.financas.prereq.text.normal': {
     'pt-BR': 'distribuição normal', en: 'normal distribution',
@@ -4270,7 +3809,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Normalverteilung', fr: 'loi normale',
     it: 'distribuzione normale', ru: 'нормальное распределение',
     ko: '정규분포', pl: 'rozkład normalny',
-    ar: 'التوزيع الطبيعي', hi: 'सामान्य वितरण',
   },
   'page.financas.prereq.text.after': {
     'pt-BR': '. As portas 5/10/15 da página de Black-Scholes funcionam',
@@ -4284,8 +3822,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '. Двери 5/10/15 на странице Блэка-Шоулза работают',
     ko: '. 블랙-숄즈 페이지의 5/10/15 도어는 동작:',
     pl: '. Drzwi 5/10/15 na stronie Black-Scholes działają',
-    ar: '. بوابات 5/10/15 في صفحة بلاك-شولز تعمل',
-    hi: '। ब्लैक-शोल्स पेज के 5/10/15 द्वार काम करते हैं',
   },
   'page.financas.prereq.text.boldNoPre': {
     'pt-BR': 'sem pré-requisito', en: 'without prerequisites',
@@ -4293,8 +3829,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ja: '前提知識なしで', de: 'ohne Voraussetzung',
     fr: 'sans prérequis', it: 'senza prerequisiti',
     ru: 'без предварительных знаний', ko: '선수 지식 없이',
-    pl: 'bez wymagań wstępnych', ar: 'بدون متطلبات سابقة',
-    hi: 'बिना पूर्वापेक्षा',
+    pl: 'bez wymagań wstępnych',
   },
   'page.financas.prereq.text.tail': {
     'pt-BR': ': criança de 5 anos consegue acompanhar o conceito por analogia de figurinhas, e adolescente de 15 com a analogia de skin de jogo.',
@@ -4308,15 +3843,13 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ': 5-летний ребёнок поймёт через аналогию с наклейками, а 15-летний — через аналогию со скинами в игре.',
     ko: ': 5세 어린이는 스티커 비유로, 15세 청소년은 게임 스킨 비유로 개념을 따라갈 수 있다.',
     pl: ': 5-latek zrozumie koncept przez analogię z naklejkami, a 15-latek — przez analogię ze skinami w grze.',
-    ar: ': طفل في الخامسة يستطيع متابعة الفكرة عبر تشبيه الملصقات، ومراهق في الخامسة عشرة عبر تشبيه سكنات الألعاب.',
-    hi: ': 5 वर्ष का बच्चा स्टिकर की उपमा से अवधारणा समझ सकता है, और 15 वर्ष का किशोर खेल स्किन की उपमा से।',
   },
 
   // ===== MANIFESTO =====
   'manifesto.kicker': {
     'pt-BR': 'Manifesto', en: 'Manifesto', es: 'Manifiesto', zh: '宣言', ja: 'マニフェスト',
     de: 'Manifest', fr: 'Manifeste', it: 'Manifesto', ru: 'Манифест', ko: '선언문',
-    pl: 'Manifest', ar: 'البيان', hi: 'घोषणापत्र',
+    pl: 'Manifest',
   },
   'manifesto.title.line1': {
     'pt-BR': 'Você vai aprender matemática',
@@ -4330,8 +3863,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Ты изучишь математику',
     ko: '당신은 수학을 배울 것입니다',
     pl: 'Nauczysz się matematyki',
-    ar: 'سوف تتعلم الرياضيات',
-    hi: 'आप गणित सीखेंगे',
   },
   'manifesto.title.line2': {
     'pt-BR': 'de verdade.',
@@ -4345,8 +3876,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'по-настоящему.',
     ko: '진짜로.',
     pl: 'naprawdę.',
-    ar: 'حقًا.',
-    hi: 'सच में।',
   },
   'manifesto.p1': {
     'pt-BR': 'Não decorar fórmula pra esquecer depois. Não assistir vídeo, achar que entendeu e não saber explicar pro colega no dia seguinte. Aprender de verdade — saber <strong>o que cada coisa faz, por que faz, e onde ela vive no mundo real</strong>.',
@@ -4360,8 +3889,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Не зубрить формулу, чтобы потом её забыть. Не смотреть видео, считая, что понял, и не уметь объяснить однокласснику на следующий день. Учиться по-настоящему — знать, <strong>что делает каждая вещь, почему она это делает и где она живёт в реальном мире</strong>.',
     ko: '공식을 외워서 나중에 잊어버리는 게 아닙니다. 영상을 보고 이해했다고 착각하다가 다음 날 친구에게 설명하지 못하는 게 아닙니다. 진짜로 배우는 것 — <strong>각각이 무엇을 하고, 왜 그렇게 하며, 현실 세계 어디에 사는지</strong>를 아는 것.',
     pl: 'Nie wkuwać wzoru, żeby potem go zapomnieć. Nie oglądać filmu, myśląc, że się rozumie, a następnego dnia nie umieć wyjaśnić koledze. Uczyć się naprawdę — wiedzieć, <strong>co każda rzecz robi, dlaczego to robi i gdzie żyje w realnym świecie</strong>.',
-    ar: 'لا حفظ صيغة لتنسى لاحقًا. لا مشاهدة فيديو والاعتقاد بأنك فهمت ثم العجز عن شرحها لزميلك في اليوم التالي. التعلّم حقًا — معرفة <strong>ما تفعله كل شيء، ولماذا تفعله، وأين تعيش في العالم الواقعي</strong>.',
-    hi: 'सूत्र को रटकर बाद में भूलना नहीं। वीडियो देखकर समझ लिया मानना और अगले दिन साथी को न समझा पाना नहीं। सच में सीखना — यह जानना कि <strong>हर चीज़ क्या करती है, क्यों करती है, और वास्तविक दुनिया में कहाँ रहती है</strong>।',
   },
   'manifesto.p2': {
     'pt-BR': 'Não importa se você reprovou Cálculo na engenharia mecânica três vezes. Não importa se você terminou mestrado em Finanças e ainda olha pra uma derivada e congela. Não importa se você tem 12 anos curioso por causa de um vídeo do YouTube, 25 voltando a estudar pro concurso, ou 50 querendo finalmente entender aquilo que te assustou na faculdade. Se você está <strong>interessado de verdade</strong> — esse site é seu.',
@@ -4375,8 +3902,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Неважно, если ты три раза заваливал Матанализ на машфаке. Неважно, если ты закончил магистратуру по финансам и до сих пор цепенеешь от производной. Неважно, тебе 12, и ты любопытен из-за видео на YouTube, 25, и ты снова готовишься к экзамену, или 50, и ты наконец хочешь понять то, что пугало тебя в институте. Если ты <strong>действительно заинтересован</strong> — этот сайт твой.',
     ko: '기계공학에서 미적분을 세 번 떨어졌어도 상관없습니다. 재무 석사를 마쳤는데도 미분을 보면 얼어붙어도 상관없습니다. YouTube 영상이 궁금한 12살이든, 시험을 다시 준비하는 25살이든, 대학 시절 두려웠던 걸 이제야 이해하고 싶은 50살이든 상관없습니다. <strong>진짜로 관심이 있다면</strong> — 이 사이트는 당신의 것입니다.',
     pl: 'Nieważne, czy oblałeś Analizę trzy razy na mechanice. Nieważne, czy skończyłeś magistra z Finansów i nadal sztywniejesz na widok pochodnej. Nieważne, czy masz 12 lat i ciekawi cię film z YouTube, 25 i znów uczysz się do egzaminu, czy 50 i chcesz wreszcie zrozumieć to, co przerażało cię na studiach. Jeśli <strong>naprawdę cię to interesuje</strong> — ta strona jest twoja.',
-    ar: 'لا يهم إن رسبت في حساب التفاضل والتكامل ثلاث مرات في الهندسة الميكانيكية. لا يهم إن أنهيت ماجستير المالية ولا تزال تتجمّد أمام مشتقة. لا يهم إن كنت في الثانية عشرة فضوليًا بسبب فيديو يوتيوب، أو في الخامسة والعشرين تعود للدراسة لمسابقة، أو في الخمسين تريد أخيرًا أن تفهم ما أرهبك في الجامعة. إذا كنت <strong>مهتمًا حقًا</strong> — هذا الموقع لك.',
-    hi: 'कोई फर्क नहीं पड़ता अगर आप मैकेनिकल इंजीनियरिंग में कैलकुलस तीन बार फेल हुए। कोई फर्क नहीं पड़ता अगर आप वित्त में स्नातकोत्तर पूरा कर चुके हैं और अब भी डेरिवेटिव देखकर ठिठक जाते हैं। कोई फर्क नहीं पड़ता अगर आप 12 साल के हैं और YouTube वीडियो ने उत्सुक किया, 25 के हैं और परीक्षा के लिए फिर से पढ़ रहे हैं, या 50 के हैं और जो कॉलेज में डराता था उसे अंततः समझना चाहते हैं। अगर आप <strong>वाकई रुचि रखते हैं</strong> — यह साइट आपकी है।',
   },
   'manifesto.h2.firstGoal': {
     'pt-BR': 'Nosso primeiro objetivo: Ensino Médio brasileiro otimizado',
@@ -4390,8 +3915,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Наша первая цель: оптимизированная бразильская старшая школа',
     ko: '우리의 첫 목표: 최적화된 브라질 고등학교 과정',
     pl: 'Nasz pierwszy cel: zoptymalizowane brazylijskie liceum',
-    ar: 'هدفنا الأول: المرحلة الثانوية البرازيلية المُحسَّنة',
-    hi: 'हमारा पहला लक्ष्य: अनुकूलित ब्राज़ीलियाई हाई स्कूल',
   },
   'manifesto.p3': {
     'pt-BR': 'A maior dor do sistema educacional brasileiro está no <strong>ensino médio</strong>. É onde aluno bom desiste de matemática, é onde aluno mediano reprova em Cálculo I na faculdade no semestre seguinte, é onde a curiosidade vira trauma. Por isso nosso <strong>primeiro objetivo é construir um currículo otimizado de matemática para o ensino médio brasileiro</strong> — 12 trimestres, 120 aulas, calibrado pelos modelos de <strong>Japão</strong> (Math I/II/III), <strong>Alemanha</strong> (Klasse 10/11/12 Leistungskurs) e <strong>Singapura</strong> (Sec 4 + JC H2 Math) — os três sistemas que mais consistentemente formam alunos prontos para engenharia de fronteira.',
@@ -4405,8 +3928,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Самая большая боль бразильской системы образования находится в <strong>старшей школе</strong>. Именно там сильный ученик бросает математику, там средний ученик заваливает Матанализ I в следующем семестре в вузе, там любопытство превращается в травму. Поэтому наша <strong>первая цель — построить оптимизированный учебный план по математике для бразильской старшей школы</strong> — 12 триместров, 120 уроков, откалиброванный по моделям <strong>Японии</strong> (Math I/II/III), <strong>Германии</strong> (Klasse 10/11/12 Leistungskurs) и <strong>Сингапура</strong> (Sec 4 + JC H2 Math) — трёх систем, которые наиболее стабильно готовят учеников к передовой инженерии.',
     ko: '브라질 교육 시스템의 가장 큰 고통은 <strong>고등학교</strong>에 있습니다. 좋은 학생이 수학을 포기하는 곳, 평범한 학생이 다음 학기 대학 미적분 I에서 낙제하는 곳, 호기심이 트라우마가 되는 곳입니다. 그래서 우리의 <strong>첫 목표는 브라질 고등학교를 위한 최적화된 수학 커리큘럼을 만드는 것</strong>입니다 — 12학기, 120강, <strong>일본</strong>(Math I/II/III), <strong>독일</strong>(Klasse 10/11/12 Leistungskurs), <strong>싱가포르</strong>(Sec 4 + JC H2 Math) 모델로 보정 — 가장 일관되게 첨단 공학에 준비된 학생을 길러내는 세 시스템.',
     pl: 'Największy ból brazylijskiego systemu edukacji jest w <strong>liceum</strong>. To tam dobry uczeń rezygnuje z matematyki, tam średni uczeń oblewa Analizę I w następnym semestrze na studiach, tam ciekawość zmienia się w traumę. Dlatego naszym <strong>pierwszym celem jest zbudowanie zoptymalizowanego programu matematyki dla brazylijskiego liceum</strong> — 12 trymestrów, 120 lekcji, skalibrowane na modelach <strong>Japonii</strong> (Math I/II/III), <strong>Niemiec</strong> (Klasse 10/11/12 Leistungskurs) i <strong>Singapuru</strong> (Sec 4 + JC H2 Math) — trzech systemów, które najbardziej konsekwentnie kształcą uczniów gotowych na inżynierię pierwszej linii.',
-    ar: 'أكبر نقطة ألم في النظام التعليمي البرازيلي تكمن في <strong>المرحلة الثانوية</strong>. هناك يستسلم الطالب الجيد للرياضيات، وهناك يرسب الطالب المتوسط في حساب التفاضل والتكامل I في الفصل التالي بالجامعة، وهناك يتحول الفضول إلى صدمة. لذلك <strong>هدفنا الأول هو بناء منهج رياضيات محسَّن للمرحلة الثانوية البرازيلية</strong> — 12 فصلاً، 120 درسًا، معايرًا على نماذج <strong>اليابان</strong> (Math I/II/III) و<strong>ألمانيا</strong> (Klasse 10/11/12 Leistungskurs) و<strong>سنغافورة</strong> (Sec 4 + JC H2 Math) — الأنظمة الثلاثة الأكثر تكوينًا متسقًا لطلاب جاهزين لهندسة الطليعة.',
-    hi: 'ब्राज़ीलियाई शिक्षा प्रणाली का सबसे बड़ा दर्द <strong>हाई स्कूल</strong> में है। यहीं अच्छा छात्र गणित छोड़ देता है, यहीं औसत छात्र अगले सेमेस्टर में विश्वविद्यालय में कैलकुलस I में फेल होता है, यहीं जिज्ञासा आघात बन जाती है। इसीलिए हमारा <strong>पहला लक्ष्य ब्राज़ीलियाई हाई स्कूल के लिए अनुकूलित गणित पाठ्यक्रम बनाना है</strong> — 12 तिमाहियाँ, 120 पाठ, <strong>जापान</strong> (Math I/II/III), <strong>जर्मनी</strong> (Klasse 10/11/12 Leistungskurs) और <strong>सिंगापुर</strong> (Sec 4 + JC H2 Math) के मॉडलों पर अंशशोधित — तीन ऐसी प्रणालियाँ जो सबसे लगातार सीमांत इंजीनियरिंग के लिए तैयार छात्र तैयार करती हैं।',
   },
   'manifesto.p4': {
     'pt-BR': 'Não é tradução de livro estrangeiro. É <strong>currículo brasileiro calibrado pelos melhores do mundo</strong>: nomenclatura BNCC, exemplos com PETR4, IBOVESPA, ENEM, ITA, IME, Olimpíada Brasileira de Matemática. Cada lição traz <strong>40 a 80 exercícios</strong> no estilo de engenharia mecânica brasileira (USP, ITA, Poli) — 25% gabaritados em desenvolvimento formal, o restante com resposta para conferência. Sem afrouxamento.',
@@ -4420,8 +3941,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Это не перевод иностранного учебника. Это <strong>бразильский учебный план, откалиброванный лучшими в мире</strong>: терминология BNCC, примеры с PETR4, IBOVESPA, ENEM, ITA, IME, Бразильской математической олимпиадой. В каждом уроке <strong>от 40 до 80 задач</strong> в стиле бразильского машфака (USP, ITA, Poli) — 25% с полным формальным решением, остальные с ответом для проверки. Без послаблений.',
     ko: '외국 교재의 번역이 아닙니다. <strong>세계 최고로 보정된 브라질 커리큘럼</strong>입니다: BNCC 용어, PETR4, IBOVESPA, ENEM, ITA, IME, 브라질 수학 올림피아드 예제. 각 강의에는 브라질 기계공학(USP, ITA, Poli) 스타일의 <strong>40~80개의 문제</strong>가 들어갑니다 — 25%는 정식 풀이 포함, 나머지는 확인용 정답 포함. 약화 없음.',
     pl: 'To nie tłumaczenie zagranicznego podręcznika. To <strong>brazylijski program skalibrowany przez najlepszych na świecie</strong>: nazewnictwo BNCC, przykłady z PETR4, IBOVESPA, ENEM, ITA, IME, brazylijską Olimpiadą Matematyczną. Każda lekcja zawiera <strong>40 do 80 zadań</strong> w stylu brazylijskiej mechaniki (USP, ITA, Poli) — 25% z pełnym formalnym rozwiązaniem, reszta z odpowiedzią do sprawdzenia. Bez taryfy ulgowej.',
-    ar: 'ليست ترجمة لكتاب أجنبي. إنها <strong>منهج برازيلي معاير من قبل الأفضل في العالم</strong>: مصطلحات BNCC، أمثلة بـ PETR4 و IBOVESPA و ENEM و ITA و IME، والأولمبياد البرازيلي للرياضيات. كل درس يحتوي على <strong>40 إلى 80 تمرينًا</strong> على أسلوب الهندسة الميكانيكية البرازيلية (USP و ITA و Poli) — 25% بحلٍّ رسمي كامل، والباقي بإجابة للتحقق. دون تساهل.',
-    hi: 'यह विदेशी पुस्तक का अनुवाद नहीं है। यह <strong>दुनिया के सर्वश्रेष्ठ द्वारा अंशशोधित ब्राज़ीलियाई पाठ्यक्रम</strong> है: BNCC नामकरण, PETR4, IBOVESPA, ENEM, ITA, IME, ब्राज़ीलियाई गणित ओलंपियाड के उदाहरण। हर पाठ में ब्राज़ीलियाई मैकेनिकल इंजीनियरिंग (USP, ITA, Poli) शैली में <strong>40 से 80 अभ्यास</strong> होते हैं — 25% पूर्ण औपचारिक हल के साथ, बाकी सत्यापन के लिए उत्तर के साथ। कोई ढील नहीं।',
   },
   'manifesto.h3.officialDocs': {
     'pt-BR': 'Documentos oficiais usados como referência',
@@ -4435,8 +3954,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Официальные документы, используемые как ориентир',
     ko: '참고로 사용된 공식 문서',
     pl: 'Oficjalne dokumenty używane jako odniesienie',
-    ar: 'الوثائق الرسمية المستخدمة كمرجع',
-    hi: 'संदर्भ के रूप में उपयोग किए गए आधिकारिक दस्तावेज़',
   },
   'manifesto.p5': {
     'pt-BR': 'Todos os links abaixo apontam para os documentos oficiais disponibilizados pelos respectivos ministérios. Você pode clicar e consultar diretamente:',
@@ -4450,8 +3967,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Все ссылки ниже ведут на официальные документы соответствующих министерств. Можешь нажать и сразу ознакомиться:',
     ko: '아래의 모든 링크는 각 부처가 공식적으로 공개한 문서를 가리킵니다. 클릭하여 바로 확인할 수 있습니다:',
     pl: 'Wszystkie poniższe linki prowadzą do oficjalnych dokumentów udostępnionych przez odpowiednie ministerstwa. Możesz kliknąć i zajrzeć bezpośrednio:',
-    ar: 'جميع الروابط أدناه تشير إلى الوثائق الرسمية التي تنشرها الوزارات المعنية. يمكنك النقر والاطلاع مباشرة:',
-    hi: 'नीचे दिए गए सभी लिंक संबंधित मंत्रालयों द्वारा प्रकाशित आधिकारिक दस्तावेज़ों की ओर इशारा करते हैं। आप क्लिक करके सीधे देख सकते हैं:',
   },
   'manifesto.docs.jp.label': {
     'pt-BR': '🇯🇵 Japão — MEXT (Ministry of Education):',
@@ -4465,8 +3980,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '🇯🇵 Япония — MEXT (Министерство образования):',
     ko: '🇯🇵 일본 — MEXT (문부과학성):',
     pl: '🇯🇵 Japonia — MEXT (Ministerstwo Edukacji):',
-    ar: '🇯🇵 اليابان — MEXT (وزارة التعليم):',
-    hi: '🇯🇵 जापान — MEXT (शिक्षा मंत्रालय):',
   },
   'manifesto.docs.jp.title': {
     'pt-BR': 'Course of Study for Senior High School (em inglês oficial, 2018, PDF)',
@@ -4480,8 +3993,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Course of Study for Senior High School (официальный английский, 2018, PDF)',
     ko: 'Course of Study for Senior High School (공식 영어판, 2018, PDF)',
     pl: 'Course of Study for Senior High School (oficjalny angielski, 2018, PDF)',
-    ar: 'Course of Study for Senior High School (الإنجليزية الرسمية، 2018، PDF)',
-    hi: 'Course of Study for Senior High School (आधिकारिक अंग्रेज़ी, 2018, PDF)',
   },
   'manifesto.docs.jp.desc': {
     'pt-BR': '— currículo nacional vigente, com Math I/II/III + Math A/B/C detalhados.',
@@ -4495,8 +4006,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '— действующая национальная программа, с детальными Math I/II/III + Math A/B/C.',
     ko: '— 현행 국가 커리큘럼, Math I/II/III + Math A/B/C 상세.',
     pl: '— obowiązujący program krajowy, ze szczegółowym Math I/II/III + Math A/B/C.',
-    ar: '— المنهج الوطني الحالي، مع تفصيل Math I/II/III + Math A/B/C.',
-    hi: '— वर्तमान राष्ट्रीय पाठ्यक्रम, विस्तृत Math I/II/III + Math A/B/C के साथ।',
   },
   'manifesto.docs.de.label': {
     'pt-BR': '🇩🇪 Alemanha — KMK (Conferência Permanente dos Ministros):',
@@ -4510,8 +4019,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '🇩🇪 Германия — KMK (Постоянная конференция министров):',
     ko: '🇩🇪 독일 — KMK (상설 장관회의):',
     pl: '🇩🇪 Niemcy — KMK (Stała Konferencja Ministrów):',
-    ar: '🇩🇪 ألمانيا — KMK (المؤتمر الدائم لوزراء التعليم):',
-    hi: '🇩🇪 जर्मनी — KMK (स्थायी मंत्रिस्तरीय सम्मेलन):',
   },
   'manifesto.docs.de.title': {
     'pt-BR': 'Bildungsstandards im Fach Mathematik für die Allgemeine Hochschulreife (Abitur, 2012, PDF)',
@@ -4525,8 +4032,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Bildungsstandards im Fach Mathematik für die Allgemeine Hochschulreife (Abitur, 2012, PDF)',
     ko: 'Bildungsstandards im Fach Mathematik für die Allgemeine Hochschulreife (Abitur, 2012, PDF)',
     pl: 'Bildungsstandards im Fach Mathematik für die Allgemeine Hochschulreife (Abitur, 2012, PDF)',
-    ar: 'Bildungsstandards im Fach Mathematik für die Allgemeine Hochschulreife (Abitur، 2012، PDF)',
-    hi: 'Bildungsstandards im Fach Mathematik für die Allgemeine Hochschulreife (Abitur, 2012, PDF)',
   },
   'manifesto.docs.de.desc': {
     'pt-BR': '— padrão nacional para o Abitur (Klasse 11–12 LK), referência usada nas Aulas de cálculo e álgebra linear.',
@@ -4540,8 +4045,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '— национальный стандарт для Abitur (Klasse 11–12 LK), ориентир для уроков матанализа и линейной алгебры.',
     ko: '— Abitur(Klasse 11–12 LK)에 대한 국가 표준, 우리 미적분 및 선형대수 강의의 참고 자료.',
     pl: '— krajowy standard dla Abitur (Klasse 11–12 LK), odniesienie używane w naszych lekcjach analizy i algebry liniowej.',
-    ar: '— المعيار الوطني لشهادة Abitur (Klasse 11–12 LK)، مرجع مستخدم في دروس التفاضل والجبر الخطي.',
-    hi: '— Abitur (Klasse 11–12 LK) के लिए राष्ट्रीय मानक, हमारे कैलकुलस और रैखिक बीजगणित के पाठों में संदर्भ।',
   },
   'manifesto.docs.sg.label': {
     'pt-BR': '🇸🇬 Singapura — MOE (Ministry of Education):',
@@ -4555,8 +4058,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '🇸🇬 Сингапур — MOE (Министерство образования):',
     ko: '🇸🇬 싱가포르 — MOE (교육부):',
     pl: '🇸🇬 Singapur — MOE (Ministerstwo Edukacji):',
-    ar: '🇸🇬 سنغافورة — MOE (وزارة التعليم):',
-    hi: '🇸🇬 सिंगापुर — MOE (शिक्षा मंत्रालय):',
   },
   'manifesto.docs.sg.title1': {
     'pt-BR': 'O-Level Mathematics Syllabus (Express/E-Math, 2020, PDF)',
@@ -4570,8 +4071,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'O-Level Mathematics Syllabus (Express/E-Math, 2020, PDF)',
     ko: 'O-Level Mathematics Syllabus (Express/E-Math, 2020, PDF)',
     pl: 'O-Level Mathematics Syllabus (Express/E-Math, 2020, PDF)',
-    ar: 'O-Level Mathematics Syllabus (Express/E-Math، 2020، PDF)',
-    hi: 'O-Level Mathematics Syllabus (Express/E-Math, 2020, PDF)',
   },
   'manifesto.docs.sg.title2': {
     'pt-BR': 'H2 Mathematics (JC1/JC2, 2025, PDF)',
@@ -4585,8 +4084,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'H2 Mathematics (JC1/JC2, 2025, PDF)',
     ko: 'H2 Mathematics (JC1/JC2, 2025, PDF)',
     pl: 'H2 Mathematics (JC1/JC2, 2025, PDF)',
-    ar: 'H2 Mathematics (JC1/JC2، 2025، PDF)',
-    hi: 'H2 Mathematics (JC1/JC2, 2025, PDF)',
   },
   'manifesto.docs.sg.desc': {
     'pt-BR': '— referências para Trim 1-4 e para o Cálculo do Ano 2-3.',
@@ -4600,8 +4097,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '— ориентиры для триместров 1–4 и для матанализа во 2–3 годах.',
     ko: '— 1~4학기와 2~3학년 미적분에 대한 참고.',
     pl: '— odniesienia dla trymestrów 1–4 i dla rachunku różniczkowego w klasach 2–3.',
-    ar: '— مراجع للفصول 1-4 ولحساب التفاضل والتكامل في السنتين 2-3.',
-    hi: '— तिमाही 1-4 और वर्ष 2-3 के कैलकुलस के लिए संदर्भ।',
   },
   'manifesto.docs.br.label': {
     'pt-BR': '🇧🇷 Brasil — MEC/CONSED (BNCC):',
@@ -4615,8 +4110,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '🇧🇷 Бразилия — MEC/CONSED (BNCC):',
     ko: '🇧🇷 브라질 — MEC/CONSED (BNCC):',
     pl: '🇧🇷 Brazylia — MEC/CONSED (BNCC):',
-    ar: '🇧🇷 البرازيل — MEC/CONSED (BNCC):',
-    hi: '🇧🇷 ब्राज़ील — MEC/CONSED (BNCC):',
   },
   'manifesto.docs.br.title': {
     'pt-BR': 'Base Nacional Comum Curricular — Ensino Médio (PDF)',
@@ -4630,8 +4123,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Base Nacional Comum Curricular — старшая школа (PDF)',
     ko: 'Base Nacional Comum Curricular — 고등학교 (PDF)',
     pl: 'Base Nacional Comum Curricular — Liceum (PDF)',
-    ar: 'Base Nacional Comum Curricular — المرحلة الثانوية (PDF)',
-    hi: 'Base Nacional Comum Curricular — हाई स्कूल (PDF)',
   },
   'manifesto.docs.br.desc': {
     'pt-BR': '— base de comparação e calibração para o público brasileiro.',
@@ -4645,8 +4136,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '— основа для сравнения и калибровки для бразильской аудитории.',
     ko: '— 브라질 독자에 대한 비교 및 보정 기준.',
     pl: '— podstawa porównań i kalibracji dla brazylijskich odbiorców.',
-    ar: '— أساس المقارنة والمعايرة للجمهور البرازيلي.',
-    hi: '— ब्राज़ीलियाई पाठकों के लिए तुलना और अंशशोधन का आधार।',
   },
   'manifesto.p6': {
     'pt-BR': 'Carga horária comparada: <strong>JP ~140h/ano</strong>, <strong>DE Klasse 10 LK ~120h/ano</strong>, <strong>SG E-Math ~135h/ano</strong>. Nosso programa: 12 trimestres × ~30h ≈ <strong>360h totais</strong> (3 anos), compatível com a média dos três sistemas.',
@@ -4660,8 +4149,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Сравнение часов: <strong>Япония ~140ч/год</strong>, <strong>Германия Klasse 10 LK ~120ч/год</strong>, <strong>Сингапур E-Math ~135ч/год</strong>. Наша программа: 12 триместров × ~30ч ≈ <strong>360ч всего</strong> (3 года), что соответствует среднему по трём системам.',
     ko: '시수 비교: <strong>일본 ~140시간/년</strong>, <strong>독일 Klasse 10 LK ~120시간/년</strong>, <strong>싱가포르 E-Math ~135시간/년</strong>. 우리 프로그램: 12학기 × ~30시간 ≈ <strong>총 360시간</strong>(3년), 세 시스템 평균과 호환.',
     pl: 'Porównanie liczby godzin: <strong>JP ~140h/rok</strong>, <strong>DE Klasse 10 LK ~120h/rok</strong>, <strong>SG E-Math ~135h/rok</strong>. Nasz program: 12 trymestrów × ~30h ≈ <strong>łącznie 360h</strong> (3 lata), zgodnie ze średnią trzech systemów.',
-    ar: 'مقارنة العبء الزمني: <strong>اليابان ~140 ساعة/سنة</strong>، <strong>ألمانيا Klasse 10 LK ~120 ساعة/سنة</strong>، <strong>سنغافورة E-Math ~135 ساعة/سنة</strong>. برنامجنا: 12 فصلاً × ~30 ساعة ≈ <strong>360 ساعة إجمالاً</strong> (3 سنوات)، متوافق مع متوسط الأنظمة الثلاثة.',
-    hi: 'घंटों की तुलना: <strong>जापान ~140 घं/वर्ष</strong>, <strong>जर्मनी Klasse 10 LK ~120 घं/वर्ष</strong>, <strong>सिंगापुर E-Math ~135 घं/वर्ष</strong>। हमारा कार्यक्रम: 12 तिमाहियाँ × ~30 घं ≈ <strong>कुल 360 घं</strong> (3 वर्ष), तीनों प्रणालियों के औसत के अनुरूप।',
   },
   'manifesto.h2.howItGrows': {
     'pt-BR': 'Como o site cresce a partir daqui',
@@ -4675,8 +4162,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Как сайт растёт дальше',
     ko: '여기서부터 사이트는 어떻게 성장하는가',
     pl: 'Jak strona rośnie dalej',
-    ar: 'كيف يكبر الموقع من هنا',
-    hi: 'यहाँ से साइट कैसे बढ़ती है',
   },
   'manifesto.p7': {
     'pt-BR': 'Depois do ensino médio bem servido, vem o resto. Em ordem:',
@@ -4690,8 +4175,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'После того как старшая школа хорошо покрыта, идёт остальное. По порядку:',
     ko: '고등학교를 잘 다룬 다음, 나머지가 옵니다. 순서대로:',
     pl: 'Gdy liceum będzie dobrze obsłużone, przychodzi reszta. Po kolei:',
-    ar: 'بعد تغطية المرحلة الثانوية بشكل جيد، يأتي البقية. بالترتيب:',
-    hi: 'हाई स्कूल को अच्छी तरह से कवर करने के बाद, बाकी आता है। क्रम में:',
   },
   'manifesto.roadmap.now.label': {
     'pt-BR': 'Hoje (em construção)',
@@ -4705,8 +4188,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Сегодня (в разработке)',
     ko: '오늘 (개발 중)',
     pl: 'Dziś (w budowie)',
-    ar: 'اليوم (قيد البناء)',
-    hi: 'आज (निर्माणाधीन)',
   },
   'manifesto.roadmap.now.linkText': {
     'pt-BR': 'Ensino Médio Otimizado',
@@ -4720,8 +4201,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Оптимизированная старшая школа',
     ko: '최적화된 고등학교 과정',
     pl: 'Zoptymalizowane Liceum',
-    ar: 'الثانوية المُحسَّنة',
-    hi: 'अनुकूलित हाई स्कूल',
   },
   'manifesto.roadmap.now.desc': {
     'pt-BR': '· 12 trimestres × 10 aulas. Matemática completa: cálculo, álgebra, geometria analítica, trigonometria, vetores, matrizes, combinatória, probabilidade, estatística, álgebra linear introdutória.',
@@ -4735,8 +4214,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '· 12 триместров × 10 уроков. Полная математика: матанализ, алгебра, аналитическая геометрия, тригонометрия, векторы, матрицы, комбинаторика, вероятность, статистика, вводная линейная алгебра.',
     ko: '· 12학기 × 10강. 완전한 수학: 미적분, 대수, 해석기하, 삼각함수, 벡터, 행렬, 조합론, 확률, 통계, 선형대수 입문.',
     pl: '· 12 trymestrów × 10 lekcji. Pełna matematyka: analiza, algebra, geometria analityczna, trygonometria, wektory, macierze, kombinatoryka, prawdopodobieństwo, statystyka, wstęp do algebry liniowej.',
-    ar: '· 12 فصلاً × 10 دروس. رياضيات كاملة: حساب التفاضل والتكامل، الجبر، الهندسة التحليلية، علم المثلثات، المتجهات، المصفوفات، التوافيق، الاحتمال، الإحصاء، مقدمة الجبر الخطي.',
-    hi: '· 12 तिमाहियाँ × 10 पाठ। पूर्ण गणित: कैलकुलस, बीजगणित, विश्लेषणात्मक ज्यामिति, त्रिकोणमिति, सदिश, मैट्रिक्स, क्रमचय-संचय, प्रायिकता, सांख्यिकी, परिचयात्मक रैखिक बीजगणित।',
   },
   'manifesto.roadmap.next.label': {
     'pt-BR': 'Próximo passo (futuro próximo)',
@@ -4750,8 +4227,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Следующий шаг (ближайшее будущее)',
     ko: '다음 단계 (가까운 미래)',
     pl: 'Następny krok (bliska przyszłość)',
-    ar: 'الخطوة التالية (المستقبل القريب)',
-    hi: 'अगला कदम (निकट भविष्य)',
   },
   'manifesto.roadmap.next.title': {
     'pt-BR': 'Física do ensino médio',
@@ -4765,8 +4240,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Физика старшей школы',
     ko: '고등학교 물리',
     pl: 'Fizyka licealna',
-    ar: 'فيزياء المرحلة الثانوية',
-    hi: 'हाई स्कूल भौतिकी',
   },
   'manifesto.roadmap.next.desc': {
     'pt-BR': '· mesma metodologia, mesmas 6+1 portas. Cinemática, dinâmica, eletromagnetismo, ondas, óptica, termodinâmica — conectando matemática com aplicação concreta.',
@@ -4780,8 +4253,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '· та же методология, те же 6+1 дверей. Кинематика, динамика, электромагнетизм, волны, оптика, термодинамика — связь математики с конкретными приложениями.',
     ko: '· 같은 방법론, 같은 6+1 문. 운동학, 동역학, 전자기학, 파동, 광학, 열역학 — 수학과 구체적 응용을 잇기.',
     pl: '· ta sama metodologia, te same 6+1 drzwi. Kinematyka, dynamika, elektromagnetyzm, fale, optyka, termodynamika — łączenie matematyki z konkretnym zastosowaniem.',
-    ar: '· نفس المنهجية، نفس الأبواب 6+1. علم الحركة، الديناميكا، الكهرومغناطيسية، الموجات، البصريات، الديناميكا الحرارية — لربط الرياضيات بالتطبيق الملموس.',
-    hi: '· वही पद्धति, वही 6+1 द्वार। गतिकी, गत्यात्मकी, विद्युत-चुंबकत्व, तरंगें, प्रकाशिकी, ऊष्मागतिकी — गणित को ठोस अनुप्रयोग से जोड़ना।',
   },
   'manifesto.roadmap.future.label': {
     'pt-BR': 'Visão de longo prazo',
@@ -4795,8 +4266,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Долгосрочное видение',
     ko: '장기 비전',
     pl: 'Wizja długoterminowa',
-    ar: 'الرؤية بعيدة المدى',
-    hi: 'दीर्घकालिक दृष्टि',
   },
   'manifesto.roadmap.future.title': {
     'pt-BR': 'Faculdade de Engenharia',
@@ -4810,8 +4279,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Инженерный факультет',
     ko: '공과대학',
     pl: 'Wydział Inżynierii',
-    ar: 'كلية الهندسة',
-    hi: 'इंजीनियरिंग कॉलेज',
   },
   'manifesto.roadmap.future.desc': {
     'pt-BR': '· disciplinas das engenharias mecânica, elétrica, civil, naval. Continuação natural para quem cursou a base. Cálculo I-IV, EDOs, Mecânica dos Sólidos, Sinais e Sistemas, Termodinâmica Aplicada — sem o silêncio que tantos sentem em sala de aula.',
@@ -4825,8 +4292,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: '· курсы из машиностроения, электротехники, строительства, корабельной инженерии. Естественное продолжение для тех, кто прошёл базу. Матанализ I-IV, ОДУ, механика твёрдого тела, сигналы и системы, прикладная термодинамика — без той тишины, которую многие чувствуют в аудитории.',
     ko: '· 기계, 전기, 토목, 조선 공학 과목들. 기본을 마친 사람들에게 자연스러운 연장. 미적분 I-IV, ODE, 고체역학, 신호와 시스템, 응용 열역학 — 많은 사람이 강의실에서 느끼는 침묵 없이.',
     pl: '· przedmioty inżynierii mechanicznej, elektrycznej, lądowej, okrętowej. Naturalne przedłużenie dla tych, którzy ukończyli podstawę. Analiza I-IV, RRZ, Mechanika ciał stałych, Sygnały i systemy, Termodynamika stosowana — bez tej ciszy, którą tylu czuje w sali wykładowej.',
-    ar: '· مواد الهندسة الميكانيكية والكهربائية والمدنية والبحرية. امتداد طبيعي لمن أكمل الأساس. حساب التفاضل والتكامل I-IV، المعادلات التفاضلية الاعتيادية، ميكانيكا الأجسام الصلبة، الإشارات والأنظمة، الديناميكا الحرارية التطبيقية — بدون الصمت الذي يشعر به الكثيرون في القاعة.',
-    hi: '· यांत्रिक, विद्युत, सिविल, नौसेना इंजीनियरिंग के विषय। आधार पूरा करने वालों के लिए स्वाभाविक विस्तार। कैलकुलस I-IV, ODEs, ठोस यांत्रिकी, सिग्नल्स और सिस्टम्स, अनुप्रयुक्त ऊष्मागतिकी — उस मौन के बिना जो बहुतों को कक्षा में महसूस होता है।',
   },
   'manifesto.p8.before': {
     'pt-BR': 'Além disso, mantemos uma',
@@ -4840,8 +4305,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Кроме того, мы ведём',
     ko: '또한, 우리는',
     pl: 'Ponadto utrzymujemy',
-    ar: 'بالإضافة إلى ذلك، نحتفظ بـ',
-    hi: 'इसके अलावा, हम एक',
   },
   'manifesto.p8.linkText': {
     'pt-BR': 'seção de Finanças Quantitativas',
@@ -4855,8 +4318,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'раздел количественных финансов',
     ko: '계량 금융 섹션을 운영합니다',
     pl: 'sekcję Finansów Ilościowych',
-    ar: 'قسم التمويل الكمّي',
-    hi: 'मात्रात्मक वित्त खंड',
   },
   'manifesto.p8.after': {
     'pt-BR': ' — Black-Scholes em destaque — como demonstração viva de que a matemática que vamos ensinar é <strong>a mesma</strong> que opera mesa de derivativos em São Paulo, Tóquio e Londres. Não é teoria descolada. É a régua do mundo.',
@@ -4870,8 +4331,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: ' — с Блэком-Шоулзом во главе — как живое доказательство того, что математика, которой мы учим, — это <strong>та же самая</strong> математика, которая работает на деривативных столах в Сан-Паулу, Токио и Лондоне. Не оторванная теория. Линейка мира.',
     ko: ' — Black-Scholes를 중심으로 — 우리가 가르칠 수학이 상파울루, 도쿄, 런던의 파생상품 데스크를 돌리는 <strong>똑같은</strong> 수학이라는 살아있는 증거. 동떨어진 이론이 아닙니다. 세상의 자입니다.',
     pl: ' — z Black-Scholesem na czele — jako żywy dowód, że matematyka, której będziemy uczyć, to <strong>ta sama</strong> matematyka, która obsługuje stoły derywatowe w São Paulo, Tokio i Londynie. Nie oderwana teoria. Linijka świata.',
-    ar: ' — مع Black-Scholes في المقدمة — كبرهان حي على أن الرياضيات التي سنعلمها هي <strong>نفسها</strong> التي تشغّل مكاتب المشتقات في ساو باولو وطوكيو ولندن. ليست نظرية منفصلة. إنها مسطرة العالم.',
-    hi: ' — Black-Scholes केंद्र में — जीवंत प्रमाण के रूप में कि जो गणित हम पढ़ाएँगे वह <strong>वही गणित</strong> है जो साओ पाउलो, टोक्यो और लंदन में डेरिवेटिव डेस्क चलाती है। अलग-थलग सिद्धांत नहीं। दुनिया का मापदंड।',
   },
   'manifesto.h2.howEachLesson': {
     'pt-BR': 'Como cada lição é construída',
@@ -4885,8 +4344,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Как построен каждый урок',
     ko: '각 강의는 어떻게 만들어지는가',
     pl: 'Jak zbudowana jest każda lekcja',
-    ar: 'كيف يُبنى كل درس',
-    hi: 'प्रत्येक पाठ कैसे बनाया जाता है',
   },
   'manifesto.p9': {
     'pt-BR': 'Aqui matemática não começa pela fórmula. Começa por <strong>um problema que ninguém sabe resolver fácil</strong> — e só depois a ferramenta aparece, porque você sentiu a falta dela primeiro. Bisseção não abre em ε e tolerância. Abre na pergunta <em>"como achar uma raiz quando não dá pra isolar o x?"</em>. Black-Scholes não abre na PDE. Abre em <em>"como saber quanto vale uma opção que ainda não venceu?"</em>.',
@@ -4900,8 +4357,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Здесь математика не начинается с формулы. Она начинается с <strong>задачи, которую никто не может легко решить</strong> — и только потом появляется инструмент, потому что сначала ты почувствовал его нехватку. Метод бисекции открывается не с ε и допуска. Он открывается вопросом <em>«как найти корень, когда нельзя выразить x?»</em>. Блэк-Шоулз открывается не с УЧП. Он открывается с <em>«как узнать, сколько стоит опцион, который ещё не истёк?»</em>.',
     ko: '여기서 수학은 공식으로 시작하지 않습니다. <strong>아무도 쉽게 풀지 못하는 문제</strong>에서 시작합니다 — 그러고 나서야 도구가 나타납니다, 당신이 먼저 그것의 부재를 느꼈기 때문입니다. 이분법은 ε와 허용오차로 열리지 않습니다. <em>"x를 분리할 수 없을 때 어떻게 근을 찾는가?"</em>라는 질문으로 열립니다. Black-Scholes는 편미분방정식으로 열리지 않습니다. <em>"아직 만기되지 않은 옵션의 가치를 어떻게 아는가?"</em>로 열립니다.',
     pl: 'Tutaj matematyka nie zaczyna się od wzoru. Zaczyna się od <strong>problemu, którego nikt nie umie łatwo rozwiązać</strong> — i dopiero potem pojawia się narzędzie, bo najpierw odczułeś jego brak. Bisekcja nie otwiera się od ε i tolerancji. Otwiera się od pytania <em>„jak znaleźć pierwiastek, gdy nie da się wyizolować x?"</em>. Black-Scholes nie otwiera się od PDE. Otwiera się od <em>„skąd wiesz, ile warta jest opcja, która jeszcze nie wygasła?"</em>.',
-    ar: 'هنا لا تبدأ الرياضيات بالصيغة. تبدأ بـ<strong>مشكلة لا يعرف أحد كيف يحلها بسهولة</strong> — وحينها فقط تظهر الأداة، لأنك أحسست بغيابها أولاً. التنصيف لا يبدأ بـ ε والتسامح. يبدأ بسؤال <em>"كيف نجد جذرًا حين لا يمكن عزل x؟"</em>. Black-Scholes لا تبدأ بمعادلة تفاضلية جزئية. تبدأ بـ<em>"كيف نعرف قيمة خيار لم ينضج بعد؟"</em>.',
-    hi: 'यहाँ गणित सूत्र से शुरू नहीं होता। यह <strong>एक ऐसी समस्या से शुरू होता है जिसे कोई आसानी से हल नहीं कर सकता</strong> — और फिर उपकरण आता है, क्योंकि पहले आपने उसकी कमी महसूस की। द्विभाजन ε और सहनशीलता से नहीं खुलता। यह इस प्रश्न से खुलता है: <em>"जब x को अलग नहीं किया जा सकता तब मूल कैसे खोजें?"</em>। Black-Scholes PDE से नहीं खुलता। यह <em>"अभी तक समाप्त न हुए विकल्प का मूल्य कैसे जानें?"</em> से खुलता है।',
   },
   'manifesto.p10': {
     'pt-BR': 'Toda equação aqui tem <strong>6 portas</strong>. Uma é a derivação formal completa, com todo o rigor que um professor de federal exige. As outras cinco são versões pra criança de 5, 10, jovem de 15, estudante de 25, profissional de 40. Todas certas. Todas conectadas. <strong>Você escolhe a porta — e troca de porta quando quiser</strong>. Toda equação central tem ainda um botão <strong>"Ler em voz alta"</strong> em PT-BR — acessibilidade embutida, não enxertada.',
@@ -4915,8 +4370,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'У каждого уравнения здесь <strong>6 дверей</strong>. Одна — полный формальный вывод со всей строгостью, которую требует профессор федерального университета. Остальные пять — версии для 5-летнего ребёнка, 10-летнего, 15-летнего подростка, 25-летнего студента, 40-летнего профессионала. Все правильные. Все связаны. <strong>Дверь выбираешь ты — и меняешь её когда захочешь</strong>. У каждого центрального уравнения есть ещё кнопка <strong>«Прочитать вслух»</strong> на PT-BR — доступность встроена, а не прикручена.',
     ko: '여기 모든 방정식에는 <strong>6개의 문</strong>이 있습니다. 하나는 연방대 교수가 요구하는 모든 엄격함을 담은 완전한 형식 유도. 나머지 다섯은 5살, 10살, 15살 청소년, 25살 학생, 40살 전문가용 버전입니다. 모두 정확합니다. 모두 연결돼 있습니다. <strong>당신이 문을 고르고 — 원할 때 문을 바꿉니다</strong>. 모든 핵심 방정식에는 PT-BR <strong>"소리내어 읽기"</strong> 버튼도 있습니다 — 접근성은 끼워넣은 게 아니라 처음부터 내장된 것입니다.',
     pl: 'Każde równanie ma tu <strong>6 drzwi</strong>. Jedne to pełne formalne wyprowadzenie, z całym rygorem, jakiego wymaga profesor uniwersytetu federalnego. Pozostałe pięć to wersje dla 5-latka, 10-latka, 15-letniego nastolatka, 25-letniego studenta, 40-letniego profesjonalisty. Wszystkie poprawne. Wszystkie połączone. <strong>Wybierasz drzwi — i zmieniasz, kiedy chcesz</strong>. Każde kluczowe równanie ma też przycisk <strong>„Czytaj na głos"</strong> w PT-BR — dostępność wbudowana, nie doczepiona.',
-    ar: 'كل معادلة هنا لها <strong>6 أبواب</strong>. واحد هو الاشتقاق الرسمي الكامل، بكل الصرامة التي يطلبها أستاذ جامعة فيدرالية. الأبواب الخمسة الأخرى نسخ لطفل في الخامسة، وفي العاشرة، ومراهق في الخامسة عشرة، وطالب في الخامسة والعشرين، ومهني في الأربعين. كلها صحيحة. كلها مترابطة. <strong>أنت تختار الباب — وتُبدّل الباب متى شئت</strong>. كل معادلة محورية تحتوي أيضًا على زر <strong>"قراءة بصوت عالٍ"</strong> بالبرتغالية البرازيلية — إمكانية وصول مدمجة لا ملحقة.',
-    hi: 'यहाँ हर समीकरण के <strong>6 द्वार</strong> हैं। एक है पूर्ण औपचारिक व्युत्पत्ति, उस पूरी कठोरता के साथ जो संघीय विश्वविद्यालय का प्रोफ़ेसर माँगता है। अन्य पाँच 5 साल के बच्चे, 10 साल, 15 साल के युवा, 25 साल के छात्र, 40 साल के पेशेवर के लिए संस्करण हैं। सभी सही। सभी जुड़े हुए। <strong>आप द्वार चुनते हैं — और जब चाहें तब बदलते हैं</strong>। हर केंद्रीय समीकरण में PT-BR का <strong>"ज़ोर से पढ़ें"</strong> बटन भी है — सुलभता अंतर्निहित है, थोपी हुई नहीं।',
   },
   'manifesto.p11': {
     'pt-BR': 'Aqui você <strong>prevê antes de ver</strong>. Erra, recebe correção, tenta de novo, e aí entende. Como se aprende uma língua morando na Espanha, não na sala de aula. Como se aprende a programar quebrando código, não lendo manual. A correção vem em loop curto, e a recompensa vem <em>depois</em> do esforço — nunca antes. Sem distintivo, sem pontos, sem ofuscação.',
@@ -4930,8 +4383,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Здесь ты <strong>предсказываешь, прежде чем увидеть</strong>. Ошибаешься, получаешь исправление, пробуешь снова — и тогда понимаешь. Как изучают язык, живя в Испании, а не в классе. Как учатся программировать, ломая код, а не читая мануал. Исправление приходит коротким циклом, а награда — <em>после</em> усилия, никогда до. Никаких значков, никаких очков, никакого замыливания.',
     ko: '여기서는 <strong>보기 전에 예측합니다</strong>. 틀리고, 수정받고, 다시 시도하고, 그제야 이해합니다. 교실이 아니라 스페인에 살며 언어를 배우듯이. 매뉴얼 읽기가 아니라 코드를 부수며 프로그래밍을 배우듯이. 수정은 짧은 루프로 오고, 보상은 노력 <em>뒤에</em> 옵니다 — 절대 그 전이 아닙니다. 배지도, 포인트도, 흐림도 없습니다.',
     pl: 'Tutaj <strong>przewidujesz, zanim zobaczysz</strong>. Mylisz się, dostajesz korektę, próbujesz znowu i wtedy rozumiesz. Tak jak uczysz się języka mieszkając w Hiszpanii, a nie w sali. Tak jak uczysz się programować łamiąc kod, a nie czytając instrukcję. Korekta przychodzi w krótkich pętlach, a nagroda <em>po</em> wysiłku — nigdy przed. Bez odznak, bez punktów, bez zaciemnień.',
-    ar: 'هنا <strong>تتنبأ قبل أن ترى</strong>. تخطئ، تتلقى التصحيح، تحاول مرة أخرى، ثم تفهم. كما تتعلم لغة بالعيش في إسبانيا، لا في القاعة الدراسية. كما تتعلم البرمجة بكسر الكود، لا بقراءة الدليل. التصحيح يأتي في حلقات قصيرة، والمكافأة تأتي <em>بعد</em> المجهود — أبدًا قبله. بلا أوسمة، بلا نقاط، بلا تعتيم.',
-    hi: 'यहाँ आप <strong>देखने से पहले अनुमान लगाते हैं</strong>। गलती करते हैं, सुधार पाते हैं, फिर कोशिश करते हैं, और तब समझते हैं। जैसे भाषा कक्षा में नहीं, स्पेन में रहकर सीखी जाती है। जैसे प्रोग्रामिंग मैन्युअल पढ़कर नहीं, कोड तोड़कर सीखी जाती है। सुधार छोटे लूप में आता है, और इनाम प्रयास के <em>बाद</em> आता है — कभी पहले नहीं। कोई बैज नहीं, कोई अंक नहीं, कोई धुंधलापन नहीं।',
   },
   'manifesto.p12': {
     'pt-BR': 'Aqui não tem paywall. Não tem login. Não tem trial de 7 dias. Não tem "assine o premium pra ver os passos". <strong>Open source pra sempre, gratuito pra sempre</strong>, código aberto no GitHub, conteúdo aberto pra qualquer professor remixar, traduzir, adaptar.',
@@ -4945,8 +4396,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Здесь нет пейволла. Нет входа. Нет 7-дневной пробы. Нет «подпишись на премиум, чтобы увидеть шаги». <strong>Открытый код навсегда, бесплатно навсегда</strong>, открытый код на GitHub, открытый контент для любого учителя — миксуй, переводи, адаптируй.',
     ko: '여기에는 페이월이 없습니다. 로그인 없습니다. 7일 체험 없습니다. "단계를 보려면 프리미엄 구독" 없습니다. <strong>영원히 오픈소스, 영원히 무료</strong>, GitHub에 공개된 코드, 어떤 교사든 리믹스, 번역, 각색할 수 있는 공개 콘텐츠.',
     pl: 'Tutaj nie ma paywalla. Bez logowania. Bez 7-dniowego trialu. Bez „wykup premium, żeby zobaczyć kroki". <strong>Open source na zawsze, bezpłatnie na zawsze</strong>, otwarty kod na GitHubie, otwarte treści dla każdego nauczyciela do remiksu, tłumaczenia, adaptacji.',
-    ar: 'لا يوجد جدار دفع هنا. لا تسجيل دخول. لا تجربة لمدة 7 أيام. لا "اشترك في النسخة المميزة لرؤية الخطوات". <strong>مفتوح المصدر إلى الأبد، مجانًا إلى الأبد</strong>، الكود مفتوح على GitHub، والمحتوى مفتوح لأي معلم لإعادة المزج والترجمة والتكييف.',
-    hi: 'यहाँ कोई पेवॉल नहीं है। कोई लॉगिन नहीं। कोई 7-दिन का ट्रायल नहीं। कोई "चरण देखने के लिए प्रीमियम लें" नहीं। <strong>हमेशा के लिए ओपन सोर्स, हमेशा के लिए मुफ़्त</strong>, GitHub पर खुला कोड, किसी भी शिक्षक के लिए रीमिक्स, अनुवाद, अनुकूलन हेतु खुला कंटेंट।',
   },
   'manifesto.p13': {
     'pt-BR': 'Não estamos competindo com a Khan Academy. <strong>Khan ensina conta. Estamos competindo com o silêncio</strong> — o silêncio entre saber a fórmula e entender o que ela diz sobre o mundo. Esse silêncio é o que faz aluno bom no ensino médio reprovar em Cálculo na faculdade. É o que faz mestre em Finanças não conseguir derivar Black-Scholes mesmo tendo tirado A na cadeira.',
@@ -4960,8 +4409,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Мы не конкурируем с Khan Academy. <strong>Khan учит арифметике. Мы конкурируем с молчанием</strong> — молчанием между «знать формулу» и «понимать, что она говорит о мире». Именно это молчание заставляет хорошего школьника заваливать Матанализ в вузе. Именно оно делает так, что магистр финансов не может вывести Блэка-Шоулза, несмотря на пятёрку по предмету.',
     ko: '우리는 Khan Academy와 경쟁하지 않습니다. <strong>Khan은 산수를 가르칩니다. 우리는 침묵과 경쟁합니다</strong> — 공식을 아는 것과 그것이 세상에 대해 말하는 것을 이해하는 것 사이의 침묵. 그 침묵이 고등학교에서 잘하던 학생을 대학 미적분에서 떨어뜨립니다. 강의에서 A를 받은 재무 석사가 Black-Scholes를 유도하지 못하게 만드는 것도 그것입니다.',
     pl: 'Nie konkurujemy z Khan Academy. <strong>Khan uczy rachunków. Konkurujemy z ciszą</strong> — ciszą między znaniem wzoru a rozumieniem tego, co mówi on o świecie. To ta cisza sprawia, że dobry licealista oblewa Analizę na studiach. To ona sprawia, że magister finansów nie potrafi wyprowadzić Black-Scholesa, mimo piątki z przedmiotu.',
-    ar: 'نحن لا ننافس Khan Academy. <strong>Khan تعلّم الحساب. نحن ننافس الصمت</strong> — الصمت بين معرفة الصيغة وفهم ما تقوله عن العالم. هذا الصمت هو ما يجعل طالبًا جيدًا في الثانوية يرسب في حساب التفاضل والتكامل في الجامعة. وهو ما يجعل ماجستير المالية عاجزًا عن اشتقاق Black-Scholes رغم حصوله على A في المادة.',
-    hi: 'हम Khan Academy से नहीं प्रतिस्पर्धा कर रहे। <strong>Khan हिसाब सिखाता है। हम मौन से प्रतिस्पर्धा कर रहे हैं</strong> — सूत्र जानने और यह समझने के बीच का मौन कि वह दुनिया के बारे में क्या कहता है। यही मौन हाई स्कूल के अच्छे छात्र को कॉलेज में कैलकुलस में फेल कराता है। यही वजह है कि वित्त में स्नातकोत्तर, A लाने के बावजूद, Black-Scholes व्युत्पन्न नहीं कर पाता।',
   },
   'manifesto.closing.line1.before': {
     'pt-BR': 'A matemática não é difícil.',
@@ -4975,8 +4422,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Математика не трудная.',
     ko: '수학은 어렵지 않습니다.',
     pl: 'Matematyka nie jest trudna.',
-    ar: 'الرياضيات ليست صعبة.',
-    hi: 'गणित कठिन नहीं है।',
   },
   'manifesto.closing.line1.after': {
     'pt-BR': 'Está mal contada.',
@@ -4990,8 +4435,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Просто плохо рассказана.',
     ko: '단지 잘못 전해졌을 뿐입니다.',
     pl: 'Jest tylko źle opowiedziana.',
-    ar: 'إنما تُحكى بشكل سيئ.',
-    hi: 'इसे बुरी तरह सुनाया गया है।',
   },
   'manifesto.closing.line2': {
     'pt-BR': 'A gente conta direito.',
@@ -5005,8 +4448,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Мы рассказываем как надо.',
     ko: '우리가 제대로 전해줍니다.',
     pl: 'My opowiadamy ją porządnie.',
-    ar: 'نحن نحكيها كما يجب.',
-    hi: 'हम इसे सही तरह से सुनाते हैं।',
   },
   'manifesto.outro': {
     'pt-BR': 'Você vai aprender matemática <em>maluco</em>. Esse é o trato.',
@@ -5020,8 +4461,6 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Ты будешь учить математику <em>как сумасшедший</em>. Договорились.',
     ko: '당신은 <em>미친 듯이</em> 수학을 배울 것입니다. 그게 약속입니다.',
     pl: 'Nauczysz się matematyki jak <em>szalony</em>. Taka umowa.',
-    ar: 'سوف تتعلم الرياضيات كـ<em>مجنون</em>. هذا هو الاتفاق.',
-    hi: 'आप <em>पागलों</em> की तरह गणित सीखेंगे। यही सौदा है।',
   },
 }
 

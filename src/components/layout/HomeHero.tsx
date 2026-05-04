@@ -2,9 +2,14 @@
 
 import Link from 'next/link'
 import { useLocale } from './LocaleProvider'
+import { LOCALES, NUM_LOCALES } from '@/lib/i18n/locales'
 
 export function HomeHero() {
   const { t } = useLocale()
+  const features = t('home.stats.features').replace('{n}', String(NUM_LOCALES))
+  const bandeiras = Object.values(LOCALES)
+    .map((l) => l.bandeira)
+    .join(' ')
   return (
     <section className="relative overflow-hidden border-b border-clube-mist-soft/30 bg-gradient-to-b from-clube-cream to-clube-cream-soft">
       <div className="container-clube py-20 sm:py-28">
@@ -20,13 +25,9 @@ export function HomeHero() {
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-clube-ink/80 sm:text-xl">
             <strong>{t('home.stats.years')}</strong>
             <br />
-            <span className="text-base">
-              {t('home.stats.features')}
-            </span>
+            <span className="text-base">{features}</span>
             <br />
-            <span className="text-sm opacity-80">
-              🇧🇷 🇺🇸 🇪🇸 🇨🇳 🇯🇵 🇩🇪 🇫🇷 🇮🇹 🇷🇺 🇰🇷 🇻🇳 🇵🇱 🇰🇪 🇱🇧 🇮🇱 🇮🇳 🇪🇪
-            </span>
+            <span className="text-sm opacity-80">{bandeiras}</span>
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link

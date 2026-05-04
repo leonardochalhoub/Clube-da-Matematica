@@ -2,7 +2,9 @@
  * Sistema de internacionalização do Clube da Matemática.
  *
  * Estratégia:
- *  - 16 idiomas suportados (mais importantes do mundo + estratégicos)
+ *  - Apenas idiomas com voz TTS instalada por padrão na maioria dos OSes
+ *    (Windows/Mac/Linux Chrome). Idiomas que exigiriam instalação manual
+ *    da voz (Hebrew, Arabic, Hindi) foram removidos pra evitar UX ruim.
  *  - Detecção automática por navigator.language no client
  *  - Fallback para inglês se idioma não suportado
  *  - Auto-mudança de voz no AudioReader pra o idioma selecionado
@@ -22,8 +24,6 @@ export type Locale =
   | 'ru'    // russo
   | 'ko'    // coreano
   | 'pl'    // polonês
-  | 'ar'    // árabe (libanês — bandeira do Líbano com o cedro)
-  | 'hi'    // hindi (Índia)
 
 export interface LocaleInfo {
   code: Locale
@@ -49,9 +49,13 @@ export const LOCALES: Record<Locale, LocaleInfo> = {
   ru:      { code: 'ru',    nome: 'Русский',             bandeira: '🇷🇺', speechLang: 'ru-RU', dir: 'ltr' },
   ko:      { code: 'ko',    nome: '한국어',                 bandeira: '🇰🇷', speechLang: 'ko-KR', dir: 'ltr' },
   pl:      { code: 'pl',    nome: 'Polski',              bandeira: '🇵🇱', speechLang: 'pl-PL', dir: 'ltr' },
-  ar:      { code: 'ar',    nome: 'العربية اللبنانية',     bandeira: '🇱🇧', speechLang: 'ar-LB', dir: 'rtl' },
-  hi:      { code: 'hi',    nome: 'हिन्दी',                  bandeira: '🇮🇳', speechLang: 'hi-IN', dir: 'ltr' },
 }
+
+/**
+ * Total de idiomas suportados — derivado de LOCALES pra evitar
+ * desync com strings hardcoded em UI. Use sempre essa constante.
+ */
+export const NUM_LOCALES = Object.keys(LOCALES).length
 
 export const DEFAULT_LOCALE: Locale = 'en'
 
@@ -71,7 +75,6 @@ const COUNTRY_TO_LOCALE: Record<string, Locale> = {
   RU: 'ru', BY: 'ru',
   KR: 'ko', KP: 'ko',
   PL: 'pl',
-  LB: 'ar', SY: 'ar', JO: 'ar', PS: 'ar', SA: 'ar', AE: 'ar', EG: 'ar', QA: 'ar', KW: 'ar',
 }
 
 /**

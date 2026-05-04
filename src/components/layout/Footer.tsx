@@ -5,9 +5,11 @@ import { Logo } from '@/components/brand/Logo'
 import { AmazingSchoolSponsor } from './AmazingSchoolSponsor'
 import { BuiltWithClaude } from './BuiltWithClaude'
 import { useLocale } from './LocaleProvider'
+import { LOCALES } from '@/lib/i18n/locales'
+import { APP_VERSION, APP_COMMIT_SHA, APP_LAST_UPDATE } from '@/lib/version.generated'
 
 export function Footer() {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   return (
     <footer className="mt-24 border-t border-clube-mist-soft/30 bg-clube-cream-soft">
       <div className="container-clube py-10">
@@ -126,6 +128,17 @@ export function Footer() {
           <BuiltWithClaude />
           <p className="max-w-2xl text-clube-mist">
             {t('footer.khan')}
+          </p>
+          <p className="font-mono text-[10px] tracking-wide text-clube-mist/70">
+            v{APP_VERSION} · {APP_COMMIT_SHA} ·{' '}
+            {new Date(APP_LAST_UPDATE).toLocaleString(LOCALES[locale].speechLang, {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZoneName: 'short',
+            })}
           </p>
         </div>
       </div>
