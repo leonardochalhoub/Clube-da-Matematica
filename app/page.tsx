@@ -22,6 +22,7 @@ import {
 } from '@/content/livros-data'
 import { SearchDiscovery } from '@/components/layout/SearchDiscovery'
 import { HomeHero } from '@/components/layout/HomeHero'
+import { HomePhilosophy } from '@/components/layout/HomePhilosophy'
 
 /** Conta exercícios em arquivos MDX via regex (extraído em build time). */
 function contarExercicios(): number {
@@ -75,40 +76,8 @@ export default function HomePage() {
       {/* Descoberta dinâmica — substitui antiga listagem estática */}
       <SearchDiscovery slugToCaminho={slugToCaminho} livros={TODOS_LIVROS} />
 
-      {/* Filosofia */}
-      <section className="border-y border-clube-mist-soft/30 bg-clube-cream-soft py-16">
-        <div className="container-clube grid gap-10 md:grid-cols-3">
-          <div>
-            <h3 className="text-lg font-bold text-clube-teal-deep">
-              Não competimos com Khan
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-clube-ink/80">
-              Khan ensina conta. A gente ensina <em>o que</em> a conta diz
-              sobre o mundo. São produtos de naturezas diferentes.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-clube-teal-deep">
-              6 portas em todo conteúdo
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-clube-ink/80">
-              Formal, 5, 10, 15, 25, 40 — você escolhe a porta. Não importa
-              se você reprovou em Cálculo ou ainda não viu derivada na
-              escola. Toda equação central tem botão "Ler em voz alta".
-            </p>
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-clube-teal-deep">
-              Caderno e dúzias de exercícios
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-clube-ink/80">
-              Cada lição traz 40-80 exercícios extraídos dos melhores livros
-              públicos (OpenStax, Active Calculus, Stitz-Zeager, livros do JP/DE/SG).
-              Senta com o caderno e vai resolvendo. Sem milagre.
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Filosofia (client shell — i18n via useLocale) */}
+      <HomePhilosophy />
     </>
   )
 }
