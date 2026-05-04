@@ -1,0 +1,374 @@
+---
+titulo: "Lição 98 — Método de Euler (numérico)"
+slug: "licao-98-euler-numerico"
+categoria: "aulas"
+subcategoria: "ano-3-trim-10"
+descricao: "y_{n+1} = y_n + h f(x_n, y_n). Erro local O(h²), global O(h). Implementação Python e Runge-Kutta."
+ordem: 98
+publicado: true
+tags: ["EDO", "ano-3", "trim-10"]
+prerrequisitos: ["licao-97"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-04-30"
+---
+
+<EquacaoCanonica
+  formula="y_{n+1} = y_n + h\, f(x_n, y_n), \quad x_{n+1} = x_n + h"
+  legenda={<>O <strong>método de Euler explícito</strong>: aproxime a próxima solução pela <em>reta tangente</em> com inclinação <Eq>{`f(x_n, y_n)`}</Eq>. Erro local <Eq>{`O(h^2)`}</Eq>, erro global <Eq>{`O(h)`}</Eq>. Base de toda integração numérica.</>}
+  audioTexto="Método de Euler. Para resolver dy dx igual f de x e y com y de x zero igual y zero. Discretize: x sub n mais um igual x sub n mais h. y sub n mais um igual y sub n mais h vezes f de x sub n, y sub n. Erro local de ordem h ao quadrado. Erro global de ordem h. Primeiro método de toda integração numérica."
+/>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Método de Euler explícito">
+
+### Problema
+
+PVI: $\dot y = f(t, y)$, $y(t_0) = y_0$. Quer aproximação em $t \in [t_0, T]$.
+
+### Discretização
+
+$t_n = t_0 + n h$, $n = 0, 1, \ldots, N$, $h = (T-t_0)/N$.
+
+### Recorrência
+
+$$y_{n+1} = y_n + h \cdot f(t_n, y_n)$$
+
+(Euler explícito ou *forward*.)
+
+### Erro local
+
+Por Taylor: $y(t + h) = y(t) + h y'(t) + \dfrac{h^2}{2} y''(\xi)$. Logo, **erro local de truncamento** = $\frac{h^2}{2} y''(\xi) = O(h^2)$.
+
+### Erro global
+
+Acumulado em $N = (T-t_0)/h$ passos: $|y(T) - y_N| = O(h)$. **1ª ordem**.
+
+### Variantes
+
+- **Euler implícito**: $y_{n+1} = y_n + h f(t_{n+1}, y_{n+1})$. **Estável** mas exige resolver equação implícita.
+- **Heun (RK2)**: usa média de duas inclinações. $O(h^2)$ global.
+- **Runge-Kutta 4 (RK4)**: 4 avaliações de $f$. $O(h^4)$ global. Padrão da indústria.
+
+</Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Imagina que você tá num caminho. Você sabe **pra que lado andar agora** (pode olhar à frente). Aí você dá um **passinho** naquela direção.
+
+Depois do passinho, você olha de novo: pode ter mudado o caminho. Aí você ajusta e dá outro passinho.
+
+É isso que o computador faz pra resolver equações: dá **passinhos pequenos**. Quanto **mais passinhos**, mais perto do certo.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+Quando você não consegue resolver uma EDO com fórmula bonita (porque não tem!), o computador **chuta passinho a passinho**.
+
+A ideia é simples: a EDO te diz **o quão rápido** $y$ está mudando ($dy/dt$). Então:
+
+- Em $t = 0$: você sabe $y(0)$ e $\dot y(0) = f(0, y(0))$.
+- Pequeno passo $h$ pra frente: $y(h) \approx y(0) + h \cdot \dot y(0)$.
+- Repete: $y(2h) \approx y(h) + h \cdot \dot y(h)$. E assim por diante.
+
+Isso é o **método de Euler**!
+
+**Problema**: passos grandes acumulam erro. Passos pequenos = devagar mas preciso. **Trade-off.**
+
+Tem métodos melhores: **RK4** dá precisão muito alta com pouco esforço. É o que a maioria dos softwares usa.
+
+</Porta>
+
+<Porta nivel="15" titulo="Pra adolescente de 15 anos">
+
+### Por que precisamos de numérico
+
+A maioria das EDOs do mundo real **não tem solução fechada**. Pendulo grande, problema de 3 corpos, equação de Lorenz, qualquer EDP. **Sempre** termina em numérico.
+
+### Geometria do Euler
+
+A cada ponto $(t_n, y_n)$, traça **reta tangente** com inclinação $f(t_n, y_n)$. Caminha $h$ ao longo dela. Repita.
+
+### Comparação com analítica
+
+Tomamos $\dot y = y$, $y(0) = 1$. Solução: $y(t) = e^t$.
+
+Com Euler $h = 0{,}1$, $N = 10$ passos pra chegar em $t = 1$:
+
+| n | t | Euler | exato $e^t$ | erro |
+|---|---|---|---|---|
+| 0 | 0,0 | 1,0000 | 1,0000 | 0 |
+| 1 | 0,1 | 1,1000 | 1,1052 | 0,005 |
+| 5 | 0,5 | 1,6105 | 1,6487 | 0,038 |
+| 10 | 1,0 | 2,5937 | 2,7183 | 0,125 |
+
+Erro cresce conforme $t$ aumenta. Reduzir $h$ pela metade: erro pela metade (1ª ordem).
+
+### Estabilidade
+
+Para $\dot y = -\lambda y$, $\lambda > 0$:
+- **Euler explícito**: estável só pra $h < 2/\lambda$.
+- **Euler implícito**: sempre estável.
+
+Equações **stiff** (alguns $\lambda$ muito grandes) exigem implícito ou métodos especiais.
+
+### Sistemas
+
+Para sistema $\dot{\mathbf y} = \mathbf f(t, \mathbf y)$, Euler vetorial:
+$$\mathbf y_{n+1} = \mathbf y_n + h\, \mathbf f(t_n, \mathbf y_n)$$
+
+EDO de 2ª ordem $\ddot x + 2\zeta\omega\dot x + \omega^2 x = 0$ → sistema:
+$$\dot x = v, \quad \dot v = -2\zeta\omega v - \omega^2 x$$
+
+</Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia">
+
+Numérico é **a vida real** em engenharia. Toda simulação (CFD, FEM, MBD) usa Euler ou variante.
+
+### Hierarquia de métodos
+
+| Método | Ordem global | Avaliações por passo | Uso |
+|---|---|---|---|
+| Euler explícito | 1 | 1 | Didático |
+| Heun / RK2 | 2 | 2 | Quando precisa simples |
+| RK4 | 4 | 4 | **Padrão geral** |
+| RK45 (Fehlberg) | 5 (com controle) | 6 | Adaptativo |
+| BDF (Gear) | 1-6 | varia | Stiff |
+| Adams-Bashforth | k | 1 (multistep) | Eficiente |
+
+### RK4
+
+$$k_1 = f(t_n, y_n)$$
+$$k_2 = f(t_n + h/2, y_n + h k_1/2)$$
+$$k_3 = f(t_n + h/2, y_n + h k_2/2)$$
+$$k_4 = f(t_n + h, y_n + h k_3)$$
+$$y_{n+1} = y_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)$$
+
+Erro global $O(h^4)$. **80% dos problemas práticos** usam isso.
+
+### Estabilidade absoluta
+
+Para $\dot y = -\lambda y$, fator de amplificação $|R(z)|$, $z = -\lambda h$:
+- Euler: $R = 1 + z$. Estável para $|1+z| \leq 1$.
+- Euler implícito: $R = 1/(1-z)$. **A-estável**.
+- RK4: $R(z) = 1 + z + z^2/2 + z^3/6 + z^4/24$.
+
+### Erro vs custo
+
+- **Mais passos**: mais preciso, mais lento.
+- **Mais sofisticado por passo**: mais preciso por passo.
+- **Trade-off**: RK4 com $h$ moderado vs Euler com $h$ super-pequeno. RK4 quase sempre vence.
+
+### Sistemas stiff
+
+Modelo químico com reações em escalas diferentes (ms e s). $\lambda_{max}/\lambda_{min} >> 1$. Métodos explícitos forçam $h \sim 1/\lambda_{max}$ — proibitivamente lento.
+
+**Solução**: BDF, Radau, Rosenbrock — métodos implícitos.
+
+### EDPs
+
+Discretizar espaço (FDM, FEM, FVM) → sistema de EDOs no tempo → use Euler/RK4.
+
+### Quando usar Euler
+
+- Demonstrações didáticas.
+- Quando $f$ é cara (1 avaliação por passo).
+- Time-stepping em explicit dynamics (estruturas, fluidos).
+
+### Quando NÃO usar Euler
+
+- Stiffness presente.
+- Precisão alta requerida.
+- Problemas Hamiltonianos (use **simpléticos**: leapfrog, Verlet — preservam energia).
+
+### Cross-domínio
+
+Problemas dos N-corpos cosmológicos usam variantes simpléticas. James Peebles recebeu o [Prêmio Nobel de Física de 2019](https://www.nobelprize.org/prizes/physics/2019/summary/) por contribuições teóricas em cosmologia, incluindo formação de estruturas via simulações N-body.
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+### Análise rigorosa
+
+**Consistência**: erro de truncamento local $\to 0$ com $h \to 0$.
+**Estabilidade**: solução numérica não explode.
+**Convergência**: $\lim_{h \to 0} y_N = y(T)$.
+
+**Teorema de Lax-equivalência**: para problemas lineares, **consistência + estabilidade $\Leftrightarrow$ convergência**.
+
+### Dahlquist
+
+- **1ª barreira**: ordem máxima de método multistep linear de $k$ passos $A$-estável é 2.
+- **2ª barreira**: ordem máxima de método multistep $A$-estável zero-estável é 6 (BDF6).
+
+### Métodos simpléticos
+
+Para Hamiltoniano $H(p, q) = T(p) + V(q)$, **leapfrog**:
+
+$$p_{n+1/2} = p_n - \frac{h}{2} V'(q_n)$$
+$$q_{n+1} = q_n + h\, p_{n+1/2}/m$$
+$$p_{n+1} = p_{n+1/2} - \frac{h}{2} V'(q_{n+1})$$
+
+Conserva **invariante** próximo a $H$ por bilhões de passos. Crucial em dinâmica molecular e cosmologia.
+
+### Métodos exponenciais
+
+$\dot y = Ay + g(y)$ — combine $e^{At}$ exato com $g$ aproximado. ETD (Cox-Matthews), Krylov.
+
+### Adaptativo
+
+PI controllers em estimadores de erro: $h_{new} = h \cdot (\text{tol}/\text{err})^{1/p}$. Padrão em LSODA, Radau.
+
+### Backward error analysis
+
+Solução numérica é solução **exata** de problema **modificado**: $\dot y = f(t, y) + h\, g(t, y) + O(h^2)$. Útil pra entender comportamento de longo prazo.
+
+### Análise espectral
+
+Para $\dot y = Ay$, $y_n = (I + hA)^n y_0$. Estabilidade depende de $\sigma(I + hA) \subset \overline{\mathbb D}$. Para sistemas, **shooting method** para BVP.
+
+### Software state-of-art
+
+- **scipy.integrate.solve_ivp**: RK45, Radau, BDF, LSODA.
+- **DifferentialEquations.jl** (Julia): muito mais opções, performance C++.
+- **SUNDIALS** (LLNL): produção em CFD/química.
+- **ODEPACK**: Fortran clássico, base de muito.
+
+### Benchmarks
+
+Para problema test (Brusselator, Van der Pol, Lorenz), comparar:
+
+```python
+from scipy.integrate import solve_ivp
+sol = solve_ivp(fun, [0, T], y0, method='RK45', rtol=1e-8, atol=1e-11)
+```
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicação prática">
+
+### Workflow numérico
+
+1. **Escreva EDO em forma padrão**: $\dot y = f(t, y)$, com $y$ vetorial se necessário.
+2. **Escolha método**: RK4 ou solve_ivp default.
+3. **Defina passo $h$**: testar com $h$ e $h/2$, comparar.
+4. **Codifique**: laço simples ou usar biblioteca.
+5. **Verifique**: compare com solução analítica em caso simples.
+6. **Itere**: refine $h$ se necessário.
+
+### Implementação Euler em Python
+
+```python
+def euler(f, y0, t_span, h):
+    import numpy as np
+    t = np.arange(t_span[0], t_span[1] + h/2, h)
+    y = np.zeros(len(t))
+    y[0] = y0
+    for n in range(len(t) - 1):
+        y[n+1] = y[n] + h * f(t[n], y[n])
+    return t, y
+
+# Exemplo: dy/dt = -y, y(0) = 1
+f = lambda t, y: -y
+t, y_num = euler(f, 1, [0, 5], 0.1)
+y_exact = np.exp(-t)
+print("Erro max:", abs(y_num - y_exact).max())
+```
+
+### RK4 em Python
+
+```python
+def rk4(f, y0, t_span, h):
+    import numpy as np
+    t = np.arange(t_span[0], t_span[1] + h/2, h)
+    y = np.zeros(len(t))
+    y[0] = y0
+    for n in range(len(t) - 1):
+        k1 = f(t[n], y[n])
+        k2 = f(t[n] + h/2, y[n] + h*k1/2)
+        k3 = f(t[n] + h/2, y[n] + h*k2/2)
+        k4 = f(t[n] + h, y[n] + h*k3)
+        y[n+1] = y[n] + h*(k1 + 2*k2 + 2*k3 + k4)/6
+    return t, y
+```
+
+### scipy
+
+```python
+from scipy.integrate import solve_ivp
+sol = solve_ivp(lambda t, y: -y, [0, 5], [1],
+                t_eval=np.linspace(0, 5, 100),
+                method='RK45', rtol=1e-8)
+```
+
+### Erros comuns
+
+- **$h$ grande demais**: instabilidade.
+- **$h$ pequeno demais**: erro de arredondamento domina.
+- **Sistema stiff sem perceber**: explosão numérica.
+- **Esquecer adaptativo**: gasta computação onde não precisa.
+
+### Diagnóstico rápido
+
+- **Solução cresce linearmente quando deveria decair?** $h$ grande, instabilidade.
+- **Solução tem dentes de serra?** Stiffness — precisa implícito.
+- **Solução não conserva energia?** Use simplético.
+
+</Porta>
+
+</DuasPortas>
+
+<ListaExercicios seed="licao-98-euler-numerico">
+
+<Exercicio numero="98.1" dificuldade="aplicacao">Aplique Euler com $h = 0{,}1$ a $\dot y = y$, $y(0) = 1$, até $t = 1$. Tabela.</Exercicio>
+<Exercicio numero="98.2" dificuldade="aplicacao">Mesmo do 98.1 com $h = 0{,}05$. Compare erro em $t = 1$.</Exercicio>
+<Exercicio numero="98.3" dificuldade="aplicacao">Mesmo com $h = 0{,}01$. Verifique que erro escala linearmente com $h$.</Exercicio>
+<Exercicio numero="98.4" dificuldade="aplicacao">Aplique Euler a $\dot y = -2y$, $y(0) = 1$, $h = 0{,}5$ — mostre instabilidade.</Exercicio>
+<Exercicio numero="98.5" dificuldade="aplicacao">Repita 98.4 com $h = 0{,}1$. Estável?</Exercicio>
+<Exercicio numero="98.6" dificuldade="aplicacao">Aplique RK4 a $\dot y = y$ com $h = 0{,}1$. Compare com Euler.</Exercicio>
+<Exercicio numero="98.7" dificuldade="aplicacao">Resolva $\dot y = y - t^2 + 1$, $y(0) = 0{,}5$ até $t = 2$, $h = 0{,}25$.</Exercicio>
+<Exercicio numero="98.8" dificuldade="aplicacao">Resolva $\dot y = \cos(t)$ com Euler $h = \pi/10$ até $t = 2\pi$.</Exercicio>
+<Exercicio numero="98.9" dificuldade="aplicacao">Resolva $\dot y = (t + y)^2$, $y(0) = 0$ com $h = 0{,}1$ até $t = 0{,}5$.</Exercicio>
+<Exercicio numero="98.10" dificuldade="aplicacao">Erro local de Euler em $\dot y = y^2$. Calcule analiticamente.</Exercicio>
+<Exercicio numero="98.11" dificuldade="aplicacao">Estimar erro global a partir de Richardson: integre com $h$ e $h/2$, compare.</Exercicio>
+<Exercicio numero="98.12" dificuldade="aplicacao">Implemente Heun (RK2) e teste em $\dot y = y$.</Exercicio>
+<Exercicio numero="98.13" dificuldade="aplicacao">Mostre que ordem de Heun é 2 numericamente.</Exercicio>
+<Exercicio numero="98.14" dificuldade="aplicacao">Sistema 2D: $\dot x = -y$, $\dot y = x$, $x(0) = 1$, $y(0) = 0$. Euler $h = 0{,}1$ até $t = 2\pi$.</Exercicio>
+<Exercicio numero="98.15" dificuldade="aplicacao">Verifique que solução de 98.14 cresce em raio com Euler explícito.</Exercicio>
+<Exercicio numero="98.16" dificuldade="aplicacao">Repita 98.14 com Euler implícito (faça à mão um passo).</Exercicio>
+<Exercicio numero="98.17" dificuldade="aplicacao">Aplique RK4 a $\dot y = y$, mostre que erro diminui $\sim h^4$.</Exercicio>
+<Exercicio numero="98.18" dificuldade="aplicacao">Stiff: $\dot y = -100(y - \cos t) - \sin t$, $y(0) = 0$. Euler explícito com $h = 0{,}05$. Estável?</Exercicio>
+<Exercicio numero="98.19" dificuldade="aplicacao">Mesmo do 98.18 com $h = 0{,}001$.</Exercicio>
+<Exercicio numero="98.20" dificuldade="aplicacao">Rótulo: ordem do método se erro $\to 0$ como $h^p$. Determine $p$ numericamente para Heun.</Exercicio>
+<Exercicio numero="98.21" dificuldade="modelagem">Decaimento radioativo: $\dot N = -kN$, $k = 0{,}1$, $N(0) = 1000$. Compare Euler/RK4 até $t = 50$ ($h = 1$).</Exercicio>
+<Exercicio numero="98.22" dificuldade="modelagem">Pêndulo grande $\ddot\theta + \sin\theta = 0$. Use RK4 e plote $\theta(t)$ vs aproximação linear.</Exercicio>
+<Exercicio numero="98.23" dificuldade="modelagem">Lotka-Volterra: $\dot x = x - xy$, $\dot y = -y + xy$. Plote órbita em $(x, y)$.</Exercicio>
+<Exercicio numero="98.24" dificuldade="modelagem">Lorenz: $\dot x = 10(y-x)$, $\dot y = x(28-z) - y$, $\dot z = xy - (8/3)z$. RK4, $h = 0{,}01$, $T = 50$.</Exercicio>
+<Exercicio numero="98.25" dificuldade="modelagem">Massa-mola amortecido: $\ddot x + 0{,}3\dot x + 4x = 0$, $x(0) = 1$, $\dot x(0) = 0$. RK4 e compare com analítica.</Exercicio>
+<Exercicio numero="98.26" dificuldade="modelagem">Newton resfriamento: $\dot T = -0{,}1(T - 25)$, $T(0) = 80$. RK4 até equilíbrio.</Exercicio>
+<Exercicio numero="98.27" dificuldade="modelagem">Equação Van der Pol $\ddot x - \mu(1 - x^2)\dot x + x = 0$, $\mu = 1$, $x(0) = 2$, $\dot x(0) = 0$. Ciclo limite?</Exercicio>
+<Exercicio numero="98.28" dificuldade="modelagem">Cinética química Robertson (stiff): $\dot y_1 = -0{,}04 y_1 + 10^4 y_2 y_3$, $\dot y_2 = 0{,}04 y_1 - 10^4 y_2 y_3 - 3\cdot10^7 y_2^2$, $\dot y_3 = 3\cdot10^7 y_2^2$. Use solver implícito.</Exercicio>
+<Exercicio numero="98.29" dificuldade="modelagem">Foguete: $m \dot v = -mg + T - kv^2$. Resolva $v(t)$ com Euler, $T = 2 m g$ por 60s, $k = 0{,}1$.</Exercicio>
+<Exercicio numero="98.30" dificuldade="modelagem">Capacitor RC carga: $\dot V = (V_s - V)/RC$. Compare $h = \tau$, $h = \tau/10$, $h = \tau/100$.</Exercicio>
+<Exercicio numero="98.31" dificuldade="compreensao">Demonstre que erro local Euler é $O(h^2)$ via expansão Taylor.</Exercicio>
+<Exercicio numero="98.32" dificuldade="compreensao">Mostre que Euler explícito é instável para $\dot y = -\lambda y$ se $h > 2/\lambda$.</Exercicio>
+<Exercicio numero="98.33" dificuldade="compreensao">Por que Euler implícito é incondicionalmente estável?</Exercicio>
+<Exercicio numero="98.34" dificuldade="compreensao">Mostre que RK4 tem ordem 4 (erro local $O(h^5)$, global $O(h^4)$).</Exercicio>
+<Exercicio numero="98.35" dificuldade="desafio">Implemente RK45 (Fehlberg) com controle adaptativo de passo. Teste em Van der Pol.</Exercicio>
+<Exercicio numero="98.36" dificuldade="desafio">Implemente método leapfrog para oscilador harmônico e mostre conservação aproximada de energia.</Exercicio>
+<Exercicio numero="98.37" dificuldade="desafio">Implemente BDF2 e teste em problema stiff Robertson.</Exercicio>
+<Exercicio numero="98.38" dificuldade="desafio">Convergência: para $\dot y = y$, prove $|y_N - y(T)| \leq M h$ para algum $M$.</Exercicio>
+<Exercicio numero="98.39" dificuldade="demonstracao">Demonstre RK4 a partir de expansão Taylor — derive os coeficientes.</Exercicio>
+<Exercicio numero="98.40" dificuldade="demonstracao">Demonstre teorema de Lax: consistência + estabilidade ⇒ convergência.</Exercicio>
+
+</ListaExercicios>
+
+## Fontes desta aula
+
+- [**Notes on Diffy Qs**](https://www.jirka.org/diffyqs/) — Jiří Lebl · 2024 · v6.6 · §1.7 · EN · CC-BY-SA. **Fonte primária.**
+- [**Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — REAMAT UFRGS · 2024 · cap. EDOs · PT-BR · CC-BY-SA.
+- [**Numerical Recipes**](http://numerical.recipes/) — Press, Teukolsky, Vetterling, Flannery · 2007 · 3rd ed · cap. 17 · EN.
+- [**Solving ODEs with Python**](https://hplgit.github.io/scipro-primer/slides/odespy/html/odespy.html) — Hans Petter Langtangen · EN · gratuito.

@@ -1,0 +1,354 @@
+---
+titulo: "Lição 79 — Probabilidade condicional e Bayes (aprofundado)"
+slug: "licao-79-bayes-aprofundado"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Priors e posteriors, atualização bayesiana, base rate fallacy. Aplicações em diagnóstico médico, spam filter, ML."
+ordem: 79
+publicado: true
+tags: ["estatística", "probabilidade", "ano-2", "trim-8"]
+prerrequisitos: ["licao-78"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-04-30"
+---
+
+<EquacaoCanonica
+  formula="P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}, \quad P(H_i|E) \propto P(E|H_i) \cdot P(H_i)"
+  legenda={<>O <strong>teorema de Bayes</strong> é a regra de atualização racional de crenças. <strong>Prior</strong> <Eq>{`P(H)`}</Eq> × <strong>likelihood</strong> <Eq>{`P(E|H)`}</Eq> = <strong>posterior</strong> <Eq>{`P(H|E)`}</Eq> (a menos de normalização). É a estrutura matemática por trás de diagnóstico médico, spam filtering e inferência científica.</>}
+  audioTexto="Teorema de Bayes. Probabilidade de H dado E é igual a probabilidade de E dado H, vezes probabilidade prévia de H, dividida pela probabilidade de E. Posterior é proporcional à verossimilhança vezes prior."
+/>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Bayes — definições e teoremas">
+
+### Probabilidade condicional
+
+$$P(A | B) = \frac{P(A \cap B)}{P(B)}, \quad P(B) > 0$$
+
+### Independência
+
+$A, B$ independentes $\iff$ $P(A | B) = P(A)$ $\iff$ $P(A \cap B) = P(A)P(B)$.
+
+### Lei da probabilidade total
+
+Para partição $\{H_1, \ldots, H_n\}$ de $\Omega$:
+
+$$P(E) = \sum_{i=1}^n P(E | H_i) P(H_i)$$
+
+### Teorema de Bayes
+
+$$P(H_i | E) = \frac{P(E | H_i) P(H_i)}{\sum_j P(E | H_j) P(H_j)}$$
+
+### Forma de odds
+
+$$\frac{P(H | E)}{P(\neg H | E)} = \frac{P(E | H)}{P(E | \neg H)} \cdot \frac{P(H)}{P(\neg H)}$$
+
+**Posterior odds = razão de verossimilhança × prior odds**.
+
+### Atualização sequencial
+
+Se $E_1, E_2$ são independentes dado $H$:
+
+$$P(H | E_1, E_2) \propto P(E_1 | H) P(E_2 | H) P(H)$$
+
+Cada nova evidência multiplica posterior anterior pela respectiva likelihood.
+
+### Distribuições conjugadas
+
+| Likelihood | Prior conjugado | Posterior |
+|---|---|---|
+| Bernoulli($p$) | Beta($\alpha, \beta$) | Beta($\alpha + k, \beta + n - k$) |
+| Poisson($\lambda$) | Gamma($\alpha, \beta$) | Gamma($\alpha + k, \beta + n$) |
+| Normal $\mu$, $\sigma$ conhecido | Normal | Normal |
+
+</Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Você ouve um latido. Pode ser um cachorro grande ou pequeno. Como você decide?
+
+- Se você sabe que **na sua rua tem mais cachorros pequenos**, vai chutar pequeno (prior).
+- Se o latido foi **bem grosso**, mais chance de ser grande (evidência).
+- Você **mistura as duas coisas** pra decidir.
+
+Bayes é exatamente isso: começar com uma chance prévia, ver uma pista, atualizar a chance.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+**Exemplo do teste médico** (clássico):
+
+- Doença rara: 1 em 1000 pessoas tem (prior $= 0{,}1\%$).
+- Teste tem 99\% de sensibilidade (acerta 99\% dos doentes) e 99\% de especificidade.
+
+Você testa positivo. Qual a chance de você estar doente?
+
+A maioria chuta 99\% — **e está completamente errado**.
+
+Em 1000 pessoas:
+- 1 doente, teste detecta com 99\% → 1 verdadeiro positivo.
+- 999 saudáveis, mas 1\% dão falso positivo → 10 falsos positivos.
+- Total positivos: 11. Doentes entre eles: 1.
+- **Chance real de estar doente dado teste positivo: 1/11 ≈ 9\%**.
+
+Isso é o **base rate fallacy**: ignorar a raridade da doença.
+
+Bayes resolve esse paradoxo combinando:
+- A **raridade** (prior)
+- A **qualidade do teste** (likelihood)
+
+</Porta>
+
+<Porta nivel="15" titulo="Pra adolescente de 15 anos">
+
+Bayes é a estrutura **única** que combina informação prévia + evidência nova de forma coerente.
+
+### Receita: 3 passos
+
+1. **Prior** $P(H)$: o que você acreditava antes.
+2. **Likelihood** $P(E | H)$: probabilidade da evidência sob hipótese.
+3. **Posterior** $P(H | E)$: crença atualizada.
+
+### Tipos de erro em testes
+
+|  | Doente | Saudável |
+|---|---|---|
+| Teste + | TP | FP |
+| Teste − | FN | TN |
+
+- **Sensibilidade** $= P(+|D) = TP/(TP+FN)$.
+- **Especificidade** $= P(−|\bar D) = TN/(TN+FP)$.
+- **Valor preditivo positivo** (VPP) $= P(D|+) = $ posterior.
+
+VPP **depende** da prevalência. Por isso teste excelente em laboratório vira ruim em screening da população.
+
+### Filtro de spam
+
+Cada palavra é evidência. Spam ou ham?
+
+$$\frac{P(\text{spam} | \text{palavras})}{P(\text{ham} | \text{palavras})} = \prod_w \frac{P(w | \text{spam})}{P(w | \text{ham})} \cdot \frac{P(\text{spam})}{P(\text{ham})}$$
+
+"Naive Bayes" — assume independência condicional das palavras. Funciona surpreendentemente bem.
+
+### Atualização sequencial
+
+Hoje você diagnostica gripe (prior). Paciente faz exame X → atualize. Faz exame Y → atualize de novo. Cada teste refina.
+
+### Por que Bayes "funciona"?
+
+É a única regra de atualização **coerente** (Cox 1946, axiomas). Qualquer sistema racional de crença com:
+- Probabilidade entre 0 e 1
+- $P(\text{tudo}) = 1$
+- Regra do produto
+
+Implica Bayes. Inevitável.
+
+</Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia">
+
+### Bayes vs. frequentismo
+
+- **Frequentista**: parâmetro $\theta$ é fixo, dados são aleatórios. IC: "se eu repetir o experimento, 95\% dos IC contém $\theta$".
+- **Bayesiano**: $\theta$ é v.a. com distribuição. Posterior $P(\theta | \text{dados})$. Credible interval: "95\% de probabilidade de $\theta$ estar aqui".
+
+Filosoficamente diferentes. Em $n$ grande, dão respostas similares.
+
+### Prior conjugado: Beta-binomial
+
+Lance moeda $n$ vezes, $k$ caras. Prior: $p \sim \text{Beta}(\alpha, \beta)$.
+
+$$p | k \sim \text{Beta}(\alpha + k, \beta + n - k)$$
+
+Posterior é Beta de novo — mesma família. Computacionalmente trivial.
+
+Beta(1,1) = uniforme = "prior não-informativo". Beta(2,2) = ligeiramente informativo (prefere $p$ próximo de 0,5).
+
+### Naive Bayes classifier
+
+Pra classes $C_1, \ldots, C_K$ e features $x_1, \ldots, x_p$:
+
+$$P(C_k | \mathbf x) \propto P(C_k) \prod_j P(x_j | C_k)$$
+
+Independência ingênua dos features. Treinamento $O(np)$, predição $O(p)$. Excelente baseline em texto.
+
+### MCMC (Markov Chain Monte Carlo)
+
+Em modelos complexos, posterior não tem forma fechada. **MCMC** (Metropolis-Hastings, Gibbs, HMC, NUTS) gera amostras de $P(\theta | \text{dados})$. Stan, PyMC, NumPyro implementam.
+
+### Inferência variacional
+
+Aproxima posterior por família tratável: $q(\theta) \approx P(\theta | D)$. Minimiza KL-divergência. Mais rápido que MCMC, menos exato.
+
+### Bayes Factor (BF)
+
+Comparação de modelos $M_1$ vs. $M_2$:
+
+$$BF_{12} = \frac{P(D | M_1)}{P(D | M_2)}$$
+
+Substitui $p$-valor em ciência bayesiana. BF > 10: evidência forte; > 100: muito forte.
+
+### Aplicações em engenharia
+
+- **Kalman filter**: Bayes em sistemas dinâmicos lineares-gaussianos.
+- **Particle filter**: Bayes em sistemas não-lineares.
+- **Reliability engineering**: estimar taxa de falha com prior + observações.
+- **Bayesian optimization**: otimização de hiperparâmetros em ML (BoTorch, Optuna TPE).
+- **A/B test bayesiano**: prob. de B ser melhor que A, sem $p$-valor.
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+### Coerência (Cox-Jaynes)
+
+Cox (1946), Jaynes (2003): qualquer "razoabilidade plausível" satisfazendo axiomas (consistência, dependência só de informação relevante, transitividade) é isomorfa à probabilidade. Bayes não é uma escolha — é o **único** cálculo racional.
+
+### Subjetividade dos priors
+
+- **Não-informativo** (Jeffreys, reference, MaxEnt): minimiza informação prévia.
+- **Empírico**: estima prior a partir dos dados.
+- **Hierárquico**: prior tem hiper-prior, ajustado pelos dados.
+
+Críticas frequentistas: "subjetivo". Resposta: TODA inferência tem priors implícitos (frequentismo: priors uniformes mascarados).
+
+### Computação moderna
+
+- **HMC / NUTS** (Stan): gradiente da log-densidade. Escala bem em $p$ grande.
+- **Variational inference**: aproximação family-restricted.
+- **Normalizing flows**: famílias variacionais expressivas.
+- **Bayesian neural networks**: posterior sobre pesos via dropout, ensembling, last-layer.
+
+### Decision theory bayesiana
+
+Decisão $a$ minimiza risco esperado posterior $E[L(a, \theta) | D]$. Generaliza estimação. Em ML moderno, mesma estrutura: **Empirical risk minimization** = caso particular sob prior uniforme.
+
+### Identificabilidade e priors
+
+Modelo não-identificável: parâmetros indistinguíveis pelos dados. Posterior degenerado em direções não-informadas. Prior **regulariza** — papel de regularização L1/L2 em ML é equivalente a prior Laplace/Normal.
+
+### Bayes empírico (James-Stein)
+
+Estimar prior dos próprios dados. Em estimação simultânea de muitas médias, **shrinkage** Bayes empírico domina MLE. Aplicações: small area estimation, esportes (Efron-Morris), fMRI.
+
+### Inferência causal bayesiana
+
+Pearl + Bayes: do-calculus + posterior sobre efeito tratamento. Permite inferir causalidade em observacional **se** modelo causal explícito.
+
+### Falácias
+
+- **Base rate neglect**: ignorar prior. Estudo Tversky-Kahneman.
+- **Conjunction fallacy** ("Linda problem"): $P(A \cap B) > P(A)$, irracional.
+- **Prosecutor's fallacy**: confundir $P(E|H_0)$ com $P(H_0|E)$. Causou condenações erradas (Sally Clark 1999).
+
+### Bayesian model averaging (BMA)
+
+Em vez de escolher modelo, pondere por posterior:
+
+$$P(y_{\text{novo}} | D) = \sum_M P(y_{\text{novo}} | M, D) P(M | D)$$
+
+Reduz overfitting, captura incerteza estrutural.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicação prática">
+
+### Receita
+
+1. **Identifique hipóteses** $H_1, \ldots, H_n$ (mutuamente exclusivas, exaustivas).
+2. **Atribua priors** $P(H_i)$.
+3. **Calcule likelihoods** $P(E | H_i)$.
+4. **Aplique Bayes**:
+   $$P(H_i | E) = \frac{P(E | H_i) P(H_i)}{\sum_j P(E | H_j) P(H_j)}$$
+
+### Tabela 2x2 (atalho)
+
+Para teste com prevalência $p$:
+
+|  | Doente ($p$) | Saudável ($1-p$) |
+|---|---|---|
+| Teste + | sens · $p$ | (1−espec) · (1−$p$) |
+| Teste − | (1−sens) · $p$ | espec · (1−$p$) |
+
+VPP = TP / (TP + FP).
+
+### Em Python
+
+```python
+def bayes_test(prevalence, sens, spec):
+    tp = prevalence * sens
+    fp = (1 - prevalence) * (1 - spec)
+    return tp / (tp + fp)
+print(bayes_test(0.001, 0.99, 0.99))  # 0.0902
+```
+
+### Erros frequentes
+
+- Esquecer da prevalência (base rate neglect).
+- Multiplicar likelihoods de evidências dependentes (assumir independência sem checar).
+- Posterior odds = likelihood ratio sem prior odds.
+- Confundir "posterior 80\%" com "verdade absoluta".
+
+### Faça os 30 exercícios
+
+Bayes é a base de **TODO** raciocínio probabilístico moderno. Sem fluência aqui, ML, diagnóstico, ciência forense ficam misteriosos.
+
+</Porta>
+
+</DuasPortas>
+
+<ListaExercicios seed="licao-79-bayes-aprofundado">
+
+### Bloco A — Cálculo direto (79.1 a 79.12)
+
+<Exercicio numero="79.1" dificuldade="aplicacao">$P(A) = 0{,}3, P(B) = 0{,}5, P(A \cap B) = 0{,}15$. $P(A | B)$. (Resp: 0,3 — independentes.)</Exercicio>
+<Exercicio numero="79.2" dificuldade="aplicacao">$P(A | B) = 0{,}6, P(B) = 0{,}5$. $P(A \cap B)$.</Exercicio>
+<Exercicio numero="79.3" dificuldade="aplicacao">$P(A) = 0{,}1, P(B|A) = 0{,}8, P(B|\bar A) = 0{,}2$. $P(B)$.</Exercicio>
+<Exercicio numero="79.4" dificuldade="aplicacao">Mesma. $P(A | B)$. (Resp: $\approx 0{,}308$.)</Exercicio>
+<Exercicio numero="79.5" dificuldade="aplicacao">Doença rara: prevalência 0,5\%. Teste: sens 95\%, espec 95\%. VPP.</Exercicio>
+<Exercicio numero="79.6" dificuldade="aplicacao">Mesma com prevalência 50\%. VPP. Compare.</Exercicio>
+<Exercicio numero="79.7" dificuldade="aplicacao">Spam: $P(\text{spam}) = 0{,}3$. Palavra "GRÁTIS" aparece em 60\% dos spams e 5\% dos hams. $P(\text{spam} | \text{GRÁTIS})$.</Exercicio>
+<Exercicio numero="79.8" dificuldade="aplicacao">Urna A: 2 vermelhas, 3 azuis. Urna B: 5 vermelhas, 1 azul. Escolho urna ao acaso e tiro vermelha. $P(A | \text{vermelha})$.</Exercicio>
+<Exercicio numero="79.9" dificuldade="aplicacao">3 moedas: 2 honestas, 1 com 2 caras. Escolho ao acaso, lanço, sai cara. $P(\text{2 caras} | \text{cara})$.</Exercicio>
+<Exercicio numero="79.10" dificuldade="aplicacao">Em uma população, $P(\text{fumante}) = 0{,}2$. $P(\text{câncer} | \text{fumante}) = 0{,}1$. $P(\text{câncer} | \neg \text{fumante}) = 0{,}01$. $P(\text{fumante} | \text{câncer})$.</Exercicio>
+<Exercicio numero="79.11" dificuldade="aplicacao">Atualização sequencial: 2 testes positivos com sens 90\%, espec 90\%, prevalência 1\%. VPP após 2º teste. (Use posterior do 1º como prior do 2º.)</Exercicio>
+<Exercicio numero="79.12" dificuldade="aplicacao">Likelihood ratio (LR+) $= $ sens/(1−espec). Para sens 90\%, espec 95\%, LR+ = ?</Exercicio>
+
+### Bloco B — Forma de odds e atualização (79.13 a 79.20)
+
+<Exercicio numero="79.13" dificuldade="aplicacao">Prior odds 1:99 (1\% prevalência). LR+ = 18 (sens 0,9, espec 0,95). Posterior odds.</Exercicio>
+<Exercicio numero="79.14" dificuldade="aplicacao">Mesma. Posterior probability.</Exercicio>
+<Exercicio numero="79.15" dificuldade="aplicacao">Em ML: classificador binário com sens 0,99, espec 0,99. Aplicado a classe rara (1\%). VPP. Discuta utilidade.</Exercicio>
+<Exercicio numero="79.16" dificuldade="aplicacao">Beta(2, 2) prior + 7 caras em 10 lançamentos. Posterior. (Resp: Beta(9, 5).)</Exercicio>
+<Exercicio numero="79.17" dificuldade="aplicacao">Em (79.16), média do posterior. (Resp: 9/14.)</Exercicio>
+<Exercicio numero="79.18" dificuldade="aplicacao">Beta(1, 1) prior (uniforme) + 0 caras em 5 lançamentos. Posterior e média.</Exercicio>
+<Exercicio numero="79.19" dificuldade="aplicacao">Em A/B test bayesiano: A teve 50/100 conversões, B teve 60/100. Beta(1,1) priors. Probabilidade que B > A.</Exercicio>
+<Exercicio numero="79.20" dificuldade="aplicacao">Naive Bayes: 3 emails de treino. Spam: "GRÁTIS" 2/3, "ganhou" 1/3. Ham: "GRÁTIS" 0/3, "ganhou" 1/3. Email "GRÁTIS ganhou" — classifica.</Exercicio>
+
+### Bloco C — Modelagem (79.21 a 79.28)
+
+<Exercicio numero="79.21" dificuldade="modelagem">Diagnóstico: paciente apresenta sintoma S. Doenças possíveis: A (10\%), B (5\%), C (1\%). $P(S | A) = 0{,}3$, $P(S | B) = 0{,}9$, $P(S | C) = 0{,}9$. Diagnóstico mais provável.</Exercicio>
+<Exercicio numero="79.22" dificuldade="modelagem">Forense: cabelo encontrado na cena. Suspeito tem traço comum a 1/1000. Há 1 milhão de pessoas na cidade. Posterior de culpa é 99,9\%? Discuta (prosecutor's fallacy).</Exercicio>
+<Exercicio numero="79.23" dificuldade="modelagem">Spam filter naive Bayes com 3 features. Treine com email exemplo. Aplique a teste.</Exercicio>
+<Exercicio numero="79.24" dificuldade="modelagem">COVID screening: prevalência 5\%, teste rápido sens 80\%, espec 95\%. VPP. Vale a pena para isolar positivos?</Exercicio>
+<Exercicio numero="79.25" dificuldade="modelagem">Em ML: classificador de fraude com sens 95\%, espec 99,9\%. Fraudes são 0,1\% das transações. VPP. Quantos falsos positivos por verdadeiro?</Exercicio>
+<Exercicio numero="79.26" dificuldade="modelagem">Teste de gravidez: sens 99\%, espec 98\%, prevalência depende da pessoa. Mulher com 30\% de chance prévia. VPP.</Exercicio>
+<Exercicio numero="79.27" dificuldade="modelagem">Detector de mentira (polígrafo): sens 70\%, espec 80\%. Em interrogatório, $P(\text{culpado}) = 5\%$ a priori. VPP. Confiável?</Exercicio>
+<Exercicio numero="79.28" dificuldade="modelagem">Análise médica: 2 testes independentes positivos, sens 0,9 e 0,85, espec 0,95 e 0,9. Prevalência 2\%. Posterior após ambos.</Exercicio>
+
+### Bloco D — Compreensão e demonstração (79.29 a 79.32)
+
+<Exercicio numero="79.29" dificuldade="compreensao">Em uma frase: o que é base rate fallacy?</Exercicio>
+<Exercicio numero="79.30" dificuldade="compreensao">Por que prior importa mesmo em "ciência objetiva"? (Sem prior, não há atualização.)</Exercicio>
+<Exercicio numero="79.31" dificuldade="desafio">Mostre que dois testes positivos independentes em série multiplicam LR+ na forma de odds.</Exercicio>
+<Exercicio numero="79.32" dificuldade="demonstracao">Demonstre teorema de Bayes a partir da definição de probabilidade condicional.</Exercicio>
+
+</ListaExercicios>
+
+## Fontes desta aula
+
+- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · 4ª ed · EN · CC-BY-SA. **Fonte primária.**
+- [**Introductory Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean (OpenStax) · 2022 · 2ª ed · EN · CC-BY-NC-SA.
+- [**Introduction to Probability**](http://probabilitybook.net/) — Blitzstein, Hwang · 2019 · 2nd ed · EN · gratuito.
