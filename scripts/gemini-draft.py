@@ -28,59 +28,28 @@ API_URL = (
 )
 DEFAULT_MODEL = "gemini-2.5-flash"
 
-SYSTEM_PROMPT = """Voce e o redator-chefe do Clube da Matematica, escrevendo aulas MDX para o
-Ensino Medio brasileiro com rigor editorial inspirado em engenharia mecanica BR+JP+DE+SG.
+CONTEXT_FILE = Path(__file__).resolve().parent.parent / "agents" / "CLUBE_CONTEXT.md"
 
-REGRAS INVIOLAVEIS:
-1. Padrao editorial: siga FIELMENTE a estrutura dos arquivos de referencia anexados.
-   O Black-Scholes e o template-mae. Toda aula nova replica a sua DNA.
-
-2. Componentes MDX disponiveis (use exatamente esta sintaxe JSX):
-   - <EquacaoCanonica formula="..." legenda={<>...</>} audioTexto="..." />
-   - <DuasPortas> ... </DuasPortas>
-   - <Porta nivel="formal|5|10|15|25|40|pratica" titulo="..."> markdown </Porta>
-     Sempre 6-7 portas: formal, 5, 10, 15, 25, 40, pratica.
-   - <Definicao titulo="..."> ... </Definicao>
-   - <ListaExercicios seed="aula-NN"> ... </ListaExercicios>
-   - <Exercicio numero="NN.X" dificuldade="aplicacao|demonstracao|compreensao|modelagem|desafio">
-     Enunciado. (Resp: ...)
-     </Exercicio>
-
-3. Exercicios: MINIMO 35, ideal 40-50. Divida em blocos:
-   - Bloco A - Aplicacao (15-20 ex, calculo direto)
-   - Bloco B - Demonstracao (5-8 ex, prova rigorosa)
-   - Bloco C - Compreensao + Modelagem (8-12 ex, conceitual e aplicado)
-   - Bloco D - Desafios (4-6 ex, vestibular/olimpiada)
-   25% dos exercicios devem ter gabarito inline "(Resp: ...)".
-
-4. Matematica: KaTeX inline ($...$). Use \\eps para epsilon, \\delta, \\infty, \\to, \\lim,
-   \\frac, \\sum, \\int, etc. Numeros decimais em PT-BR usam virgula com chave dupla:
-   $0{,}001$ (nao $0.001$).
-
-5. Fontes ao final em "## Fontes" com links markdown reais ([titulo](url)) para fontes
-   abertas (OpenStax, Active Calculus, MIT OCW, arXiv, Khan Academy, papers DOI).
-   Se mencionar Premio Nobel, SEMPRE linke para nobelprize.org.
-
-6. Frontmatter YAML obrigatorio: titulo, slug, categoria, subcategoria, descricao,
-   ordem, publicado, tags, prerrequisitos, autores, atualizadoEm.
-
-7. Tom: rigor de bacharelado em engenharia, mas porta nivel="5" deve ser realmente
-   acessivel para crianca. Sem condescendencia, sem facilitar artificialmente.
-
-8. NAO inclua disclaimers, "como assistente IA", marcadores de meta-discurso. Saida
-   limpa, pronta pra commitar. Comece direto pelo frontmatter ---.
-"""
+def load_system_prompt() -> str:
+    """Read the canonical project context. Single source of truth for all agents."""
+    if not CONTEXT_FILE.exists():
+        sys.exit(f"ERRO: contexto base nao encontrado em {CONTEXT_FILE}")
+    return CONTEXT_FILE.read_text(encoding="utf-8")
 
 
 def read_file(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 
-def build_request(brief: str, references: list, model: str, max_tokens: int) -> dict:
-    parts = [{"text": SYSTEM_PROMPT}]
+def build_request(brief: str, references: list, books: list, model: str, max_tokens: int) -> dict:
+    parts = [{"text": load_system_prompt()}]
     for ref_path in references:
         parts.append({
-            "text": f"\n\n=== REFERENCIA: {ref_path} ===\n\n{read_file(ref_path)}"
+            "text": f"\n\n=== REFERENCIA (aula MDX existente — replicar estrutura, PRESERVAR exercicios e fontes ja curados): {ref_path} ===\n\n{read_file(ref_path)}"
+        })
+    for book_path in books:
+        parts.append({
+            "text": f"\n\n=== LIVRO-FONTE (capitulo aberto pra grounding de citacoes; cite trechos verbatim com link deep — NAO invente paginas): {book_path} ===\n\n{read_file(book_path)}"
         })
     parts.append({"text": f"\n\n=== BRIEF DA NOVA AULA ===\n\n{brief}\n\nGere a aula completa agora, em MDX puro, comecando pelo frontmatter ---."})
 
@@ -107,7 +76,7 @@ def call_gemini(payload: dict, api_key: str, model: str, retries: int = 3) -> st
     last_err = None
     for attempt in range(1, retries + 1):
         try:
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with urllib.request.urlopen(req, timeout=300) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
             candidates = data.get("candidates", [])
             if not candidates:
@@ -117,9 +86,10 @@ def call_gemini(payload: dict, api_key: str, model: str, retries: int = 3) -> st
         except urllib.error.HTTPError as e:
             err_body = e.read().decode("utf-8", errors="replace")[:500]
             last_err = f"HTTP {e.code}: {err_body}"
-            if e.code == 429 and attempt < retries:
+            if (e.code == 429 or e.code >= 500) and attempt < retries:
                 wait = 2 ** attempt * 5
-                print(f"[rate-limit] tentativa {attempt} falhou, esperando {wait}s...", file=sys.stderr)
+                tag = "rate-limit" if e.code == 429 else f"server-{e.code}"
+                print(f"[{tag}] tentativa {attempt} falhou, esperando {wait}s...", file=sys.stderr)
                 time.sleep(wait)
                 continue
             raise RuntimeError(last_err) from e
@@ -136,9 +106,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--brief", required=True, help="Descricao curta da aula a gerar")
     parser.add_argument("--reference", action="append", default=[], help="Arquivo MDX de referencia (pode repetir)")
+    parser.add_argument("--book", action="append", default=[], help="Capitulo de livro extraido em livros/ (pode repetir; framing = grounding)")
     parser.add_argument("--out", help="Arquivo de saida (default: stdout)")
     parser.add_argument("--model", default=DEFAULT_MODEL, help=f"Modelo (default: {DEFAULT_MODEL})")
     parser.add_argument("--max-tokens", type=int, default=16000, help="Max tokens de saida (default: 16000)")
+    parser.add_argument("--no-validate", action="store_true", help="Pula validacao MDX pos-geracao")
     args = parser.parse_args()
 
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -149,21 +121,37 @@ def main():
     if not args.reference:
         print("AVISO: sem --reference, qualidade vai cair muito. Recomendado passar pelo menos 1.", file=sys.stderr)
 
-    payload = build_request(args.brief, args.reference, args.model, args.max_tokens)
+    payload = build_request(args.brief, args.reference, args.book, args.model, args.max_tokens)
     approx_in_tokens = sum(len(p["text"]) for p in payload["contents"][0]["parts"]) // 4
-    print(f"[gemini-draft] modelo={args.model}  ~{approx_in_tokens} tokens de entrada  refs={len(args.reference)}", file=sys.stderr)
+    print(f"[gemini-draft] modelo={args.model}  ~{approx_in_tokens} tokens de entrada  refs={len(args.reference)}  books={len(args.book)}", file=sys.stderr)
 
     t0 = time.time()
     out = call_gemini(payload, api_key, args.model)
     dt = time.time() - t0
     print(f"[gemini-draft] geracao em {dt:.1f}s  ~{len(out)//4} tokens de saida", file=sys.stderr)
 
+    # Saida: arquivo ou stdout
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(out, encoding="utf-8")
         print(f"[gemini-draft] gravado em {args.out}", file=sys.stderr)
     else:
         sys.stdout.write(out)
+
+    # Validacao pos-geracao via @mdx-js/mdx (so faz sentido com --out)
+    if args.out and not args.no_validate:
+        validator = Path(__file__).resolve().parent / "validate-mdx.mjs"
+        if validator.exists():
+            import subprocess
+            print(f"[gemini-draft] validando MDX...", file=sys.stderr)
+            r = subprocess.run(["node", str(validator), args.out], capture_output=True, text=True)
+            if r.returncode == 0:
+                print(f"[gemini-draft] {r.stdout.strip()}", file=sys.stderr)
+            else:
+                print(f"[gemini-draft] FALHA NA VALIDACAO MDX:", file=sys.stderr)
+                print(r.stderr.strip(), file=sys.stderr)
+                print(f"[gemini-draft] draft salvo mesmo assim em {args.out} pra inspecao", file=sys.stderr)
+                sys.exit(3)
 
 
 if __name__ == "__main__":
