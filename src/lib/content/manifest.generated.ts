@@ -459,12 +459,14 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   },
   'aulas/ano-2/trim-5/aula-44-limites-laterais': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-5/aula-44-limites-laterais.mdx'),
+    'de-DE': () => import('@/../content/i18n/de-DE/aulas/ano-2/trim-5/aula-44-limites-laterais.mdx'),
     'en-US': () => import('@/../content/i18n/en-US/aulas/ano-2/trim-5/aula-44-limites-laterais.mdx'),
     'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-2/trim-5/aula-44-limites-laterais.mdx'),
     'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-2/trim-5/aula-44-limites-laterais.mdx'),
   },
   'aulas/ano-2/trim-5/aula-45-limites-fundamentais': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-5/aula-45-limites-fundamentais.mdx'),
+    'de-DE': () => import('@/../content/i18n/de-DE/aulas/ano-2/trim-5/aula-45-limites-fundamentais.mdx'),
     'en-US': () => import('@/../content/i18n/en-US/aulas/ano-2/trim-5/aula-45-limites-fundamentais.mdx'),
     'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-2/trim-5/aula-45-limites-fundamentais.mdx'),
     'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-2/trim-5/aula-45-limites-fundamentais.mdx'),
@@ -483,13 +485,20 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   },
   'aulas/ano-2/trim-5/aula-48-limites-funcoes-trig': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-5/aula-48-limites-funcoes-trig.mdx'),
+    'en-US': () => import('@/../content/i18n/en-US/aulas/ano-2/trim-5/aula-48-limites-funcoes-trig.mdx'),
     'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-2/trim-5/aula-48-limites-funcoes-trig.mdx'),
+    'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-2/trim-5/aula-48-limites-funcoes-trig.mdx'),
   },
   'aulas/ano-2/trim-5/aula-49-limite-sequencias': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-5/aula-49-limite-sequencias.mdx'),
+    'en-US': () => import('@/../content/i18n/en-US/aulas/ano-2/trim-5/aula-49-limite-sequencias.mdx'),
+    'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-2/trim-5/aula-49-limite-sequencias.mdx'),
+    'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-2/trim-5/aula-49-limite-sequencias.mdx'),
   },
   'aulas/ano-2/trim-5/aula-50-consolidacao-trim-5': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-5/aula-50-consolidacao-trim-5.mdx'),
+    'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-2/trim-5/aula-50-consolidacao-trim-5.mdx'),
+    'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-2/trim-5/aula-50-consolidacao-trim-5.mdx'),
   },
   'aulas/ano-2/trim-6/aula-51-derivada-definicao': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-6/aula-51-derivada-definicao.mdx'),
