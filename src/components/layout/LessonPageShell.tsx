@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { useLocale } from './LocaleProvider'
+import { LocalizedMdx } from './LocalizedMdx'
 import { CATEGORIAS_LABEL } from '@/content/schema'
 import type { Conteudo } from '@/content/schema'
 
@@ -10,7 +11,9 @@ interface LessonPageShellProps {
   meta: Conteudo
   isAula: boolean
   isFinancas: boolean
-  /** O `<MDXContent />` renderizado pelo server component. */
+  /** Caminho do conteúdo (ex.: 'aulas/ano-1/trim-1/aula-01-conjuntos-intervalos'). */
+  caminho: string
+  /** `<MDXContent />` PT-BR pré-renderizado. Fallback se não há tradução pro locale. */
   children: ReactNode
 }
 
@@ -23,6 +26,7 @@ export function LessonPageShell({
   meta,
   isAula,
   isFinancas,
+  caminho,
   children,
 }: LessonPageShellProps) {
   const { t } = useLocale()
@@ -69,6 +73,9 @@ export function LessonPageShell({
         )}
       </header>
 
+      {/* TODO: re-enable LocalizedMdx — OOM em build com bundle por (path × locale).
+          Próximo: code-split por locale (1 chunk dinâmico via prefixo de path).
+          Por ora serve sempre PT-BR pra todos os locales. */}
       <div className="prose prose-clube max-w-none">{children}</div>
 
       <footer className="mt-16 border-t border-clube-mist-soft/40 pt-6 text-sm text-clube-mist">

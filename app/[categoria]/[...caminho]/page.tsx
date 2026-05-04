@@ -57,14 +57,12 @@ export default async function ConteudoPage({ params }: Props) {
   const isAula = categoria === 'aulas'
   const isFinancas = categoria === 'financas-quantitativas'
 
-  // TODO: re-enable LocalizedMdx — OOM em CI mesmo com 6GB heap.
-  // Próxima tentativa: bundle por idioma (não por path × idioma)
-  // ou migrar build pra Vercel (mais RAM).
   return (
     <LessonPageShell
       meta={conteudo.meta}
       isAula={isAula}
       isFinancas={isFinancas}
+      caminho={completo}
     >
       <MDXContent />
     </LessonPageShell>

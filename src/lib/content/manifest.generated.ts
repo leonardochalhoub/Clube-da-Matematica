@@ -497,6 +497,7 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   },
   'aulas/ano-2/trim-5/aula-50-consolidacao-trim-5': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-5/aula-50-consolidacao-trim-5.mdx'),
+    'en-US': () => import('@/../content/i18n/en-US/aulas/ano-2/trim-5/aula-50-consolidacao-trim-5.mdx'),
     'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-2/trim-5/aula-50-consolidacao-trim-5.mdx'),
     'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-2/trim-5/aula-50-consolidacao-trim-5.mdx'),
   },
