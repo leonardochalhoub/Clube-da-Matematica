@@ -11,7 +11,7 @@ interface LessonPageShellProps {
   meta: Conteudo
   isAula: boolean
   isFinancas: boolean
-  /** Caminho do conteúdo (ex.: 'aulas/ano-1/trim-1/aula-01-conjuntos-intervalos'). */
+  /** Caminho do conteúdo (ex.: 'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos'). */
   caminho: string
   /** `<MDXContent />` PT-BR pré-renderizado. Fallback se não há tradução pro locale. */
   children: ReactNode

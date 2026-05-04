@@ -11,7 +11,7 @@ import {
 import { useLocale } from './LocaleProvider'
 
 interface AulaPath extends Aula {
-  /** Caminho completo (ex.: 'aulas/ano-1/trim-1/aula-01-conjuntos-intervalos'). */
+  /** Caminho completo (ex.: 'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos'). */
   caminho?: string
 }
 

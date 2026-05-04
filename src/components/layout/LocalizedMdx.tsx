@@ -5,7 +5,7 @@ import { useLocale } from './LocaleProvider'
 import { manifestoI18n } from '@/lib/content/manifest.generated'
 
 interface LocalizedMdxProps {
-  /** Caminho relativo do conteúdo (ex.: 'aulas/ano-1/trim-1/aula-01-conjuntos-intervalos') */
+  /** Caminho relativo do conteúdo (ex.: 'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos') */
   caminho: string
   /** Componente PT-BR já renderizado (server-side, default). */
   fallback: React.ReactNode
