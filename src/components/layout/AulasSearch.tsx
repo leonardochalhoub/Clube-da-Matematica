@@ -79,6 +79,28 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
         className="w-full rounded-full border border-clube-mist-soft/60 bg-clube-surface px-4 py-2.5 text-sm text-clube-ink shadow-sm focus:border-clube-teal focus:outline-none"
       />
 
+      {!query.trim() && (
+        <div className="mt-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-mist">
+            {t('aulasSearch.startHere') || 'Comece aqui'}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {todasAulas
+              .filter((l) => l.caminho)
+              .slice(0, 4)
+              .map((l) => (
+                <Link
+                  key={l.num}
+                  href={`/${l.caminho}/`}
+                  className="rounded-full border border-clube-teal/30 bg-clube-cream-soft px-3 py-1 text-xs font-medium text-clube-teal no-underline hover:bg-clube-teal hover:text-white"
+                >
+                  {t('aulasSearch.lesson')} {l.num} — {l.titulo}
+                </Link>
+              ))}
+          </div>
+        </div>
+      )}
+
       {query.trim() && (
         <div className="mt-4">
           {filtered.length === 0 ? (

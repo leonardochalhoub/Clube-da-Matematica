@@ -86,7 +86,7 @@ export default async function TrimPage({ params }: PageProps) {
         / Trimestre {t.num}
       </nav>
 
-      <header className="mb-8">
+      <header className="mb-10">
         <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-clube-gold-deep">
           Trimestre {t.num} · Ano {a.num}
         </p>
@@ -96,28 +96,11 @@ export default async function TrimPage({ params }: PageProps) {
         <p className="mt-4 max-w-prose text-lg italic text-clube-mist">
           {t.foco}
         </p>
+        <p className="mt-3 text-sm text-clube-mist/80">
+          {licoes.length} lições &nbsp;·&nbsp; {licoesPublicadas} publicadas
+          &nbsp;·&nbsp; ~{HORAS_POR_TRIMESTRE}h de estudo
+        </p>
       </header>
-
-      <section className="mb-10 grid gap-3 sm:grid-cols-3">
-        <div className="card-clube text-center">
-          <div className="text-2xl font-extrabold text-clube-teal-deep">
-            {licoes.length}
-          </div>
-          <div className="mt-1 text-xs text-clube-mist">lições no trimestre</div>
-        </div>
-        <div className="card-clube text-center">
-          <div className="text-2xl font-extrabold text-clube-leaf">
-            {licoesPublicadas}
-          </div>
-          <div className="mt-1 text-xs text-clube-mist">já publicadas</div>
-        </div>
-        <div className="card-clube text-center">
-          <div className="text-2xl font-extrabold text-clube-clay">
-            ~{HORAS_POR_TRIMESTRE}h
-          </div>
-          <div className="mt-1 text-xs text-clube-mist">estudo total</div>
-        </div>
-      </section>
 
       {agrupamento.length > 0 && (
         <section className="mb-10">

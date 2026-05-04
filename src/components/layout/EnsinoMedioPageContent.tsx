@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import type { Ano } from '@/content/programa-em'
 import { AulasSearch } from './AulasSearch'
+import { HashOpener } from './HashOpener'
 import { useLocale } from './LocaleProvider'
 
 /**
@@ -122,43 +123,135 @@ export function EnsinoMedioPageContent({
         </p>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-3">
+      <HashOpener />
+
+      <section className="space-y-3">
         {programa.map((ano) => {
           const publicadas = publicadasPorAno[ano.num] ?? 0
           const total = totalPorAno[ano.num] ?? 0
           const percent = total === 0 ? 0 : Math.round((publicadas / total) * 100)
           return (
-            <Link
+            <details
               key={ano.num}
-              href={`/ensino-medio/ano-${ano.num}/`}
-              className="card-clube group flex flex-col gap-3 no-underline hover:no-underline"
+              id={`ano-${ano.num}`}
+              className="group rounded-xl border border-clube-mist-soft/40 bg-clube-surface"
             >
-              <div className="flex items-baseline justify-between">
-                <span className="rounded-full bg-clube-cream-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-clube-teal">
-                  {t('page.ensinoMedio.year.label')} {ano.num}
-                </span>
-                <span className="text-xs text-clube-mist">{ano.idade}</span>
-              </div>
-              <h2 className="text-2xl font-extrabold leading-tight text-clube-teal-deep group-hover:text-clube-teal">
-                {ano.titulo}
-              </h2>
-              <p className="text-sm leading-relaxed text-clube-mist">
-                {ano.resumo}
-              </p>
-              <div className="mt-auto pt-3 text-xs text-clube-mist/80">
-                <div>
-                  <strong>{publicadas}</strong>{' '}
-                  {t('page.ensinoMedio.year.publishedOf')} {total}{' '}
-                  {t('page.ensinoMedio.year.lessonsPublished')}
-                  {' '}({percent}%)
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 marker:hidden [&::-webkit-details-marker]:hidden">
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
+                    {t('page.ensinoMedio.year.label')} {ano.num} · {ano.idade}
+                  </span>
+                  <h2 className="mt-1 text-xl font-extrabold leading-tight text-clube-teal-deep group-open:text-clube-teal">
+                    {ano.titulo}
+                  </h2>
+                  <p className="mt-1 text-sm leading-snug text-clube-mist">
+                    {ano.resumo}
+                  </p>
+                  <p className="mt-2 text-[11px] text-clube-mist/80">
+                    <strong className="text-clube-leaf">{publicadas}</strong>{' '}
+                    {t('page.ensinoMedio.year.publishedOf')} {total}{' '}
+                    {t('page.ensinoMedio.year.lessonsPublished')} ({percent}%)
+                    <span className="ml-2 italic text-clube-mist/70">
+                      {ano.equivalencia}
+                    </span>
+                  </p>
                 </div>
-                <div className="mt-1 italic">{ano.equivalencia}</div>
+                <span
+                  aria-hidden="true"
+                  className="shrink-0 text-2xl leading-none text-clube-teal transition-transform group-open:rotate-90"
+                >
+                  ›
+                </span>
+              </summary>
+
+              <div className="border-t border-clube-mist-soft/40 px-5 pb-5 pt-4">
+                <div className="space-y-2">
+                  {ano.trimestres.map((trim) => {
+                    const publishedCount = trim.aulas.filter(
+                      (l) => l.slug && slugToCaminho[l.slug],
+                    ).length
+                    return (
+                      <details
+                        key={trim.num}
+                        id={`ano-${ano.num}-trim-${trim.num}`}
+                        className="group/trim rounded-lg border border-clube-mist-soft/30 bg-clube-cream-soft/40"
+                      >
+                        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden [&::-webkit-details-marker]:hidden">
+                          <div className="min-w-0 flex-1">
+                            <span className="text-sm font-semibold text-clube-teal-deep">
+                              {trim.titulo}
+                            </span>
+                            <span className="ml-3 text-xs text-clube-mist">
+                              {publishedCount}/{trim.aulas.length} ·{' '}
+                              ~{horasPorTrim}h
+                            </span>
+                          </div>
+                          <span
+                            aria-hidden="true"
+                            className="text-base leading-none text-clube-teal transition-transform group-open/trim:rotate-90"
+                          >
+                            ›
+                          </span>
+                        </summary>
+
+                        <ol className="divide-y divide-clube-mist-soft/20 px-4 pb-3 pt-1">
+                          {trim.aulas.map((licao) => {
+                            const caminho = licao.slug
+                              ? slugToCaminho[licao.slug]
+                              : undefined
+                            return (
+                              <li key={licao.num} className="py-2">
+                                {caminho ? (
+                                  <Link
+                                    href={`/${caminho}/`}
+                                    className="flex items-center gap-3 text-sm no-underline hover:no-underline"
+                                  >
+                                    <span className="min-w-[2.5rem] font-mono text-[10px] font-bold text-clube-teal-deep">
+                                      L{licao.num}
+                                    </span>
+                                    <span className="flex-1 font-medium text-clube-ink hover:text-clube-teal">
+                                      {licao.titulo}
+                                    </span>
+                                    <span
+                                      aria-hidden="true"
+                                      className="rounded-full bg-clube-leaf/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-clube-leaf"
+                                    >
+                                      →
+                                    </span>
+                                  </Link>
+                                ) : (
+                                  <div className="flex items-center gap-3 text-sm opacity-60">
+                                    <span className="min-w-[2.5rem] font-mono text-[10px] font-bold text-clube-teal-deep">
+                                      L{licao.num}
+                                    </span>
+                                    <span className="flex-1 text-clube-mist">
+                                      {licao.titulo}
+                                    </span>
+                                    <span className="rounded-full bg-clube-mist-soft/40 px-2 py-0.5 text-[10px] font-semibold uppercase text-clube-mist">
+                                      {t('materia.status.planned')}
+                                    </span>
+                                  </div>
+                                )}
+                              </li>
+                            )
+                          })}
+                        </ol>
+                      </details>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-3 text-right">
+                  <Link
+                    href={`/ensino-medio/ano-${ano.num}/`}
+                    className="text-xs text-clube-teal hover:text-clube-teal-deep"
+                  >
+                    {t('page.ensinoMedio.year.openYear')} {ano.num}{' '}
+                    {t('page.ensinoMedio.year.openYearSuffix')}
+                  </Link>
+                </div>
               </div>
-              <div className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-clube-teal group-hover:text-clube-teal-deep">
-                {t('page.ensinoMedio.year.openYear')} {ano.num}{' '}
-                {t('page.ensinoMedio.year.openYearSuffix')}
-              </div>
-            </Link>
+            </details>
           )
         })}
       </section>

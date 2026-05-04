@@ -7,6 +7,12 @@ import { LocalizedMdx } from './LocalizedMdx'
 import { CATEGORIAS_LABEL } from '@/content/schema'
 import type { Conteudo } from '@/content/schema'
 
+interface PrevNextLicao {
+  num: number
+  titulo: string
+  caminho?: string
+}
+
 interface LessonPageShellProps {
   meta: Conteudo
   isAula: boolean
@@ -15,6 +21,8 @@ interface LessonPageShellProps {
   caminho: string
   /** `<MDXContent />` PT-BR pré-renderizado. Fallback se não há tradução pro locale. */
   children: ReactNode
+  prevLicao?: PrevNextLicao
+  nextLicao?: PrevNextLicao
 }
 
 /**
@@ -28,6 +36,8 @@ export function LessonPageShell({
   isFinancas,
   caminho,
   children,
+  prevLicao,
+  nextLicao,
 }: LessonPageShellProps) {
   const { t } = useLocale()
 
@@ -77,6 +87,44 @@ export function LessonPageShell({
           Próximo: code-split por locale (1 chunk dinâmico via prefixo de path).
           Por ora serve sempre PT-BR pra todos os locales. */}
       <div className="prose prose-clube max-w-none">{children}</div>
+
+      {(prevLicao || nextLicao) && (
+        <nav
+          aria-label={t('lesson.nav.aria')}
+          className="mt-16 grid gap-3 border-t border-clube-mist-soft/40 pt-8 sm:grid-cols-2"
+        >
+          {prevLicao?.caminho ? (
+            <Link
+              href={`/${prevLicao.caminho}/`}
+              className="card-clube no-underline hover:no-underline"
+            >
+              <div className="text-xs uppercase tracking-wider text-clube-mist">
+                ← {t('lesson.prev') || 'Anterior'}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-clube-teal-deep">
+                {t('aulasSearch.lesson')} {prevLicao.num} — {prevLicao.titulo}
+              </div>
+            </Link>
+          ) : (
+            <div />
+          )}
+          {nextLicao?.caminho ? (
+            <Link
+              href={`/${nextLicao.caminho}/`}
+              className="card-clube no-underline hover:no-underline sm:text-right"
+            >
+              <div className="text-xs uppercase tracking-wider text-clube-mist">
+                {t('lesson.next') || 'Próxima'} →
+              </div>
+              <div className="mt-1 text-sm font-semibold text-clube-teal-deep">
+                {t('aulasSearch.lesson')} {nextLicao.num} — {nextLicao.titulo}
+              </div>
+            </Link>
+          ) : (
+            <div />
+          )}
+        </nav>
+      )}
 
       <footer className="mt-16 border-t border-clube-mist-soft/40 pt-6 text-sm text-clube-mist">
         <p>

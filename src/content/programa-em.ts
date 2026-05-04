@@ -473,6 +473,14 @@ export const PROGRAMA_EM: Ano[] = [
   },
 ]
 
+/**
+ * Lista linear de todas as 120 lições, em ordem (Ano 1 Trim 1 Lição 1 → Ano 3 Trim 12 Lição 120).
+ * Usada para navegação prev/next na shell de cada lição.
+ */
+export const LICOES_FLAT: Licao[] = PROGRAMA_EM.flatMap((ano) =>
+  ano.trimestres.flatMap((trim) => trim.aulas),
+)
+
 /** Materias usadas em cada ano (ordem fixa para tabs). */
 export function materiasDoAno(ano: Ano): MateriaEM[] {
   const set = new Set<MateriaEM>()

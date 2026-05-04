@@ -68,6 +68,27 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '번역 대기 중 — 포르투갈어로 읽음',
     pl: 'oczekuje na tłumaczenie — czytam po portugalsku',
   },
+  'audio.readPage': {
+    'pt-BR': 'Ouvir lição inteira',
+    en: 'Listen to entire lesson',
+    es: 'Escuchar lección completa',
+    zh: '听整节课',
+    ja: '授業全体を聞く',
+    de: 'Ganze Lektion anhören',
+    fr: 'Écouter toute la leçon',
+    it: 'Ascolta tutta la lezione',
+    ru: 'Слушать весь урок',
+    ko: '전체 수업 듣기',
+    pl: 'Posłuchaj całej lekcji',
+  },
+  'audio.pause': {
+    'pt-BR': 'Pausar', en: 'Pause', es: 'Pausar', zh: '暂停', ja: '一時停止',
+    de: 'Pause', fr: 'Pause', it: 'Pausa', ru: 'Пауза', ko: '일시중지', pl: 'Pauza',
+  },
+  'audio.resume': {
+    'pt-BR': 'Continuar', en: 'Resume', es: 'Continuar', zh: '继续', ja: '再開',
+    de: 'Fortsetzen', fr: 'Reprendre', it: 'Riprendi', ru: 'Продолжить', ko: '계속', pl: 'Wznów',
+  },
 
   // ===== NAVIGATION =====
   'nav.middleSchool': {
@@ -938,6 +959,32 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '단계별 풀이 보기 (이유 포함)',
     pl: 'Zobacz krok po kroku (z uzasadnieniem)',
   },
+  'exercise.showSolution': {
+    'pt-BR': 'Ver solução',
+    en: 'Show solution',
+    es: 'Ver solución',
+    zh: '查看解答',
+    ja: '解答を見る',
+    de: 'Lösung anzeigen',
+    fr: 'Voir la solution',
+    it: 'Vedi soluzione',
+    ru: 'Показать решение',
+    ko: '풀이 보기',
+    pl: 'Zobacz rozwiązanie',
+  },
+  'exercise.hideSolution': {
+    'pt-BR': 'Ocultar solução',
+    en: 'Hide solution',
+    es: 'Ocultar solución',
+    zh: '隐藏解答',
+    ja: '解答を隠す',
+    de: 'Lösung ausblenden',
+    fr: 'Masquer la solution',
+    it: 'Nascondi soluzione',
+    ru: 'Скрыть решение',
+    ko: '풀이 숨기기',
+    pl: 'Ukryj rozwiązanie',
+  },
 
   // ===== DUAS PORTAS (door selector) =====
   'duasPortas.chooseDoor': {
@@ -1323,6 +1370,12 @@ export const TRANSLATIONS: Record<string, Translations> = {
   },
 
   // ===== AULAS SEARCH =====
+  'aulasSearch.startHere': {
+    'pt-BR': 'Comece aqui', en: 'Start here', es: 'Empieza aquí',
+    zh: '从这里开始', ja: 'ここから始める', de: 'Hier starten',
+    fr: 'Commencez ici', it: 'Inizia qui', ru: 'Начните здесь',
+    ko: '여기서 시작', pl: 'Zacznij tutaj',
+  },
   'aulasSearch.label': {
     'pt-BR': '🔍 Buscar lição por nome, tópico ou matéria',
     en: '🔍 Search lessons by name, topic, or subject',
@@ -1670,6 +1723,16 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ru: 'Не найдено',
     ko: '찾을 수 없음',
     pl: 'Nie znaleziono',
+  },
+  'lesson.prev': {
+    'pt-BR': 'Anterior', en: 'Previous', es: 'Anterior', zh: '上一节',
+    ja: '前へ', de: 'Vorherige', fr: 'Précédent', it: 'Precedente',
+    ru: 'Назад', ko: '이전', pl: 'Poprzednia',
+  },
+  'lesson.next': {
+    'pt-BR': 'Próxima', en: 'Next', es: 'Siguiente', zh: '下一节',
+    ja: '次へ', de: 'Nächste', fr: 'Suivante', it: 'Successiva',
+    ru: 'Далее', ko: '다음', pl: 'Następna',
   },
 
   // ===== AUDIO READER (extras) =====
