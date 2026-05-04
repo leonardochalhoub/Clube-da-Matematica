@@ -3,19 +3,19 @@ titulo: "第35课 — 通过矩阵求解方程组"
 slug: "aula-35-sistemas-via-matrizes"
 categoria: "aulas"
 subcategoria: "ano-1-trim-4"
-descricao: "克拉默法则、高斯消元、逆矩阵。每种方法何时最佳。"
+descricao: "Cramer, escalonamento de Gauss, matriz inversa. Quando cada método é melhor."
 ordem: 35
 publicado: true
 tags: ["sistemas lineares", "Cramer", "Gauss", "ano-1", "trim-4"]
 prerrequisitos: ["aula-34-determinantes"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-29"
+atualizadoEm: "2026-04-30"
 ---
 
 <EquacaoCanonica
   formula="A\mathbf{x} = \mathbf{b} \quad \Rightarrow \quad \mathbf{x} = A^{-1}\mathbf{b}"
-  legenda={<>矩阵形式的线性方程组。解可通过逆矩阵、<strong>高斯消元</strong>或<strong>克拉默法则</strong>得到 — 三种方法到达同一结果。</>}
-  audioTexto="Sistema linear em forma matricial. A vezes x igual a b. Solução: x igual a A inversa vezes b, quando A é invertível. Em prática usa-se escalonamento de Gauss, mais eficiente que calcular a inversa explicitamente."
+  legenda={<>矩阵形式的线性方程组。可以通过逆求解，或<strong>高斯消元法</strong>，或<strong>克拉默法则</strong>——三条路径达到同一结果。</>}
+  audioTexto="矩阵形式的线性方程组。A乘x等于b。解：x等于A的逆乘b，当A可逆时。实际中用高斯消元法，比显式计算逆更高效。"
 />
 
 <DuasPortas>
@@ -24,57 +24,271 @@ atualizadoEm: "2026-04-29"
 
 ### 矩阵形式
 
-$\begin{cases} a_1 x + b_1 y + c_1 z = d_1 \\ a_2 x + b_2 y + c_2 z = d_2 \\ a_3 x + b_3 y + c_3 z = d_3 \end{cases}$ ⟺ $A\mathbf{x} = \mathbf{b}$,$A_{3 \times 3}$,$\mathbf{x}, \mathbf{b} \in \mathbb{R}^3$.
+$\begin{cases} a_1 x + b_1 y + c_1 z = d_1 \\ a_2 x + b_2 y + c_2 z = d_2 \\ a_3 x + b_3 y + c_3 z = d_3 \end{cases}$ ⟺ $A\mathbf{x} = \mathbf{b}$，$A_{3 \times 3}$，$\mathbf{x}, \mathbf{b} \in \mathbb{R}^3$。
 
-### 方法 1 — 高斯消元
+### 方法1——高斯消元
 
-初等变换(不改变解):
+初等变换（不改变解）：
 1. 交换两行。
-2. 用非零标量乘一行。
-3. 将一行的倍数加到另一行。
+2. 一行乘以非零标量。
+3. 一行倍数加到另一行。
 
-目标:将增广矩阵 $[A | \mathbf{b}]$ 三角化为阶梯形。然后回代。
+目标：将 $[A | \mathbf{b}]$ 三角化为阶梯形。然后回代。
 
-### 方法 2 — 克拉默法则
+### 方法2——克拉默
 
-对于 $A\mathbf{x} = \mathbf{b}$ 且 $\det A \neq 0$:
+对 $A\mathbf{x} = \mathbf{b}$ 且 $\det A \neq 0$：
 $$x_i = \frac{\det A_i}{\det A}$$
 
 其中 $A_i$ 是 $A$ 的第 $i$ 列被 $\mathbf{b}$ 替换。
 
-### 方法 3 — 逆矩阵
+### 方法3——逆
 
-$\mathbf{x} = A^{-1} \mathbf{b}$. 可通过 $[A | I] \to [I | A^{-1}]$ 消元计算 $A^{-1}$。
+$\mathbf{x} = A^{-1} \mathbf{b}$。可通过 $[A | I] \to [I | A^{-1}]$ 行变换计算 $A^{-1}$。
 
-### 何时使用哪种
+### 何时使用
 
-- **克拉默**: 理论优雅,但 $O(n^4)$ — 仅用于 $n \leq 3$。
-- **高斯**: $O(n^3)$,实用标准。
-- **显式逆**: 仅当需要用相同 $A$ 求解多个方程组时。
+| 方法 | 代价 | 何时使用 |
+|---|---|---|
+| 克拉默 | $O(n^4)$ | $n \leq 3$，教学 |
+| 高斯 | $O(n^3)$ | 实际标准 |
+| 逆 | $O(n^3)$ + 每方程组 $O(n^2)$ | 多个 $\mathbf b$ 同 $A$ |
+| LU | $O(n^3)$ + 每方程组 $O(n^2)$ | 多方程组，比逆好 |
 
-### 分类
+### 方程组分类
 
-- **确定**: 唯一解 ($\det A \neq 0$)。
-- **不定**: 无穷多解 ($\det A = 0$ + 一致)。
-- **不可能**: 无解 ($\det A = 0$ + 不一致)。
+- **确定的（SPD）**：唯一解（$\det A \neq 0$，或 $\text{rank}(A) = \text{rank}([A|\mathbf b]) = n$）。
+- **不定的（SPI）**：无穷多解（$\text{rank}(A) = \text{rank}([A|\mathbf b]) < n$）。
+- **不可解（SI）**：无解（$\text{rank}(A) < \text{rank}([A|\mathbf b])$）。
+
+### 鲁谢-卡佩利定理
+
+$A\mathbf x = \mathbf b$ 有解 ⟺ $\text{rank}(A) = \text{rank}([A|\mathbf b])$。两者 = 未知数个数时解唯一。
 
 </Porta>
 
-<Porta nivel="15" titulo="给15岁青少年">
+<Porta nivel="5" titulo="给5岁的孩子">
 
-矩阵形式的线性方程组:把系数装入 $A$,未知数装入 $\mathbf{x}$,结果装入 $\mathbf{b}$。方程组变成 $A\mathbf{x} = \mathbf{b}$。
+方程组就是**同时几个方程**。比如："我有3个苹果和2个梨，共13雷亚尔。我有1个苹果和4个梨，共16雷亚尔。每个多少钱？"
 
-求解方法:
+要解，你**聪明地组合**方程**消去**一种水果，找出另一个的价格，再回代。是有规则的拼图。
 
-**克拉默**: 行列式之比。漂亮,但只用于小方程组。
+</Porta>
 
-**高斯**(消元):做不改变解的运算直到矩阵成为三角形,然后从下往上求解。
+<Porta nivel="10" titulo="给10岁的孩子">
 
-例:
+**线性方程组** = 几个方程几个未知数同时为真。
 
-$$\begin{pmatrix} 2 & 1 & | & 5 \\ 1 & 3 & | & 6 \end{pmatrix} \to \begin{pmatrix} 2 & 1 & | & 5 \\ 0 & 5/2 & | & 7/2 \end{pmatrix}$$
+例：
+$$\begin{cases} x + y = 5 \\ x - y = 1 \end{cases}$$
 
-(我从 $L_2$ 减去 $L_1/2$。)从第二行得 $y = 7/5$。代入第一行:$2x = 5 - 7/5 \Rightarrow x = 9/5$。
+怎么解？
+- **两式相加**：$2x = 6 \Rightarrow x = 3$。
+- **相减**：$2y = 4 \Rightarrow y = 2$。
+
+完成：$x = 3, y = 2$。
+
+**对大方程组**，手算麻烦。所以**用矩阵组织**：
+$$\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} 5 \\ 1 \end{pmatrix}$$
+
+并用**消元法**（标准方式）或**克拉默法则**（用行列式）或**逆**（$\mathbf x = A^{-1}\mathbf b$）。
+
+**何时出错？**
+- 方程组**无解**：方程相互矛盾。
+- 方程组有**无穷解**：方程冗余。
+
+</Porta>
+
+<Porta nivel="15" titulo="给15岁的青少年">
+
+矩阵形式的线性方程组：把系数装到 $A$，未知数装到 $\mathbf{x}$，结果装到 $\mathbf{b}$。方程组变为 $A\mathbf{x} = \mathbf{b}$。
+
+**克拉默**（教学，小型）：$x_i = \det(A_i)/\det(A)$。例：
+$$\begin{cases} 2x + y = 5 \\ x - 3y = -2 \end{cases} \Rightarrow A = \begin{pmatrix} 2 & 1 \\ 1 & -3 \end{pmatrix}, \det A = -7$$
+
+$x = \det\begin{pmatrix} 5 & 1 \\ -2 & -3 \end{pmatrix}/(-7) = (-13)/(-7) = 13/7$。
+
+$y = \det\begin{pmatrix} 2 & 5 \\ 1 & -2 \end{pmatrix}/(-7) = (-9)/(-7) = 9/7$。
+
+**高斯**（标准）：做初等变换三角化。然后从下到上代入。
+
+$$[A | \mathbf b] = \begin{pmatrix} 2 & 1 & | & 5 \\ 1 & 3 & | & 6 \end{pmatrix} \xrightarrow{L_2 \leftarrow L_2 - L_1/2} \begin{pmatrix} 2 & 1 & | & 5 \\ 0 & 5/2 & | & 7/2 \end{pmatrix}$$
+
+第二行：$y = 7/5$。代入第一行：$2x = 5 - 7/5 \Rightarrow x = 9/5$。
+
+**分类**：
+- $\det A \neq 0$ → **确定**（唯一解）。
+- $\det A = 0$ + 一致 → **不定**（无穷）。
+- $\det A = 0$ + 不一致 → **不可解**。
+
+**齐次方程组** $A\mathbf x = \mathbf 0$：总有 $\mathbf x = \mathbf 0$（平凡）。有非平凡解 ⟺ $\det A = 0$。
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程系学生">
+
+求解 $A\mathbf x = \mathbf b$ 是所有科学计算中**最常见**的运算。FEM/CFD 仿真约 80% 时间花在线性求解器上。
+
+### 求解器层次
+
+1. **直接方法**（高斯、LU、QR、楚列斯基）：$O(n^3)$，机器精度内精确。
+2. **迭代方法**（雅可比、高斯-赛德尔、CG、GMRES、BiCGSTAB）：每次迭代 $O(n^2)$，需收敛，理想用于稀疏。
+3. **专用方法**：循环矩阵的 FFT、PDE 的多重网格。
+
+### 部分主元 LU
+
+$PA = LU$——$P$ 置换，$L$ 单位下三角，$U$ 上三角。通过以下解 $A\mathbf x = \mathbf b$：
+1. $L\mathbf y = P\mathbf b$（前向代入，$O(n^2)$）。
+2. $U\mathbf x = \mathbf y$（后向代入，$O(n^2)$）。
+
+主元对稳定性至关重要——避免除以小数。
+
+### 病态方程组
+
+$\kappa(A) = \|A\|\|A^{-1}\|$。在 float64 下高斯消元损失 $\log_{10}\kappa$ 位。若 $\kappa = 10^{16}$，解纯属垃圾。
+
+### 最小二乘（超定方程组）
+
+$\min_\mathbf x \|A\mathbf x - \mathbf b\|^2$。正规方程：$A^TA\mathbf x = A^T\mathbf b$。**别用！** 条件数平方化。用 QR：$A = QR$ ⟹ $R\mathbf x = Q^T\mathbf b$。
+
+### 跨领域
+
+- **电路**：KCL/KVL 生成线性方程组——改进节点分析。
+- **FEM**：$K\mathbf u = \mathbf f$——百万未知数，稀疏，对称正定。
+- **优化**：每次牛顿迭代解 $H\Delta\mathbf x = -\nabla f$。
+- **统计**：回归 $X^TX\hat\beta = X^T\mathbf y$（但用 QR/SVD）。
+- **滤波器（卡尔曼）**：每步预测-修正涉及求解器。
+
+### 数值——最佳实践
+
+- **用 `solve`，不用 `inv`**。
+- 对 SPD：楚列斯基。
+- 对稀疏：`scipy.sparse.linalg.spsolve` 或带预条件子的迭代法。
+- 对 $> 10^4$ 稠密：GPU 或迭代方法。
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士">
+
+线性求解器是 PDE、ML、优化、仿真的**基础**。方法选择是架构决策——可能决定仿真可行与否。
+
+### Wolfram 速览
+
+```mathematica
+LinearSolve[A, b]
+LeastSquares[A, b]
+LinearSolve[A, b, Method -> "Krylov"]
+```
+
+### 矩阵类与最优算法
+
+| 类型 | 求解器 |
+|---|---|
+| 一般稠密 | LU（高斯+主元） |
+| 稠密 SPD | 楚列斯基 |
+| 稠密矩形 | QR |
+| 稀疏对称不定 | MINRES、SYMMLQ |
+| 稀疏 SPD | CG（带预条件子） |
+| 稀疏非对称 | GMRES、BiCGSTAB |
+| 结构化（托普利茨） | 基于 FFT，$O(n \log n)$ |
+| 三对角 | Thomas，$O(n)$ |
+| 带状 | 专用 LU $O(nb^2)$ |
+
+### 现代迭代
+
+- **Krylov 子空间**：$\mathcal K_k = \text{span}\{\mathbf b, A\mathbf b, \ldots, A^{k-1}\mathbf b\}$。CG（SPD）、GMRES（一般）在 $\mathcal K_k$ 中构造最优近似。
+- **收敛**：CG $O(\sqrt{\kappa})$ 次迭代。预条件 $\widetilde A = M^{-1}A$ 使 $\kappa(\widetilde A) \ll \kappa(A)$ 是艺术。
+
+### 大数据/稀疏
+
+- **Hypre、PETSc、Trilinos**：$> 10^9$ 系统的工业库。
+- **多重网格**：椭圆问题 $O(n)$。
+- **域分解**：通过分解 $\Omega$ 为子域并行化。
+
+### 量化——风险中的方程组
+
+模型校准（BS、Heston、SABR）生成病态方程组。**Levenberg-Marquardt**、**Tikhonov 正则化**、**截断 SVD** 是标准。
+
+### 当前研究
+
+- **随机数值线性代数**：求解前用 sketching 降维。Drineas、Mahoney。
+- **混合精度迭代精化**：FP32 求解，FP64 精化。现代硬件 10× 增益。
+- **量子算法（HHL）**：某些类的量子比特 $O(\log n)$——仍理论。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用">
+
+**实际求解 $A\mathbf x = \mathbf b$ 的工作流程。**
+
+1. 看结构：对称？稀疏？三角？
+2. 选择兼容的求解器。
+3. 若目标是求解，**绝不用显式逆**。
+4. 检查条件数；始终验证残差 $\|A\mathbf x - \mathbf b\|$。
+
+### NumPy 配方
+
+```python
+import numpy as np
+from scipy.linalg import lu, cho_factor, cho_solve, qr, solve_triangular
+
+A = np.array([[2, 1], [1, 3]], dtype=float)
+b = np.array([5, 7], dtype=float)
+
+# 标准
+x = np.linalg.solve(A, b)
+
+# SPD
+c, lo = cho_factor(A)
+x = cho_solve((c, lo), b)
+
+# 最小二乘（超定）
+A_rect = np.random.randn(100, 5)
+b_rect = np.random.randn(100)
+x_lsq, residuals, rank, sv = np.linalg.lstsq(A_rect, b_rect, rcond=None)
+
+# 稀疏
+from scipy.sparse import csr_matrix
+from scipy.sparse.linalg import spsolve
+A_sp = csr_matrix(A)
+x_sp = spsolve(A_sp, b)
+
+# 迭代（SPD 的 CG）
+from scipy.sparse.linalg import cg
+x_cg, info = cg(A_sp, b)
+```
+
+### SymPy 符号
+
+```python
+import sympy as sp
+A = sp.Matrix([[2, 1], [1, 3]])
+b = sp.Matrix([5, 7])
+x = A.solve(b)             # 分数精确
+print(x)
+```
+
+### 手动 2×2 克拉默
+
+```python
+def cramer_2x2(A, b):
+    detA = A[0,0]*A[1,1] - A[0,1]*A[1,0]
+    if abs(detA) < 1e-14:
+        return None
+    Ax = np.array([[b[0], A[0,1]], [b[1], A[1,1]]])
+    Ay = np.array([[A[0,0], b[0]], [A[1,0], b[1]]])
+    return np.array([np.linalg.det(Ax)/detA, np.linalg.det(Ay)/detA])
+```
+
+### 陷阱
+
+- 若 `solve` 报错 `LinAlgError: singular matrix`：用 `lstsq` 或 `pinv`。
+- 即使 $\det \approx 0$ 也可能有解——取决于 $\mathbf b$ 是否在列空间。
+- **始终验证**残差：`np.linalg.norm(A @ x - b)`。
+
+### 必做任务
+
+完成所有练习。在技术面试和考试中，$3\times 3$ 方程组无处不在——**手动熟练度**是差异化优势。
 
 </Porta>
 
@@ -82,46 +296,68 @@ $$\begin{pmatrix} 2 & 1 & | & 5 \\ 1 & 3 & | & 6 \end{pmatrix} \to \begin{pmatri
 
 <ListaExercicios seed="aula-35">
 
-### A组 (35.1 到 35.20)
+### 模块A — 克拉默与消元法（35.1 至 35.20）
 
-<Exercicio numero="35.1" dificuldade="aplicacao">用克拉默求解: $\begin{cases} x + y = 5 \\ 2x - y = 1 \end{cases}$。</Exercicio>
-<Exercicio numero="35.2" dificuldade="aplicacao">用消元法求解: $\begin{cases} 3x + 2y = 11 \\ x - y = 2 \end{cases}$。</Exercicio>
-<Exercicio numero="35.3" dificuldade="aplicacao">用消元法求解 $\begin{cases} x + 2y - z = 4 \\ 2x + y + z = 6 \\ x - y + 2z = 3 \end{cases}$。</Exercicio>
-<Exercicio numero="35.4" dificuldade="aplicacao">齐次方程组 $A\mathbf{x} = \mathbf{0}$,$\det A = 5 \neq 0$。解?</Exercicio>
-<Exercicio numero="35.5" dificuldade="aplicacao">$k$ 取何值时方程组 $\begin{cases} x + 2y = 3 \\ kx + 4y = 6 \end{cases}$ 有无穷多解?</Exercicio>
-<Exercicio numero="35.6" dificuldade="aplicacao">$k$ 取何值时无解?</Exercicio>
+<Exercicio numero="35.1" dificuldade="aplicacao">用克拉默解：$\begin{cases} x + y = 5 \\ 2x - y = 1 \end{cases}$。（答：$x = 2, y = 3$。）</Exercicio>
+<Exercicio numero="35.2" dificuldade="aplicacao">用消元法解：$\begin{cases} 3x + 2y = 11 \\ x - y = 2 \end{cases}$。（答：$x = 3, y = 1$。）</Exercicio>
+<Exercicio numero="35.3" dificuldade="aplicacao">用消元法解 $\begin{cases} x + 2y - z = 4 \\ 2x + y + z = 6 \\ x - y + 2z = 3 \end{cases}$。</Exercicio>
+<Exercicio numero="35.4" dificuldade="aplicacao">齐次方程组 $A\mathbf{x} = \mathbf{0}$，$\det A = 5 \neq 0$。解？（答：平凡 $\mathbf x = \mathbf 0$。）</Exercicio>
+<Exercicio numero="35.5" dificuldade="aplicacao">$k$ 取何值时方程组 $\begin{cases} x + 2y = 3 \\ kx + 4y = 6 \end{cases}$ 有无穷多解？（答：$k = 2$。）</Exercicio>
+<Exercicio numero="35.6" dificuldade="aplicacao">上述方程组在 $k$ 取何值时无解？</Exercicio>
 <Exercicio numero="35.7" dificuldade="aplicacao">$\begin{cases} 2x + y = 5 \\ x - 3y = 1 \end{cases}$ 的矩阵形式。计算 $A^{-1}\mathbf{b}$。</Exercicio>
-<Exercicio numero="35.8" dificuldade="aplicacao">用克拉默求解 $\begin{cases} x - y + z = 1 \\ 2x + y - z = 4 \\ -x + 2y + z = 0 \end{cases}$。</Exercicio>
-<Exercicio numero="35.9" dificuldade="aplicacao">证明若 $A$ 是三角可逆的,回代很容易。</Exercicio>
-<Exercicio numero="35.10" dificuldade="aplicacao">用消元验证 $\begin{cases} x + y + z = 3 \\ 2x + 2y + 2z = 6 \\ 3x + 3y + 3z = 9 \end{cases}$ 有无穷多解。</Exercicio>
-<Exercicio numero="35.11" dificuldade="aplicacao">用逆矩阵求解: $\begin{cases} 4x + 3y = 11 \\ 2x + y = 5 \end{cases}$。</Exercicio>
-<Exercicio numero="35.12" dificuldade="aplicacao">通过 $[A|I]$ 消元计算 $\begin{pmatrix} 1 & 2 & 1 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{pmatrix}$ 的 $A^{-1}$。</Exercicio>
-<Exercicio numero="35.13" dificuldade="aplicacao">方程组 $\begin{cases} x + y + z = 1 \\ x + y + z = 2 \end{cases}$ — 解?</Exercicio>
-<Exercicio numero="35.14" dificuldade="aplicacao">方程多于未知数的方程组 — 通常超定,无精确解。</Exercicio>
-<Exercicio numero="35.15" dificuldade="aplicacao">未知数多于方程的方程组 — 欠定,无穷多解。</Exercicio>
-<Exercicio numero="35.16" dificuldade="aplicacao">求解 $\begin{cases} 0{,}1 x + 0{,}2 y = 0{,}3 \\ 0{,}4 x - 0{,}5 y = 0{,}1 \end{cases}$ — 乘以10。</Exercicio>
-<Exercicio numero="35.17" dificuldade="aplicacao">$\begin{cases} x + y - z = 0 \\ 2x - y + z = 0 \end{cases}$ 的通解(2x3 方程组)。</Exercicio>
-<Exercicio numero="35.18" dificuldade="aplicacao">证明齐次解 + 非齐次的特解 = 通解。</Exercicio>
-<Exercicio numero="35.19" dificuldade="aplicacao">检查一致性: $\begin{cases} x + y = 3 \\ 2x + 2y = 7 \end{cases}$。</Exercicio>
-<Exercicio numero="35.20" dificuldade="aplicacao">克拉默给出 $x = D_x/D$。$D$ 取何值时方法失效?</Exercicio>
+<Exercicio numero="35.8" dificuldade="aplicacao">用克拉默解 $\begin{cases} x - y + z = 1 \\ 2x + y - z = 4 \\ -x + 2y + z = 0 \end{cases}$。</Exercicio>
+<Exercicio numero="35.9" dificuldade="aplicacao">用消元法解 $\begin{cases} 2x - y = 0 \\ x + 3y = 7 \end{cases}$。（答：$x = 1, y = 2$。）</Exercicio>
+<Exercicio numero="35.10" dificuldade="aplicacao">用消元法验证 $\begin{cases} x + y + z = 3 \\ 2x + 2y + 2z = 6 \\ 3x + 3y + 3z = 9 \end{cases}$ 有无穷多解。</Exercicio>
+<Exercicio numero="35.11" dificuldade="aplicacao">用逆解：$\begin{cases} 4x + 3y = 11 \\ 2x + y = 5 \end{cases}$。（答：$x = 2, y = 1$。）</Exercicio>
+<Exercicio numero="35.12" dificuldade="aplicacao">通过 $[A|I]$ 消元法求 $\begin{pmatrix} 1 & 2 & 1 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{pmatrix}$ 的 $A^{-1}$。</Exercicio>
+<Exercicio numero="35.13" dificuldade="aplicacao">方程组 $\begin{cases} x + y + z = 1 \\ x + y + z = 2 \end{cases}$——解？（答：无解——不相容。）</Exercicio>
+<Exercicio numero="35.14" dificuldade="aplicacao">4 个方程 2 个未知数——通常超定，无精确解。实际中用最小二乘。</Exercicio>
+<Exercicio numero="35.15" dificuldade="aplicacao">2 个方程 4 个未知数——欠定，无穷多解。</Exercicio>
+<Exercicio numero="35.16" dificuldade="aplicacao">解 $\begin{cases} 0{,}1 x + 0{,}2 y = 0{,}3 \\ 0{,}4 x - 0{,}5 y = 0{,}1 \end{cases}$——先乘以10。</Exercicio>
+<Exercicio numero="35.17" dificuldade="aplicacao">$\begin{cases} x + y - z = 0 \\ 2x - y + z = 0 \end{cases}$（2x3 齐次）的通解。</Exercicio>
+<Exercicio numero="35.18" dificuldade="aplicacao">证明齐次解 + 非齐次特解 = 通解。</Exercicio>
+<Exercicio numero="35.19" dificuldade="aplicacao">检查相容性：$\begin{cases} x + y = 3 \\ 2x + 2y = 7 \end{cases}$。（答：不相容。）</Exercicio>
+<Exercicio numero="35.20" dificuldade="aplicacao">克拉默给 $x = D_x/D$。$D$ 取何值时方法失败？（答：$D = 0$。）</Exercicio>
 
-### B组 — 建模 (35.21 到 35.30)
+### 模块B — 3×3 及更大方程组（35.21 至 35.32）
 
-<Exercicio numero="35.21" dificuldade="modelagem">在 3 网孔电路中,基尔霍夫定律给出 3x3 方程组。</Exercicio>
-<Exercicio numero="35.22" dificuldade="modelagem">经济学中 IS-LM 模型生成 2x2 方程组: 产出和利率同时确定。</Exercicio>
-<Exercicio numero="35.23" dificuldade="modelagem">3 化学品混合: 3 成分形成组合。比例的 3x3 方程组。</Exercicio>
-<Exercicio numero="35.24" dificuldade="modelagem">4 节点和 3 个未知力的桁架 — 消元。</Exercicio>
-<Exercicio numero="35.25" dificuldade="modelagem">统计学中最小二乘 $X^TX\beta = X^Ty$ 是线性方程组。</Exercicio>
-<Exercicio numero="35.26" dificuldade="compreensao">证明方程组 $A\mathbf{x} = \mathbf{0}$ 总有 $\mathbf{x} = \mathbf{0}$。(平凡解。)</Exercicio>
-<Exercicio numero="35.27" dificuldade="compreensao">证明若 $A$ 可逆,$A\mathbf{x} = \mathbf{0}$ 仅有 $\mathbf{x} = \mathbf{0}$。</Exercicio>
-<Exercicio numero="35.28" dificuldade="desafio">用克拉默和高斯求解同一 3x3 方程组 — 比较计算量。</Exercicio>
-<Exercicio numero="35.29" dificuldade="desafio">解为 $(1, 2)$ 且有两个方程的方程组: 找出非唯一的 $A$。</Exercicio>
-<Exercicio numero="35.30" dificuldade="demonstracao">证明消元保持解集。</Exercicio>
+<Exercicio numero="35.21" dificuldade="aplicacao">用消元法解 $\begin{cases} x + 2y + 3z = 6 \\ 4x + 5y + 6z = 15 \\ 7x + 8y + 10z = 25 \end{cases}$。</Exercicio>
+<Exercicio numero="35.22" dificuldade="aplicacao">用克拉默解 $\begin{cases} 2x - y + 3z = 9 \\ x + y - z = 0 \\ 3x + 2y + z = 5 \end{cases}$。</Exercicio>
+<Exercicio numero="35.23" dificuldade="aplicacao">$k$ 取何值时方程组 $\begin{cases} x + y + z = 1 \\ x + 2y + kz = 2 \\ x + 4y + k^2 z = 4 \end{cases}$ 有唯一解？</Exercicio>
+<Exercicio numero="35.24" dificuldade="aplicacao">求所有满足 $\begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{pmatrix} \mathbf x = \begin{pmatrix} 0 \\ 0 \end{pmatrix}$ 的 $\mathbf x$。</Exercicio>
+<Exercicio numero="35.25" dificuldade="aplicacao">用回代解阶梯形 $\begin{cases} x + 2y - z = 3 \\ 3y + 2z = 1 \\ 5z = 10 \end{cases}$。</Exercicio>
+<Exercicio numero="35.26" dificuldade="aplicacao">对方程组 $\begin{cases} x + ky = 1 \\ kx + y = 1 \end{cases}$，按 $k$ 分类。</Exercicio>
+<Exercicio numero="35.27" dificuldade="aplicacao">解 $\begin{cases} x + 2y - z = 1 \\ 2x + 4y - 2z = 2 \\ x + y + z = 3 \end{cases}$——注意冗余。</Exercicio>
+<Exercicio numero="35.28" dificuldade="aplicacao">通过高斯-若尔当法求 $A = \begin{pmatrix} 1 & 2 & 3 \\ 0 & 1 & 4 \\ 0 & 0 & 1 \end{pmatrix}$ 的 $A^{-1}$。</Exercicio>
+<Exercicio numero="35.29" dificuldade="aplicacao">用 35.28 得到的 $A^{-1}$ 解 $A\mathbf x = (6, 5, 1)^T$。</Exercicio>
+<Exercicio numero="35.30" dificuldade="aplicacao">解 $4 \times 4$：$\begin{cases} x_1 + x_2 = 1 \\ x_2 + x_3 = 2 \\ x_3 + x_4 = 3 \\ x_1 + x_4 = 4 \end{cases}$。</Exercicio>
+<Exercicio numero="35.31" dificuldade="aplicacao">识别矩阵 $\begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \\ 1 & 1 & 1 \end{pmatrix}$ 的秩。</Exercicio>
+<Exercicio numero="35.32" dificuldade="aplicacao">将鲁谢-卡佩利应用于 $\begin{cases} x + y = 1 \\ 2x + 2y = 3 \end{cases}$——分类。</Exercicio>
+
+### 模块C — 建模与应用（35.33 至 35.42）
+
+<Exercicio numero="35.33" dificuldade="modelagem">3 网孔电路中，基尔霍夫定律给出 3x3 方程组。建模：3 个网孔电流，电阻，电源。</Exercicio>
+<Exercicio numero="35.34" dificuldade="modelagem">在经济学中，IS-LM 模型生成 2x2 方程组：产出 $Y$ 和利率 $r$ 同时。</Exercicio>
+<Exercicio numero="35.35" dificuldade="modelagem">混合：100 ml 含 3 种物质的溶液。已知浓度——$3 \times 3$ 方程组。</Exercicio>
+<Exercicio numero="35.36" dificuldade="modelagem">4 节点 3 个未知力的桁架——消元法。</Exercicio>
+<Exercicio numero="35.37" dificuldade="modelagem">在统计中，最小二乘 $X^TX\beta = X^Ty$ 是线性方程组。$X \in M_{n\times p}$，$n \gg p$，方程组维度？</Exercicio>
+<Exercicio numero="35.38" dificuldade="modelagem">在控制中，求 $\mathbf u$ 使 $\mathbf y = C(sI - A)^{-1}B \mathbf u$ 接近参考。</Exercicio>
+<Exercicio numero="35.39" dificuldade="modelagem">在 CG 中，光的辐射度求解导致方程组 $(I - F)\mathbf B = \mathbf E$——稀疏。</Exercicio>
+<Exercicio numero="35.40" dificuldade="modelagem">在二次优化 $\min \frac{1}{2}\mathbf x^T H \mathbf x + \mathbf c^T \mathbf x$ 中，临界点：$H\mathbf x = -\mathbf c$。</Exercicio>
+<Exercicio numero="35.41" dificuldade="modelagem">在 ML 中，岭回归：$(X^TX + \lambda I)\beta = X^T\mathbf y$。为何正则化？</Exercicio>
+<Exercicio numero="35.42" dificuldade="modelagem">在 PDE 中，1D 热方程离散化导致三对角方程组——Thomas 算法 $O(n)$。</Exercicio>
+
+### 模块D — 理解与挑战（35.43 至 35.46）
+
+<Exercicio numero="35.43" dificuldade="compreensao">证明方程组 $A\mathbf{x} = \mathbf{0}$ 始终有 $\mathbf{x} = \mathbf{0}$。</Exercicio>
+<Exercicio numero="35.44" dificuldade="compreensao">证明若 $A$ 可逆，$A\mathbf{x} = \mathbf{0}$ 只有 $\mathbf{x} = \mathbf{0}$。</Exercicio>
+<Exercicio numero="35.45" dificuldade="desafio">用克拉默和高斯解同一 3x3 方程组——比较运算次数。</Exercicio>
+<Exercicio numero="35.46" dificuldade="demonstracao">证明消元法保持解集——逐次操作。</Exercicio>
 
 </ListaExercicios>
 
 ## 本课参考来源
 
-- [**A First Course in Linear Algebra**](http://linear.ups.edu/) — Robert A. Beezer · 2022 · EN · GFDL · 第SLE章: 线性方程求解。**主要来源。**
-- [**Linear Algebra Done Right**](https://linear.axler.net/) — Sheldon Axler · 2024,第4版 · EN · CC-BY-NC · 第3章。
-- [**Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — REAMAT UFRGS · 2024 · PT-BR · CC-BY-SA · 第4章: 数值线性方程组。
+- [**A First Course in Linear Algebra**](http://linear.ups.edu/) — Robert A. Beezer · 2022 · EN · GFDL · 第 SLE 章：求解线性方程。**主要来源。**
+- [**Linear Algebra Done Right**](https://linear.axler.net/) — Sheldon Axler · 2024, 4th ed · EN · CC-BY-NC · 第3章。
+- [**Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — REAMAT UFRGS · 2024 · PT-BR · CC-BY-SA · 第4章：数值线性方程组。
