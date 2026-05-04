@@ -61,9 +61,10 @@ export const DEFAULT_LOCALE: Locale = 'en'
 
 /**
  * Mapeia país (ISO 3166-1 alpha-2) para idioma local padrão.
- * Usado pra auto-seleção quando o navegador permite geolocalização.
+ * Usado pra auto-seleção via timezone (Intl.DateTimeFormat) — offline,
+ * instantâneo, sem permissões.
  */
-const COUNTRY_TO_LOCALE: Record<string, Locale> = {
+export const COUNTRY_TO_LOCALE: Record<string, Locale> = {
   BR: 'pt-BR', PT: 'pt-BR', AO: 'pt-BR', MZ: 'pt-BR',
   US: 'en', GB: 'en', AU: 'en', CA: 'en', NZ: 'en', IE: 'en', IN: 'en',
   ES: 'es', MX: 'es', AR: 'es', CO: 'es', CL: 'es', PE: 'es', VE: 'es',
@@ -78,10 +79,89 @@ const COUNTRY_TO_LOCALE: Record<string, Locale> = {
 }
 
 /**
- * Detecta locale baseado em (em ordem):
- *  1. localStorage 'locale' (preferência manual prévia)
- *  2. navigator.language do browser
- *  3. fallback inglês
+ * Mapa **timezone IANA → código país**. Usado para inferir país do usuário
+ * via `Intl.DateTimeFormat().resolvedOptions().timeZone`, o que dá detecção
+ * geográfica offline (zero rede, zero permissão de browser, instantâneo).
+ *
+ * Cobertura: principais zonas dos países onde os locales suportados são
+ * dominantes. Para timezones não listadas, cai no fallback (browser lang).
+ */
+const TIMEZONE_TO_COUNTRY: Record<string, string> = {
+  // Brasil — todas as zonas
+  'America/Sao_Paulo': 'BR', 'America/Bahia': 'BR', 'America/Belem': 'BR',
+  'America/Fortaleza': 'BR', 'America/Maceio': 'BR', 'America/Recife': 'BR',
+  'America/Araguaina': 'BR', 'America/Manaus': 'BR', 'America/Cuiaba': 'BR',
+  'America/Campo_Grande': 'BR', 'America/Porto_Velho': 'BR',
+  'America/Boa_Vista': 'BR', 'America/Rio_Branco': 'BR', 'America/Eirunepe': 'BR',
+  'America/Noronha': 'BR', 'America/Santarem': 'BR',
+  // Portugal e países africanos lusófonos
+  'Europe/Lisbon': 'PT', 'Atlantic/Madeira': 'PT', 'Atlantic/Azores': 'PT',
+  'Africa/Luanda': 'AO', 'Africa/Maputo': 'MZ',
+  // EUA
+  'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US',
+  'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Anchorage': 'US',
+  'Pacific/Honolulu': 'US', 'America/Detroit': 'US', 'America/Indianapolis': 'US',
+  // Reino Unido / Irlanda / Australia / Nova Zelândia / Canadá / Índia
+  'Europe/London': 'GB', 'Europe/Dublin': 'IE',
+  'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU', 'Australia/Brisbane': 'AU',
+  'Australia/Perth': 'AU', 'Australia/Adelaide': 'AU',
+  'Pacific/Auckland': 'NZ',
+  'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'America/Edmonton': 'CA',
+  'America/Halifax': 'CA', 'America/St_Johns': 'CA',
+  'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN',
+  // Países hispanofalantes
+  'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES',
+  'America/Mexico_City': 'MX', 'America/Tijuana': 'MX', 'America/Monterrey': 'MX',
+  'America/Argentina/Buenos_Aires': 'AR', 'America/Argentina/Cordoba': 'AR',
+  'America/Bogota': 'CO', 'America/Santiago': 'CL', 'America/Lima': 'PE',
+  'America/Caracas': 'VE',
+  // China + variantes
+  'Asia/Shanghai': 'CN', 'Asia/Beijing': 'CN', 'Asia/Chongqing': 'CN',
+  'Asia/Urumqi': 'CN', 'Asia/Harbin': 'CN',
+  'Asia/Taipei': 'TW', 'Asia/Hong_Kong': 'HK', 'Asia/Singapore': 'SG',
+  // Japão / Coreia
+  'Asia/Tokyo': 'JP', 'Asia/Seoul': 'KR', 'Asia/Pyongyang': 'KP',
+  // Alemanha / Áustria / Suíça
+  'Europe/Berlin': 'DE', 'Europe/Vienna': 'AT', 'Europe/Zurich': 'CH',
+  // França / Bélgica / Luxemburgo
+  'Europe/Paris': 'FR', 'Europe/Brussels': 'BE', 'Europe/Luxembourg': 'LU',
+  // Itália
+  'Europe/Rome': 'IT', 'Europe/Vatican': 'VA', 'Europe/San_Marino': 'SM',
+  // Rússia
+  'Europe/Moscow': 'RU', 'Europe/Kaliningrad': 'RU',
+  'Asia/Yekaterinburg': 'RU', 'Asia/Novosibirsk': 'RU', 'Asia/Krasnoyarsk': 'RU',
+  'Asia/Irkutsk': 'RU', 'Asia/Yakutsk': 'RU', 'Asia/Vladivostok': 'RU',
+  'Europe/Minsk': 'BY',
+  // Polônia
+  'Europe/Warsaw': 'PL',
+}
+
+/**
+ * Tenta inferir o locale via timezone do browser. Retorna `null` se a
+ * timezone não bater com nenhum país conhecido (quem está em zona não
+ * mapeada, cai no fallback de `navigator.language`).
+ */
+function localeFromTimezone(): Locale | null {
+  if (typeof Intl === 'undefined') return null
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (!tz) return null
+    const country = TIMEZONE_TO_COUNTRY[tz]
+    if (country && country in COUNTRY_TO_LOCALE) return COUNTRY_TO_LOCALE[country]!
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Detecta locale baseado em (em ordem de prioridade):
+ *  1. localStorage 'clube-locale' — preferência manual prévia.
+ *  2. **Timezone do browser** (`Intl.DateTimeFormat`) → país → locale —
+ *     detecção geográfica offline, sem permissões. Usuário em São Paulo
+ *     vai pra pt-BR; em Madrid vai pra es; em Tóquio vai pra ja.
+ *  3. `navigator.language` do browser — fallback se timezone não mapeada.
+ *  4. Inglês — último recurso.
  */
 export function detectLocale(): Locale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE
@@ -94,18 +174,20 @@ export function detectLocale(): Locale {
     /* localStorage indisponível */
   }
 
-  // 2. Browser language
+  // 2. Timezone → país → locale (geo-aware, offline)
+  const tzLocale = localeFromTimezone()
+  if (tzLocale) return tzLocale
+
+  // 3. Browser language
   const browser = navigator.language || (navigator as { userLanguage?: string }).userLanguage
   if (browser) {
-    // Match exato (pt-BR)
     if (browser in LOCALES) return browser as Locale
-    // Match por prefixo (pt → pt-BR; pt-PT → pt-BR; en-GB → en)
     const prefix = browser.split('-')[0]
     if (prefix === 'pt') return 'pt-BR'
     if (prefix && prefix in LOCALES) return prefix as Locale
   }
 
-  // 3. Fallback
+  // 4. Fallback
   return DEFAULT_LOCALE
 }
 

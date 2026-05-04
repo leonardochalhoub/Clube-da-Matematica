@@ -113,8 +113,13 @@ interface ExercicioProps {
   opcoes?: OpcaoExercicio[]
   /** Dica progressiva. */
   dica?: ReactNode
-  /** Solução desenvolvida (só aparece nos gabaritados). */
+  /** Solução breve — explicação curta de como chegar à resposta.
+   *  Mostrada via botão "Ver solução". Idealmente todo exercício tem uma. */
   solucao?: ReactNode
+  /** Passo a passo detalhado — pensamento linha a linha, com comentários
+   *  explicando o porquê de cada passo. Mostrado via botão "Ver passo a passo".
+   *  Apenas ~25% dos exercícios precisam ter (curadoria editorial). */
+  passos?: ReactNode
   /** Fonte — clicável, vai pra página do livro. */
   fonte?: FonteExercicio
   /** Referência editorial em formato livre (legacy). Use `fonte` em vez disso. */
@@ -293,6 +298,11 @@ const LATEX_TO_WOLFRAM: Array<[RegExp, string]> = [
   [/\\prod/g, 'product '],
   [/\\lim_\{([^}]+)\}/g, 'limit as $1 of '],
   [/\\lim/g, 'limit '],
+  // Set notation: \{...\} é literal de conjunto em LaTeX. Converte para
+  // sentinelas que sobrevivem ao cleanup final de braces, depois voltam
+  // pra `{` `}` — Wolfram entende `{1,2,3} union {4,5}` etc.
+  [/\\\{/g, '❴'],
+  [/\\\}/g, '❵'],
   // Matrizes: \begin{pmatrix}a & b \\ c & d\end{pmatrix} → {{a, b}, {c, d}}
   // Usamos sentinelas (❴, ❵, ❦) para sobreviver ao cleanup
   // final que strippa braces. Convertidos de volta ao final.
@@ -365,11 +375,26 @@ const PT_TO_EN_PHRASES: Array<[RegExp, string]> = [
   // ---- Imperativos no início (case insensitive) ----
   [/^\s*(demonstre|demonstrar|prove|provar|mostre|mostrar)(\s+que)?\s*/i, ''],
   [/^\s*(calcule|calcular|determine|determinar|encontre|encontrar|ache|achar)\s*/i, ''],
-  [/^\s*(verifique|verificar|conferir|confira)\s*/i, ''],
-  [/^\s*(resolva|resolver|simplifique|simplificar)\s*/i, ''],
-  [/^\s*(considere|suponha|assuma|seja|sejam)\s+/i, 'let '],
+  [/^\s*(verifique|verificar|conferir|confira)(\s+se)?\s*/i, ''],
+  [/^\s*(resolva|resolver|simplifique|simplificar|expanda|fatore|fatorar)\s*/i, 'solve '],
+  [/^\s*(considere|suponha|assuma|seja|sejam|dados?|dadas?)\s+/i, 'let '],
   [/^\s*(integre|integrar|derive|derivar)\s*/i, ''],
   [/^\s*(esboce|esboçar|trace|tracar)\s*/i, 'sketch '],
+  [/^\s*(escreva|expresse|exprime|liste)(?:[^.,]*?(em|como|usando|na))?\s+(nota[çc][ãa]o\s+de\s+)?(intervalos?|conjuntos?|chaves|uni[ãa]o)?\s*[:.]?\s*/i, ''],
+  [/^\s*(quantos|quantas)\s+/i, 'how many '],
+  [/^\s*(verdadeiro\s+ou\s+falso[:.]?)\s*/i, 'is it true that '],
+
+  // ---- Frases finais de "embalagem" (qualquer posição, removidas) ----
+  // "e expresse a resposta em (notação de) intervalo[s]" / "expresse em intervalo"
+  [/[,.\s]+(e\s+)?(expresse|escreva|d[êe]\s+a\s+resposta)\s+(a\s+resposta\s+)?(em|como|na)\s+(nota[çc][ãa]o\s+de\s+)?(intervalos?|conjuntos?|chaves|uni[ãa]o\s+de\s+intervalos?)\b\s*\.?/gi, ''],
+  // "em notação de intervalo[s]" sozinho
+  [/[,.\s]+em\s+nota[çc][ãa]o\s+de\s+(intervalos?|conjuntos?|chaves)\b\s*\.?/gi, ''],
+  // "represente também numa reta numérica" (instrução visual, Wolfram não precisa)
+  [/[,.\s]+represente\s+tamb[ée]m\s+(numa|na)\s+reta\s+num[ée]rica\b\s*\.?/gi, ''],
+  // "(use V ou F)" parentético
+  [/\s*\(use\s+v\s+ou\s+f\)\s*\.?/gi, ''],
+  // "Justifique sem usar valores numéricos" e variantes
+  [/[,.\s]+justifique[^.,]*\.?/gi, ''],
 
   // ---- Termos técnicos compostos (rodam ANTES de conectivos isolados) ----
   [/\bpontos?\s+cr[ií]ticos?\s+de\b/gi, 'critical points of'],
@@ -391,7 +416,7 @@ const PT_TO_EN_PHRASES: Array<[RegExp, string]> = [
   [/\bs[ée]rie\s+de\b/gi, 'series of'],
   [/\bs[ée]rie\s+de\s+Taylor\s+de\b/gi, 'Taylor series of'],
   [/\bgr[áa]fico\s+de\b/gi, 'plot of'],
-  [/\báa]rea\s+entre\b/gi, 'area between'],
+  [/\b[áa]rea\s+entre\b/gi, 'area between'],
   [/\bvolume\s+de\b/gi, 'volume of'],
   [/\bm[ée]dia\s+de\b/gi, 'mean of'],
   [/\bvari[âa]ncia\s+de\b/gi, 'variance of'],
@@ -438,6 +463,57 @@ function latexToWolfram(latex: string): string {
   return out.replace(/\s+/g, ' ').trim()
 }
 
+/**
+ * Pós-processa intervalos — Wolfram lê `[3,7]` como vetor 2D, não intervalo.
+ * Reescreve `[a,b] intersection (c,d)` (e variantes open/closed) na forma
+ * de inequações que Wolfram resolve corretamente.
+ *
+ * Exemplos:
+ *   `[3, 10] intersection (1, 7)` → `solve 3 <= x <= 10 and 1 < x < 7`
+ *   `(-inf, 0] union [0, inf)` → `solve x <= 0 or x >= 0`
+ */
+const INTERVAL_RE =
+  /([\[(])\s*([+-]?\d+(?:[.,]\d+)?|[+-]?infinity)\s*,\s*([+-]?\d+(?:[.,]\d+)?|[+-]?infinity)\s*([\])])/g
+
+function isNegInf(s: string): boolean {
+  return s === '-infinity'
+}
+function isPosInf(s: string): boolean {
+  return s === 'infinity' || s === '+infinity'
+}
+
+function intervalToInequality(left: string, lo: string, hi: string, right: string, varName = 'x'): string {
+  const parts: string[] = []
+  if (!isNegInf(lo)) {
+    const op = left === '[' ? '<=' : '<'
+    parts.push(`${lo} ${op} ${varName}`)
+  }
+  if (!isPosInf(hi)) {
+    const op = right === ']' ? '<=' : '<'
+    parts.push(`${varName} ${op} ${hi}`)
+  }
+  // Ambos infinitos → "x in R" — Wolfram entende
+  if (parts.length === 0) return `${varName} in R`
+  return parts.join(' and ')
+}
+
+function rewriteIntervalSetOps(s: string): string {
+  // Match: <interval> (intersection|union) <interval>
+  const re = new RegExp(
+    `${INTERVAL_RE.source}\\s+(intersection|union)\\s+${INTERVAL_RE.source}`,
+    'g',
+  )
+  return s.replace(
+    re,
+    (_m, l1: string, lo1: string, hi1: string, r1: string, op: string, l2: string, lo2: string, hi2: string, r2: string) => {
+      const a = intervalToInequality(l1, lo1, hi1, r1)
+      const b = intervalToInequality(l2, lo2, hi2, r2)
+      const connector = op === 'intersection' ? 'and' : 'or'
+      return `solve ${a} ${connector} ${b}`
+    },
+  )
+}
+
 function ptToEn(texto: string): string {
   let out = texto
   for (const [pat, sub] of PT_TO_EN_PHRASES) {
@@ -477,7 +553,9 @@ function eDemonstracao(enunciado: string): boolean {
 function wolframUrl(enunciadoTexto: string): string | null {
   if (eDemonstracao(enunciadoTexto)) return null
   const semLatex = latexToWolfram(enunciadoTexto)
-  const final = ptToEn(semLatex).slice(0, 400)
+  const semPt = ptToEn(semLatex)
+  // Reescreve intervalos para inequações (Wolfram lê [a,b] como vetor).
+  const final = rewriteIntervalSetOps(semPt).slice(0, 400)
   if (!final) return null
   return `https://www.wolframalpha.com/input?i=${encodeURIComponent(final)}`
 }
@@ -492,6 +570,46 @@ function wolframUrl(enunciadoTexto: string): string | null {
  *
  * Aqui pegamos a `<annotation>` (LaTeX puro) e ignoramos `katex-html`.
  */
+/**
+ * Procura recursivamente uma `<annotation encoding="application/x-tex">` e
+ * devolve seu conteúdo de texto. Usado quando entramos numa subárvore
+ * `katex-mathml` — descer só na annotation evita duplicar o conteúdo
+ * matemático que também aparece como `<mrow>...</mrow>` ao lado.
+ */
+function findAnnotationLatex(node: ReactNode): string | null {
+  if (!node) return null
+  if (typeof node === 'string' || typeof node === 'number') return null
+  if (Array.isArray(node)) {
+    for (const c of node) {
+      const found = findAnnotationLatex(c)
+      if (found !== null) return found
+    }
+    return null
+  }
+  if (isValidElement(node)) {
+    const el = node as ReactElement<{ children?: ReactNode }>
+    if (
+      typeof el.type === 'string' &&
+      (el.type === 'annotation' || el.type.endsWith(':annotation'))
+    ) {
+      // Concatena texto puro dos children
+      const flat = (n: ReactNode): string => {
+        if (typeof n === 'string') return n
+        if (typeof n === 'number') return String(n)
+        if (Array.isArray(n)) return n.map(flat).join('')
+        if (isValidElement(n)) {
+          const e = n as ReactElement<{ children?: ReactNode }>
+          return flat(e.props.children ?? '')
+        }
+        return ''
+      }
+      return flat(el.props.children)
+    }
+    return findAnnotationLatex(el.props.children ?? null)
+  }
+  return null
+}
+
 function nodeToString(node: ReactNode): string {
   if (typeof node === 'string') return node
   if (typeof node === 'number') return String(node)
@@ -502,9 +620,14 @@ function nodeToString(node: ReactNode): string {
       className?: string
     }>
     const cls = typeof el.props.className === 'string' ? el.props.className : ''
-    // Visual KaTeX duplicado — pular.
+    // Visual KaTeX duplicado — pular completamente.
     if (cls.includes('katex-html')) return ''
-    // Annotation com a fonte LaTeX original.
+    // KaTeX MathML — pular `<mrow>` etc. e devolver SÓ a annotation LaTeX.
+    if (cls.includes('katex-mathml')) {
+      const latex = findAnnotationLatex(el.props.children ?? null)
+      return latex ? ` ${latex} ` : ''
+    }
+    // Caso isolado: annotation alcançada por outro caminho.
     if (
       typeof el.type === 'string' &&
       (el.type === 'annotation' || el.type.endsWith(':annotation'))
@@ -534,12 +657,14 @@ function ItemExercicio({
     opcoes,
     dica,
     solucao,
+    passos,
     fonte,
     referencia,
   } = props
   const [tentou, setTentou] = useState(false)
   const [pediuDica, setPediuDica] = useState(false)
   const [vendoSolucao, setVendoSolucao] = useState(false)
+  const [vendoPassos, setVendoPassos] = useState(false)
   const [respostaUsuario, setRespostaUsuario] = useState('')
   const [opcaoSelecionada, setOpcaoSelecionada] = useState<number | null>(null)
 
@@ -554,17 +679,18 @@ function ItemExercicio({
   const acertouOpcao =
     temOpcoes && tentou && opcaoSelecionada === indiceCorreto
 
-  const respostaLatexOnly =
-    !!resposta && respostaImpossivelDigitar(resposta)
-  // Quando há `resposta` mas é LaTeX-only e SEM opcoes, oferecemos só "Ver
-  // resposta" (sem text input que seria impossível de preencher).
-  const usaInputTexto = !!resposta && !temOpcoes && !respostaLatexOnly
-
-  const acertouTexto =
-    usaInputTexto &&
-    tentou &&
-    resposta!.trim().replace(/\s+/g, '').toLowerCase() ===
-      respostaUsuario.trim().replace(/\s+/g, '').toLowerCase()
+  // Princípio editorial: aluno resolve no caderno. Não há input de texto
+  // pra digitar resposta. Sempre que existe `resposta` e não há `opcoes`,
+  // oferecemos apenas botão "Ver resposta" (sem campo de digitação).
+  const temRespostaSemOpcoes = !!resposta && !temOpcoes
+  // Mantidos no escopo só pra evitar warning de variável não usada — não
+  // afetam render.
+  const usaInputTexto = false
+  const acertouTexto = false
+  void respostaUsuario
+  void setRespostaUsuario
+  void usaInputTexto
+  void acertouTexto
 
   return (
     <li className="rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4 sm:p-5">
@@ -637,17 +763,31 @@ function ItemExercicio({
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setTentou(true)}
-              disabled={opcaoSelecionada === null}
-              className="rounded-md bg-clube-teal px-3 py-1.5 text-sm font-semibold text-white hover:bg-clube-teal-deep disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => {
+                if (opcaoSelecionada === null) return
+                setTentou(true)
+              }}
+              aria-disabled={opcaoSelecionada === null}
+              className={`rounded-md px-3 py-1.5 text-sm font-semibold text-white transition-colors ${
+                opcaoSelecionada === null
+                  ? 'bg-clube-mist/50 cursor-not-allowed'
+                  : 'bg-clube-teal hover:bg-clube-teal-deep cursor-pointer'
+              }`}
             >
               {t('exercise.check')}
             </button>
-            {tentou && (
+            {opcaoSelecionada === null && (
+              <span className="text-xs text-clube-mist italic">
+                {t('exercise.selectFirst', 'Selecione uma opção primeiro')}
+              </span>
+            )}
+            {tentou && opcaoSelecionada !== null && (
               <span
                 className={`text-sm font-semibold ${
                   acertouOpcao ? 'text-clube-leaf' : 'text-clube-clay'
                 }`}
+                role="status"
+                aria-live="polite"
               >
                 {acertouOpcao
                   ? t('exercise.correct')
@@ -658,39 +798,9 @@ function ItemExercicio({
         </fieldset>
       )}
 
-      {/* Input texto (só quando faz sentido digitar) */}
-      {usaInputTexto && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-clube-mist-soft/40 pt-3">
-          <input
-            type="text"
-            value={respostaUsuario}
-            onChange={(e) => setRespostaUsuario(e.target.value)}
-            placeholder={t('exercise.answerPlaceholder')}
-            className="flex-1 min-w-[180px] rounded-md border border-clube-mist-soft/60 bg-clube-cream px-3 py-1.5 font-mono text-sm text-clube-ink"
-            disabled={acertouTexto}
-          />
-          <button
-            type="button"
-            onClick={() => setTentou(true)}
-            className="rounded-md bg-clube-teal px-3 py-1.5 text-sm font-semibold text-white hover:bg-clube-teal-deep"
-            disabled={acertouTexto}
-          >
-            {t('exercise.check')}
-          </button>
-          {dica && !pediuDica && (
-            <button
-              type="button"
-              onClick={() => setPediuDica(true)}
-              className="rounded-md border border-clube-mist-soft/60 bg-clube-surface px-3 py-1.5 text-sm text-clube-mist hover:border-clube-teal"
-            >
-              {t('exercise.askHint')}
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* "Ver resposta" para casos LaTeX-only sem opcoes */}
-      {respostaLatexOnly && !temOpcoes && (
+      {/* "Ver resposta" — único modo (aluno resolveu no caderno).
+         Aplica a qualquer exercício com `resposta` que NÃO seja MC. */}
+      {temRespostaSemOpcoes && (
         <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-clube-mist-soft/40 pt-3">
           <button
             type="button"
@@ -711,25 +821,8 @@ function ItemExercicio({
         </div>
       )}
 
-      {/* Feedback resposta texto */}
-      {tentou && usaInputTexto && (
-        <p
-          className={`mt-2 text-sm font-semibold ${
-            acertouTexto ? 'text-clube-leaf' : 'text-clube-clay'
-          }`}
-        >
-          {acertouTexto ? t('exercise.correct') : t('exercise.expectedAnswer')}
-          {!acertouTexto && (
-            <span
-              className="font-normal"
-              dangerouslySetInnerHTML={{ __html: renderInline(resposta!) }}
-            />
-          )}
-        </p>
-      )}
-
-      {/* Resposta revelada (caso LaTeX-only) */}
-      {tentou && respostaLatexOnly && !temOpcoes && (
+      {/* Resposta revelada (após clique em "Ver resposta") */}
+      {tentou && temRespostaSemOpcoes && (
         <div className="mt-2 rounded-md border-l-4 border-clube-leaf bg-clube-leaf/10 p-3 text-sm">
           <strong className="block text-xs uppercase tracking-wider text-clube-leaf">
             {t('exercise.answerLabel')}
@@ -789,9 +882,8 @@ function ItemExercicio({
         )}
       </div>
 
-      {/* Solução passo-a-passo — sempre disponível quando autora forneceu.
-         O badge "Gabarito" no topo ainda marca os 25% sorteados como
-         destaque visual, mas a solução em si é universal. */}
+      {/* Solução breve — explicação curta de como chegar à resposta.
+         Sempre disponível quando a autora forneceu. */}
       {solucao && (
         <details
           className="mt-3 rounded-lg border border-clube-teal/30 bg-clube-teal/5 p-3"
@@ -799,9 +891,24 @@ function ItemExercicio({
           onToggle={(e) => setVendoSolucao((e.target as HTMLDetailsElement).open)}
         >
           <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-clube-teal hover:text-clube-teal-deep">
-            {vendoSolucao ? t('exercise.hideStepByStep') : t('exercise.showStepByStep')}
+            {vendoSolucao ? t('exercise.hideSolution') : t('exercise.showSolution')}
           </summary>
           <div className="prose prose-clube prose-sm mt-3 max-w-none">{solucao}</div>
+        </details>
+      )}
+
+      {/* Passo a passo detalhado — pensamento linha a linha.
+         Apresentado em ~25% dos exercícios (curadoria editorial). */}
+      {passos && (
+        <details
+          className="mt-2 rounded-lg border border-clube-gold/40 bg-clube-gold/5 p-3"
+          open={vendoPassos}
+          onToggle={(e) => setVendoPassos((e.target as HTMLDetailsElement).open)}
+        >
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-clube-gold-deep hover:text-clube-gold">
+            {vendoPassos ? t('exercise.hideStepByStep') : t('exercise.showStepByStep')}
+          </summary>
+          <div className="prose prose-clube prose-sm mt-3 max-w-none">{passos}</div>
         </details>
       )}
     </li>

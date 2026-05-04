@@ -57,9 +57,19 @@ export function MainCounters({
   cargaHorariaH,
   livrosNoLedger,
 }: MainCountersProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [visitas, setVisitas] = useState<number | null>(null)
   const [erroVisitas, setErroVisitas] = useState(false)
+  /**
+   * Locale "real" aplicado APÓS hidratação. Server e primeira renderização
+   * client usam pt-BR (canônico) → garantem hydration match. Após mount,
+   * troca para o locale detectado do usuário (en-US, ja-JP, etc.) e os
+   * números reformatam.
+   */
+  const [hydratedLocale, setHydratedLocale] = useState<string>('pt-BR')
+  useEffect(() => {
+    setHydratedLocale(locale)
+  }, [locale])
 
   useEffect(() => {
     let cancelado = false
@@ -98,7 +108,10 @@ export function MainCounters({
       cor: 'leaf',
     },
     {
-      numero: exerciciosTotal.toLocaleString(),
+      // SSR usa pt-BR (canônico) — após hidratação, vira `hydratedLocale`
+      // do usuário. Sem mismatch porque o estado inicial é pt-BR igual ao
+      // server.
+      numero: exerciciosTotal.toLocaleString(hydratedLocale),
       label: t('counters.exercises'),
       cor: 'gold',
     },

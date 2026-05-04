@@ -53,6 +53,9 @@ export function EquacaoCanonica({
     <section
       role="math"
       aria-label={ariaLabel ?? t('equacao.canonica.aria')}
+      // `data-audio-texto` carrega a prosa autorada para o leitor de página
+      // inteira (PageAudioReader) usar em vez do LaTeX bruto.
+      data-audio-texto={audioTexto ?? undefined}
       className="not-prose my-8 overflow-hidden rounded-2xl border-2 border-clube-gold/30 bg-gradient-to-b from-clube-cream-soft to-clube-surface px-4 py-8 shadow-sm sm:my-10 sm:px-6 sm:py-10"
     >
       <div

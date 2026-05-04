@@ -7,20 +7,53 @@ import {
 import { carregarMdx } from '@/lib/content/manifest'
 import { LessonPageShell } from '@/components/layout/LessonPageShell'
 import { LICOES_FLAT } from '@/content/programa-em'
+import { LOCALES } from '@/lib/i18n/locales'
 
 interface Props {
   params: Promise<{ categoria: string; caminho: string[] }>
 }
 
+/** Códigos de locale != pt-BR (são prefixos de URL: /en/aulas/...). */
+const LOCALE_CODES = new Set(
+  Object.keys(LOCALES).filter((c) => c !== 'pt-BR'),
+)
+
+/**
+ * Detecta se o primeiro segmento da URL é um locale (ex.: 'en', 'es').
+ * Se for, devolve { locale, categoria, caminho } "reais" — descartando
+ * o prefixo. Caso contrário devolve null.
+ */
+function parseLocalePrefix(
+  segment: string,
+  rest: string[],
+): { locale: string; categoria: string; caminho: string[] } | null {
+  if (!LOCALE_CODES.has(segment)) return null
+  const [actualCategoria, ...actualCaminho] = rest
+  if (!actualCategoria) return null
+  return { locale: segment, categoria: actualCategoria, caminho: actualCaminho }
+}
+
 export function generateStaticParams() {
-  return carregarTodosConteudos().map(({ caminho }) => {
-    const partes = caminho.split('/')
-    const [categoria, ...rest] = partes
-    return {
-      categoria: categoria!,
-      caminho: rest,
-    }
+  const conteudos = carregarTodosConteudos()
+  // Paths PT-BR (sem prefixo de locale)
+  const ptBR = conteudos.map(({ caminho }) => {
+    const [categoria, ...rest] = caminho.split('/')
+    return { categoria: categoria!, caminho: rest }
   })
+  // Paths com prefixo de locale (/en/aulas/..., /es/aulas/..., etc.)
+  // Servem o mesmo conteúdo PT-BR até termos traduções no filesystem.
+  const localePaths: Array<{ categoria: string; caminho: string[] }> = []
+  for (const localeCode of LOCALE_CODES) {
+    for (const c of conteudos) {
+      const partes = c.caminho.split('/')
+      // Aqui `categoria` recebe o LOCALE; `caminho` recebe categoria+resto
+      localePaths.push({
+        categoria: localeCode,
+        caminho: partes,
+      })
+    }
+  }
+  return [...ptBR, ...localePaths]
 }
 
 function caminhoCompleto(categoria: string, caminho: string[]): string {
@@ -43,7 +76,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ConteudoPage({ params }: Props) {
-  const { categoria, caminho } = await params
+  const { categoria: rawCategoria, caminho: rawCaminho } = await params
+  // Se a URL é /<locale>/<categoria>/<...>, descasca o locale.
+  const localeMatch = parseLocalePrefix(rawCategoria, rawCaminho)
+  const categoria = localeMatch ? localeMatch.categoria : rawCategoria
+  const caminho = localeMatch ? localeMatch.caminho : rawCaminho
+
   const completo = caminhoCompleto(categoria, caminho)
   const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)

@@ -33,13 +33,13 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const detected = detectLocale()
     if (detected !== locale) setLocaleState(detected)
-    // Aplica RTL/LTR e lang HTML também na detecção inicial,
-    // não só no setLocale manual — RTL precisa funcionar mesmo
-    // pra usuário que abre o site em hebraico/árabe direto.
+    // Aplica RTL/LTR. **Não** mexe em `<html lang>` — esse atributo deve
+    // refletir a língua do CONTEÚDO (pt-BR enquanto não houver traduções
+    // de MDX), não a UI. Caso contrário o leitor de tela / Web Speech API
+    // tenta voz errada sobre texto PT-BR (= "PT com sotaque inglês").
     try {
       const info = LOCALES[detected]
       document.documentElement.dir = info.dir
-      document.documentElement.lang = info.speechLang
     } catch {
       /* noop */
     }

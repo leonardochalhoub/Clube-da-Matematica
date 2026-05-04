@@ -70,7 +70,52 @@ lecture do laureado em PDF, o banquet speech, o press release. É
 diferencial editorial vs. Khan Academy / Wolfram, que mencionam
 sem linkar.
 
-## 5. Atualização
+## 5. Livros são o ledger — IA nunca inventa exercício ou exemplo
+
+**Toda** ocorrência de `<Exercicio>` e `<Exemplo>` deve ter um
+`fonte={{ livro, url, secao, pagina, exercicio, licenca }}` apontando
+para um livro de licença aberta listado em `livros/CATALOG.md`
+(Stitz–Zeager, OpenStax, Hammack, Yoshiwara, Active Calculus,
+Wikilivros, etc.). A URL deve ir até a página/seção/exercício exato
+quando o livro permitir. Provenance is the moat — o aluno deve
+poder, em um clique, chegar à fonte primária do problema, conferir
+o original e ver as variações.
+
+**Anti-padrão:** exercício "inventado pela IA" sem fonte. A única
+exceção é drill puramente mecânico ("calcule $5 + 7$"). Se você
+quer um exercício sobre tópico X e não acha fonte aberta — escolha
+outro tópico que tenha. Qualidade vs. quantidade: 30 bem-fundados >
+60 meio-inventados.
+
+## 6. Aluno clica, nunca digita
+
+O aluno resolve no caderno. O site é apenas para ler e clicar.
+Toda interação é click/select/toggle — nunca campo de texto.
+
+- Exercício de resposta única → **múltipla escolha** (`opcoes={[...]}`).
+- "Ver solução" / "Ver passo a passo" → botões `<details>`.
+- Filtros, locale switcher, áudio → botões/select.
+
+**Anti-padrão:** `<input type="text">` para o aluno digitar
+resposta. O componente `<Exercicio>` não renderiza mais input box
+mesmo quando `resposta` está presente sem `opcoes` — mas autore MC
+de qualquer jeito. Toda novo componente que pedir interação deve
+respeitar essa regra.
+
+**Por quê:** input de texto cria fricção (teclado mobile, notação
+matemática difícil, falsos negativos por capitalização/espaços) sem
+ganho pedagógico — o aluno já escreveu a resposta no papel.
+
+## 7. Acessibilidade total — áudio para tudo
+
+Áudio é obrigatório em equações canônicas (`audioTexto` na
+`<EquacaoCanonica>`) e em fórmulas-âncora dentro do corpo. Além
+disso, toda lição deve ter um botão "ler página inteira" no topo,
+para que pessoas cegas possam consumir o conteúdo via Web Speech
+API. A localidade ativa controla a voz (PT-BR, EN-US, etc.). Não é
+extra — é parte do produto.
+
+## 8. Atualização
 
 Quando uma regra editorial nova for descoberta ou explicitada,
 adicionar como nova seção numerada neste arquivo. Não remover

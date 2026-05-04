@@ -10,7 +10,7 @@
 
 **Clube da Matemática** is a Brazilian high-school mathematics curriculum, open-source, free, multilingual, statically deployed to GitHub Pages. Three years (12 trimesters, 120 lessons), culminating in Black-Scholes (lesson 119) and a synthesis workshop (lesson 120).
 
-- **Editorial template (canonical):** `content/aulas/ano-2/trim-6/aula-52-regras-derivacao.mdx` — the 7-door pattern. Black-Scholes (`content/aulas/ano-3/trim-12/aula-119-bs-sintese.mdx`) is the reference for the highest tier. Every new piece of content imitates these.
+- **Editorial template (canonical):** `content/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx` — the **Lesson 1 standard**. Documented in detail at `docs/kb/lesson-template/`. Every new lesson imitates this file: 7 doors + 5 worked examples (ascending difficulty, all sourced) + 30–80 multiple-choice exercises (every one with `solucao` + `fonte`, ~25% with `passos`) + 3 books header + audio reader + bibliography. The earlier templates (Lesson 52 / Black-Scholes) remain valid for advanced lessons but the Lesson 1 standard is the **primary** template now.
 - **Mission:** rigorous mathematics + native-language access + zero cost to the student. The repo itself is the product.
 
 ---
@@ -102,6 +102,9 @@ atualizadoEm: "2026-MM-DD"
 4. **Engineering rigor** (BR + JP + DE + SG style): 30–80 exercises, do not soften, progression aplicação → desafio.
 5. **No placeholder exercises.** "Aplicação direta" or "Caso particular" without a real question is a bug.
 6. **No emojis in MDX** unless explicitly requested by the user.
+7. **Books are the ledger — AI never invents exercises or examples.** Every `<Exercicio>` and `<Exemplo>` MUST have a `fonte={{ livro, url, secao, pagina, exercicio, licenca }}` link to an open-licensed book (Stitz–Zeager, OpenStax, Hammack/Book of Proof, Yoshiwara, Active Calculus, Wikilivros — see `livros/CATALOG.md`). The URL should land on the exact page/section/exercise when the source allows. The only exception is pure mechanical drill ("compute $5 + 7$"). If you can't find a sourced exercise for a topic, **don't write one** — pick a different topic that IS sourced.
+8. **No text-input answer fields.** Students solve in their caderno. Single-answer exercises must use `opcoes={[...]}` (multiple choice); proofs/derivations use only the "Ver solução" button. The component no longer renders a `<input>` even when `resposta` is set without `opcoes`, but always author MC for the better UX.
+9. **Every exercise has `solucao`.** "Ver solução" is universal — short, correct, with the key reasoning. ~25% additionally have `passos={...}` (line-by-line walkthrough with prose comments) shown via the gold "Ver passo a passo" button.
 
 ### MDX sharp edges (will break the build)
 - Bare `1{,}5` outside `$...$` → MDX reads `{,}` as JSX expression. Wrap as `$1{,}5$`.

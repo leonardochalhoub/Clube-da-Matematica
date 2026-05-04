@@ -45,6 +45,47 @@ const nextConfig = {
     NEXT_PUBLIC_BASE_PATH: basePath,
   },
   devIndicators: false,
+  /**
+   * Turbopack rules para `.mdx`. Usa `@mdx-js/loader` direto (não o wrapper
+   * `@next/mdx`, cujas options não são serializáveis pelo Turbopack).
+   *
+   * Plugins passados como **strings** — o loader auto-importa do node_modules.
+   * Vantagem: tudo serializável → Turbopack feliz.
+   *
+   * Webpack continua usando o `withMDX(...)` no fim do arquivo (para `next
+   * build` / fallback). Em dev com `--turbopack`, este bloco vence.
+   */
+  turbopack: {
+    rules: {
+      '*.mdx': {
+        loaders: [
+          {
+            loader: '@mdx-js/loader',
+            options: {
+              remarkPlugins: [
+                'remark-frontmatter',
+                'remark-gfm',
+                'remark-math',
+              ],
+              rehypePlugins: [
+                ['rehype-katex', {
+                  output: 'htmlAndMathml',
+                  macros,
+                  throwOnError: false,
+                  strict: false,
+                }],
+                'rehype-slug',
+                ['rehype-autolink-headings', { behavior: 'wrap' }],
+              ],
+            },
+          },
+        ],
+        as: '*.tsx',
+      },
+    },
+  },
 }
 
+// Por enquanto: webpack (estável, mas lento). Turbopack precisa de plugins
+// MDX como funções (não strings) — fica para depois.
 export default withMDX(nextConfig)

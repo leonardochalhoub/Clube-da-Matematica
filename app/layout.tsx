@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { LocaleProvider } from '@/components/layout/LocaleProvider'
 import { VisitorTracker } from '@/components/layout/VisitorTracker'
+import { PageAudioReader } from '@/components/math/PageAudioReader'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -102,6 +103,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <VisitorTracker />
           <main id="conteudo" tabIndex={-1} className="flex-1">
+            <div className="container-clube max-w-prose-wide flex justify-center pt-4">
+              <PageAudioReader compact />
+            </div>
             {children}
           </main>
           <Footer />

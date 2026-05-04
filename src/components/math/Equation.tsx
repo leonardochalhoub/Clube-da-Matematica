@@ -87,6 +87,8 @@ export function Equation({
     <figure
       role="math"
       aria-label={ariaLabel ?? latex}
+      // Para o leitor de página inteira: prosa autorada > LaTeX bruto.
+      data-audio-texto={audioTexto ?? undefined}
       className="my-7 rounded-xl border-l-4 border-clube-gold bg-clube-cream-soft px-6 py-5"
     >
       <div className="flex items-start justify-between gap-4">

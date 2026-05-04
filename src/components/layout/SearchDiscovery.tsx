@@ -19,7 +19,7 @@ interface AulaResult {
 }
 
 interface SearchDiscoveryProps {
-  /** Mapa slug → caminho (ex.: 'aulas/ano-1/trim-1/aula-01-...'). */
+  /** Mapa slug → caminho (ex.: 'aulas/ano-1/trim-1/licao-01-...'). */
   slugToCaminho: Record<string, string>
   /** Catálogo completo de livros. */
   livros: Livro[]

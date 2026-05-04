@@ -82,6 +82,11 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
       return
     }
 
+    // Sempre limpa fila/estado anterior — outro player (PageAudioReader,
+    // outra equação) pode ter deixado o speechSynthesis em estado pausado
+    // ou com utterances enfileiradas. Sem isso, click some no silêncio.
+    window.speechSynthesis.cancel()
+
     const vozes = await obterVoicesAsync()
     const exatas = vozes.filter((v) => v.lang === langFalado)
     const prefixo = vozes.filter((v) => {
