@@ -58,7 +58,14 @@ export function Equation({
   audioTexto,
 }: EquationProps) {
   const { t } = useLocale()
-  const html = katex.renderToString(children, {
+  // Guard: next-mdx-remote/rsc pode passar children como array de strings
+  // ou ReactNode; KaTeX só aceita string.
+  const latex = typeof children === 'string'
+    ? children
+    : Array.isArray(children)
+      ? (children as unknown[]).filter((c) => typeof c === 'string').join('')
+      : String(children ?? '')
+  const html = katex.renderToString(latex, {
     output: 'htmlAndMathml',
     displayMode: !inline,
     throwOnError: false,
@@ -70,7 +77,7 @@ export function Equation({
     return (
       <span
         className="katex-inline"
-        aria-label={ariaLabel ?? children}
+        aria-label={ariaLabel ?? latex}
         dangerouslySetInnerHTML={{ __html: html }}
       />
     )
@@ -79,7 +86,7 @@ export function Equation({
   return (
     <figure
       role="math"
-      aria-label={ariaLabel ?? children}
+      aria-label={ariaLabel ?? latex}
       className="my-7 rounded-xl border-l-4 border-clube-gold bg-clube-cream-soft px-6 py-5"
     >
       <div className="flex items-start justify-between gap-4">

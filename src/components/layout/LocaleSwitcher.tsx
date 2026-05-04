@@ -1,9 +1,30 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useLocale } from './LocaleProvider'
 import { LOCALES, type Locale } from '@/lib/i18n/locales'
 import { Flag } from './Flag'
+
+/** Lista dos códigos curtos de locale não-PT-BR (rotas /<locale>/...). */
+const LOCALE_PREFIXES = Object.keys(LOCALES).filter((c) => c !== 'pt-BR')
+
+/** Remove o prefixo de locale do path, devolvendo o path "canônico" PT-BR. */
+function pathSemLocale(path: string): string {
+  for (const code of LOCALE_PREFIXES) {
+    if (path === `/${code}` || path.startsWith(`/${code}/`)) {
+      return path.slice(code.length + 1) || '/'
+    }
+  }
+  return path
+}
+
+/** Constrói o path para o novo locale. PT-BR não usa prefixo. */
+function pathParaLocale(currentPath: string, novoLocale: Locale): string {
+  const canonical = pathSemLocale(currentPath)
+  if (novoLocale === 'pt-BR') return canonical
+  return canonical === '/' ? `/${novoLocale}` : `/${novoLocale}${canonical}`
+}
 
 /**
  * Botão de idioma com dropdown. Mostra bandeira + nome no idioma.
@@ -11,6 +32,8 @@ import { Flag } from './Flag'
  */
 export function LocaleSwitcher() {
   const { locale, setLocale, t } = useLocale()
+  const router = useRouter()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -76,6 +99,20 @@ export function LocaleSwitcher() {
                 onClick={() => {
                   setLocale(info.code as Locale)
                   setOpen(false)
+                  // Navega pra rota localizada se a página suporta
+                  // (apenas lições; outras pages traduzem via useLocale).
+                  const isLessonRoute =
+                    pathname &&
+                    (pathname.startsWith('/aulas') ||
+                      pathname.startsWith('/financas-quantitativas') ||
+                      LOCALE_PREFIXES.some(
+                        (c) =>
+                          pathname.startsWith(`/${c}/aulas`) ||
+                          pathname.startsWith(`/${c}/financas-quantitativas`),
+                      ))
+                  if (isLessonRoute && pathname) {
+                    router.push(pathParaLocale(pathname, info.code as Locale))
+                  }
                 }}
                 className={
                   'flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm transition-colors ' +
