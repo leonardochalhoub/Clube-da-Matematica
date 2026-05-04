@@ -149,6 +149,10 @@ Inside each `<Porta>`:
   modelagem.
 - **Every example has `**Fonte.**`** at the end — links to the source
   problem, never invented.
+- **`titulo=` must NOT include "Exemplo N —" prefix.** The component
+  renders the prefix automatically: `<Exemplo titulo="Listando..."
+  numero="1">` displays as `Exemplo — 1 · Listando...`. Putting "Exemplo
+  1 —" in titulo gives the duplicate `Exemplo — 1 · Exemplo 1 — Listando...`.
 - Title text **must NOT contain `$...$`** (MDX attribute parser breaks).
   Use literal Unicode like `|u| ≤ c` instead.
 

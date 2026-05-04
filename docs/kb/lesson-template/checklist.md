@@ -16,6 +16,9 @@ Every item maps to a hard rule in the template. Skip none.
       40 + prática). Each door has substantive content matching its level.
 - [ ] `## Exemplos resolvidos` with **exactly 5 `<Exemplo>` blocks**,
       ascending difficulty, each ending with `**Fonte.** [...](url) — licença Y`.
+- [ ] **No `Exemplo N —` prefix in `titulo=`** — the component renders the
+      number automatically. Use `titulo="Topic name (level)"` not
+      `titulo="Exemplo 1 — Topic name (level)"`.
 - [ ] `<ListaExercicios seed="licao-NN-slug">` with 30–80 `<Exercicio>` blocks.
 - [ ] `## Fontes` bibliography lists every book cited above.
 
