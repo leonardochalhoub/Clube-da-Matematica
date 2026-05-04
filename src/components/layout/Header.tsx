@@ -47,7 +47,7 @@ export function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Navegação principal" className="hidden lg:block">
+        <nav aria-label={t('header.nav.main')} className="hidden lg:block">
           <ul className="flex items-center gap-1">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
@@ -80,7 +80,7 @@ export function Header() {
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            aria-label={open ? 'Fechar menu' : 'Abrir menu'}
+            aria-label={open ? t('header.menu.close') : t('header.menu.open')}
             aria-controls="mobile-menu"
             className="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-md text-clube-ink/80 hover:bg-clube-cream-soft hover:text-clube-teal"
           >
@@ -110,7 +110,7 @@ export function Header() {
           />
           <nav
             id="mobile-menu"
-            aria-label="Navegação mobile"
+            aria-label={t('header.nav.mobile')}
             className="fixed inset-x-0 top-16 z-40 border-b border-clube-mist-soft/40 bg-clube-cream shadow-md lg:hidden"
           >
             <ul className="container-clube flex flex-col gap-1 py-3">

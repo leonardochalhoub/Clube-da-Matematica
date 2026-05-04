@@ -124,7 +124,7 @@ export function MainCounters({
 
   return (
     <section
-      aria-label="Contadores da plataforma"
+      aria-label={t('counters.aria')}
       className="border-y-2 border-clube-gold/40 bg-gradient-to-b from-clube-cream-soft via-clube-surface to-clube-cream-soft py-12 sm:py-16"
     >
       <div className="container-clube">

@@ -121,7 +121,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
           </span>
           {q.length > 0 && q.length < 2 && (
             <p className="mt-2 text-xs italic text-clube-mist">
-              digite pelo menos 2 letras…
+              {t('search.minLetters')}
             </p>
           )}
         </div>
@@ -134,13 +134,13 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
             {t('search.empty.invite')}
           </p>
           <p className="mt-2 text-xs italic">
-            Ou explore o programa completo em{' '}
+            {t('search.exploreOr')}{' '}
             <Link href="/ensino-medio" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
-              Ensino Médio →
+              {t('nav.middleSchool')} →
             </Link>
-            {' '}e o catálogo de livros em{' '}
+            {' '}{t('search.andCatalog')}{' '}
             <Link href="/livros" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
-              Livros →
+              {t('nav.books')} →
             </Link>
           </p>
         </div>
@@ -154,7 +154,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
           </h3>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {licoes.map((l) => {
-              const tag = `Ano ${l.ano} · Trim ${l.trim} · Lição ${l.num}`
+              const tag = `${t('search.tag.year')} ${l.ano} · ${t('search.tag.term')} ${l.trim} · ${t('search.tag.lesson')} ${l.num}`
               if (l.caminho) {
                 return (
                   <Link
@@ -175,7 +175,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
               return (
                 <div key={l.num} className="card-clube flex flex-col gap-2 opacity-60">
                   <span className="rounded-full bg-clube-cream-soft px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-mist self-start">
-                    {tag} · planejada
+                    {tag} · {t('materia.status.planned')}
                   </span>
                   <h4 className="text-base font-semibold text-clube-mist">{l.titulo}</h4>
                   <p className="text-xs text-clube-mist/80">{l.topicos}</p>

@@ -1,3 +1,7 @@
+'use client'
+
+import { useLocale } from './LocaleProvider'
+
 /**
  * Banner de patrocínio da Amazing School.
  * Pequeno, elegante; não compete com o conteúdo.
@@ -7,22 +11,23 @@
  *   - URL oficial: https://amazing-school-app.vercel.app/
  */
 export function AmazingSchoolSponsor() {
+  const { t } = useLocale()
   return (
     <a
       href="https://amazing-school-app.vercel.app/"
       target="_blank"
       rel="noopener noreferrer"
       className="group not-prose inline-flex items-center gap-2.5 rounded-full border border-violet-400/40 bg-gradient-to-r from-violet-500/10 to-blue-500/10 px-4 py-2 text-xs text-clube-ink/85 no-underline transition-all hover:-translate-y-0.5 hover:border-violet-500/70 hover:from-violet-500/20 hover:to-blue-500/20 hover:no-underline hover:shadow-sm"
-      aria-label="Amazing School — plataforma grátis de inglês com IA — apoiadora do Clube da Matemática"
+      aria-label={t('sponsor.amazing.aria')}
     >
       <span className="text-base leading-none" aria-hidden>🎓</span>
       <SmileIcon />
       <span>
-        <span className="text-clube-mist">apoio:</span>{' '}
+        <span className="text-clube-mist">{t('sponsor.amazing.support')}</span>{' '}
         <strong className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
           Amazing School
         </strong>{' '}
-        <span className="text-clube-mist">· inglês grátis com IA</span>
+        <span className="text-clube-mist">{t('sponsor.amazing.tagline')}</span>
       </span>
       <span
         aria-hidden

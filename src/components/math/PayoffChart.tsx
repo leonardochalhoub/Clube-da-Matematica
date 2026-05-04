@@ -1,4 +1,7 @@
+'use client'
+
 import { AudioReader } from './AudioReader'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 interface PayoffChartProps {
   /** Tipo da posição. */
@@ -18,12 +21,12 @@ interface PayoffChartProps {
   legenda?: string
 }
 
-const TIPO_LABEL: Record<PayoffChartProps['tipo'], string> = {
-  'long-call': 'compra de call (long call)',
-  'short-call': 'venda de call (short call)',
-  'long-put': 'compra de put (long put)',
-  'short-put': 'venda de put (short put)',
-  'covered-call': 'covered call (long ações + short call)',
+const TIPO_TKEY: Record<PayoffChartProps['tipo'], string> = {
+  'long-call': 'payoff.tipo.long-call',
+  'short-call': 'payoff.tipo.short-call',
+  'long-put': 'payoff.tipo.long-put',
+  'short-put': 'payoff.tipo.short-put',
+  'covered-call': 'payoff.tipo.covered-call',
 }
 
 function fmtBRL(v: number): string {
@@ -53,6 +56,7 @@ export function PayoffChart({
   titulo,
   legenda,
 }: PayoffChartProps) {
+  const { t } = useLocale()
   const xMin = rangeMin ?? Math.min(S, K) * 0.75
   const xMax = rangeMax ?? Math.max(S, K) * 1.25
 
@@ -138,18 +142,18 @@ export function PayoffChart({
   // ────────────────────────────────────────────────
   // Texto narrativo (para leitores de tela e áudio)
   // ────────────────────────────────────────────────
-  const tipoLabel = TIPO_LABEL[tipo]
+  const tipoLabel = t(TIPO_TKEY[tipo])
 
   const desc = [
-    `Diagrama de payoff de uma ${tipoLabel} no vencimento.`,
-    `Eixo horizontal: preço do ativo no vencimento, em reais, de ${fmtBRL(xMin)} a ${fmtBRL(xMax)}.`,
-    `Eixo vertical: lucro ou prejuízo, em reais.`,
-    `Preço atual do ativo (spot): ${fmtBRL(S)} reais.`,
-    `Preço de exercício (strike): ${fmtBRL(K)} reais.`,
-    `Prêmio: ${fmtBRL(premio)} reais.`,
-    be !== null ? `Ponto de equilíbrio (breakeven): ${fmtBRL(be)} reais.` : '',
-    `Lucro máximo no intervalo mostrado: ${fmtBRL(lucroMax)} reais.`,
-    `Prejuízo máximo no intervalo mostrado: ${fmtBRL(prejMax)} reais.`,
+    t('payoff.desc.title').replace('{tipo}', tipoLabel),
+    t('payoff.desc.xAxis').replace('{min}', fmtBRL(xMin)).replace('{max}', fmtBRL(xMax)),
+    t('payoff.desc.yAxis'),
+    t('payoff.desc.spot').replace('{value}', fmtBRL(S)),
+    t('payoff.desc.strike').replace('{value}', fmtBRL(K)),
+    t('payoff.desc.premio').replace('{value}', fmtBRL(premio)),
+    be !== null ? t('payoff.desc.breakeven').replace('{value}', fmtBRL(be)) : '',
+    t('payoff.desc.lucroMax').replace('{value}', fmtBRL(lucroMax)),
+    t('payoff.desc.prejMax').replace('{value}', fmtBRL(prejMax)),
   ]
     .filter(Boolean)
     .join(' ')
@@ -166,7 +170,7 @@ export function PayoffChart({
           className="mb-2 flex items-center justify-between gap-3 px-1 text-sm font-semibold text-clube-teal-deep"
         >
           <span>{titulo}</span>
-          <AudioReader texto={desc} label="Ouvir descrição" />
+          <AudioReader texto={desc} label={t('payoff.audioLabel')} />
         </figcaption>
       )}
       <svg
@@ -177,7 +181,10 @@ export function PayoffChart({
         aria-describedby={descId}
       >
         <title id={titleId}>
-          Payoff de {tipoLabel}, strike R$ {fmtBRL(K)}, prêmio R$ {fmtBRL(premio)}
+          {t('payoff.title.aria')
+            .replace('{tipo}', tipoLabel)
+            .replace('{strike}', fmtBRL(K))
+            .replace('{premio}', fmtBRL(premio))}
         </title>
         <desc id={descId}>{desc}</desc>
 
@@ -347,7 +354,7 @@ export function PayoffChart({
           fill="currentColor"
           fillOpacity={0.6}
         >
-          Preço no vencimento (R$)
+          {t('payoff.xAxisLabel')}
         </text>
 
         <text
@@ -360,25 +367,24 @@ export function PayoffChart({
           fillOpacity={0.6}
           transform={`rotate(-90 14 ${H / 2})`}
         >
-          Lucro / Prejuízo (R$)
+          {t('payoff.yAxisLabel')}
         </text>
       </svg>
 
       {/* Resumo numérico — versão visualmente oculta lida pelo leitor de tela.
          Provê os mesmos dados do gráfico em forma textual estruturada. */}
       <div className="sr-only">
-        <h4>Resumo do diagrama de payoff</h4>
+        <h4>{t('payoff.summary.title')}</h4>
         <ul>
-          <li>Tipo de posição: {tipoLabel}.</li>
-          <li>Preço atual do ativo (S): R$ {fmtBRL(S)}.</li>
-          <li>Strike (K): R$ {fmtBRL(K)}.</li>
-          <li>Prêmio: R$ {fmtBRL(premio)}.</li>
-          {be !== null && <li>Breakeven (lucro zero): R$ {fmtBRL(be)}.</li>}
-          <li>Lucro máximo no intervalo mostrado: R$ {fmtBRL(lucroMax)}.</li>
-          <li>Prejuízo máximo no intervalo mostrado: R$ {fmtBRL(prejMax)}.</li>
+          <li>{t('payoff.summary.tipo')} {tipoLabel}.</li>
+          <li>{t('payoff.summary.spot')} R$ {fmtBRL(S)}.</li>
+          <li>{t('payoff.summary.strike')} R$ {fmtBRL(K)}.</li>
+          <li>{t('payoff.summary.premio')} R$ {fmtBRL(premio)}.</li>
+          {be !== null && <li>{t('payoff.summary.breakeven')} R$ {fmtBRL(be)}.</li>}
+          <li>{t('payoff.summary.lucroMax')} R$ {fmtBRL(lucroMax)}.</li>
+          <li>{t('payoff.summary.prejMax')} R$ {fmtBRL(prejMax)}.</li>
           <li>
-            Faixa do eixo X (preço do ativo no vencimento): R$ {fmtBRL(xMin)} a R${' '}
-            {fmtBRL(xMax)}.
+            {t('payoff.summary.xRange').replace('{min}', fmtBRL(xMin)).replace('{max}', fmtBRL(xMax))}
           </li>
         </ul>
       </div>

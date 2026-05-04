@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import katex from 'katex'
 import { type Prova, PROVAS } from '@/content/provas-data'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 const macros: Record<string, string> = {
   '\\R': '\\mathbb{R}',
@@ -31,6 +32,7 @@ function renderMarkdown(text: string): string {
 }
 
 export function ProvaViewer() {
+  const { t } = useLocale()
   const [trimFiltro, setTrimFiltro] = useState<number>(1)
   const provasDoTrim = useMemo(
     () => PROVAS.filter((p) => p.trim === trimFiltro),
@@ -45,9 +47,9 @@ export function ProvaViewer() {
 
   const prova = PROVAS.find((p) => p.id === provaId) ?? provasDoTrim[0] ?? PROVAS[0]!
 
-  function selectTrim(t: number) {
-    setTrimFiltro(t)
-    const novas = PROVAS.filter((p) => p.trim === t)
+  function selectTrim(trimNum: number) {
+    setTrimFiltro(trimNum)
+    const novas = PROVAS.filter((p) => p.trim === trimNum)
     const primeiraCurada = novas.find((p) => p.status === 'curada')
     setProvaId(primeiraCurada?.id ?? novas[0]?.id ?? PROVAS[0]!.id)
     setRevealed({})
@@ -70,13 +72,17 @@ export function ProvaViewer() {
       {/* Filtro por trimestre */}
       <div className="mb-4 rounded-2xl border border-clube-mist-soft/40 bg-clube-cream-soft p-4">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-          Trimestre — <span className="text-clube-mist normal-case tracking-normal">borda <strong className="text-[#a97142]">bronze</strong> = ano 1, <strong className="text-[#9ca3af]">prata</strong> = ano 2, <strong className="text-[#c9a35f]">ouro</strong> = ano 3</span>
+          {t('prova.term.label')} —{' '}
+          <span
+            className="text-clube-mist normal-case tracking-normal"
+            dangerouslySetInnerHTML={{ __html: t('prova.term.legend') }}
+          />
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {Array.from({ length: 12 }, (_, i) => i + 1).map((t) => {
-            const ativo = t === trimFiltro
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((tn) => {
+            const ativo = tn === trimFiltro
             // T1-T4 = ano 1 (bronze); T5-T8 = ano 2 (prata); T9-T12 = ano 3 (ouro)
-            const ano = t <= 4 ? 1 : t <= 8 ? 2 : 3
+            const ano = tn <= 4 ? 1 : tn <= 8 ? 2 : 3
             const corBordaInativa =
               ano === 1
                 ? 'border-[#a97142]/60 hover:border-[#a97142] hover:text-[#a97142]'
@@ -91,18 +97,18 @@ export function ProvaViewer() {
                   : 'bg-[#9c7c3a] text-white shadow-sm border-2 border-[#9c7c3a]'
             return (
               <button
-                key={t}
+                key={tn}
                 type="button"
-                onClick={() => selectTrim(t)}
+                onClick={() => selectTrim(tn)}
                 className={
                   'rounded-full px-3 py-1 font-mono text-xs font-semibold transition-all ' +
                   (ativo
                     ? corAtiva
                     : `border-2 bg-clube-surface text-clube-ink/85 ${corBordaInativa}`)
                 }
-                aria-label={`Trimestre ${t} (ano ${ano})`}
+                aria-label={t('prova.term.aria').replace('{t}', String(tn)).replace('{ano}', String(ano))}
               >
-                T{t}
+                T{tn}
               </button>
             )
           })}
@@ -115,7 +121,7 @@ export function ProvaViewer() {
           htmlFor="prova-select"
           className="mb-2 block text-xs font-semibold uppercase tracking-wider text-clube-gold-deep"
         >
-          Versão da prova
+          {t('prova.version.label')}
         </label>
         <select
           id="prova-select"
@@ -125,7 +131,7 @@ export function ProvaViewer() {
         >
           {provasDoTrim.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.titulo} {p.status === 'curada' ? '✓' : '· em curadoria'}
+              {p.titulo} {p.status === 'curada' ? '✓' : `· ${t('prova.status.curating')}`}
             </option>
           ))}
         </select>
@@ -139,7 +145,7 @@ export function ProvaViewer() {
           </h2>
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="rounded-full bg-clube-cream-soft px-2 py-1 font-mono text-clube-teal-deep">
-              {prova.duracaoMinutos} min
+              {prova.duracaoMinutos} {t('prova.minutes')}
             </span>
             <span className="rounded-full bg-clube-gold/15 px-2 py-1 font-mono text-clube-gold-deep">
               {'★'.repeat(prova.intensidade)}
@@ -152,9 +158,11 @@ export function ProvaViewer() {
         </div>
         <p className="mt-2 text-sm text-clube-mist">{prova.descricao}</p>
         <p className="mt-1 text-xs italic text-clube-mist/70">
-          Trim {prova.trim} · versão {prova.versao} · {totalQuestoes} questões ·{' '}
-          {totalReveladas} resolução{totalReveladas === 1 ? '' : 'ões'} revelada
-          {totalReveladas === 1 ? '' : 's'}
+          {t('prova.meta.term')} {prova.trim} · {t('prova.meta.version')} {prova.versao} · {totalQuestoes} {t('prova.meta.questions')} ·{' '}
+          {totalReveladas}{' '}
+          {totalReveladas === 1
+            ? t('prova.meta.revealedSingular')
+            : t('prova.meta.revealedPlural')}
         </p>
       </header>
 
@@ -162,12 +170,10 @@ export function ProvaViewer() {
       {prova.status === 'em-curadoria' && (
         <div className="mb-8 rounded-xl border-2 border-dashed border-clube-mist-soft p-6 text-center">
           <p className="text-sm text-clube-mist">
-            Esta versão está sendo curada. As questões saem de OpenStax,
-            Active Calculus e outros livros públicos — escrever cada questão
-            com passo a passo profundo leva tempo.
+            {t('prova.curating.text')}
           </p>
           <p className="mt-3 text-sm text-clube-ink">
-            <strong>Use a versão 1 deste trimestre por enquanto.</strong>
+            <strong>{t('prova.curating.fallback')}</strong>
           </p>
         </div>
       )}
@@ -198,7 +204,7 @@ export function ProvaViewer() {
             {/* Fonte original */}
             <div className="mt-3 rounded-md border border-clube-mist-soft/30 bg-clube-cream-soft px-3 py-2 text-[11px]">
               <span className="font-semibold uppercase tracking-wider text-clube-mist">
-                fonte:
+                {t('prova.source.label')}
               </span>{' '}
               <a
                 href={q.fonteOriginal.url}
@@ -224,7 +230,7 @@ export function ProvaViewer() {
                     : 'bg-clube-teal text-white hover:bg-clube-teal-deep')
                 }
               >
-                {revealed[q.numero] ? 'Esconder resolução' : 'Revelar passo a passo'}
+                {revealed[q.numero] ? t('prova.hideSolution') : t('prova.revealSolution')}
               </button>
               {q.aulasCobertas.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
@@ -243,14 +249,14 @@ export function ProvaViewer() {
             {revealed[q.numero] && (
               <div className="mt-4 rounded-lg border-l-4 border-clube-gold bg-clube-cream-soft p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-                  Resposta
+                  {t('prova.answer')}
                 </p>
                 <div
                   className="mt-1 text-sm text-clube-ink"
                   dangerouslySetInnerHTML={{ __html: renderMath(q.resposta) }}
                 />
                 <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-                  Passo a passo
+                  {t('prova.stepByStep')}
                 </p>
                 <div
                   className="mt-1 text-sm leading-relaxed text-clube-ink/85"

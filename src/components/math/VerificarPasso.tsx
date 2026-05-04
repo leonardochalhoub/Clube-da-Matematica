@@ -16,6 +16,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import katex from 'katex'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 const KATEX_MACROS: Record<string, string> = {
   '\\R': '\\mathbb{R}',
@@ -113,6 +114,7 @@ export function VerificarPasso({
   prompt,
   variaveis = 'x, y, z',
 }: VerificarPassoProps) {
+  const { t } = useLocale()
   const [status, setStatus] = useState<Status>('idle')
   const [input, setInput] = useState('')
   const [feedback, setFeedback] = useState<{
@@ -149,7 +151,7 @@ export function VerificarPasso({
     if (!py) {
       setFeedback({
         ok: false,
-        msg: 'Motor de verificação não disponível.',
+        msg: t('verificar.engineUnavailable'),
       })
       return
     }
@@ -169,19 +171,19 @@ export function VerificarPasso({
       if (ok) {
         setFeedback({
           ok: true,
-          msg: 'Equivalente à resposta esperada (simbolicamente).',
+          msg: t('verificar.equivalent'),
         })
       } else {
         setFeedback({
           ok: false,
-          msg: `Diferente da resposta. Diferença simplificada: ${diff}`,
+          msg: `${t('verificar.differentDiff')} ${diff}`,
         })
       }
     } catch (err) {
       setFeedback({
         ok: false,
-        msg: `Erro ao analisar: ${
-          err instanceof Error ? err.message : 'desconhecido'
+        msg: `${t('verificar.parseError')} ${
+          err instanceof Error ? err.message : t('verificar.unknown')
         }`,
       })
     }
@@ -190,25 +192,25 @@ export function VerificarPasso({
   return (
     <div className="not-prose my-6 rounded-xl border-2 border-dashed border-clube-gold/40 bg-clube-cream-soft p-5">
       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-        ✍️ Verificar passo (SymPy)
+        {t('verificar.title')}
       </p>
       <p
         className="mb-3 text-sm text-clube-ink"
         dangerouslySetInnerHTML={{ __html: renderInline(prompt) }}
       />
-      <p className="mb-3 text-xs text-clube-mist">
-        Variáveis aceitas: <code>{variaveis}</code>. Use sintaxe Python:{' '}
-        <code>**</code> pra potência, <code>*</code> pra multiplicação,{' '}
-        <code>sin(x)</code>, <code>cos(x)</code>, <code>exp(x)</code>,{' '}
-        <code>log(x)</code>, <code>sqrt(x)</code>, <code>pi</code>, <code>E</code>.
-      </p>
+      <p
+        className="mb-3 text-xs text-clube-mist"
+        dangerouslySetInnerHTML={{
+          __html: `${t('verificar.variables')} <code>${variaveis}</code>. ${t('verificar.syntax')}`,
+        }}
+      />
       <div className="flex flex-wrap items-center gap-2">
         <input
           ref={inputRef}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="ex.: 2*x + 3"
+          placeholder={t('verificar.placeholder')}
           onKeyDown={(e) => {
             if (e.key === 'Enter') verificar()
           }}
@@ -220,18 +222,17 @@ export function VerificarPasso({
           disabled={!input.trim() || status === 'loading'}
           className="rounded-full bg-clube-teal px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-clube-teal-deep disabled:opacity-50"
         >
-          {status === 'loading' ? 'Carregando SymPy…' : 'Verificar'}
+          {status === 'loading' ? t('verificar.loading') : t('verificar.button')}
         </button>
       </div>
       {status === 'idle' && (
         <p className="mt-2 text-[11px] italic text-clube-mist">
-          Primeira verificação carrega o motor (~10 MB, ~3s). Depois fica
-          rápido.
+          {t('verificar.idleHint')}
         </p>
       )}
       {status === 'error' && (
         <p className="mt-2 text-xs text-clube-clay">
-          Falha ao carregar o motor de verificação. Verifique sua conexão.
+          {t('verificar.errorLoad')}
         </p>
       )}
       {feedback && (
@@ -247,7 +248,7 @@ export function VerificarPasso({
           {feedback.msg}
           {latex && feedback.ok && (
             <div className="mt-2 font-mono text-xs opacity-80">
-              Sua resposta em LaTeX: <code>${latex}$</code>
+              {t('verificar.yourLatex')} <code>${latex}$</code>
             </div>
           )}
         </div>

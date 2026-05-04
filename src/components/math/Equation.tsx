@@ -1,5 +1,8 @@
+'use client'
+
 import katex from 'katex'
 import { AudioReader } from './AudioReader'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 interface EquationProps {
   /** LaTeX da equação (sem delimitadores `$$`). */
@@ -54,6 +57,7 @@ export function Equation({
   ariaLabel,
   audioTexto,
 }: EquationProps) {
+  const { t } = useLocale()
   const html = katex.renderToString(children, {
     output: 'htmlAndMathml',
     displayMode: !inline,
@@ -84,7 +88,7 @@ export function Equation({
           dangerouslySetInnerHTML={{ __html: html }}
         />
         <div className="flex shrink-0 items-center gap-3 self-center">
-          {audioTexto && <AudioReader texto={audioTexto} label="Ler" />}
+          {audioTexto && <AudioReader texto={audioTexto} label={t('equation.audioLabel')} />}
           {numero && (
             <div className="font-mono text-sm text-clube-mist">({numero})</div>
           )}
@@ -93,7 +97,7 @@ export function Equation({
       {explicacao && (
         <figcaption className="mt-3 border-t border-clube-mist-soft/40 pt-3 text-sm leading-relaxed text-clube-mist">
           <span className="font-semibold uppercase tracking-wider text-clube-gold-deep">
-            o que isso quer dizer ·{' '}
+            {t('equation.meaningLabel')}
           </span>
           {explicacao}
         </figcaption>

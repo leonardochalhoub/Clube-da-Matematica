@@ -1,4 +1,7 @@
+'use client'
+
 import type { SVGProps } from 'react'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 interface LogoProps extends SVGProps<SVGSVGElement> {
   size?: number
@@ -12,6 +15,9 @@ interface LogoProps extends SVGProps<SVGSVGElement> {
  * (aprendizado nunca fecha). Base teal #1A4D5C, traço gold #E8C77A.
  */
 export function Logo({ size = 32, variant = 'filled', ...props }: LogoProps) {
+  const { t } = useLocale()
+  const brand = t('brand.name')
+
   if (variant === 'outline') {
     return (
       <svg
@@ -20,10 +26,10 @@ export function Logo({ size = 32, variant = 'filled', ...props }: LogoProps) {
         width={size}
         height={size}
         role="img"
-        aria-label="Clube da Matemática"
+        aria-label={brand}
         {...props}
       >
-        <title>Clube da Matemática</title>
+        <title>{brand}</title>
         <g
           transform="translate(23 31) scale(3.5)"
           fill="none"
@@ -45,10 +51,10 @@ export function Logo({ size = 32, variant = 'filled', ...props }: LogoProps) {
       width={size}
       height={size}
       role="img"
-      aria-label="Clube da Matemática"
+      aria-label={brand}
       {...props}
     >
-      <title>Clube da Matemática</title>
+      <title>{brand}</title>
       <rect width="64" height="64" rx="12" fill="#1A4D5C" />
       <g
         transform="translate(23 31) scale(3.5)"

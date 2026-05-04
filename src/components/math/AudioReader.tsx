@@ -93,12 +93,8 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     // Sem voz e idioma estrangeiro: alert pra instalar voz no OS.
     if (candidatas.length === 0 && langFalado !== 'pt-BR') {
       const nomeIdioma = LOCALES[locale].nome
-      alert(
-        `${nomeIdioma}: voz TTS não instalada no navegador. ` +
-        `Instale uma voz ${nomeIdioma} no seu sistema operacional ` +
-        `(em Windows: Configurações > Hora e Idioma > Voz) ` +
-        `ou troque pra PT-BR pra ouvir.`,
-      )
+      const msg = t('audio.voiceNotInstalled').replace(/\{lang\}/g, nomeIdioma)
+      alert(msg)
       setEstado('idle')
       return
     }

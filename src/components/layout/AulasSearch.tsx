@@ -7,6 +7,7 @@ import {
   type Aula,
   MATERIAS_LABEL,
 } from '@/content/programa-em'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 interface AulaCompleta extends Aula {
   ano: number
@@ -44,6 +45,7 @@ function normalize(s: string): string {
 }
 
 export function AulasSearch({ caminhos }: AulasSearchProps) {
+  const { t } = useLocale()
   const [query, setQuery] = useState('')
   const todasAulas = useMemo(() => flattenAulas(caminhos), [caminhos])
 
@@ -66,14 +68,14 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
         htmlFor="aulas-search"
         className="mb-2 block text-xs font-semibold uppercase tracking-wider text-clube-gold-deep"
       >
-        🔍 Buscar lição por nome, tópico ou matéria
+        {t('aulasSearch.label')}
       </label>
       <input
         id="aulas-search"
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder='ex.: "derivada", "Bayes", "matriz inversa", "trigonometria"'
+        placeholder={t('aulasSearch.placeholder')}
         className="w-full rounded-full border border-clube-mist-soft/60 bg-clube-surface px-4 py-2.5 text-sm text-clube-ink shadow-sm focus:border-clube-teal focus:outline-none"
       />
 
@@ -81,13 +83,15 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
         <div className="mt-4">
           {filtered.length === 0 ? (
             <p className="rounded-lg bg-clube-cream-soft px-4 py-3 text-sm italic text-clube-mist">
-              Nenhuma lição encontrada para "{query}". Tente outro termo —
-              palavras-chave funcionam melhor que frases inteiras.
+              {t('aulasSearch.noResultsPrefix')} "{query}". {t('aulasSearch.noResultsHint')}
             </p>
           ) : (
             <>
               <p className="mb-2 text-xs uppercase tracking-wider text-clube-mist">
-                {filtered.length} resultado{filtered.length === 1 ? '' : 's'}
+                {filtered.length}{' '}
+                {filtered.length === 1
+                  ? t('aulasSearch.resultsSingular')
+                  : t('aulasSearch.resultsPlural')}
               </p>
               <ul className="space-y-1.5">
                 {filtered.map((a) => {
@@ -95,13 +99,13 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
                   const Inner = (
                     <div className="flex items-baseline gap-2">
                       <span className="rounded-full bg-clube-cream-soft px-2 py-0.5 font-mono text-[10px] font-bold text-clube-teal-deep">
-                        Lição {a.num}
+                        {t('aulasSearch.lesson')} {a.num}
                       </span>
                       <span className="text-sm font-semibold text-clube-ink">
                         {a.titulo}
                       </span>
                       <span className="ml-auto text-[10px] uppercase tracking-wider text-clube-mist">
-                        Ano {a.ano} / Trim {a.trim} · {MATERIAS_LABEL[a.materia]}
+                        {t('aulasSearch.year')} {a.ano} / {t('aulasSearch.term')} {a.trim} · {MATERIAS_LABEL[a.materia]}
                       </span>
                     </div>
                   )
@@ -121,7 +125,7 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
                         <div className="opacity-70">
                           {Inner}
                           <div className="mt-1 text-[10px] italic text-clube-mist">
-                            (planejada — ainda não publicada)
+                            {t('aulasSearch.plannedNote')}
                           </div>
                         </div>
                       )}

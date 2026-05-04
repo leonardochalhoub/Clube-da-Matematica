@@ -8,6 +8,7 @@ import {
   MATERIAS_LABEL,
   MATERIAS_DESCRICAO,
 } from '@/content/programa-em'
+import { useLocale } from './LocaleProvider'
 
 interface AulaPath extends Aula {
   /** Caminho completo (ex.: 'aulas/ano-1/trim-1/aula-01-conjuntos-intervalos'). */
@@ -27,13 +28,14 @@ interface MateriaTabsProps {
  * têm link clicável, planejadas ficam em estado "planejada".
  */
 export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
+  const { t } = useLocale()
   const [ativa, setAtiva] = useState<MateriaEM>(materias[0]!)
   const groupId = useId()
 
   if (materias.length === 0) {
     return (
       <p className="rounded-lg bg-clube-cream-soft px-4 py-3 text-sm italic text-clube-mist">
-        Sem matérias registradas.
+        {t('materia.empty.subjects')}
       </p>
     )
   }
@@ -42,7 +44,7 @@ export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
     <div className="not-prose">
       <div
         role="tablist"
-        aria-label="Matérias do ano"
+        aria-label={t('materia.tablist.aria')}
         className="flex flex-wrap gap-2 border-b border-clube-mist-soft/40 pb-3"
       >
         {materias.map((m) => {
@@ -108,7 +110,7 @@ export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
 
             {aulas.length === 0 ? (
               <p className="rounded-lg bg-clube-cream-soft px-4 py-3 text-sm italic text-clube-mist">
-                Sem lições registradas nesta matéria para este ano.
+                {t('materia.empty.lessons')}
               </p>
             ) : (
               <ol className="space-y-2">
@@ -120,7 +122,7 @@ export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
                       className="flex items-start gap-3 rounded-lg border border-clube-mist-soft/30 bg-clube-surface px-3 py-2 text-sm"
                     >
                       <span className="mt-0.5 inline-block min-w-[3rem] rounded-full bg-clube-cream-soft px-2 py-0.5 text-center font-mono text-[10px] font-bold text-clube-teal-deep">
-                        Lição {aula.num}
+                        {t('materia.lesson.label')} {aula.num}
                       </span>
                       <div className="flex-1">
                         <div className="font-semibold text-clube-ink">
@@ -141,11 +143,11 @@ export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
                       </div>
                       {publicada ? (
                         <span className="rounded-full bg-clube-leaf/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-leaf">
-                          publicada
+                          {t('materia.status.published')}
                         </span>
                       ) : (
                         <span className="rounded-full bg-clube-mist-soft/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-mist">
-                          planejada
+                          {t('materia.status.planned')}
                         </span>
                       )}
                     </li>

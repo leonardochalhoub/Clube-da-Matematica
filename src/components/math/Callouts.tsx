@@ -1,4 +1,7 @@
+'use client'
+
 import type { ReactNode } from 'react'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 interface CalloutBaseProps {
   titulo?: string
@@ -51,23 +54,28 @@ const Icone = {
 }
 
 export function Definicao(props: CalloutBaseProps) {
-  return <Bloco rotulo="Definição" cor="#1A4D5C" icone={Icone.D} {...props} />
+  const { t } = useLocale()
+  return <Bloco rotulo={t('callout.definicao')} cor="#1A4D5C" icone={Icone.D} {...props} />
 }
 
 export function Teorema(props: CalloutBaseProps) {
-  return <Bloco rotulo="Teorema" cor="#0F3540" icone={Icone.T} {...props} />
+  const { t } = useLocale()
+  return <Bloco rotulo={t('callout.teorema')} cor="#0F3540" icone={Icone.T} {...props} />
 }
 
 export function Exemplo(props: CalloutBaseProps) {
-  return <Bloco rotulo="Exemplo" cor="#3D7A5F" icone={Icone.E} {...props} />
+  const { t } = useLocale()
+  return <Bloco rotulo={t('callout.exemplo')} cor="#3D7A5F" icone={Icone.E} {...props} />
 }
 
 export function Insight(props: CalloutBaseProps) {
-  return <Bloco rotulo="Observação" cor="#C9A35F" icone={Icone.I} {...props} />
+  const { t } = useLocale()
+  return <Bloco rotulo={t('callout.observacao')} cor="#C9A35F" icone={Icone.I} {...props} />
 }
 
 export function Cuidado(props: CalloutBaseProps) {
-  return <Bloco rotulo="Cuidado" cor="#C76B3F" icone={Icone.W} {...props} />
+  const { t } = useLocale()
+  return <Bloco rotulo={t('callout.cuidado')} cor="#C76B3F" icone={Icone.W} {...props} />
 }
 
 interface LeiturasProps {
@@ -78,10 +86,11 @@ interface LeiturasProps {
  * Bloco de "Leituras adicionais / fontes" no fim de cada conteúdo.
  */
 export function Leituras({ children }: LeiturasProps) {
+  const { t } = useLocale()
   return (
     <section className="mt-12 rounded-xl bg-clube-cream-soft px-6 py-5">
       <h3 className="!mt-0 text-sm font-semibold uppercase tracking-wider text-clube-mist">
-        Para continuar
+        {t('callout.leituras')}
       </h3>
       <div className="prose prose-clube prose-sm mt-3 max-w-none">{children}</div>
     </section>

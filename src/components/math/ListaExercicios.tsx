@@ -9,6 +9,7 @@ import {
   type ReactElement,
 } from 'react'
 import katex from 'katex'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 export type DificuldadeExercicio =
   | 'aplicacao'
@@ -17,12 +18,12 @@ export type DificuldadeExercicio =
   | 'desafio'
   | 'demonstracao'
 
-const DIFICULDADE_LABEL: Record<DificuldadeExercicio, string> = {
-  aplicacao: 'Aplicação',
-  compreensao: 'Compreensão',
-  modelagem: 'Modelagem',
-  desafio: 'Desafio',
-  demonstracao: 'Demonstração',
+const DIFICULDADE_KEY: Record<DificuldadeExercicio, string> = {
+  aplicacao: 'difficulty.aplicacao',
+  compreensao: 'difficulty.compreensao',
+  modelagem: 'difficulty.modelagem',
+  desafio: 'difficulty.desafio',
+  demonstracao: 'difficulty.demonstracao',
 }
 
 const DIFICULDADE_COR: Record<DificuldadeExercicio, string> = {
@@ -160,6 +161,7 @@ export function ListaExercicios({
   fracaoGabaritada = 0.25,
   children,
 }: ListaExerciciosProps) {
+  const { t } = useLocale()
   // Robusto a Next.js client boundary: filtra por presença de prop `dificuldade`
   const exercicios = Children.toArray(children).filter(
     (c): c is ReactElement<ExercicioProps> => {
@@ -203,10 +205,10 @@ export function ListaExercicios({
     <section className="not-prose my-10 rounded-2xl border-2 border-clube-mist-soft/40 bg-clube-cream-soft p-4 sm:p-6 lg:p-8">
       <header className="mb-6 border-b border-clube-mist-soft/40 pb-4">
         <h3 className="text-xl font-bold text-clube-teal-deep">
-          Lista de exercícios
+          {t('exercise.listTitle')}
         </h3>
         <p className="mt-1 text-sm text-clube-mist">
-          {total} exercícios · {gabaritados} com solução desenvolvida ({Math.round(fracaoGabaritada * 100)}%)
+          {total} {t('exercise.countExercises')} · {gabaritados} {t('exercise.withSolution')} ({Math.round(fracaoGabaritada * 100)}%)
         </p>
         <div className="mt-3 flex flex-wrap gap-2 text-xs">
           {(Object.entries(contagem) as [DificuldadeExercicio, number][])
@@ -216,7 +218,7 @@ export function ListaExercicios({
                 key={dif}
                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium ${DIFICULDADE_COR[dif]}`}
               >
-                {DIFICULDADE_LABEL[dif]} <strong>{n}</strong>
+                {t(DIFICULDADE_KEY[dif])} <strong>{n}</strong>
               </span>
             ))}
         </div>
@@ -523,6 +525,7 @@ function ItemExercicio({
   props: ExercicioProps
   gabaritado: boolean
 }) {
+  const { t } = useLocale()
   const {
     numero,
     dificuldade,
@@ -568,16 +571,16 @@ function ItemExercicio({
       {/* Header do exercício */}
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <span className="font-mono text-sm font-bold text-clube-teal-deep">
-          Ex. {id}
+          {t('exercise.exShort')} {id}
         </span>
         <span
           className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${DIFICULDADE_COR[dificuldade]}`}
         >
-          {DIFICULDADE_LABEL[dificuldade]}
+          {t(DIFICULDADE_KEY[dificuldade])}
         </span>
         {gabaritado && (
           <span className="rounded-full bg-clube-gold/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-gold-deep">
-            Gabarito
+            {t('exercise.answerKey')}
           </span>
         )}
       </div>
@@ -589,7 +592,7 @@ function ItemExercicio({
       {temOpcoes && (
         <fieldset className="mt-4 border-t border-clube-mist-soft/40 pt-4">
           <legend className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-mist">
-            Selecione a alternativa correta
+            {t('exercise.selectCorrect')}
           </legend>
           <div className="space-y-2">
             {opcoes!.map((op, idx) => {
@@ -623,7 +626,7 @@ function ItemExercicio({
                     dangerouslySetInnerHTML={{ __html: renderInline(op.texto) }}
                   />
                   {tentou && idx === indiceCorreto && (
-                    <span className="text-clube-leaf" aria-label="correta">
+                    <span className="text-clube-leaf" aria-label={t('exercise.correctAria')}>
                       ✓
                     </span>
                   )}
@@ -638,7 +641,7 @@ function ItemExercicio({
               disabled={opcaoSelecionada === null}
               className="rounded-md bg-clube-teal px-3 py-1.5 text-sm font-semibold text-white hover:bg-clube-teal-deep disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Conferir
+              {t('exercise.check')}
             </button>
             {tentou && (
               <span
@@ -647,8 +650,8 @@ function ItemExercicio({
                 }`}
               >
                 {acertouOpcao
-                  ? '✓ Correto.'
-                  : '✗ Tente novamente — escolha outra alternativa.'}
+                  ? t('exercise.correct')
+                  : t('exercise.tryAgain')}
               </span>
             )}
           </div>
@@ -662,7 +665,7 @@ function ItemExercicio({
             type="text"
             value={respostaUsuario}
             onChange={(e) => setRespostaUsuario(e.target.value)}
-            placeholder="sua resposta"
+            placeholder={t('exercise.answerPlaceholder')}
             className="flex-1 min-w-[180px] rounded-md border border-clube-mist-soft/60 bg-clube-cream px-3 py-1.5 font-mono text-sm text-clube-ink"
             disabled={acertouTexto}
           />
@@ -672,7 +675,7 @@ function ItemExercicio({
             className="rounded-md bg-clube-teal px-3 py-1.5 text-sm font-semibold text-white hover:bg-clube-teal-deep"
             disabled={acertouTexto}
           >
-            Conferir
+            {t('exercise.check')}
           </button>
           {dica && !pediuDica && (
             <button
@@ -680,7 +683,7 @@ function ItemExercicio({
               onClick={() => setPediuDica(true)}
               className="rounded-md border border-clube-mist-soft/60 bg-clube-surface px-3 py-1.5 text-sm text-clube-mist hover:border-clube-teal"
             >
-              Pedir dica
+              {t('exercise.askHint')}
             </button>
           )}
         </div>
@@ -694,7 +697,7 @@ function ItemExercicio({
             onClick={() => setTentou(true)}
             className="rounded-md bg-clube-teal px-3 py-1.5 text-sm font-semibold text-white hover:bg-clube-teal-deep"
           >
-            {tentou ? 'Resposta revelada ↓' : 'Ver resposta'}
+            {tentou ? t('exercise.revealedAnswer') : t('exercise.seeAnswer')}
           </button>
           {dica && !pediuDica && (
             <button
@@ -702,7 +705,7 @@ function ItemExercicio({
               onClick={() => setPediuDica(true)}
               className="rounded-md border border-clube-mist-soft/60 bg-clube-surface px-3 py-1.5 text-sm text-clube-mist hover:border-clube-teal"
             >
-              Pedir dica
+              {t('exercise.askHint')}
             </button>
           )}
         </div>
@@ -715,7 +718,7 @@ function ItemExercicio({
             acertouTexto ? 'text-clube-leaf' : 'text-clube-clay'
           }`}
         >
-          {acertouTexto ? '✓ Correto.' : `✗ Resposta esperada: `}
+          {acertouTexto ? t('exercise.correct') : t('exercise.expectedAnswer')}
           {!acertouTexto && (
             <span
               className="font-normal"
@@ -729,7 +732,7 @@ function ItemExercicio({
       {tentou && respostaLatexOnly && !temOpcoes && (
         <div className="mt-2 rounded-md border-l-4 border-clube-leaf bg-clube-leaf/10 p-3 text-sm">
           <strong className="block text-xs uppercase tracking-wider text-clube-leaf">
-            Resposta
+            {t('exercise.answerLabel')}
           </strong>
           <span
             className="mt-1 inline-block text-clube-ink"
@@ -742,7 +745,7 @@ function ItemExercicio({
       {pediuDica && dica && (
         <div className="mt-3 rounded-lg border-l-4 border-clube-gold bg-clube-gold/10 p-3 text-sm">
           <strong className="block text-xs uppercase tracking-wider text-clube-gold-deep">
-            Dica
+            {t('exercise.hintLabel')}
           </strong>
           <div className="prose prose-clube prose-sm mt-1 max-w-none">{dica}</div>
         </div>
@@ -759,9 +762,9 @@ function ItemExercicio({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 rounded-full border border-clube-mist-soft/60 bg-clube-cream px-2.5 py-1 font-medium text-clube-teal hover:border-clube-teal hover:bg-clube-teal/5 hover:no-underline"
-              aria-label="Resolver este exercício online no Wolfram Alpha"
+              aria-label={t('exercise.solveOnlineAria')}
             >
-              <CalcIcon /> Resolver online
+              <CalcIcon /> {t('exercise.solveOnline')}
             </a>
           )
         })()}
@@ -782,7 +785,7 @@ function ItemExercicio({
           </a>
         )}
         {!fonte && referencia && (
-          <span className="text-clube-mist/80">ref: {referencia}</span>
+          <span className="text-clube-mist/80">{t('exercise.refLabel')} {referencia}</span>
         )}
       </div>
 
@@ -796,7 +799,7 @@ function ItemExercicio({
           onToggle={(e) => setVendoSolucao((e.target as HTMLDetailsElement).open)}
         >
           <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-clube-teal hover:text-clube-teal-deep">
-            {vendoSolucao ? 'Ocultar passo a passo' : 'Ver passo a passo (com o porquê)'}
+            {vendoSolucao ? t('exercise.hideStepByStep') : t('exercise.showStepByStep')}
           </summary>
           <div className="prose prose-clube prose-sm mt-3 max-w-none">{solucao}</div>
         </details>

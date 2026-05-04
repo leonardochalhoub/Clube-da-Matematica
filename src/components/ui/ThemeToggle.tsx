@@ -1,5 +1,7 @@
 'use client'
 
+import { useLocale } from '@/components/layout/LocaleProvider'
+
 /**
  * Toggle de tema claro/escuro.
  *
@@ -13,6 +15,8 @@
  * deles baseado em `.dark` em <html>. Zero hidratação reativa, zero flash.
  */
 export function ThemeToggle() {
+  const { t } = useLocale()
+
   function alternar() {
     const eEscuro = document.documentElement.classList.toggle('dark')
     try {
@@ -26,8 +30,8 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={alternar}
-      aria-label="Alternar tema claro/escuro"
-      title="Alternar tema"
+      aria-label={t('theme.toggle.aria')}
+      title={t('theme.toggle.title')}
       className="inline-flex h-9 w-9 items-center justify-center rounded-md text-clube-ink/70 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal"
     >
       <SunIcon className="dark:hidden" />

@@ -1,5 +1,8 @@
+'use client'
+
 import katex from 'katex'
 import { AudioReader } from './AudioReader'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 interface EquacaoCanonicaProps {
   /** LaTeX (sem `$$`). */
@@ -36,6 +39,8 @@ export function EquacaoCanonica({
   ariaLabel,
   audioTexto,
 }: EquacaoCanonicaProps) {
+  const { t } = useLocale()
+
   const html = katex.renderToString(formula, {
     output: 'htmlAndMathml',
     displayMode: true,
@@ -47,7 +52,7 @@ export function EquacaoCanonica({
   return (
     <section
       role="math"
-      aria-label={ariaLabel ?? formula}
+      aria-label={ariaLabel ?? t('equacao.canonica.aria')}
       className="not-prose my-8 overflow-hidden rounded-2xl border-2 border-clube-gold/30 bg-gradient-to-b from-clube-cream-soft to-clube-surface px-4 py-8 shadow-sm sm:my-10 sm:px-6 sm:py-10"
     >
       <div

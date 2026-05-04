@@ -9,7 +9,8 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react'
-import { IDADES_PADRAO, IDADE_LABEL, IDADE_DESCRICAO, type Idade } from '@/content/schema'
+import { IDADES_PADRAO, type Idade } from '@/content/schema'
+import { useLocale } from '@/components/layout/LocaleProvider'
 
 interface PortaProps {
   nivel: Idade | string
@@ -51,6 +52,8 @@ interface DuasPortasProps {
  *   sinaliza a mudança ao leitor de tela.
  */
 export function DuasPortas({ children, idadeInicial = 'formal' }: DuasPortasProps) {
+  const { t } = useLocale()
+
   const portas = Children.toArray(children).filter(
     (child): child is ReactElement<PortaProps> =>
       isValidElement(child) &&
@@ -77,10 +80,14 @@ export function DuasPortas({ children, idadeInicial = 'formal' }: DuasPortasProp
 
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({})
 
-  const labelDe = (id: string): string =>
-    id in IDADE_LABEL ? IDADE_LABEL[id as Idade] : `${id} anos`
-  const descDe = (id: string): string =>
-    id in IDADE_DESCRICAO ? IDADE_DESCRICAO[id as Idade] : ''
+  const labelDe = (id: string): string => {
+    if (idadesPadrao.has(id)) return t(`idade.${id}.label`)
+    return `${id} ${t('duasPortas.years')}`
+  }
+  const descDe = (id: string): string => {
+    if (idadesPadrao.has(id)) return t(`idade.${id}.desc`, '')
+    return ''
+  }
 
   const tabId = (id: string) => `porta-tab-${id}`
   const panelId = (id: string) => `porta-panel-${id}`
@@ -123,7 +130,7 @@ export function DuasPortas({ children, idadeInicial = 'formal' }: DuasPortasProp
         className="mb-1 text-xs font-semibold uppercase tracking-wider text-clube-mist"
         id="porta-tablist-label"
       >
-        Escolha sua porta
+        {t('duasPortas.chooseDoor')}
       </div>
       <div
         className="-mx-1 flex flex-wrap items-center gap-1.5 py-2"
@@ -164,7 +171,7 @@ export function DuasPortas({ children, idadeInicial = 'formal' }: DuasPortasProp
         className="mt-6 rounded-2xl border border-clube-mist-soft/40 bg-clube-surface p-6 sm:p-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-clube-gold"
       >
         {portaAtiva ?? (
-          <p className="text-clube-mist">Nenhum conteúdo para esta idade ainda.</p>
+          <p className="text-clube-mist">{t('duasPortas.empty')}</p>
         )}
       </div>
     </div>

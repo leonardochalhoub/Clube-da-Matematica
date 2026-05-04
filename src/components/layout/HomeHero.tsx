@@ -18,10 +18,10 @@ export function HomeHero() {
             <span className="text-clube-teal">{t('home.title.line2')}</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-clube-ink/80 sm:text-xl">
-            <strong>3 anos · 12 trimestres · 120 lições</strong>
+            <strong>{t('home.stats.years')}</strong>
             <br />
             <span className="text-base">
-              17 idiomas 🌍 · 6 portas 🚪 (formal, 5/10/15/25/40 anos) · áudio 🔊 · 40-80 exercícios por lição
+              {t('home.stats.features')}
             </span>
             <br />
             <span className="text-sm opacity-80">

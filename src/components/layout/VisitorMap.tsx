@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { readCounter } from '@/lib/analytics/visitor-tracker'
 import { Flag } from './Flag'
+import { useLocale } from './LocaleProvider'
 
 /**
  * Lista os ~80 países que potencialmente tem leitores. Para cada um, lê
@@ -93,6 +94,7 @@ interface CountryData {
 }
 
 export function VisitorMap() {
+  const { t, locale } = useLocale()
   const [data, setData] = useState<CountryData[] | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -119,7 +121,7 @@ export function VisitorMap() {
   if (loading) {
     return (
       <div className="rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft/30 p-8 text-center text-sm text-clube-mist">
-        Carregando dados de visitantes…
+        {t('visitor.loading')}
       </div>
     )
   }
@@ -128,10 +130,10 @@ export function VisitorMap() {
     return (
       <div className="rounded-xl border-2 border-dashed border-clube-mist-soft/40 bg-clube-cream-soft/30 p-12 text-center">
         <p className="text-base text-clube-mist">
-          Ainda sem visitas registradas — seja o primeiro!
+          {t('visitor.empty.title')}
         </p>
         <p className="mt-2 text-xs italic text-clube-mist/70">
-          (As contagens aparecem após o primeiro acesso de cada país.)
+          {t('visitor.empty.note')}
         </p>
       </div>
     )
@@ -139,13 +141,14 @@ export function VisitorMap() {
 
   const total = data.reduce((acc, c) => acc + c.count, 0)
   const max = data[0]!.count
+  const numberLocale = locale === 'pt-BR' ? 'pt-BR' : locale
 
   return (
     <div>
       <div className="mb-6 rounded-xl border border-clube-teal/30 bg-clube-teal/5 p-4 text-center">
         <p className="text-sm text-clube-mist">
-          Visitantes vindos de <strong className="text-clube-teal-deep">{data.length} países</strong> ·
-          total <strong className="text-clube-teal-deep">{total.toLocaleString('pt-BR')}</strong>
+          {t('visitor.summary.from')} <strong className="text-clube-teal-deep">{data.length} {t('visitor.summary.countries')}</strong> ·
+          {' '}{t('visitor.summary.total')} <strong className="text-clube-teal-deep">{total.toLocaleString(numberLocale)}</strong>
         </p>
       </div>
 
@@ -168,7 +171,7 @@ export function VisitorMap() {
                   {c.nome}
                 </span>
                 <span className="font-mono text-sm font-semibold text-clube-teal-deep">
-                  {c.count.toLocaleString('pt-BR')}
+                  {c.count.toLocaleString(numberLocale)}
                 </span>
               </div>
             </li>
@@ -177,7 +180,7 @@ export function VisitorMap() {
       </ul>
 
       <p className="mt-6 text-center text-xs italic text-clube-mist/70">
-        Dados anônimos · Geolocalização aproximada via IP · Atualizado a cada acesso
+        {t('visitor.footer.note')}
       </p>
     </div>
   )
