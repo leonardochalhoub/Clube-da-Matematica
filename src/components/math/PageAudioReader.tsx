@@ -93,10 +93,10 @@ export function PageAudioReader({
    */
   function latexToProse(latex: string): string {
     let s = latex
-    // Conjuntos: `\{ x : ... \}` → "o conjunto dos x tais que ..." → simples,
-    // só strippa as chaves escapadas pra contexto natural.
-    s = s.replace(/\\\{/g, ' o conjunto ')
-    s = s.replace(/\\\}/g, ' ')
+    // Chaves de conjunto: `\{ ... \}` ou `\lbrace ... \rbrace`. Tornamos "o
+    // conjunto" e fechamos com vírgula natural.
+    s = s.replace(/\\\{|\\lbrace\b/g, ' o conjunto ')
+    s = s.replace(/\\\}|\\rbrace\b/g, ' ')
     // Comandos com argumentos
     s = s.replace(/\\sqrt\{([^}]+)\}/g, ' raiz quadrada de $1 ')
     s = s.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, ' $1 sobre $2 ')
@@ -133,6 +133,7 @@ export function PageAudioReader({
       [/\\cdot|\\times/g, ' vezes '],
       [/\\div/g, ' dividido por '],
       [/\\pm/g, ' mais ou menos '],
+      [/\\mid\b/g, ' tal que '],
       [/\\alpha\b/g, ' alfa '],
       [/\\beta\b/g, ' beta '],
       [/\\gamma\b/g, ' gama '],
@@ -157,8 +158,11 @@ export function PageAudioReader({
     s = s.replace(/\s*!=\s*/g, ' diferente de ')
     s = s.replace(/\s*<\s*/g, ' menor que ')
     s = s.replace(/\s*>\s*/g, ' maior que ')
-    // Limpa restos
-    s = s.replace(/\\[a-zA-Z]+/g, ' ')
+    // Limpa restos: comandos `\foo`, qualquer barra invertida solta (que o
+    // sintetizador pronunciaria como "contra barra"), e chaves órfãs.
+    s = s.replace(/\\[a-zA-Z]+\*?/g, ' ')
+    s = s.replace(/\\./g, ' ')
+    s = s.replace(/\\/g, ' ')
     s = s.replace(/[{}]/g, ' ')
     s = s.replace(/\s+/g, ' ').trim()
     return s
@@ -363,7 +367,7 @@ export function PageAudioReader({
 
   if (estado === 'indisponivel') return null
 
-  const label = t('audio.readPage', 'Ouvir lição inteira')
+  const label = t('audio.readPage', 'Ouvir página inteira')
   const labelStop = t('audio.stop', 'Parar')
   const labelPause = t('audio.pause', 'Pausar')
   const labelResume = t('audio.resume', 'Continuar')
@@ -395,6 +399,7 @@ export function PageAudioReader({
           <SpeakerIcon />
           {!compact && <span>{label}</span>}
           {compact && <span className="hidden sm:inline">{label}</span>}
+          <AccessibilityIcon />
         </button>
       )}
 
@@ -517,6 +522,21 @@ function SpeakerIcon() {
       <path d="M11 5 6 9H2v6h4l5 4z" />
       <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
       <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </svg>
+  )
+}
+
+function AccessibilityIcon() {
+  // Universal access symbol: person figure inside a circle. Signals
+  // that this control is the accessibility entry point for the page.
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="7" r="1.4" fill="currentColor" />
+      <path d="M7.5 10.5h9" />
+      <path d="M12 10.5v4" />
+      <path d="M9.5 18l2.5-3.5 2.5 3.5" />
     </svg>
   )
 }
