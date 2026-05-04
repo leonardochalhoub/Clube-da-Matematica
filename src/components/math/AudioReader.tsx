@@ -90,22 +90,25 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     })
     const candidatas = exatas.length > 0 ? exatas : prefixo
 
-    // Sem voz e idioma estrangeiro: alert pra instalar voz no OS.
+    // Sem voz pro locale: fallback silencioso pra texto+voz PT-BR.
+    // (Sem alert — usuário já vê bandeira PT-BR no botão indicando fallback.)
+    let textoFinal = textoFalado
+    let langFinal = langFalado
+    let vozesFinal = candidatas
     if (candidatas.length === 0 && langFalado !== 'pt-BR') {
-      const nomeIdioma = LOCALES[locale].nome
-      const msg = t('audio.voiceNotInstalled').replace(/\{lang\}/g, nomeIdioma)
-      alert(msg)
-      setEstado('idle')
-      return
+      const fallbackVozes = vozes.filter((v) => v.lang.toLowerCase().startsWith('pt'))
+      textoFinal = texto // texto original PT-BR
+      langFinal = 'pt-BR'
+      vozesFinal = fallbackVozes
     }
 
-    const u = new SpeechSynthesisUtterance(textoFalado)
-    u.lang = langFalado
+    const u = new SpeechSynthesisUtterance(textoFinal)
+    u.lang = langFinal
     u.rate = 0.95
     u.pitch = 1
     u.volume = 1
-    if (candidatas.length > 0) {
-      const random = candidatas[Math.floor(Math.random() * candidatas.length)]!
+    if (vozesFinal.length > 0) {
+      const random = vozesFinal[Math.floor(Math.random() * vozesFinal.length)]!
       u.voice = random
     }
 
