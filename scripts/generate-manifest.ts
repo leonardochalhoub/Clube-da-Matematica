@@ -45,11 +45,34 @@ async function* walkMdx(dir: string, prefix = ''): AsyncGenerator<string> {
   }
 }
 
+/**
+ * Reads frontmatter `publicado:` flag. Returns `true` for any non-aula path
+ * (Black-Scholes, métodos numéricos, etc. — those don't gate by publicado),
+ * or for aula paths whose frontmatter has `publicado: true`.
+ *
+ * Filtering keeps the webpack module graph small: only published lessons
+ * + their existing translations get bundled, avoiding OOM at ~468 entries.
+ */
+async function isPublished(rel: string): Promise<boolean> {
+  if (!rel.startsWith('aulas/')) return true
+  try {
+    const text = await fs.readFile(path.join(CONTENT_DIR, `${rel}.mdx`), 'utf-8')
+    const fm = text.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? ''
+    return /^publicado:\s*true\s*$/m.test(fm)
+  } catch {
+    return false
+  }
+}
+
 async function main() {
   console.log('📘 Lendo content/ (PT-BR origem)…')
+  const ptPathsAll = new Set<string>()
+  for await (const p of walkMdx(CONTENT_DIR)) ptPathsAll.add(p)
   const ptPaths = new Set<string>()
-  for await (const p of walkMdx(CONTENT_DIR)) ptPaths.add(p)
-  console.log(`   ${ptPaths.size} arquivos PT-BR`)
+  for (const p of ptPathsAll) {
+    if (await isPublished(p)) ptPaths.add(p)
+  }
+  console.log(`   ${ptPathsAll.size} arquivos PT-BR no disco, ${ptPaths.size} publicados (entram no manifesto)`)
 
   console.log('🌐 Lendo content/i18n/<locale>/…')
   const locales = await fs.readdir(I18N_DIR).catch(() => [])

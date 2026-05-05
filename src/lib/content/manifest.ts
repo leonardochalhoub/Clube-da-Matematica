@@ -292,3 +292,36 @@ export async function carregarMdx(caminho: string) {
   if (!loader) return null
   return loader()
 }
+
+import { manifestoI18n } from './manifest.generated'
+
+/**
+ * Carrega o módulo MDX traduzido para o `locale` desejado.
+ *
+ * Por que existe: a rota `/[categoria]/[...caminho]` antes usava
+ * `compileMDX` (next-mdx-remote/rsc) para locales != pt-BR, e o
+ * compileMDX-rsc DROPA props de expressão JSX (`opcoes={[...]}`,
+ * `solucao={<>...</>}`, `passos={...}`, `fonte={{...}}`). Resultado:
+ * exercícios renderizavam como texto puro sem botões. O webpack
+ * manifest path preserva todas as props.
+ *
+ * O `manifestoI18n` é gerado por `scripts/generate-manifest.ts` e contém
+ * APENAS lições com `publicado: true` no frontmatter, mais conteúdo
+ * non-aula (que não tem flag publicado). Isso mantém o módulo graph
+ * pequeno o bastante para o build não OOMar.
+ *
+ * Estratégia de fallback: se a tradução para `locale` não existe (ou
+ * não está no manifesto), retorna o módulo PT-BR. Assim quem toggla
+ * para um locale sem tradução vê PT-BR com exercícios funcionando,
+ * em vez de uma página quebrada.
+ */
+export async function carregarMdxLocalizado(
+  caminho: string,
+  locale: string,
+) {
+  const localized = manifestoI18n[caminho]
+  if (!localized) return null
+  const loader = localized[locale] ?? localized['pt-BR']
+  if (!loader) return null
+  return loader()
+}

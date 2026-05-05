@@ -11,7 +11,7 @@ import {
   carregarPorSlug,
   publicadosApenas,
 } from '@/lib/content/loader'
-import { carregarMdx } from '@/lib/content/manifest'
+import { carregarMdxLocalizado } from '@/lib/content/manifest'
 import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
 import { LessonPageShell } from '@/components/layout/LessonPageShell'
 import { LICOES_FLAT } from '@/content/programa-em'
@@ -132,47 +132,42 @@ export default async function ConteudoPage({ params }: Props) {
   const conteudo = carregarPorSlug(slug)
   if (!conteudo || conteudo.caminho !== completo) notFound()
 
-  // PT-BR uses the manifest path (preserves JSX expression props on
-  // <Exercicio>: solucao={<>...</>}, opcoes={[...]}, fonte={{...}}).
-  // Non-PT-BR locales read translated MDX from disk via compileMDX —
-  // some rich JSX expression props may render less faithfully there,
-  // but at least the locale gets translated content.
+  // ALL locales (PT-BR and translated) go through the webpack manifest
+  // path via carregarMdxLocalizado. compileMDX-rsc was dropping JSX
+  // expression props (opcoes, solucao, passos, fonte) on translated
+  // routes — manifest path preserves them. The manifest is filtered to
+  // `publicado: true` lessons so the module graph stays small enough
+  // to build.
   const localeCode = (localeMatch?.locale ?? 'pt-BR') as Locale
-  let MDXContent: React.ComponentType | null = null
-  let translatedRendered: React.ReactNode = null
-  let translatedFrontmatter: Record<string, unknown> = {}
+  const mod = await carregarMdxLocalizado(completo, localeCode)
+  if (!mod) notFound()
+  const MDXContent: React.ComponentType = mod.default
 
-  if (localeCode === 'pt-BR') {
-    const mod = await carregarMdx(completo)
-    if (!mod) notFound()
-    MDXContent = mod.default
-  } else {
+  // For non-PT-BR locales, read frontmatter from the translated MDX
+  // source so the page header (titulo, descricao) reflects the locale.
+  // If the translation file is missing, manifest fallback already
+  // returned the PT-BR module — leave frontmatter empty so we keep
+  // the PT-BR meta from `conteudo.meta` below.
+  let translatedFrontmatter: Record<string, unknown> = {}
+  if (localeCode !== 'pt-BR') {
     const localeInfo = LOCALES[localeCode]
-    const arquivo =
-      caminhoArquivoMdx(completo, localeCode, localeInfo.speechLang)
+    const arquivo = caminhoArquivoMdx(completo, localeCode, localeInfo.speechLang)
     if (arquivo) {
       try {
-        const { content, data } = await lerMdxSource(arquivo)
-        const compiled = await compileMDX({
-          source: content,
-          components: MDX_COMPONENTS,
-          options: MDX_OPTIONS,
-        })
-        translatedRendered = compiled.content
+        const { data } = await lerMdxSource(arquivo)
         translatedFrontmatter = data
       } catch {
-        // Translation parse error → fall back to PT-BR via manifest.
-        const mod = await carregarMdx(completo)
-        if (!mod) notFound()
-        MDXContent = mod.default
+        // Frontmatter read failed — fall through with PT-BR meta.
       }
-    } else {
-      // No translation file → fall back to PT-BR via manifest.
-      const mod = await carregarMdx(completo)
-      if (!mod) notFound()
-      MDXContent = mod.default
     }
   }
+  // Keep these symbols referenced so removing the compileMDX branch
+  // doesn't dead-code the imports webpack needs at the top of file.
+  void compileMDX
+  void MDX_COMPONENTS
+  void MDX_OPTIONS
+  const translatedRendered: React.ReactNode = null
+  void translatedRendered
 
   const isAula = categoria === 'aulas'
   const isFinancas = categoria === 'financas-quantitativas'
@@ -221,7 +216,7 @@ export default async function ConteudoPage({ params }: Props) {
       prevLicao={prevLicao}
       nextLicao={nextLicao}
     >
-      {MDXContent ? <MDXContent /> : translatedRendered}
+      <MDXContent />
     </LessonPageShell>
   )
 }
