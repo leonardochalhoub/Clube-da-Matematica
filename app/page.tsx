@@ -49,7 +49,12 @@ const TODOS_LIVROS = [
 
 export default function HomePage() {
   const todos = carregarTodosConteudos()
-  const aulasMdx = todos.filter((c) => c.meta.categoria === 'aulas')
+  // Only `publicado: true` lessons count as "published" for the home page
+  // counters and link cards. Unpublished lessons appear in /ensino-medio
+  // listings with a red "soon" badge but don't count here.
+  const aulasMdx = todos.filter(
+    (c) => c.meta.categoria === 'aulas' && c.meta.publicado,
+  )
   const licoesPublicadas = aulasMdx.length
   const licoesPlanejadas = PROGRAMA_EM.reduce(
     (acc, ano) => acc + ano.trimestres.reduce((a, t) => a + t.aulas.length, 0),
@@ -58,11 +63,31 @@ export default function HomePage() {
   const slugToCaminho: Record<string, string> = {}
   for (const c of aulasMdx) slugToCaminho[c.meta.slug] = c.caminho
 
+  // Per-year stats for the hero year cards.
+  const aulasPublicadasSet = new Set(aulasMdx.map((c) => c.meta.slug))
+  const anosCards = PROGRAMA_EM.map((ano) => {
+    let total = 0
+    let publicadas = 0
+    for (const t of ano.trimestres) {
+      for (const a of t.aulas) {
+        total += 1
+        if (a.slug && aulasPublicadasSet.has(a.slug)) publicadas += 1
+      }
+    }
+    return {
+      num: ano.num,
+      titulo: ano.titulo,
+      idade: ano.idade,
+      equivalencia: ano.equivalencia,
+      resumo: ano.resumo,
+      total,
+      publicadas,
+    }
+  })
+
   return (
     <>
-      <HomeHero />
-
-      {/* Counters */}
+      {/* KPIs at the top — sets the platform's scale before anything else. */}
       <MainCounters
         licoesPublicadas={licoesPublicadas}
         licoesPlanejadas={licoesPlanejadas}
@@ -73,10 +98,14 @@ export default function HomePage() {
         livrosNoLedger={LIVROS_NO_LEDGER}
       />
 
-      {/* Descoberta dinâmica — substitui antiga listagem estática */}
+      {/* Hero — narrative on the left, year cards (Ano 1/2/3) on the right.
+          On mobile both columns stack: narrative first, then year cards. */}
+      <HomeHero anos={anosCards} />
+
+      {/* Search bar + browse panels. */}
       <SearchDiscovery slugToCaminho={slugToCaminho} livros={TODOS_LIVROS} />
 
-      {/* Filosofia (client shell — i18n via useLocale) */}
+      {/* Philosophy (client shell — i18n via useLocale) */}
       <HomePhilosophy />
     </>
   )

@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import type { Ano } from '@/content/programa-em'
-import { AulasSearch } from './AulasSearch'
 import { HashOpener } from './HashOpener'
 import { useLocale } from './LocaleProvider'
 import { localizedHref } from '@/lib/i18n/href'
@@ -43,72 +42,28 @@ export function EnsinoMedioPageContent({
   )
 
   return (
-    <article className="container-clube max-w-5xl py-12 sm:py-16">
-      <header className="mb-12">
-        <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-clube-gold-deep">
+    <article className="container-clube max-w-5xl py-10 sm:py-14">
+      {/* Compact header — the home page already carries the program-level
+          intro + KPIs + year cards + search. /ensino-medio is now the
+          "deep browser": skip the marketing copy and lead straight into
+          the per-year breakdown so the page does its own job. */}
+      <header className="mb-8">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep sm:text-sm">
           {t('page.ensinoMedio.eyebrow')}
         </p>
-        <h1 className="text-display font-extrabold text-clube-teal-deep">
+        <h1 className="text-3xl font-extrabold leading-tight text-clube-teal-deep sm:text-4xl">
           {t('page.ensinoMedio.title')}
         </h1>
-        <p className="mt-6 max-w-prose text-lg leading-relaxed text-clube-mist">
-          <strong>{t('page.ensinoMedio.intro1.threeYears')}</strong>{' '}
-          {t('page.ensinoMedio.intro1.groupedInto')}{' '}
-          <strong>{t('page.ensinoMedio.intro1.classes')}</strong>
-          {t('page.ensinoMedio.intro1.middle')}{' '}
-          <strong>{t('page.ensinoMedio.intro1.japanLabel')}</strong> (Math I/II/III),{' '}
-          <strong>{t('page.ensinoMedio.intro1.germanyLabel')}</strong> (Klasse 10/11/12 Leistungskurs) e{' '}
-          <strong>{t('page.ensinoMedio.intro1.singaporeLabel')}</strong> (Sec 4 + JC 1/2 H2 Math).
-        </p>
-        <p className="mt-4 max-w-prose text-base text-clube-mist/85">
-          {t('page.ensinoMedio.intro2.before')}{' '}
-          <strong>{t('page.ensinoMedio.intro2.exercises')}</strong>{' '}
-          {t('page.ensinoMedio.intro2.middle')}{' '}
-          <strong>{t('page.ensinoMedio.intro2.solved')}</strong>{' '}
-          {t('page.ensinoMedio.intro2.middle2')}{' '}
-          <strong>{t('page.ensinoMedio.intro2.readAloud')}</strong>{' '}
-          {t('page.ensinoMedio.intro2.after')}
+        <p className="mt-2 text-sm text-clube-mist">
+          <strong className="text-clube-leaf">{totalPublicadas}</strong>
+          <span className="text-clube-mist/70"> / {totalLicoes}</span>{' '}
+          {t('page.ensinoMedio.stats.lessonsPublished')}
+          <span className="mx-2 text-clube-mist/40">·</span>
+          ~{horasTotais}h ({horasPorAno}{studyDetail})
         </p>
       </header>
 
-      <section className="mb-12 grid gap-3 grid-cols-2 sm:gap-4 sm:grid-cols-4">
-        <div className="card-clube !p-4 text-center sm:!p-6">
-          <div className="text-2xl font-extrabold text-clube-teal-deep sm:text-3xl">
-            {totalLicoes}
-          </div>
-          <div className="mt-1 text-xs text-clube-mist sm:text-sm">
-            {t('page.ensinoMedio.stats.lessonsPlanned')}
-          </div>
-        </div>
-        <div className="card-clube !p-4 text-center sm:!p-6">
-          <div className="text-2xl font-extrabold text-clube-leaf sm:text-3xl">
-            {totalPublicadas}
-          </div>
-          <div className="mt-1 text-xs text-clube-mist sm:text-sm">
-            {t('page.ensinoMedio.stats.lessonsPublished')}
-          </div>
-        </div>
-        <div className="card-clube !p-4 text-center sm:!p-6">
-          <div className="text-2xl font-extrabold text-clube-gold-deep sm:text-3xl">~6.000</div>
-          <div className="mt-1 text-xs text-clube-mist sm:text-sm">
-            {t('page.ensinoMedio.stats.totalExercises')}
-          </div>
-        </div>
-        <div className="card-clube !p-4 text-center sm:!p-6">
-          <div className="text-2xl font-extrabold text-clube-clay sm:text-3xl">
-            ~{horasTotais}h
-          </div>
-          <div className="mt-1 text-xs text-clube-mist sm:text-sm">
-            {t('page.ensinoMedio.stats.totalStudy')} ({horasPorAno}{studyDetail})
-          </div>
-        </div>
-      </section>
-
-      <section className="mb-10 rounded-2xl border border-clube-mist-soft/40 bg-clube-surface p-5">
-        <AulasSearch caminhos={slugToCaminho} />
-      </section>
-
-      <section className="mb-10 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-4 text-sm text-clube-ink/85">
+      <section className="mb-8 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-3 text-xs text-clube-ink/85 sm:p-4 sm:text-sm">
         <p>
           <strong>{t('page.ensinoMedio.workload.before')}</strong>{' '}
           {t('page.ensinoMedio.workload.middle')} {horasPorAno}
