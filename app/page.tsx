@@ -23,6 +23,7 @@ import {
 import { SearchDiscovery } from '@/components/layout/SearchDiscovery'
 import { HomeHero } from '@/components/layout/HomeHero'
 import { HomePhilosophy } from '@/components/layout/HomePhilosophy'
+import { CheerBanner } from '@/components/layout/CheerBanner'
 
 /** Conta exercícios em arquivos MDX via regex (extraído em build time). */
 function contarExercicios(): number {
@@ -87,6 +88,9 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Faixa fina com frase aleatória de incentivo (avô torcedor). */}
+      <CheerBanner />
+
       {/* Hero — narrative on the left, year cards (Ano 1/2/3) on the right.
           On mobile both columns stack: narrative first, then year cards. */}
       <HomeHero anos={anosCards} />
