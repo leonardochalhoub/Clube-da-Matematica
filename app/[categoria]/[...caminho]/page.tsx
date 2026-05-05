@@ -9,6 +9,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import {
   carregarTodosConteudos,
   carregarPorSlug,
+  publicadosApenas,
 } from '@/lib/content/loader'
 import { carregarMdx } from '@/lib/content/manifest'
 import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
@@ -75,7 +76,10 @@ function parseLocalePrefix(
 }
 
 export function generateStaticParams() {
-  const conteudos = carregarTodosConteudos()
+  // Only emit routes for `publicado: true` content. Quarantined lessons
+  // (publicado: false) are skipped at SSG time so they neither render nor
+  // crash the build with malformed JSX.
+  const conteudos = publicadosApenas()
   // Paths PT-BR (sem prefixo de locale)
   const ptBR = conteudos.map(({ caminho }) => {
     const [categoria, ...rest] = caminho.split('/')

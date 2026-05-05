@@ -55,8 +55,10 @@ function renderKatex(expr: string): string {
   }
 }
 
-/** Renderiza string com $...$ inline → KaTeX. */
-function renderInline(text: string): string {
+/** Renderiza string com $...$ inline → KaTeX. Tolerant of non-string input
+ *  (returns '' when called with undefined/null/objects from malformed MDX). */
+function renderInline(text: unknown): string {
+  if (typeof text !== 'string') return ''
   return text.replace(/\$([^$]+)\$/g, (_, expr) => renderKatex(expr))
 }
 
@@ -675,9 +677,17 @@ function ItemExercicio({
   const enunciadoTexto = nodeToString(children)
 
   // ====== Lógica de conferência ======
-  const temOpcoes = !!opcoes && opcoes.length > 0
+  // Normalize opcoes: some Sonnet-written lessons pass plain strings instead
+  // of `{texto, correta}` objects. Coerce so the build doesn't crash; correta
+  // stays false (no answer-checking) but rendering works.
+  const opcoesNormalizadas: OpcaoExercicio[] | undefined = opcoes?.map((op) =>
+    typeof op === 'string'
+      ? { texto: op, correta: false }
+      : (op as OpcaoExercicio),
+  )
+  const temOpcoes = !!opcoesNormalizadas && opcoesNormalizadas.length > 0
   const indiceCorreto = temOpcoes
-    ? opcoes!.findIndex((o) => o.correta)
+    ? opcoesNormalizadas!.findIndex((o) => o.correta)
     : -1
   const acertouOpcao =
     temOpcoes && tentou && opcaoSelecionada === indiceCorreto
@@ -724,7 +734,7 @@ function ItemExercicio({
             {t('exercise.selectCorrect')}
           </legend>
           <div className="space-y-2">
-            {opcoes!.map((op, idx) => {
+            {opcoesNormalizadas!.map((op, idx) => {
               const isSel = opcaoSelecionada === idx
               const showCertaErrada = tentou && isSel
               const corBorda = showCertaErrada
