@@ -103,12 +103,24 @@ type MdxLoader = () => Promise<{ default: ComponentType }>
 export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> = {
 `
 
+  // Lessons whose translations are aligned with the canonical PT-BR
+  // (re-translated after the L1-standard rewrite). Translations for any
+  // other path are deliberately excluded from the manifest to keep the
+  // webpack module graph small enough for CI's 7 GB heap. Files stay on
+  // disk for future re-translation; the route falls back to PT-BR.
+  const includeTranslationsFor = new Set<string>([
+    'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos',
+    'aulas/ano-1/trim-1/licao-02-funcoes',
+  ])
+
   for (const p of sortedPaths) {
     out += `  '${p}': {\n`
     out += `    'pt-BR': () => import('@/../content/${p}.mdx'),\n`
-    for (const [locale, set] of Object.entries(localeMap)) {
-      if (set.has(p)) {
-        out += `    '${locale}': () => import('@/../content/i18n/${locale}/${p}.mdx'),\n`
+    if (includeTranslationsFor.has(p)) {
+      for (const [locale, set] of Object.entries(localeMap)) {
+        if (set.has(p)) {
+          out += `    '${locale}': () => import('@/../content/i18n/${locale}/${p}.mdx'),\n`
+        }
       }
     }
     out += `  },\n`
@@ -120,7 +132,9 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   // Estatísticas
   const totalEntries = sortedPaths.reduce((acc, p) => {
     let count = 1 // pt-BR sempre
-    for (const set of Object.values(localeMap)) if (set.has(p)) count++
+    if (includeTranslationsFor.has(p)) {
+      for (const set of Object.values(localeMap)) if (set.has(p)) count++
+    }
     return acc + count
   }, 0)
 
