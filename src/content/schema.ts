@@ -39,6 +39,16 @@ export const conteudoSchema = z.object({
   atualizadoEm: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   /** Disciplinas de engenharia onde esse conteúdo é usado. */
   usadoEm: z.array(z.string()).default([]),
+  /**
+   * Editorial version flag.
+   * - 'v1' (green): rewritten to the L1 standard — full canonical pattern,
+   *   caderno-first exercises, sourced examples, 7 doors with substantive
+   *   prose, all mechanical checks pass.
+   * - 'v0' (legacy): inherited content, structurally complete but not yet
+   *   matching the L1 standard. Published so users can see the full
+   *   curriculum scope; rewrite to v1 in progress.
+   */
+  versao: z.enum(['v0', 'v1']).default('v0'),
 })
 
 export type Conteudo = z.infer<typeof conteudoSchema>

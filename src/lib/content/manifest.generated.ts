@@ -28,9 +28,6 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
     'ru-RU': () => import('@/../content/i18n/ru-RU/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
     'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
   },
-  'aulas/ano-1/trim-1/licao-03-afim': {
-    'pt-BR': () => import('@/../content/aulas/ano-1/trim-1/licao-03-afim.mdx'),
-  },
   'aulas/ano-1/trim-1/licao-04-quadratica': {
     'pt-BR': () => import('@/../content/aulas/ano-1/trim-1/licao-04-quadratica.mdx'),
   },

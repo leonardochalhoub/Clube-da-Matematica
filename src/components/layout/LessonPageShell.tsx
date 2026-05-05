@@ -67,6 +67,25 @@ export function LessonPageShell({
       </nav>
 
       <header className="mb-10 border-b border-clube-mist-soft/40 pb-8">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          {meta.versao === 'v1' ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-clube-leaf/40 bg-clube-leaf/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-leaf"
+              title={t('lesson.v1Tooltip', 'Reescrita ao padrão canônico (Lição 1): exercícios caderno-first, fontes verificadas, 7 portas substantivas.')}
+            >
+              <span aria-hidden>✓</span>
+              {t('lesson.v1Label', 'v1 · padrão canônico')}
+            </span>
+          ) : (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-clube-clay/40 bg-clube-clay/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-clay"
+              title={t('lesson.v0Tooltip', 'Conteúdo herdado (legado). Estrutura completa mas ainda não reescrita ao padrão canônico de Lição 1. Reescrita em curso.')}
+            >
+              <span aria-hidden>⚠</span>
+              {t('lesson.v0Label', 'v0 · legado, reescrita em curso')}
+            </span>
+          )}
+        </div>
         <h1 className="text-hero font-extrabold leading-tight text-clube-teal-deep">
           {meta.titulo}
         </h1>
