@@ -8,6 +8,7 @@ import {
   MATERIAS_LABEL,
 } from '@/content/programa-em'
 import { useLocale } from '@/components/layout/LocaleProvider'
+import { localizedHref } from '@/lib/i18n/href'
 
 interface AulaCompleta extends Aula {
   ano: number
@@ -45,7 +46,7 @@ function normalize(s: string): string {
 }
 
 export function AulasSearch({ caminhos }: AulasSearchProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [query, setQuery] = useState('')
   const todasAulas = useMemo(() => flattenAulas(caminhos), [caminhos])
 
@@ -91,7 +92,7 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
               .map((l) => (
                 <Link
                   key={l.num}
-                  href={`/${l.caminho}/`}
+                  href={localizedHref(l.caminho!, locale)}
                   className="rounded-full border border-clube-teal/30 bg-clube-cream-soft px-3 py-1 text-xs font-medium text-clube-teal no-underline hover:bg-clube-teal hover:text-white"
                 >
                   {t('aulasSearch.lesson')} {l.num} — {l.titulo}
@@ -138,7 +139,7 @@ export function AulasSearch({ caminhos }: AulasSearchProps) {
                     >
                       {isPub && a.caminho ? (
                         <Link
-                          href={`/${a.caminho}/`}
+                          href={localizedHref(a.caminho!, locale)}
                           className="block no-underline hover:no-underline"
                         >
                           {Inner}

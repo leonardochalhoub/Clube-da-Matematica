@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { useLocale } from './LocaleProvider'
 import { LocalizedMdx } from './LocalizedMdx'
+import { localizedHref } from '@/lib/i18n/href'
 import { CATEGORIAS_LABEL } from '@/content/schema'
 import type { Conteudo } from '@/content/schema'
 
@@ -39,7 +40,7 @@ export function LessonPageShell({
   prevLicao,
   nextLicao,
 }: LessonPageShellProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
 
   return (
     <article className="container-clube max-w-prose-wide py-12 sm:py-16">
@@ -66,9 +67,6 @@ export function LessonPageShell({
       </nav>
 
       <header className="mb-10 border-b border-clube-mist-soft/40 pb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-          {CATEGORIAS_LABEL[meta.categoria]}
-        </p>
         <h1 className="text-hero font-extrabold leading-tight text-clube-teal-deep">
           {meta.titulo}
         </h1>
@@ -95,7 +93,7 @@ export function LessonPageShell({
         >
           {prevLicao?.caminho ? (
             <Link
-              href={`/${prevLicao.caminho}/`}
+              href={localizedHref(prevLicao.caminho, locale)}
               className="card-clube no-underline hover:no-underline"
             >
               <div className="text-xs uppercase tracking-wider text-clube-mist">
@@ -110,7 +108,7 @@ export function LessonPageShell({
           )}
           {nextLicao?.caminho ? (
             <Link
-              href={`/${nextLicao.caminho}/`}
+              href={localizedHref(nextLicao.caminho, locale)}
               className="card-clube no-underline hover:no-underline sm:text-right"
             >
               <div className="text-xs uppercase tracking-wider text-clube-mist">

@@ -54,28 +54,15 @@ export function PageAudioReader({
   }, [])
 
   /**
-   * Língua a falar — reflete o **conteúdo** da página, não o locale da UI.
+   * Speech language — derived directly from the active locale.
    *
-   * Hoje todas as páginas têm conteúdo PT-BR (mesmo quando usuário trocou
-   * UI pra inglês), porque ainda não temos traduções de MDX. Forçar voz
-   * inglesa sobre texto PT-BR resulta em "português com sotaque inglês"
-   * — ininteligível.
-   *
-   * Estratégia: usar `document.documentElement.lang` se disponível (a rota
-   * pode marcar a página como `lang="en-US"` quando servir conteúdo
-   * traduzido). Senão, fallback pra `pt-BR` (o source).
-   *
-   * Quando traduções de MDX estiverem prontas, o roteamento já seta o lang
-   * correto e essa heurística pega a voz certa automaticamente.
+   * On translated routes the URL prefix (/en, /es, …) determines the
+   * locale, the locale provider exposes it, and we pick the matching
+   * `speechLang` from the LOCALES table. No reliance on
+   * `document.documentElement.lang`, which never reliably reflects the
+   * current page's content language in this app.
    */
-  const [speechLang, setSpeechLang] = useState<string>('pt-BR')
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    const docLang = document.documentElement.getAttribute('data-content-lang')
-      || document.documentElement.lang
-    setSpeechLang(docLang || 'pt-BR')
-    void LOCALES[locale]
-  }, [locale])
+  const speechLang = LOCALES[locale]?.speechLang ?? 'pt-BR'
 
   /**
    * Extrai texto legível do article. Pula:
@@ -371,7 +358,6 @@ export function PageAudioReader({
   const labelStop = t('audio.stop', 'Parar')
   const labelPause = t('audio.pause', 'Pausar')
   const labelResume = t('audio.resume', 'Continuar')
-  void LOCALES[locale]
 
   const containerClass = compact
     ? 'inline-flex items-center gap-1.5'

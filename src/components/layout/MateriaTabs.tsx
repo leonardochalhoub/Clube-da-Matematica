@@ -9,6 +9,7 @@ import {
   MATERIAS_DESCRICAO,
 } from '@/content/programa-em'
 import { useLocale } from './LocaleProvider'
+import { localizedHref } from '@/lib/i18n/href'
 
 interface AulaPath extends Aula {
   /** Caminho completo (ex.: 'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos'). */
@@ -28,7 +29,7 @@ interface MateriaTabsProps {
  * têm link clicável, planejadas ficam em estado "planejada".
  */
 export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [ativa, setAtiva] = useState<MateriaEM>(materias[0]!)
   const groupId = useId()
 
@@ -128,7 +129,7 @@ export function MateriaTabs({ materias, aulasPorMateria }: MateriaTabsProps) {
                         <div className="font-semibold text-clube-ink">
                           {publicada && aula.caminho ? (
                             <Link
-                              href={`/${aula.caminho}/`}
+                              href={localizedHref(aula.caminho, locale)}
                               className="text-clube-teal hover:text-clube-teal-deep"
                             >
                               {aula.titulo} →

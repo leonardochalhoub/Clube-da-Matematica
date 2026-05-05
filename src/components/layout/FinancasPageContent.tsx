@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useLocale } from './LocaleProvider'
+import { localizedHref } from '@/lib/i18n/href'
 
 /**
  * Conteúdo client-side da página /financas.
@@ -23,7 +24,7 @@ export interface FinancasPageContentProps {
 }
 
 export function FinancasPageContent({ conteudos }: FinancasPageContentProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
 
   return (
     <article className="container-clube max-w-5xl py-12 sm:py-16">
@@ -64,7 +65,7 @@ export function FinancasPageContent({ conteudos }: FinancasPageContentProps) {
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
-            href="/financas-quantitativas/opcoes/black-scholes/"
+            href={localizedHref('financas-quantitativas/opcoes/black-scholes', locale)}
             className="inline-flex items-center gap-2 rounded-full bg-clube-teal px-5 py-2.5 font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-clube-teal-deep hover:no-underline hover:shadow"
           >
             {t('page.financas.featured.openPage')}
@@ -94,7 +95,7 @@ export function FinancasPageContent({ conteudos }: FinancasPageContentProps) {
             {conteudos.map((item) => (
               <Link
                 key={item.slug}
-                href={`/${item.caminho}/`}
+                href={localizedHref(item.caminho, locale)}
                 className="card-clube no-underline hover:no-underline"
               >
                 <div className="text-xs uppercase tracking-wider text-clube-gold-deep">

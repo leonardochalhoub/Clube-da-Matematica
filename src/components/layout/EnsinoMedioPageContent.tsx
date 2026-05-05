@@ -5,6 +5,7 @@ import type { Ano } from '@/content/programa-em'
 import { AulasSearch } from './AulasSearch'
 import { HashOpener } from './HashOpener'
 import { useLocale } from './LocaleProvider'
+import { localizedHref } from '@/lib/i18n/href'
 
 /**
  * Conteúdo client-side da página /ensino-medio.
@@ -35,7 +36,7 @@ export function EnsinoMedioPageContent({
   horasTotais,
   slugToCaminho,
 }: EnsinoMedioPageContentProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const studyDetail = t('page.ensinoMedio.stats.studyDetail').replace(
     '{hPorTrim}',
     String(horasPorTrim),
@@ -203,7 +204,7 @@ export function EnsinoMedioPageContent({
                               <li key={licao.num} className="py-2">
                                 {caminho ? (
                                   <Link
-                                    href={`/${caminho}/`}
+                                    href={localizedHref(caminho, locale)}
                                     className="flex items-center gap-3 text-sm no-underline hover:no-underline"
                                   >
                                     <span className="min-w-[2.5rem] font-mono text-[10px] font-bold text-clube-teal-deep">

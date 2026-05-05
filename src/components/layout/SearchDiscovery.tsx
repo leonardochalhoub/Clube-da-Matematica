@@ -8,6 +8,7 @@ import {
   type Aula,
 } from '@/content/programa-em'
 import { useLocale } from './LocaleProvider'
+import { localizedHref } from '@/lib/i18n/href'
 
 interface AulaResult {
   num: number
@@ -58,7 +59,7 @@ function flatLicoes(slugToCaminho: Record<string, string>): AulaResult[] {
  * em ordem (Ano/Trim/lição número), com cards clicáveis.
  */
 export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [q, setQ] = useState('')
   const todasLicoes = useMemo(() => flatLicoes(slugToCaminho), [slugToCaminho])
 
@@ -159,7 +160,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
                 return (
                   <Link
                     key={l.num}
-                    href={`/${l.caminho}/`}
+                    href={localizedHref(l.caminho, locale)}
                     className="card-clube group flex flex-col gap-2 no-underline hover:no-underline"
                   >
                     <span className="rounded-full bg-clube-cream-soft px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-teal self-start">
