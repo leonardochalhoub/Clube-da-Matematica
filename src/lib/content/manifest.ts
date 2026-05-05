@@ -294,6 +294,7 @@ export async function carregarMdx(caminho: string) {
 }
 
 import { manifestoI18n } from './manifest.generated'
+import { LOCALES, type Locale } from '@/lib/i18n/locales'
 
 /**
  * Carrega o módulo MDX traduzido para o `locale` desejado.
@@ -310,6 +311,12 @@ import { manifestoI18n } from './manifest.generated'
  * non-aula (que não tem flag publicado). Isso mantém o módulo graph
  * pequeno o bastante para o build não OOMar.
  *
+ * Mapeamento de chave: a rota passa o `locale` (URL prefix: 'en', 'es',
+ * 'zh' …). O manifesto é chaveado por `speechLang` (BCP-47: 'en-US',
+ * 'es-ES', 'zh-CN' …) porque é assim que os arquivos sob
+ * `content/i18n/<speechLang>/` são organizados. Convertemos aqui para
+ * que rota e manifesto se entendam.
+ *
  * Estratégia de fallback: se a tradução para `locale` não existe (ou
  * não está no manifesto), retorna o módulo PT-BR. Assim quem toggla
  * para um locale sem tradução vê PT-BR com exercícios funcionando,
@@ -321,7 +328,14 @@ export async function carregarMdxLocalizado(
 ) {
   const localized = manifestoI18n[caminho]
   if (!localized) return null
-  const loader = localized[locale] ?? localized['pt-BR']
+  // Map URL-prefix locale → speechLang (the manifest's actual key).
+  // pt-BR is identical in both schemes; for everything else we look
+  // up speechLang via LOCALES. Unknown locales fall straight through
+  // to the pt-BR loader below.
+  const manifestKey =
+    locale === 'pt-BR' ? 'pt-BR' : LOCALES[locale as Locale]?.speechLang
+  const loader =
+    (manifestKey ? localized[manifestKey] : undefined) ?? localized['pt-BR']
   if (!loader) return null
   return loader()
 }
