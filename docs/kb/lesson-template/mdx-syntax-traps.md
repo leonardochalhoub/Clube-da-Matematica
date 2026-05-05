@@ -279,3 +279,48 @@ Inside `> "..."` blockquote with `$math$`, the math is opaque to remark-math but
 ```
 
 Use `\lbrace` / `\rbrace` instead of `\{` / `\}` to avoid both markdown and JSX escape rules. `\mid`, `\neq`, `\leq`, `\in` etc. always single-backslash inside markdown blockquotes.
+
+## Discovered 2026-05-05 — currency `R\$` inside `$...$` math breaks the build
+
+`$ p = 25 - 6,25 = \text{R\$}\;18{,}75 $` produces `Could not parse expression with acorn` somewhere downstream — usually the error column points to a later character (often inside the next `{,}`-style decimal) because MDX's math-boundary scanner gets confused by the `\$` escape and runs the math expression past where it should have closed.
+
+KaTeX itself accepts `\text{R\$}` for a literal dollar inside math. The problem is MDX's *outer* parser scans for the closing `$` first, and the `\$` makes it ambiguous which `$` closes the math.
+
+**Bad:**
+```mdx
+Preço ótimo: $p = 25 - 6,25 = \text{R\$}\;18,75$.
+```
+
+**Good — keep currency in PROSE, never inside math:**
+```mdx
+Preço ótimo: $p = 25 - 6,25 = 18,75$ reais (R\$ 18,75).
+```
+
+This matches L1's convention: `R\$ 1,80` in plain prose, `\$` only as the markdown-math-boundary escape. Inside `$...$` just leave bare numbers.
+
+## Discovered 2026-05-05 — translation manifest gating (CI OOM at 8GB)
+
+The localized manifest at `src/lib/content/manifest.generated.ts` is auto-generated from filesystem. When every existing translation file is included, the webpack module graph balloons: 13 published lessons × 11 locales = 143 import() entry points, plus their dep trees (Equation, Exercicio, KaTeX). Build heap peaks past 8 GB → CI fails. GitHub-hosted runners cap at ~7 GB RAM (`NODE_OPTIONS=--max-old-space-size=8192` ceiling).
+
+**The fix.** `scripts/generate-manifest.ts` now gates translations by an explicit allowlist:
+
+```ts
+const includeTranslationsFor = new Set<string>([
+  'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos',
+  'aulas/ano-1/trim-1/licao-02-funcoes',
+  // add a path here ONLY when its translations have been
+  // re-translated from the new canonical PT-BR
+])
+```
+
+Default behavior: lesson goes into the manifest **PT-BR only**. The route's `carregarMdxLocalizado` already falls back to PT-BR when a locale entry is missing, so non-allowlisted lessons render in PT-BR for non-PT-BR users until their translations catch up.
+
+**Why this is mandatory, not optional.** When you rewrite a PT-BR lesson (e.g. caderno-first rebalance), the existing translations become stale — they reflect the OLD content. Auto-including them lets users toggle to en-US and see the OLD MC-heavy lesson with full UI fidelity. That looks like a regression because it CONTRADICTS the new canonical PT-BR.
+
+**Workflow when publishing a new lesson:**
+1. Rewrite + `publicado: true`
+2. Run `npx tsx scripts/generate-manifest.ts` (translations stay disabled for this lesson)
+3. Build + verify at 8GB heap
+4. Translation pipeline (Gemini) regenerates all 11 locales from the new canonical PT-BR
+5. Add the lesson path to `includeTranslationsFor`
+6. Regenerate manifest, rebuild, ship
