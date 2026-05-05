@@ -902,37 +902,57 @@ function ItemExercicio({
 
       {/* Passo a passo detalhado — pensamento linha a linha.
          Apresentado em ~25% dos exercícios (curadoria editorial).
-         Accepts JSX (preferred) or `[{passo, comentario}, ...]` array. */}
-      {passos != null && (Array.isArray(passos) ? passos.length > 0 : true) && (
-        <details
-          className="mt-2 rounded-lg border border-clube-gold/40 bg-clube-gold/5 p-3"
-          open={vendoPassos}
-          onToggle={(e) => setVendoPassos((e.target as HTMLDetailsElement).open)}
-        >
-          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-clube-gold-deep hover:text-clube-gold">
-            {vendoPassos ? t('exercise.hideStepByStep') : t('exercise.showStepByStep')}
-          </summary>
-          <div className="prose prose-clube prose-sm mt-3 max-w-none">
-            {Array.isArray(passos) ? (
-              <ol>
-                {(passos as Array<{ passo: string; comentario?: string }>).map((item, i) => (
-                  <li key={i}>
-                    <span dangerouslySetInnerHTML={{ __html: renderInline(item.passo) }} />
-                    {item.comentario && (
-                      <>
-                        {' '}
-                        <em className="text-clube-mist" dangerouslySetInnerHTML={{ __html: renderInline(item.comentario) }} />
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              passos
-            )}
-          </div>
-        </details>
-      )}
+         Accepts JSX (preferred) or `[{passo, comentario|descricao}, ...]` array. */}
+      {(() => {
+        if (passos == null) return null
+        // Detect plain-object array (legacy `passos={[{passo, ...}, ...]}` form).
+        // JSX fragments serialize as arrays of React elements in RSC, so checking
+        // Array.isArray alone is not enough — verify the first item is a plain
+        // object with a `passo` string field.
+        const isStepArray =
+          Array.isArray(passos) &&
+          passos.length > 0 &&
+          passos.every(
+            (it) =>
+              it != null &&
+              typeof it === 'object' &&
+              !('$$typeof' in (it as object)) &&
+              typeof (it as { passo?: unknown }).passo === 'string',
+          )
+        return (
+          <details
+            className="mt-2 rounded-lg border border-clube-gold/40 bg-clube-gold/5 p-3"
+            open={vendoPassos}
+            onToggle={(e) => setVendoPassos((e.target as HTMLDetailsElement).open)}
+          >
+            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-clube-gold-deep hover:text-clube-gold">
+              {vendoPassos ? t('exercise.hideStepByStep') : t('exercise.showStepByStep')}
+            </summary>
+            <div className="prose prose-clube prose-sm mt-3 max-w-none">
+              {isStepArray ? (
+                <ol>
+                  {(passos as Array<{ passo: string; comentario?: string; descricao?: string }>).map((item, i) => {
+                    const sub = item.comentario ?? item.descricao
+                    return (
+                      <li key={i}>
+                        <span dangerouslySetInnerHTML={{ __html: renderInline(item.passo) }} />
+                        {sub && (
+                          <>
+                            {' '}
+                            <em className="text-clube-mist" dangerouslySetInnerHTML={{ __html: renderInline(sub) }} />
+                          </>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ol>
+              ) : (
+                passos as ReactNode
+              )}
+            </div>
+          </details>
+        )
+      })()}
     </li>
   )
 }
