@@ -26,7 +26,7 @@ export const VIDEOS: VideoLista[] = [
     titulo: '3Blue1Brown — Essence of Calculus',
     canal: '3Blue1Brown (Grant Sanderson)',
     idioma: 'EN',
-    url: 'https://www.youtube.com/watch?v=WUvTyaaNkzM&list=PL590CCC2BC5AF3BC1',
+    url: 'https://www.youtube.com/playlist?list=PL590CCC2BC5AF3BC1',
     playlistId: 'PL590CCC2BC5AF3BC1',
     videoId: 'WUvTyaaNkzM',
     descricao:
@@ -56,7 +56,12 @@ export function getPlaylistId(url: string): string | null {
 
 /** Constrói URL de embed para playlist. */
 export function getEmbedUrl(playlistId: string): string {
-  return `https://www.youtube.com/embed/videoseries?list=${playlistId}`
+  return `https://www.youtube.com/embed/videoseries?list=${playlistId}&rel=0`
+}
+
+/** URL canônica da página de playlist no YouTube (lista completa de vídeos). */
+export function getPlaylistUrl(playlistId: string): string {
+  return `https://www.youtube.com/playlist?list=${playlistId}`
 }
 
 /** URL da thumbnail do primeiro vídeo da playlist (via API pública). */

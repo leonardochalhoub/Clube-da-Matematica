@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { VIDEOS, getEmbedUrl, getThumbnail } from '@/content/videos-data'
+import { VIDEOS, getEmbedUrl, getPlaylistUrl, getThumbnail } from '@/content/videos-data'
 import { useLocale } from '@/components/layout/LocaleProvider'
 
 const BANDEIRAS: Record<string, string> = {
@@ -50,7 +50,9 @@ export default function VideosContent() {
       </header>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {VIDEOS.map((v) => (
+        {VIDEOS.map((v) => {
+          const primaryUrl = v.playlistId ? getPlaylistUrl(v.playlistId) : v.url
+          return (
           <article
             key={v.url}
             className="card-clube flex flex-col gap-3"
@@ -66,6 +68,9 @@ export default function VideosContent() {
                   allowFullScreen
                   className="absolute inset-0 h-full w-full"
                 />
+                <span className="pointer-events-none absolute left-2 top-2 rounded-full bg-clube-gold/95 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-clube-teal-deep shadow">
+                  {t('page.videos.playlistBadge')}
+                </span>
               </div>
             ) : (
               v.videoId &&
@@ -89,7 +94,7 @@ export default function VideosContent() {
 
             <div className="flex flex-wrap items-baseline gap-2">
               <a
-                href={v.url}
+                href={primaryUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-lg font-semibold text-clube-teal-deep hover:text-clube-teal"
@@ -118,8 +123,19 @@ export default function VideosContent() {
             <p className="mt-1 text-xs italic text-clube-mist/70">
               {t('page.videos.covers')} {v.cobertura}
             </p>
+            {v.playlistId && (
+              <a
+                href={getPlaylistUrl(v.playlistId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-flex items-center gap-1.5 self-start rounded-full bg-clube-teal-deep px-3 py-1.5 text-xs font-semibold text-clube-cream no-underline transition hover:bg-clube-teal"
+              >
+                {t('page.videos.openPlaylist')} →
+              </a>
+            )}
           </article>
-        ))}
+          )
+        })}
       </div>
 
       <footer className="mt-16 rounded-2xl bg-clube-cream-soft p-6 text-sm text-clube-mist">
