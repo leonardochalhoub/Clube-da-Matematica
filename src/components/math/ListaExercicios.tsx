@@ -917,7 +917,13 @@ function ItemExercicio({
               it != null &&
               typeof it === 'object' &&
               !('$$typeof' in (it as object)) &&
-              typeof (it as { passo?: unknown }).passo === 'string',
+              // Accept any object whose values are strings — different
+              // lessons use different keys (`passo`, `expressao`, `etapa`,
+              // etc.). We pick the first string field as the line and the
+              // second as the comment.
+              Object.values(it as Record<string, unknown>).some(
+                (v) => typeof v === 'string',
+              ),
           )
         return (
           <details
@@ -931,11 +937,15 @@ function ItemExercicio({
             <div className="prose prose-clube prose-sm mt-3 max-w-none">
               {isStepArray ? (
                 <ol>
-                  {(passos as Array<{ passo: string; comentario?: string; descricao?: string }>).map((item, i) => {
-                    const sub = item.comentario ?? item.descricao
+                  {(passos as Array<Record<string, unknown>>).map((item, i) => {
+                    const stringValues = Object.entries(item)
+                      .filter(([, v]) => typeof v === 'string')
+                      .map(([, v]) => v as string)
+                    const main = stringValues[0] ?? ''
+                    const sub = stringValues[1]
                     return (
                       <li key={i}>
-                        <span dangerouslySetInnerHTML={{ __html: renderInline(item.passo) }} />
+                        <span dangerouslySetInnerHTML={{ __html: renderInline(main) }} />
                         {sub && (
                           <>
                             {' '}
