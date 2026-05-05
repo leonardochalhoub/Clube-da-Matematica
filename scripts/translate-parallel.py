@@ -120,14 +120,14 @@ def call_gemini(system: str, user: str, *, key: str,
     body = {
         "system_instruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": [{"text": user}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 8000},
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 60000},
     }
     data = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers={
         "Content-Type": "application/json",
         "User-Agent": "clube-da-matematica/0.1 (https://github.com/leonardochalhoub/Clube-da-Matematica)",
     })
-    with urllib.request.urlopen(req, timeout=120) as resp:
+    with urllib.request.urlopen(req, timeout=600) as resp:
         payload = json.loads(resp.read().decode("utf-8"))
     cand = payload["candidates"][0]
     parts = cand.get("content", {}).get("parts", [])
@@ -144,7 +144,7 @@ def call_groq(system: str, user: str, *, key: str,
             {"role": "user", "content": user},
         ],
         "temperature": 0.2,
-        "max_tokens": 8000,
+        "max_tokens": 60000,
     }
     data = json.dumps(body).encode("utf-8")
     # Cloudflare 1010 fix: send a non-Python User-Agent so we look like a
@@ -155,7 +155,7 @@ def call_groq(system: str, user: str, *, key: str,
         "Accept": "application/json",
         "User-Agent": "clube-da-matematica/0.1 (https://github.com/leonardochalhoub/Clube-da-Matematica)",
     })
-    with urllib.request.urlopen(req, timeout=120) as resp:
+    with urllib.request.urlopen(req, timeout=600) as resp:
         payload = json.loads(resp.read().decode("utf-8"))
     return payload["choices"][0]["message"]["content"]
 
