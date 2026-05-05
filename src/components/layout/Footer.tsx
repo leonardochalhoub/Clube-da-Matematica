@@ -67,7 +67,7 @@ export function Footer() {
             </h4>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
-                <Link href="/conteudos" className="text-clube-ink/80 hover:text-clube-teal">
+                <Link href="/ensino-medio" className="text-clube-ink/80 hover:text-clube-teal">
                   {t('footer.allContent')}
                 </Link>
               </li>
