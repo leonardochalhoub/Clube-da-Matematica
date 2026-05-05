@@ -31,11 +31,24 @@ For **every** `<Exercicio>`:
 - [ ] **`fonte={{ livro, url, ..., licenca }}` is mandatory.** AI **never** invents exercises or examples — every one is sourced from one of the open-licensed books in `livros/CATALOG.md` (OpenStax, Stitz-Zeager, Hammack, Yoshiwara, Active Calculus, Wikilivros). Prefer URLs that deep-link to the exact page/section/exercise. If you can't find a sourced exercise for a topic, **delete the exercise** — never write one without a citation.
 - [ ] **`solucao={<>...</>}` is mandatory.** Every exercise renders a "Ver solução" button. Universal — no exercise without a solution.
 - [ ] Has `numero="NN.M"`, `dificuldade=...`.
-- [ ] **The student NEVER types into the site — only clicks.** This means every exercise must be answerable by clicking. No `<input>` text fields anywhere. The Exercicio component already enforces this (text inputs are disabled), but the MDX must give the student something to click:
-  - **Multiple-choice items** use `opcoes={[{texto, correta:true}, {texto}, {texto}, {texto}]}` — student clicks an option, then "Conferir".
-  - **Short-answer items** (specific number, set, interval) use `resposta="..."` — student clicks "Ver resposta" to reveal.
-  - **Proof / demonstration items** use `dificuldade="demonstracao"` (no resposta, no opcoes) — student clicks "Ver solução" only.
-  - **Never leave an exercise with neither `opcoes` nor `resposta` nor `dificuldade="demonstracao"`** — that creates a dead exercise with no clickable answer. Pick the appropriate one.
+- [ ] **The student NEVER types into the site — only clicks.** Every exercise must be answerable by clicking. No `<input>` text fields anywhere. The Exercicio component already enforces this. **CRITICAL: "click only" does NOT mean "everything must be multiple choice."** The default click mechanism for a practice exercise is the "Ver solução" button — student attempts on paper, clicks to reveal the worked solution. Pick the right mechanism per exercise:
+  - **Pure "Ver solução"** — DEFAULT for practice (~50–60% of a lesson). Compute, derive, find domain, evaluate, integrate — student does the math on paper, clicks to compare reasoning. Author writes only `solucao={<>...</>}` (no `opcoes`, no `resposta`).
+  - **`resposta="..."` reveal** (~25–35%) — single-answer items where the result is a discrete number, set, interval, or short symbolic expression. Student clicks "Ver resposta" to confirm just the final value.
+  - **Multiple choice** `opcoes={[{texto, correta:true}, {texto}, {texto}, {texto}]}` (~5–10% CAP) — reserved for **conceptual discrimination only**. The four options must reflect *specific common mistakes* (off-by-one, wrong domain restriction, sign error). NEVER use MC for arithmetic drill — it short-circuits the computation.
+  - **Demonstração** (`dificuldade="demonstracao"`, ~5–10%) — proofs, "show that", derivations. Only `solucao`.
+  - **Never leave an exercise with no `solucao`** — every exercise needs at minimum the Ver solução button to work.
+
+### The MC trap — read this before authoring
+
+It is tempting to default to MC because "the student must click something." That is wrong. In L1 (the canonical template) only **3 of 54 exercises** are MC; **30 are pure Ver solução** caderno-first. If you find yourself authoring 50 MC items, stop — you are pattern-matching on the wrong rule. See [`feedback-no-typing.md`](../../../../.claude/projects/-home-leochalhoub-Clube-da-Matematica/memory/feedback-no-typing.md) for the full explanation. **L2 was first written with 49/50 MC and had to be rebalanced** — don't repeat that mistake.
+
+### When MC is right (the 5–10% that earn it)
+
+A good MC item: correct answer not obvious from glancing; each distractor maps to a specific common mistake; student learns from seeing why wrong options are wrong.
+
+GOOD: "Qual é o domínio máximo de $f(x) = \sqrt{x-3}/(x-5)$? A) $[3, +\infty)$ — esqueceu o denominador. B) $(3, +\infty) \setminus \{5\}$ — usou aberto na raiz. C) $[3, 5) \cup (5, +\infty)$ — correto. D) $\mathbb{R} \setminus \{5\}$ — esqueceu a raiz."
+
+BAD: "Calcule $f(2)$ se $f(x) = 3x+1$. A) 6 B) 7 C) 8 D) 5." → backsolvable in 2 seconds. Should be `resposta="7"` or pure Ver solução.
 - [ ] Statement is Wolfram-friendly: short imperative, math in `$...$`, no "expresse a resposta em intervalo" trailing fluff.
 
 For **~25% of exercises** (curated selection — 1 per bloco, varying
