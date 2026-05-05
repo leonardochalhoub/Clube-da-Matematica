@@ -12,6 +12,7 @@ import {
   type Aula,
 } from '@/content/programa-em'
 import { MateriaTabs } from '@/components/layout/MateriaTabs'
+import { YearSearch } from '@/components/layout/YearSearch'
 
 interface AulaPath extends Aula {
   caminho?: string
@@ -53,8 +54,6 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
   if (!ano) notFound()
 
   const todos = carregarTodosConteudos()
-  // Only `publicado: true` lessons map to a clickable path. Unpublished
-  // lessons (publicado: false) render with a red "soon" badge.
   const aulasMdx = todos.filter(
     (c) => c.meta.categoria === 'aulas' && c.meta.publicado,
   )
@@ -69,6 +68,18 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
     }))
   }
 
+  // Flat list of all Aulas in the year, with caminho + trim number for search
+  const allAulasFlat: Array<Aula & { caminho?: string; trimNum: number }> = []
+  for (const t of ano.trimestres) {
+    for (const a of t.aulas) {
+      allAulasFlat.push({
+        ...a,
+        trimNum: t.num,
+        caminho: a.slug ? slugToCaminho.get(a.slug) : undefined,
+      })
+    }
+  }
+
   const totalLicoes = ano.trimestres.reduce((acc, t) => acc + t.aulas.length, 0)
   const publicadas = ano.trimestres.reduce(
     (acc, t) =>
@@ -77,7 +88,7 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
   )
 
   return (
-    <article className="container-clube max-w-5xl py-12 sm:py-16">
+    <article className="container-clube max-w-6xl py-12 sm:py-16">
       <nav aria-label="Trilha" className="mb-6 text-sm text-clube-mist">
         <Link href="/ensino-medio" className="text-clube-teal hover:text-clube-teal-deep">
           Ensino Médio
@@ -85,22 +96,83 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
         / Ano {ano.num}
       </nav>
 
-      <header className="mb-10">
-        <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-clube-gold-deep">
-          Ano {ano.num} · {ano.idade}
-        </p>
-        <h1 className="text-display font-extrabold text-clube-teal-deep">
-          {ano.titulo}
-        </h1>
-        <p className="mt-4 max-w-prose text-lg leading-relaxed text-clube-mist">
-          {ano.resumo}
-        </p>
-        <p className="mt-3 text-sm italic text-clube-mist/85">
-          {ano.equivalencia}
-        </p>
-      </header>
+      {/* TWO-COLUMN HERO — left: narrative; right: trimester schedule */}
+      <section className="mb-12 grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-14">
+        {/* LEFT — narrative */}
+        <div>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-clube-gold-deep">
+            Ano {ano.num} · {ano.idade}
+          </p>
+          <h1 className="text-display font-extrabold leading-tight text-clube-teal-deep">
+            {ano.titulo}
+          </h1>
+          <p className="mt-5 text-lg leading-relaxed text-clube-ink/85">
+            {ano.resumo}
+          </p>
+          <p className="mt-4 text-sm italic text-clube-mist">
+            {ano.equivalencia}
+          </p>
+        </div>
 
-      <section className="mb-10 grid gap-3 grid-cols-2 sm:grid-cols-4">
+        {/* RIGHT — trimester schedule */}
+        <div>
+          <h2 className="text-xl font-bold text-clube-teal-deep">
+            Cronograma por trimestre
+          </h2>
+          <p className="mt-1 text-sm text-clube-mist">
+            <strong>Clique num trimestre</strong> para ver as Aulas e Lições
+            (cada Lição abre o conteúdo). Lições agrupadas em{' '}
+            <strong>Aulas</strong> didáticas (3-5 lições por Aula). Ou use as
+            abas abaixo para navegar por matéria.
+          </p>
+          <div className="mt-4 space-y-3">
+            {ano.trimestres.map((t) => (
+              <Link
+                key={t.num}
+                href={`/ensino-medio/ano-${ano.num}/trim-${t.num}/`}
+                className="group block rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4 no-underline transition-all hover:border-clube-teal hover:shadow-sm hover:no-underline"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <h3 className="text-sm font-bold text-clube-teal-deep group-hover:text-clube-teal">
+                    {t.titulo}
+                  </h3>
+                  <span className="text-xs text-clube-teal opacity-0 transition-opacity group-hover:opacity-100">
+                    abrir →
+                  </span>
+                </div>
+                <p className="mt-1 text-xs italic text-clube-mist">{t.foco}</p>
+                <p className="mt-2 text-xs text-clube-mist/85">
+                  {t.aulas.length} lições · ~{HORAS_POR_TRIMESTRE}h de estudo
+                </p>
+                {t.agrupamento && t.agrupamento.length > 0 && (
+                  <ul className="mt-3 space-y-1 border-t border-clube-mist-soft/40 pt-3">
+                    {t.agrupamento.map((g) => (
+                      <li
+                        key={g.id}
+                        className="flex items-baseline gap-2 text-[11px]"
+                      >
+                        <span className="rounded-full bg-clube-gold/15 px-2 py-0.5 font-mono uppercase tracking-wider text-clube-gold-deep">
+                          ~{g.cargaHoraria}h
+                        </span>
+                        <span className="text-clube-ink/85">{g.titulo}</span>
+                        <span className="ml-auto text-clube-mist/70">
+                          ({g.licoesNums.length} lições)
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SEARCH BAR — scoped to this year's lessons */}
+      <YearSearch aulas={allAulasFlat} anoNum={ano.num} />
+
+      {/* KPI ROW */}
+      <section className="mb-12 grid gap-3 grid-cols-2 sm:grid-cols-4">
         <div className="card-clube !p-4 text-center sm:!p-6">
           <div className="text-xl font-extrabold text-clube-teal-deep sm:text-2xl">
             {totalLicoes}
@@ -109,7 +181,8 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
         </div>
         <div className="card-clube !p-4 text-center sm:!p-6">
           <div className="text-xl font-extrabold text-clube-leaf sm:text-2xl">
-            {publicadas}<span className="text-clube-mist/70"> / {totalLicoes}</span>
+            {publicadas}
+            <span className="text-clube-mist/70"> / {totalLicoes}</span>
           </div>
           <div className="mt-1 text-xs text-clube-mist">lições publicadas</div>
         </div>
@@ -129,59 +202,7 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Calendario por trimestre — clicáveis */}
-      <section className="mb-12">
-        <h2 className="text-xl font-bold text-clube-teal-deep">
-          Cronograma por trimestre
-        </h2>
-        <p className="mt-1 text-sm text-clube-mist">
-          <strong>Clique num trimestre</strong> para ver as Aulas e Lições
-          (cada Lição abre o conteúdo). Lições agrupadas em <strong>Aulas</strong>{' '}
-          didáticas (3-5 lições por Aula). Ou use as abas abaixo para
-          navegar por matéria.
-        </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {ano.trimestres.map((t) => (
-            <Link
-              key={t.num}
-              href={`/ensino-medio/ano-${ano.num}/trim-${t.num}/`}
-              className="group rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4 no-underline transition-all hover:border-clube-teal hover:shadow-sm hover:no-underline"
-            >
-              <div className="flex items-baseline justify-between gap-2">
-                <h3 className="text-sm font-bold text-clube-teal-deep group-hover:text-clube-teal">
-                  {t.titulo}
-                </h3>
-                <span className="text-xs text-clube-teal opacity-0 group-hover:opacity-100">
-                  abrir →
-                </span>
-              </div>
-              <p className="mt-1 text-xs italic text-clube-mist">{t.foco}</p>
-              <p className="mt-2 text-xs text-clube-mist/85">
-                {t.aulas.length} lições · ~{HORAS_POR_TRIMESTRE}h de estudo
-              </p>
-              {t.agrupamento && t.agrupamento.length > 0 && (
-                <ul className="mt-3 space-y-1 border-t border-clube-mist-soft/40 pt-3">
-                  {t.agrupamento.map((g) => (
-                    <li
-                      key={g.id}
-                      className="flex items-baseline gap-2 text-[11px]"
-                    >
-                      <span className="rounded-full bg-clube-gold/15 px-2 py-0.5 font-mono uppercase tracking-wider text-clube-gold-deep">
-                        ~{g.cargaHoraria}h
-                      </span>
-                      <span className="text-clube-ink/85">{g.titulo}</span>
-                      <span className="ml-auto text-clube-mist/70">
-                        ({g.licoesNums.length} lições)
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Link>
-          ))}
-        </div>
-      </section>
-
+      {/* MATERIA TABS — secondary navigation */}
       <section>
         <h2 className="mb-4 text-xl font-bold text-clube-teal-deep">
           Lições organizadas por matéria
@@ -189,6 +210,7 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
         <MateriaTabs materias={materias} aulasPorMateria={indexMaterias} />
       </section>
 
+      {/* PREV / NEXT */}
       <section className="mt-16 grid gap-3 sm:grid-cols-2">
         {ano.num > 1 && (
           <Link
