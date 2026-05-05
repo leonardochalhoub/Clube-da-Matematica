@@ -22,28 +22,35 @@ Every item maps to a hard rule in the template. Skip none.
 - [ ] `<ListaExercicios seed="licao-NN-slug">` with 30–80 `<Exercicio>` blocks.
 - [ ] `## Fontes` bibliography lists every book cited above.
 
-## Per-exercise hygiene
+## Per-exercise hygiene — HARD RULES
+
+**The owner has spelled these out repeatedly. Zero tolerance for violations.**
 
 For **every** `<Exercicio>`:
 
+- [ ] **`fonte={{ livro, url, ..., licenca }}` is mandatory.** AI **never** invents exercises or examples — every one is sourced from one of the open-licensed books in `livros/CATALOG.md` (OpenStax, Stitz-Zeager, Hammack, Yoshiwara, Active Calculus, Wikilivros). Prefer URLs that deep-link to the exact page/section/exercise. If you can't find a sourced exercise for a topic, **delete the exercise** — never write one without a citation.
+- [ ] **`solucao={<>...</>}` is mandatory.** Every exercise renders a "Ver solução" button. Universal — no exercise without a solution.
 - [ ] Has `numero="NN.M"`, `dificuldade=...`.
-- [ ] Has `solucao={<>...</>}`.
-- [ ] Has `fonte={{ livro, url, ..., licenca }}` pointing to a real open
-      book — **AI never invents exercises**.
-- [ ] If short-answer (single number, set, interval): use `opcoes={[...]}`
-      with one correct + 3 distractors that reflect common student mistakes.
-      Never leave just `resposta=` without `opcoes`.
-- [ ] Statement is Wolfram-friendly: short imperative, math in `$...$`,
-      no "expresse a resposta em intervalo" trailing fluff (the regex
-      pipeline strips most of these but cleaner statements give cleaner
-      links).
+- [ ] **The student NEVER types into the site — only clicks.** This means every exercise must be answerable by clicking. No `<input>` text fields anywhere. The Exercicio component already enforces this (text inputs are disabled), but the MDX must give the student something to click:
+  - **Multiple-choice items** use `opcoes={[{texto, correta:true}, {texto}, {texto}, {texto}]}` — student clicks an option, then "Conferir".
+  - **Short-answer items** (specific number, set, interval) use `resposta="..."` — student clicks "Ver resposta" to reveal.
+  - **Proof / demonstration items** use `dificuldade="demonstracao"` (no resposta, no opcoes) — student clicks "Ver solução" only.
+  - **Never leave an exercise with neither `opcoes` nor `resposta` nor `dificuldade="demonstracao"`** — that creates a dead exercise with no clickable answer. Pick the appropriate one.
+- [ ] Statement is Wolfram-friendly: short imperative, math in `$...$`, no "expresse a resposta em intervalo" trailing fluff.
 
-For **~25% of exercises** (curated selection — 1 per blocos, varying
+For **~25% of exercises** (curated selection — 1 per bloco, varying
 difficulties):
 
-- [ ] Has `passos={<>...</>}` with a numbered `<ol>` walkthrough that
-      explains the *thinking*, not just the steps. End with one `<em>`
-      paragraph ("Macete", "Atalho mental", "Observação", "Curiosidade").
+- [ ] Has `passos={<>...</>}` with a numbered `<ol>` walkthrough.
+- [ ] Each `<li>` has prose that explains the *thinking*, not just the action — the student must understand WHY this step, not just what to do.
+- [ ] As many `<li>` as needed to walk through the reasoning fully.
+- [ ] Closing `<em>Macete:</em>` / `<em>Atalho mental:</em>` / `<em>Observação:</em>` / `<em>Curiosidade:</em>` paragraph.
+
+## SVG figures inside MDX — HARD RULE
+
+**Never use `.map()` returning JSX inside `<svg>` blocks in MDX.** The next-mdx-remote/rsc compiler doesn't fully evaluate JSX expressions with `.map()` + computed positions, so figures render as empty boxes above their captions.
+
+**Always expand to explicit `<g>` blocks** — one per item. Static JSX only. Same for `<Equation>` content: pass plain string children (no template-literal expressions) when possible, or wrap rich content in raw `<svg>` static markup.
 
 ## MDX syntax
 

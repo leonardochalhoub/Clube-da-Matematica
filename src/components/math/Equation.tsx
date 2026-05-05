@@ -5,8 +5,12 @@ import { AudioReader } from './AudioReader'
 import { useLocale } from '@/components/layout/LocaleProvider'
 
 interface EquationProps {
-  /** LaTeX da equação (sem delimitadores `$$`). */
-  children: string
+  /** LaTeX da equação (sem delimitadores `$$`). Aceito também como children,
+   *  mas `latex` é o caminho preferido — compileMDX-rsc não passa template
+   *  literals `{`...`}` como children, então a prop é mais robusta. */
+  latex?: string
+  /** LaTeX como children (legado). Use `latex` prop quando puder. */
+  children?: string | React.ReactNode
   /** Explicação obrigatória abaixo — "o que essa equação significa". */
   explicacao?: React.ReactNode
   /** Numeração opcional: "Eq. (1)", "Eq. (2)", etc. */
@@ -50,6 +54,7 @@ const macros: Record<string, string> = {
  * — acessível para usuários com deficiência visual.
  */
 export function Equation({
+  latex: latexProp,
   children,
   explicacao,
   numero,
@@ -58,13 +63,23 @@ export function Equation({
   audioTexto,
 }: EquationProps) {
   const { t } = useLocale()
-  // Guard: next-mdx-remote/rsc pode passar children como array de strings
-  // ou ReactNode; KaTeX só aceita string.
-  const latex = typeof children === 'string'
-    ? children
-    : Array.isArray(children)
-      ? (children as unknown[]).filter((c) => typeof c === 'string').join('')
-      : String(children ?? '')
+  // Guard: next-mdx-remote/rsc may pass children as a React element wrapping
+  // a string (template literals get wrapped). Recursively extract text.
+  function extractText(node: unknown): string {
+    if (node == null || typeof node === 'boolean') return ''
+    if (typeof node === 'string') return node
+    if (typeof node === 'number') return String(node)
+    if (Array.isArray(node)) return node.map(extractText).join('')
+    if (typeof node === 'object' && node !== null) {
+      const el = node as { props?: { children?: unknown } }
+      if (el.props && 'children' in el.props) return extractText(el.props.children)
+    }
+    return ''
+  }
+  // Prefer the explicit `latex` prop. Fall back to children extraction
+  // (works for some MDX paths but unreliable with compileMDX-rsc + template
+  // literals — see docs/kb/lesson-template/mdx-syntax-traps.md).
+  const latex = latexProp ?? extractText(children)
   const html = katex.renderToString(latex, {
     output: 'htmlAndMathml',
     displayMode: !inline,

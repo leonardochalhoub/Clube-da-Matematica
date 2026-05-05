@@ -59,19 +59,20 @@ export const metadata: Metadata = {
 /**
  * Script inline que define o tema ANTES do primeiro paint.
  * Evita flash de tema errado (FOUC):
- *  1) lê localStorage.theme
- *  2) se ausente, consulta prefers-color-scheme
- *  3) aplica `dark` na <html> antes do React hidratar
+ *  1) lê localStorage.theme — preferência manual do usuário (se existe).
+ *  2) se ausente, default = 'dark'. Tema escuro é o estado padrão da
+ *     plataforma; usuário pode alternar para claro via ThemeToggle e a
+ *     escolha é persistida em localStorage.
+ *  3) aplica `dark` na <html> antes do React hidratar.
  */
 const themeScript = `
 (function() {
   try {
-    var t = localStorage.getItem('theme');
-    if (!t) {
-      t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
+    var t = localStorage.getItem('theme') || 'dark';
     if (t === 'dark') document.documentElement.classList.add('dark');
-  } catch (_) {}
+  } catch (_) {
+    document.documentElement.classList.add('dark');
+  }
 })();
 `
 
