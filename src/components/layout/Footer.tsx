@@ -126,9 +126,6 @@ export function Footer() {
             <AmazingSchoolSponsor />
           </div>
           <BuiltWithClaude />
-          <p className="max-w-2xl text-clube-mist">
-            {t('footer.khan')}
-          </p>
           <p className="font-mono text-[10px] tracking-wide text-clube-mist/70">
             v{APP_VERSION} · {APP_COMMIT_SHA} ·{' '}
             {new Date(APP_LAST_UPDATE).toLocaleString(LOCALES[locale].speechLang, {
