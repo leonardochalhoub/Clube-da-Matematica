@@ -119,7 +119,10 @@ interface ExercicioProps {
   /** Passo a passo detalhado — pensamento linha a linha, com comentários
    *  explicando o porquê de cada passo. Mostrado via botão "Ver passo a passo".
    *  Apenas ~25% dos exercícios precisam ter (curadoria editorial). */
-  passos?: ReactNode
+  /** Walkthrough. Accepts either a ReactNode (JSX `<ol>` etc.) or
+   *  an array of `{ passo, comentario }` step objects (rendered as
+   *  numbered list automatically). */
+  passos?: ReactNode | Array<{ passo: string; comentario?: string }>
   /** Fonte — clicável, vai pra página do livro. */
   fonte?: FonteExercicio
   /** Referência editorial em formato livre (legacy). Use `fonte` em vez disso. */
@@ -898,8 +901,9 @@ function ItemExercicio({
       )}
 
       {/* Passo a passo detalhado — pensamento linha a linha.
-         Apresentado em ~25% dos exercícios (curadoria editorial). */}
-      {passos && (
+         Apresentado em ~25% dos exercícios (curadoria editorial).
+         Accepts JSX (preferred) or `[{passo, comentario}, ...]` array. */}
+      {passos != null && (Array.isArray(passos) ? passos.length > 0 : true) && (
         <details
           className="mt-2 rounded-lg border border-clube-gold/40 bg-clube-gold/5 p-3"
           open={vendoPassos}
@@ -908,7 +912,25 @@ function ItemExercicio({
           <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-clube-gold-deep hover:text-clube-gold">
             {vendoPassos ? t('exercise.hideStepByStep') : t('exercise.showStepByStep')}
           </summary>
-          <div className="prose prose-clube prose-sm mt-3 max-w-none">{passos}</div>
+          <div className="prose prose-clube prose-sm mt-3 max-w-none">
+            {Array.isArray(passos) ? (
+              <ol>
+                {(passos as Array<{ passo: string; comentario?: string }>).map((item, i) => (
+                  <li key={i}>
+                    <span dangerouslySetInnerHTML={{ __html: renderInline(item.passo) }} />
+                    {item.comentario && (
+                      <>
+                        {' '}
+                        <em className="text-clube-mist" dangerouslySetInnerHTML={{ __html: renderInline(item.comentario) }} />
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              passos
+            )}
+          </div>
         </details>
       )}
     </li>

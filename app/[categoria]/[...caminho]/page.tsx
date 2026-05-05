@@ -1,13 +1,54 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { compileMDX } from 'next-mdx-remote/rsc'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import {
   carregarTodosConteudos,
   carregarPorSlug,
 } from '@/lib/content/loader'
 import { carregarMdx } from '@/lib/content/manifest'
+import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
 import { LessonPageShell } from '@/components/layout/LessonPageShell'
 import { LICOES_FLAT } from '@/content/programa-em'
-import { LOCALES } from '@/lib/i18n/locales'
+import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import { DuasPortas, Porta } from '@/components/math/DuasPortas'
+import { Equation, Eq } from '@/components/math/Equation'
+import { EquacaoCanonica } from '@/components/math/EquacaoCanonica'
+import { PayoffChart } from '@/components/math/PayoffChart'
+import { ListaExercicios, Exercicio } from '@/components/math/ListaExercicios'
+import { VerificarPasso } from '@/components/math/VerificarPasso'
+import {
+  Definicao,
+  Teorema,
+  Exemplo,
+  Insight,
+  Cuidado,
+  Leituras,
+} from '@/components/math/Callouts'
+
+const MDX_COMPONENTS = {
+  DuasPortas, Porta,
+  Equation, Eq, EquacaoCanonica,
+  PayoffChart,
+  ListaExercicios, Exercicio,
+  VerificarPasso,
+  Definicao, Teorema, Exemplo, Insight, Cuidado, Leituras,
+}
+
+const MDX_OPTIONS: Parameters<typeof compileMDX>[0]['options'] = {
+  mdxOptions: {
+    remarkPlugins: [remarkGfm, remarkMath],
+    rehypePlugins: [
+      rehypeKatex,
+      rehypeSlug,
+      [rehypeAutolinkHeadings, { behavior: 'wrap' }],
+    ],
+  },
+}
 
 interface Props {
   params: Promise<{ categoria: string; caminho: string[] }>
@@ -87,14 +128,47 @@ export default async function ConteudoPage({ params }: Props) {
   const conteudo = carregarPorSlug(slug)
   if (!conteudo || conteudo.caminho !== completo) notFound()
 
-  // Carrega via manifest (webpack dynamic import). Diferente de
-  // compileMDX, esse caminho preserva props com expressões JSX
-  // ({ opcoes: [...], fonte: {...}, solucao: <>...</> }).
-  // Trade-off: webpack precisa bundlar todos os 120 paths PT-BR,
-  // o que aumenta uso de memória — daí o NODE_OPTIONS=8192 no build.
-  const mod = await carregarMdx(completo)
-  if (!mod) notFound()
-  const MDXContent = mod.default
+  // PT-BR uses the manifest path (preserves JSX expression props on
+  // <Exercicio>: solucao={<>...</>}, opcoes={[...]}, fonte={{...}}).
+  // Non-PT-BR locales read translated MDX from disk via compileMDX —
+  // some rich JSX expression props may render less faithfully there,
+  // but at least the locale gets translated content.
+  const localeCode = (localeMatch?.locale ?? 'pt-BR') as Locale
+  let MDXContent: React.ComponentType | null = null
+  let translatedRendered: React.ReactNode = null
+  let translatedFrontmatter: Record<string, unknown> = {}
+
+  if (localeCode === 'pt-BR') {
+    const mod = await carregarMdx(completo)
+    if (!mod) notFound()
+    MDXContent = mod.default
+  } else {
+    const localeInfo = LOCALES[localeCode]
+    const arquivo =
+      caminhoArquivoMdx(completo, localeCode, localeInfo.speechLang)
+    if (arquivo) {
+      try {
+        const { content, data } = await lerMdxSource(arquivo)
+        const compiled = await compileMDX({
+          source: content,
+          components: MDX_COMPONENTS,
+          options: MDX_OPTIONS,
+        })
+        translatedRendered = compiled.content
+        translatedFrontmatter = data
+      } catch {
+        // Translation parse error → fall back to PT-BR via manifest.
+        const mod = await carregarMdx(completo)
+        if (!mod) notFound()
+        MDXContent = mod.default
+      }
+    } else {
+      // No translation file → fall back to PT-BR via manifest.
+      const mod = await carregarMdx(completo)
+      if (!mod) notFound()
+      MDXContent = mod.default
+    }
+  }
 
   const isAula = categoria === 'aulas'
   const isFinancas = categoria === 'financas-quantitativas'
@@ -127,16 +201,23 @@ export default async function ConteudoPage({ params }: Props) {
     }
   }
 
+  // Localized meta — non-PT-BR pages use the translated frontmatter
+  // (titulo, descricao, usadoEm) so the page header reflects the locale.
+  const localizedMeta = {
+    ...conteudo.meta,
+    ...(translatedFrontmatter as Partial<typeof conteudo.meta>),
+  }
+
   return (
     <LessonPageShell
-      meta={conteudo.meta}
+      meta={localizedMeta}
       isAula={isAula}
       isFinancas={isFinancas}
       caminho={completo}
       prevLicao={prevLicao}
       nextLicao={nextLicao}
     >
-      <MDXContent />
+      {MDXContent ? <MDXContent /> : translatedRendered}
     </LessonPageShell>
   )
 }
