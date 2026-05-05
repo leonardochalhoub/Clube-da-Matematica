@@ -64,13 +64,42 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   const speechLang = LOCALES[locale].speechLang
   const labelFinal = label ?? t('audio.read', 'Ouvir')
 
+  // Architecture: `texto` comes from the MDX prop. Lessons compile from
+  // per-locale files (content/i18n/<locale>/...), so `texto` is usually
+  // ALREADY in the active locale's language. When the locale's MDX is
+  // missing, the route falls back to the PT-BR MDX, in which case `texto`
+  // is PT-BR and we look it up in AUDIO_TRANSLATIONS (keyed by PT-BR).
+  const knownPtKey = Object.prototype.hasOwnProperty.call(AUDIO_TRANSLATIONS, texto)
   const traducaoManual = textosI18n?.[locale]
-  const traducaoPreBuild = AUDIO_TRANSLATIONS[texto]?.[speechLang]
-  const traducao = traducaoManual ?? traducaoPreBuild
-  const temTraducao = !!traducao || locale === 'pt-BR'
-  const textoFalado = traducao ?? texto
-  const langFalado = temTraducao ? speechLang : 'pt-BR'
-  const bandeiraFalada = temTraducao
+  const traducaoPreBuild = knownPtKey ? AUDIO_TRANSLATIONS[texto]?.[speechLang] : undefined
+
+  let textoFalado: string
+  let langFalado: string
+  let usandoTarget: boolean
+  if (locale === 'pt-BR') {
+    textoFalado = texto
+    langFalado = 'pt-BR'
+    usandoTarget = true
+  } else if (traducaoManual) {
+    textoFalado = traducaoManual
+    langFalado = speechLang
+    usandoTarget = true
+  } else if (!knownPtKey) {
+    textoFalado = texto
+    langFalado = speechLang
+    usandoTarget = true
+  } else if (traducaoPreBuild) {
+    textoFalado = traducaoPreBuild
+    langFalado = speechLang
+    usandoTarget = true
+  } else {
+    textoFalado = texto
+    langFalado = 'pt-BR'
+    usandoTarget = false
+  }
+
+  const temTraducao = usandoTarget
+  const bandeiraFalada = usandoTarget
     ? LOCALES[locale].bandeira
     : LOCALES['pt-BR'].bandeira
 
