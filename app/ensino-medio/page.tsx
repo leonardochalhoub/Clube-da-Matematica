@@ -17,7 +17,12 @@ export const metadata: Metadata = {
 
 export default function EnsinoMedioPage() {
   const todos = carregarTodosConteudos()
-  const aulasMdx = todos.filter((c) => c.meta.categoria === 'aulas')
+  // Only `publicado: true` lessons render as clickable links + count toward
+  // the "published" totals. Unpublished lessons (publicado: false) appear
+  // in the listing with a red "soon" badge instead.
+  const aulasMdx = todos.filter(
+    (c) => c.meta.categoria === 'aulas' && c.meta.publicado,
+  )
   const aulasPublicadas = new Set(aulasMdx.map((c) => c.meta.slug))
   const slugToCaminho: Record<string, string> = {}
   for (const c of aulasMdx) slugToCaminho[c.meta.slug] = c.caminho

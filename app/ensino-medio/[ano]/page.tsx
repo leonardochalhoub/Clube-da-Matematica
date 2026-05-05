@@ -53,7 +53,11 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
   if (!ano) notFound()
 
   const todos = carregarTodosConteudos()
-  const aulasMdx = todos.filter((c) => c.meta.categoria === 'aulas')
+  // Only `publicado: true` lessons map to a clickable path. Unpublished
+  // lessons (publicado: false) render with a red "soon" badge.
+  const aulasMdx = todos.filter(
+    (c) => c.meta.categoria === 'aulas' && c.meta.publicado,
+  )
   const slugToCaminho = new Map(aulasMdx.map((c) => [c.meta.slug, c.caminho]))
 
   const materias = materiasDoAno(ano)
@@ -105,7 +109,7 @@ export default async function AnoEnsinoMedioPage({ params }: PageProps) {
         </div>
         <div className="card-clube !p-4 text-center sm:!p-6">
           <div className="text-xl font-extrabold text-clube-leaf sm:text-2xl">
-            {publicadas}
+            {publicadas}<span className="text-clube-mist/70"> / {totalLicoes}</span>
           </div>
           <div className="mt-1 text-xs text-clube-mist">lições publicadas</div>
         </div>

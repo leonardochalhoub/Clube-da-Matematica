@@ -175,7 +175,7 @@ export function SearchDiscovery({ slugToCaminho, livros }: SearchDiscoveryProps)
               }
               return (
                 <div key={l.num} className="card-clube flex flex-col gap-2 opacity-60">
-                  <span className="rounded-full bg-clube-cream-soft px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-mist self-start">
+                  <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-red-700 self-start">
                     {tag} · {t('materia.status.planned')}
                   </span>
                   <h4 className="text-base font-semibold text-clube-mist">{l.titulo}</h4>

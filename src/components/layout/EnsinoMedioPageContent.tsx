@@ -228,7 +228,7 @@ export function EnsinoMedioPageContent({
                                     <span className="flex-1 text-clube-mist">
                                       {licao.titulo}
                                     </span>
-                                    <span className="rounded-full bg-clube-mist-soft/40 px-2 py-0.5 text-[10px] font-semibold uppercase text-clube-mist">
+                                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-red-700">
                                       {t('materia.status.planned')}
                                     </span>
                                   </div>

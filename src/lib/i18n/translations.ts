@@ -589,9 +589,9 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '게시됨', pl: 'opublikowana',
   },
   'materia.status.planned': {
-    'pt-BR': 'planejada', en: 'planned', es: 'planificada', zh: '计划中', ja: '計画中',
-    de: 'geplant', fr: 'prévue', it: 'pianificata', ru: 'запланировано',
-    ko: '계획됨', pl: 'planowana',
+    'pt-BR': 'em breve', en: 'soon', es: 'pronto', zh: '即将推出', ja: '近日公開',
+    de: 'demnächst', fr: 'bientôt', it: 'presto', ru: 'скоро',
+    ko: '곧 공개', pl: 'wkrótce',
   },
 
   // ===== SEARCH DISCOVERY EXTRAS =====

@@ -54,9 +54,11 @@ export default async function TrimPage({ params }: PageProps) {
   if (!a || !t) notFound()
 
   const todos = carregarTodosConteudos()
+  // Only `publicado: true` lessons map to a clickable path; unpublished
+  // ones get a red "soon" badge in the listing below.
   const slugToCaminho = new Map(
     todos
-      .filter((c) => c.meta.categoria === 'aulas')
+      .filter((c) => c.meta.categoria === 'aulas' && c.meta.publicado)
       .map((c) => [c.meta.slug, c.caminho]),
   )
 
