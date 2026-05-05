@@ -57,7 +57,20 @@ export const LOCALES: Record<Locale, LocaleInfo> = {
  */
 export const NUM_LOCALES = Object.keys(LOCALES).length
 
-export const DEFAULT_LOCALE: Locale = 'en'
+/**
+ * Default locale used for SSR and as the last-resort fallback in
+ * `detectLocale`. PT-BR is correct here because:
+ *  - The project is a Brazilian high-school curriculum; the canonical
+ *    content is PT-BR and most users land from .br timezones.
+ *  - SSG emits a single HTML per route. If we render in English and
+ *    rely on a client-side hydration swap to PT-BR, Brazilian visitors
+ *    see a flash of English (and stay in English on cache misses or
+ *    when the useEffect doesn't fire — e.g. JS-disabled, slow hydration,
+ *    pre-warmed by Lighthouse, etc.). PT-BR-first eliminates that
+ *    flicker for the majority case and still lets `detectLocale()`
+ *    upgrade to en/es/etc. when timezone or navigator.language match.
+ */
+export const DEFAULT_LOCALE: Locale = 'pt-BR'
 
 /**
  * Mapeia país (ISO 3166-1 alpha-2) para idioma local padrão.
