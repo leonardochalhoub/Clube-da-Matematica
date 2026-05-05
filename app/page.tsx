@@ -87,7 +87,15 @@ export default function HomePage() {
 
   return (
     <>
-      {/* KPIs at the top — sets the platform's scale before anything else. */}
+      {/* Hero — narrative on the left, year cards (Ano 1/2/3) on the right.
+          On mobile both columns stack: narrative first, then year cards. */}
+      <HomeHero anos={anosCards} />
+
+      {/* Search bar + browse panels — first action after the hero. */}
+      <SearchDiscovery slugToCaminho={slugToCaminho} livros={TODOS_LIVROS} />
+
+      {/* KPIs sit below the search so the page leads with year cards +
+          discovery, then backs them with platform-scale numbers. */}
       <MainCounters
         licoesPublicadas={licoesPublicadas}
         licoesPlanejadas={licoesPlanejadas}
@@ -97,13 +105,6 @@ export default function HomePage() {
         cargaHorariaH={HORAS_TOTAIS}
         livrosNoLedger={LIVROS_NO_LEDGER}
       />
-
-      {/* Hero — narrative on the left, year cards (Ano 1/2/3) on the right.
-          On mobile both columns stack: narrative first, then year cards. */}
-      <HomeHero anos={anosCards} />
-
-      {/* Search bar + browse panels. */}
-      <SearchDiscovery slugToCaminho={slugToCaminho} livros={TODOS_LIVROS} />
 
       {/* Philosophy (client shell — i18n via useLocale) */}
       <HomePhilosophy />
