@@ -63,22 +63,6 @@ export function EnsinoMedioPageContent({
         </p>
       </header>
 
-      <section className="mb-8 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-3 text-xs text-clube-ink/85 sm:p-4 sm:text-sm">
-        <p>
-          <strong>{t('page.ensinoMedio.workload.before')}</strong>{' '}
-          {t('page.ensinoMedio.workload.middle')} {horasPorAno}
-          {t('page.ensinoMedio.workload.middle2')}{' '}
-          <em>{t('page.ensinoMedio.workload.lesson')}</em>{' '}
-          {t('page.ensinoMedio.workload.equiv')}{' '}
-          <em>{t('page.ensinoMedio.workload.class')}</em>{' '}
-          {t('page.ensinoMedio.workload.groups')}{' '}
-          <Link href="/manifesto" className="text-clube-teal">
-            {t('page.ensinoMedio.workload.manifesto')}
-          </Link>
-          .
-        </p>
-      </section>
-
       <HashOpener />
 
       <section className="space-y-3">
@@ -210,6 +194,25 @@ export function EnsinoMedioPageContent({
             </details>
           )
         })}
+      </section>
+
+      {/* Workload note — placed below the year accordion (after Ano 3) so
+          the page leads with the curriculum and closes with the
+          comparative-load contextualization. */}
+      <section className="mt-10 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-3 text-xs text-clube-ink/85 sm:p-4 sm:text-sm">
+        <p>
+          <strong>{t('page.ensinoMedio.workload.before')}</strong>{' '}
+          {t('page.ensinoMedio.workload.middle')} {horasPorAno}
+          {t('page.ensinoMedio.workload.middle2')}{' '}
+          <em>{t('page.ensinoMedio.workload.lesson')}</em>{' '}
+          {t('page.ensinoMedio.workload.equiv')}{' '}
+          <em>{t('page.ensinoMedio.workload.class')}</em>{' '}
+          {t('page.ensinoMedio.workload.groups')}{' '}
+          <Link href="/manifesto" className="text-clube-teal">
+            {t('page.ensinoMedio.workload.manifesto')}
+          </Link>
+          .
+        </p>
       </section>
 
       <section className="mt-14 rounded-2xl border-l-4 border-clube-teal bg-clube-cream-soft p-6">
