@@ -70,6 +70,7 @@ const themeScript = `
   try {
     var t = localStorage.getItem('theme') || 'dark';
     if (t === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   } catch (_) {
     document.documentElement.classList.add('dark');
   }
@@ -80,7 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} dark`}
       suppressHydrationWarning
     >
       <head>
