@@ -80,15 +80,28 @@ export function generateStaticParams() {
   // (publicado: false) are skipped at SSG time so they neither render nor
   // crash the build with malformed JSX.
   const conteudos = publicadosApenas()
+
+  // BUILD_LOCALE controls which routes this build emits.
+  // - Unset: emit ALL (PT-BR + every translated locale prefix). Used for
+  //   local dev / single-build mode.
+  // - Set: emit ONLY that locale's routes. Matrix-build mode (CI), where
+  //   each locale gets its own job and 11 jobs merge into the final out/.
+  const buildLocale = process.env.BUILD_LOCALE ?? ''
+
   // Paths PT-BR (sem prefixo de locale)
   const ptBR = conteudos.map(({ caminho }) => {
     const [categoria, ...rest] = caminho.split('/')
     return { categoria: categoria!, caminho: rest }
   })
+
+  if (buildLocale === 'pt-BR') return ptBR
+
   // Paths com prefixo de locale (/en/aulas/..., /es/aulas/..., etc.)
-  // Servem o mesmo conteúdo PT-BR até termos traduções no filesystem.
+  // No matrix mode: só o locale-alvo. No single-build mode: todos.
   const localePaths: Array<{ categoria: string; caminho: string[] }> = []
-  for (const localeCode of LOCALE_CODES) {
+  const targetLocales = buildLocale ? [buildLocale] : Array.from(LOCALE_CODES)
+  for (const localeCode of targetLocales) {
+    if (localeCode === 'pt-BR') continue
     for (const c of conteudos) {
       const partes = c.caminho.split('/')
       // Aqui `categoria` recebe o LOCALE; `caminho` recebe categoria+resto
@@ -98,6 +111,7 @@ export function generateStaticParams() {
       })
     }
   }
+  if (buildLocale) return localePaths
   return [...ptBR, ...localePaths]
 }
 

@@ -2,6 +2,8 @@
  * GERADO AUTOMATICAMENTE por scripts/generate-manifest.ts
  * Não edite à mão — rode: pnpm tsx scripts/generate-manifest.ts
  *
+ * Modo: dev/single (allowlist gated)
+ *
  * Cada path mapeia (locale → import dinâmico do MDX).
  * Usar via carregarMdxLocalizado(caminho, locale) em manifest.ts.
  */
