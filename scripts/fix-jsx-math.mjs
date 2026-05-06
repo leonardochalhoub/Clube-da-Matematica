@@ -33,14 +33,17 @@ async function processFile(path) {
     if (processThisLine) {
       // Replace each $...$ that contains { or < or > with <Eq>{`...`}</Eq>
       // Skip if the match is inside an existing <Eq>{`...`}</Eq>
-      const newLine = line.replace(/\$([^$\n]+?)\$/g, (match, mathContent, offset) => {
+      // Match $...$ but NOT \$...\$ (escaped dollars are currency markers, not math)
+      const newLine = line.replace(/(?<!\\)\$([^$\n]+?)(?<!\\)\$/g, (match, mathContent, offset) => {
         // Check it's not already inside a <Eq>{` ... `}</Eq> by inspecting char to the left
         const before = line.slice(Math.max(0, offset - 8), offset)
         const after = line.slice(offset + match.length, offset + match.length + 8)
         if (before.endsWith('<Eq>{`') || before.includes('<Eq>{`') && !after.startsWith('`}</Eq>')) {
           return match
         }
-        // Only convert if math contains { or < or > (problematic chars)
+        // Skip if math content contains \$ (escaped dollar = currency)
+        if (mathContent.includes('\\$')) return match
+        // Only convert if math contains { or < or > (problematic chars in JSX)
         if (!/[{<>]/.test(mathContent)) return match
         // Escape backslashes for template literal
         const esc = mathContent.replace(/\\/g, '\\\\')
