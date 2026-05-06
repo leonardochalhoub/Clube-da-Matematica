@@ -111,9 +111,154 @@ Antes de declarar pronto, rodo este check mental:
 - Mix de mecanismos: bate com a faixa-alvo (50-60% / 25-35% / 5-10% / 5-10%)?
 - Diferenciação de portas: o registro da porta `5` é genuinamente diferente do registro da porta `25`?
 - Síntese mecânica: rodo `npm run validate-content` e `grep -c "opcoes={\[" arquivo.mdx` (deve ser ≤10% do total)
-- MDX traps: nenhum `.map()` em SVG, nenhum `\\` em `resposta="..."`, nenhum `<Equation>{`...`}</Equation>`
+- **MDX/JSX traps** (ver seção "MDX gotchas que QUEBRAM build" abaixo) — uma sweep dedicada antes de declarar pronto.
 
 Se algum check falhar, corrijo antes de declarar pronto.
+
+## MDX gotchas que QUEBRAM build (lições aprendidas em sangue)
+
+Estas são as armadilhas reais que quebraram a build do orquestrador depois que eu entreguei lições. **Antes de declarar pronto, rode mentalmente cada check abaixo.** O `npm run validate-content` NÃO pega esses bugs — só o `next build` os encontra (lentamente). Use `node scripts/check-mdx-modified.mjs <file>` pra um check rápido isolado.
+
+### 1. NUNCA escreva `$math$` cru dentro de JSX expression body
+
+Se a lição tem `solucao={<>...</>}`, `passos={<>...</>}`, ou `legenda={<>...</>}`, o conteúdo do fragment é JSX, **não markdown**. O `remark-math` não roda lá dentro. Pior: `{` é interpretado como abertura de expressão JSX.
+
+```mdx
+// ERRADO — quebra na build com "ReferenceError: u is not defined"
+solucao={<>O vetor $\vec{u}$ é projeção de $\vec{v}$.</>}
+
+// CERTO — use <Eq>{`...`}</Eq> sempre
+solucao={<>O vetor <Eq>{`\\vec{u}`}</Eq> é projeção de <Eq>{`\\vec{v}`}</Eq>.</>}
+```
+
+Mesmo `$x$` (sem braces) dentro de `<>...</>` vira texto JSX `$x$` literal — KaTeX não renderiza. Sempre `<Eq>` em JSX expression bodies.
+
+### 2. NUNCA escreva `$math$` ou `$$math$$` dentro de `<Definicao>`, `<Teorema>`, `<Insight>`
+
+Esses são JSX block elements. Mesmo com blank lines separando, MDX trata o conteúdo como JSX (não markdown puro). Math com `{` quebra.
+
+```mdx
+// ERRADO
+<Definicao titulo="X">
+
+O limite $\lim_{x \to a} f(x) = L$ se ε,δ ...
+
+</Definicao>
+
+// CERTO
+<Definicao titulo="X">
+
+O limite <Eq>{`\\lim_{x \\to a} f(x) = L`}</Eq> se ε,δ ...
+
+</Definicao>
+
+// para display math use:
+<Eq display>{`\\lim_{x \\to a} f(x) = L`}</Eq>
+```
+
+### 3. Tabelas markdown com `|...|` dentro de cells
+
+GFM usa `|` como separador de cell. Se uma cell tem `$|x|$` (módulo), o `|` é interpretado como início de nova cell e a tabela quebra.
+
+```mdx
+// ERRADO
+| Tipo | Fórmula |
+| Distância | $|x_1 - x_2|$ |   ← os | dentro de math quebram tabela
+
+// CERTO
+| Distância | $\lvert x_1 - x_2 \rvert$ |
+```
+
+### 4. Bracket-order em `<Eq>{`...`}</Eq>`
+
+Sempre `<Eq>{`expr`}</Eq>`. Nunca `<Eq>{`expr`</Eq>}` ou `<Eq>{`expr`</Eq></Eq>`. Esses bugs são de escrita rápida e quebram com "Could not parse expression with acorn".
+
+### 5. NUNCA `$math$` dentro de attribute string ou JSON value
+
+Em `texto: "$\\vec{u}$"`, é uma string JS — KaTeX renderiza no runtime via `renderInline()`. Esse caso é OK porque vai pra função que processa `$...$` antes de injetar como JSX.
+
+### 6. SVGs precisam de `</g>` se abriram `<g>`
+
+Tag balance é validado pelo MDX/JSX parser. Não esqueça `</g>` antes de `</svg>`.
+
+### 7. NUNCA use `.map()` ou outras expressões dentro de SVG
+
+```mdx
+// ERRADO
+{[1,2,3].map(i => <circle key={i} cx={i*10} />)}
+
+// CERTO — escreva cada elemento à mão
+<circle cx="10" />
+<circle cx="20" />
+<circle cx="30" />
+```
+
+### 8. `\\` em `resposta="..."` quebra
+
+```mdx
+// ERRADO
+resposta="$\\sqrt{2}$"
+
+// CERTO
+resposta="$\sqrt{2}$"
+```
+
+`resposta` é string. JSX strings já fazem escape de `\`, então `\\` vira `\\` literal.
+
+### 9. Currency: `R\$` em prosa, NUNCA dentro de `$...$`
+
+```mdx
+// CERTO em prosa MDX
+O custo é R\$ 50.
+
+// CERTO em JSX expression body
+O custo é R\$ 50 ou <Eq>{`\\mathrm{R\\$ }50`}</Eq>.
+
+// ERRADO
+O custo é $R\$ 50$ por unidade.   ← \$ dentro de math quebra
+```
+
+### 10. Bare `<` seguido de espaço-dígito vira tag JSX inválida
+
+```mdx
+// ERRADO em JSX text
+<li>Rank 2 < 3</li>     ← `<` é interpretado como início de tag
+
+// CERTO
+<li>Rank 2 menor que 3</li>
+<li>Rank <Eq>{`2 < 3`}</Eq></li>
+```
+
+### 11. Bare `{...}` em JSX text é expressão JS
+
+```mdx
+// ERRADO — JSX vê {A,B} como expressão JS, A e B não estão definidos
+<li>Trate {A, B} como bloco</li>
+
+// CERTO
+<li>Trate <Eq>{`\\{A,B\\}`}</Eq> como bloco</li>
+```
+
+### 12. Frontmatter sempre tem `versao: "v1"` quando entregue por mim
+
+```yaml
+versao: "v1"
+atualizadoEm: "2026-MM-DD"
+publicado: true
+```
+
+### Sweep antes de declarar pronto
+
+```bash
+# 1. validate-content (valida frontmatter)
+npm run validate-content
+
+# 2. MDX compile check (pega 90% dos bugs sem precisar de full build)
+node scripts/check-mdx-modified.mjs path/to/lesson.mdx
+
+# 3. ÓPTICO: rode o auto-fixer pra converter $math{}$ órfão em JSX expr bodies
+node scripts/fix-jsx-math.mjs path/to/lesson.mdx
+```
 
 ### Passo 6 — set publicado: true e devolvo
 
