@@ -1,480 +1,927 @@
 ---
-titulo: "Lição 110 — Consolidação Trim 11"
+titulo: "Lição 110 — Consolidação Trim 11: Inferência Estatística"
 slug: "licao-110-consolidacao-trim-11"
 categoria: "aulas"
 subcategoria: "ano-3-trim-11"
-descricao: "Workshop de estatística inferencial: IC, testes, regressão, ANOVA, Bayes."
+descricao: "Workshop de síntese do trim 11: IC para média, testes z e t, ANOVA, qui-quadrado, regressão simples e múltipla, e inferência bayesiana — todos os pilares da estatística inferencial em um mapa integrado."
 ordem: 110
 publicado: true
-tags: ["estatística inferencial", "ano-3", "trim-11"]
-prerrequisitos: ["licao-109"]
+tags: ["estatística inferencial", "intervalo de confiança", "teste de hipótese", "regressão", "ANOVA", "qui-quadrado", "bayes", "ano-3", "trim-11"]
+prerrequisitos: ["licao-109-bayes"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-versao: "v0"
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM / Stochastik LK alemão", "Math B japonês (Estatística)", "H2 Mathematics (Singapura) — Statistics"]
+versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="\hat\theta \pm \text{margem}; \quad p\!=\!P(T\!\geq\!t_{obs} \mid H_0); \quad P(\theta \mid D) \propto P(D \mid \theta) P(\theta)"
-  legenda={<>O <strong>trim 11 inteiro</strong> em uma equação: estimar com IC, testar com p-valor, atualizar crença com Bayes. Tudo é variação dessa tríade — a inferência estatística vive aí.</>}
-  audioTexto="Consolidação do trimestre onze. Três pilares: intervalo de confiança para estimar; pê-valor para testar; teorema de Bayes para atualizar crenças. Toda inferência estatística é variação dessa tríade."
+  formula="\hat\theta \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}};\quad T = \frac{\bar X - \mu_0}{s/\sqrt{n}};\quad P(\theta \mid D) \propto P(D \mid \theta)\,P(\theta)"
+  legenda={<>O <strong>trim 11 em três equações</strong>: intervalo de confiança para estimar, estatística <Eq>{`T`}</Eq> para testar, e regra de Bayes para atualizar crenças. Toda inferência estatística é variação dessas três formas.</>}
+  audioTexto="O trimestre onze em três equações. Primeira: estimador mais ou menos zê vezes sigma sobre raiz de ene — o intervalo de confiança. Segunda: ene maiúsculo igual a xê barra menos mü zero sobre esse dividido pela raiz de ene — a estatística de teste. Terceira: probabilidade de teta dado dê é proporcional a probabilidade de dê dado teta vezes probabilidade de teta — a regra de Bayes. Toda inferência estatística é variação dessas três formas."
 />
+
+<aside>
+
+**Livros que cobrem esta lição**
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §5–8 (IC, testes, regressão, qui-quadrado) · **CC-BY-SA** · <em>O texto mais pedagógico para síntese de inferência em nível EM avançado; cada capítulo tem exercícios contextualizados com dados reais.</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §8–13 (IC, t, ANOVA, qui-quadrado, regressão) · **CC-BY** · <em>Cobertura sistemática de todos os tópicos do trim 11 com exemplos do cotidiano e tabelas de distribuição integradas.</em>
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Poldrack · Ch. 7–15 (testes, regressão, Bayes) · **CC-BY-NC** · <em>Abordagem moderna com ênfase em reprodutibilidade, tamanho de efeito e crítica ao p-valor — ideal para a porta 40.</em>
+
+</aside>
 
 <DuasPortas>
 
 <Porta nivel="formal" titulo="Síntese formal do trim 11">
 
-### Mapa do trimestre
+### Os três pilares da inferência estatística
 
-| Aula | Tópico | Equação chave |
+<Definicao titulo="Pilar 1 — Estimação por intervalo de confiança">
+
+Seja $X_1, \ldots, X_n \overset{iid}{\sim} N(\mu, \sigma^2)$.
+
+**IC bilateral de nível $1-\alpha$ para $\mu$** ($\sigma$ conhecido):
+
+<Equation explicacao="Intervalo de confiança para média com desvio-padrão populacional conhecido." latex="\bar X \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}}" />
+
+**IC com $\sigma$ desconhecido** — usa distribuição t de Student com $n-1$ graus de liberdade:
+
+<Equation explicacao="Intervalo de confiança para média com desvio-padrão amostral (uso prático mais comum)." latex="\bar X \pm t_{\alpha/2;\,n-1}\frac{s}{\sqrt{n}}" />
+
+**Tamanho amostral** para margem de erro máxima $E$:
+
+<Equation explicacao="Fórmula do tamanho de amostra: quadrado de z vezes sigma, dividido por E ao quadrado." latex="n \geq \left(\frac{z_{\alpha/2}\,\sigma}{E}\right)^2" />
+
+</Definicao>
+
+> "Um intervalo de confiança fornece uma faixa plausível de valores para o parâmetro da população. A interpretação correta: se repetirmos o procedimento muitas vezes, $(1-\alpha)100\%$ dos intervalos construídos conterão o verdadeiro parâmetro." — [OpenIntro Statistics §5.2](https://www.openintro.org/book/os/)
+
+<Definicao titulo="Pilar 2 — Teste de hipótese (visão unificada)">
+
+Todo teste de hipótese segue o mesmo esquema:
+
+1. Enunciar $H_0$ e $H_1$.
+2. Calcular a **estatística de teste** sob $H_0$.
+3. Calcular o **p-valor** = $P(\text{resultado tão ou mais extremo que o observado} \mid H_0)$.
+4. Se $p \leq \alpha$, rejeitar $H_0$.
+
+**Mapa de testes:**
+
+| Cenário | Estatística | Distribuição |
 |---|---|---|
-| 102 | IC média | $\bar X \pm z_{\alpha/2}\sigma/\sqrt n$ |
-| 103 | Teste hipótese | $p \leq \alpha \Rightarrow$ rejeita $H_0$ |
-| 104 | Teste z e t | $T = (\bar X - \mu_0)/(s/\sqrt n)$ |
-| 105 | Regressão simples | $\hat\beta_1 = S_{xy}/S_{xx}$ |
-| 106 | Regressão múltipla | $\hat\beta = (X^TX)^{-1}X^Ty$ |
-| 107 | ANOVA | $F = MS_B/MS_W$ |
-| 108 | Qui-quadrado | $\chi^2 = \sum (O-E)^2/E$ |
-| 109 | Bayes | $P(\theta\|D) \propto P(D\|\theta)P(\theta)$ |
+| 1 média, $\sigma$ conhecido | $Z = (\bar X - \mu_0)/(\sigma/\sqrt{n})$ | $N(0,1)$ |
+| 1 média, $\sigma$ desconhecido | $T = (\bar X - \mu_0)/(s/\sqrt{n})$ | $t_{n-1}$ |
+| 2 médias independentes | Welch $T$ | $t_{\nu}$ (graus de liberdade de Welch) |
+| $k$ médias | $F = MS_B/MS_W$ | $F_{k-1,\,N-k}$ |
+| Tabela de contingência | $\chi^2 = \sum (O-E)^2/E$ | $\chi^2_{(r-1)(c-1)}$ |
+| Proporção vs valor de referência | $Z = (\hat p - p_0)/\sqrt{p_0(1-p_0)/n}$ | $N(0,1)$ |
 
-### Os 3 pilares da inferência
+</Definicao>
 
-1. **Estimação** com IC: faixa plausível para parâmetro.
-2. **Teste** de hipótese: decidir entre $H_0$ e $H_1$.
-3. **Modelagem** preditiva: regressão, ANOVA.
+<Definicao titulo="Pilar 3 — Regressão e modelagem preditiva">
 
-### Sob qual condição cada teste?
+**Regressão linear simples** $\hat Y = \hat\beta_0 + \hat\beta_1 X$:
 
-| Cenário | Teste |
-|---|---|
-| 1 média, $\sigma$ conhecido | Teste z |
-| 1 média, $\sigma$ desconhecido | Teste t |
-| 2 médias independentes | Welch's t |
-| Pareado | t pareado |
-| $k$ médias | ANOVA + Tukey |
-| 2 proporções | z para proporções |
-| Tabela de contingência | $\chi^2$ |
-| Aderência | $\chi^2$ goodness of fit |
-| Predição linear | Regressão |
-| Crença atualizada | Bayes |
+<Equation explicacao="Estimadores de mínimos quadrados ordinárias para regressão simples." latex="\hat\beta_1 = \frac{S_{xy}}{S_{xx}},\quad \hat\beta_0 = \bar Y - \hat\beta_1 \bar X" />
+
+**Regressão múltipla** $\hat{\mathbf{y}} = X\hat{\boldsymbol\beta}$:
+
+<Equation explicacao="Estimador vetorial de mínimos quadrados para regressão múltipla." latex="\hat{\boldsymbol\beta} = (X^\top X)^{-1} X^\top \mathbf{y}" />
+
+**Coeficiente de determinação** e sua versão ajustada:
+
+<Equation explicacao="R-quadrado ajustado penaliza preditores extras que não contribuem para o ajuste." latex="R^2_{\text{adj}} = 1 - \frac{(1-R^2)(n-1)}{n-p-1}" />
+
+</Definicao>
+
+<Teorema titulo="Regra de Bayes para atualização de crenças">
+
+Seja $\theta$ o parâmetro de interesse, $D$ os dados observados:
+
+<Equation explicacao="A distribuição posterior é proporcional à verossimilhança vezes o prior." latex="P(\theta \mid D) = \frac{P(D \mid \theta)\,P(\theta)}{P(D)} \propto P(D \mid \theta)\,P(\theta)" />
+
+**Conjugada Beta-Binomial:** se $\theta \sim \text{Beta}(\alpha, \beta)$ e $X \mid \theta \sim \text{Bin}(n, \theta)$, então:
+
+<Equation explicacao="Distribuição posterior quando o prior é Beta e a verossimilhança é binomial — o prior se atualiza somando sucessos e fracassos." latex="\theta \mid X \sim \text{Beta}(\alpha + X,\; \beta + n - X)" />
+
+</Teorema>
+
+<Insight>
+
+**Unidade profunda.** Regressão linear, ANOVA, teste $t$ e o modelo log-linear do $\chi^2$ são todos casos do **Modelo Linear Geral**: $g(E[Y]) = X\beta$. Dominar o GLM é dominar a inferência paramétrica clássica.
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<defs>
+  <marker id="arr110" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="70" width="110" height="36" rx="6" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="65" y="83" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Pergunta:</text>
+  <text x="65" y="97" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Estimar μ?</text>
+</g>
+<g>
+  <line x1="120" x2="165" y1="88" y2="88" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="167" y="55" width="110" height="36" rx="6" fill="rgb(232 199 122 / 0.25)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="222" y="68" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">IC: X̄ ± t·s/√n</text>
+  <text x="222" y="82" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">n ≥ (z·σ/E)²</text>
+</g>
+<g>
+  <line x1="120" x2="165" y1="95" y2="115" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="167" y="105" width="110" height="36" rx="6" fill="rgb(61 122 95 / 0.25)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="222" y="118" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Teste H₀</text>
+  <text x="222" y="132" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">z / t / F / χ²</text>
+</g>
+<g>
+  <line x1="277" y1="88" x2="322" y2="65" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="324" y="50" width="110" height="36" rx="6" fill="rgb(199 107 63 / 0.25)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="379" y="63" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Predizer Y?</text>
+  <text x="379" y="77" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Regressão OLS</text>
+</g>
+<g>
+  <line x1="277" y1="123" x2="322" y2="123" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="324" y="105" width="110" height="36" rx="6" fill="rgb(100 80 160 / 0.25)" stroke="rgb(100 80 160)" strokeWidth="1.2"/>
+  <text x="379" y="118" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Atualizar crença?</text>
+  <text x="379" y="132" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Teorema de Bayes</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Fluxo de decisão do trim 11 — cada pergunta estatística tem seu método.
+</figcaption>
+</figure>
 
 </Porta>
 
 <Porta nivel="5" titulo="Pra criança de 5 anos">
 
-Você passou o trimestre aprendendo a **falar com números**. Agora sabe:
+Imagina que você quer saber **quantas balas tem numa jarra enorme**.
 
-- Como **dizer o quanto sabe** (IC).
-- Como **decidir se uma ideia é certa** (teste).
-- Como **aprender com o que vê** (Bayes).
+- Você não conta todas — tira um punhado, conta, e **chuta um intervalo**: "deve ter entre 200 e 300 balas". Isso é o **intervalo de confiança**.
+- Seu amigo disse "tem exatamente 150". Você olha o seu punhado e pensa: "isso é muito improvável se fosse 150". Então você diz "não acredito!" — isso é o **teste de hipótese**.
+- Ontem você já sabia um pouco sobre a jarra. Hoje combinou esse "saber de ontem" com o que você contou agora, e ficou mais esperto. Isso é **Bayes** — aprender combinando o que sabia com o que viu.
 
-Estatística é como um **amigo do detetive**: ela te diz o quão certo você pode estar.
+Os três juntos são como ser um **bom detetive de números**.
 
 </Porta>
 
 <Porta nivel="10" titulo="Pra criança de 10 anos">
 
-### O que você sabe agora
+Você passou o trim 11 aprendendo a **tirar conclusões a partir de amostras**.
 
-Antes do trim 11 você sabia **descrever** dados (média, desvio). Agora você sabe **inferir** sobre o **mundo** a partir de uma amostra.
+**O que era e o que é agora:**
 
-### Roteiro de qualquer análise
+Antes, você calculava a média de uma turma inteira — você **tinha** todos os dados. Agora você aprende com uma **amostra** e faz afirmações sobre o **mundo**.
 
-1. **Que pergunta?** (estimar, testar, predizer?)
-2. **Que dados?** (contínuos, categóricos? pareados?)
-3. **Que método?** (use o mapa)
-4. **Suposições OK?**
-5. **Calcule** (Excel, Python, R).
-6. **Interprete e reporte**.
+**Os três métodos:**
 
-### Decision tree mini
+1. **Intervalo de confiança:** "Com 95% de confiança, a nota média da escola fica entre 6,2 e 7,1." Você não sabe o valor exato — dá um intervalo plausível.
 
-- "Quero estimar uma média": IC com t.
-- "Quero testar se média mudou": teste t.
-- "Quero comparar 3+ grupos": ANOVA.
-- "Quero comparar proporções": qui-quadrado.
-- "Quero prever Y a partir de X": regressão.
-- "Quero atualizar crença": Bayes.
+2. **Teste de hipótese:** "A nova apostila melhorou a média?" Você coleta dados, calcula a probabilidade desse resultado se não tivesse melhorado nada (o p-valor), e decide se acredita ou não na mudança.
 
-### Quem usa isso?
+3. **Bayes:** Você já sabia alguma coisa antes de coletar dados. Com Bayes, você combina o que já sabia (prior) com o que observou (dados) e atualiza a crença.
 
-- Médicos: ensaios clínicos.
-- Engenheiros: controle de qualidade, A/B testing.
-- Cientistas: descobertas, replicações.
-- Gerentes: tomada de decisão.
+**Escolhendo o método:**
+
+- Quero estimar uma média: IC com $t$.
+- Quero comparar dois grupos: teste $t$.
+- Quero comparar vários grupos: ANOVA.
+- Quero cruzar duas variáveis categóricas: qui-quadrado.
+- Quero prever $Y$ a partir de $X$: regressão.
+- Quero atualizar minha crença: Bayes.
 
 </Porta>
 
 <Porta nivel="15" titulo="Pra adolescente de 15 anos">
 
-### Síntese: estatística inferencial
+### Síntese: frequentismo vs bayesianismo
 
-**Ponto de vista frequentista** (102-108):
+**Perspectiva frequentista** (aulas 102–108):
 
-- Parâmetros são fixos, dados são aleatórios.
-- IC: cobertura sobre amostras hipotéticas.
-- $p$-valor: probabilidade dos dados sob $H_0$.
+- Parâmetros ($\mu$, $\sigma$, $\beta$) são **constantes desconhecidas** — não têm distribuição.
+- IC: cobertura sobre experimentos hipotéticos repetidos.
+- $p$-valor: "quão improvável seria este resultado se $H_0$ fosse verdadeira?"
 
-**Ponto de vista bayesiano** (109):
+**Perspectiva bayesiana** (aula 109):
 
-- Parâmetros são variáveis aleatórias.
-- Posterior: probabilidade direta sobre $\theta$.
-- Atualização: prior + likelihood = posterior.
+- Parâmetros têm **distribuição de probabilidade** que reflete incerteza.
+- IC credível: "com probabilidade 95% $\theta \in [a, b]$ dados os dados observados."
+- Atualização: prior + verossimilhança = posterior.
 
-### Conexões internas
+### Conexões que o trim 11 revelou
 
-- **Regressão = ANOVA = teste t**: caso particular do modelo linear geral.
-- **$\chi^2 \approx \sum Z_i^2$**: relação com normal.
-- **MAP com prior uniforme = MLE**: bayesiano e frequentista coincidem.
-- **F = T²** quando $k=2$ na ANOVA.
+| Relação | Detalhe |
+|---|---|
+| Regressão com dummy = teste $t$ | 1 preditora binária → intercepto e coeficiente são as médias dos grupos |
+| ANOVA = regressão com $k-1$ dummies | F geral do modelo = F da ANOVA |
+| $F = T^2$ quando $k = 2$ | ANOVA com 2 grupos é idêntica ao teste $t$ bilateral |
+| MAP com prior uniforme = MLE | frequentismo e bayesianismo coincidem quando você não tem informação prévia |
 
-### Erros recorrentes em todos os métodos
+### Erros recorrentes (nunca cometa esses)
 
-1. **Múltiplas comparações sem correção**.
-2. **Suposições não verificadas** (normalidade, independência).
-3. **Confundir associação com causa**.
-4. **Significância estatística vs prática**.
-5. **$p$-hacking**.
-
-### Boas práticas
-
-- **Pré-registrar** hipóteses.
-- **Power analysis** antes de coletar.
-- **Reportar IC, $p$, tamanho de efeito**.
-- **Diagnóstico de modelo**.
-- **Replicação** quando possível.
-
-### Workshop pessoal
-
-Para cada exercício prático:
-
-1. Identifique o tipo do dado.
-2. Identifique a pergunta.
-3. Escolha o método.
-4. Verifique suposições.
-5. Aplique e reporte completamente.
+1. **$p = 0{,}06$ não é evidência de $H_0$** — é apenas "não rejeitamos $H_0$ ao nível 5%".
+2. **Significância estatística $\neq$ significância prática** — um efeito minúsculo pode ser significativo com $n$ grande.
+3. **Correlação $\neq$ causalidade** — regressão não prova causa.
+4. **$R^2$ alto $\neq$ modelo bom** — pode haver padrões nos resíduos.
+5. **p-hacking** — testar múltiplas hipóteses sem correção de múltiplas comparações infla o erro tipo I.
 
 </Porta>
 
 <Porta nivel="25" titulo="Pra estudante de engenharia">
 
-### Generalização: tudo é modelo linear (quase)
+### Tudo é modelo linear geral (GLM)
 
-Regressão, ANOVA, teste t, $\chi^2$ (em forma log-linear) — todos são casos particulares do **GLM** (modelo linear generalizado):
+Regressão linear, ANOVA, teste $t$, e o modelo log-linear para $\chi^2$ são casos do **modelo linear generalizado**:
 
 $$g(E[Y]) = X\beta$$
 
-| Método | Likelihood | Link |
+| Método | Distribuição de $Y$ | Função de ligação $g$ |
 |---|---|---|
-| Regressão linear | Normal | identidade |
-| ANOVA | Normal | identidade |
-| Logística | Bernoulli | logit |
-| Poisson | Poisson | log |
-| Multinomial | Multinomial | logit multivariado |
+| Regressão linear | Normal | Identidade |
+| ANOVA | Normal | Identidade |
+| Regressão logística | Bernoulli | Logit |
+| Regressão de Poisson | Poisson | Log |
+| Regressão multinomial | Multinomial | Logit multivariado |
 
-Mestre do GLM = mestre da inferência paramétrica clássica.
+Dominar GLM = dominar toda a inferência paramétrica clássica.
 
-### Resampling: paradigma alternativo
+### Resampling: alternativa não-paramétrica
 
-- **Bootstrap**: para IC, EP de qualquer estatística.
-- **Permutação**: para $p$-valor sem suposição paramétrica.
-- **Cross-validation**: para validação preditiva.
+- **Bootstrap:** IC e erro-padrão de qualquer estatística sem hipótese distribucional.
+- **Permutação:** $p$-valor sem suposição de normalidade.
+- **Cross-validation:** avaliação preditiva robusta.
 
-Esses superam paramétrico em muitos cenários reais.
+### Power analysis (subutilizada na prática)
 
-### Frequentista vs Bayesiano: complementares
+Antes de qualquer coleta de dados, calcule o tamanho de amostra para detectar o efeito mínimo relevante com potência de 80%:
 
-| Pergunta | Bom para |
-|---|---|
-| "Que dados são improváveis sob $H_0$?" | Frequentista |
-| "Qual probabilidade de $H$ dado dados?" | Bayesiano |
-| "Decisão sob risco" | Bayesiano |
-| "Long-run error rates" | Frequentista |
+$$n = \frac{2\sigma^2(z_\alpha + z_\beta)^2}{\delta^2}$$
 
-Use ambos, não rivais.
+onde $\delta$ é a diferença mínima detectável, $z_\alpha$ e $z_\beta$ correspondem aos erros tipo I e II.
 
-### Power analysis (subutilizada!)
+Sem power analysis, experimentos morrem antes de nascer — ou produzem resultados inconclusivos que ninguém consegue replicar.
 
-Antes de qualquer coleta:
+### Checklist de análise profissional
 
-```python
-from statsmodels.stats.power import TTestPower
-analysis = TTestPower()
-n = analysis.solve_power(effect_size=0.5, power=0.8, alpha=0.05)
-```
-
-Sem isso, experimentos morrem antes de nascer.
-
-### Reprodutibilidade
-
-- **Pré-registro** (OSF, AsPredicted).
-- **Código aberto**.
-- **Dados públicos** quando ético.
-- **Replicação** independente.
-
-### Workshop integrado
-
-Dado um problema real (ex.: A/B testing em e-commerce):
-
-1. **Define** métrica primária e secundária.
-2. **Power analysis**: $n$ necessário.
-3. **Aleatoriza**: design experimental.
-4. **Coleta**: até $n$ alvo.
-5. **Analisa**: teste z para proporções + IC.
-6. **Reporta**: completo, sem $p$-hacking.
-
-### Implementação master
-
-```python
-import scipy.stats as st
-import statsmodels.api as sm
-import numpy as np
-
-# IC
-mean, se = data.mean(), st.sem(data)
-ci = st.t.interval(0.95, len(data)-1, loc=mean, scale=se)
-
-# Teste t
-t, p = st.ttest_ind(A, B, equal_var=False)
-
-# Regressão
-X = sm.add_constant(x); model = sm.OLS(y, X).fit()
-
-# ANOVA
-F, p = st.f_oneway(g1, g2, g3)
-
-# Qui-quadrado
-chi2, p, dof, exp = st.chi2_contingency(table)
-```
+1. Pré-registrar hipóteses (OSF, AsPredicted).
+2. Power analysis e cálculo de $n$.
+3. Coletar com design controlado (aleatorização, cegamento).
+4. Verificar suposições (normalidade, homocedasticidade, independência).
+5. Reportar: estimativa + IC + tamanho de efeito + $p$-valor.
+6. Diagnóstico de resíduos (regressão).
+7. Correção de múltiplas comparações (Bonferroni, FDR).
 
 </Porta>
 
 <Porta nivel="40" titulo="Pra profissional sênior">
 
-### Filosofia: o que é inferência?
+### Filosofia da inferência estatística
 
-- **Frequentista** (Neyman-Pearson): controlar long-run error rates.
-- **Bayesiano** (Jeffreys, Lindley): atualizar crenças coerentemente.
-- **Likelihoodista** (Fisher, Edwards): comparar verossimilhanças.
-- **Causal** (Pearl, Rubin): estimar contrafactuais.
+Quatro escolas formam o landscape atual:
 
-### Crise de replicação
+- **Frequentista Neyman-Pearson:** controla long-run error rates ($\alpha$, $\beta$). IC tem cobertura frequente, não probabilidade de conter o parâmetro.
+- **Fisheriano:** p-valor como medida contínua de evidência contra $H_0$. Sem dicotomia rejeita/não-rejeita.
+- **Likelihoodista (Edwards):** razão de verossimilhança como medida de evidência entre modelos. Sem prior.
+- **Bayesiano (Jeffreys, Lindley, McElreath):** parâmetros têm distribuições; posterior é a resposta completa. Permite afirmações diretas de probabilidade sobre hipóteses.
 
-2015: Open Science Collaboration — 36% dos resultados em psicologia replicam. Causas:
+Nenhuma é universalmente superior. A escolha depende do contexto, dos objetivos e das suposições que o analista aceita.
 
-1. $p$-hacking, HARKing.
-2. Power analysis ignorada.
-3. Múltiplas comparações.
-4. Dados não compartilhados.
-5. Vieses publicação.
+### Crise de replicação e o que aprendemos
 
-Soluções: pré-registro, replicação direta, código aberto, métricas além de $p < 0{,}05$.
+Em 2015, o Open Science Collaboration replicou 100 estudos em psicologia — apenas 36% replicaram. As causas são instrumentais:
 
-### Modern statistics
+1. P-hacking e HARKing (Hypothesizing After Results are Known).
+2. Power analysis ignorada — efeitos pequenos, amostras insuficientes.
+3. Múltiplas comparações sem correção.
+4. Dados e código não compartilhados.
+5. Viés de publicação (resultados negativos não aparecem).
 
-- **Causal inference**: DAGs, do-calculus, IV, RDD, DiD.
-- **Machine learning**: predição vs inferência. Bias-variance tradeoff.
-- **High-dimensional**: $p \gg n$. Lasso, knockoffs.
-- **Bayesian computation**: HMC, VI, ABC.
-- **Selective inference**: post-selection valid p-values.
+Soluções implementadas na comunidade: pré-registro, replicação direta, ciência aberta, relatórios registrados (registered reports), e métricas além de $p < 0{,}05$ (tamanho de efeito, BIC, Bayes Factor).
 
-### Software stack moderno
+### Fronteira atual
 
-- **R**: tidyverse, brms, lme4, marginaleffects, easystats.
-- **Python**: scipy, statsmodels, pymc, sklearn, lifelines.
-- **Stan**: HMC para qualquer modelo.
-- **JAX**: differentiable programming.
+- **Inferência causal (Pearl, Rubin):** DAGs, do-calculus, variáveis instrumentais, RDD, diferença-em-diferenças. Estatística clássica estima associações; causal inference estima contrafactuais.
+- **High-dimensional:** $p \gg n$. Lasso, ridge, elastic net, knockoffs (Candès) para controle de FDR.
+- **Inferência seletiva:** p-valores válidos pós-seleção de variáveis.
+- **Computação bayesiana:** HMC (Stan), inferência variacional, ABC. Tornou modelos hierárquicos complexos tratáveis.
+- **Modelos preditivos vs inferenciais:** ML maximize precisão preditiva; inferência maximize interpretabilidade e validade causal. Breiman (2001) chamou isso de "duas culturas".
 
-### Etica em estatística
+### Ética em estatística
 
-- **p-hacking** = fraude leve.
-- **Dredge** sem disclosure = fraude.
-- **Não reportar análises pré-especificadas** = fraude.
-
-Veja ASA Statement on $p$-values (2016).
-
-### O que você ainda não viu (futuro)
-
-- Modelos lineares generalizados (GLM).
-- Regressão logística, Poisson, Cox.
-- Modelos mistos / multinível.
-- Análise de sobrevivência.
-- Time series (ARIMA, VAR).
-- ML clássico e profundo.
-- Causal inference formal.
-
-### Cross-domain
-
-Estatística inferencial é a língua franca da ciência empírica. Cada campo tem suas variantes:
-
-- **Medicina**: ITT, NNT, Cox.
-- **Economia**: 2SLS, fixed effects, GMM.
-- **Genética**: GWAS, FDR control.
-- **Marketing**: MMM, attribution, causal forests.
-- **Política**: surveys, RDD em eleições.
-
-Domine os fundamentos (este trim) e cada campo é uma tarde de adaptação.
-
-### Parágrafo final
-
-Estatística é o **antídoto contra ilusões cognitivas**. Sem ela, vendemos histórias bonitas. Com ela, distinguimos sinal de ruído. **Esse é o ferramental** — agora aplique em problemas reais.
+Manipular dados, escolher testes post-hoc sem disclosure, não reportar análises pré-especificadas — são práticas que cruzam a linha da integridade científica. O ASA Statement on P-Values (2016) é uma leitura obrigatória para qualquer profissional.
 
 </Porta>
 
 <Porta nivel="pratica" titulo="Aplicação prática">
 
-**Workshop final: aplique tudo.**
+### Caso 1 — Preço médio de aluguel em São Paulo
 
-### Caso 1: A/B testing
+Uma imobiliária amostrou $n = 49$ apartamentos de 2 quartos na zona sul. Média amostral R\$ 2.850/mês, desvio-padrão amostral R\$ 420/mês.
 
-Versão A vs B do checkout. Métrica: conversão. $n_A = n_B = 5000$, $s_A = 250$, $s_B = 290$.
+**IC 95% para o preço médio:**
+$t_{0,025;\,48} \approx 2{,}011$. Margem: $2{,}011 \times 420/7 = 120{,}66$.
+IC: R\$ 2.729 a R\$ 2.971.
 
-1. **Frequentista**: teste z para proporções.
-2. **Bayesiano**: posterior $\text{Beta}(s+1, n-s+1)$, $P(\theta_B > \theta_A)$ via simulação.
-3. **Reporte**: ambos.
+**Teste:** A prefeitura alega que o aluguel médio é R\$ 2.700. $T = (2850 - 2700)/(420/7) = 2{,}50$. p-valor bilateral $\approx 0{,}016 < 0{,}05$. Rejeita-se $H_0$.
 
-### Caso 2: ensaio clínico
+### Caso 2 — Comparação de grupos no ENEM
 
-Droga vs placebo, $n=200$ cada, redução de pressão (mmHg). $\bar D_{\text{droga}} = 8 \pm 4$, $\bar D_{\text{placebo}} = 2 \pm 4$.
+Alunos de escola pública (grupo 1, $n_1 = 200$, $\bar X_1 = 540$, $s_1 = 80$) vs privada (grupo 2, $n_2 = 200$, $\bar X_2 = 590$, $s_2 = 75$). Welch $T$, IC 95% para a diferença.
 
-1. Welch t-test.
-2. Tamanho de efeito Cohen's d.
-3. IC 95% para diferença.
+### Caso 3 — A/B testing de uma landing page
 
-### Caso 3: regressão preditiva
+Versão A: 120 conversões em 1000 visitantes. Versão B: 150/1000. Teste z para diferença de proporções:
+$\hat p_A = 0{,}12$, $\hat p_B = 0{,}15$, $\hat p = 0{,}135$.
+$Z = (0{,}15 - 0{,}12)/\sqrt{0{,}135 \cdot 0{,}865 \cdot (1/1000 + 1/1000)} = 2{,}09$.
+p-valor bilateral $\approx 0{,}037 < 0{,}05$. B é melhor ao nível 5%.
 
-Preço de imóvel vs $m^2$, quartos, idade. $n=200$ casas.
+### Caso 4 — Fertilizantes e produtividade (ANOVA)
 
-1. Ajuste OLS múltipla.
-2. VIF para colinearidade.
-3. Diagnóstico de resíduos.
-4. $R^2_{\text{adj}}$.
-5. Predição com IC.
+4 fertilizantes, 25 plantas cada, produtividade (kg/ha). ANOVA $F(3, 96)$. Se $F > F_{0,05;\,3,96} \approx 2{,}70$, algum fertilizante difere. Post-hoc: Tukey HSD.
 
-### Caso 4: ANOVA com post-hoc
+### Caso 5 — Regressão de preço de imóvel
 
-4 fertilizantes, 25 plantas cada. Rendimento médio.
+$Y$ = preço (R\$ mil), $X_1 = m^2$, $X_2$ = número de quartos, $X_3$ = idade (anos). Ajuste OLS com $n = 200$ imóveis. Interpretação de cada $\hat\beta_i$, $R^2_{\text{adj}}$, e diagnóstico de resíduos.
 
-1. Levene + Shapiro-Wilk.
-2. ANOVA.
-3. Tukey HSD.
-4. $\eta^2$.
+### Caso 6 — Bayes em controle de qualidade
 
-### Caso 5: tabela de contingência
-
-Marca $\times$ região: 5x4 tabela. Independência?
-
-1. $\chi^2$ test.
-2. Cramér's V.
-3. Resíduos padronizados.
-
-### Caso 6: bayesiano end-to-end
-
-Conversão de feature toggle: prior $\text{Beta}(2, 8)$, observa 30/100.
-
-1. Posterior.
-2. IC credível 95%.
-3. $P(\theta > 0{,}25 | D)$ via simulação.
-
-### Workflow profissional
-
-```python
-def analyze_ab_test(s_A, n_A, s_B, n_B):
-    from scipy import stats
-    import numpy as np
-
-    # Frequentista
-    p_A, p_B = s_A/n_A, s_B/n_B
-    pooled = (s_A + s_B) / (n_A + n_B)
-    se = np.sqrt(pooled * (1-pooled) * (1/n_A + 1/n_B))
-    z = (p_B - p_A) / se
-    p_value = 2 * (1 - stats.norm.cdf(abs(z)))
-
-    # Bayesiano
-    A = np.random.beta(s_A + 1, n_A - s_A + 1, 100000)
-    B = np.random.beta(s_B + 1, n_B - s_B + 1, 100000)
-    prob_B_better = (B > A).mean()
-
-    return dict(p_value=p_value, prob_B_better=prob_B_better, lift=p_B/p_A - 1)
-```
-
-### Checklist final
-
-- [ ] Hipótese pré-registrada
-- [ ] Power analysis feita
-- [ ] Suposições verificadas
-- [ ] Teste correto aplicado
-- [ ] IC reportado
-- [ ] Tamanho de efeito reportado
-- [ ] Visualizações
-- [ ] Código reproduzível
-- [ ] Limitações discutidas
-- [ ] Implicações práticas claras
-
-### Sua próxima aula (Trim 12 ou Engenharia/Física)
-
-Você está pronto para:
-
-- Modelos lineares generalizados.
-- Análise de sobrevivência.
-- Modelos hierárquicos.
-- Causal inference formal.
-- Machine learning supervisionado.
-
-Estatística inferencial **não acabou** aqui — você só **abriu a porta**.
+Proporção de defeitos $\theta$ em lote de peças. Prior: $\text{Beta}(2, 18)$ (experiência: ~10% defeitos). Inspeciona-se $n = 50$, encontra $x = 8$ defeitos. Posterior: $\text{Beta}(10, 60)$. Média posterior: $10/70 \approx 14{,}3\%$. IC credível 95% via quantis da Beta.
 
 </Porta>
 
 </DuasPortas>
 
+## Exemplos resolvidos
+
+<Exemplo titulo="IC 95% para nota média do ENEM (desvio desconhecido)" numero="1">
+
+**Problema.** Uma amostra de $n = 36$ candidatos do ENEM 2023 na disciplina de Matemática apresentou média $\bar X = 580$ pontos e desvio-padrão amostral $s = 90$ pontos. Construa um IC 95% para a nota média populacional $\mu$.
+
+**Estratégia.** Como $\sigma$ é desconhecido, usa-se a distribuição $t$ com $n - 1 = 35$ graus de liberdade. Localize $t_{0,025;\,35}$ em tabela.
+
+**Resolução.**
+
+$t_{0,025;\,35} = 2{,}030$.
+
+Margem de erro: $E = 2{,}030 \times \frac{90}{\sqrt{36}} = 2{,}030 \times 15 = 30{,}45$.
+
+IC 95%: $(580 - 30{,}45\;;\; 580 + 30{,}45) = (549{,}55\;;\; 610{,}45)$.
+
+**Verificação.** A margem cresce com $s$ e diminui com $\sqrt{n}$. Para $n = 144$, a margem seria $2{,}030 \times 90/12 = 15{,}2$ — metade, pois quadruplicamos o $n$.
+
+**Fonte.** [OpenIntro Statistics §5.2](https://www.openintro.org/book/os/) — Exercício 5.5, p. 222 · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Teste t de uma amostra vs meta governamental" numero="2">
+
+**Problema.** O governo afirma que o tempo médio de atendimento em UBSs é $\mu_0 = 20$ minutos. Uma auditoria amostra $n = 25$ atendimentos: $\bar X = 24{,}8$ min, $s = 7{,}2$ min. Ao nível $\alpha = 5\%$, há evidência de que a média real supera 20 min?
+
+**Estratégia.** Teste $t$ unilateral à direita ($H_1: \mu > 20$), com $df = 24$.
+
+**Resolução.**
+
+$T = \frac{24{,}8 - 20}{7{,}2/\sqrt{25}} = \frac{4{,}8}{1{,}44} = 3{,}33$.
+
+$t_{0,05;\,24} = 1{,}711$ (unilateral). Como $3{,}33 > 1{,}711$, rejeita-se $H_0$.
+
+p-valor: $P(t_{24} \geq 3{,}33) \approx 0{,}001 < 0{,}05$. Há evidência de que o tempo médio supera 20 minutos.
+
+**Verificação.** IC 95% unilateral inferior: $24{,}8 - 1{,}711 \times 1{,}44 = 22{,}33$ min. O valor $\mu_0 = 20$ está abaixo desse limite, confirmando a rejeição.
+
+**Fonte.** [Statistics, OpenStax §9.4](https://openstax.org/books/statistics/pages/9-4-comparing-two-independent-population-means) — adaptado do exemplo 9.10, p. 476 · CC-BY.
+
+</Exemplo>
+
+<Exemplo titulo="ANOVA de um fator — produtividade com 3 adubos" numero="3">
+
+**Problema.** Três adubos foram testados em grupos de $n_i = 10$ plantas cada. Produtividade (kg): $\bar X_1 = 12{,}0$, $\bar X_2 = 14{,}5$, $\bar X_3 = 13{,}2$. Média geral $\bar X = 13{,}23$. $SS_W = 162$ (soma dos quadrados intra-grupos). Ao nível 5%, há diferença entre adubos?
+
+**Estratégia.** ANOVA: calcule $SS_B$, obtenha $F$, compare com $F_{0,05;\,2,\,27}$.
+
+**Resolução.**
+
+$SS_B = 10[(12{,}0 - 13{,}23)^2 + (14{,}5 - 13{,}23)^2 + (13{,}2 - 13{,}23)^2]$
+$= 10[1{,}513 + 1{,}613 + 0{,}001] = 31{,}27$.
+
+$MS_B = 31{,}27/2 = 15{,}64$; $MS_W = 162/27 = 6{,}00$.
+
+$F = 15{,}64 / 6{,}00 = 2{,}61$.
+
+$F_{0,05;\,2,\,27} \approx 3{,}35$. Como $2{,}61 < 3{,}35$, **não se rejeita $H_0$** — não há evidência de diferença entre os adubos ao nível 5%.
+
+**Verificação.** p-valor $\approx 0{,}092 > 0{,}05$. Resultado consistente. Com $n_i = 20$ por grupo, o poder seria maior e poderia haver rejeição.
+
+**Fonte.** [OpenIntro Statistics §7.5](https://www.openintro.org/book/os/) — estrutura baseada no exemplo de ANOVA, p. 319 · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Regressão linear simples — salário vs anos de experiência" numero="4">
+
+**Problema.** Com $n = 20$ profissionais: $\bar X = 8$ anos, salário médio R\$ 6.200 ($\bar Y = 6.200$), $S_{xx} = 180$, $S_{xy} = 54.000$. Ajuste o modelo de regressão e interprete os coeficientes.
+
+**Estratégia.** Calcule $\hat\beta_1$ e $\hat\beta_0$ pelas fórmulas de mínimos quadrados; interprete no contexto.
+
+**Resolução.**
+
+$\hat\beta_1 = S_{xy}/S_{xx} = 54.000/180 = 300$.
+
+$\hat\beta_0 = \bar Y - \hat\beta_1 \bar X = 6.200 - 300 \times 8 = 3.800$.
+
+Modelo: $\hat Y = 3.800 + 300\,X$ (em reais, $X$ em anos).
+
+**Interpretação.** Cada ano adicional de experiência está associado a um aumento médio de R\$ 300 no salário. O intercepto R\$ 3.800 é o salário estimado para 0 anos de experiência (extrapolação — use com cautela).
+
+**Verificação.** Para $X = 10$ anos: $\hat Y = 3.800 + 3.000 = 6.800$ reais (R\$ 6.800). Plausível dado $\bar Y = 6.200$ para $\bar X = 8$.
+
+**Fonte.** [OpenIntro Statistics §8.2](https://www.openintro.org/book/os/) — baseado no Exercício 8.13 (dados de salários), p. 360 · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Atualização bayesiana — proporção de defeitos em linha de produção" numero="5">
+
+**Problema.** Um engenheiro de qualidade acredita a priori que a proporção de defeitos $\theta$ em uma linha tem distribuição $\text{Beta}(3, 17)$ (média prior $= 3/20 = 15\%$). Inspeciona $n = 40$ peças e encontra $X = 4$ defeitos. Qual é a distribuição posterior e qual é a nova estimativa pontual para $\theta$?
+
+**Estratégia.** Usar conjugada Beta-Binomial: posterior $= \text{Beta}(\alpha + X, \beta + n - X)$.
+
+**Resolução.**
+
+Posterior: $\text{Beta}(3 + 4,\; 17 + 40 - 4) = \text{Beta}(7, 53)$.
+
+Média posterior: $7/(7+53) = 7/60 \approx 11{,}7\%$.
+
+IC credível 95%: quantis 2,5% e 97,5% da $\text{Beta}(7, 53)$, aproximadamente $[0{,}049;\; 0{,}221]$.
+
+**Verificação.** Antes: média prior 15%. Depois de ver 4 defeitos em 40 (MLE = 10%), a posterior desloca para 11,7% — média ponderada entre prior e dados. Com amostras maiores, a posterior se aproximaria cada vez mais do MLE.
+
+**Fonte.** [Statistical Thinking for the 21st Century, Ch. 15](https://statsthinking21.org/) — estrutura do exemplo Beta-Binomial, §15.3 · CC-BY-NC.
+
+</Exemplo>
+
 <ListaExercicios seed="licao-110-consolidacao-trim-11">
 
-<Exercicio numero="110.1" dificuldade="aplicacao">$n=64$, $\bar x = 50$, $s = 8$. IC 95% para média.</Exercicio>
-<Exercicio numero="110.2" dificuldade="aplicacao">Teste $H_0: \mu = 48$ com dados acima. $T$ e conclusão.</Exercicio>
-<Exercicio numero="110.3" dificuldade="aplicacao">2 amostras: $\bar x_1 = 100$, $s_1=10$, $n_1=50$; $\bar x_2 = 95$, $s_2=12$, $n_2=60$. Welch $T$.</Exercicio>
-<Exercicio numero="110.4" dificuldade="aplicacao">3 grupos: médias 10, 12, 14. $n=20$ cada. ANOVA $F$ se $\sigma^2 \approx 4$.</Exercicio>
-<Exercicio numero="110.5" dificuldade="aplicacao">Regressão $\hat Y = 5 + 2X$. Predição em $X=10$.</Exercicio>
-<Exercicio numero="110.6" dificuldade="aplicacao">$R^2 = 0{,}8$, $n=50$, $p=4$. $R^2_{\text{adj}}$.</Exercicio>
-<Exercicio numero="110.7" dificuldade="aplicacao">Tabela 2x3 com $\chi^2 = 8$. $df$ e conclusão.</Exercicio>
-<Exercicio numero="110.8" dificuldade="aplicacao">Prior $\text{Beta}(2,2)$. Após 8/10 sucessos, posterior.</Exercicio>
-<Exercicio numero="110.9" dificuldade="aplicacao">Posterior média no exercício acima.</Exercicio>
-<Exercicio numero="110.10" dificuldade="aplicacao">$z_{0{,}025}$. (Resp: $1{,}96$.)</Exercicio>
-<Exercicio numero="110.11" dificuldade="aplicacao">$t_{0{,}025; 19}$. (Resp: $2{,}093$.)</Exercicio>
-<Exercicio numero="110.12" dificuldade="aplicacao">$F_{0{,}05; 2, 27}$. (Resp: $\sim 3{,}35$.)</Exercicio>
-<Exercicio numero="110.13" dificuldade="aplicacao">$\chi^2_{0{,}05; 4}$. (Resp: $9{,}488$.)</Exercicio>
-<Exercicio numero="110.14" dificuldade="aplicacao">Identifique o teste apropriado: comparar 2 médias independentes.</Exercicio>
-<Exercicio numero="110.15" dificuldade="aplicacao">Identifique o teste: tabela de gênero $\times$ partido em 100 pessoas.</Exercicio>
-<Exercicio numero="110.16" dificuldade="aplicacao">Identifique o teste: 4 dosagens de droga, perda de peso.</Exercicio>
-<Exercicio numero="110.17" dificuldade="aplicacao">Identifique o teste: peso antes/depois de dieta em 20 pessoas.</Exercicio>
-<Exercicio numero="110.18" dificuldade="aplicacao">$Z=2{,}1$. $p$-valor bilateral.</Exercicio>
-<Exercicio numero="110.19" dificuldade="aplicacao">Tamanho amostral para $E=2$, $\sigma=10$, IC 95%.</Exercicio>
-<Exercicio numero="110.20" dificuldade="aplicacao">Cohen's $d=0{,}5$: tamanho de efeito convencional?</Exercicio>
-<Exercicio numero="110.21" dificuldade="aplicacao">Cramér's $V = 0{,}25$: tamanho?</Exercicio>
-<Exercicio numero="110.22" dificuldade="aplicacao">$\eta^2 = 0{,}10$: tamanho?</Exercicio>
-<Exercicio numero="110.23" dificuldade="aplicacao">$BF_{10} = 5$: força da evidência.</Exercicio>
-<Exercicio numero="110.24" dificuldade="aplicacao">Distinção 1 frase: IC vs IC credível.</Exercicio>
-<Exercicio numero="110.25" dificuldade="aplicacao">Distinção 1 frase: erro tipo I vs II.</Exercicio>
-<Exercicio numero="110.26" dificuldade="aplicacao">Distinção 1 frase: significância estatística vs prática.</Exercicio>
-<Exercicio numero="110.27" dificuldade="aplicacao">Distinção 1 frase: associação vs causalidade.</Exercicio>
-<Exercicio numero="110.28" dificuldade="aplicacao">Distinção 1 frase: pareado vs independente.</Exercicio>
-<Exercicio numero="110.29" dificuldade="aplicacao">Distinção 1 frase: $R^2$ vs $R^2_{\text{adj}}$.</Exercicio>
-<Exercicio numero="110.30" dificuldade="aplicacao">Distinção 1 frase: prior vs posterior.</Exercicio>
-<Exercicio numero="110.31" dificuldade="modelagem">A/B testing: $A$: 80/1000; $B$: 110/1000. Frequentista E bayesiano. Compare conclusões.</Exercicio>
-<Exercicio numero="110.32" dificuldade="modelagem">Ensaio clínico: droga reduz pressão, $\bar D = 7$ mmHg, $s = 5$, $n=64$. Teste t pareado, IC 95%.</Exercicio>
-<Exercicio numero="110.33" dificuldade="modelagem">Preço de casa: $m^2$ explica 70% da variância. Adicionar quartos sobe para 78%. Vale a pena?</Exercicio>
-<Exercicio numero="110.34" dificuldade="modelagem">5 dietas, 30 pessoas cada. ANOVA + Tukey. Esboce relatório completo.</Exercicio>
-<Exercicio numero="110.35" dificuldade="modelagem">Pesquisa eleitoral em 4 regiões $\times$ 3 candidatos. $\chi^2$ e Cramér's V.</Exercicio>
-<Exercicio numero="110.36" dificuldade="compreensao">Justifique por que $p = 0{,}06$ não é "evidência de $H_0$".</Exercicio>
-<Exercicio numero="110.37" dificuldade="compreensao">Mostre que regressão simples com 2 grupos via dummy = teste t.</Exercicio>
-<Exercicio numero="110.38" dificuldade="compreensao">Explique por que ANOVA $F = T^2$ quando $k=2$.</Exercicio>
-<Exercicio numero="110.39" dificuldade="compreensao">Mostre que MLE com prior uniforme = MAP.</Exercicio>
-<Exercicio numero="110.40" dificuldade="desafio">Implemente em pseudocódigo um pipeline completo: power analysis → coleta → teste → IC → relatório.</Exercicio>
-<Exercicio numero="110.41" dificuldade="desafio">Compare em texto detalhado: quando preferir frequentista vs bayesiano em A/B testing online?</Exercicio>
-<Exercicio numero="110.42" dificuldade="demonstracao">Demonstre via integração que se $\theta \sim \text{Beta}(\alpha,\beta)$ e $X|\theta \sim \text{Bin}(n, \theta)$, então $\theta|X \sim \text{Beta}(\alpha+X, \beta+n-X)$.</Exercicio>
+<Exercicio
+  numero="110.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.1", pagina: "213", exercicio: "5.1", licenca: "CC-BY-SA" }}
+  solucao={<>IC 95%: <Eq>{`\\bar X \\pm z_{0,025}\\,\\sigma/\\sqrt{n} = 50 \\pm 1{,}96 \\times 8/8 = 50 \\pm 1{,}96`}</Eq>. Intervalo: <Eq>{`(48{,}04\\;; 51{,}96)`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Identifique: <Eq>{`n=64`}</Eq>, <Eq>{`\\bar x = 50`}</Eq>, <Eq>{`\\sigma = 8`}</Eq> (conhecido). <em>Por quê:</em> <Eq>{`\\sigma`}</Eq> conhecido → usa-se <Eq>{`z`}</Eq>, não <Eq>{`t`}</Eq>.</li>
+      <li>Valor crítico: <Eq>{`z_{0,025} = 1{,}96`}</Eq>.</li>
+      <li>Margem: <Eq>{`E = 1{,}96 \\times 8/\\sqrt{64} = 1{,}96`}</Eq>.</li>
+      <li>IC: <Eq>{`(48{,}04\\;; 51{,}96)`}</Eq>.</li>
+    </ol>
+    <p><em>Macete:</em> com <Eq>{`n = 64`}</Eq>, <Eq>{`\\sqrt{n} = 8`}</Eq> — cálculo mental rápido.</p>
+  </>}
+>
+$n = 64$, $\bar x = 50$, $\sigma = 8$ (conhecido). Construa o IC 95% para $\mu$.
+</Exercicio>
+
+<Exercicio
+  numero="110.2"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "234", exercicio: "5.15", licenca: "CC-BY-SA" }}
+  solucao={<>Com os mesmos dados (<Eq>{`\\bar x = 50`}</Eq>, <Eq>{`s = 8`}</Eq>, <Eq>{`n=64`}</Eq>): <Eq>{`T = (50-48)/(8/8) = 2`}</Eq>. p-valor bilateral <Eq>{`\\approx 0{,}046`}</Eq>. Rejeita-se <Eq>{`H_0`}</Eq> ao nível 5%.</>}
+>
+Com os dados do exercício anterior ($\bar x = 50$, $s = 8$, $n = 64$), teste $H_0: \mu = 48$ vs $H_1: \mu \neq 48$ ao nível 5%. Calcule $T$ e decida.
+</Exercicio>
+
+<Exercicio
+  numero="110.3"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/10-1-comparing-two-independent-population-means", secao: "§10.1", pagina: "497", exercicio: "ex. 10.1", licenca: "CC-BY" }}
+  solucao={<>Welch: <Eq>{`T = (100-95)/\\sqrt{100/50 + 144/60} = 5/\\sqrt{4{,}4} \\approx 5/2{,}098 \\approx 2{,}38`}</Eq>. Com graus de liberdade de Welch <Eq>{`\\approx 106`}</Eq>, p-valor <Eq>{`\\approx 0{,}019`}</Eq>. Rejeita-se <Eq>{`H_0`}</Eq>.</>}
+>
+Duas amostras independentes: $\bar x_1 = 100$, $s_1 = 10$, $n_1 = 50$; $\bar x_2 = 95$, $s_2 = 12$, $n_2 = 60$. Execute o teste Welch $t$ bilateral ao nível 5%.
+</Exercicio>
+
+<Exercicio
+  numero="110.4"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "318", exercicio: "7.27", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`SS_B = 20[(10-12)^2+(12-12)^2+(14-12)^2] = 20 \\cdot 8 = 160`}</Eq>. <Eq>{`MS_B = 80`}</Eq>. Se <Eq>{`MS_W = \\sigma^2 = 4`}</Eq> então <Eq>{`F = 80/4 = 20`}</Eq>. <Eq>{`F_{0,05;2,57} \\approx 3{,}16`}</Eq>. Rejeita-se <Eq>{`H_0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Média geral: <Eq>{`\\bar X = (10+12+14)/3 = 12`}</Eq>.</li>
+      <li><Eq>{`SS_B = 20\\sum(\\bar X_i - \\bar X)^2 = 20(4+0+4) = 160`}</Eq>. <em>Por quê:</em> <Eq>{`n_i = 20`}</Eq> plantas por grupo.</li>
+      <li><Eq>{`MS_B = SS_B/(k-1) = 160/2 = 80`}</Eq>.</li>
+      <li><Eq>{`F = MS_B/MS_W = 80/4 = 20 \\gg 3{,}16`}</Eq>. Rejeita fortemente.</li>
+    </ol>
+    <p><em>Observação:</em> Com <Eq>{`F = 20`}</Eq> e <Eq>{`F_{crit} \\approx 3{,}16`}</Eq>, o p-valor é minúsculo — efeito enorme.</p>
+  </>}
+>
+Três grupos com $n_i = 20$ plantas cada, médias $\bar X_1 = 10$, $\bar X_2 = 12$, $\bar X_3 = 14$. Supondo $\sigma^2 = 4$ (variância intra-grupos), calcule $F$ da ANOVA e decida ao nível 5%.
+</Exercicio>
+
+<Exercicio
+  numero="110.5"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "348", exercicio: "8.1", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`\\hat Y = 5 + 2 \\times 10 = 25`}</Eq>.</>}
+>
+Modelo ajustado: $\hat Y = 5 + 2X$. Qual é a predição pontual para $X = 10$?
+</Exercicio>
+
+<Exercicio
+  numero="110.6"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "655", exercicio: "ex. 12.9", licenca: "CC-BY" }}
+  solucao={<><Eq>{`R^2_{\\text{adj}} = 1 - (1 - 0{,}8)(50-1)/(50-4-1) = 1 - 0{,}2 \\times 49/45 = 1 - 0{,}2178 \\approx 0{,}782`}</Eq>.</>}
+>
+$R^2 = 0{,}8$, $n = 50$, $p = 4$ preditores. Calcule $R^2_{\text{adj}}$.
+</Exercicio>
+
+<Exercicio
+  numero="110.7"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "291", exercicio: "6.33", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela <Eq>{`2 \\times 3`}</Eq>: <Eq>{`df = (2-1)(3-1) = 2`}</Eq>. <Eq>{`\\chi^2_{0,05;\\,2} = 5{,}991`}</Eq>. Como <Eq>{`\\chi^2 = 8 > 5{,}991`}</Eq>, rejeita-se a hipótese de independência.</>}
+>
+Uma tabela de contingência $2 \times 3$ produziu $\chi^2 = 8$. Quantos graus de liberdade? Há associação ao nível 5%?
+</Exercicio>
+
+<Exercicio
+  numero="110.8"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "ex. 15.1", licenca: "CC-BY-NC" }}
+  solucao={<>Prior: <Eq>{`\\text{Beta}(2, 2)`}</Eq>. Likelihood: <Eq>{`\\text{Bin}(10, \\theta)`}</Eq>, <Eq>{`X = 8`}</Eq>. Posterior: <Eq>{`\\text{Beta}(2+8, 2+10-8) = \\text{Beta}(10, 4)`}</Eq>.</>}
+>
+Prior $\theta \sim \text{Beta}(2, 2)$. Observa-se $X = 8$ sucessos em $n = 10$ ensaios. Qual é a distribuição posterior de $\theta$?
+</Exercicio>
+
+<Exercicio
+  numero="110.9"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "ex. 15.2", licenca: "CC-BY-NC" }}
+  solucao={<>Posterior <Eq>{`\\text{Beta}(10, 4)`}</Eq>: média <Eq>{`= 10/(10+4) = 10/14 \\approx 0{,}714`}</Eq>. Estimativa pontual MAP = moda = <Eq>{`(10-1)/(14-2) = 9/12 = 0{,}75`}</Eq>.</>}
+>
+Com a posterior $\text{Beta}(10, 4)$ do exercício anterior, calcule a média posterior e o MAP (moda da distribuição posterior).
+</Exercicio>
+
+<Exercicio
+  numero="110.10"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela z", pagina: "A-1", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`z_{0,025} = 1{,}960`}</Eq>. Valor crítico bilateral para IC 95%.</>}
+>
+Localize na tabela da distribuição normal padrão: qual é $z_{0,025}$? (Resp: $1{,}960$.)
+</Exercicio>
+
+<Exercicio
+  numero="110.11"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela t", pagina: "A-3", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`t_{0,025;\\,19} = 2{,}093`}</Eq>. Distribuição <Eq>{`t`}</Eq> com 19 graus de liberdade, área bilateral 5%.</>}
+>
+Localize na tabela $t$: $t_{0,025;\,19}$. (Resp: $2{,}093$.)
+</Exercicio>
+
+<Exercicio
+  numero="110.12"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela F", pagina: "A-5", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`F_{0,05;\\,2,\\,27} \\approx 3{,}35`}</Eq>. Valor crítico ANOVA com <Eq>{`k=3`}</Eq> grupos e <Eq>{`N-k=27`}</Eq> graus de liberdade do erro.</>}
+>
+Localize $F_{0,05;\,2,\,27}$ na tabela F. (Resp: ${\approx}\,3{,}35$.)
+</Exercicio>
+
+<Exercicio
+  numero="110.13"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela chi²", pagina: "A-7", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\chi^2_{0,05;\\,4} = 9{,}488`}</Eq>.</>}
+>
+Localize $\chi^2_{0,05;\,4}$. (Resp: $9{,}488$.)
+</Exercicio>
+
+<Exercicio
+  numero="110.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Teste qui-quadrado de independência", correta: false },
+    { texto: "B) ANOVA de um fator", correta: false },
+    { texto: "C) Teste t de duas amostras independentes (Welch)", correta: true },
+    { texto: "D) Teste t de uma amostra", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "300", exercicio: "ex. 7.10", licenca: "CC-BY-SA" }}
+  solucao={<>Duas médias independentes e contínuas, com desvios desconhecidos: o método correto é o teste <strong>Welch t</strong> (C). Qui-quadrado é para categóricas; ANOVA serve 3+ grupos; teste <Eq>{`t`}</Eq> de uma amostra compara com valor fixo.</>}
+>
+Qual teste é apropriado para comparar o salário médio de homens e mulheres em uma empresa, com amostras independentes e variâncias desconhecidas?
+</Exercicio>
+
+<Exercicio
+  numero="110.15"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) ANOVA", correta: false },
+    { texto: "B) Qui-quadrado de independência", correta: true },
+    { texto: "C) Regressão linear", correta: false },
+    { texto: "D) Teste t pareado", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "285", exercicio: "ex. 6.25", licenca: "CC-BY-SA" }}
+  solucao={<>Gênero e partido são duas variáveis <strong>categóricas</strong> — o teste adequado é o <strong>qui-quadrado de independência</strong> (B). ANOVA e teste <Eq>{`t`}</Eq> exigem variável contínua; regressão linear prediz valores numéricos.</>}
+>
+Pesquisa com 100 pessoas registra gênero (M/F) e partido preferido (A/B/C). Qual teste verifica associação entre as variáveis?
+</Exercicio>
+
+<Exercicio
+  numero="110.16"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Teste t de uma amostra", correta: false },
+    { texto: "B) Qui-quadrado de aderência", correta: false },
+    { texto: "C) ANOVA de um fator", correta: true },
+    { texto: "D) Welch t bilateral", correta: false },
+  ]}
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-4-test-of-two-variances", secao: "§13.1", pagina: "658", exercicio: "ex. 13.2", licenca: "CC-BY" }}
+  solucao={<>Quatro dosagens (quatro grupos) e uma variável contínua (perda de peso): <strong>ANOVA de um fator</strong> (C). Welch <Eq>{`t`}</Eq> serve apenas para 2 grupos; qui-quadrado não se aplica a variáveis contínuas.</>}
+>
+Um estudo testa 4 dosagens de um medicamento (dose baixa, média, alta, placebo) na perda de peso (kg) em 20 pacientes por grupo. Qual o método de análise?
+</Exercicio>
+
+<Exercicio
+  numero="110.17"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Welch t de duas amostras independentes", correta: false },
+    { texto: "B) Teste t pareado", correta: true },
+    { texto: "C) ANOVA", correta: false },
+    { texto: "D) Qui-quadrado de independência", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "308", exercicio: "ex. 7.17", licenca: "CC-BY-SA" }}
+  solucao={<>Peso antes e depois na <em>mesma pessoa</em>: os dados são <strong>pareados</strong>. Aplica-se o <strong>teste t pareado</strong> (B), que analisa a diferença <Eq>{`D_i = X_{i,\\text{depois}} - X_{i,\\text{antes}}`}</Eq>.</>}
+>
+Mede-se o peso de 20 pessoas antes e depois de uma dieta de 3 meses. Os dados são pareados. Qual é o teste correto?
+</Exercicio>
+
+<Exercicio
+  numero="110.18"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/9-1-null-and-alternative-hypotheses", secao: "§9.1", pagina: "454", exercicio: "ex. 9.3", licenca: "CC-BY" }}
+  solucao={<>p-valor bilateral: <Eq>{`2 \\times P(Z \\geq 2{,}1) = 2 \\times (1 - 0{,}9821) = 2 \\times 0{,}0179 = 0{,}036`}</Eq>. Rejeita-se <Eq>{`H_0`}</Eq> ao nível 5%.</>}
+>
+Uma estatística $Z = 2{,}1$ foi obtida em um teste bilateral. Calcule o p-valor e decida ao nível $\alpha = 5\%$.
+</Exercicio>
+
+<Exercicio
+  numero="110.19"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "244", exercicio: "5.23", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`n \\geq (z_{0,025}\\,\\sigma/E)^2 = (1{,}96 \\times 10/2)^2 = (9{,}8)^2 = 96{,}04`}</Eq>. Portanto <Eq>{`n \\geq 97`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Fórmula: <Eq>{`n \\geq (z_{\\alpha/2}\\,\\sigma/E)^2`}</Eq>. <em>Por quê:</em> deriva do IC — isola <Eq>{`n`}</Eq> na desigualdade <Eq>{`z \\cdot \\sigma/\\sqrt{n} \\leq E`}</Eq>.</li>
+      <li>Substitua: <Eq>{`n \\geq (1{,}96 \\times 10/2)^2 = 9{,}8^2 = 96{,}04`}</Eq>.</li>
+      <li>Arredonde para cima: <Eq>{`n = 97`}</Eq>. <em>Macete:</em> sempre arredondar para cima, nunca para baixo — garantir margem.</li>
+    </ol>
+  </>}
+>
+Para um IC 95% com margem de erro $E = 2$ e $\sigma = 10$, qual é o tamanho mínimo de amostra?
+</Exercicio>
+
+<Exercicio
+  numero="110.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Pequeno — efeito irrelevante", correta: false },
+    { texto: "B) Médio — efeito moderado", correta: true },
+    { texto: "C) Grande — efeito forte", correta: false },
+    { texto: "D) Enorme — Cohen d > 1", correta: false },
+  ]}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.3", exercicio: "classificação Cohen", licenca: "CC-BY-NC" }}
+  solucao={<>Pela convenção de Cohen (1988): <Eq>{`d = 0{,}2`}</Eq> = pequeno; <Eq>{`d = 0{,}5`}</Eq> = <strong>médio</strong> (B); <Eq>{`d = 0{,}8`}</Eq> = grande. Distratores A e C mapeiam confusões comuns nos limiares.</>}
+>
+Cohen's $d = 0{,}5$. Qual é o tamanho do efeito segundo a convenção de Cohen?
+</Exercicio>
+
+<Exercicio
+  numero="110.21"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "293", exercicio: "6.37", licenca: "CC-BY-SA" }}
+  solucao={<>Cramér's <Eq>{`V = 0{,}25`}</Eq>: efeito <strong>médio</strong>. Convenção: <Eq>{`V \\leq 0{,}1`}</Eq> pequeno; <Eq>{`0{,}1 < V \\leq 0{,}3`}</Eq> médio; <Eq>{`V > 0{,}3`}</Eq> grande.</>}
+>
+Uma tabela de contingência produziu Cramér's $V = 0{,}25$. Classifique o tamanho do efeito.
+</Exercicio>
+
+<Exercicio
+  numero="110.22"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.3", exercicio: "eta2", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`\\eta^2 = 0{,}10`}</Eq>: efeito <strong>médio</strong>. Convenção: <Eq>{`\\eta^2 = 0{,}01`}</Eq> pequeno; <Eq>{`0{,}06`}</Eq> médio; <Eq>{`0{,}14`}</Eq> grande (Cohen, 1988).</>}
+>
+Uma ANOVA produziu $\eta^2 = 0{,}10$. Qual é o tamanho do efeito?
+</Exercicio>
+
+<Exercicio
+  numero="110.23"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Evidência fraca a favor de H₁", correta: false },
+    { texto: "B) Evidência moderada a favor de H₁", correta: true },
+    { texto: "C) Evidência forte a favor de H₁", correta: false },
+    { texto: "D) Evidência anedótica — irrelevante", correta: false },
+  ]}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.4", exercicio: "Bayes Factor", licenca: "CC-BY-NC" }}
+  solucao={<>Pela escala de Jeffreys: <Eq>{`BF_{10} = 5`}</Eq> indica <strong>evidência moderada</strong> a favor de <Eq>{`H_1`}</Eq> (B). <Eq>{`BF < 3`}</Eq> é fraco; <Eq>{`3 \\leq BF < 10`}</Eq> é moderado; <Eq>{`10 \\leq BF < 30`}</Eq> é forte.</>}
+>
+$BF_{10} = 5$. Que força de evidência a favor de $H_1$ isso representa, pela escala de Jeffreys?
+</Exercicio>
+
+<Exercicio
+  numero="110.24"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "220", exercicio: "5.9", licenca: "CC-BY-SA" }}
+  solucao={<>IC frequentista: afirmação sobre o procedimento — em 95% das amostras hipotéticas, o intervalo conterá <Eq>{`\\mu`}</Eq>. IC credível bayesiano: afirmação sobre o parâmetro — "com probabilidade 95%, <Eq>{`\\theta \\in [a,b]`}</Eq>" dados os dados observados.</>}
+>
+Em uma frase cada: qual é a diferença de interpretação entre um IC frequentista (95%) e um IC credível bayesiano (95%)?
+</Exercicio>
+
+<Exercicio
+  numero="110.25"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "231", exercicio: "5.13", licenca: "CC-BY-SA" }}
+  solucao={<>Erro tipo I: rejeitar <Eq>{`H_0`}</Eq> verdadeira (falso positivo) — probabilidade <Eq>{`\\alpha`}</Eq>. Erro tipo II: não rejeitar <Eq>{`H_0`}</Eq> falsa (falso negativo) — probabilidade <Eq>{`\\beta = 1 - \\text{poder}`}</Eq>.</>}
+>
+Distinga em uma frase: erro tipo I vs erro tipo II em um teste de hipótese.
+</Exercicio>
+
+<Exercicio
+  numero="110.26"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.2", exercicio: "efeito prático", licenca: "CC-BY-NC" }}
+  solucao={<>Significância estatística (<Eq>{`p < \\alpha`}</Eq>) indica que o efeito provavelmente não é zero. Significância prática avalia se o efeito é grande o suficiente para importar no mundo real — com <Eq>{`n`}</Eq> grande, efeitos minúsculos são estatisticamente significativos mas praticamente irrelevantes.</>}
+>
+Distinga: significância estatística vs significância prática. Por que um resultado pode ser estatisticamente significativo mas praticamente irrelevante?
+</Exercicio>
+
+<Exercicio
+  numero="110.27"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "378", exercicio: "8.29", licenca: "CC-BY-SA" }}
+  solucao={<>Associação: as variáveis variam juntas (correlação, coeficiente <Eq>{`r`}</Eq>). Causalidade: mudança em <Eq>{`X`}</Eq> <em>produz</em> mudança em <Eq>{`Y`}</Eq>. Regressão e correlação medem associação — inferência causal exige design experimental ou métodos específicos (variáveis instrumentais, RCT).</>}
+>
+Distinga: associação estatística vs causalidade. Por que regressão linear mede associação, não causa?
+</Exercicio>
+
+<Exercicio
+  numero="110.28"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "305", exercicio: "7.15", licenca: "CC-BY-SA" }}
+  solucao={<>Dados pareados: as observações dos dois grupos são emparelhadas naturalmente (mesmo indivíduo antes/depois, gêmeos, etc.) — analisa-se a diferença <Eq>{`D_i`}</Eq>. Amostras independentes: os grupos não têm correspondência entre observações — compara-se as médias diretamente.</>}
+>
+Distinga: dados pareados vs amostras independentes. Dê um exemplo de cada.
+</Exercicio>
+
+<Exercicio
+  numero="110.29"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "641", exercicio: "ex. 12.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`R^2`}</Eq> é a proporção da variância de <Eq>{`Y`}</Eq> explicada pelo modelo — aumenta (ou mantém) ao adicionar qualquer preditor. <Eq>{`R^2_{\\text{adj}}`}</Eq> penaliza cada preditor extra adicionado: apenas sobe se o preditor melhora o ajuste além do esperado por acaso.</>}
+>
+Distinga: $R^2$ vs $R^2_{\text{adj}}$ em regressão múltipla. Por que o segundo é mais confiável para comparar modelos com número diferente de preditores?
+</Exercicio>
+
+<Exercicio
+  numero="110.30"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.1", exercicio: "prior/posterior", licenca: "CC-BY-NC" }}
+  solucao={<>Prior: distribuição de probabilidade sobre <Eq>{`\\theta`}</Eq> <em>antes</em> de ver os dados — codifica o conhecimento a priori. Posterior: distribuição atualizada <em>após</em> combinar prior com a verossimilhança dos dados via teorema de Bayes.</>}
+>
+Distinga: distribuição prior vs distribuição posterior na inferência bayesiana.
+</Exercicio>
+
+<Exercicio
+  numero="110.31"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "265", exercicio: "6.13", licenca: "CC-BY-SA" }}
+  solucao={<>Teste z para proporções: <Eq>{`\\hat p_A = 0{,}08`}</Eq>, <Eq>{`\\hat p_B = 0{,}11`}</Eq>, <Eq>{`\\hat p = 0{,}095`}</Eq>. <Eq>{`Z = (0{,}11-0{,}08)/\\sqrt{0{,}095 \\times 0{,}905 \\times 2/1000} \\approx 2{,}30`}</Eq>. p-valor bilateral <Eq>{`\\approx 0{,}021`}</Eq>. Frequentista: rejeita <Eq>{`H_0`}</Eq>. Bayesiano: <Eq>{`\\text{Beta}(81, 921)`}</Eq> vs <Eq>{`\\text{Beta}(111, 891)`}</Eq> — <Eq>{`P(\\theta_B > \\theta_A)`}</Eq> via simulação.</>}
+  passos={<>
+    <ol>
+      <li>Frequentista: calcule <Eq>{`\\hat p`}</Eq> poolado, estatística <Eq>{`Z`}</Eq>, p-valor bilateral.</li>
+      <li>Bayesiano: prior <Eq>{`\\text{Beta}(1,1)`}</Eq> (não-informativo). Posterior A: <Eq>{`\\text{Beta}(81, 921)`}</Eq>; posterior B: <Eq>{`\\text{Beta}(111, 891)`}</Eq>.</li>
+      <li>Simule 100.000 pares <Eq>{`(\\theta_A, \\theta_B)`}</Eq> e calcule <Eq>{`P(\\theta_B > \\theta_A)`}</Eq>. <em>Observação:</em> probabilidade de B superar A é mais direta para decisão de negócio do que o p-valor.</li>
+    </ol>
+  </>}
+>
+A/B testing: versão A obteve 80 conversões em 1000 visitantes; versão B obteve 110/1000. Aplique o teste z para proporções (frequentista) e estime $P(\theta_B > \theta_A)$ bayesianamente com prior $\text{Beta}(1,1)$.
+</Exercicio>
+
+<Exercicio
+  numero="110.32"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "309", exercicio: "7.19", licenca: "CC-BY-SA" }}
+  solucao={<>Diferença <Eq>{`D_i`}</Eq> = pressão após menos pressão antes; média <Eq>{`\\bar D = -7`}</Eq> mmHg. <Eq>{`T = -7/(5/8) = -11{,}2`}</Eq>. <Eq>{`t_{0,025;63} \\approx 1{,}998`}</Eq>. Rejeita <Eq>{`H_0`}</Eq>. IC 95%: <Eq>{`-7 \\pm 1{,}998 \\times 5/8 = -7 \\pm 1{,}25 = (-8{,}25\\;; -5{,}75)`}</Eq> mmHg.</>}
+>
+Ensaio clínico: droga reduz pressão. Para $n = 64$ pacientes, a diferença pareada (antes$-$depois) tem $\bar D = 7$ mmHg e $s_D = 5$ mmHg. Faça o teste $t$ pareado (unilateral: $H_1: \mu_D > 0$) e construa o IC 95% para a redução média.
+</Exercicio>
+
+<Exercicio
+  numero="110.33"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§9.1", pagina: "396", exercicio: "9.3", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`R^2`}</Eq> subiu de 0,70 para 0,78 ao adicionar quartos. <Eq>{`R^2_{\\text{adj}}`}</Eq> (com <Eq>{`p=1`}</Eq> e <Eq>{`p=2`}</Eq>, <Eq>{`n=200`}</Eq>): 0,699 e 0,778. O incremento ajustado é substancial. A variável quartos contribui genuinamente. Vale a pena incluí-la, mas verificar VIF para colinearidade.</>}
+>
+Regressão de preço de imóvel: modelo com apenas $m^2$ tem $R^2 = 0{,}70$ ($n = 200$). Ao adicionar número de quartos, $R^2 = 0{,}78$. Calcule $R^2_{\text{adj}}$ para cada modelo e decida se o preditor extra é justificado.
+</Exercicio>
+
+<Exercicio
+  numero="110.34"
+  dificuldade="modelagem"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "665", exercicio: "ex. 13.5", licenca: "CC-BY" }}
+  solucao={<>Verificar: Levene (homocedasticidade), Shapiro-Wilk por grupo. ANOVA: <Eq>{`F(4, 145)`}</Eq>, <Eq>{`F_{crit} \\approx 2{,}44`}</Eq>. Se <Eq>{`F > 2{,}44`}</Eq>, Tukey HSD para comparações múltiplas. Reportar: <Eq>{`F`}</Eq>, <Eq>{`df`}</Eq>, p-valor, <Eq>{`\\eta^2`}</Eq> e quais pares diferem com IC 95% para as diferenças.</>}
+>
+Cinco dietas, 30 pessoas por grupo. Esboce o protocolo de análise completo: verificação de suposições, ANOVA, post-hoc e o que reportar.
+</Exercicio>
+
+<Exercicio
+  numero="110.35"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "290", exercicio: "6.29", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela <Eq>{`4 \\times 3`}</Eq>: <Eq>{`df = (4-1)(3-1) = 6`}</Eq>. Calcule <Eq>{`\\chi^2 = \\sum (O-E)^2/E`}</Eq> com <Eq>{`E_{ij} = R_i C_j / N`}</Eq>. Cramér's <Eq>{`V = \\sqrt{\\chi^2 / (N \\cdot \\min(r-1, c-1))}`}</Eq>. Resíduos padronizados: <Eq>{`e_{ij} = (O_{ij} - E_{ij})/\\sqrt{E_{ij}}`}</Eq> identificam células que mais contribuem para a associação.</>}
+>
+Pesquisa eleitoral: 4 regiões (Norte, Nordeste, Sudeste, Sul) $\times$ 3 candidatos. Tabela de contingência com $N = 400$. Calcule os graus de liberdade, execute o $\chi^2$, Cramér's $V$, e identifique as células com maior resíduo padronizado.
+</Exercicio>
+
+<Exercicio
+  numero="110.36"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.5", exercicio: "p-hacking", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`p = 0{,}06`}</Eq> significa: "se <Eq>{`H_0`}</Eq> fosse verdadeira, haveria 6% de chance de obter este resultado ou mais extremo". Isso não é evidência de <Eq>{`H_0`}</Eq> — a falta de rejeição pode dever-se a tamanho de amostra insuficiente (baixo poder). A ausência de evidência não é evidência de ausência.</>}
+>
+Justifique por que $p = 0{,}06$ não constitui evidência de que $H_0$ é verdadeira.
+</Exercicio>
+
+<Exercicio
+  numero="110.37"
+  dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§9.3", pagina: "410", exercicio: "demonstração regressão-t", licenca: "CC-BY-SA" }}
+  solucao={<>Seja <Eq>{`X`}</Eq> dummy: <Eq>{`X_i = 0`}</Eq> (grupo 1) ou <Eq>{`X_i = 1`}</Eq> (grupo 2). Mínimos quadrados: <Eq>{`\\hat\\beta_0 = \\bar Y_1`}</Eq>, <Eq>{`\\hat\\beta_1 = \\bar Y_2 - \\bar Y_1`}</Eq>. Estatística <Eq>{`t`}</Eq> do coeficiente: <Eq>{`t = \\hat\\beta_1/SE(\\hat\\beta_1)`}</Eq>. Com <Eq>{`SE(\\hat\\beta_1) = s_p\\sqrt{1/n_1 + 1/n_2}`}</Eq> (variâncias iguais), isso é exatamente o teste <Eq>{`t`}</Eq> de duas amostras.</>}
+>
+Demonstre que a regressão linear simples com uma variável dummy binária (0/1 indicando grupo) produz exatamente o mesmo resultado que o teste $t$ de duas amostras independentes (variâncias iguais).
+</Exercicio>
+
+<Exercicio
+  numero="110.38"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "662", exercicio: "relação F-T", licenca: "CC-BY" }}
+  solucao={<>ANOVA com <Eq>{`k=2`}</Eq> grupos: <Eq>{`SS_B = n_1 n_2 (\\bar X_1 - \\bar X_2)^2/(n_1+n_2)`}</Eq>. <Eq>{`MS_B = SS_B`}</Eq> (1 df). <Eq>{`T^2 = (\\bar X_1 - \\bar X_2)^2 / [s_p^2(1/n_1+1/n_2)]`}</Eq>. Expandindo: <Eq>{`F = MS_B/MS_W = T^2`}</Eq>. Portanto <Eq>{`F_{1, N-2} = T^2_{N-2}`}</Eq>.</>}
+>
+Demonstre que, quando a ANOVA tem apenas $k = 2$ grupos, a estatística $F$ é igual ao quadrado da estatística $T$ do teste $t$ bilateral. Explicite os graus de liberdade.
+</Exercicio>
+
+<Exercicio
+  numero="110.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.2", exercicio: "MAP = MLE", licenca: "CC-BY-NC" }}
+  solucao={<>MAP: <Eq>{`\\hat\\theta_{MAP} = \\arg\\max_\\theta [\\log P(D|\\theta) + \\log P(\\theta)]`}</Eq>. Com prior uniforme <Eq>{`P(\\theta) = c`}</Eq> (constante), <Eq>{`\\log P(\\theta) = \\log c`}</Eq> não depende de <Eq>{`\\theta`}</Eq>. Então <Eq>{`\\hat\\theta_{MAP} = \\arg\\max_\\theta \\log P(D|\\theta) = \\hat\\theta_{MLE}`}</Eq>.</>}
+>
+Mostre que o estimador MAP com prior uniforme é identicamente igual ao estimador de máxima verossimilhança (MLE). Parta da definição de MAP.
+</Exercicio>
+
+<Exercicio
+  numero="110.40"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "247", exercicio: "power analysis", licenca: "CC-BY-SA" }}
+  solucao={<>Power analysis: dado <Eq>{`\\delta`}</Eq> (diferença mínima relevante), <Eq>{`\\sigma`}</Eq>, <Eq>{`\\alpha = 0{,}05`}</Eq> e potência 80%, calcule <Eq>{`n \\geq 2\\sigma^2(z_\\alpha + z_\\beta)^2/\\delta^2`}</Eq>. Pipeline completo: 1) power analysis → <Eq>{`n`}</Eq>; 2) coleta até <Eq>{`n`}</Eq> com aleatorização; 3) teste z/t com IC; 4) tamanho de efeito; 5) relatório com todos os elementos; 6) diagnóstico e limitações.</>}
+>
+Descreva, em pseudocódigo ou lista estruturada, um pipeline completo de análise A/B testing para uma taxa de conversão de e-commerce: desde a power analysis (efeito mínimo detectável de 2 p.p., $\alpha = 5\%$, potência 80%) até o relatório final com todos os elementos que um revisor estatístico exigiria.
+</Exercicio>
+
+<Exercicio
+  numero="110.41"
+  dificuldade="desafio"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.5", exercicio: "bayes vs freq", licenca: "CC-BY-NC" }}
+  solucao={<>Frequentista: controla taxa de erro tipo I a longo prazo; adequado quando o analista não tem prior informativo e quer garantias de false positive rate. Bayesiano: fornece <Eq>{`P(\\theta_B > \\theta_A \\mid \\text{dados})`}</Eq> diretamente — mais natural para decisão sequencial (pode parar no interim), incorpora conhecimento prévio e não exige definição de <Eq>{`n`}</Eq> fixo a priori. Em A/B online, Bayes é preferível pela tomada de decisão sequencial e pela interpretabilidade para stakeholders não-estatísticos.</>}
+>
+Compare em texto detalhado (ao menos 200 palavras) quando preferir abordagem frequentista vs bayesiana em A/B testing online. Considere: interpretabilidade, tomada de decisão sequencial, incorporação de priors, e garantias de erro.
+</Exercicio>
+
+<Exercicio
+  numero="110.42"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "conjugada Beta-Bin", licenca: "CC-BY-NC" }}
+  solucao={<>Prior: <Eq>{`P(\\theta) \\propto \\theta^{\\alpha-1}(1-\\theta)^{\\beta-1}`}</Eq>. Verossimilhança: <Eq>{`P(X|\\theta) \\propto \\theta^X(1-\\theta)^{n-X}`}</Eq>. Posterior: <Eq>{`P(\\theta|X) \\propto \\theta^{\\alpha+X-1}(1-\\theta)^{\\beta+n-X-1}`}</Eq> — núcleo de <Eq>{`\\text{Beta}(\\alpha+X, \\beta+n-X)`}</Eq>. A constante de normalização é <Eq>{`B(\\alpha+X, \\beta+n-X)^{-1}`}</Eq>, confirmando a forma beta.</>}
+  passos={<>
+    <ol>
+      <li>Escreva o prior <Eq>{`\\text{Beta}(\\alpha,\\beta)`}</Eq> sem constante de normalização: <Eq>{`P(\\theta) \\propto \\theta^{\\alpha-1}(1-\\theta)^{\\beta-1}`}</Eq>.</li>
+      <li>Escreva a verossimilhança binomial: <Eq>{`P(X|\\theta) = \\binom{n}{X}\\theta^X(1-\\theta)^{n-X} \\propto \\theta^X(1-\\theta)^{n-X}`}</Eq>. <em>Por quê:</em> o binomial <Eq>{`\\binom{n}{X}`}</Eq> não depende de <Eq>{`\\theta`}</Eq>, cai na proporcionalidade.</li>
+      <li>Multiplique: <Eq>{`P(\\theta|X) \\propto \\theta^{\\alpha+X-1}(1-\\theta)^{\\beta+n-X-1}`}</Eq>.</li>
+      <li>Reconheça o núcleo: isso é a função densidade de <Eq>{`\\text{Beta}(\\alpha+X, \\beta+n-X)`}</Eq>.</li>
+    </ol>
+    <p><em>Curiosidade:</em> a distribuição Beta é chamada conjugada da binomial exatamente porque o prior e o posterior têm a mesma família — a atualização é só somar expoentes.</p>
+  </>}
+>
+Demonstre por integração (ou por identificação do núcleo) que se $\theta \sim \text{Beta}(\alpha, \beta)$ e $X \mid \theta \sim \text{Bin}(n, \theta)$, então $\theta \mid X \sim \text{Beta}(\alpha + X,\; \beta + n - X)$.
+</Exercicio>
 
 </ListaExercicios>
 
 ## Fontes
-- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019 · 4ª ed · síntese geral. **Fonte primária.**
-- [**An Introduction to Statistical Learning**](https://www.statlearning.com/) — James, Witten, Hastie, Tibshirani · 2023 · 2nd ed · síntese geral.
-- [**Statistical Rethinking**](https://xcelab.net/rm/statistical-rethinking/) — McElreath · 2020 · 2ª ed · perspectiva bayesiana.
-- [**ASA Statement on p-values**](https://www.amstat.org/asa/files/pdfs/p-valuestatement.pdf) — American Statistical Association · 2016.
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · CC-BY-SA. **Fonte primária** para IC, testes, ANOVA, qui-quadrado e regressão (§5–9).
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY. Fonte para exemplos práticos de IC, testes $z$ e $t$, tabelas de distribuição (§8–13).
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC. Fonte para inferência bayesiana, tamanho de efeito, reprodutibilidade e crise de replicação (Ch. 9, 15).

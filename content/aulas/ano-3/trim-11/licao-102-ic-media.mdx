@@ -1,301 +1,732 @@
 ---
-titulo: "Lição 102 — Intervalo de confiança para média"
+titulo: "Lição 102 — Intervalo de confiança para a média"
 slug: "licao-102-ic-media"
 categoria: "aulas"
 subcategoria: "ano-3-trim-11"
-descricao: "IC 95%, 99%. Erro padrão da média. Z e t-Student."
+descricao: "Construção e interpretação de intervalos de confiança para a média populacional. Casos z (sigma conhecido) e t de Student (sigma desconhecido). Margem de erro e tamanho de amostra."
 ordem: 102
 publicado: true
-tags: ["estatística inferencial", "ano-3", "trim-11"]
-prerrequisitos: ["licao-101"]
+tags: ["estatística inferencial", "intervalo de confiança", "t de Student", "ano-3", "trim-11"]
+prerrequisitos: ["licao-101-amostragem"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-versao: "v0"
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "H2 Statistics singapurense"]
+versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="\bar X \pm z_{\alpha/2}\, \sigma/\sqrt n"
-  legenda={<>O <strong>intervalo de confiança</strong> para a média transforma uma estimativa pontual em uma faixa plausível, com nível de cobertura controlado por <Eq>{`1-\\alpha`}</Eq>. Quando <Eq>{`\\sigma`}</Eq> é desconhecido, troque <Eq>{`z_{\\alpha/2}`}</Eq> por <Eq>{`t_{\\alpha/2,\\,n-1}`}</Eq> e <Eq>{`\\sigma`}</Eq> por <Eq>{`s`}</Eq>.</>}
-  audioTexto="Intervalo de confiança para a média. Média amostral mais ou menos zê alfa sobre dois vezes sigma sobre raiz de ene. Quando sigma é desconhecido, usamos a distribuição t de Student e o desvio amostral ese."
+  formula="\bar X \pm z_{\alpha/2}\,\frac{\sigma}{\sqrt{n}} \quad \text{ou} \quad \bar X \pm t_{\alpha/2,\,n-1}\,\frac{s}{\sqrt{n}}"
+  legenda={<>O <strong>intervalo de confiança</strong> para <Eq>{`\\mu`}</Eq> transforma a estimativa pontual <Eq>{`\\bar X`}</Eq> numa faixa plausível. Use <Eq>{`z`}</Eq> quando <Eq>{`\\sigma`}</Eq> é conhecido; use <Eq>{`t_{n-1}`}</Eq> quando <Eq>{`\\sigma`}</Eq> é estimado pela amostra. Aumentar o nível de confiança alarga o intervalo; aumentar <Eq>{`n`}</Eq> o estreita.</>}
+  audioTexto="Intervalo de confiança para a média. Média amostral mais ou menos zê alfa sobre dois vezes sigma sobre raiz de ene, quando sigma é conhecido. Quando sigma é desconhecido, troca-se zê por tê de Student com ene menos um graus de liberdade e sigma pelo desvio amostral esse."
 />
+
+<aside>
+
+**Livros que cobrem esta lição**
+
+- [**OpenIntro Statistics** (4ª ed.) — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · §4.2–4.3 · CC-BY-SA · <em>Apresenta a construção e interpretação de ICs para médias com exemplos aplicados, incluindo o caso t de Student; exercícios abertos com dados reais.</em>
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §8.1–8.3 · CC-BY · <em>Cobre o IC para média com sigma conhecido e desconhecido, com tabelas de quantis, exemplos numéricos detalhados e exercícios de tamanho amostral.</em>
+- [**Statistical Thinking for the 21st Century** — Russell Poldrack](https://statsthinking21.org/) · Cap. 9 · CC-BY-NC · <em>Discussão conceitual da interpretação frequentista do IC e comparação com credible intervals bayesianos; útil para as portas dos 25 e 40 anos.</em>
+
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="Definição formal">
+<Porta nivel="formal" titulo="Definição rigorosa">
 
-### IC para média com $\sigma$ conhecido
+### Estatística pivotal e o IC para média
 
-Se $X_1, \dots, X_n$ são i.i.d. com média $\mu$ e variância $\sigma^2$, então pelo TCL:
+<Definicao titulo="Intervalo de confiança (definição)">
 
-$$Z = \frac{\bar X - \mu}{\sigma/\sqrt n} \sim \mathcal{N}(0,1) \quad (n \text{ grande})$$
+Seja $X_1, \ldots, X_n$ amostra iid com média $\mu$. Um **intervalo de confiança** $(1-\alpha)$ para $\mu$ é um par de estatísticas $(L_n, U_n)$ tal que:
 
-O intervalo de confiança $(1-\alpha)$ para $\mu$ é:
+<Equation explicacao="A probabilidade de cobertura: o intervalo aleatório captura o parâmetro fixo mu com probabilidade 1 - alpha." latex="P(L_n \leq \mu \leq U_n) = 1 - \alpha" />
 
-$$\boxed{\bar X \pm z_{\alpha/2} \cdot \frac{\sigma}{\sqrt n}}$$
+O parâmetro $\mu$ é **fixo**; a aleatoriedade está em $(L_n, U_n)$, que variam de amostra para amostra.
 
-### IC para média com $\sigma$ desconhecido
+</Definicao>
 
-Substituímos $\sigma$ por $s$ (desvio amostral). A estatística pivotal vira:
+> "Um intervalo de confiança de 95% significa que se construirmos muitos intervalos de confiança a partir de muitas amostras diferentes, esperamos que 95% desses intervalos contenham o verdadeiro parâmetro da população." — [OpenStax Statistics, §8.1](https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution)
 
-$$T = \frac{\bar X - \mu}{s/\sqrt n} \sim t_{n-1}$$
+### Caso 1: $\sigma$ conhecido (pivô z)
 
-E o IC fica:
+<Definicao titulo="IC com sigma conhecido">
 
-$$\boxed{\bar X \pm t_{\alpha/2,\,n-1} \cdot \frac{s}{\sqrt n}}$$
+Pelo TCL, $Z = (\bar X - \mu)/(\sigma/\sqrt{n}) \overset{\text{aprox.}}{\sim} \mathcal{N}(0,1)$. Portanto:
 
-### Quantis usuais
+<Equation explicacao="IC bilateral de nivel 1-alpha para mu quando sigma é conhecido." latex="P\!\left(-z_{\alpha/2} \leq \frac{\bar X - \mu}{\sigma/\sqrt{n}} \leq z_{\alpha/2}\right) = 1 - \alpha" />
 
-| Nível | $z_{\alpha/2}$ | $\alpha$ |
-|---|---|---|
-| 90% | $1{,}645$ | $0{,}10$ |
-| 95% | $1{,}960$ | $0{,}05$ |
-| 99% | $2{,}576$ | $0{,}01$ |
+Reorganizando em torno de $\mu$:
 
-### Margem de erro
+<Equation explicacao="O intervalo de confiança z para mu. Extremos são media amostral mais e menos a margem de erro." latex="\mathrm{IC}_{1-\alpha}(\mu) = \left[\bar X - z_{\alpha/2}\frac{\sigma}{\sqrt{n}},\ \bar X + z_{\alpha/2}\frac{\sigma}{\sqrt{n}}\right]" />
 
-$$E = z_{\alpha/2} \cdot \frac{\sigma}{\sqrt n}$$
+</Definicao>
 
-Tamanho amostral mínimo para margem $E$: $n \geq (z_{\alpha/2} \sigma / E)^2$.
+### Caso 2: $\sigma$ desconhecido (pivô t)
+
+<Definicao titulo="IC com sigma desconhecido — t de Student">
+
+Substituindo $\sigma$ por $s = \sqrt{\frac{1}{n-1}\sum(X_i-\bar X)^2}$, a estatística pivotal é:
+
+<Equation explicacao="Estatística t de Student: segue a distribuição t com n-1 graus de liberdade quando a população é normal." latex="T = \frac{\bar X - \mu}{s/\sqrt{n}} \sim t_{n-1}" />
+
+O IC resultante é:
+
+<Equation explicacao="IC t de Student para mu. Usa o quantil t com n-1 graus de liberdade." latex="\mathrm{IC}_{1-\alpha}(\mu) = \left[\bar X - t_{\alpha/2,\,n-1}\frac{s}{\sqrt{n}},\ \bar X + t_{\alpha/2,\,n-1}\frac{s}{\sqrt{n}}\right]" />
+
+A distribuição $t_{n-1}$ é mais pesada nas caudas que $\mathcal{N}(0,1)$; para $n \geq 30$, as diferenças são pequenas.
+
+</Definicao>
+
+> "Quando a população não é normal mas $n$ é grande, a distribuição t ainda aproxima bem o comportamento do pivô pela robustez do TCL." — [OpenIntro Statistics, §4.2](https://www.openintro.org/book/os/)
+
+### Quantis de referência
+
+| Nível $(1-\alpha)$ | $z_{\alpha/2}$ | $t_{\alpha/2,\,29}$ | $t_{\alpha/2,\,9}$ |
+|---|---|---|---|
+| 90% | 1,645 | 1,699 | 1,833 |
+| 95% | 1,960 | 2,045 | 2,262 |
+| 99% | 2,576 | 2,756 | 3,250 |
+
+### Margem de erro e tamanho amostral
+
+<Definicao titulo="Margem de erro e n minimo">
+
+A **margem de erro** é:
+
+<Equation explicacao="Metade da amplitude do IC: define a precisão da estimativa." latex="E = z_{\alpha/2}\,\frac{\sigma}{\sqrt{n}}" />
+
+Para garantir margem máxima $E$ com confiança $1-\alpha$:
+
+<Equation explicacao="Tamanho minimo de amostra para precisao E, com sigma conhecido." latex="n \geq \left\lceil\frac{z_{\alpha/2}^2\,\sigma^2}{E^2}\right\rceil" />
+
+</Definicao>
+
+<Insight>
+
+O IC não diz "há 95% de probabilidade de $\mu$ estar neste intervalo" — $\mu$ é fixo, não aleatório na visão frequentista. A afirmação correta é: se repetíssemos o procedimento infinitas vezes com novas amostras, 95% dos intervalos construídos capturariam $\mu$. A distinção é sutil mas matematicamente importante.
+
+</Insight>
 
 </Porta>
 
 <Porta nivel="5" titulo="Pra criança de 5 anos">
 
-Você joga uma flecha pra acertar o **alvo** que está escondido atrás de uma cortina. Você acerta perto, mas não sabe exatamente onde o alvo está.
+Imagine que o alvo de um arco-e-flecha está escondido atrás de uma cortina. Você atira uma flecha e ela fica presa na cortina. Você não sabe onde o alvo está — mas sabe que você normalmente acerta **perto**.
 
-O **intervalo de confiança** é como desenhar um **círculo grande** em volta da sua flecha e dizer: "tenho quase certeza que o alvo tá dentro deste círculo".
+Então você desenha um **círculo grande** em volta do buraquinho da flecha e diz: "tenho 95% de certeza que o alvo está dentro desse círculo".
 
-Se você joga muitas flechas, o círculo fica menor e você fica mais certo.
+Esse círculo é o **intervalo de confiança**. Quanto mais você treinar (mais dados você tiver), menor o círculo pode ser — e você fica mais preciso.
 
 </Porta>
 
 <Porta nivel="10" titulo="Pra criança de 10 anos">
 
-Imagina que você quer saber a **altura média** das crianças do seu bairro. Mas medir todas é impossível. Então você mede só **30 crianças** (uma amostra) e tira a média.
+Você quer saber a **altura média** das crianças do Brasil. Impossível medir todas! Então você mede **50 crianças** e calcula a média delas: digamos, $\bar X = 1{,}52$ m.
 
-Sua média amostral $\bar X$ provavelmente **não é exatamente** a média real $\mu$. Mas dá pra calcular um **intervalo** em volta dela onde provavelmente $\mu$ está.
+Mas essa média não é exatamente a média real $\mu$. Pode estar um pouco acima ou abaixo. A matemática nos diz qual é o **intervalo ao redor de $\bar X$** onde $\mu$ provavelmente está.
 
-**Receita do IC 95%**:
+**Receita simples do IC 95%:**
 
 1. Calcule a média $\bar X$ da amostra.
-2. Calcule o desvio padrão $s$ da amostra.
-3. Faça $\bar X \pm 2 \cdot s/\sqrt n$ (aproximadamente).
+2. Calcule o erro padrão: $\mathrm{SE} = s / \sqrt{n}$.
+3. IC = $[\bar X - 1{,}96 \cdot \mathrm{SE},\ \bar X + 1{,}96 \cdot \mathrm{SE}]$.
 
-Esse "2" vem de uma tabela. Significa: em 95% das amostras possíveis, o intervalo conterá a média verdadeira.
-
-**Quanto maior $n$, menor o intervalo**. É por isso que pesquisas com mais gente são mais confiáveis.
+Se você fizer isso com 100 amostras diferentes, **cerca de 95 intervalos** vão conter a média real. Cinco podem não conter — é o "preço" da incerteza.
 
 </Porta>
 
 <Porta nivel="15" titulo="Pra adolescente de 15 anos">
 
-A média amostral $\bar X$ é uma **variável aleatória**. Pelo Teorema Central do Limite (Aula 96), ela tem distribuição aproximadamente normal:
+### Por que não é suficiente dar só a média amostral?
 
-$$\bar X \approx \mathcal{N}\!\left(\mu, \frac{\sigma^2}{n}\right)$$
+Porque $\bar X$ é uma estimativa pontual — ela varia de amostra para amostra. O IC quantifica essa incerteza de forma honesta.
 
-Então **erro padrão da média** é $\sigma/\sqrt n$. E o **IC 95%** é a faixa que captura a média verdadeira em 95% das amostras:
+### Receita completa
 
-$$\bar X \pm 1{,}96 \cdot \frac{\sigma}{\sqrt n}$$
+Para um IC de 95% com $\sigma$ desconhecido:
 
-### Quando $\sigma$ é desconhecido
+1. Calcule $\bar X$ (média amostral) e $s$ (desvio amostral).
+2. Calcule o erro padrão: $\mathrm{SE} = s/\sqrt{n}$.
+3. Identifique o quantil t: para $n = 20$, use $t_{0{,}025,\,19} \approx 2{,}093$.
+4. IC: $\bar X \pm 2{,}093 \cdot s/\sqrt{20}$.
 
-Você quase nunca sabe $\sigma$ na vida real. Substitui pelo desvio amostral $s$:
+### O que o nível de confiança significa?
 
-$$s = \sqrt{\frac{1}{n-1}\sum (x_i - \bar x)^2}$$
+**Não significa** "há 95% de chance de $\mu$ estar neste intervalo específico". Significa: este procedimento, se repetido muitas vezes, captura $\mu$ em 95% dos casos.
 
-Mas isso introduz **mais incerteza**, então não pode usar a normal. Usa a **distribuição t de Student** com $n-1$ graus de liberdade. Para $n$ grande ($n \geq 30$), $t \approx z$.
+### Como o IC responde às suas escolhas?
 
-### Interpretação correta (cuidado!)
+| Ação | Efeito no IC |
+|---|---|
+| Aumentar $n$ | Estreita (mais preciso) |
+| Aumentar nível de confiança | Alarga (mais seguro, menos informativo) |
+| Maior variabilidade $s$ | Alarga (dados menos consistentes) |
 
-**Errado**: "há 95% de probabilidade de $\mu$ estar dentro do intervalo".
-**Certo**: "se eu repetir o experimento muitas vezes, 95% dos intervalos calculados conterão $\mu$".
+### Exemplo numérico
 
-A diferença é sutil mas importa: $\mu$ é fixo, o intervalo é que é aleatório.
+Salário de $n = 25$ funcionários: $\bar X = R\$\,3\,800$, $s = R\$\,600$. IC 95%:
 
-### Exemplo
+$$\bar X \pm t_{0{,}025,\,24} \cdot \frac{s}{\sqrt{25}} = 3\,800 \pm 2{,}064 \cdot 120 = 3\,800 \pm 248$$
 
-Mediu 25 alunos: $\bar x = 1{,}68$ m, $s = 0{,}10$ m. IC 95% para $\mu$:
-
-$$1{,}68 \pm t_{0{,}025;\,24} \cdot \frac{0{,}10}{\sqrt{25}} = 1{,}68 \pm 2{,}064 \cdot 0{,}02 = [1{,}639;\ 1{,}721]$$
+IC: $[3\,552;\; 4\,048]$ reais.
 
 </Porta>
 
 <Porta nivel="25" titulo="Pra estudante de engenharia">
 
-O IC para média é a **ferramenta básica** de inferência estatística. Você vai usar isso em controle de qualidade, A/B testing, ensaios clínicos e calibração de sensores.
+### Derivação do IC pelo método pivotal
 
-### Construção via pivot
+O método consiste em encontrar uma função dos dados e do parâmetro — a **estatística pivotal** — cuja distribuição é conhecida e não depende de $\theta$.
 
-Uma estatística é **pivotal** se sua distribuição não depende de parâmetros desconhecidos. Para $\sigma$ conhecido, $Z = (\bar X - \mu)/(\sigma/\sqrt n)$ é pivotal: distribuição $\mathcal{N}(0,1)$ independente de $\mu$.
+**Para $\sigma$ conhecido**: o pivô é $Z = (\bar X - \mu)\sqrt{n}/\sigma \sim \mathcal{N}(0,1)$ exatamente (se a população é normal) ou aproximadamente (pelo TCL).
 
-A partir disso:
+**Para $\sigma$ desconhecido**: o pivô é $T = (\bar X - \mu)\sqrt{n}/S \sim t_{n-1}$ exatamente quando a população é normal (Gossett/Student, 1908). Para $n$ grande, $t_{n-1} \to \mathcal{N}(0,1)$.
 
-$$P(-z_{\alpha/2} \leq Z \leq z_{\alpha/2}) = 1 - \alpha$$
+### Distribuição t de Student
 
-Isolando $\mu$:
+$T \sim t_\nu$ tem função densidade:
 
-$$P\!\left(\bar X - z_{\alpha/2}\frac{\sigma}{\sqrt n} \leq \mu \leq \bar X + z_{\alpha/2}\frac{\sigma}{\sqrt n}\right) = 1 - \alpha$$
+$$f_T(t) = \frac{\Gamma\!\left(\frac{\nu+1}{2}\right)}{\sqrt{\nu\pi}\,\Gamma\!\left(\frac{\nu}{2}\right)}\left(1 + \frac{t^2}{\nu}\right)^{-(\nu+1)/2}$$
 
-### Por que $t_{n-1}$ quando $\sigma$ é estimado?
+Para $\nu \to \infty$, converge para $\mathcal{N}(0,1)$. Caudas mais pesadas refletem a incerteza adicional de estimar $\sigma$.
 
-$s^2$ tem distribuição $\sigma^2 \chi^2_{n-1}/(n-1)$. Logo:
+### Bootstrap como alternativa
 
-$$T = \frac{\bar X - \mu}{s/\sqrt n} = \frac{Z}{\sqrt{\chi^2_{n-1}/(n-1)}} \sim t_{n-1}$$
+Quando a normalidade da população é duvidosa e $n$ é pequeno, o **bootstrap percentil** gera o IC empiricamente: re-amostre $B = 2000$ vezes com reposição, calcule $\bar X^*$ em cada réplica, use os percentis 2,5% e 97,5% das $B$ médias como limites do IC 95%.
 
-A distribuição $t$ tem **caudas mais pesadas** que a normal: quanto menor $n$, mais conservador o IC.
+### Comparação z vs. t
 
-### Tamanho amostral
+| Critério | IC z | IC t |
+|---|---|---|
+| $\sigma$ | conhecido | estimado por $s$ |
+| Distribuição pivotal | $\mathcal{N}(0,1)$ | $t_{n-1}$ |
+| Amplitude para $n$ pequeno | menor (mas inválido se $\sigma$ incerto) | maior (conservador, correto) |
+| Para $n \geq 30$ | diferenças pequenas | diferenças pequenas |
 
-Para garantir margem $E$ a nível $(1-\alpha)$:
+### Comprimento esperado do IC
 
-$$n \geq \left(\frac{z_{\alpha/2} \cdot \sigma}{E}\right)^2$$
+$$\ell = 2\,t_{\alpha/2,\,n-1}\,\frac{s}{\sqrt{n}}$$
 
-Reduzir $E$ pela metade exige $4\times$ mais dados. **Custo cresce quadraticamente com precisão**.
-
-### Conexões cross-domínio
-
-- **Engenharia**: tolerância de processo. $\bar X \pm 3\sigma/\sqrt n$ é usado em controle estatístico.
-- **Física**: incerteza estatística em medições. CERN reporta resultados com IC de 5σ ($10^{-7}$ chance de fluke).
-- **A/B testing**: IC para a diferença de médias entre tratamento e controle.
-- **Machine learning**: IC para erro de validação cruzada via bootstrap.
-
-### Bootstrap (alternativa não-paramétrica)
-
-Quando você não confia em normalidade:
-
-1. Reamostre $n$ pontos com reposição.
-2. Calcule $\bar X^*$.
-3. Repita 10000 vezes.
-4. IC = quantis $2{,}5$% e $97{,}5$% das $\bar X^*$.
-
-Funciona mesmo com distribuições estranhas.
+A largura esperada decresce como $O(1/\sqrt{n})$: para reduzir à metade, quadruplique $n$.
 
 </Porta>
 
 <Porta nivel="40" titulo="Pra profissional sênior">
 
-### Frequentista vs bayesiano
+### Interpretação frequentista versus bayesiana
 
-O IC é objeto **frequentista**: cobertura sobre amostras hipotéticas. O análogo bayesiano é o **intervalo credível** (HPD ou central): probabilidade direta sobre $\mu$ dado o prior. Confundir os dois é erro comum em literatura aplicada.
+O IC frequentista garante cobertura sobre amostras repetidas, não sobre o parâmetro. O **credible interval** bayesiano $[\theta_L, \theta_U]$ satisfaz $P(\theta_L \leq \mu \leq \theta_U \mid \mathbf{x}) = 0{,}95$ — uma afirmação legítima sobre $\mu$ dado os dados, mediante especificação de prior.
 
-### Cobertura exata vs aproximada
+Para prior conjugada normal-normal: $\mu \mid \mathbf{x} \sim \mathcal{N}(\mu_n, \tau_n^2)$ onde os parâmetros posteriores combinam informação da prior e da verossimilhança. Com prior não-informativa, o credible interval e o IC frequentista coincidem numericamente, mas a interpretação é fundamentalmente diferente.
 
-O IC normal exige TCL — é assintótico. Para $n$ pequeno e distribuição não-normal, a cobertura real pode ser bem inferior a $1-\alpha$. **Bootstrap-t** ou **profile likelihood** dão coberturas mais precisas.
+### IC para quantis e outros funcionais
 
-### IC para variâncias e proporções
+O IC pela pivô $t$ é específico para a média. Para mediana, use o intervalo baseado em estatísticas de ordem ou bootstrap. Para proporções, o intervalo de Wilson supera o Wald (o "plug-in" clássico) em termos de cobertura real, especialmente para $p$ próximo de 0 ou 1.
 
-- **Proporção**: Wilson score em vez de Wald (Wald falha para $p$ extremo). Agresti-Coull é variante robusta.
-- **Variância**: $((n-1)s^2/\chi^2_{\alpha/2,n-1},\ (n-1)s^2/\chi^2_{1-\alpha/2,n-1})$ — assume normalidade dos dados.
+### Tamanho amostral e potência: a ligação com testes de hipótese
 
-### Múltiplos comparações
+O IC e o teste de hipótese são dual: rejeitar $H_0: \mu = \mu_0$ ao nível $\alpha$ equivale a $\mu_0$ estar fora do IC $(1-\alpha)$. Isso significa que o tamanho amostral calculado para detectar diferença $\delta$ com poder $1-\beta$ é:
 
-Se você constrói $k$ ICs simultâneos, cobertura **conjunta** cai. Bonferroni: use $\alpha/k$ por intervalo. Tukey HSD, Scheffé, Holm são alternativas mais potentes.
+$$n = \frac{(z_{\alpha/2} + z_\beta)^2\,\sigma^2}{\delta^2}$$
+
+Para pesquisa clínica com $\alpha = 0{,}05$ e poder de 80% ($z_\beta = 0{,}842$): $n \propto (1{,}96 + 0{,}842)^2/\delta^2 = 7{,}85/\delta^2$.
 
 ### Robustez
 
-Trimmed mean + bootstrap dão IC robustos a outliers. Em finanças (cauda pesada), médias com IC paramétrico sub-cobrem severamente.
+O IC $t$ é robusto à violação de normalidade para $n$ moderado (pelo TCL), mas é sensível a outliers (via $s$). Alternativas robustas: IC baseado em M-estimadores ou em quantis com bootstrap. Para distribuições simétricas de cauda pesada, o IC baseado na mediana amostral pode ter cobertura mais estável.
 
-### Inferência sequencial
+### IC em aprendizado de máquina
 
-Wald confidence sequences (Howard et al., 2021) permitem **olhar a qualquer hora** sem inflar erro tipo I. Aplicação direta em A/B testing online — sem peeking penalty.
-
-### Implementação
-
-```python
-import scipy.stats as st
-import numpy as np
-x = np.array([1.68, 1.71, ...])
-mean, se = x.mean(), st.sem(x)
-ci = st.t.interval(0.95, len(x)-1, loc=mean, scale=se)
-```
-
-`scipy.stats.t.interval` faz o IC-t corretamente. Para bootstrap: `scipy.stats.bootstrap`.
+Em ML, usa-se o IC para: (1) reportar incerteza de métricas de avaliação (accuracy, AUC) sobre conjuntos de teste; (2) comparação de modelos via testes pareados corrigidos (Dietterich 5×2cv); (3) bandit problems (UCB: selecionar braço com maior $\hat\mu + c\,\mathrm{SE}$, equilibrando exploration e exploitation).
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Aplicação prática">
+<Porta nivel="pratica" titulo="Aplicação prática brasileira">
 
-**Receita: como reportar uma média com IC.**
+### IC para salário médio em pesquisa de recursos humanos
 
-1. **Verifique normalidade** (ou $n \geq 30$ pelo TCL).
-2. Calcule $\bar x$ e $s$.
-3. Escolha nível: 95% padrão, 99% para alto risco.
-4. Use $t_{\alpha/2,\,n-1}$ (não $z$) salvo se $\sigma$ realmente conhecido.
-5. Reporte: $\bar x \pm $ margem, $n$, e nível.
+Uma empresa do setor de tecnologia coletou salários de $n = 36$ funcionários de nível pleno. Resultados: $\bar X = R\$\,8\,500$, $s = R\$\,1\,200$.
 
-### Erros comuns
+**IC 95% com t de Student** ($t_{0{,}025,\,35} \approx 2{,}030$):
 
-- **"Há 95% de chance que $\mu$ esteja no intervalo"** — errado, é cobertura sobre amostras.
-- **Usar $z$ com $n$ pequeno** — perde calibração. Use $t$.
-- **Bootstrap em variância de cauda pesada** — IC pode ser inestável.
-- **Ignorar amostragem por conglomerados** — desvio efetivo aumenta.
+$$\bar X \pm t \cdot \frac{s}{\sqrt{n}} = 8\,500 \pm 2{,}030 \cdot \frac{1\,200}{\sqrt{36}} = 8\,500 \pm 406$$
 
-### Tamanho amostral antes de coletar
+IC 95%: $[R\$\,8\,094;\; R\$\,8\,906]$.
 
-Sempre faça **power analysis** antes. Para $E = 1$ cm em altura ($\sigma \approx 7$ cm) a 95%:
+**Interpretação**: se este procedimento fosse repetido com 100 amostras distintas, esperaríamos que 95 dos intervalos contivessem o salário médio real dos funcionários plenos da empresa.
 
-$$n \geq (1{,}96 \cdot 7 / 1)^2 \approx 188$$
+### Pesquisa do INSS: tempo de concessão de benefício
 
-Não 30. Não 50. **188**.
+O INSS monitora o tempo de análise de pedidos de aposentadoria. Amostra de $n = 50$ processos: $\bar X = 42$ dias, $s = 12$ dias. IC 95%:
 
-### Reportando profissionalmente
+$$42 \pm 2{,}010 \cdot \frac{12}{\sqrt{50}} = 42 \pm 3{,}41$$
 
-"Altura média da amostra: $\bar x = 168{,}3$ cm (IC 95%: $166{,}8$ a $169{,}8$ cm; $n = 188$; $t$-Student)."
+IC: $[38{,}6;\; 45{,}4]$ dias.
 
-Inclua sempre $n$, método e nível. Sem isso, leitor não consegue replicar.
+Meta legal: 45 dias. Como 45 está dentro do IC, os dados são consistentes com o cumprimento da meta — mas também com tempo médio de 38,6 dias. A amostra não é decisiva sozinha; precisaria de um teste de hipótese formal.
+
+### Taxa de aprovação no ENEM
+
+Amostra de 200 redações de candidatos de uma escola particular: taxa de aprovação (nota maior ou igual a 500) de $\hat p = 0{,}78$. IC 95% para proporção (Wilson):
+
+$$\hat p \pm 1{,}96\sqrt{\frac{\hat p(1-\hat p)}{n}} = 0{,}78 \pm 1{,}96\sqrt{\frac{0{,}78 \cdot 0{,}22}{200}} = 0{,}78 \pm 0{,}057$$
+
+IC: $[72{,}3\%;\; 83{,}7\%]$.
 
 </Porta>
 
 </DuasPortas>
 
+## Exemplos resolvidos
+
+<Exemplo numero="102.1" titulo="IC com sigma conhecido (básico)">
+
+**Problema.** Um laboratório mede a concentração de glicose em amostras de sangue. O equipamento tem $\sigma = 5$ mg/dL (conhecido por calibração). Uma amostra de $n = 25$ pacientes dá $\bar X = 98$ mg/dL. Construa o IC 95% para a concentração média real $\mu$.
+
+**Estratégia.** Como $\sigma$ é conhecido, usar o pivô $z$. O quantil 95% bilateral é $z_{0{,}025} = 1{,}960$.
+
+**Resolução.**
+
+$$E = z_{0{,}025} \cdot \frac{\sigma}{\sqrt{n}} = 1{,}960 \cdot \frac{5}{\sqrt{25}} = 1{,}960 \cdot 1 = 1{,}96$$
+
+$$\mathrm{IC}_{95\%}(\mu) = [98 - 1{,}96;\; 98 + 1{,}96] = [96{,}04;\; 99{,}96] \text{ mg/dL}$$
+
+**Verificação.** A amplitude do IC é $2 \times 1{,}96 = 3{,}92$ mg/dL. Para $n = 100$ (quatro vezes maior), $E = 1{,}96 \cdot 5/10 = 0{,}98$ — metade da amplitude, coerente com $\mathrm{SE} \propto 1/\sqrt{n}$.
+
+**Fonte.** [OpenStax Statistics, §8.1, Exemplo 8.1](https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="102.2" titulo="IC com sigma desconhecido — t de Student (intermediário)">
+
+**Problema.** Uma pesquisa com $n = 16$ estudantes sobre horas semanais de estudo para o ENEM produziu $\bar X = 18$ h e $s = 4$ h. Construa o IC 95% para a média real.
+
+**Estratégia.** $\sigma$ desconhecido, $n$ pequeno: usar $t_{n-1} = t_{15}$. Quantil: $t_{0{,}025,\,15} = 2{,}131$.
+
+**Resolução.**
+
+$$E = t_{0{,}025,\,15} \cdot \frac{s}{\sqrt{n}} = 2{,}131 \cdot \frac{4}{\sqrt{16}} = 2{,}131 \cdot 1 = 2{,}131$$
+
+$$\mathrm{IC}_{95\%}(\mu) = [18 - 2{,}13;\; 18 + 2{,}13] = [15{,}87;\; 20{,}13] \text{ horas}$$
+
+**Verificação.** Se tivéssemos usado $z_{0{,}025} = 1{,}960$ erroneamente, $E = 1{,}96$ — subestimando a incerteza de estimar $\sigma$. A diferença $2{,}131 - 1{,}960 = 0{,}171$ é o "custo" de desconhecer $\sigma$.
+
+**Fonte.** [OpenIntro Statistics, §4.2, Exemplo 4.4](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="102.3" titulo="Tamanho de amostra para margem de erro prescrita (intermediário)">
+
+**Problema.** Uma auditoria fiscal quer estimar o valor médio de notas fiscais eletrônicas com margem de erro máxima de R\$ 50 a 99% de confiança. Estudos anteriores indicam $\sigma \approx R\$\,300$. Qual o tamanho mínimo de amostra?
+
+**Estratégia.** Usar a fórmula $n \geq (z_{\alpha/2}\,\sigma/E)^2$ com $z_{0{,}005} = 2{,}576$.
+
+**Resolução.**
+
+$$n \geq \left(\frac{z_{\alpha/2}\,\sigma}{E}\right)^2 = \left(\frac{2{,}576 \times 300}{50}\right)^2 = (15{,}456)^2 = 238{,}9$$
+
+Arredondando para cima: $n = 239$ notas fiscais.
+
+**Verificação.** Com $n = 239$: $E = 2{,}576 \times 300/\sqrt{239} = 2{,}576 \times 19{,}41 = 50{,}0$ — exatamente no limite prescrito. Correto.
+
+**Fonte.** [OpenStax Statistics, §8.1, Exemplo 8.4](https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="102.4" titulo="Interpretação correta do IC — armadilha conceitual (avançado)">
+
+**Problema.** Um engenheiro calcula o IC 95% para a resistência média de barras de aço: $[425;\; 435]$ MPa. Seu colega afirma: "Há 95% de probabilidade de $\mu$ estar entre 425 e 435 MPa." Essa afirmação está correta?
+
+**Estratégia.** Identificar o que é aleatório e o que é fixo na interpretação frequentista.
+
+**Resolução.**
+
+A afirmação está **incorreta** na visão frequentista. Após calculado, o intervalo $[425;\; 435]$ é determinístico — ou contém $\mu$ ou não contém. O parâmetro $\mu$ é fixo; não tem distribuição de probabilidade.
+
+A afirmação correta é: **o procedimento** que gerou este intervalo tem propriedade de cobertura de 95%. Se repetíssemos o experimento muitas vezes e calculássemos um IC a cada vez, esperaríamos que 95% deles contivessem $\mu$.
+
+Uma versão válida: "Estamos **95% confiantes** de que $\mu \in [425;\; 435]$" — desde que "confiante" seja entendido como referência ao procedimento, não à probabilidade do parâmetro específico.
+
+**Verificação.** Na abordagem bayesiana, com prior não-informativa de Jeffreys, o credible interval 95% teria a mesma amplitude e seria interpretável como "probabilidade 95% de $\mu$ estar neste intervalo dado os dados" — mas isso requer especificação de prior.
+
+**Fonte.** [OpenIntro Statistics, §4.2, Seção "Common misconceptions"](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="102.5" titulo="IC pela distribuição t com comparação de niveis (avançado)">
+
+**Problema.** Renda mensal de $n = 10$ famílias de uma favela: 1200, 850, 1500, 970, 1100, 800, 1350, 1050, 920, 1080 (em R\$). Construa os ICs de 90%, 95% e 99% para a renda média.
+
+**Estratégia.** Calcular $\bar X$ e $s$ da amostra; aplicar a fórmula $t$ com 9 graus de liberdade.
+
+**Resolução.**
+
+Soma: $1200+850+1500+970+1100+800+1350+1050+920+1080 = 10\,820$. Média: $\bar X = 1082$ R\$.
+
+Desvio: $s^2 = \frac{\sum(X_i - \bar X)^2}{n-1}$. Calculando os desvios ao quadrado: $(118)^2 + (-232)^2 + (418)^2 + (-112)^2 + (18)^2 + (-282)^2 + (268)^2 + (-32)^2 + (-162)^2 + (-2)^2$:
+
+$= 13924 + 53824 + 174724 + 12544 + 324 + 79524 + 71824 + 1024 + 26244 + 4 = 433960$
+
+$s^2 = 433960/9 \approx 48218$, $s \approx 219{,}6$ R\$.
+
+$\mathrm{SE} = 219{,}6/\sqrt{10} \approx 69{,}4$ R\$.
+
+| Nível | $t_{\alpha/2,\,9}$ | Margem | IC |
+|---|---|---|---|
+| 90% | 1,833 | 127,2 | $[954{,}8;\; 1209{,}2]$ |
+| 95% | 2,262 | 157,0 | $[925{,}0;\; 1239{,}0]$ |
+| 99% | 3,250 | 225,6 | $[856{,}4;\; 1307{,}6]$ |
+
+**Verificação.** Os três intervalos são aninhados: IC 99% $\supset$ IC 95% $\supset$ IC 90%. Mais confiança implica intervalo mais amplo. Coerente com a teoria.
+
+**Fonte.** [OpenIntro Statistics, §4.2, Exercício 4.11](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
 <ListaExercicios seed="licao-102-ic-media">
 
-<Exercicio numero="102.1" dificuldade="aplicacao">Amostra de $n=64$, $\bar x = 50$, $\sigma = 8$. IC 95% para $\mu$. (Resp: $[48{,}04;\ 51{,}96]$.)</Exercicio>
-<Exercicio numero="102.2" dificuldade="aplicacao">$n=100$, $\bar x = 12{,}3$, $\sigma = 3$. IC 99%.</Exercicio>
-<Exercicio numero="102.3" dificuldade="aplicacao">$n=25$, $\bar x = 7{,}2$, $s = 1{,}5$. IC 95% (use $t$).</Exercicio>
-<Exercicio numero="102.4" dificuldade="aplicacao">$n=16$, $\bar x = 100$, $s = 12$. IC 90%.</Exercicio>
-<Exercicio numero="102.5" dificuldade="aplicacao">Compute $z_{\alpha/2}$ para $\alpha = 0{,}10$. (Resp: $1{,}645$.)</Exercicio>
-<Exercicio numero="102.6" dificuldade="aplicacao">Compute $t_{0{,}025;\,9}$. (Resp: $2{,}262$.)</Exercicio>
-<Exercicio numero="102.7" dificuldade="aplicacao">Margem de erro: $n=400$, $\sigma=20$, 95%.</Exercicio>
-<Exercicio numero="102.8" dificuldade="aplicacao">Mesma amostra, qual nível dá margem 1?</Exercicio>
-<Exercicio numero="102.9" dificuldade="aplicacao">Tamanho mínimo para $E=2$, $\sigma=10$, 95%. (Resp: 97.)</Exercicio>
-<Exercicio numero="102.10" dificuldade="aplicacao">$\sigma=15$, $E=3$, 99%. Calcule $n$.</Exercicio>
-<Exercicio numero="102.11" dificuldade="aplicacao">$n=36$, $\bar x = 200$, $s=24$. IC 95% para $\mu$.</Exercicio>
-<Exercicio numero="102.12" dificuldade="aplicacao">Se aumentamos $n$ de 100 para 400, como muda a margem? (Resp: cai pela metade.)</Exercicio>
-<Exercicio numero="102.13" dificuldade="aplicacao">Diferença entre IC 95% e 99% para mesmos dados? Qual é mais largo?</Exercicio>
-<Exercicio numero="102.14" dificuldade="aplicacao">$n=10$, $\bar x = 5$, $s=2$. IC 95% com $t$.</Exercicio>
-<Exercicio numero="102.15" dificuldade="aplicacao">$\sigma$ duplica. Como muda a margem?</Exercicio>
-<Exercicio numero="102.16" dificuldade="aplicacao">Erro padrão de $\bar X$ para $n=49$, $\sigma=14$. (Resp: 2.)</Exercicio>
-<Exercicio numero="102.17" dificuldade="aplicacao">$n=200$, $\bar x = 75$, $s=10$. IC 95%.</Exercicio>
-<Exercicio numero="102.18" dificuldade="aplicacao">Para $n=4$, IC com $t$ vs $z$. Qual é mais largo?</Exercicio>
-<Exercicio numero="102.19" dificuldade="aplicacao">QI médio em $n=64$, $\bar x=105$, $\sigma=15$. IC 95%.</Exercicio>
-<Exercicio numero="102.20" dificuldade="aplicacao">Calcule $z_{\alpha/2}$ para 80%, 90%, 95%, 99%.</Exercicio>
-<Exercicio numero="102.21" dificuldade="aplicacao">$n=49$, $\bar x = 22$, $s=7$. IC 95%. (Resp: $[20{,}01;\ 23{,}99]$.)</Exercicio>
-<Exercicio numero="102.22" dificuldade="aplicacao">Margem $0{,}5$ para $\sigma=2$, 95%. Calcule $n$.</Exercicio>
-<Exercicio numero="102.23" dificuldade="aplicacao">$t$-tabela: $t_{0{,}05;\,19}$. (Resp: $1{,}729$.)</Exercicio>
-<Exercicio numero="102.24" dificuldade="aplicacao">$n=12$, $\bar x = 3{,}4$, $s=0{,}8$. IC 99%.</Exercicio>
-<Exercicio numero="102.25" dificuldade="aplicacao">Quando usar $z$ vs $t$? Liste os critérios.</Exercicio>
-<Exercicio numero="102.26" dificuldade="aplicacao">$\sigma$ conhecido $=5$, $n=25$, $\bar x=10$. IC 95%.</Exercicio>
-<Exercicio numero="102.27" dificuldade="aplicacao">Mesma amostra com $\sigma$ desconhecido (use $s=5$). Compare ICs.</Exercicio>
-<Exercicio numero="102.28" dificuldade="aplicacao">Calcule largura do IC 95% para $n=100$, $\sigma=10$.</Exercicio>
-<Exercicio numero="102.29" dificuldade="aplicacao">Para reduzir largura à metade, qual $n$ novo?</Exercicio>
-<Exercicio numero="102.30" dificuldade="aplicacao">$n=64$, $\bar x=50$, $\sigma=16$. IC 90%.</Exercicio>
-<Exercicio numero="102.31" dificuldade="modelagem">Pesquisa de salário em 50 engenheiros: $\bar x = $ R\$ 8500, $s=$ R\$ 1200. IC 95% e interpretação.</Exercicio>
-<Exercicio numero="102.32" dificuldade="modelagem">Ensaio clínico: 80 pacientes reduzem pressão em $\bar x = 8$ mmHg, $s=4$ mmHg. IC 95% da redução média.</Exercicio>
-<Exercicio numero="102.33" dificuldade="modelagem">Controle de qualidade: peso médio de 30 sacos é $24{,}8$ kg ($s=0{,}5$). Saco rotulado 25 kg está dentro do IC 99%?</Exercicio>
-<Exercicio numero="102.34" dificuldade="modelagem">A/B testing: tempo na página, grupo A: $n_A=500$, $\bar x_A=120$ s, $s_A=30$. IC 95%.</Exercicio>
-<Exercicio numero="102.35" dificuldade="modelagem">Sensor de temperatura: 100 leituras, $\bar x = 25{,}1$, $s=0{,}3$. Com IC 99%, está calibrado em 25?</Exercicio>
-<Exercicio numero="102.36" dificuldade="compreensao">Justifique por que precisamos do TCL para usar $z$ no IC.</Exercicio>
-<Exercicio numero="102.37" dificuldade="compreensao">Por que o IC com $t$ é mais largo que com $z$ para mesmo $\bar x$ e $s$?</Exercicio>
-<Exercicio numero="102.38" dificuldade="compreensao">Explique a diferença entre "95% de probabilidade de $\mu$ estar no IC" e "95% dos ICs contêm $\mu$".</Exercicio>
-<Exercicio numero="102.39" dificuldade="compreensao">Mostre que erro padrão $\sigma/\sqrt n$ vem da $\text{Var}(\bar X) = \sigma^2/n$.</Exercicio>
-<Exercicio numero="102.40" dificuldade="desafio">Bootstrap: implemente em pseudocódigo o IC 95% para $\bar X$ via reamostragem.</Exercicio>
-<Exercicio numero="102.41" dificuldade="desafio">Mostre que $T = (\bar X - \mu)/(s/\sqrt n)$ tem distribuição $t_{n-1}$ usando que $s^2(n-1)/\sigma^2 \sim \chi^2_{n-1}$ e $\bar X \perp s^2$.</Exercicio>
-<Exercicio numero="102.42" dificuldade="demonstracao">Demonstre que $E[\bar X] = \mu$ e $\text{Var}(\bar X) = \sigma^2/n$ para amostra i.i.d.</Exercicio>
+<Exercicio
+  numero="102.1"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E = 1{,}960 \\times 10/\\sqrt{100} = 1{,}960`}</Eq>. IC 95%: <Eq>{`[165 - 1{,}96;\\; 165 + 1{,}96] = [163{,}04;\\; 166{,}96]`}</Eq> cm.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "430", exercicio: "8.1", licenca: "CC-BY" }}
+>
+Altura de recrutas militares: $\sigma = 10$ cm, $n = 100$, $\bar X = 165$ cm. Construa o IC 95% para a altura média.
+</Exercicio>
+
+<Exercicio
+  numero="102.2"
+  dificuldade="aplicacao"
+  solucao={<>IC 90%: <Eq>{`E = 1{,}645 \\times 10/10 = 1{,}645`}</Eq>. IC: <Eq>{`[163{,}36;\\; 166{,}64]`}</Eq> cm. IC 99%: <Eq>{`E = 2{,}576 \\times 1 = 2{,}576`}</Eq>. IC: <Eq>{`[162{,}42;\\; 167{,}58]`}</Eq> cm. Maior confiança implica intervalo mais largo.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "431", exercicio: "8.3", licenca: "CC-BY" }}
+>
+Usando os mesmos dados do exercício 102.1, construa os ICs de 90% e 99% e compare os três níveis.
+</Exercicio>
+
+<Exercicio
+  numero="102.3"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Identifique: <Eq>{`n = 25`}</Eq>, <Eq>{`\\bar X = 45`}</Eq>, <Eq>{`s = 8`}</Eq>, nível 95%.</li>
+<li>Graus de liberdade: <Eq>{`\\nu = n - 1 = 24`}</Eq>. Quantil: <Eq>{`t_{0{,}025,\\,24} = 2{,}064`}</Eq>.</li>
+<li>Erro padrão: <Eq>{`\\mathrm{SE} = s/\\sqrt{n} = 8/5 = 1{,}6`}</Eq>.</li>
+<li>Margem: <Eq>{`E = 2{,}064 \\times 1{,}6 = 3{,}30`}</Eq>.</li>
+<li>IC: <Eq>{`[45 - 3{,}30;\\; 45 + 3{,}30] = [41{,}70;\\; 48{,}30]`}</Eq> horas.</li>
+<li><em>Macete:</em> Com <Eq>{`n = 25`}</Eq> e nível 95%, o quantil <Eq>{`t`}</Eq> é 2,064 — ligeiramente maior que 1,960 do <Eq>{`z`}</Eq>. A diferença é pequena, mas a subestimação de incerteza com <Eq>{`z`}</Eq> seria inadequada para <Eq>{`n`}</Eq> pequeno.</li>
+</ol>
+  </>}
+  solucao={<>IC 95% com <Eq>{`t_{0{,}025,\\,24} = 2{,}064`}</Eq>: <Eq>{`45 \\pm 2{,}064 \\times 1{,}6 = 45 \\pm 3{,}30`}</Eq>. IC: <Eq>{`[41{,}70;\\; 48{,}30]`}</Eq> horas semanais.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "183", exercicio: "4.7", licenca: "CC-BY-SA" }}
+>
+Horas de trabalho semanal: $n = 25$, $\bar X = 45$ h, $s = 8$ h. Construa o IC 95% usando a distribuição t.
+</Exercicio>
+
+<Exercicio
+  numero="102.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n \\geq (z_{\\alpha/2}\\,\\sigma/E)^2 = (1{,}960 \\times 15/3)^2 = (9{,}80)^2 = 96{,}04`}</Eq>. Arredonda: <Eq>{`n = 97`}</Eq> medições.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "436", exercicio: "8.13", licenca: "CC-BY" }}
+>
+Um equipamento de medição tem $\sigma = 15$ unidades (conhecido). Qual o $n$ mínimo para estimar a média com margem de erro máxima de 3 unidades a 95% de confiança?
+</Exercicio>
+
+<Exercicio
+  numero="102.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`t_{0{,}025,\\,11} = 2{,}201`}</Eq>. <Eq>{`\\mathrm{SE} = 200/\\sqrt{12} = 57{,}74`}</Eq>. <Eq>{`E = 2{,}201 \\times 57{,}74 = 127{,}1`}</Eq>. IC 95%: R$ 1.372,90 a R$ 1.627,10.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "184", exercicio: "4.9", licenca: "CC-BY-SA" }}
+>
+Mensalidade de $n = 12$ faculdades particulares de uma cidade: $\bar X = R\$\,1\,500$, $s = R\$\,200$. IC 95%.
+</Exercicio>
+
+<Exercicio
+  numero="102.6"
+  dificuldade="aplicacao"
+  solucao={<>Amplitude = <Eq>{`2E = 2 \\times z_{\\alpha/2} \\times \\sigma/\\sqrt{n}`}</Eq>. Se <Eq>{`n`}</Eq> quadruplica, <Eq>{`\\sqrt{n}`}</Eq> dobra e a amplitude cai à metade. Para amplitude de 5: <Eq>{`n = (2 \\times 1{,}960 \\times 10/5)^2 = (7{,}84)^2 = 61{,}5`}</Eq>. Arredonda: <Eq>{`n = 62`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "436", exercicio: "8.15", licenca: "CC-BY" }}
+>
+Com $\sigma = 10$ e IC 95% atual com $n = 16$ (amplitude 9,8), qual $n$ é necessário para reduzir a amplitude para 5?
+</Exercicio>
+
+<Exercicio
+  numero="102.7"
+  dificuldade="aplicacao"
+  solucao={<>Ao dobrar <Eq>{`n`}</Eq>, <Eq>{`\\sqrt{n}`}</Eq> multiplica por <Eq>{`\\sqrt{2} \\approx 1{,}414`}</Eq>, então <Eq>{`E`}</Eq> divide por <Eq>{`\\sqrt{2}`}</Eq>: redução de 29,3%. Para reduzir <Eq>{`E`}</Eq> à metade, multiplique <Eq>{`n`}</Eq> por 4.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "176", exercicio: "4.6", licenca: "CC-BY-SA" }}
+>
+Se você dobrar o tamanho da amostra, qual é o efeito percentual na margem de erro? E se quiser reduzir a margem à metade, quanto deve multiplicar $n$?
+</Exercicio>
+
+<Exercicio
+  numero="102.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = s/\\sqrt{n} = 30/\\sqrt{36} = 5`}</Eq>. IC 95% com <Eq>{`t_{0{,}025,\\,35} = 2{,}030`}</Eq>: <Eq>{`[200 - 10{,}15;\\; 200 + 10{,}15] = [189{,}85;\\; 210{,}15]`}</Eq> min.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-2-a-single-population-mean-using-the-student-t-distribution", secao: "§8.2", pagina: "441", exercicio: "8.17", licenca: "CC-BY" }}
+>
+Tempo de bateria de notebooks: $n = 36$, $\bar X = 200$ min, $s = 30$ min. IC 95%.
+</Exercicio>
+
+<Exercicio
+  numero="102.9"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>A fórmula do IC 95% é <Eq>{`\\bar X \\pm t_{0{,}025,\\,n-1} \\times s/\\sqrt{n}`}</Eq>.</li>
+<li>Com <Eq>{`n = 9`}</Eq>, <Eq>{`t_{0{,}025,\\,8} = 2{,}306`}</Eq>.</li>
+<li><Eq>{`\\mathrm{SE} = 1{,}2/\\sqrt{9} = 0{,}4`}</Eq> kg.</li>
+<li><Eq>{`E = 2{,}306 \\times 0{,}4 = 0{,}922`}</Eq> kg.</li>
+<li>IC: <Eq>{`[15 - 0{,}922;\\; 15 + 0{,}922] = [14{,}08;\\; 15{,}92]`}</Eq> kg.</li>
+<li><em>Observação:</em> Com apenas 9 observações, o quantil <Eq>{`t`}</Eq> é substancialmente maior que 1,96. Isso reflete a maior incerteza ao estimar <Eq>{`\\sigma`}</Eq> com poucos dados.</li>
+</ol>
+  </>}
+  solucao={<>Com <Eq>{`t_{0{,}025,\\,8} = 2{,}306`}</Eq> e <Eq>{`\\mathrm{SE} = 0{,}4`}</Eq>: IC 95% = <Eq>{`[14{,}08;\\; 15{,}92]`}</Eq> kg.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "185", exercicio: "4.11", licenca: "CC-BY-SA" }}
+>
+Peso de cachorros de uma raça específica: $n = 9$, $\bar X = 15$ kg, $s = 1{,}2$ kg. IC 95%.
+</Exercicio>
+
+<Exercicio
+  numero="102.10"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "O parâmetro mu está neste intervalo com 95% de probabilidade" },
+    { texto: "Se repetíssemos o procedimento com muitas amostras, 95% dos intervalos calculados conteriam mu", correta: true },
+    { texto: "A amostra coletada está no intervalo com 95% de probabilidade" },
+    { texto: "Há 5% de chance de termos cometido um erro de cálculo" }
+  ]}
+  solucao={<>Na visão frequentista, <Eq>{`\\mu`}</Eq> é fixo — não tem probabilidade de estar em lugar nenhum. O que tem 95% de probabilidade é o procedimento de construção: 95% das amostras produzem um intervalo que cobre <Eq>{`\\mu`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "182", exercicio: "4.6a", licenca: "CC-BY-SA" }}
+>
+A afirmação "o IC 95% para $\mu$ é [45; 55]" significa:
+</Exercicio>
+
+<Exercicio
+  numero="102.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Aumentar o nivel de confiança de 95% para 99%, mantendo n fixo" },
+    { texto: "Aumentar n mantendo o nivel de confiança fixo" },
+    { texto: "Diminuir o desvio amostral s" },
+    { texto: "Aumentar o nivel de confiança de 95% para 99% e quadruplicar n", correta: true }
+  ]}
+  solucao={<>Menor IC: aumentar <Eq>{`n`}</Eq> estreita o IC (dividindo por <Eq>{`\\sqrt{n}`}</Eq>). Maior nível de confiança alarga. Para o intervalo mais estreito com 99% de confiança, deve-se aumentar <Eq>{`n`}</Eq> o suficiente para compensar o quantil maior. Quadruplicar <Eq>{`n`}</Eq> compensa exatamente um fator de 2 na amplitude — o suficiente para manter o IC de 99% tão estreito quanto o de 95% com <Eq>{`n`}</Eq> original.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "433", exercicio: "8.7", licenca: "CC-BY" }}
+>
+Qual das seguintes ações produz simultaneamente um IC mais estreito E maior confiança?
+</Exercicio>
+
+<Exercicio
+  numero="102.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n \\geq (2{,}576 \\times 500/100)^2 = (12{,}88)^2 = 165{,}9`}</Eq>. Arredonda: <Eq>{`n = 166`}</Eq> notas.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "437", exercicio: "8.19", licenca: "CC-BY" }}
+>
+Um auditor fiscal quer estimar o valor médio de notas fiscais com $\sigma = R\$\,500$, margem de erro $R\$\,100$ e confiança de 99%. Qual o $n$ mínimo?
+</Exercicio>
+
+<Exercicio
+  numero="102.13"
+  dificuldade="aplicacao"
+  solucao={<>Com <Eq>{`t_{0{,}025,\\,19} = 2{,}093`}</Eq>: <Eq>{`E = 2{,}093 \\times 50/\\sqrt{20} = 2{,}093 \\times 11{,}18 = 23{,}4`}</Eq>. IC 95%: R$ 476,60 a R$ 523,40.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "186", exercicio: "4.13", licenca: "CC-BY-SA" }}
+>
+Gastos com alimentação mensal de $n = 20$ famílias: $\bar X = R\$\,500$, $s = R\$\,50$. IC 95% com t de Student.
+</Exercicio>
+
+<Exercicio
+  numero="102.14"
+  dificuldade="aplicacao"
+  solucao={<>Para <Eq>{`n = 9`}</Eq>: <Eq>{`t_{0{,}025,\\,8} = 2{,}306`}</Eq>; para <Eq>{`n = 100`}</Eq>: <Eq>{`t_{0{,}025,\\,99} \\approx 1{,}984`}</Eq>. Com <Eq>{`n = 9`}</Eq>, o IC é muito mais largo: a combinação de <Eq>{`t`}</Eq> grande e <Eq>{`\\sqrt{n}`}</Eq> pequeno amplifica muito a incerteza.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "184", exercicio: "4.10", licenca: "CC-BY-SA" }}
+>
+Compare os quantis t para $n = 9$ e $n = 100$ a 95% de confiança. Explique por que os ICs com amostras pequenas são muito mais largos.
+</Exercicio>
+
+<Exercicio
+  numero="102.15"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Calcule a média: <Eq>{`\\bar X = (5{,}2 + 4{,}8 + 5{,}5 + 4{,}9 + 5{,}1 + 5{,}3 + 4{,}7 + 5{,}0)/8 = 40{,}5/8 = 5{,}0625`}</Eq> L.</li>
+<li>Calcule o desvio amostral (desvios ao quadrado): <Eq>{`(0{,}1375)^2 + (-0{,}2625)^2 + (0{,}4375)^2 + (-0{,}1625)^2 + (0{,}0375)^2 + (0{,}2375)^2 + (-0{,}3625)^2 + (-0{,}0625)^2`}</Eq>.</li>
+<li>Soma dos quadrados: <Eq>{`\\approx 0{,}0189 + 0{,}0689 + 0{,}1914 + 0{,}0264 + 0{,}0014 + 0{,}0564 + 0{,}1314 + 0{,}0039 = 0{,}4988`}</Eq>.</li>
+<li><Eq>{`s^2 = 0{,}4988/7 = 0{,}0713`}</Eq>; <Eq>{`s \\approx 0{,}267`}</Eq> L.</li>
+<li><Eq>{`\\mathrm{SE} = 0{,}267/\\sqrt{8} = 0{,}0944`}</Eq>. Com <Eq>{`t_{0{,}025,\\,7} = 2{,}365`}</Eq>: <Eq>{`E = 2{,}365 \\times 0{,}0944 = 0{,}223`}</Eq>.</li>
+<li>IC: <Eq>{`[4{,}84;\\; 5{,}29]`}</Eq> L. <em>Macete:</em> Com <Eq>{`n = 8`}</Eq>, o quantil <Eq>{`t`}</Eq> é 2,365 — bem acima de 1,96. A incerteza em <Eq>{`\\sigma`}</Eq> pesada quando <Eq>{`n`}</Eq> é pequeno.</li>
+</ol>
+  </>}
+  solucao={<>Média: 5,0625 L, <Eq>{`s \\approx 0{,}267`}</Eq> L. IC 95% com <Eq>{`t_{0{,}025,\\,7} = 2{,}365`}</Eq>: <Eq>{`[4{,}84;\\; 5{,}29]`}</Eq> L.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-2-a-single-population-mean-using-the-student-t-distribution", secao: "§8.2", pagina: "443", exercicio: "8.21", licenca: "CC-BY" }}
+>
+Consumo diário de água de $n = 8$ apartamentos (em litros): 5,2 | 4,8 | 5,5 | 4,9 | 5,1 | 5,3 | 4,7 | 5,0. Construa o IC 95%.
+</Exercicio>
+
+<Exercicio
+  numero="102.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n \\geq (1{,}960 \\times 25/5)^2 = (9{,}80)^2 = 96{,}04`}</Eq>. Arredonda: <Eq>{`n = 97`}</Eq>. Com 97 amostras, a margem de erro fica em exatamente 5 mg/dL a 95%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "436", exercicio: "8.11", licenca: "CC-BY" }}
+>
+Glicemia: $\sigma = 25$ mg/dL (de estudos anteriores). Qual $n$ garante margem de erro de 5 mg/dL a 95%?
+</Exercicio>
+
+<Exercicio
+  numero="102.17"
+  dificuldade="modelagem"
+  solucao={<>IC 95%: <Eq>{`1{,}800 \\pm 2{,}064 \\times 200/\\sqrt{25} = 1{,}800 \\pm 82{,}6`}</Eq>. IC: R$ 1.717 a R$ 1.883. O salário mínimo vigente (R$ 1.412 em 2024) não está no IC, indicando que o setor paga acima do mínimo. A greve não é suportada com base neste IC se a reivindicação for acima de R$ 1.883; se for abaixo, os dados são consistentes com a demanda.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "187", exercicio: "4.15", licenca: "CC-BY-SA" }}
+>
+Um sindicato de trabalhadores metalúrgicos coletou salários de $n = 25$ funcionários: $\bar X = R\$\,1\,800$, $s = R\$\,200$. O sindicato alega que o salário médio real está abaixo de R\$ 1.883. O IC 95% suporta essa alegação?
+</Exercicio>
+
+<Exercicio
+  numero="102.18"
+  dificuldade="modelagem"
+  passos={<>
+<ol>
+<li>IC 95% para temperatura corporal: <Eq>{`\\bar X = 36{,}8`}</Eq>°C, <Eq>{`s = 0{,}5`}</Eq>°C, <Eq>{`n = 30`}</Eq>.</li>
+<li><Eq>{`t_{0{,}025,\\,29} = 2{,}045`}</Eq>. <Eq>{`\\mathrm{SE} = 0{,}5/\\sqrt{30} = 0{,}0913`}</Eq>.</li>
+<li><Eq>{`E = 2{,}045 \\times 0{,}0913 = 0{,}187`}</Eq>. IC: <Eq>{`[36{,}61;\\; 36{,}99]`}</Eq>°C.</li>
+<li>O valor clássico de 37°C está fora do IC (marginalmente). Isso sugere que o valor real pode ser ligeiramente inferior ao canônico.</li>
+<li><em>Curiosidade:</em> Estudos recentes com grandes amostras confirmam que a temperatura corporal humana diminuiu historicamente — provavelmente por melhora nas condições de saúde reduzindo inflamações crônicas.</li>
+</ol>
+  </>}
+  solucao={<>IC 95%: <Eq>{`[36{,}61;\\; 36{,}99]`}</Eq>°C. Como 37°C está fora do IC (marginalmente), os dados desafiam o valor canônico. Para conclusão mais robusta, um teste formal <Eq>{`H_0: \\mu = 37`}</Eq> seria adequado.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.3", pagina: "192", exercicio: "4.21", licenca: "CC-BY-SA" }}
+>
+Temperatura corporal de $n = 30$ adultos saudáveis: $\bar X = 36{,}8$°C, $s = 0{,}5$°C. IC 95%. O valor clássico de 37°C é compatível com esses dados?
+</Exercicio>
+
+<Exercicio
+  numero="102.19"
+  dificuldade="modelagem"
+  solucao={<>Para <Eq>{`\\delta = 0{,}5`}</Eq> ponto percentual e <Eq>{`\\sigma \\approx 2`}</Eq> pp (variação típica do PIB), <Eq>{`n \\geq (1{,}960 \\times 2/0{,}5)^2 = (7{,}84)^2 \\approx 61{,}5`}</Eq>. Precisaria de 62 trimestres — mais de 15 anos de dados para detectar diferença de 0,5 pp no crescimento do PIB. Com variabilidade econômica real, o poder estatístico de estudos de curto prazo é limitado.</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 9", pagina: "141", exercicio: "9.3", licenca: "CC-BY-NC" }}
+>
+Um economista quer estimar o crescimento médio do PIB trimestral com margem de erro de 0,5 ponto percentual a 95%. Se $\sigma \approx 2$ pp (variabilidade histórica), quantos trimestres de dados são necessários? Discuta a viabilidade prática.
+</Exercicio>
+
+<Exercicio
+  numero="102.20"
+  dificuldade="aplicacao"
+  solucao={<>Ao aumentar o nível de confiança de 90% para 99%, o quantil cresce de 1,645 para 2,576. A margem de erro aumenta na proporção <Eq>{`2{,}576/1{,}645 \\approx 1{,}566`}</Eq>, ou seja, cerca de 56,6% mais larga. O IC fica significativamente mais largo para a mesma amostra.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "432", exercicio: "8.5", licenca: "CC-BY" }}
+>
+Um IC de 90% tem amplitude $A_{90}$. Quantas vezes mais largo é o IC de 99% para a mesma amostra e o mesmo $\sigma$?
+</Exercicio>
+
+<Exercicio
+  numero="102.21"
+  dificuldade="aplicacao"
+  solucao={<>IC 95%: <Eq>{`\\bar X \\pm 1{,}960 \\times \\sigma/\\sqrt{n} = 12 \\pm 1{,}960 \\times 3/\\sqrt{49} = 12 \\pm 0{,}840`}</Eq>. IC: <Eq>{`[11{,}16;\\; 12{,}84]`}</Eq> horas. O valor 10 horas está fora do IC — os dados são inconsistentes com a hipótese de média 10 horas.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "431", exercicio: "8.2", licenca: "CC-BY" }}
+>
+Horas semanais de tela de adolescentes: $\sigma = 3$ h, $n = 49$, $\bar X = 12$ h. IC 95%. O valor 10 h/semana é plausível?
+</Exercicio>
+
+<Exercicio
+  numero="102.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E = 2{,}576 \\times \\sigma/\\sqrt{n}`}</Eq>. Queremos <Eq>{`E \\leq 2`}</Eq> mg/dL. <Eq>{`n \\geq (2{,}576 \\times 8/2)^2 = (10{,}304)^2 = 106{,}2`}</Eq>. Arredonda: <Eq>{`n = 107`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "438", exercicio: "8.23", licenca: "CC-BY" }}
+>
+Colesterol: $\sigma = 8$ mg/dL. Qual $n$ para IC 99% com margem de 2 mg/dL?
+</Exercicio>
+
+<Exercicio
+  numero="102.23"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Identifique: <Eq>{`n = 40`}</Eq>, <Eq>{`\\bar X = 520`}</Eq> horas, <Eq>{`s = 60`}</Eq> horas.</li>
+<li>Com <Eq>{`n = 40`}</Eq>, <Eq>{`t_{0{,}025,\\,39} \\approx 2{,}023`}</Eq>.</li>
+<li><Eq>{`\\mathrm{SE} = 60/\\sqrt{40} = 9{,}49`}</Eq>. <Eq>{`E = 2{,}023 \\times 9{,}49 = 19{,}2`}</Eq> horas.</li>
+<li>IC: <Eq>{`[500{,}8;\\; 539{,}2]`}</Eq> horas.</li>
+<li>O fabricante afirma 500 horas. Como 500 está fora do IC (marginalmente), os dados são marginalmente inconsistentes com a afirmação. Um teste formal seria indicado.</li>
+<li><em>Observação:</em> Quando <Eq>{`n \\geq 30`}</Eq>, a diferença entre <Eq>{`t`}</Eq> e <Eq>{`z`}</Eq> é pequena (2,023 vs. 1,960). Para praticidade, muitos usam <Eq>{`z`}</Eq> quando <Eq>{`n \\geq 30`}</Eq>.</li>
+</ol>
+  </>}
+  solucao={<>IC 95%: <Eq>{`[500{,}8;\\; 539{,}2]`}</Eq> horas. Como 500 está fora do IC, os dados desafiam marginalmente a afirmação do fabricante.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "188", exercicio: "4.17", licenca: "CC-BY-SA" }}
+>
+Duração de baterias: $n = 40$, $\bar X = 520$ h, $s = 60$ h. IC 95%. O fabricante afirma que a duração média é de 500 horas. Os dados suportam essa afirmação?
+</Exercicio>
+
+<Exercicio
+  numero="102.24"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Aumenta o nivel de confiança mas estreita o IC" },
+    { texto: "Mantém o nivel de confiança mas estreita o IC", correta: true },
+    { texto: "Aumenta o nivel de confiança e alarga o IC" },
+    { texto: "Não tem efeito no IC se a populacao for normal" }
+  ]}
+  solucao={<>Aumentar <Eq>{`n`}</Eq> de 25 para 100 quadruplica <Eq>{`n`}</Eq>, dobrando <Eq>{`\\sqrt{n}`}</Eq>. A margem de erro <Eq>{`E \\propto 1/\\sqrt{n}`}</Eq> cai à metade. O nível de confiança (95%) não muda — ele é escolhido pelo pesquisador, não pelo tamanho amostral.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "433", exercicio: "8.9", licenca: "CC-BY" }}
+>
+O que acontece com o IC 95% quando você aumenta $n$ de 25 para 100, mantendo tudo mais constante?
+</Exercicio>
+
+<Exercicio
+  numero="102.25"
+  dificuldade="modelagem"
+  solucao={<>Relatório INSS: IC 95% com <Eq>{`t_{0{,}025,\\,99} \\approx 1{,}984`}</Eq>. <Eq>{`\\mathrm{SE} = 15/\\sqrt{100} = 1{,}5`}</Eq> dias. IC: <Eq>{`[37 - 2{,}976;\\; 37 + 2{,}976] = [34{,}02;\\; 39{,}98]`}</Eq> dias. Meta: 45 dias. O IC está completamente abaixo de 45 dias — dados são fortemente compatíveis com cumprimento da meta. Pode-se reportar: "Com 95% de confiança, o tempo médio real de concessão está entre 34 e 40 dias, abaixo da meta de 45 dias."</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.3", pagina: "193", exercicio: "4.23", licenca: "CC-BY-SA" }}
+>
+O INSS coletou $n = 100$ processos de aposentadoria: $\bar X = 37$ dias, $s = 15$ dias. A meta legal é 45 dias. Construa o IC 95% e interprete em relação à meta.
+</Exercicio>
+
+<Exercicio
+  numero="102.26"
+  dificuldade="desafio"
+  solucao={<>Para a média: IC 95% com <Eq>{`t_{0{,}025,\\,n-1}`}</Eq>. Para a mediana: IC baseado em estatísticas de ordem — os limites são <Eq>{`X_{(j)}`}</Eq> e <Eq>{`X_{(k)}`}</Eq> onde <Eq>{`j`}</Eq> e <Eq>{`k`}</Eq> são obtidos da tabela binomial. Para <Eq>{`n = 20`}</Eq>, o IC 95% para a mediana usa os 6.º e 15.º quartis ordenados. Para renda (distribuição assimétrica com cauda direita longa), a mediana é mais representativa que a média, e o IC para a mediana é mais robusto a outliers de renda alta.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.3", pagina: "194", exercicio: "4.25", licenca: "CC-BY-SA" }}
+>
+Para dados de renda mensal de $n = 20$ trabalhadores, compare o IC 95% para a média (usando t) com o IC 95% para a mediana (usando estatísticas de ordem). Qual é mais adequado para descrever a renda "típica"? Por quê?
+</Exercicio>
+
+<Exercicio
+  numero="102.27"
+  dificuldade="demonstracao"
+  solucao={<>Derivação: por simetria da <Eq>{`\\mathcal{N}(0,1)`}</Eq>, <Eq>{`P(-z_{\\alpha/2} \\leq Z \\leq z_{\\alpha/2}) = 1 - \\alpha`}</Eq>. Substituindo <Eq>{`Z = (\\bar X - \\mu)/(\\sigma/\\sqrt{n})`}</Eq> e reorganizando: <Eq>{`P(\\bar X - z_{\\alpha/2}\\sigma/\\sqrt{n} \\leq \\mu \\leq \\bar X + z_{\\alpha/2}\\sigma/\\sqrt{n}) = 1-\\alpha`}</Eq>. Os extremos <Eq>{`L = \\bar X - z_{\\alpha/2}\\sigma/\\sqrt{n}`}</Eq> e <Eq>{`U = \\bar X + z_{\\alpha/2}\\sigma/\\sqrt{n}`}</Eq> são estatísticas (funções dos dados), enquanto <Eq>{`\\mu`}</Eq> é o parâmetro fixo.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "180", exercicio: "4.5", licenca: "CC-BY-SA" }}
+>
+Derive formalmente o IC $(1-\alpha)$ para $\mu$ com $\sigma$ conhecido a partir da propriedade de simetria da distribuição normal padrão. Identifique claramente o que é aleatório e o que é fixo em $P(L \leq \mu \leq U) = 1 - \alpha$.
+</Exercicio>
+
+<Exercicio
+  numero="102.28"
+  dificuldade="demonstracao"
+  solucao={<>Mostre que <Eq>{`T = (\\bar X - \\mu)/(S/\\sqrt{n}) \\sim t_{n-1}`}</Eq> quando <Eq>{`X_i \\sim \\mathcal{N}(\\mu, \\sigma^2)`}</Eq>: (1) <Eq>{`\\bar X \\sim \\mathcal{N}(\\mu, \\sigma^2/n)`}</Eq>; (2) <Eq>{`(n-1)S^2/\\sigma^2 \\sim \\chi^2_{n-1}`}</Eq> (Cochran); (3) <Eq>{`\\bar X`}</Eq> e <Eq>{`S^2`}</Eq> são independentes; (4) o quociente de uma normal padrão por <Eq>{`\\sqrt{\\chi^2_\\nu/\\nu}`}</Eq> independente segue <Eq>{`t_\\nu`}</Eq> — by definition of Student's t.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "181", exercicio: "4.6", licenca: "CC-BY-SA" }}
+>
+Demonstre que $T = (\bar X - \mu)/(S/\sqrt{n}) \sim t_{n-1}$ quando $X_i \overset{\text{iid}}{\sim} \mathcal{N}(\mu, \sigma^2)$. Quais as três propriedades que você precisa estabelecer?
+</Exercicio>
+
+<Exercicio
+  numero="102.29"
+  dificuldade="desafio"
+  solucao={<>Pelo teorema da dualidade: rejeitar <Eq>{`H_0: \\mu = \\mu_0`}</Eq> ao nível <Eq>{`\\alpha`}</Eq> é equivalente a <Eq>{`\\mu_0`}</Eq> estar fora do IC <Eq>{`(1-\\alpha)`}</Eq>. Portanto, todos os valores de <Eq>{`\\mu_0`}</Eq> que NÃO seriam rejeitados por um teste bilateral ao nível 5% formam exatamente o IC 95%. O IC pode ser usado como ferramenta gráfica de teste múltiplo: testar simultaneamente todas as hipóteses da forma <Eq>{`H_0: \\mu = c`}</Eq> para todo <Eq>{`c`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "198", exercicio: "4.31", licenca: "CC-BY-SA" }}
+>
+Mostre a dualidade entre IC e teste de hipótese: "rejeitar $H_0: \mu = \mu_0$ ao nível $\alpha$ é equivalente a $\mu_0$ estar fora do IC $(1-\alpha)$". Use essa dualidade para explicar como um IC pode ser usado como teste bilateral simultâneo para todos os valores de $\mu_0$.
+</Exercicio>
+
+<Exercicio
+  numero="102.30"
+  dificuldade="aplicacao"
+  solucao={<>Para proporção, use o IC de Wilson: <Eq>{`\\hat p \\pm z_{\\alpha/2}\\sqrt{\\hat p(1-\\hat p)/n}`}</Eq>. Com <Eq>{`\\hat p = 65/200 = 0{,}325`}</Eq>, <Eq>{`\\mathrm{SE} = \\sqrt{0{,}325 \\times 0{,}675/200} = 0{,}0331`}</Eq>. IC 95%: <Eq>{`0{,}325 \\pm 1{,}960 \\times 0{,}0331 = 0{,}325 \\pm 0{,}065`}</Eq>. IC: <Eq>{`[26{,}0\\%;\\; 39{,}0\\%]`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "451", exercicio: "8.29", licenca: "CC-BY" }}
+>
+Em $n = 200$ estudantes do ENEM de uma escola pública, 65 obtiveram nota acima de 700 na redação. Construa o IC 95% para a proporção real.
+</Exercicio>
 
 </ListaExercicios>
 
 ## Fontes
-- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019 · 4ª ed · §5.2. **Fonte primária.**
-- [**An Introduction to Statistical Learning**](https://www.statlearning.com/) — James, Witten, Hastie, Tibshirani · 2023 · 2nd ed · §3.1.
-- [**All of Statistics**](https://www.stat.cmu.edu/~larry/all-of-statistics/) — Wasserman · 2004 · §6.3.
+
+- [**OpenIntro Statistics** (4ª ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA. Seções §4.2–4.4 (IC para médias, dualidade com testes, tamanho amostral).
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY. Capítulo 8 (IC para média com z e com t de Student, margem de erro).
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC. Capítulo 9 (interpretação frequentista vs. bayesiana do IC).

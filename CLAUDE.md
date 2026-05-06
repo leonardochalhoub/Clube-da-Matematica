@@ -265,15 +265,15 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ## 9. Roadmap snapshot (current)
 
-- ✅ 120 lessons in PT-BR with 7 doors + ~4,770 exercises.
+- ✅ 120 lessons in PT-BR with 7 doors + ~4,770 sourced exercises.
+- ✅ All 120 lessons stabilized to the Lição 1 canonical template (L14-L120 rewritten 2026-04 → 2026-05; build green).
 - ✅ 1,800 exam questions (12 trimesters × 10 versions × 15 questions) in `provas-data.ts`.
-- ✅ UI translated to 11 locales.
-- ✅ Per-locale lesson routing (493 static pages).
-- ✅ Footer with `version · commit · timestamp`.
-- ⏳ MDX translation coverage: ~36% average (worst: pl-PL 21/120, best: en-US/es-ES 50/120). Gemini agents fill this in.
-- ⏳ Wolfram Alpha exercise links must use clean symbolic queries (not localized text). Lesson-1 audit pending.
-- ⏳ Audio: Spanish locale shows BR flag/voice in some cases (regression from per-locale routes — see issue queue).
-- 🔜 Provas i18n.
+- ✅ UI translated to 11 locales (no MDX bodies).
+- ✅ Per-locale lesson routing (1,390 static pages — incl. en/es/zh/ja/de/fr/it/ru/ko/pl prefixes that fall back to PT-BR bodies).
+- ✅ Footer with `version · commit · timestamp` (currently `0.2.0`).
+- ⏳ **MDX lesson translations → TO-DO**. Pipeline ready (`scripts/translate-parallel.py` with Gemini free tier); execution pending.
+- ⏳ Provas i18n → TO-DO.
+- ⏳ Wolfram Alpha exercise links must use clean symbolic queries. Lesson-1 audit pending.
 - 🔜 Future modules: Physics (high-school), Engineering intro.
 
 ---
@@ -301,4 +301,4 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ---
 
-> **Last update:** 2026-05-04. If you change a convention, edit this file in the same commit.
+> **Last update:** 2026-05-06. If you change a convention, edit this file in the same commit.

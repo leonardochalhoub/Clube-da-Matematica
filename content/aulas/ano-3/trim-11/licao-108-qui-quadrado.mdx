@@ -1,380 +1,884 @@
 ---
-titulo: "Lição 108 — Qui-quadrado e tabelas de contingência"
+titulo: "Lição 108 — Teste qui-quadrado: aderência e independência"
 slug: "licao-108-qui-quadrado"
 categoria: "aulas"
 subcategoria: "ano-3-trim-11"
-descricao: "Goodness of fit, independência. Graus de liberdade. Yates."
+descricao: "Estatística chi-quadrado: distribuição assintótica, graus de liberdade, teste de aderência (goodness of fit) e teste de independência em tabelas de contingência. Correção de Yates, V de Cramér."
 ordem: 108
 publicado: true
-tags: ["estatística inferencial", "ano-3", "trim-11"]
-prerrequisitos: ["licao-107"]
+tags: ["estatística inferencial", "qui-quadrado", "tabela de contingência", "independência", "aderência", "ano-3", "trim-11"]
+prerrequisitos: ["licao-107-hipoteses-paramtricas"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-versao: "v0"
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano EM", "Stochastik LK alemão", "H2 Statistics singapurense", "Math B japonês — estatística inferencial"]
+versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="\chi^2 = \sum \frac{(O_i - E_i)^2}{E_i}"
-  legenda={<>O <strong>teste qui-quadrado</strong> compara contagens observadas com esperadas. Em <em>goodness of fit</em>, testa aderência a uma distribuição; em tabelas de contingência, testa independência entre categorias.</>}
-  audioTexto="Qui-quadrado. Soma de observado menos esperado, ao quadrado, dividido pelo esperado. Para teste de aderência usamos uma única série de categorias. Para tabela de contingência, comparamos linhas e colunas com esperados sob independência."
+  formula="\chi^2 = \sum_{i=1}^{k} \frac{(O_i - E_i)^2}{E_i}"
+  legenda={<>A <strong>estatística qui-quadrado</strong> mede a discrepância total entre contagens <em>observadas</em> <Eq>{`O_i`}</Eq> e contagens <em>esperadas</em> <Eq>{`E_i`}</Eq> sob <Eq>{`H_0`}</Eq>. Quanto maior <Eq>{`\\chi^2`}</Eq>, mais evidência contra a hipótese nula. Para <em>aderência</em>, testa se os dados seguem uma distribuição prescrita; para <em>independência</em>, testa se duas variáveis categóricas são independentes em uma tabela <Eq>{`r \\times c`}</Eq>.</>}
+  audioTexto="Qui-quadrado igual à soma de: observado menos esperado, ao quadrado, dividido pelo esperado. Somamos essa fração para cada categoria. Quanto mais os dados se afastam do esperado sob a hipótese nula, maior o valor da estatística."
 />
+
+<aside>
+
+**Livros que cobrem esta lição**
+
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · [§11.1–11.6](https://openstax.org/books/statistics/pages/11-1-facts-about-the-chi-square-distribution) · <em>Fonte primária: trata aderência, independência e homogeneidade com exemplos passo a passo, incluindo tabelas de valor crítico e exercícios de contexto real.</em>
+- [**OpenIntro Statistics (4ª ed)**](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · [§6.3–6.4](https://www.openintro.org/book/os/) · <em>Abordagem conceitual limpa: motiva o teste via contagens multinomiais, explica graus de liberdade geometricamente e apresenta o V de Cramér como tamanho de efeito.</em>
+- [**Introduction to Modern Statistics**](https://openintro-ims.netlify.app/) — Çetinkaya-Rundel, Hardin · CC-BY-SA · [§18–19](https://openintro-ims.netlify.app/inference-tables) · <em>Versão modernizada com simulação permutacional para motivar a distribuição qui-quadrado antes da teoria assintótica; ideal para intuição.</em>
+
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="Definição formal">
+<Porta nivel="formal" titulo="Definição rigorosa">
 
-### Estatística
+### Distribuição qui-quadrado
 
+<Definicao titulo="Distribuicao chi-quadrado com k graus de liberdade">
+
+Sejam $Z_1, Z_2, \ldots, Z_k$ variáveis aleatórias independentes com distribuição $\mathcal{N}(0,1)$. Define-se:
+
+$$X = Z_1^2 + Z_2^2 + \cdots + Z_k^2$$
+
+A variável $X$ tem distribuição **qui-quadrado com $k$ graus de liberdade**, escrita $X \sim \chi^2_k$. Propriedades:
+
+- $\mathbb{E}[X] = k$ e $\text{Var}[X] = 2k$.
+- A densidade é $f(x) = \frac{x^{k/2-1}e^{-x/2}}{2^{k/2}\Gamma(k/2)}$ para $x > 0$.
+- Para $k$ grande, $\chi^2_k \approx \mathcal{N}(k, 2k)$ (TCL).
+
+</Definicao>
+
+> "As distribuições qui-quadrado têm uma propriedade de aditividade: se $X_1 \sim \chi^2_{n_1}$ e $X_2 \sim \chi^2_{n_2}$ são independentes, então $X_1 + X_2 \sim \chi^2_{n_1 + n_2}$." — [OpenStax Statistics, §11.1](https://openstax.org/books/statistics/pages/11-1-facts-about-the-chi-square-distribution)
+
+### Teste de aderência (goodness of fit)
+
+<Definicao titulo="Hipoteses e estatistica de aderencia">
+
+Dada uma amostra de $n$ observações categorizadas em $k$ classes:
+
+**Hipóteses:**
+$$H_0: p_i = p_i^0 \quad (i = 1, \ldots, k) \qquad \text{vs.} \qquad H_1: \text{pelo menos um } p_i \neq p_i^0$$
+
+**Frequências esperadas:** $E_i = n \, p_i^0$.
+
+**Estatística:**
 $$\chi^2 = \sum_{i=1}^{k} \frac{(O_i - E_i)^2}{E_i}$$
 
-onde $O_i$ é frequência observada e $E_i$ esperada na categoria $i$.
+**Graus de liberdade:** $df = k - 1 - r$, onde $r$ é o número de parâmetros estimados a partir dos dados (tipicamente $r = 0$ para distribuições completamente especificadas).
 
-Sob $H_0$, $\chi^2 \sim \chi^2_{df}$ assintoticamente.
+Sob $H_0$, $\chi^2 \xrightarrow{d} \chi^2_{df}$ quando $n \to \infty$ (resultado assintótico de Pearson, 1900).
 
-### Goodness of fit (aderência)
+</Definicao>
 
-$$H_0: p_i = p_i^0, \quad i=1, \dots, k$$
+### Teste de independência em tabela $r \times c$
 
-$E_i = n p_i^0$. Graus de liberdade: $df = k - 1 - r$, onde $r$ é número de parâmetros estimados.
+<Definicao titulo="Esperados e estatistica em tabela de contingencia">
 
-### Independência (tabela de contingência)
+Para uma tabela com $r$ linhas e $c$ colunas, total $n$, total da linha $i$ igual a $R_i$, total da coluna $j$ igual a $C_j$:
 
-Para tabela $r \times c$:
+**Hipóteses:**
+$$H_0: P(A_i \cap B_j) = P(A_i)\,P(B_j) \quad \forall\, i, j \qquad \text{(independência)}$$
 
-$$E_{ij} = \frac{(\text{total linha } i)(\text{total coluna } j)}{n}$$
+**Frequências esperadas sob $H_0$:**
+$$E_{ij} = \frac{R_i \cdot C_j}{n}$$
 
-$$\chi^2 = \sum_{i,j} \frac{(O_{ij} - E_{ij})^2}{E_{ij}}, \quad df = (r-1)(c-1)$$
+**Estatística:**
+$$\chi^2 = \sum_{i=1}^{r} \sum_{j=1}^{c} \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$$
 
-### Suposições
+**Graus de liberdade:** $df = (r-1)(c-1)$.
 
-- Observações independentes.
-- $E_i \geq 5$ para todas as células (ou pelo menos 80% delas).
-- Categorias mutuamente exclusivas e exaustivas.
+</Definicao>
 
-### Correção de Yates (2x2)
+> "As frequências esperadas para um teste de independência são calculadas assumindo que as proporções da linha são iguais em todas as colunas. Se a hipótese nula for verdadeira (variáveis independentes), esse pressuposto é satisfeito." — [OpenIntro Statistics, §6.4](https://www.openintro.org/book/os/)
 
-$$\chi^2 = \sum \frac{(|O_{ij} - E_{ij}| - 0{,}5)^2}{E_{ij}}$$
+### Suposições de validade (regra de Cochran)
 
-Para tabelas $2 \times 2$ com $E$ pequenos.
+<Definicao titulo="Condicoes de aplicabilidade">
+
+O teste qui-quadrado (aderência ou independência) é válido quando:
+
+1. **Independência** das observações (amostragem aleatória simples ou experimento com unidades independentes).
+2. **Tamanho mínimo de célula:** $E_i \geq 5$ em todas as células — ou, na versão relaxada de Cochran, pelo menos 80% das células com $E_i \geq 5$ e nenhuma com $E_i < 1$.
+3. **Categorias mutuamente exclusivas e exaustivas** (cada observação pertence a exatamente uma célula).
+
+Quando a condição 2 falha em tabelas $2 \times 2$: use o **Teste Exato de Fisher**.
+
+</Definicao>
+
+### Correção de Yates (tabela $2 \times 2$)
+
+<Teorema titulo="Correcao de Yates para continuidade">
+
+Para tabelas $2 \times 2$ com $E_{ij}$ próximos de 5, a aproximação discreta–contínua pode ser melhorada com:
+
+$$\chi^2_Y = \sum_{i,j} \frac{\bigl(\lvert O_{ij} - E_{ij} \rvert - 0,5\bigr)^2}{E_{ij}}$$
+
+A correção é conservadora: reduz ligeiramente $\chi^2$, aumentando o p-valor. Sua adoção é debatida — muitos estatísticos preferem o Teste Exato de Fisher em amostras pequenas.
+
+</Teorema>
+
+### Tamanho de efeito: V de Cramér
+
+<Definicao titulo="V de Cramer">
+
+O V de Cramér normaliza $\chi^2$ para uma escala $[0, 1]$ independente de $n$:
+
+$$V = \sqrt{\frac{\chi^2}{n \cdot \min(r-1,\, c-1)}}$$
+
+Interpretação convencional (Cohen):
+
+- $V \approx 0,1$: efeito pequeno
+- $V \approx 0,3$: efeito médio
+- $V \geq 0,5$: efeito grande
+
+</Definicao>
+
+<Insight>
+
+**Por que a estatística tem essa forma?** Cada parcela $(O_i - E_i)^2 / E_i$ é proporcional a $Z_i^2$ onde $Z_i = (O_i - E_i)/\sqrt{E_i}$ é uma padronização da discrepância na categoria $i$. A soma de quadrados de normais padrão converge para $\chi^2$ — a restrição "soma dos $O_i$ = $n$" reduz os graus de liberdade em 1, daí $df = k - 1$.
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 500 200" className="w-full">
+<defs>
+  <marker id="arr108" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="30" x2="480" y1="160" y2="160" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" markerEnd="url(#arr108)"/>
+  <text x="485" y="164" fontSize="10" fill="currentColor" fillOpacity="0.6">x</text>
+  <text x="10" y="20" fontSize="10" fill="currentColor" fillOpacity="0.6">f(x)</text>
+  <path d="M 40,158 Q 60,158 70,130 Q 80,90 100,60 Q 120,38 140,32 Q 160,30 180,35 Q 220,48 270,90 Q 320,130 380,150 Q 420,158 460,159" stroke="rgb(26 77 92)" strokeWidth="2" fill="none"/>
+  <path d="M 280,158 L 280,100 Q 320,130 380,150 Q 420,158 460,159" stroke="rgb(232 199 122)" strokeWidth="1.5" fill="rgb(232 199 122 / 0.3)"/>
+  <text x="340" y="145" fontSize="9" fill="rgb(201 163 95)">região crítica</text>
+  <text x="270" y="175" fontSize="9" fill="currentColor" fillOpacity="0.6">valor crítico</text>
+  <line x1="280" x2="280" y1="100" y2="160" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1" strokeDasharray="3,2"/>
+  <text x="100" y="22" fontSize="10" fill="currentColor" fillOpacity="0.7">chi-quadrado df=5</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Curva qui-quadrado com df = 5. A região amarela à direita do valor crítico é a área de rejeição de H0 ao nível alpha = 5%.
+</figcaption>
+</figure>
 
 </Porta>
 
 <Porta nivel="5" titulo="Pra criança de 5 anos">
 
-Você tem **6 jujubas de cores diferentes** num saco e diz que elas saem **na mesma proporção**. Mas quando você tira 60, sai muito mais vermelha que verde.
+Imagina que você tem um saco com **seis bolas** coloridas — duas vermelhas, duas azuis e duas amarelas — e seu irmão diz que todas as cores saem com a mesma chance.
 
-O teste qui-quadrado pergunta: "**O que eu observei está perto do que eu esperava**?" Se está bem diferente, alguma coisa está errada.
+Você tira 60 bolas e conta: 25 vermelhas, 10 azuis e 25 amarelas.
+
+Isso é muito diferente do que se esperava (20 de cada)! O teste qui-quadrado é como um **juiz de brinquedo**: ele olha para a diferença entre o que você esperava e o que de fato saiu e diz: "Isso foi azar, ou tem algo errado com o saco?"
+
+Se a diferença é grande demais para ser só azar, o juiz bate o martelo: **o saco está errado**.
 
 </Porta>
 
 <Porta nivel="10" titulo="Pra criança de 10 anos">
 
-### Dois usos principais
+### Dois usos do teste qui-quadrado
 
-1. **Aderência (goodness of fit)**: dado é justo? Distribuição segue Poisson? etc.
-2. **Independência**: cor de cabelo está relacionada com cor dos olhos? Ou são independentes?
+**1. Aderência** — os dados combinam com a teoria?
 
-### Receita básica
+Você joga um dado 60 vezes e conta quantas vezes saiu cada face. Se o dado for honesto, esperaria 10 de cada. Se saiu 15 vezes o 6 e apenas 5 vezes o 1, será que o dado está viciado?
 
-1. Conte **observado** ($O_i$).
-2. Calcule **esperado** ($E_i$) sob $H_0$.
-3. Some $(O - E)^2 / E$ para cada categoria.
-4. Compare com tabela $\chi^2$ usando $df$.
+O teste soma $(O - E)^2 / E$ para cada face. Se a soma for grande demais, concluímos que o dado provavelmente é viciado.
 
-### Exemplo: dado é justo?
+**2. Independência** — duas características estão relacionadas?
 
-Joga 60 vezes. Observa: 12, 8, 11, 9, 13, 7. Esperado se justo: 10 cada.
+Pesquiso 200 pessoas sobre preferência de time (A, B, C) e região (Norte, Sul). As torcidas são proporcionais em cada região, ou a região influencia o time?
 
-$\chi^2 = (12-10)^2/10 + (8-10)^2/10 + \dots = (4+4+1+1+9+9)/10 = 2{,}8$
+O teste monta uma tabela com as contagens observadas e calcula o que esperaríamos se não houvesse nenhuma relação. A diferença vira a estatística qui-quadrado.
 
-$df = 6 - 1 = 5$. Crítico a 5%: $11{,}07$. **Não rejeita** — dado parece justo.
-
-### Tabela 2x2
-
-| | Curou | Não curou |
-|---|---|---|
-| Droga | 80 | 20 |
-| Placebo | 60 | 40 |
-
-Calcule esperados, $\chi^2$, $df=(2-1)(2-1)=1$. Compare com $3{,}84$ (5%).
+**Graus de liberdade:** para $k$ categorias, $df = k - 1$. Para tabela $r \times c$, $df = (r-1)(c-1)$.
 
 </Porta>
 
 <Porta nivel="15" titulo="Pra adolescente de 15 anos">
 
-### Por que essa fórmula?
+### A ideia central
 
-Cada $(O-E)^2/E$ é uma "padronização" da diferença. Lembra $Z^2$. Para muitas categorias, soma desses $Z^2$ aproxima $\chi^2$ pela teoria assintótica.
+Quando observamos $k$ categorias numa amostra de tamanho $n$, cada frequência $O_i$ oscila em torno de $E_i = n p_i$. A oscilação esperada de $O_i$ é da ordem de $\sqrt{E_i}$ (desvio padrão de uma binomial). Portanto $(O_i - E_i)/\sqrt{E_i} \approx Z_i$ é aproximadamente normal padrão. A soma $\sum Z_i^2$ aproxima $\chi^2$ — e essa é precisamente a estatística de teste.
 
-### Distribuição $\chi^2_k$
+### Roteiro de execução
 
-Soma de $k$ normais padrão ao quadrado. Média $k$, variância $2k$. Para $k$ grande, $\chi^2_k \approx \mathcal{N}(k, 2k)$.
+1. **Defina $H_0$** e as proporções esperadas $p_i^0$ (aderência) ou suponha independência (tabela).
+2. **Calcule $E_i$**: para aderência, $E_i = n p_i^0$; para independência, $E_{ij} = R_i C_j / n$.
+3. **Verifique** $E_i \geq 5$ em todas as células.
+4. **Compute** $\chi^2 = \sum (O_i - E_i)^2 / E_i$.
+5. **Determine $df$**: $k - 1$ (aderência sem parâmetros estimados) ou $(r-1)(c-1)$ (independência).
+6. **Compare** com o valor crítico $\chi^2_{\alpha; df}$ ou calcule o p-valor.
+7. Se $\chi^2 > \chi^2_{\alpha; df}$, rejeite $H_0$.
 
-### Goodness of fit detalhado
+### Exemplo rápido: dado viciado?
 
-**Exemplo**: distribuição de cor de bala (cervejaria de Mars):
+Lança um dado 120 vezes. Observa: 15, 22, 17, 25, 19, 22.
 
-- Vermelho: esperado 20%
-- Verde: 20%
-- Amarelo: 20%
-- Marrom: 20%
-- Laranja: 20%
+$E_i = 120/6 = 20$ cada. $df = 6 - 1 = 5$.
 
-Observa em $n=200$ balas: 30 vermelhas, 50 verdes, 35 amarelas, 45 marrons, 40 laranja.
+$$\chi^2 = \frac{(15-20)^2}{20} + \frac{(22-20)^2}{20} + \frac{(17-20)^2}{20} + \frac{(25-20)^2}{20} + \frac{(19-20)^2}{20} + \frac{(22-20)^2}{20}$$
 
-Esperado: 40 cada. $\chi^2 = (10^2 + 10^2 + 5^2 + 5^2 + 0)/40 = 250/40 = 6{,}25$
+$$= \frac{25 + 4 + 9 + 25 + 1 + 4}{20} = \frac{68}{20} = 3,40$$
 
-$df = 5-1 = 4$. Crítico 5%: $9{,}488$. Não rejeita.
-
-### Independência
-
-Tabela $r \times c$. $E_{ij} = (R_i C_j)/n$. Subtração $(r-1)(c-1)$ porque marginais são fixos.
-
-**Exemplo**: gênero $\times$ preferência política em 200 pessoas. $E_{ij}$ = produto das marginais sobre $n$. Teste $\chi^2$.
-
-### Quando NÃO usar $\chi^2$
-
-- $E_i < 5$ em mais de 20% das células: use Fisher exato.
-- Amostras pareadas: use McNemar (diferente!).
-- Variável ordinal: use Mann-Whitney ou Kendall.
-
-### Tamanho de efeito
-
-**Cramér's V**: $V = \sqrt{\chi^2/(n \cdot \min(r-1, c-1))}$. $V \in [0,1]$. $0{,}1$ pequeno; $0{,}3$ médio; $0{,}5$ grande.
+Valor crítico a 5%: $\chi^2_{0,05;\,5} = 11,07$. Como $3,40 < 11,07$, **não rejeitamos** $H_0$ — sem evidência de vício.
 
 </Porta>
 
 <Porta nivel="25" titulo="Pra estudante de engenharia">
 
-### Derivação
+### Derivação assintótica
 
-Pela teoria multinomial, sob $H_0$, contagens $(O_1, \dots, O_k)$ seguem multinomial$(n, p^0)$. A estatística $\chi^2$ aproxima $\sum Z_i^2 \approx \chi^2_{k-1}$ por aplicação do TCL multivariado e covariância das marginais.
+Sob $H_0$, o vetor de contagens $(O_1, \ldots, O_k)$ segue distribuição Multinomial$(n, p^0)$. A matriz de covariância do vetor $\mathbf{O}/n$ é $\Sigma = \text{diag}(p^0) - p^0 (p^0)^\top$. Após padronização, o TCL multivariado garante que $\sqrt{n}(O/n - p^0) \to \mathcal{N}(\mathbf{0}, \Sigma)$. A estatística de Pearson converge para a forma quadrática $\chi^2_{k-1}$ pela teoria de formas quadráticas em normais com restrição linear (Teorema de Cochran).
 
-### Df detalhado
+### Graus de liberdade — intuição linear
 
-- **Goodness of fit puro**: $df = k - 1$.
-- **Goodness of fit estimando $r$ parâmetros**: $df = k - 1 - r$.
-- **Independência $r \times c$**: $df = (r-1)(c-1)$.
-- **Homogeneidade entre populações**: mesmo $df$ que independência.
+A restrição $\sum O_i = n$ elimina 1 grau de liberdade: o vetor de resíduos $(O_i - E_i)$ vive num subespaço de dimensão $k - 1$. Para aderência com $r$ parâmetros estimados via MLE: cada parâmetro estimado reduz $df$ em 1 adicional, logo $df = k - 1 - r$.
 
-### Validade da aproximação
+Para tabela $r \times c$: os $rc$ valores $O_{ij}$ têm $r + c - 1$ restrições (margens fixas), logo $df = rc - (r + c - 1) = (r-1)(c-1)$.
 
-Regra Cochran: $E_i \geq 5$ em todos. Modificação: $\geq 1$ em todos e $\geq 5$ em 80%. Se viola: Fisher exato.
+### Estatística $G^2$ (razão de verossimilhança)
 
-### McNemar (pareado)
+Alternativa assintoticamente equivalente:
 
-Para tabela 2x2 pareada (mesmo sujeito antes/depois):
+$$G^2 = 2 \sum_{i} O_i \ln\!\left(\frac{O_i}{E_i}\right)$$
 
-$$\chi^2 = \frac{(b - c)^2}{b + c}, \quad df = 1$$
+Para $n$ grande, $G^2 \approx \chi^2$ com os mesmos $df$. Em modelos log-lineares (GLM Poisson com link log), $G^2$ é o desvio residual, preferido por sua interpretação via divergência KL.
 
-onde $b, c$ são discordâncias.
+### Resíduos padronizados
 
-### Likelihood ratio test alternativo
+Para diagnosticar quais células contribuem mais à rejeição:
 
-$$G^2 = 2 \sum O_i \ln(O_i/E_i)$$
+$$r_{ij} = \frac{O_{ij} - E_{ij}}{\sqrt{E_{ij}\,(1 - R_i/n)(1 - C_j/n)}}$$
 
-Equivalente a $\chi^2$ assintoticamente. Em log-linear models é o padrão.
+Células com $\lvert r_{ij} \rvert > 1,96$ são suspeitas ao nível 5% (corrigir por Bonferroni se muitas células).
 
-### Aplicações
-
-- **Genética**: testar leis de Mendel em proporções fenotípicas.
-- **Marketing**: variação por região em conversão.
-- **Engenharia de qualidade**: distribuição de defeitos uniforme entre máquinas?
-- **Epidemiologia**: associação entre exposição e doença.
-
-### Implementação
+### Implementação Python
 
 ```python
 from scipy.stats import chisquare, chi2_contingency
+import numpy as np
 
-# Goodness of fit
-chi2, p = chisquare(observed, expected)
+# Aderência
+chi2, p = chisquare(f_obs=[15, 22, 17, 25, 19, 22])
 
-# Independência (tabela)
-chi2, p, dof, expected = chi2_contingency(table)
+# Independência
+table = [[80, 20], [60, 40]]
+chi2, p, dof, expected = chi2_contingency(table, correction=False)
+
+# V de Cramér
+n = np.array(table).sum()
+v = np.sqrt(chi2 / (n * (min(np.array(table).shape) - 1)))
 ```
 
-### Exemplo completo
+### Quando usar alternativas
 
-Tabela $3 \times 2$: três marcas, conversão.
-
-|        | Comprou | Não    |
-|--------|---------|--------|
-| Marca A | 40 | 60 |
-| Marca B | 50 | 50 |
-| Marca C | 30 | 70 |
-
-Total $n = 300$. Marginais: 120 compras (40%), 100 cada marca.
-
-$E_{ij}$: marca A: 40, 60. Marca B: 40, 60. Marca C: 40, 60.
-
-$\chi^2 = 0 + 0 + 100/40 + 100/60 + 100/40 + 100/60 = 2{,}5 + 1{,}67 + 2{,}5 + 1{,}67 = 8{,}33$
-
-$df = 2$. Crítico 5%: $5{,}99$. **Rejeita** — marcas diferem em conversão.
+| Situação | Teste adequado |
+|---|---|
+| Tabela $2 \times 2$ com $E_{ij} < 5$ | Fisher exato |
+| Tabela 2x2 pareada (antes/depois) | McNemar |
+| Variável resposta ordinal | Mann-Whitney ou Kendall |
+| Múltiplas tabelas $2 \times 2$ (estratificação) | Cochran-Mantel-Haenszel |
+| Modelo multivariado de categorias | Regressão logística multinomial |
 
 </Porta>
 
 <Porta nivel="40" titulo="Pra profissional sênior">
 
-### Conexão com modelos log-lineares
+### Contexto histórico
 
-Tabela de contingência é caso particular de **GLM Poisson** com log link. Modelo de independência:
+Karl Pearson (1900) propôs a estatística $\chi^2$ como solução ao problema de mensurar discrepâncias entre frequências observadas e teóricas, estabelecendo a base da estatística moderna de hipóteses. O resultado assintótico é válido para $n \to \infty$; para amostras finitas, a questão de quão boa é a aproximação foi debatida por décadas — Fisher (1922) corrigiu os graus de liberdade de Pearson para o caso de parâmetros estimados, gerando um dos conflitos mais célebres da estatística do século XX.
+
+### Modelos log-lineares
+
+A tabela de contingência é caso particular de **GLM Poisson** com link logarítmico. Para tabela $r \times c$, o modelo de independência é:
 
 $$\log E_{ij} = \mu + \alpha_i + \beta_j$$
 
-Modelo saturado adiciona $(\alpha\beta)_{ij}$. Comparação via LR test = $G^2 = \chi^2$ assintoticamente.
+O modelo saturado adiciona termos de interação $(\alpha\beta)_{ij}$. O desvio de ajuste $G^2$ entre modelo de independência e modelo saturado é o teste de independência. A extensão para tabelas multidimensionais (modelos log-lineares hierárquicos) permite testar independência parcial, independência condicional e efeitos de interação de ordem superior.
 
-### Tamanho amostral
+### Questões de potência e tamanho amostral
 
-Para detectar Cramér's $V = 0{,}3$ em $3 \times 3$ a poder 80%, $\alpha=0{,}05$:
+Para detectar $V = 0,3$ em tabela $3 \times 3$ com poder $1 - \beta = 0,80$ e $\alpha = 0,05$, o cálculo via Cohen (1988) usa:
 
-```python
-from statsmodels.stats.power import GofChisquarePower
-analysis = GofChisquarePower()
-analysis.solve_power(effect_size=0.3, alpha=0.05, power=0.80, n_bins=9)
-```
+$$n = \frac{\lambda^*}{\lambda_{\text{nc}}} \quad \text{onde } \lambda_{\text{nc}} = n V^2 \min(r-1, c-1)$$
 
-### Bayesian alternative
+O parâmetro de não-centralidade $\lambda_{\text{nc}}$ é proporcional a $n$. Pacote R `pwr::pwr.chisq.test` automatiza isso.
 
-Bayes factor para tabelas via Dirichlet-multinomial. Pacote `BayesFactor::contingencyTableBF` em R.
+### Paradoxo de Simpson e Cochran-Mantel-Haenszel
 
-### Múltiplas correções
+Em estudos observacionais, a associação vista numa tabela $2 \times 2$ pode inverter sinal quando estratificada por uma variável de confusão (Paradoxo de Simpson). O teste Cochran-Mantel-Haenszel combina $k$ tabelas $2 \times 2$:
 
-Testar $k$ tabelas: Bonferroni $\alpha/k$. Para post-hoc após $\chi^2$ global: residuais padronizados $|r_{ij}| > 1{,}96$ indicam células anômalas.
+$$\chi^2_{CMH} = \frac{\left[\sum_s (O_{11s} - E_{11s})\right]^2}{\sum_s \text{Var}(O_{11s})}$$
 
-### Fisher's exact
+com $df = 1$, sendo $s$ o índice do estrato. Obtém razão de odds comum ajustada.
 
-Em tabelas pequenas ou desbalanceadas, distribuição hipergeométrica exata em vez de aproximação. `scipy.stats.fisher_exact`. Computacionalmente caro para tabelas grandes.
+### Alternativas bayesianas
 
-### Cochran-Mantel-Haenszel
+O fator de Bayes para tabelas de contingência usa o modelo Dirichlet-Multinomial. Pacote R `BayesFactor::contingencyTableBF`. Para grandes tabelas esparsas, priors de Dirichlet hierárquico modelam a heterogeneidade entre células sem os problemas assintóticos do $\chi^2$ clássico.
 
-Combina múltiplas tabelas $2 \times 2$ ajustando por estrato (Simpson's paradox).
+### Limites do $\chi^2$ com $n$ grande
 
-### Goodness of fit para distribuições contínuas
-
-- **Kolmogorov-Smirnov**: max distance entre CDF empírica e teórica.
-- **Anderson-Darling**: pesa caudas mais.
-- **Shapiro-Wilk**: específico para normalidade.
-
-$\chi^2$ requer agrupar em bins — perda de info.
-
-### Multinomial GLM
-
-Para resposta categórica com mais de 2 níveis, multinomial logistic regression. Tabela "long" com função link multinomial.
-
-### Crítica
-
-$\chi^2$ assintótico. Para $n$ pequeno ou $E$ pequeno: Fisher. Para $n$ grande: tudo significativo, foque em $V$.
+Para $n$ muito grande, qualquer discrepância real — mesmo ínfima — se torna estatisticamente significativa. Um $V = 0,03$ com $n = 10.000$ gera $\chi^2 = 9$ e p-valor $< 0,05$ em tabela $2 \times 2$. O profissional deve reportar e interpretar $V$ (ou $\phi$), não só o p-valor.
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Aplicação prática">
+<Porta nivel="pratica" titulo="Aplicação prática brasileira">
 
-**Receita: qui-quadrado correto.**
+### Pesquisa eleitoral no Brasil
 
-1. **Identifique tipo**: aderência ou independência?
-2. **Verifique $E_i \geq 5$**: senão, Fisher exato.
-3. **Calcule $E_i$**: para aderência, $np_i^0$; para independência, $(R_i C_j)/n$.
-4. **Compute $\chi^2$**.
-5. **$df$**: $k-1-r$ (aderência) ou $(r-1)(c-1)$ (independência).
-6. **Compare** com tabela ou software.
-7. **Tamanho de efeito**: Cramér's V.
-8. **Reporte**: $\chi^2$, $df$, $p$, $V$, $n$.
+O TSE divulga resultados de urnas por estado e faixa etária. Um analista quer saber se a preferência por candidato é independente da faixa etária numa amostra de 1.200 eleitores do estado do Rio de Janeiro.
 
-### Erros frequentes
+**Tabela observada** (simplificada, 3 candidatos × 3 faixas etárias):
 
-- **Aplicar $\chi^2$ em dados pareados**: use McNemar.
-- **Ignorar células com $E < 5$**: aproximação falha.
-- **$n$ enorme + V minúsculo**: significância sem relevância.
-- **Tabela com totais marginais zerados**: indefinido.
+| | 18–34 | 35–54 | 55+ | Total |
+|---|---|---|---|---|
+| Cand. A | 120 | 150 | 80 | 350 |
+| Cand. B | 100 | 180 | 120 | 400 |
+| Cand. C | 80 | 70 | 100 | 250 |
+| **Total** | 300 | 400 | 300 | 1000 |
 
-### Reportando
+(Amostra ajustada para $n = 1000$ para facilitar o cálculo.)
 
-"Houve associação significativa entre marca e conversão ($\chi^2(2, N=300) = 8{,}33$; $p = 0{,}016$; Cramér's $V = 0{,}17$, efeito pequeno)."
+**Passo 1 — Esperados:** $E_{ij} = R_i C_j / n$.
 
-### Workflow
+$E_{A,18-34} = 350 \times 300 / 1000 = 105$; $E_{A,35-54} = 350 \times 400/1000 = 140$; $E_{A,55+} = 350 \times 300/1000 = 105$. Demais analogamente.
 
-```python
-import pandas as pd
-from scipy.stats import chi2_contingency
+**Passo 2 — Verificar $E_{ij} \geq 5$:** todos acima de 75. OK.
 
-table = pd.crosstab(df['marca'], df['comprou'])
-chi2, p, dof, expected = chi2_contingency(table)
+**Passo 3 — Calcular $\chi^2$:**
 
-# Cramér's V
-import numpy as np
-n = table.sum().sum()
-v = np.sqrt(chi2 / (n * (min(table.shape) - 1)))
-```
+Para Cand. A: $(120-105)^2/105 + (150-140)^2/140 + (80-105)^2/105 \approx 2,14 + 0,71 + 5,95 = 8,80$.
 
-### Visualização
+Somando todas as 9 células: $\chi^2 \approx 26,4$ (valor aproximado).
 
-- **Mosaic plot**: tamanhos proporcionais a frequências.
-- **Heatmap de resíduos padronizados**: identifica células anômalas.
+**Passo 4 — $df$:** $(3-1)(3-1) = 4$.
 
-### Quando outros testes são melhores
+**Passo 5 — Decisão:** Valor crítico $\chi^2_{0,05;\,4} = 9,49$. Como $26,4 \gg 9,49$, **rejeitamos $H_0$** — há associação significativa entre candidato preferido e faixa etária.
 
-| Situação | Use |
-|---|---|
-| 2x2, $n$ pequeno | Fisher exato |
-| Pareado | McNemar |
-| Variável ordinal | Mann-Whitney, Kendall |
-| Múltiplas tabelas | Cochran-Mantel-Haenszel |
-| Continua | KS, AD, Shapiro |
-| Bayesian | BF Dirichlet-multinomial |
+**Passo 6 — Tamanho de efeito:** $V = \sqrt{26,4/(1000 \times 2)} \approx 0,115$ (efeito pequeno apesar da significância — $n$ grande amplifica tudo).
+
+**Erros frequentes em contexto brasileiro**
+
+- Usar $\chi^2$ em dados de painel (antes/depois da campanha) sem adaptar para McNemar.
+- Ignorar o design amostral complexo do TSE — estimadores de $\chi^2$ devem ser corrigidos por pesos amostrais (pacote `survey` no R).
+- Reportar só o p-valor sem V de Cramér num contexto de $n$ grande.
 
 </Porta>
 
 </DuasPortas>
 
+## Exemplos resolvidos
+
+<Exemplo numero="1" titulo="Aderencia: dado honesto?" dificuldade="basico">
+
+**Problema.** Um dado é lançado 120 vezes. Contagens por face: 15, 22, 17, 25, 19, 22. Ao nível 5%, o dado é honesto?
+
+**Estratégia.** Teste de aderência: $H_0$ é que cada face tem probabilidade 1/6. Esperado: $E_i = 120/6 = 20$ para cada face. $df = 6 - 1 = 5$.
+
+**Resolução.**
+
+$$\chi^2 = \frac{(15-20)^2}{20} + \frac{(22-20)^2}{20} + \frac{(17-20)^2}{20} + \frac{(25-20)^2}{20} + \frac{(19-20)^2}{20} + \frac{(22-20)^2}{20}$$
+
+$$= \frac{25 + 4 + 9 + 25 + 1 + 4}{20} = \frac{68}{20} = 3,40$$
+
+Valor crítico: $\chi^2_{0,05;\,5} = 11,07$. Como $3,40 < 11,07$, **não rejeitamos $H_0$**.
+
+**Verificação.** O p-valor associado a $\chi^2 = 3,40$ com $df = 5$ é aproximadamente 0,64 — bem acima de 0,05. A maior discrepância foi na face 4 (+5), mas dentro do esperado por variação amostral.
+
+**Fonte.** [OpenStax Statistics, §11.3, Example 11.3](https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="2" titulo="Independencia: genero e opiniao sobre politica de cotas" dificuldade="intermediario">
+
+**Problema.** Pesquisa com 400 eleitores brasileiros registra gênero (Masc/Fem) e opinião sobre cotas raciais (Favorável/Neutro/Contrário). Tabela observada:
+
+|  | Favorável | Neutro | Contrário | Total |
+|---|---|---|---|---|
+| Masculino | 80 | 40 | 80 | 200 |
+| Feminino | 120 | 50 | 30 | 200 |
+| **Total** | 200 | 90 | 110 | 400 |
+
+Teste independência a $\alpha = 5\%$.
+
+**Estratégia.** Tabela $2 \times 3$: $df = (2-1)(3-1) = 2$.
+
+**Resolução.**
+
+$E_{M,Fav} = 200 \times 200 / 400 = 100$; $E_{M,Neu} = 200 \times 90/400 = 45$; $E_{M,Con} = 200 \times 110/400 = 55$.
+
+$E_{F,Fav} = 100$; $E_{F,Neu} = 45$; $E_{F,Con} = 55$.
+
+$$\chi^2 = \frac{(80-100)^2}{100} + \frac{(40-45)^2}{45} + \frac{(80-55)^2}{55} + \frac{(120-100)^2}{100} + \frac{(50-45)^2}{45} + \frac{(30-55)^2}{55}$$
+
+$$= 4,00 + 0,56 + 11,36 + 4,00 + 0,56 + 11,36 = 31,84$$
+
+Valor crítico: $\chi^2_{0,05;\,2} = 5,99$. Como $31,84 \gg 5,99$, **rejeitamos $H_0$** — há associação significativa.
+
+**Verificação.** $V = \sqrt{31,84/(400 \times 1)} \approx 0,282$ — efeito médio. A maior contribuição vem da categoria "Contrário" (25 pontos de 31,84).
+
+**Fonte.** [OpenIntro Statistics, §6.4, Exercise 6.29](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="3" titulo="Aderencia a distribuicao de Poisson" dificuldade="intermediario">
+
+**Problema.** Um call center registra o número de ligações por hora em 200 horas: 0 ligações (30 horas), 1 ligação (60 horas), 2 ligações (54 horas), 3 ligações (36 horas), 4 ou mais (20 horas). Teste se os dados seguem Poisson a 5%.
+
+**Estratégia.** Estima-se $\hat{\lambda} = (0 \cdot 30 + 1 \cdot 60 + 2 \cdot 54 + 3 \cdot 36 + 4 \cdot 20)/200 = 328/200 = 1,64$. Como estimamos 1 parâmetro, $df = 5 - 1 - 1 = 3$.
+
+**Resolução.**
+
+Probabilidades Poisson($\hat{\lambda} = 1,64$): $p_0 = e^{-1,64} \approx 0,1942$; $p_1 \approx 0,3185$; $p_2 \approx 0,2612$; $p_3 \approx 0,1427$; $p_{4+} = 1 - \sum_{0}^{3} p_i \approx 0,0834$.
+
+Esperados: $E_0 = 38,8$; $E_1 = 63,7$; $E_2 = 52,2$; $E_3 = 28,5$; $E_{4+} = 16,7$. Todos $\geq 5$: OK.
+
+$$\chi^2 = \frac{(30-38,8)^2}{38,8} + \frac{(60-63,7)^2}{63,7} + \frac{(54-52,2)^2}{52,2} + \frac{(36-28,5)^2}{28,5} + \frac{(20-16,7)^2}{16,7}$$
+
+$$\approx 2,00 + 0,21 + 0,06 + 1,97 + 0,65 = 4,89$$
+
+Valor crítico: $\chi^2_{0,05;\,3} = 7,81$. Como $4,89 < 7,81$, **não rejeitamos $H_0$** — os dados são compatíveis com Poisson.
+
+**Verificação.** O $df = 3$ (e não 4) porque estimamos $\lambda$ dos próprios dados; não usar $df$ errado é a armadilha mais comum neste tipo de problema.
+
+**Fonte.** [OpenStax Statistics, §11.3, Example 11.5 (adaptado)](https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="4" titulo="Tabela 2x2 com correcao de Yates" dificuldade="avancado">
+
+**Problema.** Um ensaio clínico compara vacina vs. placebo em 60 voluntários (30 em cada grupo). Resultados:
+
+| | Protegido | Não protegido | Total |
+|---|---|---|---|
+| Vacina | 22 | 8 | 30 |
+| Placebo | 15 | 15 | 30 |
+| **Total** | 37 | 23 | 60 |
+
+Com correção de Yates, teste independência a 5%.
+
+**Estratégia.** Tabela $2 \times 2$, $df = 1$. Esperados: $E_{V,P} = 37 \times 30/60 = 18,5$; $E_{V,NP} = 23 \times 30/60 = 11,5$; demais iguais por simetria.
+
+**Resolução.**
+
+$$\chi^2_Y = \frac{(\lvert 22 - 18,5\rvert - 0,5)^2}{18,5} + \frac{(\lvert 8 - 11,5\rvert - 0,5)^2}{11,5} + \frac{(\lvert 15 - 18,5\rvert - 0,5)^2}{18,5} + \frac{(\lvert 15 - 11,5\rvert - 0,5)^2}{11,5}$$
+
+$$= \frac{(3,0)^2}{18,5} + \frac{(3,0)^2}{11,5} + \frac{(3,0)^2}{18,5} + \frac{(3,0)^2}{11,5} = \frac{9}{18,5} + \frac{9}{11,5} + \frac{9}{18,5} + \frac{9}{11,5}$$
+
+$$= 0,486 + 0,783 + 0,486 + 0,783 = 2,538$$
+
+Valor crítico: $\chi^2_{0,05;\,1} = 3,84$. Como $2,538 < 3,84$, **não rejeitamos $H_0$** ao nível 5%.
+
+**Verificação.** Sem correção de Yates: $\chi^2 = (3,5)^2 \times (2/18,5 + 2/11,5) = 12,25 \times (0,108 + 0,174) = 3,45$. Ainda não rejeitaria, mas a correção foi conservadora como esperado.
+
+**Fonte.** [OpenIntro Statistics, §6.4, Exercise 6.35 (adaptado)](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="5" titulo="Genetica mendeliana: proporcao 9:3:3:1" dificuldade="desafio">
+
+**Problema.** Um cruzamento dihíbrido em ervilhas (Mendel) prevê fenótipos na proporção 9:3:3:1 (liso-amarelo : liso-verde : rugoso-amarelo : rugoso-verde). Observa-se em 160 descendentes: 90, 30, 27, 13. Teste a 5% se os dados seguem Mendel.
+
+**Estratégia.** Proporcões esperadas: $p_1 = 9/16$, $p_2 = 3/16$, $p_3 = 3/16$, $p_4 = 1/16$. $df = 4 - 1 = 3$ (distribuição completamente especificada).
+
+**Resolução.**
+
+$E_1 = 160 \times 9/16 = 90$; $E_2 = 160 \times 3/16 = 30$; $E_3 = 30$; $E_4 = 160 \times 1/16 = 10$.
+
+$$\chi^2 = \frac{(90-90)^2}{90} + \frac{(30-30)^2}{30} + \frac{(27-30)^2}{30} + \frac{(13-10)^2}{10}$$
+
+$$= 0 + 0 + \frac{9}{30} + \frac{9}{10} = 0,30 + 0,90 = 1,20$$
+
+Valor crítico: $\chi^2_{0,05;\,3} = 7,81$. Como $1,20 \ll 7,81$, **não rejeitamos $H_0$** — os dados são consistentes com as leis de Mendel.
+
+**Verificação.** O p-valor é aproximadamente 0,75 — os dados se encaixam quase perfeitamente na proporção 9:3:3:1. A categoria rugoso-verde ($E_4 = 10$) está exatamente no limite da regra de Cochran; para amostras menores seria recomendável fusão de categorias ou Fisher–Freeman–Halton.
+
+**Fonte.** [OpenStax Statistics, §11.3, Example 11.7 (adaptado)](https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test) — CC-BY.
+
+</Exemplo>
+
 <ListaExercicios seed="licao-108-qui-quadrado">
 
-<Exercicio numero="108.1" dificuldade="aplicacao">$O = (12, 8, 11, 9, 13, 7)$, esperado uniforme em 60 lançamentos. $\chi^2$. (Resp: $2{,}8$.)</Exercicio>
-<Exercicio numero="108.2" dificuldade="aplicacao">$df$ para 6 categorias sem parâmetros estimados. (Resp: 5.)</Exercicio>
-<Exercicio numero="108.3" dificuldade="aplicacao">Crítico $\chi^2_{0{,}05; 5}$. (Resp: $11{,}07$.)</Exercicio>
-<Exercicio numero="108.4" dificuldade="aplicacao">$\chi^2 = 14{,}5$, $df=5$. Conclusão a $\alpha=0{,}05$.</Exercicio>
-<Exercicio numero="108.5" dificuldade="aplicacao">Tabela 3x4. $df$. (Resp: 6.)</Exercicio>
-<Exercicio numero="108.6" dificuldade="aplicacao">$E_{11}$ na tabela com $R_1=80$, $C_1=120$, $n=300$. (Resp: 32.)</Exercicio>
-<Exercicio numero="108.7" dificuldade="aplicacao">$\chi^2 = 8$, $df = 2$. Significativo a 5%? (Crítico $5{,}99$.)</Exercicio>
-<Exercicio numero="108.8" dificuldade="aplicacao">Cramér's V: $\chi^2=20$, $n=200$, min(r-1,c-1)=2. (Resp: $V=0{,}22$.)</Exercicio>
-<Exercicio numero="108.9" dificuldade="aplicacao">Quando usar correção de Yates?</Exercicio>
-<Exercicio numero="108.10" dificuldade="aplicacao">$E_i = 3$ em algumas células. Apropriado?</Exercicio>
-<Exercicio numero="108.11" dificuldade="aplicacao">$O = (45, 35, 20)$, $E$ esperado por $0{,}5, 0{,}3, 0{,}2$ em $n=100$. $\chi^2$.</Exercicio>
-<Exercicio numero="108.12" dificuldade="aplicacao">Df no exercício acima. (Resp: 2.)</Exercicio>
-<Exercicio numero="108.13" dificuldade="aplicacao">McNemar para tabela 2x2 pareada. Quando usar?</Exercicio>
-<Exercicio numero="108.14" dificuldade="aplicacao">$\chi^2_{0{,}05; 1}$. (Resp: $3{,}84$.)</Exercicio>
-<Exercicio numero="108.15" dificuldade="aplicacao">Tabela 2x2: $a=80, b=20, c=60, d=40$. Esperados.</Exercicio>
-<Exercicio numero="108.16" dificuldade="aplicacao">$\chi^2$ na tabela acima.</Exercicio>
-<Exercicio numero="108.17" dificuldade="aplicacao">Por que df = (r-1)(c-1) em independência?</Exercicio>
-<Exercicio numero="108.18" dificuldade="aplicacao">Goodness of fit estimando 1 parâmetro: $df$ ajustado.</Exercicio>
-<Exercicio numero="108.19" dificuldade="aplicacao">Distribuição $\chi^2_k$: média e variância.</Exercicio>
-<Exercicio numero="108.20" dificuldade="aplicacao">$\chi^2$ é simétrico? (Resp: não.)</Exercicio>
-<Exercicio numero="108.21" dificuldade="aplicacao">$\chi^2_{20}$ comportamento — aproxima $\mathcal{N}$?</Exercicio>
-<Exercicio numero="108.22" dificuldade="aplicacao">Fisher exact: usado quando?</Exercicio>
-<Exercicio numero="108.23" dificuldade="aplicacao">$O = (10, 20, 30, 40)$, $E$ uniforme em $n=100$. $\chi^2$.</Exercicio>
-<Exercicio numero="108.24" dificuldade="aplicacao">$\chi^2 = 30{,}8$ no exercício acima. Conclua a 1%.</Exercicio>
-<Exercicio numero="108.25" dificuldade="aplicacao">Likelihood ratio $G^2$: fórmula.</Exercicio>
-<Exercicio numero="108.26" dificuldade="aplicacao">Por que $G^2$ e $\chi^2$ coincidem assintoticamente?</Exercicio>
-<Exercicio numero="108.27" dificuldade="aplicacao">Resíduos padronizados $r_{ij} > 1{,}96$. O que indica?</Exercicio>
-<Exercicio numero="108.28" dificuldade="aplicacao">$n$ enorme: $\chi^2$ pode ser sempre significativo. Solução?</Exercicio>
-<Exercicio numero="108.29" dificuldade="aplicacao">Cochran-Mantel-Haenszel: para que serve?</Exercicio>
-<Exercicio numero="108.30" dificuldade="aplicacao">Diferença entre teste de homogeneidade e independência?</Exercicio>
-<Exercicio numero="108.31" dificuldade="modelagem">Genética: cruzamento Mendel produz fenótipos 9:3:3:1. Observa $(95, 30, 28, 7)$. Aderência.</Exercicio>
-<Exercicio numero="108.32" dificuldade="modelagem">A/B/C teste landing: 200 visitantes em cada, conversões 24, 30, 40. $\chi^2$ de homogeneidade.</Exercicio>
-<Exercicio numero="108.33" dificuldade="modelagem">Defeitos por máquina: 4 máquinas, contagens 30, 40, 25, 35. Diferenças?</Exercicio>
-<Exercicio numero="108.34" dificuldade="modelagem">Pesquisa eleitoral: gênero $\times$ candidato. Tabela 2x3. Independência?</Exercicio>
-<Exercicio numero="108.35" dificuldade="modelagem">Ensaio clínico: tratamento vs placebo, melhorou ou não. Tabela 2x2 com Yates.</Exercicio>
-<Exercicio numero="108.36" dificuldade="compreensao">Justifique por que $\chi^2$ aproxima $\sum Z_i^2$.</Exercicio>
-<Exercicio numero="108.37" dificuldade="compreensao">Por que $df = k-1$ na multinomial sem parâmetros estimados?</Exercicio>
-<Exercicio numero="108.38" dificuldade="compreensao">Mostre que $\chi^2$ é sempre não-negativo.</Exercicio>
-<Exercicio numero="108.39" dificuldade="compreensao">Explique a regra de Cochran sobre $E_i \geq 5$.</Exercicio>
-<Exercicio numero="108.40" dificuldade="desafio">Implemente $\chi^2$ goodness of fit em pseudocódigo. Compare com `scipy.stats.chisquare`.</Exercicio>
-<Exercicio numero="108.41" dificuldade="desafio">Demonstre que para tabela 2x2, $\chi^2$ relaciona com odds ratio: derive a fórmula.</Exercicio>
-<Exercicio numero="108.42" dificuldade="demonstracao">Demonstre que $\chi^2 = \sum (O_i - E_i)^2/E_i \to \chi^2_{k-1}$ sob multinomial.</Exercicio>
+<Exercicio numero="108.1" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "620", exercicio: "ex. 11.1 (adaptado)", licenca: "CC-BY" }}
+  solucao={<><Eq>{`df = k - 1 = 6 - 1 = 5`}</Eq>. Para 6 categorias sem nenhum parâmetro estimado, perdemos 1 grau de liberdade pela restrição <Eq>{`\\sum O_i = n`}</Eq>.</>}
+>
+Um dado de seis faces é lançado 60 vezes. Qual é o número de graus de liberdade no teste de aderência à distribuição uniforme?
+</Exercicio>
+
+<Exercicio numero="108.2" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "621", exercicio: "ex. 11.2 (adaptado)", licenca: "CC-BY" }}
+  resposta="10"
+  solucao={<><Eq>{`E_i = n \\cdot p_i^0 = 60 \\times (1/6) = 10`}</Eq> para cada face.</>}
+  passos={<>
+    <ol>
+      <li>Identificar <Eq>{`n = 60`}</Eq> e <Eq>{`p_i^0 = 1/6`}</Eq> para cada face. <em>Por quê:</em> sob <Eq>{`H_0`}</Eq> de dado honesto, cada face tem probabilidade igual.</li>
+      <li>Calcular <Eq>{`E_i = n \\cdot p_i^0 = 60 \\times 1/6 = 10`}</Eq>.</li>
+    </ol>
+    <p><em>Macete:</em> em distribuições uniformes discretas, <Eq>{`E_i`}</Eq> é simplesmente <Eq>{`n/k`}</Eq>.</p>
+  </>}
+>
+Para o dado do exercício anterior lançado 60 vezes, qual é a frequência esperada por face?
+</Exercicio>
+
+<Exercicio numero="108.3" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "622", exercicio: "ex. 11.4 (adaptado)", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\chi^2 = (12-10)^2/10 + (8-10)^2/10 + (11-10)^2/10 + (9-10)^2/10 + (13-10)^2/10 + (7-10)^2/10 = (4+4+1+1+9+9)/10 = 28/10 = 2,8`}</Eq>. Valor crítico a 5% com <Eq>{`df=5`}</Eq>: 11,07. Não rejeita <Eq>{`H_0`}</Eq>.</>}
+>
+Um dado é lançado 60 vezes: observa-se 12, 8, 11, 9, 13, 7 para as faces 1 a 6. Calcule $\chi^2$ e conclua a 5%.
+</Exercicio>
+
+<Exercicio numero="108.4" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-1-facts-about-the-chi-square-distribution", secao: "§11.1", pagina: "608", exercicio: "ex. 11.6 (adaptado)", licenca: "CC-BY" }}
+  solucao={<>Tabela <Eq>{`3 \\times 4`}</Eq>: <Eq>{`df = (3-1)(4-1) = 2 \\times 3 = 6`}</Eq>.</>}
+>
+Calcule os graus de liberdade para o teste de independência em uma tabela de contingência $3 \times 4$.
+</Exercicio>
+
+<Exercicio numero="108.5" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.3", pagina: "268", exercicio: "6.1", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`E_{11} = R_1 \\times C_1 / n = 80 \\times 120 / 300 = 32`}</Eq>. Sob independência, a frequência esperada é o produto das marginais dividido pelo total.</>}
+  passos={<>
+    <ol>
+      <li>Identificar os marginais: total da linha <Eq>{`R_1 = 80`}</Eq>, total da coluna <Eq>{`C_1 = 120`}</Eq>, total geral <Eq>{`n = 300`}</Eq>.</li>
+      <li>Aplicar a fórmula: <Eq>{`E_{11} = R_1 C_1 / n = 80 \\times 120 / 300 = 32`}</Eq>. <em>Por quê:</em> sob independência, <Eq>{`P(A_1 \\cap B_1) = P(A_1) \\cdot P(B_1) = (80/300)(120/300)`}</Eq>, e <Eq>{`E_{11} = n \\cdot P(A_1 \\cap B_1)`}</Eq>.</li>
+    </ol>
+    <p><em>Macete:</em> <Eq>{`E_{ij} = \\text{total da linha} \\times \\text{total da coluna} / \\text{total geral}`}</Eq>.</p>
+  </>}
+>
+Em uma tabela de contingência com $R_1 = 80$, $C_1 = 120$, $n = 300$, calcule $E_{11}$.
+</Exercicio>
+
+<Exercicio numero="108.6" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-4-test-of-independence", secao: "§11.4", pagina: "630", exercicio: "ex. 11.10 (adaptado)", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\chi^2 = 8 > \\chi^2_{0,05;\\,2} = 5,99`}</Eq>. Rejeitamos <Eq>{`H_0`}</Eq>: há associação significativa entre as variáveis ao nível 5%.</>}
+>
+Em um teste de independência, obteve-se $\chi^2 = 8$ com $df = 2$. O valor crítico a 5% é 5,99. Qual é a conclusão?
+</Exercicio>
+
+<Exercicio numero="108.7" dificuldade="aplicacao"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§18.1", pagina: "online", exercicio: "Exercise 18.1 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`V = \\sqrt{\\chi^2 / (n \\cdot \\min(r-1, c-1))} = \\sqrt{20 / (200 \\times 2)} = \\sqrt{0,05} \\approx 0,224`}</Eq>. Efeito pequeno a médio.</>}
+>
+Calcule o V de Cramér: $\chi^2 = 20$, $n = 200$, tabela $3 \times 4$ (logo $\min(r-1,c-1) = 2$).
+</Exercicio>
+
+<Exercicio numero="108.8" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.3", pagina: "270", exercicio: "6.5 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>A correção de Yates aplica-se a tabelas <Eq>{`2 \\times 2`}</Eq> quando as frequências esperadas são pequenas (próximas de 5). Ela subtrai <Eq>{`0,5`}</Eq> de cada <Eq>{`\\lvert O_{ij} - E_{ij} \\rvert`}</Eq> antes de elevar ao quadrado, tornando o teste mais conservador.</>}
+>
+Em quais situações deve-se aplicar a correção de Yates no teste qui-quadrado?
+</Exercicio>
+
+<Exercicio numero="108.9" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-4-test-of-independence", secao: "§11.4", pagina: "631", exercicio: "ex. 11.11 (adaptado)", licenca: "CC-BY" }}
+  solucao={<>Quando <Eq>{`E_i < 5`}</Eq> em mais de 20% das células (ou qualquer <Eq>{`E_i < 1`}</Eq>), a aproximação qui-quadrado é inadequada. Nesse caso usa-se o Teste Exato de Fisher para tabelas <Eq>{`2 \\times 2`}</Eq>, ou fusão de categorias para reduzir o número de células com <Eq>{`E_i < 5`}</Eq>.</>}
+>
+Um pesquisador tem $E_i = 3$ em duas das cinco células de uma tabela. O teste qui-quadrado é apropriado? Justifique.
+</Exercicio>
+
+<Exercicio numero="108.10" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "624", exercicio: "ex. 11.8 (adaptado)", licenca: "CC-BY" }}
+  solucao={<><Eq>{`O = (45, 35, 20)`}</Eq>, <Eq>{`E = (50, 30, 20)`}</Eq> pois <Eq>{`n = 100`}</Eq> e <Eq>{`p^0 = (0,5,\\, 0,3,\\, 0,2)`}</Eq>. <Eq>{`\\chi^2 = (45-50)^2/50 + (35-30)^2/30 + (20-20)^2/20 = 25/50 + 25/30 + 0 = 0,5 + 0,833 = 1,333`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Calcular esperados: <Eq>{`E_1 = 100 \\times 0,5 = 50`}</Eq>; <Eq>{`E_2 = 100 \\times 0,3 = 30`}</Eq>; <Eq>{`E_3 = 100 \\times 0,2 = 20`}</Eq>.</li>
+      <li>Calcular cada parcela: <Eq>{`(45-50)^2/50 = 25/50 = 0,5`}</Eq>; <Eq>{`(35-30)^2/30 = 25/30 \\approx 0,833`}</Eq>; <Eq>{`(20-20)^2/20 = 0`}</Eq>.</li>
+      <li>Somar: <Eq>{`\\chi^2 \\approx 1,333`}</Eq>. <Eq>{`df = 3 - 1 = 2`}</Eq>. Crítico a 5%: 5,99. Não rejeita <Eq>{`H_0`}</Eq>.</li>
+    </ol>
+    <p><em>Curiosidade:</em> a terceira categoria não contribui nada para <Eq>{`\\chi^2`}</Eq> pois <Eq>{`O_3 = E_3`}</Eq>.</p>
+  </>}
+>
+Observa-se $O = (45, 35, 20)$ em $n = 100$ observações com proporcões esperadas $(0,5;\; 0,3;\; 0,2)$. Calcule $\chi^2$.
+</Exercicio>
+
+<Exercicio numero="108.11" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "619", exercicio: "ex. 11.3 (adaptado)", licenca: "CC-BY" }}
+  solucao={<><Eq>{`df = k - 1 = 3 - 1 = 2`}</Eq>.</>}
+>
+Para o exercício anterior (3 categorias, distribuição completamente especificada), qual é o número de graus de liberdade?
+</Exercicio>
+
+<Exercicio numero="108.12" dificuldade="aplicacao"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§18.2", pagina: "online", exercicio: "Exercise 18.5 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Dados pareados (mesmo voluntário medido antes e depois) requerem o teste de McNemar, não o qui-quadrado padrão. O qui-quadrado assume independência entre linhas, o que é violado quando as observações são pareadas.</>}
+>
+Um estudo mede pressão arterial (alta/normal) no mesmo grupo de pacientes antes e depois de um programa de exercícios. Por que o teste qui-quadrado de independência não é adequado?
+</Exercicio>
+
+<Exercicio numero="108.13" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-1-facts-about-the-chi-square-distribution", secao: "§11.1", pagina: "607", exercicio: "ex. 11.1", licenca: "CC-BY" }}
+  resposta="3,84"
+  solucao={<>O valor crítico <Eq>{`\\chi^2_{0,05;\\,1} = 3,841`}</Eq>. Este valor é fundamental: qualquer <Eq>{`\\chi^2 > 3,84`}</Eq> em tabela <Eq>{`2 \\times 2`}</Eq> (com <Eq>{`df = 1`}</Eq>) é significativo a 5%.</>}
+>
+Qual é o valor crítico $\chi^2_{0,05;\,1}$ (qui-quadrado com 1 grau de liberdade ao nível 5%)?
+</Exercicio>
+
+<Exercicio numero="108.14" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "280", exercicio: "6.15 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela <Eq>{`2 \\times 2`}</Eq>: <Eq>{`a=80, b=20, c=60, d=40`}</Eq>. <Eq>{`R_1 = 100`}</Eq>, <Eq>{`R_2 = 100`}</Eq>, <Eq>{`C_1 = 140`}</Eq>, <Eq>{`C_2 = 60`}</Eq>, <Eq>{`n = 200`}</Eq>. <Eq>{`E_{11} = 100 \\times 140/200 = 70`}</Eq>; <Eq>{`E_{12} = 100 \\times 60/200 = 30`}</Eq>; <Eq>{`E_{21} = 70`}</Eq>; <Eq>{`E_{22} = 30`}</Eq>.</>}
+>
+Calcule as frequências esperadas para a tabela $2 \times 2$ com células $a = 80$, $b = 20$, $c = 60$, $d = 40$.
+</Exercicio>
+
+<Exercicio numero="108.15" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "280", exercicio: "6.15 (continuação)", licenca: "CC-BY-SA" }}
+  solucao={<>Usando os esperados do exercício anterior: <Eq>{`\\chi^2 = (80-70)^2/70 + (20-30)^2/30 + (60-70)^2/70 + (40-30)^2/30 = 100/70 + 100/30 + 100/70 + 100/30 = 1,429 + 3,333 + 1,429 + 3,333 = 9,524`}</Eq>. <Eq>{`df=1`}</Eq>. Crítico 5%: 3,84. Rejeita <Eq>{`H_0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Usar <Eq>{`E_{ij}`}</Eq> calculados no exercício anterior: 70, 30, 70, 30.</li>
+      <li>Calcular cada parcela: <Eq>{`(80-70)^2/70 = 100/70 \\approx 1,43`}</Eq>; <Eq>{`(20-30)^2/30 = 100/30 \\approx 3,33`}</Eq>; idem para linha 2.</li>
+      <li>Somar: <Eq>{`\\chi^2 \\approx 9,52 > 3,84`}</Eq>. Rejeitar <Eq>{`H_0`}</Eq>.</li>
+    </ol>
+    <p><em>Macete:</em> em tabela <Eq>{`2 \\times 2`}</Eq>, as quatro contribuições são simétricas duas a duas.</p>
+  </>}
+>
+Com os esperados do exercício anterior, calcule $\chi^2$ e conclua a 5%.
+</Exercicio>
+
+<Exercicio numero="108.16" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-4-test-of-independence", secao: "§11.4", pagina: "633", exercicio: "ex. 11.13 (adaptado)", licenca: "CC-BY" }}
+  solucao={<><Eq>{`df = (r-1)(c-1) = (2-1)(2-1) = 1`}</Eq>. Em tabela <Eq>{`2 \\times 2`}</Eq>, há 4 células mas 3 restrições (total por linha 1, total por coluna 1, e total geral — mas total geral é consequência das outras duas, portanto apenas <Eq>{`r - 1 + c - 1 = 2`}</Eq> restrições independentes, deixando <Eq>{`4 - 2 - 1 = 1`}</Eq> grau de liberdade). Na fórmula: <Eq>{`(2-1)(2-1) = 1`}</Eq>.</>}
+>
+Por que $df = 1$ em toda tabela de contingência $2 \times 2$? Explique geometricamente ou algebricamente.
+</Exercicio>
+
+<Exercicio numero="108.17" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-1-facts-about-the-chi-square-distribution", secao: "§11.1", pagina: "610", exercicio: "ex. 11.7 (adaptado)", licenca: "CC-BY" }}
+  solucao={<>A distribuição <Eq>{`\\chi^2_k`}</Eq> tem média <Eq>{`k`}</Eq> e variância <Eq>{`2k`}</Eq>. Para <Eq>{`k`}</Eq> grande, pelo TCL, <Eq>{`\\chi^2_k`}</Eq> aproxima <Eq>{`\\mathcal{N}(k, 2k)`}</Eq>. A distribuição é assimétrica à direita (positivamente assimétrica), não simétrica.</>}
+>
+Quais são a média e a variância de $\chi^2_k$? Para $k = 20$, a distribuição é aproximadamente simétrica?
+</Exercicio>
+
+<Exercicio numero="108.18" dificuldade="aplicacao"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§18.1", pagina: "online", exercicio: "Exercise 18.3 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Ao estimar <Eq>{`r`}</Eq> parâmetros a partir dos dados, perde-se <Eq>{`r`}</Eq> graus de liberdade adicionais. Portanto <Eq>{`df = k - 1 - r`}</Eq>. Exemplo: aderência a Poisson com <Eq>{`\\lambda`}</Eq> estimado: <Eq>{`df = k - 1 - 1 = k - 2`}</Eq>.</>}
+>
+Em teste de aderência com $k$ categorias, como os graus de liberdade mudam quando estimamos $r$ parâmetros da distribuição a partir dos próprios dados?
+</Exercicio>
+
+<Exercicio numero="108.19" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.3", pagina: "267", exercicio: "6.3 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>A estatística qui-quadrado é sempre não-negativa: cada parcela <Eq>{`(O_i - E_i)^2 / E_i \\geq 0`}</Eq> pois é um quadrado dividido por número positivo. Portanto <Eq>{`\\chi^2 = \\sum \\geq 0`}</Eq>.</>}
+>
+Mostre que a estatística qui-quadrado $\chi^2 = \sum (O_i - E_i)^2 / E_i$ é sempre não-negativa.
+</Exercicio>
+
+<Exercicio numero="108.20" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "617", exercicio: "ex. 11.2", licenca: "CC-BY" }}
+  solucao={<>O qui-quadrado é unilateral (cauda direita): rejeita-se <Eq>{`H_0`}</Eq> apenas quando <Eq>{`\\chi^2`}</Eq> é grande. Discrepâncias tanto positivas quanto negativas contribuem com parcelas positivas ao somatório — não há distinção de direção na estatística de teste.</>}
+>
+O teste qui-quadrado de aderência é unilateral (cauda direita) ou bilateral? Por quê?
+</Exercicio>
+
+<Exercicio numero="108.21" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "625", exercicio: "ex. 11.9 (adaptado)", licenca: "CC-BY" }}
+  solucao={<><Eq>{`O = (10, 20, 30, 40)`}</Eq>, <Eq>{`E = 25`}</Eq> cada (uniforme, <Eq>{`n = 100`}</Eq>). <Eq>{`\\chi^2 = (10-25)^2/25 + (20-25)^2/25 + (30-25)^2/25 + (40-25)^2/25 = (225 + 25 + 25 + 225)/25 = 500/25 = 20`}</Eq>. <Eq>{`df = 3`}</Eq>. Crítico 1%: 11,34. Rejeita <Eq>{`H_0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`E_i = 100/4 = 25`}</Eq> para cada categoria.</li>
+      <li><Eq>{`(10-25)^2/25 = 225/25 = 9`}</Eq>; <Eq>{`(20-25)^2/25 = 1`}</Eq>; <Eq>{`(30-25)^2/25 = 1`}</Eq>; <Eq>{`(40-25)^2/25 = 9`}</Eq>.</li>
+      <li><Eq>{`\\chi^2 = 9 + 1 + 1 + 9 = 20`}</Eq>. <Eq>{`df = 3`}</Eq>. Valor crítico a 1%: 11,34. Rejeita-se <Eq>{`H_0`}</Eq>.</li>
+    </ol>
+    <p><em>Curiosidade:</em> a distribuição observada é crescente, enquanto <Eq>{`H_0`}</Eq> postula uniformidade — as caudas (extremos) contribuem muito mais para <Eq>{`\\chi^2`}</Eq>.</p>
+  </>}
+>
+$O = (10, 20, 30, 40)$ em $n = 100$ com distribuição uniforme esperada. Calcule $\chi^2$ e conclua a 1%.
+</Exercicio>
+
+<Exercicio numero="108.22" dificuldade="aplicacao"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§19.1", pagina: "online", exercicio: "Exercise 19.3 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>O teste de homogeneidade testa se <Eq>{`k`}</Eq> populações têm a mesma distribuição categórica (amostras independentes retiradas de cada população). O teste de independência testa se duas variáveis são independentes numa única amostra aleatória. A matemática é idêntica (<Eq>{`df`}</Eq>, <Eq>{`E_{ij}`}</Eq>, <Eq>{`\\chi^2`}</Eq>), mas a interpretação e o delineamento são diferentes.</>}
+>
+Qual é a diferença conceitual entre teste de homogeneidade e teste de independência? A fórmula de $\chi^2$ muda?
+</Exercicio>
+
+<Exercicio numero="108.23" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-4-test-of-independence", secao: "§11.4", pagina: "635", exercicio: "ex. 11.15 (adaptado)", licenca: "CC-BY" }}
+  solucao={<>Para <Eq>{`\\chi^2 = 14,5`}</Eq> e <Eq>{`df = 5`}</Eq>: valor crítico a 5% é 11,07. Como <Eq>{`14,5 > 11,07`}</Eq>, rejeitamos <Eq>{`H_0`}</Eq> a 5%. A 1%, crítico é 15,09; como <Eq>{`14,5 < 15,09`}</Eq>, não rejeitamos a 1%. O p-valor está entre 1% e 5%.</>}
+>
+$\chi^2 = 14,5$ com $df = 5$. Qual é a conclusão a 5% e a 1%? (Críticos: 11,07 e 15,09 respectivamente.)
+</Exercicio>
+
+<Exercicio numero="108.24" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.3", pagina: "271", exercicio: "6.7", licenca: "CC-BY-SA" }}
+  solucao={<>Quando <Eq>{`\\chi^2 = 0`}</Eq>, todos os <Eq>{`O_i = E_i`}</Eq> exatamente — os dados encaixam perfeitamente na hipótese nula. Isso é raro em dados reais (flutuação amostral sempre produz alguma discrepância). Um <Eq>{`\\chi^2 = 0`}</Eq> exato indica erro de entrada ou dados fabricados.</>}
+>
+O que significaria obter $\chi^2 = 0$ num teste de aderência? É isso possível em dados reais?
+</Exercicio>
+
+<Exercicio numero="108.25" dificuldade="compreensao"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§18.2", pagina: "online", exercicio: "Exercise 18.7 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Com <Eq>{`n`}</Eq> muito grande, mesmo uma discrepância mínima (como <Eq>{`V = 0,02`}</Eq>) gera <Eq>{`\\chi^2 = n V^2 \\cdot \\min(r-1,c-1)`}</Eq> enorme e altamente significativo. O p-valor vira irrelevante — qualquer modelo é "rejeitado". A solução é reportar e interpretar o V de Cramér como tamanho de efeito, que não depende de <Eq>{`n`}</Eq>.</>}
+>
+Por que amostras muito grandes tornam o $\chi^2$ uma medida problemática? Qual alternativa usar?
+</Exercicio>
+
+<Exercicio numero="108.26" dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-4-test-of-independence", secao: "§11.4", pagina: "628", exercicio: "ex. 11.9 (conceitual)", licenca: "CC-BY" }}
+  solucao={<>A distribuição qui-quadrado é assimétrica à direita e sempre positiva. Ela é a distribuição de somas de quadrados de normais padrão independentes. A assimetria à direita diminui à medida que <Eq>{`df`}</Eq> cresce (para <Eq>{`df`}</Eq> grande ela se aproxima da normal). Isso justifica o uso de valores críticos maiores para mais graus de liberdade.</>}
+>
+Descreva a forma da curva qui-quadrado para $df$ pequeno (ex. $df = 2$) vs. $df$ grande (ex. $df = 20$). Como isso se relaciona com a origem da distribuição como soma de quadrados?
+</Exercicio>
+
+<Exercicio numero="108.27" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "282", exercicio: "6.19 (adaptado)", licenca: "CC-BY-SA" }}
+  opcoes={[
+    { texto: "A) $\\chi^2 = \\sum (O_i - E_i) / E_i$", },
+    { texto: "B) $\\chi^2 = \\sum (O_i - E_i)^2 / E_i$", correta: true },
+    { texto: "C) $\\chi^2 = \\sum (O_i - E_i)^2 / O_i$", },
+    { texto: "D) $\\chi^2 = \\sum \\lvert O_i - E_i \\rvert / E_i$", },
+  ]}
+  solucao={<>A alternativa B é a fórmula correta de Pearson. A alternativa A omitiria o quadrado, perdendo sinal e não seguindo distribuição qui-quadrado. A alternativa C usaria <Eq>{`O_i`}</Eq> no denominador em vez de <Eq>{`E_i`}</Eq> — formula incorreta. A alternativa D usa valor absoluto em vez de quadrado — também incorreta e de mais difícil análise assintótica.</>}
+>
+Qual das fórmulas abaixo é a estatística qui-quadrado de Pearson?
+</Exercicio>
+
+<Exercicio numero="108.28" dificuldade="compreensao"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§18.1", pagina: "online", exercicio: "Exercise 18.2 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>A regra de Cochran exige <Eq>{`E_i \\geq 5`}</Eq> para garantir que a aproximação da distribuição discreta pela qui-quadrado contínua seja boa. Com <Eq>{`E_i < 5`}</Eq>, a aproximação pode superestimar o p-valor (conservadora) ou subestimá-lo (liberal) dependendo do cenário. A fusão de categorias adjacentes é a solução prática.</>}
+>
+Explique por que a regra de Cochran ($E_i \geq 5$) é necessária para a validade do teste qui-quadrado.
+</Exercicio>
+
+<Exercicio numero="108.29" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "620", exercicio: "ex. 11.4 (adaptado)", licenca: "CC-BY" }}
+  solucao={<>Proporções esperadas: Liso-amarelo <Eq>{`p_1 = 9/16`}</Eq>, Liso-verde <Eq>{`p_2 = 3/16`}</Eq>, Rugoso-amarelo <Eq>{`p_3 = 3/16`}</Eq>, Rugoso-verde <Eq>{`p_4 = 1/16`}</Eq>. Em <Eq>{`n = 160`}</Eq>: <Eq>{`E_1 = 90`}</Eq>, <Eq>{`E_2 = 30`}</Eq>, <Eq>{`E_3 = 30`}</Eq>, <Eq>{`E_4 = 10`}</Eq>. <Eq>{`\\chi^2 = (95-90)^2/90 + (30-30)^2/30 + (27-30)^2/30 + (8-10)^2/10 = 0,278 + 0 + 0,3 + 0,4 = 0,978`}</Eq>. <Eq>{`df = 3`}</Eq>. Crítico 5%: 7,81. Não rejeita — compatível com Mendel.</>}
+  passos={<>
+    <ol>
+      <li>Calcular as proporções esperadas de Mendel: <Eq>{`9/16`}</Eq>, <Eq>{`3/16`}</Eq>, <Eq>{`3/16`}</Eq>, <Eq>{`1/16`}</Eq>.</li>
+      <li>Multiplicar por <Eq>{`n = 160`}</Eq>: <Eq>{`E = (90, 30, 30, 10)`}</Eq>. Todos <Eq>{`\\geq 5`}</Eq>: OK.</li>
+      <li>Calcular <Eq>{`\\chi^2`}</Eq> parcela a parcela: <Eq>{`0,278 + 0 + 0,3 + 0,4 = 0,978`}</Eq>.</li>
+      <li><Eq>{`df = 4 - 1 = 3`}</Eq> (distribuição completamente especificada). Comparar com 7,81: não rejeita.</li>
+    </ol>
+    <p><em>Curiosidade:</em> o próprio Mendel publicou resultados suspeita mente próximos aos esperados — pesquisas posteriores sugerem que ele (ou seus assistentes) talvez tenham descartado dados discrepantes.</p>
+  </>}
+>
+Cruzamento dihíbrido de ervilhas prevê fenótipos na proporção 9:3:3:1. Em 160 descendentes observa-se 95, 30, 27, 8. Teste aderência a 5%.
+</Exercicio>
+
+<Exercicio numero="108.30" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "278", exercicio: "6.25 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela <Eq>{`2 \\times 3`}</Eq>: <Eq>{`df = (2-1)(3-1) = 2`}</Eq>. Calcule <Eq>{`E_{ij}`}</Eq> com os marginais fornecidos, depois <Eq>{`\\chi^2`}</Eq>. Se <Eq>{`\\chi^2 > 5,99`}</Eq> (crítico 5%), há associação significativa entre gênero e opinião.</>}
+>
+Em pesquisa com 400 estudantes universitários (200 homens, 200 mulheres), obteve-se a seguinte tabulação de opinião sobre cotas (Favorável/Neutro/Contrário): homens 70/60/70, mulheres 110/50/40. Teste independência a 5%.
+</Exercicio>
+
+<Exercicio numero="108.31" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-5-test-of-a-single-variance", secao: "§11.4", pagina: "640", exercicio: "ex. 11.20 (adaptado)", licenca: "CC-BY" }}
+  solucao={<>Proporções esperadas para M&M's segundo a fabricante: vermelho 13%, laranja 20%, amarelo 14%, verde 16%, azul 24%, marrom 13% (soma 100%). Em <Eq>{`n = 200`}</Eq>: <Eq>{`E_i = (26, 40, 28, 32, 48, 26)`}</Eq>. Calcule <Eq>{`\\chi^2 = \\sum (O_i - E_i)^2/E_i`}</Eq> com <Eq>{`df = 5`}</Eq>. Compare com 11,07 (5%) ou 15,09 (1%).</>}
+>
+Uma amostra de 200 M&M's de um pacote apresenta: 30 vermelhos, 35 laranjas, 22 amarelos, 40 verdes, 55 azuis, 18 marrons. Segundo a fabricante, as proporções são 13%, 20%, 14%, 16%, 24%, 13%. Teste aderência a 5%.
+</Exercicio>
+
+<Exercicio numero="108.32" dificuldade="modelagem"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§19.2", pagina: "online", exercicio: "Exercise 19.5 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela de homogeneidade <Eq>{`3 \\times 2`}</Eq>: cada grupo (A, B, C) tem 200 visitantes, conversões (24, 30, 40) e não-conversões (176, 170, 160). <Eq>{`df = (3-1)(2-1) = 2`}</Eq>. <Eq>{`E_{A,conv} = 600 \\times 94/600 = 94/3 \\approx 31,33`}</Eq>. Calcule <Eq>{`\\chi^2`}</Eq> e compare com 5,99.</>}
+>
+Teste A/B/C em landing page: 200 visitantes por variação. Conversões: A = 24, B = 30, C = 40. Teste homogeneidade das taxas de conversão a 5%.
+</Exercicio>
+
+<Exercicio numero="108.33" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-4-test-of-independence", secao: "§11.4", pagina: "636", exercicio: "ex. 11.16 (adaptado)", licenca: "CC-BY" }}
+  solucao={<>4 máquinas, contagens de defeitos: 30, 40, 25, 35 (total 130). Sob <Eq>{`H_0`}</Eq> de uniformidade: <Eq>{`E_i = 130/4 = 32,5`}</Eq>. <Eq>{`\\chi^2 = (30-32,5)^2/32,5 + (40-32,5)^2/32,5 + (25-32,5)^2/32,5 + (35-32,5)^2/32,5 = (6,25 + 56,25 + 56,25 + 6,25)/32,5 = 125/32,5 \\approx 3,85`}</Eq>. <Eq>{`df = 3`}</Eq>. Crítico 5%: 7,81. Não rejeita — sem diferença significativa entre máquinas.</>}
+>
+Quatro máquinas produzem defeitos: 30, 40, 25, 35 defeitos respectivamente (total 130). Teste se a taxa de defeitos é uniforme entre máquinas ao nível 5%.
+</Exercicio>
+
+<Exercicio numero="108.34" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "279", exercicio: "6.27 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela <Eq>{`2 \\times 2`}</Eq>. Aplicar correção de Yates se algum <Eq>{`E_{ij}`}</Eq> próximo de 5. Calcular <Eq>{`\\chi^2_Y`}</Eq> e comparar com <Eq>{`\\chi^2_{0,05;\\,1} = 3,84`}</Eq>. Se rejeitamos, concluímos que o tratamento altera significativamente a proporção de curas.</>}
+>
+Ensaio clínico com 50 pacientes (25 por grupo): vacina resultou em 18 curas, placebo em 12 curas. Monte a tabela $2 \times 2$ e aplique o teste qui-quadrado com correção de Yates a 5%.
+</Exercicio>
+
+<Exercicio numero="108.35" dificuldade="modelagem"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§19.2", pagina: "online", exercicio: "Exercise 19.7 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Dados mensais de acidentes em rodovias federais por estado categoriza-se em faixas (0-2, 3-5, 6-10, 11+). Ajusta-se média <Eq>{`\\hat{\\lambda}`}</Eq> (Poisson) pelos dados, calcula <Eq>{`E_i`}</Eq>, verifica <Eq>{`E_i \\geq 5`}</Eq> (agrupa categorias se necessário), computa <Eq>{`\\chi^2`}</Eq> com <Eq>{`df = k - 2`}</Eq> (estimou <Eq>{`\\lambda`}</Eq>). Compara com tabela.</>}
+>
+Dados de acidentes em rodovias do DNIT seguem distribuição de Poisson? Descreva o roteiro completo do teste de aderência, incluindo como tratar o parâmetro desconhecido.
+</Exercicio>
+
+<Exercicio numero="108.36" dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-4-test-of-independence", secao: "§11.4", pagina: "629", exercicio: "ex. 11.10 (conceitual)", licenca: "CC-BY" }}
+  opcoes={[
+    { texto: "A) A frequência esperada de cada célula deve ser pelo menos 1.", },
+    { texto: "B) As observações devem ser independentes e $E_{ij} \\geq 5$ em todas as células.", correta: true },
+    { texto: "C) O total $n$ deve ser superior a 1000.", },
+    { texto: "D) As variáveis devem ser quantitativas contínuas.", },
+  ]}
+  solucao={<>A alternativa B resume as condições de Cochran. A: <Eq>{`E_i \\geq 1`}</Eq> é condição mínima relaxada de Cochran mas insuficiente sozinha. C: <Eq>{`n > 1000`}</Eq> não é regra — amostras de 50 bastam com células adequadas. D: qui-quadrado é exclusivo para variáveis categóricas, não quantitativas contínuas.</>}
+>
+Qual das condições abaixo é necessária para a validade do teste qui-quadrado de independência?
+</Exercicio>
+
+<Exercicio numero="108.37" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.3", pagina: "269", exercicio: "6.9 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>O McNemar testa se <Eq>{`b \\neq c`}</Eq> em tabela <Eq>{`2 \\times 2`}</Eq> de dados pareados (onde <Eq>{`b`}</Eq> e <Eq>{`c`}</Eq> são as discordâncias). A estatística é <Eq>{`\\chi^2 = (b-c)^2/(b+c)`}</Eq> com <Eq>{`df = 1`}</Eq>. O qui-quadrado padrão ignoraria a correlação entre medidas repetidas, violando o pressuposto de independência.</>}
+>
+Em um estudo antes-depois, os mesmos 80 pacientes são classificados como hipertensos ou normais antes e depois de intervenção. Por que usar McNemar em vez do qui-quadrado padrão?
+</Exercicio>
+
+<Exercicio numero="108.38" dificuldade="compreensao"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§18.2", pagina: "online", exercicio: "Exercise 18.9 (adaptado)", licenca: "CC-BY-SA" }}
+  opcoes={[
+    { texto: "A) Qui-quadrado de independência com $df = (3-1)(2-1) = 2$.", correta: true },
+    { texto: "B) Qui-quadrado de aderência com $df = 6 - 1 = 5$.", },
+    { texto: "C) Teste t pareado para comparar as proporções.", },
+    { texto: "D) Regressão linear múltipla com variável dependente binária.", },
+  ]}
+  solucao={<>Duas variáveis categóricas (região: 3 categorias × preferência: 2 categorias) em uma única amostra aleatória → teste de independência com <Eq>{`df = (3-1)(2-1) = 2`}</Eq>. Não é aderência (não há distribuição teórica prescrita). Não é t pareado (não há pareamento). Não é regressão linear (resposta categórica).</>}
+>
+Uma pesquisa com 500 brasileiros registra região (Norte, Sudeste, Sul) e preferência por pagamento (à vista vs. parcelado). Qual teste é mais adequado para verificar se preferência e região são independentes?
+</Exercicio>
+
+<Exercicio numero="108.39" dificuldade="desafio"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/11-3-goodness-of-fit-test", secao: "§11.3", pagina: "621", exercicio: "ex. 11.6 (adaptado)", licenca: "CC-BY" }}
+  solucao={<><Eq>{`H_0`}</Eq>: dias de semana são igualmente solicitados. <Eq>{`n = 210`}</Eq>, <Eq>{`k = 7`}</Eq>, <Eq>{`E_i = 30`}</Eq> cada. <Eq>{`\\chi^2 = \\sum (O_i - 30)^2/30`}</Eq>. Dependendo das contagens observadas, compara-se com <Eq>{`\\chi^2_{0,05;\\,6} = 12,59`}</Eq>. Se a rede preferir segunda e sexta (padrão comum de atendimento), espera-se <Eq>{`\\chi^2`}</Eq> elevado e rejeição de <Eq>{`H_0`}</Eq>.</>}
+>
+Um pronto-socorro registrou 210 atendimentos em uma semana (30 por dia esperado). Observou-se: Dom=18, Seg=40, Ter=28, Qua=25, Qui=29, Sex=42, Sáb=28. O fluxo é uniforme entre os dias? Teste a 5%.
+</Exercicio>
+
+<Exercicio numero="108.40" dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "283", exercicio: "6.31 (adaptado)", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela <Eq>{`3 \\times 3`}</Eq> (3 candidatos × 3 estados). <Eq>{`df = (3-1)(3-1) = 4`}</Eq>. Calcule <Eq>{`E_{ij} = R_i C_j / n`}</Eq> para cada célula. Compute <Eq>{`\\chi^2`}</Eq>. Se <Eq>{`\\chi^2 > \\chi^2_{0,05;\\,4} = 9,49`}</Eq>, conclui-se que a preferência por candidato varia por estado. Reporte <Eq>{`V = \\sqrt{\\chi^2/(n \\cdot 2)}`}</Eq> como tamanho de efeito.</>}
+  passos={<>
+    <ol>
+      <li>Organizar a tabela <Eq>{`3 \\times 3`}</Eq> com contagens por estado × candidato.</li>
+      <li>Calcular marginais por linha (<Eq>{`R_i`}</Eq>) e por coluna (<Eq>{`C_j`}</Eq>).</li>
+      <li>Calcular cada <Eq>{`E_{ij} = R_i C_j / n`}</Eq>. Verificar <Eq>{`E_{ij} \\geq 5`}</Eq>.</li>
+      <li>Calcular <Eq>{`\\chi^2 = \\sum (O_{ij} - E_{ij})^2 / E_{ij}`}</Eq>. <Eq>{`df = 4`}</Eq>.</li>
+      <li>Comparar com 9,49 e calcular <Eq>{`V`}</Eq> para reportar o efeito.</li>
+    </ol>
+    <p><em>Macete:</em> em tabelas <Eq>{`r \\times c`}</Eq> grandes, verificar quais células têm residuos padronizados maiores que 1,96 para identificar onde a associação é mais forte.</p>
+  </>}
+>
+Pesquisa eleitoral em 3 estados brasileiros (SP, RJ, MG) com 600 eleitores (200 por estado) registra preferência por candidato (A, B, C). Dados: SP=(80,70,50), RJ=(60,90,50), MG=(70,60,70). Teste independência entre estado e candidato a 5% e calcule V de Cramér.
+</Exercicio>
+
+<Exercicio numero="108.41" dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.3", pagina: "265", exercicio: "demonstracao §6.3", licenca: "CC-BY-SA" }}
+  solucao={<>Para <Eq>{`k = 2`}</Eq> categorias com probabilidades <Eq>{`p`}</Eq> e <Eq>{`1-p`}</Eq>: <Eq>{`O_1 + O_2 = n`}</Eq>, <Eq>{`E_1 = np`}</Eq>, <Eq>{`E_2 = n(1-p)`}</Eq>. <Eq>{`\\chi^2 = (O_1 - np)^2/(np) + (O_2 - n(1-p))^2/(n(1-p))`}</Eq>. Como <Eq>{`O_2 - E_2 = -(O_1 - E_1)`}</Eq>, cada parcela é <Eq>{`(O_1 - np)^2 \\times (1/(np) + 1/(n(1-p))) = (O_1 - np)^2/(np(1-p))`}</Eq>. Isso é exatamente <Eq>{`Z^2`}</Eq> onde <Eq>{`Z = (O_1 - np)/\\sqrt{np(1-p)}`}</Eq> é o estatístico de teste para proporção binomial — mostrando a equivalência entre qui-quadrado com <Eq>{`df=1`}</Eq> e o teste <Eq>{`z`}</Eq> bilateral para proporção.</>}
+>
+Mostre que para $k = 2$ categorias, $\chi^2 = Z^2$ onde $Z$ é o estatístico $z$ do teste bilateral para proporção. Isso explica por que $\chi^2_{0,05;\,1} = (1,96)^2 \approx 3,84$.
+</Exercicio>
+
+<Exercicio numero="108.42" dificuldade="demonstracao"
+  fonte={{ livro: "Introduction to Modern Statistics", url: "https://openintro-ims.netlify.app/inference-tables", secao: "§18.1", pagina: "online", exercicio: "Derivation 18.1", licenca: "CC-BY-SA" }}
+  solucao={<>Para tabela <Eq>{`r \\times c`}</Eq>: há <Eq>{`rc`}</Eq> células, com <Eq>{`r`}</Eq> restrições de linha (<Eq>{`\\sum_j O_{ij} = R_i`}</Eq>) e <Eq>{`c`}</Eq> restrições de coluna (<Eq>{`\\sum_i O_{ij} = C_j`}</Eq>), mas as <Eq>{`r`}</Eq> restrições de linha e <Eq>{`c`}</Eq> restrições de coluna compartilham a restrição global <Eq>{`\\sum_{ij} O_{ij} = n`}</Eq>, totalizando <Eq>{`r + c - 1`}</Eq> restrições independentes. Portanto <Eq>{`df = rc - (r + c - 1) = rc - r - c + 1 = (r-1)(c-1)`}</Eq>. Cada restrição imposta "gasta" um grau de liberdade porque fixa uma dimensão do espaço dos vetores de contagem.</>}
+>
+Demonstre a fórmula $df = (r-1)(c-1)$ para o teste de independência em tabela $r \times c$, explicando quantas restrições independentes os marginais impõem ao vetor de contagens.
+</Exercicio>
 
 </ListaExercicios>
 
 ## Fontes
-- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez et al. · 2019 · 4ª ed · §6. **Fonte primária.**
-- [**Categorical Data Analysis**](https://www.wiley.com/en-us/Categorical+Data+Analysis%2C+3rd+Edition-p-9780470463635) — Agresti · 2013 · 3ª ed · §3.
-- [**All of Statistics**](https://www.stat.cmu.edu/~larry/all-of-statistics/) — Wasserman · 2004 · §10.5.
+
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · Capítulo 11 (§11.1–11.5). **Fonte primária dos exercícios e exemplos.**
+- [**OpenIntro Statistics (4ª ed)**](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · §6.3–6.4. **Abordagem conceitual e exercícios de contexto.**
+- [**Introduction to Modern Statistics**](https://openintro-ims.netlify.app/) — Çetinkaya-Rundel, Hardin · CC-BY-SA · §18–19. **Perspectiva via simulação e inferência moderna.**

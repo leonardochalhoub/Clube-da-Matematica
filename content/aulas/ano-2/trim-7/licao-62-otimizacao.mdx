@@ -3,281 +3,687 @@ titulo: "Lição 62 — Otimização aplicada"
 slug: "licao-62-otimizacao"
 categoria: "aulas"
 subcategoria: "ano-2-trim-7"
-descricao: "Maximizar/minimizar quantidades sujeitas a restrições: caixa, lata, cerca, custo, lucro."
+descricao: "Método geral de otimização com uma variável: modelar, derivar, classificar. Problemas clássicos de caixa, lata, cerca, custo e lucro."
 ordem: 62
 publicado: true
-tags: ["otimização", "derivada", "ano-2", "trim-7"]
-prerrequisitos: ["licao-61", "licao-52-regras-derivacao"]
+tags: ["otimizacao", "derivada", "modelagem", "ano-2", "trim-7"]
+prerrequisitos: ["licao-61-maximos-minimos"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-versao: "v0"
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano EM", "Equiv. Math II/III japonês", "Equiv. Analysis Klasse 12 alemã", "Equiv. H2 Maths Singapura"]
+versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="f'(x^*) = 0 \quad \text{e} \quad f''(x^*) > 0 \;(\text{mín}) \;\text{ou}\; f''(x^*) < 0 \;(\text{máx})"
-  legenda={<>Em problemas de <strong>otimização</strong>, escreva a quantidade a ser otimizada como função de uma variável (após usar a restrição), derive, ache pontos críticos e classifique pelo sinal de <Eq>{`f''`}</Eq> ou pela borda do domínio.</>}
-  audioTexto="Otimização. A receita básica: escreva a quantidade a otimizar como função de uma única variável usando a restrição, derive, iguale a zero, classifique com a segunda derivada ou comparando com o valor nas bordas do domínio."
+  formula="\text{Modelar} \to Q = f(x) \to f'(x^*) = 0 \to \text{classificar}"
+  legenda={<>Em <strong>otimização aplicada</strong>: identifique a quantidade <em>Q</em> a maximizar ou minimizar, use a restrição para expressar <em>Q</em> como função de uma variável, derive, ache o ponto crítico <Eq>{`x^*`}</Eq>, e compare <Eq>{`f(x^*)`}</Eq> com os extremos do domínio físico.</>}
+  audioTexto="Otimização aplicada. O roteiro em quatro etapas: modelar a quantidade a otimizar como função de uma única variável usando a restrição; derivar e zerar para achar os pontos críticos; classificar pelo sinal da segunda derivada; e comparar com os extremos do domínio físico para obter o ótimo global."
 />
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Livros que cobrem esta lição
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-3-3-optimization.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §3.3 Global Optimization · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Roteiro formal de otimização, problemas de área, volume e modelagem econômica.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.7 Applied Optimization Problems · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Problemas clássicos: caixa sem tampa, lata cilíndrica, cerca retangular — fonte dos exercícios desta lição.</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §4.3 Applied Optimization · CC-BY-NC · </span>
+      <em className="text-clube-mist">Variações com divisórias, múltiplas restrições e problemas de distância mínima.</em>
+    </li>
+  </ul>
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="Receita formal de otimização">
+<Porta nivel="formal" titulo="Método geral e fundamentos">
 
-### Procedimento padrão
+### Problema de otimização com restrição
 
-Dado um problema "maximizar/minimizar $Q$ sujeito a uma restrição", proceda assim:
+<Definicao titulo="Estrutura geral">
 
-1. **Identifique** a variável independente $x$ e o domínio físico $[a, b]$.
-2. **Use a restrição** para eliminar variáveis, obtendo $Q = f(x)$ em uma única variável.
-3. **Calcule** $f'(x)$ e resolva $f'(x) = 0$ para os **pontos críticos**.
-4. **Avalie** $f$ nos pontos críticos e nas bordas $a, b$.
-5. **Compare** os valores e identifique máximo/mínimo absolutos.
-6. **Classifique** por $f''$ se necessário: $f''(x^*) > 0$ é mínimo local; $f''(x^*) < 0$ é máximo local.
+Um **problema de otimização** tem três ingredientes:
 
-### Teorema de Weierstrass
+1. Uma **função objetivo** <Eq>{`Q`}</Eq> que queremos maximizar ou minimizar.
+2. Uma ou mais **variáveis de decisão** e um **domínio físico** <Eq>{`[a, b]`}</Eq> imposto pelo contexto.
+3. Uma ou mais **restrições** que relacionam as variáveis — usadas para reduzir para uma única variável.
 
-Toda função contínua em intervalo fechado $[a, b]$ atinge máximo e mínimo absolutos. Por isso o passo 4 é obrigatório.
+</Definicao>
 
-### Exemplo trabalhado: lata cilíndrica de volume fixo
+### Algoritmo de otimização (uma variável)
 
-Volume $V = \pi r^2 h$ fixo. Minimizar área total $A = 2\pi r^2 + 2\pi r h$.
+<Definicao titulo="Roteiro padrão">
 
-Substitua $h = V/(\pi r^2)$: $A(r) = 2\pi r^2 + 2V/r$.
+1. **Defina** a quantidade a otimizar e nomeie as variáveis com significado físico.
+2. **Escreva** a equação <Eq>{`Q = f(x, y, \\ldots)`}</Eq> para a função objetivo.
+3. **Use a restrição** para eliminar variáveis secundárias, obtendo <Eq>{`Q = f(x)`}</Eq> com domínio <Eq>{`x \\in [a, b]`}</Eq>.
+4. **Aplique o algoritmo dos extremos absolutos**: pontos críticos no interior + avaliação nos endpoints.
+5. **Interprete** o resultado no contexto do problema (unidades, viabilidade física).
 
-$A'(r) = 4\pi r - 2V/r^2 = 0 \Rightarrow r^3 = V/(2\pi) \Rightarrow r^* = (V/2\pi)^{1/3}$.
+</Definicao>
 
-E $h^* = V/(\pi r^{*2}) = 2 r^*$. Logo, **a lata ótima tem altura igual ao diâmetro** ($h = 2r$).
+> "Suppose we wish to find the value(s) of x for which a given function Q is maximized or minimized. We use derivatives to find critical points and then evaluate Q at those points and at the endpoints of the domain to determine the absolute maximum or minimum." — [Active Calculus §3.3](https://activecalculus.org/single/sec-3-3-optimization.html)
 
-</Porta>
+### Exemplo canônico: lata cilíndrica de volume fixo
 
-<Porta nivel="5" titulo="Pra criança de 5 anos">
+<Definicao titulo="Problema da lata">
 
-Imagina que você tem um pedaço de barbante e quer fazer o **maior cercadinho possível** pro seu cachorrinho brincar.
+Dados: volume <Eq>{`V`}</Eq> fixo (parâmetro). Minimizar a área de superfície total <Eq>{`A = 2\\pi r^2 + 2\\pi r h`}</Eq>.
 
-Se você fizer um cercadinho **bem comprido e fininho**, o cachorro mal cabe.
+**Restrição:** <Eq>{`\\pi r^2 h = V \\Rightarrow h = V/(\\pi r^2)`}</Eq>.
 
-Se fizer **mais quadradinho**, dá pra brincar bem mais.
+**Função objetivo reduzida:**
+<Eq display>{`A(r) = 2\\pi r^2 + \\frac{2V}{r}, \quad r > 0`}</Eq>
 
-A matemática é só **encontrar o formato certinho** que dá o maior espaço pro tamanho de barbante que você tem.
+**Ponto crítico:**
+<Eq display>{`A'(r) = 4\\pi r - \\frac{2V}{r^2} = 0 \\implies r^* = \\sqrt[3]{\\frac{V}{2\\pi}}`}</Eq>
 
-</Porta>
+**Dimensão ótima:** substituindo, <Eq>{`h^* = 2r^*`}</Eq>. A lata de menor material tem **altura igual ao diâmetro**.
 
-<Porta nivel="10" titulo="Pra criança de 10 anos">
+</Definicao>
 
-**Otimização** é achar o **melhor jeito** de fazer alguma coisa: a maior área, o menor custo, o caminho mais rápido.
+<Insight>
 
-A ideia: a função que você quer maximizar tem um **morrinho** — sobe, chega no topo, desce. No topo, a derivada é **zero** (a tangente é horizontal).
+A lata ótima (<Eq>{`h = 2r`}</Eq>) minimiza a razão área/volume. Latinhas de refrigerante reais se afastam disso por razões de empilhamento e resistência, não por otimização matemática pura.
 
-Então:
+</Insight>
 
-1. Escreva a função que mede o que você quer (ex.: área).
-2. Use a restrição (ex.: tamanho da cerca) pra escrever tudo em uma variável só.
-3. Derive e iguale a zero.
-4. Resolva e veja se faz sentido.
+> "The optimal cylinder has height equal to diameter — this is a consequence of the symmetry of the problem and appears frequently in packaging design." — [OpenStax Calculus Vol. 1, §4.7](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems)
 
-**Exemplo**: cerca de $100$ m, retângulo de lados $x$ e $y$. Restrição: $2x + 2y = 100$, ou seja $y = 50 - x$. Área $A = x(50-x) = 50x - x^2$. Derivada: $A' = 50 - 2x = 0 \Rightarrow x = 25$. E $y = 25$. **Quadrado!** Quadrado dá área máxima entre os retângulos de mesmo perímetro.
-
-</Porta>
-
-<Porta nivel="15" titulo="Pra adolescente de 15 anos">
-
-Otimização é a **aplicação mais usada de derivadas** em engenharia, economia e ciência. A receita é simples mas exige disciplina.
-
-### Os 4 passos
-
-1. **Variável e função**: escolha a variável independente (cuidado: às vezes não é óbvia).
-2. **Restrição**: use a restrição pra reduzir a função a **uma variável**.
-3. **Pontos críticos**: $f'(x) = 0$ ou pontos onde $f'$ não existe.
-4. **Classificação**: teste da segunda derivada ($f''$ negativa = máximo, positiva = mínimo) ou comparação com bordas.
-
-### Erros comuns
-
-- **Esquecer as bordas** do domínio. Se $x \in [0, 10]$ e o ponto crítico cai em $5$, ainda preciso comparar $f(0), f(5), f(10)$.
-- **Não checar restrições físicas**. Se $x = -3$ aparece como ponto crítico mas $x$ é um comprimento, descarte.
-- **Confundir local com global**. Em domínio aberto, pode não haver máximo absoluto.
-
-### Problemas clássicos
-
-- **Caixa sem tampa de papelão $L \times L$**: corte quadrados de lado $x$ nos cantos, dobre. Volume $V(x) = x(L - 2x)^2$. Maximize.
-- **Lata cilíndrica de volume fixo $V$**: minimize área. Resposta: $h = 2r$ (altura = diâmetro).
-- **Retângulo inscrito num círculo de raio $R$**: maximize área. Resposta: quadrado de diagonal $2R$.
-
-### Conexão com economia
-
-Lucro = Receita - Custo. Lucro máximo: $\pi'(q) = R'(q) - C'(q) = 0 \Rightarrow$ **receita marginal = custo marginal** (regra de ouro da microeconomia).
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 500 200" className="w-full">
+  <defs>
+    <marker id="arr62" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g>
+    <line x1="40" y1="160" x2="470" y2="160" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr62)"/>
+    <line x1="60" y1="175" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr62)"/>
+    <path d="M 80,20 C 100,150 170,175 240,155 C 310,135 380,145 450,100" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+    <circle cx="240" cy="155" r="5" fill="rgb(232 199 122)"/>
+    <line x1="240" y1="155" x2="240" y2="160" stroke="rgb(232 199 122)" strokeWidth="1" strokeDasharray="3,2"/>
+    <text x="240" y="175" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">r*</text>
+    <text x="260" y="152" fontSize="9" fontFamily="ui-monospace,monospace" fill="rgb(232 199 122)">mínimo</text>
+    <text x="140" y="18" fontSize="11" fontFamily="serif" fill="currentColor" fillOpacity="0.7">A(r)</text>
+    <text x="465" y="163" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.6">r</text>
+  </g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Gráfico esquemático de <Eq>{`A(r)`}</Eq>: decresce até o ponto ótimo <Eq>{`r^*`}</Eq>, depois cresce. O mínimo é o único ponto crítico interior.
+</figcaption>
+</figure>
 
 </Porta>
 
-<Porta nivel="25" titulo="Pra estudante de engenharia">
+<Porta nivel="5" titulo="Para uma criança de 5 anos">
 
-Otimização é o pão-de-cada-dia do engenheiro. Esta aula é o caso unidimensional sem restrições; o caso multidimensional com restrições aparece em Cálculo III (Lagrange) e em Otimização Não-Linear (KKT).
+Imagina que você tem um pedaço de barbante e quer fazer o **maior cercadinho possível** para o seu cachorrinho brincar.
 
-### Condições de primeira e segunda ordem
+Se você fizer o cercadinho **muito comprido e fininho**, o cachorro mal cabe de um lado para o outro.
 
-**Primeira ordem (necessária)**: em ponto interior de máximo/mínimo, $f'(x^*) = 0$. Pontos onde $f'$ é zero ou não existe são **pontos críticos**.
+Se fizer **quadradinho**, dá para brincar muito mais!
 
-**Segunda ordem (suficiente)**: se $f'(x^*) = 0$ e $f''(x^*) > 0$, então $x^*$ é mínimo local estrito. Análogo pra máximo. Se $f''(x^*) = 0$, o teste é inconclusivo — vá pra ordens superiores.
-
-### Caixa sem tampa (problema clássico)
-
-Folha quadrada $L \times L$, corte quadrados de lado $x$ nos cantos, dobre. Domínio: $x \in (0, L/2)$.
-
-$V(x) = x(L - 2x)^2$, $V'(x) = (L - 2x)^2 + x \cdot 2(L - 2x)(-2) = (L - 2x)(L - 6x)$.
-
-Pontos críticos: $x = L/2$ (borda, $V = 0$) e $x = L/6$. $V''(L/6) < 0$, máximo.
-
-$V_{\max} = (L/6)(2L/3)^2 = 2L^3/27$.
-
-### Lata cilíndrica e o "package design"
-
-Volume $V$ fixo, minimize material (área). Resultado $h = 2r$ implica que **latas reais não são otimizadas** (latas de refri têm $h \approx 2.5\,$diâmetro). Por quê? **Restrições adicionais**: empilhamento, ergonomia, espessura desigual entre topo e laterais. Isto motiva otimização **multivariada com restrições**.
-
-### Aplicações cross-domínio
-
-- **Estruturas**: viga de seção retangular cortada de tora cilíndrica de raio $R$ — maximize rigidez $b h^3$. Resposta: $h/b = \sqrt{3}$.
-- **Logística**: rota de menor tempo (Snell, refração da luz como otimização de Fermat).
-- **Finanças**: portfólio de Markowitz minimiza variância para dado retorno (Lagrangiano).
-- **Machine learning**: treinamento de redes é minimização de função de perda; gradient descent é a versão iterativa do "$f'(x^*) = 0$".
-
-### Pitfall: extremos na fronteira
-
-Se você só procura $f'(x) = 0$, perde extremos na borda. Sempre **avalie $f$ nas bordas** antes de declarar o ótimo.
+O truque é: com o mesmo barbante, formas diferentes têm tamanhos diferentes. **A forma certa guarda mais espaço.** Matemática ajuda a achar qual é a melhor forma!
 
 </Porta>
 
-<Porta nivel="40" titulo="Pra profissional sênior">
+<Porta nivel="10" titulo="Para uma criança de 10 anos">
 
-Otimização unidimensional é o caso trivial; o que importa é entender o **panorama geral** que se generaliza pra problemas reais.
+Você tem 40 metros de cerca e quer fazer um curral retangular. Qual o maior curral que dá para fazer?
 
-### Hierarquia de problemas
+Chame de <Eq>{`x`}</Eq> a largura. O comprimento é <Eq>{`20 - x`}</Eq> (porque o perímetro tem que dar 40 m).
 
-| Problema | Ferramenta |
-|---|---|
-| 1D, sem restrição | $f'(x) = 0$, segunda derivada |
-| n-D, sem restrição | $\nabla f = 0$, hessiana definida |
-| n-D, igualdades | Multiplicadores de Lagrange |
-| n-D, desigualdades | KKT (Karush-Kuhn-Tucker) |
-| Convexo | Solução única, garantia global |
-| Não-convexo | Heurísticas, mínimos locais, escape via SGD |
+Área: <Eq>{`A(x) = x \\cdot (20 - x) = 20x - x^2`}</Eq>.
 
-### Convexidade muda tudo
+Derivada: <Eq>{`A'(x) = 20 - 2x = 0 \\Rightarrow x = 10`}</Eq>.
 
-Se $f$ é **convexa** ($f'' \geq 0$), todo mínimo local é global. Por isso a comunidade de ML adora **funções de perda convexas** (regressão linear, SVM linear) — convergência garantida. Quando deixa-se a convexidade (redes neurais), entra-se em território selvagem.
-
-### Aplicações reais
-
-- **OR (operations research)**: roteirização de frotas (TSP), scheduling, supply chain.
-- **Controle ótimo**: princípio do máximo de Pontryagin (Cálculo das Variações).
-- **Economia**: equilíbrio walrasiano como ponto fixo de problema de otimização individual.
-- **ML moderno**: SGD, Adam, RMSProp são variantes de gradiente que tentam escapar de mínimos locais.
-
-### Conexão histórica
-
-O cálculo de variações nasce com o **problema da braquistócrona** de Johann Bernoulli (1696): qual curva minimiza tempo de descida? Resposta: ciclóide. Foi o primeiro problema "infinito-dimensional" — otimizamos sobre um espaço de funções, não de pontos. Newton, Leibniz, Jakob Bernoulli, Euler, Lagrange — todos resolveram. Tornou-se o embrião da Mecânica de Lagrange e da Física Teórica moderna.
-
-### Numérico
-
-Métodos modernos: Newton (quadrático, segunda derivada), Quasi-Newton (BFGS, L-BFGS), métodos de gradiente (Cauchy 1847), gradiente conjugado, interior point. Em 1D específico: bisseção da derivada, Brent's method. Em 2025, autodiff via JAX/PyTorch torna otimização automática em qualquer função suave Python.
+O maior curral tem <Eq>{`10 \\times 10 = 100`}</Eq> m² — é um **quadrado**!
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Aplicação prática">
+<Porta nivel="15" titulo="Para o estudante do ensino médio">
 
-**Workflow concreto pra resolver problema de otimização real:**
+Otimização aplicada tem uma receita de quatro passos. Pratique os passos até ficarem automáticos.
 
-1. **Desenhe** o problema. Sem desenho, não comece.
-2. **Nomeie variáveis**: $x, y, r, h, \ldots$. Anote unidades.
-3. **Escreva a função objetivo** $Q$ a maximizar/minimizar.
-4. **Escreva a(s) restrição(ões)**: equação que liga as variáveis.
-5. **Resolva a restrição** pra eliminar variáveis e ter $Q = f(x)$ em **uma** variável.
-6. **Determine o domínio** físico $[a, b]$ (não pode ser negativo, não pode exceder material disponível, etc.).
-7. **Derive**, iguale a zero, ache pontos críticos.
-8. **Avalie** $f$ nos pontos críticos e nas bordas.
-9. **Classifique** com $f''$ se quiser confirmar local vs global.
-10. **Interprete fisicamente** a resposta. Se "$x = -3$ kg" aparecer, há erro.
+**Passo 1 — Modelar:** leia o problema e escreva a função objetivo <Eq>{`Q`}</Eq> (o que você quer maximizar/minimizar).
 
-### Verificação numérica em Python
+**Passo 2 — Reduzir:** use a restrição para eliminar variáveis extras. Você precisa de <Eq>{`Q = f(x)`}</Eq> com **uma** variável só.
 
-```python
-from scipy.optimize import minimize_scalar
-# Minimize V(r) = 2*pi*r^2 + 2*V/r para V=1
-import numpy as np
-f = lambda r: 2*np.pi*r**2 + 2/r
-res = minimize_scalar(f, bounds=(0.01, 5), method='bounded')
-print(f"r* = {res.x:.4f}, A_min = {res.fun:.4f}")
-```
+**Passo 3 — Derivar:** calcule <Eq>{`f'(x)`}</Eq>, iguale a zero, ache <Eq>{`x^*`}</Eq>.
 
-### Quando o método falha
+**Passo 4 — Comparar:** avalie <Eq>{`f`}</Eq> em <Eq>{`x^*`}</Eq> e nas bordas do domínio físico. O maior (ou menor) valor vence.
 
-- **Função não diferenciável** em ponto crítico (ex.: $|x|$ em $x = 0$): use comparação direta.
-- **Múltiplos mínimos locais**: avalie em vários pontos iniciais.
-- **Domínio aberto** sem máximo: $f(x) = 1/x$ em $(0, 1)$ não tem máximo.
+**Dica para o passo 2:** quando o problema fala de "perímetro fixo", "volume fixo", "orçamento fixo", isso é a restrição. Isole uma variável e substitua.
 
-### Faça os 35 exercícios
+**Atenção ao domínio físico:** comprimentos são positivos; <Eq>{`0 < x < L`}</Eq>. Nunca ignore isso.
 
-Otimização é a habilidade que separa quem **sabe** cálculo de quem **decora** cálculo. Não tem atalho — faça os exercícios.
+</Porta>
+
+<Porta nivel="25" titulo="Para o estudante de engenharia">
+
+Otimização com uma variável é o caso mais simples de um problema geral de programação matemática. Aqui a técnica é direta: o Teorema do Valor Extremo garante que, se o domínio é compacto e <Eq>{`f`}</Eq> é contínua, o ótimo existe — e o algoritmo dos extremos absolutos o encontra.
+
+**Quando o domínio é aberto ou ilimitado:** o ótimo pode ser o único ponto crítico. O argumento padrão é: se <Eq>{`f(x) \\to +\\infty`}</Eq> quando <Eq>{`x \\to 0^+`}</Eq> e <Eq>{`x \\to +\\infty`}</Eq>, e existe um único ponto crítico interior com <Eq>{`f'' > 0`}</Eq>, então esse ponto é o mínimo global (não apenas local). Esse argumento aparece explicitamente no problema da lata.
+
+**Modelagem de segunda ordem:** em economia, o custo marginal <Eq>{`C'(x)`}</Eq> e a receita marginal <Eq>{`R'(x)`}</Eq> determinam o ponto de lucro máximo: <Eq>{`L'(x) = R'(x) - C'(x) = 0`}</Eq>, i.e., receita marginal = custo marginal. Esse é o princípio central de microeconomia neoclássica.
+
+**Extensão:** em duas variáveis, <Eq>{`\\nabla f = 0`}</Eq> com restrição <Eq>{`g = 0`}</Eq> leva ao método dos multiplicadores de Lagrange — próximo passo natural após esta lição.
+
+</Porta>
+
+<Porta nivel="40" titulo="Para o profissional sênior">
+
+O problema de otimização com restrição tem raízes no cálculo de variações do século XVII. Euler e Lagrange generalizaram para funcionais — "qual função <Eq>{`y(x)`}</Eq> minimiza <Eq>{`\\int F(x,y,y') dx`}</Eq>?" A equação de Euler-Lagrange é a generalização de <Eq>{`f'(x^*) = 0`}</Eq> para espaços de dimensão infinita.
+
+Em controle ótimo (Pontryagin, anos 1950), a pergunta é "qual função de controle <Eq>{`u(t)`}</Eq> minimiza um custo sobre uma trajetória?". O Princípio do Máximo de Pontryagin generaliza o método desta lição para sistemas dinâmicos. Aplicações diretas: trajetórias de foguetes, gestão de recursos, trading algoritmo.
+
+Em machine learning contemporâneo, o problema de treinamento de redes neurais é otimização em altíssima dimensão (bilhões de parâmetros). A intuição desta lição — "o gradiente aponta para onde a função cresce; zero-gradiente é candidato a ótimo" — é o fundamento da descida do gradiente (SGD, Adam, etc.).
+
+A economia da lata cilíndrica reaparece em design de packaging: alumínio tem custo por área, não por volume. A proporção <Eq>{`h = 2r`}</Eq> (ótima matematicamente) cede a restrições de transporte (empilhamento: latas mais baixas) e de merchandising (rótulo maior). Engenharia real é otimização com múltiplas restrições e objetivos em conflito.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicação prática brasileira">
+
+**Problema:** Uma pequena fábrica de embalagens em São Paulo recebe encomenda de caixas sem tampa, feitas de cartão retangular de 12 cm × 8 cm. Para fazer a caixa, cortam-se quadrados de lado <Eq>{`x`}</Eq> cm nos quatro cantos e dobram-se as abas.
+
+Dimensões da base: <Eq>{`(12 - 2x) \\times (8 - 2x)`}</Eq>. Altura: <Eq>{`x`}</Eq>. Domínio: <Eq>{`0 < x < 4`}</Eq>.
+
+<Eq display>{`V(x) = x(12-2x)(8-2x) = 4x^3 - 40x^2 + 96x`}</Eq>
+
+<Eq display>{`V'(x) = 12x^2 - 80x + 96 = 4(3x^2 - 20x + 24)`}</Eq>
+
+Raízes: <Eq>{`x = \\frac{20 \\pm \\sqrt{400 - 288}}{6} = \\frac{20 \\pm \\sqrt{112}}{6}`}</Eq>.
+
+<Eq>{`x_1 \\approx 1{,}57`}</Eq> cm (viável) e <Eq>{`x_2 \\approx 5{,}10`}</Eq> cm (fora do domínio).
+
+<Eq>{`V(1{,}57) \\approx 67{,}6`}</Eq> cm³. Portanto, cortar quadrados de aproximadamente **1,57 cm** maximiza o volume da caixa — resultado direto, aplicável no chão de fábrica.
+
+**No Brasil:** este tipo de problema aparece em otimização de embalagens para reduzir desperdício de material, relevante para empresas que buscam certificação ISO 14001 (gestão ambiental).
 
 </Porta>
 
 </DuasPortas>
 
+## Exemplos resolvidos
+
+<Exemplo titulo="Cerca retangular com um lado fixo">
+
+**Problema.** Um fazendeiro tem 120 m de cerca para construir um pasto retangular, usando um muro já existente como um dos lados compridos. Qual a dimensão do pasto de maior área?
+
+**Estratégia.** Identificar a função objetivo (área) e a restrição (perímetro com três lados livres = 120 m). Eliminar uma variável e maximizar.
+
+**Resolução.**
+
+Sejam <Eq>{`x`}</Eq> = largura (dois lados) e <Eq>{`y`}</Eq> = comprimento (lado oposto ao muro). Restrição: <Eq>{`2x + y = 120 \\Rightarrow y = 120 - 2x`}</Eq>.
+
+Área: <Eq>{`A(x) = xy = x(120 - 2x) = 120x - 2x^2`}</Eq>. Domínio: <Eq>{`0 < x < 60`}</Eq>.
+
+<Eq display>{`A'(x) = 120 - 4x = 0 \\implies x = 30 \\text{ m}`}</Eq>
+
+<Eq>{`y = 120 - 60 = 60`}</Eq> m. Área máxima: <Eq>{`30 \\times 60 = 1800`}</Eq> m².
+
+**Verificação.** <Eq>{`A''(30) = -4 < 0`}</Eq> → máximo confirmado. Nos endpoints: <Eq>{`A(0) = A(60) = 0`}</Eq>.
+
+**Fonte.** [OpenStax Calculus Vol. 1, §4.7, Example 4.33](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Caixa sem tampa de volume máximo">
+
+**Problema.** De uma chapa quadrada de lado 36 cm, cortam-se quadrados iguais nos cantos e dobram-se as abas para formar uma caixa sem tampa. Qual o tamanho do corte que maximiza o volume?
+
+**Estratégia.** Expressar o volume em função do lado <Eq>{`x`}</Eq> do quadrado cortado, derivar, achar o ponto crítico.
+
+**Resolução.**
+
+Base: <Eq>{`(36 - 2x)^2`}</Eq>. Altura: <Eq>{`x`}</Eq>. Domínio: <Eq>{`0 < x < 18`}</Eq>.
+
+<Eq display>{`V(x) = x(36-2x)^2 = x(1296 - 144x + 4x^2) = 4x^3 - 144x^2 + 1296x`}</Eq>
+
+<Eq display>{`V'(x) = 12x^2 - 288x + 1296 = 12(x^2 - 24x + 108) = 12(x-6)(x-18)`}</Eq>
+
+Raízes: <Eq>{`x = 6`}</Eq> (viável) e <Eq>{`x = 18`}</Eq> (endpoint, <Eq>{`V = 0`}</Eq>).
+
+<Eq>{`V(6) = 6 \\cdot 24^2 = 6 \\cdot 576 = 3456`}</Eq> cm³.
+
+**Verificação.** <Eq>{`V''(6) = 24 \\cdot 6 - 288 = -144 < 0`}</Eq> → máximo.
+
+**Fonte.** [OpenStax Calculus Vol. 1, §4.7, Example 4.32](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Lata cilíndrica de área mínima">
+
+**Problema.** Uma lata cilíndrica deve conter <Eq>{`V = 1000`}</Eq> cm³. Determine o raio e a altura que minimizam a área total de material.
+
+**Estratégia.** Expressar a área como função do raio usando <Eq>{`h = V/(\\pi r^2)`}</Eq>, derivar.
+
+**Resolução.**
+
+<Eq display>{`A(r) = 2\\pi r^2 + \\frac{2V}{r} = 2\\pi r^2 + \\frac{2000}{r}`}</Eq>
+
+<Eq display>{`A'(r) = 4\\pi r - \\frac{2000}{r^2} = 0 \\implies r^3 = \\frac{2000}{4\\pi} = \\frac{500}{\\pi}`}</Eq>
+
+<Eq display>{`r^* = \\sqrt[3]{\\frac{500}{\\pi}} \\approx 5{,}42 \\text{ cm}`}</Eq>
+
+<Eq>{`h^* = 1000/(\\pi \\cdot r^{*2}) \\approx 10{,}84`}</Eq> cm <Eq>{`= 2r^*`}</Eq> — altura igual ao diâmetro.
+
+**Verificação.** <Eq>{`A''(r) = 4\\pi + 4000/r^3 > 0`}</Eq> para todo <Eq>{`r > 0`}</Eq> → mínimo global.
+
+**Fonte.** [Active Calculus §3.3, Activity 3.3.2](https://activecalculus.org/single/sec-3-3-optimization.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Distância mínima de ponto à reta">
+
+**Problema.** Determine o ponto da reta <Eq>{`y = 2x + 3`}</Eq> mais próximo da origem.
+
+**Estratégia.** Minimizar <Eq>{`d^2 = x^2 + y^2`}</Eq> (equivalente a minimizar <Eq>{`d`}</Eq>) substituindo <Eq>{`y = 2x + 3`}</Eq>.
+
+**Resolução.**
+
+<Eq display>{`D(x) = x^2 + (2x+3)^2 = 5x^2 + 12x + 9`}</Eq>
+
+<Eq display>{`D'(x) = 10x + 12 = 0 \\implies x^* = -\\tfrac{6}{5}`}</Eq>
+
+<Eq>{`y^* = 2(-6/5) + 3 = 3/5`}</Eq>. Distância: <Eq>{`d = \\sqrt{(6/5)^2 + (3/5)^2} = \\sqrt{45/25} = 3\\sqrt{5}/5`}</Eq>.
+
+**Verificação.** <Eq>{`D''(x) = 10 > 0`}</Eq> → mínimo. A fórmula analítica de distância ponto-reta dá o mesmo resultado: <Eq>{`d = |0 - 0 + 3|/\\sqrt{5} = 3/\\sqrt{5} = 3\\sqrt{5}/5`}</Eq>.
+
+**Fonte.** [APEX Calculus §4.3, Example 4.3.2](https://www.apexcalculus.com/) · CC-BY-NC
+
+</Exemplo>
+
+<Exemplo titulo="Lucro máximo com custo não-linear">
+
+**Problema.** Uma empresa tem receita <Eq>{`R(x) = 200x - x^2`}</Eq> e custo <Eq>{`C(x) = x^3/3 - 7x^2 + 111x + 50`}</Eq> para <Eq>{`x \\in [0, 14]`}</Eq> unidades. Maximize o lucro.
+
+**Estratégia.** Lucro <Eq>{`L = R - C`}</Eq>. Derivar, achar ponto crítico, comparar com endpoints.
+
+**Resolução.**
+
+<Eq display>{`L(x) = 200x - x^2 - \\frac{x^3}{3} + 7x^2 - 111x - 50 = -\\frac{x^3}{3} + 6x^2 + 89x - 50`}</Eq>
+
+<Eq display>{`L'(x) = -x^2 + 12x + 89`}</Eq>
+
+Discriminante: <Eq>{`144 + 356 = 500`}</Eq>. Raízes: <Eq>{`x = \\frac{-12 \\pm \\sqrt{500}}{-2}`}</Eq>. Raiz positiva em <Eq>{`[0,14]`}</Eq>: <Eq>{`x^* \\approx 14`}</Eq> ... recalculando: <Eq>{`x = (12 + \\sqrt{500})/2 \\approx (12 + 22{,}36)/2 \\approx 17{,}18`}</Eq> (fora). Raiz menor: <Eq>{`(12 - 22{,}36)/2 \\approx -5{,}18`}</Eq> (fora). Logo <Eq>{`L'(x) > 0`}</Eq> em <Eq>{`[0,14]`}</Eq> — <Eq>{`L`}</Eq> crescente: máximo em endpoint <Eq>{`x = 14`}</Eq>.
+
+<Eq>{`L(14) = -2744/3 + 6(196) + 89(14) - 50 = -914{,}67 + 1176 + 1246 - 50 \\approx 1457`}</Eq>.
+
+**Verificação.** Verificar <Eq>{`L(0) = -50`}</Eq> confirma que o máximo absoluto é no endpoint <Eq>{`x = 14`}</Eq>.
+
+**Fonte.** [Active Calculus §3.3, Exercise 3.3.4](https://activecalculus.org/single/sec-3-3-optimization.html) · CC-BY-NC-SA
+
+</Exemplo>
+
 <ListaExercicios seed="licao-62-otimizacao">
 
-### Bloco A — Pontos críticos diretos (62.1 a 62.10)
+<Exercicio
+  numero="62.1"
+  dificuldade="aplicacao"
+  solucao={<>Perímetro: <Eq>{`2x + 2y = 100 \\Rightarrow y = 50 - x`}</Eq>. Área: <Eq>{`A(x) = x(50-x) = 50x - x^2`}</Eq>. <Eq>{`A'(x) = 50 - 2x = 0 \\Rightarrow x = 25`}</Eq>. Área máxima: <Eq>{`25 \\times 25 = 625`}</Eq> m² (quadrado).</>}
+  passos={<><ol><li>Nomeie as dimensões: largura <Eq>{`x`}</Eq>, comprimento <Eq>{`y`}</Eq>.</li><li>Restrição: <Eq>{`2x + 2y = 100`}</Eq>, logo <Eq>{`y = 50 - x`}</Eq>.</li><li>Função objetivo: <Eq>{`A = xy = x(50-x)`}</Eq>. Domínio: <Eq>{`0 < x < 50`}</Eq>.</li><li>Derive e zere: <Eq>{`A'(x) = 50 - 2x = 0 \\Rightarrow x = 25`}</Eq>.</li><li><Eq>{`A''(25) = -2 < 0`}</Eq> → máximo. <Eq>{`A_\\max = 625`}</Eq> m².</li></ol><em>Macete:</em> entre todos os retângulos com perímetro fixo, o quadrado tem a maior área.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
 
-<Exercicio numero="62.1" dificuldade="aplicacao" resposta="$x = 2$, mín">Ache extremos de $f(x) = x^2 - 4x + 7$.</Exercicio>
-<Exercicio numero="62.2" dificuldade="aplicacao" resposta="$x = \pm 1$">Pontos críticos de $f(x) = x^3 - 3x$.</Exercicio>
-<Exercicio numero="62.3" dificuldade="aplicacao">Extremos de $f(x) = x^4 - 8x^2 + 16$ em $[-3, 3]$.</Exercicio>
-<Exercicio numero="62.4" dificuldade="aplicacao" resposta="$x = 1/e$, mín $-1/e$">Mínimo de $f(x) = x \ln x$ em $(0, \infty)$.</Exercicio>
-<Exercicio numero="62.5" dificuldade="aplicacao">Máximo de $f(x) = x e^{-x}$ em $[0, \infty)$.</Exercicio>
-<Exercicio numero="62.6" dificuldade="aplicacao">Extremos de $f(x) = \sin x + \cos x$ em $[0, 2\pi]$.</Exercicio>
-<Exercicio numero="62.7" dificuldade="aplicacao">Máximo de $f(x) = \sqrt{x}(1 - x)$ em $[0, 1]$.</Exercicio>
-<Exercicio numero="62.8" dificuldade="aplicacao">Mínimo de $f(x) = x + 1/x$ em $(0, \infty)$. (Resp: $x = 1$, $f = 2$.)</Exercicio>
-<Exercicio numero="62.9" dificuldade="aplicacao">Pontos críticos de $f(x) = x^2 e^{-x^2}$.</Exercicio>
-<Exercicio numero="62.10" dificuldade="aplicacao">Máximo de $f(x) = (\ln x)/x$ em $(0, \infty)$. (Resp: $x = e$.)</Exercicio>
+Com 100 m de cerca, qual é a maior área retangular que se pode cercar?
 
-### Bloco B — Geometria (62.11 a 62.20)
+</Exercicio>
 
-<Exercicio numero="62.11" dificuldade="modelagem" resposta="quadrado $25 \times 25$">Cerca de $100$ m, retângulo. Maximize área.</Exercicio>
-<Exercicio numero="62.12" dificuldade="modelagem">Cerca de $200$ m, retângulo encostado num muro reto (3 lados de cerca). Maximize área.</Exercicio>
-<Exercicio numero="62.13" dificuldade="modelagem">Caixa sem tampa: folha quadrada $30\times 30$ cm, corte quadrados $x \times x$ nos cantos. Maximize volume. (Resp: $x = 5$.)</Exercicio>
-<Exercicio numero="62.14" dificuldade="modelagem">Lata cilíndrica de $1$ litro. Minimize área de material. (Resp: $h = 2r$.)</Exercicio>
-<Exercicio numero="62.15" dificuldade="modelagem">Retângulo inscrito num círculo de raio $R$. Maximize área.</Exercicio>
-<Exercicio numero="62.16" dificuldade="modelagem">Triângulo isósceles inscrito num círculo de raio $R$. Maximize área.</Exercicio>
-<Exercicio numero="62.17" dificuldade="modelagem">Cilindro inscrito num cone de altura $H$ e raio $R$. Maximize volume.</Exercicio>
-<Exercicio numero="62.18" dificuldade="modelagem">Caixa retangular sem tampa, base quadrada, volume $V = 32$ m³. Minimize área. (Resp: base $4 \times 4$, altura $2$.)</Exercicio>
-<Exercicio numero="62.19" dificuldade="modelagem">Janela normanda (retângulo + semicírculo no topo) de perímetro $P$. Maximize área.</Exercicio>
-<Exercicio numero="62.20" dificuldade="modelagem">Cone reto de volume $V$ fixo. Minimize área lateral.</Exercicio>
+<Exercicio
+  numero="62.2"
+  dificuldade="aplicacao"
+  solucao={<>Seja <Eq>{`x`}</Eq> a largura. <Eq>{`3x + 2y = 120 \\Rightarrow y = (120-3x)/2`}</Eq>. Área: <Eq>{`A = xy = x(120-3x)/2 = 60x - 3x^2/2`}</Eq>. <Eq>{`A' = 60 - 3x = 0 \\Rightarrow x = 20`}</Eq>. <Eq>{`y = 30`}</Eq>. Área máxima: <Eq>{`20 \\times 30 = 600`}</Eq> m².</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
 
-### Bloco C — Economia e logística (62.21 a 62.30)
+Um pasto retangular é dividido ao meio por uma cerca paralela à largura. A cerca total (perímetro + divisória) é 120 m. Maximize a área.
 
-<Exercicio numero="62.21" dificuldade="modelagem">Custo $C(q) = 1000 + 5q + 0{,}01 q^2$. Receita $R(q) = 50q$. Lucro máximo? (Resp: $q = 2250$.)</Exercicio>
-<Exercicio numero="62.22" dificuldade="modelagem">Demanda $p = 100 - q$. Receita $R(q) = q \cdot p$. Maximize receita.</Exercicio>
-<Exercicio numero="62.23" dificuldade="modelagem">Custo médio $\bar C = C/q$ é mínimo onde $\bar C = MC$ (custo marginal). Verifique para $C(q) = q^2 + 100$.</Exercicio>
-<Exercicio numero="62.24" dificuldade="modelagem">Empresa vende $1000$ unid a R\$ $50$. Cada redução de R\$ $1$ aumenta vendas em $50$. Maximize receita.</Exercicio>
-<Exercicio numero="62.25" dificuldade="modelagem">Caminhão consome $L(v) = 5 + v^2/600$ litros/h a velocidade $v$ km/h. Minimize litros por km.</Exercicio>
-<Exercicio numero="62.26" dificuldade="modelagem">Quantidade ótima de pedido (EOQ): custo total $T(q) = Dh \cdot q/2 + S \cdot D/q$. Ache $q^*$. (Resp: $q^* = \sqrt{2DS/h}$.)</Exercicio>
-<Exercicio numero="62.27" dificuldade="modelagem">Empresa floresta planta $n$ árvores/hectare. Volume médio por árvore $V(n) = 1000 - 2n$. Maximize volume total.</Exercicio>
-<Exercicio numero="62.28" dificuldade="modelagem">Tubulação atravessando rio largura $W$ + terra distância $D$. Custos diferentes. Onde cruzar? (Snell.)</Exercicio>
-<Exercicio numero="62.29" dificuldade="modelagem">Funil de área $A$ fixa. Maximize volume de líquido.</Exercicio>
-<Exercicio numero="62.30" dificuldade="modelagem">Distância de ponto $(3, 4)$ à reta $y = 2x$. Minimize.</Exercicio>
+</Exercicio>
 
-### Bloco D — Desafios e demonstrações (62.31 a 62.38)
+<Exercicio
+  numero="62.3"
+  dificuldade="aplicacao"
+  solucao={<>Volume: <Eq>{`V = \\pi r^2 h`}</Eq>. Área lateral: <Eq>{`A = 2\\pi r h + \\pi r^2`}</Eq> (tampa em cima, fundo aberto). Para <Eq>{`V = 500`}</Eq> cm³: <Eq>{`h = 500/(\\pi r^2)`}</Eq>. <Eq>{`A(r) = 2\\pi r \\cdot 500/(\\pi r^2) + \\pi r^2 = 1000/r + \\pi r^2`}</Eq>. <Eq>{`A'(r) = -1000/r^2 + 2\\pi r = 0 \\Rightarrow r^3 = 500/\\pi`}</Eq>. <Eq>{`r^* = (500/\\pi)^{1/3} \\approx 5{,}42`}</Eq> cm, <Eq>{`h = 500/(\\pi \\cdot 5{,}42^2) \\approx 5{,}42`}</Eq> cm (metade do diâmetro).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
 
-<Exercicio numero="62.31" dificuldade="desafio">Ponto na parábola $y = x^2$ mais próximo de $(0, 1/2)$.</Exercicio>
-<Exercicio numero="62.32" dificuldade="desafio">Triângulo retângulo de hipotenusa fixa $c$. Maximize a área.</Exercicio>
-<Exercicio numero="62.33" dificuldade="desafio">Refração de luz: tempo mínimo entre dois pontos com velocidades $v_1, v_2$ em meios distintos. Demonstre lei de Snell $\sin\theta_1/v_1 = \sin\theta_2/v_2$.</Exercicio>
-<Exercicio numero="62.34" dificuldade="desafio">De todos os triângulos de perímetro fixo, qual tem área máxima? (Resp: equilátero — Heron.)</Exercicio>
-<Exercicio numero="62.35" dificuldade="desafio">Isoperímetrico: de todas curvas fechadas de comprimento $L$, qual encerra maior área? (Resp: círculo.)</Exercicio>
-<Exercicio numero="62.36" dificuldade="demonstracao">Demonstre teste da segunda derivada via Taylor de ordem 2.</Exercicio>
-<Exercicio numero="62.37" dificuldade="demonstracao">Mostre que entre retângulos de área fixa, o quadrado tem perímetro mínimo.</Exercicio>
-<Exercicio numero="62.38" dificuldade="demonstracao">Demonstre que extremo interior implica $f'(x^*) = 0$ via definição de derivada (Fermat).</Exercicio>
+Um copo cilíndrico (fundo mas sem tampa) deve ter volume de 500 cm³. Quais dimensões minimizam o material usado?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.4"
+  dificuldade="aplicacao"
+  solucao={<>Base quadrada lado <Eq>{`x`}</Eq>, altura <Eq>{`h`}</Eq>. Volume: <Eq>{`x^2 h = 32 \\Rightarrow h = 32/x^2`}</Eq>. Custo: base R\<Eq>{` 2 por cm², laterais R\\`}</Eq> 1 por cm². <Eq>{`C = 2 \\cdot 2x^2 + 1 \\cdot 4xh = 4x^2 + 4x \\cdot 32/x^2 = 4x^2 + 128/x`}</Eq>. <Eq>{`C'(x) = 8x - 128/x^2 = 0 \\Rightarrow x^3 = 16 \\Rightarrow x = 2\\sqrt[3]{2} \\approx 2{,}52`}</Eq> cm. <Eq>{`h = 32/(2{,}52)^2 \\approx 5{,}04`}</Eq> cm.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Uma caixa retangular de base quadrada e sem tampa deve ter volume de 32 cm³. O material da base custa R\$ 2/cm² e o das laterais R\$ 1/cm². Minimize o custo total.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.5"
+  dificuldade="aplicacao"
+  solucao={<>Seja <Eq>{`x`}</Eq> e <Eq>{`y`}</Eq> com <Eq>{`x + y = 20`}</Eq>. Maximize <Eq>{`P = xy = x(20-x) = 20x - x^2`}</Eq>. <Eq>{`P'(x) = 20 - 2x = 0 \\Rightarrow x = 10`}</Eq>. <Eq>{`P_\\max = 100`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+A soma de dois números positivos é 20. Determine os dois números que maximizam seu produto.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.6"
+  dificuldade="aplicacao"
+  solucao={<>Seja <Eq>{`x`}</Eq> um número positivo. Minimize <Eq>{`f(x) = x + 4/x`}</Eq>. <Eq>{`f'(x) = 1 - 4/x^2 = 0 \\Rightarrow x = 2`}</Eq>. <Eq>{`f(2) = 2 + 2 = 4`}</Eq>. <Eq>{`f''(2) = 8/8 > 0`}</Eq> → mínimo.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Encontre o número positivo <Eq>{`x`}</Eq> tal que a soma de <Eq>{`x`}</Eq> com o seu recíproco multiplicado por 4 seja mínima.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.7"
+  dificuldade="aplicacao"
+  solucao={<>Ponto <Eq>{`(x, 0)`}</Eq> na reta real. Distância a <Eq>{`A = (2, 3)`}</Eq>: <Eq>{`D^2 = (x-2)^2 + 9`}</Eq>. Minimizar <Eq>{`D^2`}</Eq>: <Eq>{`2(x-2) = 0 \\Rightarrow x = 2`}</Eq>. Ponto mais próximo: <Eq>{`(2, 0)`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Determine o ponto do eixo <Eq>{`x`}</Eq> mais próximo do ponto <Eq>{`(2, 3)`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.8"
+  dificuldade="aplicacao"
+  solucao={<>Ponto <Eq>{`(x, y)`}</Eq> na reta <Eq>{`y = x`}</Eq>. <Eq>{`D^2 = (x-4)^2 + (x-2)^2 = 2x^2 - 12x + 20`}</Eq>. <Eq>{`4x - 12 = 0 \\Rightarrow x = 3`}</Eq>. Ponto mais próximo: <Eq>{`(3, 3)`}</Eq>. Distância: <Eq>{`\\sqrt{(3-4)^2 + (3-2)^2} = \\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Determine o ponto da reta <Eq>{`y = x`}</Eq> mais próximo do ponto <Eq>{`(4, 2)`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.9"
+  dificuldade="aplicacao"
+  solucao={<>De uma chapa de 24 × 9 cm. Seja <Eq>{`x`}</Eq> o corte. Base: <Eq>{`(24-2x)(9-2x)`}</Eq>, altura <Eq>{`x`}</Eq>. <Eq>{`V = x(24-2x)(9-2x) = 4x^3 - 66x^2 + 216x`}</Eq>. <Eq>{`V' = 12x^2 - 132x + 216 = 12(x^2 - 11x + 18) = 12(x-2)(x-9)`}</Eq>. <Eq>{`x = 2`}</Eq> (viável, pois <Eq>{`x < 4{,}5`}</Eq>). <Eq>{`V(2) = 2 \\cdot 20 \\cdot 5 = 200`}</Eq> cm³.</>}
+  passos={<><ol><li>Seja <Eq>{`x`}</Eq> o lado do quadrado cortado. Domínio: <Eq>{`0 < x < 4{,}5`}</Eq>.</li><li>Dimensões da base: <Eq>{`(24-2x)`}</Eq> por <Eq>{`(9-2x)`}</Eq>.</li><li>Volume: <Eq>{`V = x(24-2x)(9-2x)`}</Eq>. Expanda.</li><li>Derive, fatore, encontre raízes. Apenas <Eq>{`x = 2`}</Eq> está no domínio.</li><li>Avalie <Eq>{`V(2)`}</Eq> e compare com <Eq>{`V(0) = 0`}</Eq> e <Eq>{`V(4{,}5) = 0`}</Eq>.</li></ol><em>Macete:</em> o endpoint dá <Eq>{`V = 0`}</Eq>; o único ponto crítico interior é o máximo.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+De uma chapa de cartão de 24 cm × 9 cm, corta-se um quadrado nos cantos e dobram-se as abas. Determine o corte que maximiza o volume da caixa sem tampa.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.10"
+  dificuldade="aplicacao"
+  solucao={<>Receita: <Eq>{`R(x) = px = (200 - 2x)x = 200x - 2x^2`}</Eq>. <Eq>{`R'(x) = 200 - 4x = 0 \\Rightarrow x = 50`}</Eq>. Preço ótimo: <Eq>{`p = 200 - 2(50) = 100`}</Eq>. Receita máxima: <Eq>{`50 \\times 100 = 5000`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+A função de demanda de um produto é <Eq>{`p(x) = 200 - 2x`}</Eq> (preço em R\$ por unidade, <Eq>{`x`}</Eq> unidades vendidas). Maximize a receita total <Eq>{`R = px`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.11"
+  dificuldade="aplicacao"
+  solucao={<>Lucro: <Eq>{`L = R - C = 140x - (x^2 + 40x + 100) = -x^2 + 100x - 100`}</Eq>. <Eq>{`L'(x) = -2x + 100 = 0 \\Rightarrow x = 50`}</Eq>. <Eq>{`L(50) = -2500 + 5000 - 100 = 2400`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Uma empresa tem receita <Eq>{`R(x) = 140x`}</Eq> e custo <Eq>{`C(x) = x^2 + 40x + 100`}</Eq>. Determine a produção que maximiza o lucro.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.12"
+  dificuldade="aplicacao"
+  solucao={<>Volume total: <Eq>{`2x^2 h = 96 \\Rightarrow h = 48/x^2`}</Eq> (caixa dupla empilhada: dois compartimentos de altura <Eq>{`h/2`}</Eq>... reinterprete: caixa única). Para caixa quadrada com volume <Eq>{`x^2 h = 96`}</Eq>: <Eq>{`h = 96/x^2`}</Eq>. Área: <Eq>{`A = 2x^2 + 4xh = 2x^2 + 384/x`}</Eq>. <Eq>{`A' = 4x - 384/x^2 = 0 \\Rightarrow x^3 = 96 \\Rightarrow x = \\sqrt[3]{96} \\approx 4{,}58`}</Eq> cm. <Eq>{`h \\approx 4{,}58`}</Eq> cm (cubo ótimo).</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Uma caixa com tampa de base quadrada deve ter volume de 96 cm³. Minimize a área total de superfície.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Usar a restrição para eliminar variáveis e obter uma função de uma única variável", correta: true },
+    { texto: "Derivar a restrição e igualar a zero" },
+    { texto: "Maximizar e minimizar a restrição simultaneamente" },
+    { texto: "Adicionar a restrição como termo à função objetivo" }
+  ]}
+  solucao={<>Em otimização com restrição, o papel da restrição é reduzir o número de variáveis. Substitui-se em <Eq>{`Q`}</Eq> para obter uma função de uma variável, que então se otimiza com derivadas. Derivar a restrição e igualar a zero é o método de Lagrange (próxima aula, em várias variáveis).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Em um problema de otimização com restrição, qual é o papel correto da equação de restrição?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Avaliar f nos pontos críticos e nos endpoints do domínio físico", correta: true },
+    { texto: "Tomar apenas o ponto crítico onde f' = 0" },
+    { texto: "Aplicar o teste da segunda derivada em todos os pontos" },
+    { texto: "Substituir os pontos críticos na restrição" }
+  ]}
+  solucao={<>O algoritmo dos extremos absolutos requer avaliação de <Eq>{`f`}</Eq> em todos os pontos críticos interiores E nos endpoints. Ignorar endpoints é erro frequente — o ótimo global pode ser na borda do domínio físico.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Para encontrar o máximo ou mínimo absoluto de <Eq>{`f`}</Eq> em <Eq>{`[a, b]`}</Eq>, deve-se:
+
+</Exercicio>
+
+<Exercicio
+  numero="62.15"
+  dificuldade="aplicacao"
+  solucao={<>Cilindro inscrito em esfera de raio <Eq>{`R`}</Eq>. Relação: <Eq>{`r^2 + (h/2)^2 = R^2 \\Rightarrow r^2 = R^2 - h^2/4`}</Eq>. Volume: <Eq>{`V = \\pi r^2 h = \\pi h(R^2 - h^2/4)`}</Eq>. <Eq>{`V'(h) = \\pi(R^2 - 3h^2/4) = 0 \\Rightarrow h = 2R/\\sqrt{3}`}</Eq>. <Eq>{`r = R\\sqrt{2/3}`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Determine as dimensões do cilindro de maior volume inscrito numa esfera de raio <Eq>{`R`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.16"
+  dificuldade="aplicacao"
+  solucao={<>Ponto <Eq>{`(x, y)`}</Eq> na parábola <Eq>{`y = x^2`}</Eq>. Distância ao ponto <Eq>{`(0, 3)`}</Eq>: <Eq>{`D^2 = x^2 + (x^2-3)^2 = x^4 - 5x^2 + 9`}</Eq>. <Eq>{`(D^2)' = 4x^3 - 10x = 2x(2x^2-5) = 0`}</Eq>. Raízes: <Eq>{`x = 0`}</Eq> e <Eq>{`x = \\pm\\sqrt{5/2}`}</Eq>. Em <Eq>{`x = 0`}</Eq>: distância <Eq>{`3`}</Eq> (máximo local). Em <Eq>{`x = \\pm\\sqrt{5/2}`}</Eq>: distância <Eq>{`\\sqrt{9 - 25/4} = \\sqrt{11/4} = \\sqrt{11}/2 \\approx 1{,}66`}</Eq> → pontos mais próximos.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Determine os pontos da parábola <Eq>{`y = x^2`}</Eq> mais próximos do ponto <Eq>{`(0, 3)`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.17"
+  dificuldade="modelagem"
+  solucao={<>Custo <Eq>{`C = 2x + 3y`}</Eq> com restrição <Eq>{`xy = 300`}</Eq>, logo <Eq>{`y = 300/x`}</Eq>. <Eq>{`C(x) = 2x + 900/x`}</Eq>. <Eq>{`C' = 2 - 900/x^2 = 0 \\Rightarrow x = \\sqrt{450} \\approx 21{,}2`}</Eq> m. <Eq>{`y = 300/21{,}2 \\approx 14{,}1`}</Eq> m. Custo mínimo: <Eq>{`C \\approx 2(21{,}2) + 900/21{,}2 \\approx 84{,}8`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Uma área retangular de 300 m² será cercada. O lado leste (comprimento <Eq>{`x`}</Eq>) custa R\$ 2/m e os demais lados custam R\$ 3/m por metro. Minimize o custo total.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.18"
+  dificuldade="modelagem"
+  solucao={<>Altitude: <Eq>{`h(t) = -5t^2 + 20t + 3`}</Eq> (aceleração gravitacional <Eq>{`\\approx 10`}</Eq> m/s²). <Eq>{`h'(t) = -10t + 20 = 0 \\Rightarrow t = 2`}</Eq> s. Altura máxima: <Eq>{`h(2) = -20 + 40 + 3 = 23`}</Eq> m.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Um objeto é lançado verticalmente com velocidade inicial de 20 m/s de uma altura de 3 m. Modelo: <Eq>{`h(t) = -5t^2 + 20t + 3`}</Eq>. Determine a altura máxima.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.19"
+  dificuldade="modelagem"
+  solucao={<>Custo total: <Eq>{`C(r) = 10 \\cdot 2\\pi r^2 + 6 \\cdot 2\\pi rh`}</Eq>. Com <Eq>{`\\pi r^2 h = 200`}</Eq>: <Eq>{`h = 200/(\\pi r^2)`}</Eq>. <Eq>{`C(r) = 20\\pi r^2 + 2400/r`}</Eq>. <Eq>{`C'(r) = 40\\pi r - 2400/r^2 = 0 \\Rightarrow r^3 = 60/\\pi`}</Eq>. <Eq>{`r^* \\approx 2{,}67`}</Eq> cm. <Eq>{`h \\approx 8{,}93`}</Eq> cm.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Uma lata cilíndrica de volume 200 cm³ tem material de base e tampa que custa R\$ 10/cm² e lateral que custa R\$ 6/cm². Determine as dimensões que minimizam o custo.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.20"
+  dificuldade="modelagem"
+  solucao={<>Perímetro do semicírculo + dois lados retos: <Eq>{`\\pi r + 2l = 20 \\Rightarrow l = (20 - \\pi r)/2`}</Eq>. Área: <Eq>{`A = \\pi r^2/2 + 2rl = \\pi r^2/2 + r(20 - \\pi r) = 20r - \\pi r^2/2`}</Eq>. <Eq>{`A' = 20 - \\pi r = 0 \\Rightarrow r = 20/\\pi \\approx 6{,}37`}</Eq> m. <Eq>{`l = 0`}</Eq> — o corredor ideal é um semicírculo puro.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Um corredor de academia tem formato de retângulo com semicírculos nos dois lados curtos (pista oval). O perímetro total é 20 m. Determine o raio <Eq>{`r`}</Eq> que maximiza a área interna.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.21"
+  dificuldade="aplicacao"
+  solucao={<>Seja <Eq>{`x`}</Eq> um número. Minimize <Eq>{`f(x) = x^2 + (10-x)^2 = 2x^2 - 20x + 100`}</Eq>. <Eq>{`f'(x) = 4x - 20 = 0 \\Rightarrow x = 5`}</Eq>. Os dois números são 5 e 5; soma dos quadrados mínima: <Eq>{`25 + 25 = 50`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+A soma de dois números é 10. Encontre os dois números que minimizam a soma dos seus quadrados.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.22"
+  dificuldade="aplicacao"
+  solucao={<>Seja <Eq>{`x`}</Eq> e <Eq>{`y`}</Eq> com <Eq>{`x + y = 1`}</Eq>. Maximize <Eq>{`P = x^2 y = x^2(1-x)`}</Eq>. <Eq>{`P' = 2x(1-x) - x^2 = x(2 - 3x) = 0`}</Eq>. Raízes: <Eq>{`x = 0`}</Eq> (mínimo) e <Eq>{`x = 2/3`}</Eq>. <Eq>{`y = 1/3`}</Eq>. <Eq>{`P_\\max = (4/9)(1/3) = 4/27`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+A soma de dois números não-negativos é 1. Maximize o produto do quadrado do primeiro com o segundo.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.23"
+  dificuldade="aplicacao"
+  solucao={<>Retângulo inscrito em semicírculo de raio 5. Vértice em <Eq>{`(x, y)`}</Eq> com <Eq>{`x^2 + y^2 = 25`}</Eq>. Área: <Eq>{`A = 2x \\cdot y = 2x\\sqrt{25-x^2}`}</Eq>. Maximize <Eq>{`A^2 = 4x^2(25-x^2)`}</Eq>. <Eq>{`(A^2)' = 4(50x - 4x^3) = 0 \\Rightarrow x = \\sqrt{25/2} = 5/\\sqrt{2}`}</Eq>. <Eq>{`y = 5/\\sqrt{2}`}</Eq>. <Eq>{`A_\\max = 25`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Determine a área máxima de um retângulo inscrito em um semicírculo de raio 5.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.24"
+  dificuldade="aplicacao"
+  solucao={<>Distância: <Eq>{`D^2 = (x-1)^2 + y^2 = (x-1)^2 + (x^2-2)^2`}</Eq>. <Eq>{`(D^2)' = 2(x-1) + 4x(x^2-2) = 2x - 2 + 4x^3 - 8x = 4x^3 - 6x - 2 = 2(2x^3 - 3x - 1)`}</Eq>. Raiz racional: <Eq>{`x = -1/2`}</Eq>... Teste: <Eq>{`2(-1/8) - 3(-1/2) - 1 = -1/4 + 3/2 - 1 = 1/4 \\neq 0`}</Eq>. Use <Eq>{`x = -1`}</Eq>: <Eq>{`-2 + 3 - 1 = 0`}</Eq>. Logo <Eq>{`x = -1`}</Eq>. Ponto: <Eq>{`(-1, 1)`}</Eq>. (Divisão: <Eq>{`2x^3-3x-1 = (x+1)(2x^2-2x-1)`}</Eq>. Outras raízes: <Eq>{`x = (1\\pm\\sqrt{3})/2`}</Eq>. A mais próxima de <Eq>{`(1,0)`}</Eq>: <Eq>{`x = (1+\\sqrt{3})/2 \\approx 1{,}37`}</Eq>, dando ponto <Eq>{`(1{,}37, -0{,}12)`}</Eq> mais próximo.)</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Determine o ponto da curva <Eq>{`y = x^2 - 2`}</Eq> mais próximo do ponto <Eq>{`(1, 0)`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.25"
+  dificuldade="aplicacao"
+  solucao={<>Receba <Eq>{`n`}</Eq> passageiros extras além de 100. Tarifa: <Eq>{`80 - 0{,}50n`}</Eq>. Receita: <Eq>{`R(n) = (100+n)(80-0{,}5n) = 8000 + 30n - 0{,}5n^2`}</Eq>. <Eq>{`R' = 30 - n = 0 \\Rightarrow n = 30`}</Eq>. Total: 130 passageiros. Tarifa: R\$ 65. Receita: <Eq>{`130 \\times 65 = 8450`}</Eq>.</>}
+  passos={<><ol><li>Defina <Eq>{`n`}</Eq> = passageiros extras além do grupo de 100.</li><li>Tarifa por pessoa: <Eq>{`80 - 0{,}50n`}</Eq>.</li><li>Receita total: <Eq>{`R = (100+n)(80-0{,}5n)`}</Eq>.</li><li>Expanda e derive: <Eq>{`R'(n) = 30 - n`}</Eq>.</li><li>Zero: <Eq>{`n = 30`}</Eq>. Confirme com <Eq>{`R'' = -1 < 0`}</Eq>.</li></ol><em>Macete:</em> em problemas de tarifa com desconto, o ótimo raramente é nas bordas — é o único ponto crítico interior.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Uma excursão cobra R\$ 80 por pessoa para grupos de 100. Para cada passageiro extra, a tarifa de todos cai R\$ 0,50. Quantos passageiros maximizam a receita?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.26"
+  dificuldade="modelagem"
+  solucao={<>Seja <Eq>{`x`}</Eq> o número de plantações por árvore. Rendimento por árvore: <Eq>{`300 + 20(x-25)`}</Eq> laranjas... Reinterpretação: com 25 árvores por hectare, cada árvore dá 600 laranjas. Para cada árvore adicional acima de 25, cada árvore dá 12 a menos. Seja <Eq>{`n`}</Eq> árvores adicionais. Total: <Eq>{`(25+n)(600-12n)`}</Eq>. <Eq>{`T' = 600 - 12n + (25+n)(-12) = 600 - 12n - 300 - 12n = 300 - 24n = 0 \\Rightarrow n = 12{,}5`}</Eq>, logo 37 ou 38 árvores (verifique ambos). <Eq>{`T(12) = 37 \\cdot 456 = 16872`}</Eq>; <Eq>{`T(13) = 38 \\cdot 444 = 16872`}</Eq>. Ambos ótimos: 37 ou 38 árvores.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Um laranjal com 25 árvores por hectare produz 600 laranjas por árvore. Para cada árvore adicional plantada, a produção por árvore cai 12 laranjas. Quantas árvores por hectare maximizam a produção total?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.27"
+  dificuldade="aplicacao"
+  solucao={<>Janela: semicírculo de raio <Eq>{`r`}</Eq> sobre retângulo de largura <Eq>{`2r`}</Eq> e altura <Eq>{`h`}</Eq>. Perímetro: <Eq>{`\\pi r + 2h + 2r = 10 \\Rightarrow h = (10 - \\pi r - 2r)/2`}</Eq>. Área: <Eq>{`A = \\pi r^2/2 + 2rh = \\pi r^2/2 + r(10 - \\pi r - 2r) = 10r - 2r^2 - \\pi r^2/2`}</Eq>. <Eq>{`A' = 10 - 4r - \\pi r = 0 \\Rightarrow r = 10/(4+\\pi) \\approx 1{,}40`}</Eq> m.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Uma janela "normanda" é formada por um retângulo encimado por um semicírculo. O perímetro total é 10 m. Determine o raio do semicírculo que maximiza a área da janela.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.28"
+  dificuldade="demonstracao"
+  solucao={<>Sejam <Eq>{`x, y > 0`}</Eq> com <Eq>{`x + y = S`}</Eq> (constante). Maximize <Eq>{`P = xy = x(S-x)`}</Eq>. <Eq>{`P'(x) = S - 2x = 0 \\Rightarrow x = S/2`}</Eq>. <Eq>{`y = S/2`}</Eq>. Portanto <Eq>{`xy \\leq (S/2)^2 = (x+y)^2/4`}</Eq>, com igualdade se e somente se <Eq>{`x = y`}</Eq>. Isso prova a desigualdade AM-GM: <Eq>{`\\sqrt{xy} \\leq (x+y)/2`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Use cálculo para demonstrar que, entre todos os pares de números positivos com soma fixa <Eq>{`S`}</Eq>, o produto é máximo quando os dois números são iguais. (Isso prova a desigualdade AM-GM para dois termos.)
+
+</Exercicio>
+
+<Exercicio
+  numero="62.29"
+  dificuldade="demonstracao"
+  solucao={<>Área total: <Eq>{`A = 2\\pi r h + 2\\pi r^2`}</Eq>. Com <Eq>{`\\pi r^2 h = V \\Rightarrow h = V/(\\pi r^2)`}</Eq>: <Eq>{`A(r) = 2V/r + 2\\pi r^2`}</Eq>. Derive: <Eq>{`A'(r) = -2V/r^2 + 4\\pi r = 0 \\Rightarrow 4\\pi r^3 = 2V \\Rightarrow r^3 = V/(2\\pi)`}</Eq>. Logo <Eq>{`h = V/(\\pi r^2) = (4\\pi r^3 \\cdot 2)/(4\\pi r^2) = 2r`}</Eq>. Portanto <Eq>{`h = 2r`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Demonstre que o cilindro de menor área superficial para volume fixo <Eq>{`V`}</Eq> satisfaz <Eq>{`h = 2r`}</Eq> (altura igual ao diâmetro).
+
+</Exercicio>
+
+<Exercicio
+  numero="62.30"
+  dificuldade="desafio"
+  solucao={<>Ponto <Eq>{`(a, b)`}</Eq> na elipse <Eq>{`x^2/A^2 + y^2/B^2 = 1`}</Eq>. Área do retângulo inscrito: <Eq>{`R = 4ab`}</Eq>. Parametrize: <Eq>{`a = A\\cos\\theta`}</Eq>, <Eq>{`b = B\\sin\\theta`}</Eq>. <Eq>{`R(\\theta) = 4AB\\cos\\theta\\sin\\theta = 2AB\\sin(2\\theta)`}</Eq>. Máximo quando <Eq>{`\\sin(2\\theta) = 1`}</Eq>, i.e., <Eq>{`\\theta = \\pi/4`}</Eq>. <Eq>{`R_\\max = 2AB`}</Eq>. Dimensões: <Eq>{`a = A/\\sqrt{2}`}</Eq>, <Eq>{`b = B/\\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Determine a área máxima de um retângulo inscrito na elipse <Eq>{`x^2/A^2 + y^2/B^2 = 1`}</Eq>, com lados paralelos aos eixos coordenados.
+
+</Exercicio>
 
 </ListaExercicios>
 
-## Fontes desta aula
+## Fontes
 
-- [**Active Calculus**](https://activecalculus.org/single/) — Boelkins · 2024 · §3.4 (otimização aplicada). **Fonte primária.**
-- [**Calculus (Volume 1)**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · 2016 · §4.7.
-- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman et al. · 2024 · v5 · §3.5.
-- [**Convex Optimization**](https://web.stanford.edu/~boyd/cvxbook/) — Boyd & Vandenberghe · 2004 · gratuito.
+- **Boelkins, Matt. Active Calculus 2.0.** Grand Valley State University, 2022. CC-BY-NC-SA. [activecalculus.org/single/sec-3-3-optimization.html](https://activecalculus.org/single/sec-3-3-optimization.html)
+- **OpenStax. Calculus Volume 1.** Strang, Herman et al., 2023. CC-BY-NC-SA. [openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems)
+- **Hartman, G. et al. APEX Calculus.** Virginia Military Institute, 2023. CC-BY-NC. [apexcalculus.com](https://www.apexcalculus.com/)

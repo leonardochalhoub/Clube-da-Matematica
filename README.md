@@ -3,11 +3,25 @@
 > *"A matemática é a única linguagem em que se pode raciocinar sem ambiguidade sobre o infinito, o aleatório e o invisível."*
 > — adaptado de Bertrand Russell
 
-**Open source · gratuito · em 13 idiomas**
+**Open source · gratuito · UI em 11 idiomas (lições traduzidas: TO-DO)**
 
-Curso completo de matemática para o Ensino Médio brasileiro, do nível conjunto/intervalo até Black-Scholes — escrito com **rigor de engenharia** (BR + JP + DE + SG), com cada conceito explicado em **7 níveis progressivos** (criança de 5 anos → profissional sênior).
+Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lineares, 12 trimestres, 120 lições, do nível conjunto/intervalo até Black-Scholes. Escrito com **rigor de engenharia** (BR + JP + DE + SG), com cada conceito explicado em **7 níveis progressivos** (criança de 5 anos → profissional sênior).
 
 [**Acessar o site →**](https://leonardochalhoub.github.io/Clube-da-Matematica/)
+
+---
+
+## O que está pronto hoje
+
+- ✅ **120 lições** em PT-BR cobrindo o Ensino Médio inteiro (Anos 1-3 × 4 trimestres × 10 lições)
+- ✅ **~4.770 exercícios** com fonte (livro · página · licença) — nenhum inventado pela IA
+- ✅ **1.800 questões em provas** (12 trim × 10 versões × 15 q)
+- ✅ **UI traduzida em 11 idiomas** (botões, navegação, "Ouvir", breadcrumb)
+- ✅ **Acessibilidade — leitor de voz em toda página**: cada lição, exemplo e seção tem uma **caixa de áudio "Ouvir"** que narra o conteúdo via Web Speech API nativa do navegador (zero arquivos MP3, voz no idioma selecionado). Ajuda alunos com dislexia, deficiência visual, ou que aprendem melhor por audição.
+- ✅ **Build estático** em GitHub Pages — custo R$ 0,00
+- ⏳ **Tradução das lições MDX → TO-DO** (por enquanto: PT-BR é a única língua dos corpos; UI já localiza a navegação)
+- ⏳ **Provas i18n** — TO-DO (1.800 questões × 10 idiomas)
+- ⏳ **Próximos módulos**: Física Ensino Médio, Engenharia introdutória
 
 ---
 
@@ -20,7 +34,8 @@ Curso completo de matemática para o Ensino Médio brasileiro, do nível conjunt
 | **Exercícios reais** | ~4.770 (não placeholders) |
 | **Provas curadas** | 120 versões (12 trimestres × 10 versões) |
 | **Questões em provas** | 1.800 |
-| **Idiomas** | 13 (português, inglês, espanhol, mandarim, japonês, alemão, francês, italiano, russo, coreano, polonês, árabe libanês, hindi) |
+| **Idiomas (UI + áudio)** | 11 (português, inglês, espanhol, mandarim, japonês, alemão, francês, italiano, russo, coreano, polonês) |
+| **Idiomas (lições MDX)** | 1 (PT-BR) — 10 demais estão na fila TO-DO |
 | **Componentes interativos** | 14 (DuasPortas, ListaExercicios, AudioReader, VerificarPasso, etc.) |
 | **Linhas de código** | ~30.000 |
 | **Custo de hospedagem** | R\$ 0,00 (GitHub Pages) |
@@ -56,16 +71,18 @@ Cada lição tem **30-50 exercícios reais** — sem placeholders genéricos. Di
 
 **25%** dos exercícios trazem `(Resp: X)` inline para autocorreção. Os restantes são para o aluno descobrir — e errar — antes de conferir.
 
-### Black-Scholes como template
+### Lição 1 como template canônico
 
-A [**Lição 119 — Black-Scholes síntese**](content/aulas/ano-3/trim-12/aula-119-bs-sintese.mdx) é o **template editorial central** do projeto. Toda lição nova é escrita seguindo o padrão dela:
+A [**Lição 1 — Conjuntos e intervalos**](content/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx) é o **template editorial canônico** do projeto. Toda lição nova é escrita seguindo o padrão dela:
 
-- Equação canônica + áudio narrado
-- 7 portas com profundidade crescente
-- Demonstração passo-a-passo
-- Conexão com o Nobel oficial ([nobelprize.org](https://www.nobelprize.org/prizes/economic-sciences/1997/))
-- Exercícios distribuídos por dificuldade
-- Fontes OER (OpenStax, Active Calculus, MIT OCW, Strang)
+- Equação canônica + áudio narrado (`<EquacaoCanonica>`)
+- 7 portas com profundidade crescente (`<DuasPortas>`)
+- 5 exemplos resolvidos com fonte explícita
+- 30-80 exercícios em `<ListaExercicios>`, todos com `solucao` + `fonte` (livro · página · licença) — ~25% também com `passos` (passo-a-passo)
+- Conexão com Nobel oficial ([nobelprize.org](https://www.nobelprize.org/prizes/economic-sciences/1997/)) quando aplicável
+- Fontes OER apenas: OpenStax, Active Calculus, Hammack, Stitz–Zeager, Yoshiwara, MIT OCW, Strang, Axler, etc.
+
+A [**Lição 119 — Black-Scholes**](content/aulas/ano-3/trim-12/licao-119-bs-sintese.mdx) e a [**Lição 120 — Workshop final**](content/aulas/ano-3/trim-12/licao-120-workshop-final.mdx) fecham o currículo de 3 anos.
 
 ---
 
@@ -88,31 +105,29 @@ A [**Lição 119 — Black-Scholes síntese**](content/aulas/ano-3/trim-12/aula-
 
 ---
 
-## Multilinguagem real
+## Multilinguagem (estado atual)
 
-Não é Google Translate em runtime. É **tradução pré-compilada** com:
+Não é Google Translate em runtime. É **tradução pré-compilada**. Hoje, o status real é:
 
-- **UI** (botões, menus, breadcrumb, "Ouvir") → 13 idiomas
-- **Áudio TTS** (texto narrado pelo botão "Ouvir") → 13 idiomas com voz nativa via Web Speech API
-- **Lições MDX** → traduzidas pelo Claude Opus 4.7 com preservação de LaTeX, JSX e fórmulas
+- **UI** (botões, menus, breadcrumb, "Ouvir") → **11 idiomas, 100%**
+- **Áudio TTS** (narrado pelo botão "Ouvir") → **11 idiomas, 100%**, com voz nativa do SO via Web Speech API
+- **Lições MDX (corpos das aulas)** → **TO-DO**: por enquanto só PT-BR. Quando o aluno escolhe outro idioma, a UI muda mas o corpo da lição permanece em português. A pipeline de tradução com Gemini free-tier está pronta (`scripts/translate-parallel.py`); falta executar.
 
-Um nativo da Espanha que entra no site vê o curso completo em espanhol castelhano, sem nenhuma string em PT-BR.
+Idiomas atualmente removidos: árabe, hebraico e hindi — saíram temporariamente porque o TTS gratuito não rendia bem; voltarão quando tivermos uma solução de voz neural.
 
-| Idioma | Cobertura UI | Cobertura MDX | Cobertura áudio |
+| Idioma | UI | TTS | Lições MDX |
 |---|---|---|---|
-| 🇧🇷 Português (Brasil) | 100% | 100% (fonte) | 100% |
-| 🇺🇸 English | 100% | em curso | 100% |
-| 🇪🇸 Español | 100% | em curso | 100% |
-| 🇨🇳 中文 (简体) | 100% | em curso | 100% |
-| 🇯🇵 日本語 | 100% | em curso | 100% |
-| 🇩🇪 Deutsch | 100% | em curso | 100% |
-| 🇫🇷 Français | 100% | em curso | 100% |
-| 🇮🇹 Italiano | 100% | em curso | 100% |
-| 🇷🇺 Русский | 100% | em curso | 100% |
-| 🇰🇷 한국어 | 100% | em curso | 100% |
-| 🇵🇱 Polski | 100% | em curso | 100% |
-| 🇱🇧 العربية | 100% (RTL) | em curso | 100% |
-| 🇮🇳 हिन्दी | 100% | em curso | 100% |
+| 🇧🇷 Português (Brasil) | 100% | 100% | **100% (fonte)** |
+| 🇺🇸 English | 100% | 100% | TO-DO |
+| 🇪🇸 Español | 100% | 100% | TO-DO |
+| 🇨🇳 中文 (简体) | 100% | 100% | TO-DO |
+| 🇯🇵 日本語 | 100% | 100% | TO-DO |
+| 🇩🇪 Deutsch | 100% | 100% | TO-DO |
+| 🇫🇷 Français | 100% | 100% | TO-DO |
+| 🇮🇹 Italiano | 100% | 100% | TO-DO |
+| 🇷🇺 Русский | 100% | 100% | TO-DO |
+| 🇰🇷 한국어 | 100% | 100% | TO-DO |
+| 🇵🇱 Polski | 100% | 100% | TO-DO |
 
 ---
 
@@ -217,13 +232,14 @@ Fontes externas mantêm suas próprias licenças (OpenStax CC-BY, Active Calculu
 
 ## Roadmap
 
-- [x] **120/120 lições** com 7 portas + 4.770 exercícios
+- [x] **120/120 lições** em PT-BR com 7 portas + ~4.770 exercícios sourceados
 - [x] **1.800 questões em provas** (12 trim × 10 versões × 15 q)
-- [x] **UI traduzida** em 13 idiomas
-- [x] **Áudio TTS** em 13 idiomas (Hebrew temporariamente removido — voltará com TTS neural)
-- [ ] **MDX traduzido** em 12 idiomas além do PT-BR (em curso, ~25%)
-- [ ] **LocalizedMdx wired** (atualmente serve PT-BR; trabalhando em bundle por idioma para evitar OOM)
-- [ ] **Provas i18n** (1.800 questões × 12 idiomas)
+- [x] **UI traduzida** em 11 idiomas
+- [x] **Áudio TTS / leitor de voz acessível** em 11 idiomas (Web Speech API)
+- [x] **Lições L1-L120 padronizadas no template canônico** (Lição 1 standard)
+- [ ] **MDX das lições traduzido** em 10 idiomas além do PT-BR — **TO-DO** (pipeline Gemini pronta em `scripts/translate-parallel.py`)
+- [ ] **Provas i18n** (1.800 questões × 10 idiomas) — TO-DO
+- [ ] **Retorno de árabe / hebraico / hindi** quando houver TTS neural decente
 - [ ] **Próximo módulo: Física Ensino Médio** (mecânica, ondas, eletromagnetismo)
 - [ ] **Próximo módulo: Engenharia introdutória** (mecânica dos materiais, termo, fluidos)
 

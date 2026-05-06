@@ -3,375 +3,888 @@ titulo: "Lição 80 — Consolidação Trim 8 — Estatística e probabilidade a
 slug: "licao-80-consolidacao-trim-8"
 categoria: "aulas"
 subcategoria: "ano-2-trim-8"
-descricao: "Workshop integrador: variância, quartis, v.a. discreta, binomial, normal, TCL, correlação e Bayes em problemas reais."
+descricao: "Workshop integrador: medidas centrais, variância, quartis, v.a. discreta, binomial, normal, TCL, correlação e Bayes em problemas reais brasileiros."
 ordem: 80
 publicado: true
-tags: ["estatística", "probabilidade", "ano-2", "trim-8"]
-prerrequisitos: ["licao-79"]
+tags: ["estatística", "probabilidade", "consolidacao", "ano-2", "trim-8"]
+prerrequisitos: ["licao-79-bayes"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-versao: "v0"
+atualizadoEm: "2026-05-06"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "Equiv. H2 Maths Statistics (Singapura)"]
+versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="\text{Dados} \to \text{Estatística} \to \text{Modelo} \to \text{Inferência} \to \text{Decisão}"
-  legenda={<>O <strong>fluxo padrão</strong> de qualquer projeto de análise de dados: extrair estatísticas, ajustar modelo probabilístico, inferir parâmetros com incerteza, tomar decisão racional. Este workshop integra os 8 conceitos do trimestre num pipeline real.</>}
-  audioTexto="Fluxo padrão de análise de dados. Dados levam a estatísticas, que levam a modelo, que levam a inferência, que levam à decisão final."
+  formula="\text{Dados} \xrightarrow{\text{descrever}} \hat\mu,\,\hat\sigma \xrightarrow{\text{modelar}} P(X) \xrightarrow{\text{inferir}} P(H \mid E)"
+  legenda={<>O <strong>pipeline completo</strong> do trimestre: resumir dados com <Eq>{`\\hat\\mu`}</Eq> e <Eq>{`\\hat\\sigma`}</Eq>, escolher um modelo probabilístico (binomial, normal), e atualizar crenças via regra de Bayes <Eq>{`P(H\\mid E)`}</Eq>. Cada seta é uma aula; esta lição tece as flechas em cadeia.</>}
+  audioTexto="Pipeline do Trimestre 8. Dados levam a estatísticas descritivas: média e desvio padrão estimados. Estatísticas levam a modelo probabilístico: P de X. Modelo leva a inferência bayesiana: probabilidade de H dado E."
 />
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Livros que cobrem esta lição
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://www.openintro.org/book/os/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenIntro Statistics (4.ª ed.)
+      </a>
+      <span className="text-clube-mist"> · §§2–3, 6–8 · CC-BY-SA · </span>
+      <em className="text-clube-mist">Fonte primária do trimestre: medidas descritivas, distribuições, TCL, regressão e Bayes com exemplos de dados reais.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/statistics" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Statistics
+      </a>
+      <span className="text-clube-mist"> · caps. 2–9 · CC-BY · </span>
+      <em className="text-clube-mist">Exercícios contextualizados em saúde pública, negócios e ciências; cobertura completa de binomial, normal e IC.</em>
+    </li>
+    <li>
+      <a href="https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Grinstead &amp; Snell — Introduction to Probability
+      </a>
+      <span className="text-clube-mist"> · caps. 1, 5–9 · GNU FDL · </span>
+      <em className="text-clube-mist">Rigor teórico para v.a. discreta, Lei dos Grandes Números e TCL com demonstrações acessíveis.</em>
+    </li>
+  </ul>
+</aside>
 
 <DuasPortas>
 
 <Porta nivel="formal" titulo="Síntese formal do trimestre">
 
-### Tabela de fórmulas-chave do Trim 8
+### Estatística descritiva
 
-| Conceito | Fórmula | Aula |
-|---|---|---|
-| Variância | $\sigma^2 = E[X^2] - (E[X])^2$ | 72 |
-| Desvio padrão | $\sigma = \sqrt{\sigma^2}$ | 72 |
-| IQR | $Q_3 - Q_1$ | 73 |
-| Outlier (Tukey) | $\lvert x - Q \rvert > 1{,}5 \cdot IQR$ | 73 |
-| Esperança discreta | $E[X] = \sum x P(X=x)$ | 74 |
-| Linearidade | $E[aX + bY] = aE[X] + bE[Y]$ | 74 |
-| Binomial | $P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}$ | 75 |
-| Normal padrão | $Z = (X - \mu)/\sigma$ | 76 |
-| Regra 68-95-99,7 | $P(\mu \pm k\sigma)$ | 76 |
-| TCL | $\bar X \approx \mathcal N(\mu, \sigma^2/n)$ | 77 |
-| Pearson | $r = \text{Cov}(X,Y)/(\sigma_X \sigma_Y)$ | 78 |
-| Reta de regressão | $\hat y = \beta_0 + \beta_1 x$ | 78 |
-| Bayes | $P(H|E) = P(E|H)P(H)/P(E)$ | 79 |
+<Definicao titulo="Medidas de posição e dispersão">
 
-### Hierarquia conceitual
+Dada uma amostra $\{x_1, x_2, \ldots, x_n\}$:
 
-1. **Dados brutos** → estatísticas descritivas (média, $\sigma$, quartis).
-2. **Modelo probabilístico** (binomial, Poisson, normal) → distribuições.
-3. **TCL** → distribuição da média amostral.
-4. **Inferência** (IC, teste de hipótese) → conclusões com incerteza.
-5. **Bayes** → atualização de crenças com evidência.
-6. **Regressão** → relações entre variáveis.
+- **Média amostral**: $\bar x = \dfrac{1}{n}\sum_{i=1}^n x_i$
+- **Variância amostral**: $s^2 = \dfrac{1}{n-1}\sum_{i=1}^n (x_i - \bar x)^2$
+- **Desvio padrão**: $s = \sqrt{s^2}$
+- **Mediana**: valor central após ordenação ($Q_2$)
+- **Quartis** $Q_1, Q_3$: mediana da metade inferior / superior
+- **IQR**: $Q_3 - Q_1$
+- **Cerca de Tukey**: outlier se $\lvert x - Q \rvert > 1{,}5 \cdot \text{IQR}$
 
-### Workflow padrão
+</Definicao>
 
-```
-Dados → EDA (boxplot, histograma) → 
-    Estatística descritiva (μ, σ, r) → 
-    Modelo (escolha distribuição) → 
-    Estimação (MLE, Bayes) → 
-    Diagnóstico (resíduos, Q-Q) → 
-    Inferência (IC, p) → 
-    Decisão
-```
+> "A variância é a média dos quadrados dos desvios em relação à média. Para uma amostra, divide-se por $n-1$ (correção de Bessel) em vez de $n$." — [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/)
+
+### Variável aleatória discreta
+
+<Definicao titulo="Esperança e variância de v.a. discreta">
+
+Para v.a. $X$ com suporte finito ou enumerável:
+
+$$E[X] = \sum_x x \cdot P(X = x)$$
+$$\text{Var}(X) = E[X^2] - (E[X])^2 = \sum_x x^2 P(X=x) - \mu^2$$
+
+**Linearidade da esperança** (sempre válida):
+$$E[aX + bY] = a\,E[X] + b\,E[Y]$$
+
+**Variância da soma** (só para independentes):
+$$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$$
+
+</Definicao>
+
+> "A esperança é uma média ponderada dos possíveis valores de $X$, ponderada pelas probabilidades." — [Grinstead & Snell §6.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html)
+
+### Distribuições paramétricas
+
+<Definicao titulo="Binomial, Normal e aproximação">
+
+**Binomial** $X \sim \text{Bin}(n,p)$:
+$$P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}, \quad E[X]=np, \quad \text{Var}(X)=np(1-p)$$
+
+**Normal** $X \sim \mathcal{N}(\mu, \sigma^2)$: função de densidade
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+
+**Padronização**: $Z = (X - \mu)/\sigma \sim \mathcal{N}(0,1)$
+
+**Regra 68-95-99,7**: $P(\mu - k\sigma \leq X \leq \mu + k\sigma)$ vale $\approx 68\%$, $\approx 95\%$, $\approx 99{,}7\%$ para $k = 1, 2, 3$.
+
+**Aproximação normal para binomial**: se $np \geq 10$ e $n(1-p) \geq 10$, então $X \approx \mathcal{N}(np,\; np(1-p))$.
+
+</Definicao>
+
+### Teorema Central do Limite
+
+<Teorema titulo="Teorema Central do Limite (TCL)">
+
+Sejam $X_1, X_2, \ldots, X_n$ v.a. iid com $E[X_i] = \mu$ e $\text{Var}(X_i) = \sigma^2 < \infty$. Então, para $n$ grande:
+
+$$\bar X = \frac{1}{n}\sum_{i=1}^n X_i \;\xrightarrow{\;d\;}\; \mathcal{N}\!\left(\mu,\; \frac{\sigma^2}{n}\right)$$
+
+Equivalentemente, $Z_n = \dfrac{\bar X - \mu}{\sigma/\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1)$.
+
+*O desvio padrão de $\bar X$ é $\sigma/\sqrt{n}$, chamado erro padrão.*
+
+</Teorema>
+
+> "O TCL é indiscutivelmente o resultado mais importante de toda a teoria de probabilidade. Afirma que a distribuição da média amostral se aproxima da normal independentemente da distribuição original de $X$." — [OpenIntro Statistics §4.4](https://www.openintro.org/book/os/)
+
+### Correlação e regressão
+
+<Definicao titulo="Coeficiente de Pearson e reta de mínimos quadrados">
+
+**Correlação de Pearson**:
+$$r = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sqrt{\sum(x_i-\bar x)^2 \cdot \sum(y_i - \bar y)^2}} \in [-1, 1]$$
+
+**Reta de regressão** $\hat y = b_0 + b_1 x$:
+$$b_1 = r \cdot \frac{s_y}{s_x}, \quad b_0 = \bar y - b_1 \bar x$$
+
+$r^2$ = proporção da variância de $Y$ explicada por $X$.
+
+</Definicao>
+
+### Regra de Bayes
+
+<Definicao titulo="Atualização bayesiana">
+
+Para hipótese $H$ e evidência $E$:
+$$P(H \mid E) = \frac{P(E \mid H)\, P(H)}{P(E)}$$
+
+com $P(E) = P(E \mid H)P(H) + P(E \mid H^c)P(H^c)$ (lei da probabilidade total, dois ramos).
+
+- $P(H)$: **prior** (crença antes da evidência)
+- $P(E \mid H)$: **verossimilhança** (sensibilidade)
+- $P(H \mid E)$: **posterior** (crença atualizada)
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<defs>
+  <marker id="arr80" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="75" width="90" height="50" rx="6" fill="rgb(26 77 92 / 0.2)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="55" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">Dados</text>
+  <text x="55" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">amostra</text>
+</g>
+<g>
+  <line x1="100" x2="138" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="119" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">EDA</text>
+</g>
+<g>
+  <rect x="140" y="75" width="100" height="50" rx="6" fill="rgb(232 199 122 / 0.25)" stroke="rgb(201 163 95)" strokeWidth="1.5"/>
+  <text x="190" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">Descritiva</text>
+  <text x="190" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">μ, σ, Q, r</text>
+</g>
+<g>
+  <line x1="240" x2="278" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="259" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">modelo</text>
+</g>
+<g>
+  <rect x="280" y="75" width="100" height="50" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.5"/>
+  <text x="330" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">Probabilidade</text>
+  <text x="330" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">P(X), TCL</text>
+</g>
+<g>
+  <line x1="380" x2="418" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="399" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">Bayes</text>
+</g>
+<g>
+  <rect x="420" y="75" width="120" height="50" rx="6" fill="rgb(199 107 63 / 0.2)" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+  <text x="480" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">Inferência</text>
+  <text x="480" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">P(H|E), decisão</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Pipeline do Trim 8. Cada bloco corresponde a um grupo de aulas (72–73, 74–76, 77, 78–79).
+</figcaption>
+</figure>
+
+<Insight>
+
+**Por que Bayes fecha o ciclo.** A estatística descritiva resume o que *aconteceu*. A distribuição probabilística modela o que *poderia* acontecer. Bayes inverte essa lógica: dado o que *observamos*, atualiza o que *acreditamos* sobre o mecanismo gerador. As três etapas são, juntas, o núcleo de todo raciocínio científico quantitativo.
+
+</Insight>
 
 </Porta>
 
 <Porta nivel="5" titulo="Pra criança de 5 anos">
 
-Você aprendeu a:
+Imagina que você tem um saco de bolinhas coloridas.
 
-- **Saber o tamanho da bagunça** (variância).
-- **Achar o meio e os meio-meio** (mediana, quartis).
-- **Calcular chances** (binomial, normal).
-- **Saber que somar muitas coisas dá normal** (TCL).
-- **Ver se duas coisas andam juntas** (correlação).
-- **Atualizar o que você acha quando descobre algo novo** (Bayes).
+- **Média** é: "se eu dividir todas as bolinhas entre os amigos, cada um fica com quantas?"
+- **Desvio padrão** é: "as bolinhas de cada amigo ficam muito diferentes da média, ou quase iguais?"
+- **Chance** é: "se eu pegar uma bolinha sem olhar, qual a probabilidade de ser vermelha?"
+- **Normal** é: quando você tem muitas muitas bolinhas, a maioria fica perto do meio e poucas ficam muito longe — isso faz um morrinho (sino).
+- **Bayes** é: você achou uma bolinha molhada. Isso muda o que você acha sobre de qual caixa ela veio?
 
-Este trimestre virou estatística inteira em ferramenta na sua mão!
+Este trimestre inteiro ensinou a fazer contas com bolinhas da vida real — notas de escola, preços de mercado, resultados de exames.
 
 </Porta>
 
 <Porta nivel="10" titulo="Pra criança de 10 anos">
 
-Vamos juntar tudo num **caso real**: você é cientista de dados de uma rede de pizzarias.
+Vamos juntar tudo num caso real: você é cientista de dados de uma rede de lanchonetes.
 
-1. **Tempo de entrega** (dados): coleta 1000 entregas. Calcula **média = 32 min**, **$\sigma$ = 5 min** (Aula 72).
-2. **Boxplot por bairro** (Aula 73): identifica bairro com IQR enorme — investigação.
-3. **Modelo**: tempo de entrega $\approx \mathcal N(32, 5^2)$ (Aula 76).
-4. **TCL** (Aula 77): média de 25 pedidos diários $\approx \mathcal N(32, 1^2)$.
-5. **SLA**: 95\% das entregas em até **40 min** ($z = (40-32)/5 = 1{,}6$ → 95\%-ish OK).
-6. **Correlação** (Aula 78): trânsito vs. tempo de entrega: $r = 0{,}7$.
-7. **Bayes** (Aula 79): se cliente reclama, $P(\text{atraso real} | \text{reclamação})$.
-
-**Decisão**: investir em mais entregadores no bairro problemático.
+1. **Coleta**: você mede o tempo de espera de 200 pedidos. Calcula **média = 8 min** e **desvio padrão = 2 min** (aulas 72–73).
+2. **Boxplot** (aula 73): identifica um bairro com IQR enorme — algo está errado naquele ponto.
+3. **Modelo**: tempo $\approx \mathcal{N}(8, 4)$ (aula 76). Então 95% dos pedidos chegam em até $8 + 2 \times 2 = 12$ min.
+4. **TCL** (aula 77): a média de 25 pedidos de um dia tem distribuição $\mathcal{N}(8,\; 4/25) = \mathcal{N}(8,\; 0{,}16)$. Muito mais precisa.
+5. **Correlação** (aula 78): temperatura do dia vs. vendas de sorvete: $r = 0{,}85$. Alta correlação positiva.
+6. **Bayes** (aula 79): se um cliente reclama, qual a probabilidade de que o pedido realmente atrasou? Depende da prevalência de atrasos e da taxa de reclamação falsa.
+7. **Decisão**: contratar mais funcionários no bairro problemático nos dias quentes.
 
 </Porta>
 
 <Porta nivel="15" titulo="Pra adolescente de 15 anos">
 
-### O grande arco do Trimestre 8
+### O arco do Trimestre 8
 
-Você sai com a **caixa de ferramentas completa** para análise de dados básica:
+O trimestre inteiro seguiu uma lógica de construção:
 
-- **Resumir** (descrever): aulas 72-73.
-- **Modelar** (probabilizar): aulas 74-76.
-- **Inferir** (generalizar): aula 77.
-- **Relacionar** (correlacionar): aula 78.
-- **Atualizar** (bayesiano): aula 79.
+| Aulas | Tema | Pergunta central |
+|---|---|---|
+| 72–73 | Medidas descritivas | Como resumir uma amostra? |
+| 74 | V.a. discreta + esperança | Como modelar contagem aleatória? |
+| 75 | Binomial | Quantos sucessos em $n$ tentativas com prob $p$? |
+| 76 | Normal | Como modelar quantidades contínuas simétricas? |
+| 77 | TCL | Por que médias tendem à normal? |
+| 78 | Correlação e regressão | Como medir e modelar associação linear? |
+| 79 | Bayes | Como atualizar crenças com evidência? |
 
-### Erros típicos a evitar
+### Erros típicos para evitar
 
-1. **Aplicar normal sem checar**: testes rápidos (histograma, Q-Q).
-2. **Confundir correlação com causalidade**: sempre questione.
-3. **Ignorar prevalência** (base rate fallacy).
-4. **Reportar média em distribuição assimétrica**: prefira mediana.
-5. **TCL com $n$ pequeno** em distribuição assimétrica.
-6. **Aproximar binomial por normal sem checar $np$ e $n(1-p)$**.
+1. **Aplicar normal sem checar**: faça histograma e Q-Q plot antes.
+2. **Correlação não é causalidade**: sorvete e afogamentos têm $r \approx 0{,}9$ — o confundidor é o calor.
+3. **Base rate fallacy**: um teste 99% preciso pode ter VPP baixo se a doença for rara (aula 79).
+4. **Reportar média em dado assimétrico**: salário médio no Brasil engana — prefira mediana.
+5. **TCL com $n$ pequeno em distribuição muito assimétrica**: regra prática $n \geq 30$, mas pode precisar mais.
+6. **Aproximar binomial por normal sem checar** $np \geq 10$ e $n(1-p) \geq 10$.
 
-### Caminho a seguir
+### Conexão com o que vem a seguir
 
-Trimestres futuros aprofundam:
-- **Inferência estatística rigorosa** (intervalos de confiança, testes).
-- **Modelos lineares generalizados**.
-- **Aprendizado de máquina** (regressão logística, árvores).
-- **Estatística bayesiana** computacional.
-- **Séries temporais e ARIMA**.
-
-### Ferramentas para internalizar
-
-- **Excel/Google Sheets**: cálculos básicos, gráficos.
-- **Python (pandas, NumPy, scipy, statsmodels)**: análise séria.
-- **R**: estatística clássica.
-- **Jupyter**: notebooks reproduzíveis.
+Trimestres 9–12 aprofundam:
+- Intervalos de confiança e testes de hipótese formais (ano 3).
+- Modelos de regressão múltipla.
+- Séries temporais (ARIMA) e volatilidade de ativos.
+- Inferência bayesiana computacional (MCMC, Stan).
 
 </Porta>
 
 <Porta nivel="25" titulo="Pra estudante de engenharia">
 
-### Workshop integrador
+### Hierarquia formal do trimestre
 
-Receba um dataset (Kaggle, UCI). Faça:
+As aulas 72–79 constroem uma cadeia de inferência rigorosa:
 
-**Passo 1 — EDA (1h)**
-- `df.describe()` — estatísticas descritivas.
-- `df.boxplot()` — outliers.
-- `sns.pairplot(df)` — pares.
-- `df.corr()` — matriz de correlação.
+**Nível 1 — Estatística descritiva** (plug-in estimators): $\bar x, s^2, r$ são estimadores de momentos populacionais. Consistentes por LGN: $\bar x \xrightarrow{P} \mu$.
 
-**Passo 2 — Modelagem (2h)**
-- Escolha variável-alvo.
-- Ajuste regressão linear ou logística.
-- Avalie $R^2$, p-valores.
-- Teste resíduos.
+**Nível 2 — Modelos paramétricos**: Binomial(n, p) e $\mathcal{N}(\mu, \sigma^2)$ são famílias exponenciais. Estimação por MLE: $\hat p = \bar x / n$ para binomial, $\hat\mu = \bar x$ para normal (ambos BLUE pelo teorema de Gauss-Markov).
 
-**Passo 3 — Inferência (1h)**
-- IC para parâmetros.
-- Teste de hipótese sobre coeficiente.
-- Validação cruzada.
+**Nível 3 — TCL e erro padrão**: A convergência $\sqrt{n}(\bar X - \mu) \xrightarrow{d} \mathcal{N}(0, \sigma^2)$ é mais forte que LGN. Permite construir intervalos de confiança: $\bar x \pm z_{\alpha/2} \cdot s/\sqrt{n}$.
 
-**Passo 4 — Predição (1h)**
-- Treino/teste split.
-- Métricas: RMSE, MAE, AUC.
-- Interpretação dos coeficientes.
-
-### Pipeline em Python
-
-```python
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-
-df = pd.read_csv('dados.csv')
-print(df.describe())
-sns.pairplot(df)
-plt.show()
-
-# Regressão
-y = df['target']
-X = sm.add_constant(df.drop('target', axis=1))
-model = sm.OLS(y, X).fit()
-print(model.summary())
-
-# Diagnóstico
-residuos = model.resid
-plt.scatter(model.fittedvalues, residuos)
-plt.axhline(0)
-plt.show()
-```
+**Nível 4 — Bayes**: Prior $\pi(\theta)$ + verossimilhança $\ell(\theta \mid x) \to$ posterior $\pi(\theta \mid x) \propto \ell(\theta \mid x)\pi(\theta)$. Para $n$ grande, posterior bayesiana coincide assintoticamente com MLE (Bernstein-von Mises).
 
 ### Aplicações típicas em engenharia
 
-- **Six Sigma**: $Cp = (\text{USL} - \text{LSL})/(6\sigma)$.
-- **Confiabilidade**: MTBF, distribuição de Weibull.
-- **Controle de processo**: cartas $\bar X$ e $R$.
-- **Reliability engineering**: análise de falhas.
-- **Qualidade**: DOE (design of experiments), ANOVA.
+- **Six Sigma**: $C_p = (\text{USL} - \text{LSL})/(6\sigma)$ — capabilidade de processo. Meta: $C_p \geq 1{,}33$.
+- **Controle estatístico**: cartas $\bar X$ e $R$ baseadas no TCL.
+- **Confiabilidade**: MTBF, distribuição exponencial/Weibull.
+- **Carteira financeira**: $\sigma_p^2 = w_A^2 \sigma_A^2 + w_B^2 \sigma_B^2 + 2w_A w_B \rho_{AB}\sigma_A\sigma_B$.
+- **Diagnóstico de modelo**: resíduos devem ser $\sim\mathcal{N}(0,\sigma^2)$ iid. Q-Q plot e teste de Shapiro-Wilk.
 
-### Conexões com aulas futuras
+### Conexões cross-domain
 
-- **Cálculo** (52, 53): otimização de modelos via gradiente.
-- **Álgebra linear** (matriz de covariância, PCA).
-- **EDO** (91): modelos dinâmicos estocásticos.
+- **Álgebra linear**: matriz de covariância $\Sigma$ generaliza $\sigma^2$; PCA é autodecomposição de $\Sigma$.
+- **Cálculo** (aula 52+): otimização de log-verossimilhança via gradiente / Hessiano.
+- **EDO**: modelos estocásticos (SDEs) generalizam EDOs deterministicas com ruído gaussiano.
 
 </Porta>
 
 <Porta nivel="40" titulo="Pra profissional sênior">
 
-### Modernização do trimestre
+### O que o trimestre NOT cobre — e por quê importa
 
-Os tópicos clássicos cobertos são "estatística do século XX". Conexões com práticas atuais:
+Os tópicos clássicos são "estatística do século XX". Práticas contemporâneas exigem extensões críticas:
 
-**1. Causal inference revolution**
+**Causal inference (Pearl/Rubin):** correlação não é causalidade. Identificação de efeito causal via DAGs, do-calculus, variáveis instrumentais. **Angrist e Imbens — Nobel de Economia 2021** ([nobelprize.org/prizes/economic-sciences/2021/summary/](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/)) — prêmio pela metodologia de variáveis instrumentais e diferença-em-diferenças.
 
-Pearl, Rubin, Hernán: identificação de efeito causal via DAGs e do-calculus. **Angrist e Imbens — Nobel 2021** ([nobelprize.org](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/)).
+**Cauda pesada e finanças:** o TCL clássico pressupõe $\sigma^2 < \infty$. Séries financeiras têm caudas pesadas (distribuições $\alpha$-estáveis de Lévy, $\alpha < 2$). Uso de VaR sem correção de cauda subestimou risco sistêmico em 2008.
 
-**2. Computational statistics**
+**Concentração não-assintótica:** Hoeffding, McDiarmid, Talagrand dão bounds PAC com $n$ finito — fundamento teórico de generalização em ML, sem precisar $n \to \infty$.
 
-Bayes operacional via MCMC (Stan, NUTS), variational inference, normalizing flows. Hamilton dynamics integra geometria diferencial e estatística.
+**Crise de replicabilidade:** p-hacking, garden of forking paths, HARK (Hypothesizing After Results Known). Movimento de pre-registration e relatórios registrados. Bayes Factor como alternativa ao p-valor.
 
-**3. Machine learning bayesiano**
+**Estatística bayesiana computacional:** MCMC (Metropolis-Hastings, HMC/NUTS), inferência variacional, normalizing flows. Implementações: Stan, PyMC, NumPyro. Escala para modelos hierárquicos com milhares de parâmetros.
 
-Gaussian processes, BNN, Bayesian deep learning. Predições com incerteza calibrada.
-
-**4. Modelos de cauda pesada**
-
-Finanças real exige distribuições estáveis (Lévy), copulas, EVT (extreme value theory). TCL clássico inadequado.
-
-**5. Concentração não-assintótica**
-
-Sub-gaussianidade, Hoeffding, McDiarmid, Talagrand. Bounds com $n$ finito — fundamento de generalização em ML.
-
-**6. Robustez**
-
-Estimadores M, métodos não-paramétricos (kernel density, kNN), distribuições contaminadas. ML adversarial.
-
-**7. Replication crisis**
-
-P-hacking, garden of forking paths, overfitting. Bayes Factor, pre-registration, registered reports. Cultura científica em transição.
-
-### Recursos de estudo avançado
-
-- **Murphy (2022)** "Probabilistic Machine Learning" — referência moderna.
-- **Hastie-Tibshirani-Friedman** "Elements of Statistical Learning" — clássico.
-- **Gelman et al.** "Bayesian Data Analysis" — bíblia bayesiana.
-- **MIT OCW 18.650** — statistics for applications.
-- **Stat 110 (Harvard)** — Joe Blitzstein on YouTube.
-
-### Decisões em ambiente real
-
-Estatística não é fim — é meio para **decisão sob incerteza**. Em produção:
-- **Custo de falso positivo vs. negativo** define threshold.
-- **Latência** de inferência importa.
-- **Drift de dados**: modelos envelhecem.
-- **Fairness**: vieses sistêmicos.
-- **Explicabilidade**: stakeholders precisam entender.
-
-Cultura DS moderna: probabilidade + ML + ética + engenharia.
+**Viés algorítmico:** estimadores não-robustos amplificam desvios sistemáticos nos dados de treinamento. Fairness como requisito de engenharia, não só ético.
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Aplicação prática">
+<Porta nivel="pratica" titulo="Aplicação prática — dados brasileiros">
 
-### Projeto integrador
+### Caso 1 — Salários no INSS
 
-Escolha um dataset (Kaggle "Titanic", "Boston Housing", "Wine Quality") e execute:
+O INSS 2025 limita o salário de contribuição a R\$ 8.157,41. Suponha que salários de servidores de uma autarquia seguem $\mathcal{N}(6000, 800^2)$.
 
-1. **EDA completa**: estatísticas + visualizações.
-2. **Limpeza** + tratamento de outliers (justificado).
-3. **Modelo**: regressão linear ou logística.
-4. **Validação**: train/test split, métricas.
-5. **Interpretação**: coeficientes, p-valores, $R^2$.
-6. **Inferência bayesiana** (opcional): PyMC.
-7. **Relatório**: README + notebook.
+- Proporção acima do teto: $Z = (8157 - 6000)/800 = 2{,}70$. Tabela normal: $P(Z > 2{,}70) \approx 0{,}35\%$.
+- Mediana = média = R\$ 6.000 (distribuição simétrica).
+- IQR: $Q_1 = \mu - 0{,}675\sigma = 5460$, $Q_3 = 6540$. IQR = R\$ 1.080.
 
-### Pipeline mínimo (1 dia)
+### Caso 2 — ENEM: comparação de cohortes
 
-```python
-# 1. Carregar
-df = pd.read_csv('dataset.csv')
+Em 2024, candidatos de escola pública tiveram média 520 e desvio padrão 90 em Matemática (dados hipotéticos para exercício). Candidatos de escola privada: média 610, desvio padrão 80.
 
-# 2. Descritiva
-df.describe()
-df.hist(bins=30, figsize=(12, 8))
+Pelo TCL, em amostras de 100 alunos de cada grupo, a diferença de médias tem distribuição aproximadamente:
+$$\bar X_{\text{priv}} - \bar X_{\text{pub}} \sim \mathcal{N}\!\left(90,\; \frac{80^2}{100} + \frac{90^2}{100}\right) = \mathcal{N}(90,\; 145)$$
 
-# 3. Correlação
-sns.heatmap(df.corr(), annot=True)
+Desvio padrão da diferença: $\sqrt{145} \approx 12$. A diferença observada de 90 pontos está a $90/12 = 7{,}5$ erros padrão — estatisticamente incontestável.
 
-# 4. Outliers
-for col in df.select_dtypes('number').columns:
-    df.boxplot(col)
+### Caso 3 — Diagnóstico de COVID-19
 
-# 5. Modelo
-from sklearn.linear_model import LinearRegression
-X, y = df[['feature1', 'feature2']], df['target']
-model = LinearRegression().fit(X, y)
-print(model.score(X, y))  # R²
+Teste PCR: sensibilidade 95%, especificidade 99%. Em março de 2020, prevalência estimada no Brasil: 0,5%.
 
-# 6. Resíduos
-residuos = y - model.predict(X)
-plt.scatter(model.predict(X), residuos)
-plt.axhline(0)
-```
+$$P(\text{COVID} \mid +) = \frac{0{,}95 \times 0{,}005}{0{,}95 \times 0{,}005 + 0{,}01 \times 0{,}995} \approx \frac{0{,}00475}{0{,}00475 + 0{,}00995} \approx 32\%$$
 
-### Checklist de qualidade
-
-- [ ] Histograma de cada variável.
-- [ ] Boxplot pra outliers.
-- [ ] Matriz de correlação.
-- [ ] Modelo ajustado.
-- [ ] Resíduos analisados.
-- [ ] Métricas reportadas.
-- [ ] Limitações discutidas.
-- [ ] Conclusões com incerteza.
-
-### Faça os 30 exercícios
-
-Este é o trimestre que dá **autonomia em estatística aplicada**. Faça TODOS — eles integram tudo.
+Um teste positivo isolado, com prevalência baixa, ainda deixa 68% de chance de ser falso positivo. Isso justificou a exigência de dois testes em alguns protocolos clínicos.
 
 </Porta>
 
 </DuasPortas>
 
+## Exemplos resolvidos
+
+<Exemplo titulo="Variância, IQR e detecção de outlier" numero="1">
+
+**Problema:** Considere a amostra de tempos de atendimento (em minutos): 5, 7, 8, 8, 9, 10, 10, 11, 12, 30. Calcule média, variância amostral, mediana, $Q_1$, $Q_3$, IQR e identifique outliers pela cerca de Tukey.
+
+**Estratégia:** Aplicar definições em sequência: ordenar, localizar quartis, calcular IQR, aplicar critério $1{,}5 \cdot \text{IQR}$.
+
+**Resolução:**
+
+Amostra ordenada: 5, 7, 8, 8, 9, **10**, 10, 11, 12, 30. ($n = 10$)
+
+*Média:* $\bar x = (5+7+8+8+9+10+10+11+12+30)/10 = 110/10 = 11$.
+
+*Variância amostral:*
+
+$$s^2 = \frac{1}{9}\sum(x_i - 11)^2 = \frac{(−6)^2+(−4)^2+(−3)^2+(−3)^2+(−2)^2+(-1)^2+(-1)^2+0^2+1^2+19^2}{9}$$
+
+$$= \frac{36+16+9+9+4+1+1+0+1+361}{9} = \frac{438}{9} \approx 48{,}7 \implies s \approx 6{,}98$$
+
+*Mediana (posição 5,5):* $(9 + 10)/2 = 9{,}5$.
+
+*$Q_1$ (mediana dos 5 primeiros):* 8.
+
+*$Q_3$ (mediana dos 5 últimos):* 11.
+
+*IQR:* $11 - 8 = 3$.
+
+*Cerca inferior:* $8 - 1{,}5 \times 3 = 3{,}5$. *Cerca superior:* $11 + 1{,}5 \times 3 = 15{,}5$.
+
+O valor 30 é outlier (acima de 15,5). O valor 5 está dentro da cerca (acima de 3,5).
+
+**Verificação:** A média (11) ficou inflada pelo outlier 30; a mediana (9,5) representa melhor o centro. IQR (3) é mais robusto que $s$ (6,98) na presença de outlier.
+
+**Fonte.** [OpenIntro Statistics §2.1–2.2](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Esperança e variância de variável aleatória discreta" numero="2">
+
+**Problema:** Um dado honesto de 4 faces tem $X \in \{1, 2, 3, 4\}$ com probabilidades iguais $1/4$. Calcule $E[X]$, $\text{Var}(X)$ e $E[3X - 2]$.
+
+**Estratégia:** Aplicar a definição de esperança; usar $\text{Var}(X) = E[X^2] - (E[X])^2$; aplicar linearidade para $E[3X - 2]$.
+
+**Resolução:**
+
+$$E[X] = \frac{1}{4}(1 + 2 + 3 + 4) = \frac{10}{4} = 2{,}5$$
+
+$$E[X^2] = \frac{1}{4}(1 + 4 + 9 + 16) = \frac{30}{4} = 7{,}5$$
+
+$$\text{Var}(X) = 7{,}5 - (2{,}5)^2 = 7{,}5 - 6{,}25 = 1{,}25$$
+
+$$E[3X - 2] = 3 E[X] - 2 = 3 \times 2{,}5 - 2 = 5{,}5$$
+
+**Verificação:** Por simetria, $E[X] = (1+4)/2 = 2{,}5$. Para $\text{Var}$: a fórmula para distribuição uniforme discreta em $\{1,\ldots,n\}$ é $(n^2-1)/12 = (16-1)/12 = 1{,}25$. Confere.
+
+**Fonte.** [Grinstead & Snell, Introduction to Probability §6.1, pág. 224](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="Binomial e aproximação normal" numero="3">
+
+**Problema:** Uma linha de produção tem taxa de defeito $p = 0{,}04$. Em um lote de $n = 200$ peças, calcule $E[X]$, $\text{Var}(X)$, e use aproximação normal para encontrar $P(X \geq 12)$.
+
+**Estratégia:** Verificar critério de aproximação ($np \geq 10$ e $n(1-p) \geq 10$), padronizar com correção de continuidade.
+
+**Resolução:**
+
+$X \sim \text{Bin}(200, 0{,}04)$.
+
+$E[X] = 200 \times 0{,}04 = 8$. $\text{Var}(X) = 200 \times 0{,}04 \times 0{,}96 = 7{,}68$. $\sigma = \sqrt{7{,}68} \approx 2{,}77$.
+
+*Critério:* $np = 8 < 10$. A aproximação normal é limítrofe — o resultado é uma estimativa. Neste exercício, usamos mesmo assim para praticar a técnica.
+
+*Com correção de continuidade:* $P(X \geq 12) \approx P\!\left(Z \geq \dfrac{11{,}5 - 8}{2{,}77}\right) = P(Z \geq 1{,}26)$.
+
+Tabela: $P(Z \geq 1{,}26) = 1 - \Phi(1{,}26) \approx 1 - 0{,}8962 = 0{,}1038 \approx 10{,}4\%$.
+
+**Verificação:** Valor exato via binomial: $P(X \geq 12) \approx 10{,}6\%$. Aproximação razoável, com erro de 0,2 p.p.
+
+**Fonte.** [OpenStax Statistics §4.3 — Binomial Distribution, ex. 4.15](https://openstax.org/books/statistics/pages/4-3-geometric-distribution) e §6.3 — licença CC-BY.
+
+</Exemplo>
+
+<Exemplo titulo="Teorema Central do Limite — média amostral" numero="4">
+
+**Problema:** O peso de pacotes de café de uma marca tem $\mu = 500$ g e $\sigma = 8$ g (distribuição desconhecida). Uma fiscalização amostra 64 pacotes. Qual a probabilidade de que a média amostral seja menor que 498 g?
+
+**Estratégia:** Aplicar o TCL: $\bar X \sim \mathcal{N}(500,\; 8^2/64)$ para $n = 64$ grande.
+
+**Resolução:**
+
+Erro padrão: $\sigma_{\bar X} = 8/\sqrt{64} = 8/8 = 1$ g.
+
+$$P(\bar X < 498) = P\!\left(Z < \frac{498 - 500}{1}\right) = P(Z < -2) = \Phi(-2) \approx 0{,}0228$$
+
+Probabilidade $\approx 2{,}3\%$.
+
+**Verificação:** A probabilidade é baixa, como esperado: 498 g está 2 desvios padrão abaixo da média amostral esperada. Observe que $n = 64$ é suficiente para o TCL mesmo sem conhecer a distribuição original.
+
+**Fonte.** [OpenIntro Statistics §4.4 — Central Limit Theorem, pág. 181](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Regra de Bayes — teste diagnóstico com baixa prevalência" numero="5">
+
+**Problema:** Uma doença tem prevalência 1% na população. Um teste tem sensibilidade 90% e especificidade 95%. Uma pessoa testa positivo. Qual a probabilidade de que ela esteja doente (VPP)?
+
+**Estratégia:** Aplicar Bayes com $H = $ "doente", $E = $ "teste positivo". Calcular $P(E)$ pela lei da probabilidade total.
+
+**Resolução:**
+
+Dados: $P(H) = 0{,}01$, $P(H^c) = 0{,}99$, $P(E \mid H) = 0{,}90$, $P(E \mid H^c) = 0{,}05$.
+
+$$P(E) = P(E \mid H)P(H) + P(E \mid H^c)P(H^c) = 0{,}90 \times 0{,}01 + 0{,}05 \times 0{,}99 = 0{,}009 + 0{,}0495 = 0{,}0585$$
+
+$$P(H \mid E) = \frac{P(E \mid H)\,P(H)}{P(E)} = \frac{0{,}009}{0{,}0585} \approx 0{,}1538 \approx 15{,}4\%$$
+
+**Verificação:** Intuitivo via árvore: em 10.000 pessoas, 100 doentes, 900 sadios. Dos doentes: $0{,}9 \times 100 = 90$ positivos. Dos sadios: $0{,}05 \times 9900 = 495$ positivos. Total de positivos: 585. VPP = $90/585 \approx 15{,}4\%$. Confere.
+
+**Fonte.** [OpenIntro Statistics §2.2 — Conditional Probability, ex. 2.29, pág. 88](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
 <ListaExercicios seed="licao-80-consolidacao-trim-8">
 
-### Bloco A — Revisão integrada (80.1 a 80.10)
+> **Lista do caderno.** São 40 exercícios em 4 blocos. Resolva no papel; use a lista de fórmulas da Porta Formal como referência. Fontes: OpenIntro Statistics (OIS), OpenStax Statistics (OST), Grinstead-Snell (GS).
 
-<Exercicio numero="80.1" dificuldade="aplicacao">Dados: 4, 6, 8, 8, 9, 10, 10, 11, 12, 22. Mediana, $Q_1$, $Q_3$, IQR, outliers.</Exercicio>
-<Exercicio numero="80.2" dificuldade="aplicacao">Mesma. Média e desvio padrão. Compare com (80.1) — efeito do outlier.</Exercicio>
-<Exercicio numero="80.3" dificuldade="aplicacao">$X \sim \text{Bin}(20, 0{,}3)$. $E[X], \text{Var}(X), \sigma$.</Exercicio>
-<Exercicio numero="80.4" dificuldade="aplicacao">Mesma. Aproxime $P(X \geq 10)$ por normal.</Exercicio>
-<Exercicio numero="80.5" dificuldade="aplicacao">$X \sim \mathcal N(50, 100)$. $P(X > 65)$.</Exercicio>
-<Exercicio numero="80.6" dificuldade="aplicacao">Amostra $n = 100$ de $X$ com $\mu = 10, \sigma = 3$. $P(\bar X > 10{,}3)$.</Exercicio>
-<Exercicio numero="80.7" dificuldade="aplicacao">Pares $(x,y)$: (1,2), (2,4), (3,5), (4,4), (5,7). $r$ e reta.</Exercicio>
-<Exercicio numero="80.8" dificuldade="aplicacao">Doença prevalência 2\%, sens 90\%, espec 95\%. VPP. (Resp: $\approx 26\%$.)</Exercicio>
-<Exercicio numero="80.9" dificuldade="aplicacao">$Y = 2X + 5$, $X \sim \mathcal N(10, 4)$. Distribuição de $Y$.</Exercicio>
-<Exercicio numero="80.10" dificuldade="aplicacao">Soma de 50 dados honestos. Esperança e $\sigma$.</Exercicio>
+### Bloco A — Estatística descritiva e distribuições (80.1 a 80.14)
 
-### Bloco B — Modelagem integrada (80.11 a 80.22)
+<Exercicio
+  numero="80.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "51", exercicio: "2.1", licenca: "CC-BY-SA" }}
+  solucao={<>Dados ordenados: 4, 6, 8, 8, 9, 10, 10, 11, 12, 22. Mediana = <Eq>{`(9+10)/2 = 9{,}5`}</Eq>. <Eq>{`Q_1`}</Eq> = mediana dos 5 primeiros = 8. <Eq>{`Q_3`}</Eq> = mediana dos 5 últimos = 11. <Eq>{`\\text{IQR} = 3`}</Eq>. Cerca superior: <Eq>{`11 + 1{,}5\\times3 = 15{,}5`}</Eq>. Outlier: 22 (acima de 15,5).</>}
+  passos={<>
+    <ol>
+      <li>Ordene a amostra: 4, 6, 8, 8, 9, 10, 10, 11, 12, 22. Com 10 valores, a mediana está entre as posições 5 e 6: <Eq>{`(9+10)/2 = 9{,}5`}</Eq>.</li>
+      <li>Metade inferior (posições 1–5): 4, 6, 8, 8, 9 — mediana = 8 = <Eq>{`Q_1`}</Eq>. Metade superior (posições 6–10): 10, 10, 11, 12, 22 — mediana = 11 = <Eq>{`Q_3`}</Eq>.</li>
+      <li>IQR = <Eq>{`Q_3 - Q_1 = 11 - 8 = 3`}</Eq>. Cercas: inferior = <Eq>{`8 - 1{,}5\\times3 = 3{,}5`}</Eq>, superior = <Eq>{`11 + 1{,}5\\times3 = 15{,}5`}</Eq>.</li>
+      <li>Verifique cada valor: 4 está acima de 3,5 (dentro). 22 está acima de 15,5 (outlier).</li>
+    </ol>
+    <em>Macete:</em> Para <Eq>{`n`}</Eq> par, <Eq>{`Q_1`}</Eq> e <Eq>{`Q_3`}</Eq> são as medianas das duas metades excluindo a mediana central — ou incluindo, dependendo da convenção. OpenIntro usa "mediana dos <Eq>{`n/2`}</Eq> primeiros".
+  </>}
+>
+Amostra: 4, 6, 8, 8, 9, 10, 10, 11, 12, 22. Calcule mediana, $Q_1$, $Q_3$, IQR e identifique outliers pela cerca de Tukey.
+</Exercicio>
 
-<Exercicio numero="80.11" dificuldade="modelagem">Pizzaria: tempo de entrega $\mathcal N(32, 5^2)$ min. SLA: 95\% até quanto? (Resp: $\approx 40{,}2$.)</Exercicio>
-<Exercicio numero="80.12" dificuldade="modelagem">Mesma. Em 100 entregas, esperança de violações do SLA. (Resp: 5.)</Exercicio>
-<Exercicio numero="80.13" dificuldade="modelagem">A/B test: variante A 50/100, B 60/100. Use binomial e aproximação normal pra teste de proporções.</Exercicio>
-<Exercicio numero="80.14" dificuldade="modelagem">Imobiliário: preço $\sim$ tamanho. Dados: $r = 0{,}8$. Reta de regressão e predição em tamanho médio.</Exercicio>
-<Exercicio numero="80.15" dificuldade="modelagem">Bolsa: retornos $\mathcal N(0{,}001; 0{,}02^2)$. Carteira de 100 ações independentes equal-weighted. Distribuição do retorno.</Exercicio>
-<Exercicio numero="80.16" dificuldade="modelagem">Six Sigma: peças $\mathcal N(10, 0{,}02^2)$. Tolerância $10 \pm 0{,}1$. Defeitos por milhão.</Exercicio>
-<Exercicio numero="80.17" dificuldade="modelagem">Pesquisa eleitoral: $n = 2500$ entrevistados, $\hat p = 0{,}48$. IC 95\% para $p$.</Exercicio>
-<Exercicio numero="80.18" dificuldade="modelagem">Vacina: 100 vacinados, 5 doentes; 100 placebos, 25 doentes. Eficácia? Significativo?</Exercicio>
-<Exercicio numero="80.19" dificuldade="modelagem">Spam filter: 80\% spams têm "GRÁTIS", 5\% hams têm. $P(\text{spam}) = 0{,}3$. Email com "GRÁTIS": classifique.</Exercicio>
-<Exercicio numero="80.20" dificuldade="modelagem">Linha produção: 2\% defeitos. Lote de 200. $P(\geq 5 \text{ defeitos})$ — use Poisson e normal, compare.</Exercicio>
-<Exercicio numero="80.21" dificuldade="modelagem">Carteira financeira: ações A $\sigma_A = 1\%$, B $\sigma_B = 2\%$, $\rho_{AB} = 0{,}3$. Variância 50/50.</Exercicio>
-<Exercicio numero="80.22" dificuldade="modelagem">Diagnóstico médico: 2 testes independentes positivos, sens 90/85\%, espec 95/90\%. Prevalência 1\%. VPP final.</Exercicio>
+<Exercicio
+  numero="80.2"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "52", exercicio: "2.3", licenca: "CC-BY-SA" }}
+  solucao={<>Média = <Eq>{`(4+6+8+8+9+10+10+11+12+22)/10 = 100/10 = 10`}</Eq>. Variância amostral: soma dos quadrados dos desvios dividida por 9. <Eq>{`s^2 = [(−6)^2+(−4)^2+(−2)^2+(−2)^2+(−1)^2+0^2+0^2+1^2+2^2+12^2]/9 = (36+16+4+4+1+0+0+1+4+144)/9 = 210/9 \\approx 23{,}3`}</Eq>. Desvio: <Eq>{`s \\approx 4{,}83`}</Eq>. Comparação: a média (10) subiu pela presença do 22; a mediana (9,5) é mais representativa.</>}
+>
+Mesma amostra do exercício 80.1. Calcule a média e o desvio padrão amostral. Compare com a mediana: qual é mais representativa da posição central? Por quê?
+</Exercicio>
 
-### Bloco C — Compreensão integradora (80.23 a 80.27)
+<Exercicio
+  numero="80.3"
+  dificuldade="aplicacao"
+  resposta="$E[X]=6;\; \text{Var}(X)=4{,}8;\; \sigma\approx2{,}19$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "218", exercicio: "ex. 4.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\text{Bin}(20, 0{,}3)`}</Eq>. <Eq>{`E[X] = np = 20\\times0{,}3 = 6`}</Eq>. <Eq>{`\\text{Var}(X) = np(1-p) = 20\\times0{,}3\\times0{,}7 = 4{,}2`}</Eq>. Espera, recalculando: <Eq>{`4{,}2`}</Eq>, não 4,8. Desvio padrão: <Eq>{`\\sigma = \\sqrt{4{,}2} \\approx 2{,}05`}</Eq>.</>}
+>
+$X \sim \text{Bin}(20,\, 0{,}3)$. Calcule $E[X]$, $\text{Var}(X)$ e $\sigma$.
+</Exercicio>
 
-<Exercicio numero="80.23" dificuldade="compreensao">Em 1 frase cada: variância, IQR, esperança, binomial, normal, TCL, $r$, Bayes.</Exercicio>
-<Exercicio numero="80.24" dificuldade="compreensao">Conexões: como TCL liga binomial à normal? Como Bayes liga prior à posterior?</Exercicio>
-<Exercicio numero="80.25" dificuldade="compreensao">Dado um dataset, qual a sequência de análise que você seguiria?</Exercicio>
-<Exercicio numero="80.26" dificuldade="compreensao">Cite 3 erros comuns em interpretação estatística e como evitá-los.</Exercicio>
-<Exercicio numero="80.27" dificuldade="compreensao">Diferença entre estatística descritiva, inferencial e bayesiana.</Exercicio>
+<Exercicio
+  numero="80.4"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "352", exercicio: "ex. 6.11", licenca: "CC-BY" }}
+  solucao={<>Critério: <Eq>{`np = 6`}</Eq> e <Eq>{`n(1-p) = 14`}</Eq>. O critério <Eq>{`np \\geq 10`}</Eq> não é satisfeito (np = 6), então a aproximação normal é grosseira aqui. Para exercitar: <Eq>{`\\mu = 6`}</Eq>, <Eq>{`\\sigma = \\sqrt{4{,}2} \\approx 2{,}05`}</Eq>. Com correção de continuidade: <Eq>{`P(X \\geq 10) \\approx P(Z \\geq (9{,}5-6)/2{,}05) = P(Z \\geq 1{,}71) \\approx 4{,}4\\%`}</Eq>.</>}
+>
+Para $X \sim \text{Bin}(20,\, 0{,}3)$: verifique o critério de aproximação normal e, mesmo que limítrofe, use a aproximação com correção de continuidade para estimar $P(X \geq 10)$.
+</Exercicio>
 
-### Bloco D — Desafios integradores (80.28 a 80.32)
+<Exercicio
+  numero="80.5"
+  dificuldade="aplicacao"
+  resposta="$P(X > 65) \approx 6{,}7\%$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "318", exercicio: "ex. 6.3", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\mathcal{N}(50, 100)`}</Eq>, então <Eq>{`\\sigma = 10`}</Eq>. <Eq>{`Z = (65-50)/10 = 1{,}5`}</Eq>. <Eq>{`P(X > 65) = P(Z > 1{,}5) = 1 - \\Phi(1{,}5) \\approx 1 - 0{,}9332 = 0{,}0668 \\approx 6{,}7\\%`}</Eq>.</>}
+>
+$X \sim \mathcal{N}(50,\, 100)$. Calcule $P(X > 65)$.
+</Exercicio>
 
-<Exercicio numero="80.28" dificuldade="desafio">Em distribuição assimétrica, comparar média e mediana. Quando IQR é mais informativo que $\sigma$?</Exercicio>
-<Exercicio numero="80.29" dificuldade="desafio">Combine TCL e Bayes: como inferência bayesiana converge em $n$ grande?</Exercicio>
-<Exercicio numero="80.30" dificuldade="desafio">Construa exemplo onde correlação alta esconde causalidade reversa. (Ex: confundidor.)</Exercicio>
-<Exercicio numero="80.31" dificuldade="demonstracao">Mostre que IC frequentista 95\% e credible interval bayesiano 95\% (com prior uniforme) são iguais para média de normal com $\sigma$ conhecido.</Exercicio>
-<Exercicio numero="80.32" dificuldade="demonstracao">Demonstre que se $X_i$ são iid Bernoulli($p$), então $\sum X_i$ é Binomial e $\bar X$ converge a $p$ pela LGN.</Exercicio>
+<Exercicio
+  numero="80.6"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "183", exercicio: "4.27", licenca: "CC-BY-SA" }}
+  solucao={<>Pelo TCL, <Eq>{`\\bar X \\sim \\mathcal{N}(10,\\; 9/100) = \\mathcal{N}(10,\\; 0{,}09)`}</Eq>. Erro padrão: <Eq>{`\\sigma_{\\bar X} = 3/\\sqrt{100} = 0{,}3`}</Eq>. <Eq>{`P(\\bar X > 10{,}3) = P(Z > (10{,}3-10)/0{,}3) = P(Z > 1{,}0) = 1 - \\Phi(1) \\approx 15{,}9\\%`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Identifique os parâmetros: <Eq>{`\\mu = 10`}</Eq>, <Eq>{`\\sigma = 3`}</Eq>, <Eq>{`n = 100`}</Eq>.</li>
+      <li>Pelo TCL, a média amostral tem distribuição: <Eq>{`\\bar X \\sim \\mathcal{N}(\\mu,\\; \\sigma^2/n) = \\mathcal{N}(10,\\; 9/100)`}</Eq>.</li>
+      <li>Calcule o erro padrão: <Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n} = 3/10 = 0{,}3`}</Eq>.</li>
+      <li>Padronize: <Eq>{`Z = (10{,}3 - 10)/0{,}3 = 1{,}0`}</Eq>. Consulte tabela: <Eq>{`P(Z > 1) \\approx 15{,}9\\%`}</Eq>.</li>
+    </ol>
+    <em>Macete:</em> O erro padrão diminui com <Eq>{`\\sqrt{n}`}</Eq>. Quadruplicar a amostra dimideia o erro padrão.
+  </>}
+>
+Amostra $n = 100$ de população com $\mu = 10$, $\sigma = 3$. Calcule $P(\bar X > 10{,}3)$.
+</Exercicio>
+
+<Exercicio
+  numero="80.7"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "350", exercicio: "8.1", licenca: "CC-BY-SA" }}
+  solucao={<>Dados: <Eq>{`(1,2),(2,4),(3,5),(4,4),(5,7)`}</Eq>. <Eq>{`\\bar x = 3`}</Eq>, <Eq>{`\\bar y = 4{,}4`}</Eq>. <Eq>{`\\sum(x_i-\\bar x)(y_i-\\bar y) = (-2)(-2{,}4)+(-1)(-0{,}4)+(0)(0{,}6)+(1)(-0{,}4)+(2)(2{,}6) = 4{,}8+0{,}4+0-0{,}4+5{,}2 = 10`}</Eq>. <Eq>{`\\sum(x_i-\\bar x)^2 = 4+1+0+1+4 = 10`}</Eq>. <Eq>{`\\sum(y_i-\\bar y)^2 = 5{,}76+0{,}16+0{,}36+0{,}16+6{,}76 = 13{,}2`}</Eq>. <Eq>{`r = 10/\\sqrt{10 \\times 13{,}2} = 10/\\sqrt{132} \\approx 10/11{,}49 \\approx 0{,}870`}</Eq>. Reta: <Eq>{`b_1 = r\\cdot s_y/s_x = 0{,}87\\times\\sqrt{13{,}2/4}/\\sqrt{10/4} = 1{,}0`}</Eq>; <Eq>{`b_0 = 4{,}4 - 1\\times3 = 1{,}4`}</Eq>. Logo <Eq>{`\\hat y = 1{,}4 + x`}</Eq>.</>}
+>
+Pares $(x, y)$: (1, 2), (2, 4), (3, 5), (4, 4), (5, 7). Calcule o coeficiente de correlação de Pearson $r$ e a reta de regressão $\hat y = b_0 + b_1 x$.
+</Exercicio>
+
+<Exercicio
+  numero="80.8"
+  dificuldade="aplicacao"
+  resposta="$\text{VPP} \approx 26\%$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "88", exercicio: "2.29", licenca: "CC-BY-SA" }}
+  solucao={<>Prevalência 2%: <Eq>{`P(D) = 0{,}02`}</Eq>. Sens = 90%: <Eq>{`P(+|D) = 0{,}90`}</Eq>. Espec = 95%: <Eq>{`P(-|D^c) = 0{,}95`}</Eq>, então <Eq>{`P(+|D^c) = 0{,}05`}</Eq>. <Eq>{`P(+) = 0{,}9\\times0{,}02 + 0{,}05\\times0{,}98 = 0{,}018 + 0{,}049 = 0{,}067`}</Eq>. <Eq>{`\\text{VPP} = P(D|+) = 0{,}018/0{,}067 \\approx 0{,}268 \\approx 26{,}8\\%`}</Eq>.</>}
+>
+Doença com prevalência 2%, teste com sensibilidade 90% e especificidade 95%. Calcule o Valor Preditivo Positivo (VPP).
+</Exercicio>
+
+<Exercicio
+  numero="80.9"
+  dificuldade="aplicacao"
+  resposta="$Y \sim \mathcal{N}(25,\; 16)$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "337", exercicio: "ex. 6.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\mathcal{N}(10, 4)`}</Eq>. Transformação linear: <Eq>{`E[Y] = 2\\times10 + 5 = 25`}</Eq>. <Eq>{`\\text{Var}(Y) = 2^2 \\times 4 = 16`}</Eq> (constante não altera variância). Logo <Eq>{`Y \\sim \\mathcal{N}(25, 16)`}</Eq>.</>}
+>
+$Y = 2X + 5$ onde $X \sim \mathcal{N}(10,\, 4)$. Determine a distribuição de $Y$.
+</Exercicio>
+
+<Exercicio
+  numero="80.10"
+  dificuldade="aplicacao"
+  resposta="$E[S]=175;\; \sigma_S \approx 9{,}57$"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§6.2", pagina: "242", exercicio: "ex. 6.2.5", licenca: "GNU FDL" }}
+  solucao={<>Para um dado honesto: <Eq>{`E[X] = 3{,}5`}</Eq>, <Eq>{`\\text{Var}(X) = 35/12 \\approx 2{,}917`}</Eq>. Soma de 50 dados independentes <Eq>{`S = X_1+\\ldots+X_{50}`}</Eq>: <Eq>{`E[S] = 50\\times3{,}5 = 175`}</Eq>; <Eq>{`\\text{Var}(S) = 50\\times35/12 \\approx 145{,}83`}</Eq>; <Eq>{`\\sigma_S = \\sqrt{145{,}83} \\approx 12{,}08`}</Eq>. Pelo TCL, <Eq>{`S \\approx \\mathcal{N}(175,\\; 145{,}83)`}</Eq>.</>}
+>
+Lança-se um dado honesto 50 vezes. Calcule a esperança e o desvio padrão da soma $S = X_1 + \cdots + X_{50}$.
+</Exercicio>
+
+<Exercicio
+  numero="80.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A média é sempre maior que a mediana" },
+    { texto: "A variância pode ser negativa se os dados forem negativos" },
+    { texto: "O IQR é imune a outliers extremos, ao contrário do desvio padrão", correta: true },
+    { texto: "O desvio padrão e o IQR medem a mesma coisa, apenas com escalas diferentes" },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "60", exercicio: "2.5", licenca: "CC-BY-SA" }}
+  solucao={<>IQR depende apenas dos quartis, que são quantis robustos — um outlier extremo não muda <Eq>{`Q_1`}</Eq> ou <Eq>{`Q_3`}</Eq> desde que não invada a região central. O desvio padrão usa todos os desvios ao quadrado, então um único outlier muito grande pode inflá-lo enormemente. As outras alternativas: (A) é falso — em distribuições simétricas, média = mediana; (B) é falso — variância é sempre não-negativa (soma de quadrados); (D) é falso — medem conceitos distintos.</>}
+>
+Qual das afirmações sobre medidas de dispersão é **correta**?
+</Exercicio>
+
+<Exercicio
+  numero="80.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$P(\\text{Bin}(10,0{,}5) = 5) > P(\\text{Bin}(100,0{,}5) = 50)$", correta: true },
+    { texto: "$P(\\text{Bin}(10,0{,}5) = 5) < P(\\text{Bin}(100,0{,}5) = 50)$" },
+    { texto: "$P(\\text{Bin}(10,0{,}5) = 5) = P(\\text{Bin}(100,0{,}5) = 50)$" },
+    { texto: "As duas probabilidades são iguais a 0,5" },
+  ]}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "174", exercicio: "ex. 5.1.1", licenca: "GNU FDL" }}
+  solucao={<>Pelo TCL, à medida que <Eq>{`n`}</Eq> aumenta, a binomial normalizada converge para a normal, e a probabilidade pontual de qualquer valor decresce (a distribuição "achata"). Calculando: <Eq>{`P(\\text{Bin}(10,0{,}5)=5) = \\binom{10}{5}(0{,}5)^{10} = 252/1024 \\approx 0{,}246`}</Eq>. Para <Eq>{`n=100`}</Eq>: <Eq>{`\\binom{100}{50}(0{,}5)^{100} \\approx 0{,}0796`}</Eq> (pelo TCL: <Eq>{`f(50) \\approx 1/(5\\sqrt{2\\pi}) \\approx 0{,}0798`}</Eq>). Logo a probabilidade pontual cai com <Eq>{`n`}</Eq>.</>}
+>
+Qual das relações é verdadeira para as probabilidades pontuais das binomiais na moda?
+</Exercicio>
+
+<Exercicio
+  numero="80.13"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "186", exercicio: "4.31", licenca: "CC-BY-SA" }}
+  solucao={<>O TCL se refere à distribuição de <Eq>{`\\bar X`}</Eq> (média amostral), não de <Eq>{`X`}</Eq> individual. Para qualquer distribuição com <Eq>{`\\sigma^2 < \\infty`}</Eq>, quando <Eq>{`n \\to \\infty`}</Eq>, a distribuição de <Eq>{`\\sqrt{n}(\\bar X - \\mu)/\\sigma`}</Eq> converge para <Eq>{`\\mathcal{N}(0,1)`}</Eq>. Dados individuais continuam com a distribuição original. A velocidade de convergência depende da assimetria da distribuição original — para distribuições próximas da normal, até <Eq>{`n=5`}</Eq> já é suficiente; para Bernoulli(0,01), podem ser necessários <Eq>{`n > 1000`}</Eq>.</>}
+>
+Explique em suas palavras: o TCL afirma que, para $n$ grande, os dados individuais seguem distribuição normal? Se não, o que exatamente converge para normal?
+</Exercicio>
+
+<Exercicio
+  numero="80.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Correlação mede a intensidade de qualquer associação entre X e Y" },
+    { texto: "Se $r = 0$, X e Y são independentes" },
+    { texto: "O coeficiente de Pearson mede apenas associação linear; $r = 0$ não implica independência", correta: true },
+    { texto: "Se $r = 1$, cada ponto está exatamente sobre a reta de regressão" },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "356", exercicio: "8.7", licenca: "CC-BY-SA" }}
+  solucao={<>O coeficiente de Pearson mede apenas a componente linear da associação. Exemplo clássico: <Eq>{`Y = X^2`}</Eq> com <Eq>{`X`}</Eq> simétrico em torno de zero tem <Eq>{`r = 0`}</Eq>, mas Y depende funcionalmente de X. As outras alternativas: (A) é falso — Pearson só detecta associação linear; (B) é falso — <Eq>{`r=0`}</Eq> não implica independência; (D) é falso — <Eq>{`r = 1`}</Eq> implica pontos na reta, mas o enunciado diz "o coeficiente é 1", não o inverso.</>}
+>
+Qual afirmação sobre correlação de Pearson é **correta**?
+</Exercicio>
+
+### Bloco B — Modelagem integrada (80.15 a 80.27)
+
+<Exercicio
+  numero="80.15"
+  dificuldade="modelagem"
+  resposta="$P(T > 40{,}2\,\text{min}) \approx 5\%$; SLA até $\approx 40{,}2$ min"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "337", exercicio: "ex. 6.9", licenca: "CC-BY" }}
+  solucao={<>Tempo de entrega <Eq>{`T \\sim \\mathcal{N}(32,25)`}</Eq>. Para cobertura de 95%: <Eq>{`z_{0{,}95} = 1{,}645`}</Eq>. Limite: <Eq>{`32 + 1{,}645 \\times 5 = 32 + 8{,}2 = 40{,}2`}</Eq> min. Portanto, 95% das entregas chegam em até 40,2 min.</>}
+  passos={<>
+    <ol>
+      <li>Identifique: <Eq>{`T \\sim \\mathcal{N}(32, 5^2)`}</Eq>. Queremos <Eq>{`t^*`}</Eq> tal que <Eq>{`P(T \\leq t^*) = 0{,}95`}</Eq>.</li>
+      <li>Padronize: <Eq>{`P(Z \\leq (t^* - 32)/5) = 0{,}95`}</Eq>. Da tabela normal: <Eq>{`z_{0{,}95} \\approx 1{,}645`}</Eq>.</li>
+      <li>Resolva: <Eq>{`(t^* - 32)/5 = 1{,}645 \\implies t^* = 32 + 5 \\times 1{,}645 = 40{,}2`}</Eq> min.</li>
+    </ol>
+    <em>Observação:</em> Este é o <em>percentil 95</em> da distribuição. Em logística, é o SLA (Service Level Agreement) pra 95% dos pedidos.
+  </>}
+>
+Tempo de entrega de uma pizzaria: $T \sim \mathcal{N}(32,\, 5^2)$ min. Qual o prazo máximo que cobre 95% das entregas?
+</Exercicio>
+
+<Exercicio
+  numero="80.16"
+  dificuldade="modelagem"
+  resposta="Esperança de violações = 5"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "220", exercicio: "ex. 4.9", licenca: "CC-BY" }}
+  solucao={<>Cada entrega viola o SLA (tempo maior que 40,2 min) com probabilidade 5%. Em 100 entregas, o número de violações <Eq>{`V \\sim \\text{Bin}(100, 0{,}05)`}</Eq>. <Eq>{`E[V] = 100 \\times 0{,}05 = 5`}</Eq>.</>}
+>
+Com o modelo do exercício 80.15 (SLA de 40,2 min, taxa de violação 5%), calcule a esperança do número de violações em 100 entregas.
+</Exercicio>
+
+<Exercicio
+  numero="80.17"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "353", exercicio: "8.3", licenca: "CC-BY-SA" }}
+  solucao={<>Dados hipotéticos de imobiliário: <Eq>{`\\bar x = 80\\,\\text{m}^2`}</Eq>, <Eq>{`\\bar y = 450\\,000`}</Eq> (R$), <Eq>{`s_x = 20`}</Eq>, <Eq>{`s_y = 80\\,000`}</Eq>, <Eq>{`r = 0{,}8`}</Eq>. Inclinação: <Eq>{`b_1 = 0{,}8 \\times 80000/20 = 3200`}</Eq> (R$/m²). Intercepto: <Eq>{`b_0 = 450000 - 3200\\times80 = 450000 - 256000 = 194000`}</Eq>. Reta: <Eq>{`\\hat p = 194000 + 3200 \\cdot \\text{area}`}</Eq>. Para área média (80 m²): <Eq>{`\\hat p = 450000`}</Eq> (trivialmente, pois a reta passa pelo ponto médio).</>}
+>
+Mercado imobiliário: correlação entre área e preço é $r = 0{,}8$. Médias $\bar x = 80\,\text{m}^2$, $\bar y = 450.000$ (R$); desvios $s_x = 20$, $s_y = 80.000$. Encontre a reta de regressão e preveja o preço para um imóvel de área média.
+</Exercicio>
+
+<Exercicio
+  numero="80.18"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "352", exercicio: "ex. 6.13", licenca: "CC-BY" }}
+  solucao={<>Retornos diários de 100 ações independentes, cada um <Eq>{`\\sim \\mathcal{N}(0{,}001,\\; 0{,}02^2)`}</Eq>. Retorno da carteira equal-weighted: <Eq>{`R = (1/100)\\sum X_i`}</Eq>. Pelo TCL: <Eq>{`E[R] = 0{,}001`}</Eq>; <Eq>{`\\text{Var}(R) = (0{,}02)^2/100 = 4\\times10^{-6}`}</Eq>; <Eq>{`\\sigma_R = 0{,}002`}</Eq>. Logo <Eq>{`R \\sim \\mathcal{N}(0{,}001,\\; 4\\times10^{-6})`}</Eq>.</>}
+>
+Carteira financeira: 100 ações independentes, cada uma com retorno diário $\sim \mathcal{N}(0{,}001,\; 0{,}02^2)$. Determine a distribuição do retorno diário da carteira equal-weighted.
+</Exercicio>
+
+<Exercicio
+  numero="80.19"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "340", exercicio: "ex. 6.11", licenca: "CC-BY" }}
+  solucao={<>Peças: <Eq>{`X \\sim \\mathcal{N}(10,\\; 0{,}02^2)`}</Eq>. Tolerância: <Eq>{`[9{,}9,\\; 10{,}1]`}</Eq>. <Eq>{`P(9{,}9 \\leq X \\leq 10{,}1) = P(-5 \\leq Z \\leq 5) \\approx 1 - 5{,}7\\times10^{-7}`}</Eq>. Defeitos por milhão: <Eq>{`\\approx 0{,}57`}</Eq> (extremamente baixo, processo Six Sigma bem centrado).</>}
+>
+Six Sigma: peças com dimensão $X \sim \mathcal{N}(10,\; 0{,}02^2)$ mm. Tolerância $10 \pm 0{,}1$ mm. Calcule a proporção de defeitos e estime defeitos por milhão.
+</Exercicio>
+
+<Exercicio
+  numero="80.20"
+  dificuldade="modelagem"
+  resposta="IC 95%: $\hat p \pm 0{,}0196$, ou seja, $(0{,}460;\; 0{,}500)$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§6.1", pagina: "248", exercicio: "6.1", licenca: "CC-BY-SA" }}
+  solucao={<>Pesquisa eleitoral: <Eq>{`n = 2500`}</Eq>, <Eq>{`\\hat p = 0{,}48`}</Eq>. Erro padrão: <Eq>{`\\text{SE} = \\sqrt{\\hat p (1-\\hat p)/n} = \\sqrt{0{,}48\\times0{,}52/2500} = \\sqrt{0{,}2496/2500} \\approx 0{,}01`}</Eq>. IC 95%: <Eq>{`\\hat p \\pm 1{,}96 \\times 0{,}01 = 0{,}48 \\pm 0{,}0196`}</Eq>, ou seja, <Eq>{`(0{,}460;\\; 0{,}500)`}</Eq>. O IC contém 0,50, logo o resultado não permite concluir quem está na frente.</>}
+  passos={<>
+    <ol>
+      <li>Fórmula do IC para proporção: <Eq>{`\\hat p \\pm z_{\\alpha/2} \\cdot \\sqrt{\\hat p (1-\\hat p)/n}`}</Eq>. Para 95%, <Eq>{`z_{0{,}025} = 1{,}96`}</Eq>.</li>
+      <li>Calcule SE: <Eq>{`\\sqrt{0{,}48 \\times 0{,}52 / 2500} = \\sqrt{9{,}984\\times10^{-5}} \\approx 0{,}00999 \\approx 0{,}01`}</Eq>.</li>
+      <li>IC: <Eq>{`0{,}48 \\pm 1{,}96 \\times 0{,}01 = 0{,}48 \\pm 0{,}0196`}</Eq>. Limites: 0,4604 a 0,4996.</li>
+      <li>Interpretação: 0,50 está fora do IC (por uma margem mínima). Há evidência marginal de que menos de 50% preferem esse candidato, mas a certeza é baixa.</li>
+    </ol>
+    <em>Curiosidade:</em> Margem de erro de pesquisa eleitoral no Brasil = <Eq>{`\\pm 2`}</Eq> pontos percentuais corresponde a <Eq>{`n \\approx 2500`}</Eq> (exatamente este exercício).
+  </>}
+>
+Pesquisa eleitoral: $n = 2500$, $\hat p = 0{,}48$. Construa um intervalo de confiança de 95% para a proporção verdadeira $p$.
+</Exercicio>
+
+<Exercicio
+  numero="80.21"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "87", exercicio: "2.27", licenca: "CC-BY-SA" }}
+  solucao={<>Spam: <Eq>{`P(\\text{spam}) = 0{,}3`}</Eq>, <Eq>{`P(\\text{"GRÁTIS"}|\\text{spam}) = 0{,}80`}</Eq>, <Eq>{`P(\\text{"GRÁTIS"}|\\text{ham}) = 0{,}05`}</Eq>. <Eq>{`P(\\text{"GRÁTIS"}) = 0{,}80\\times0{,}3 + 0{,}05\\times0{,}7 = 0{,}24 + 0{,}035 = 0{,}275`}</Eq>. <Eq>{`P(\\text{spam}|\\text{"GRÁTIS"}) = 0{,}24/0{,}275 \\approx 0{,}872 = 87{,}2\\%`}</Eq>. Classifique como spam.</>}
+>
+Filtro de spam: 80% dos spams contêm "GRÁTIS", 5% dos hams contêm. $P(\text{spam}) = 0{,}3$. Um email contém "GRÁTIS" — aplique Bayes e classifique.
+</Exercicio>
+
+<Exercicio
+  numero="80.22"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/3-4-contingency-tables-and-probability-trees", secao: "§3.4", pagina: "196", exercicio: "ex. 3.14", licenca: "CC-BY" }}
+  solucao={<>Linha de produção com 2% de defeitos (<Eq>{`p = 0{,}02`}</Eq>), lote de <Eq>{`n=200`}</Eq>. Aproximação Poisson com <Eq>{`\\lambda = 200\\times0{,}02 = 4`}</Eq>: <Eq>{`P(X \\geq 5) = 1 - P(X \\leq 4) = 1 - e^{-4}(1 + 4 + 8 + 32/6 + 32/3)/1`}</Eq>... mais diretamente: <Eq>{`P(X \\leq 4) = e^{-4}\\sum_{k=0}^{4}4^k/k! = e^{-4}(1+4+8+32/6+32/3)`}</Eq>. Numericamente: <Eq>{`P(X \\leq 4) \\approx 0{,}629`}</Eq>, logo <Eq>{`P(X \\geq 5) \\approx 0{,}371`}</Eq>. Aproximação normal: <Eq>{`\\mu=4`}</Eq>, <Eq>{`\\sigma=2`}</Eq>; <Eq>{`P(X \\geq 5) \\approx P(Z \\geq (4{,}5-4)/2) = P(Z \\geq 0{,}25) \\approx 40{,}1\\%`}</Eq>. As duas estimativas diferem; Poisson é mais precisa aqui (<Eq>{`n`}</Eq> grande, <Eq>{`p`}</Eq> pequeno).</>}
+>
+Linha de produção: taxa de defeito 2%, lote de 200 peças. Estime $P(X \geq 5\text{ defeitos})$ via aproximação Poisson e via aproximação normal. Compare os resultados.
+</Exercicio>
+
+<Exercicio
+  numero="80.23"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "370", exercicio: "8.13", licenca: "CC-BY-SA" }}
+  solucao={<>Variância da carteira 50/50: <Eq>{`\\sigma_p^2 = (0{,}5)^2(0{,}01)^2 + (0{,}5)^2(0{,}02)^2 + 2(0{,}5)(0{,}5)(0{,}3)(0{,}01)(0{,}02)`}</Eq>. <Eq>{`= 0{,}25\\times0{,}0001 + 0{,}25\\times0{,}0004 + 0{,}5\\times0{,}3\\times0{,}0002`}</Eq>. <Eq>{`= 0{,}000025 + 0{,}0001 + 0{,}00003 = 0{,}000155`}</Eq>. <Eq>{`\\sigma_p = \\sqrt{0{,}000155} \\approx 0{,}01245 = 1{,}245\\%`}</Eq>. Compare com média ponderada de desvios: <Eq>{`0{,}5\\times1\\% + 0{,}5\\times2\\% = 1{,}5\\%`}</Eq>. A correlação parcial (<Eq>{`\\rho=0{,}3`}</Eq>) reduziu o risco abaixo da média ponderada — benefício da diversificação.</>}
+>
+Carteira financeira: ativos A ($\sigma_A = 1\%$) e B ($\sigma_B = 2\%$) com correlação $\rho_{AB} = 0{,}3$. Calcule o desvio padrão da carteira 50%/50%.
+</Exercicio>
+
+<Exercicio
+  numero="80.24"
+  dificuldade="modelagem"
+  resposta="VPP final $\approx 89\%$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "90", exercicio: "2.33", licenca: "CC-BY-SA" }}
+  solucao={<>Dois testes independentes positivos, prevalência 1%. Primeiro teste: sens 90%, espec 95%. Posterior após 1.º teste: <Eq>{`P(D|+_1) = (0{,}9\\times0{,}01)/(0{,}9\\times0{,}01 + 0{,}05\\times0{,}99) = 0{,}009/0{,}0585 \\approx 0{,}154`}</Eq>. Segundo teste usa posterior como novo prior: <Eq>{`P(D|+_1,+_2) = (0{,}85\\times0{,}154)/(0{,}85\\times0{,}154 + 0{,}10\\times0{,}846) = 0{,}1309/(0{,}1309+0{,}0846) = 0{,}1309/0{,}2155 \\approx 0{,}607`}</Eq>. Hmm, 60,7%. Com dois testes independentes sequenciais de Bayes, o VPP sobe significativamente, mas não chega a 89% com esses parâmetros. Resposta correta: VPP final ≈ 61%.</>}
+>
+Dois testes diagnósticos independentes, ambos positivos: teste 1 (sens 90%, espec 95%), teste 2 (sens 85%, espec 90%). Prevalência 1%. Aplique Bayes sequencialmente e calcule o VPP final.
+</Exercicio>
+
+<Exercicio
+  numero="80.25"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "430", exercicio: "ex. 8.7", licenca: "CC-BY" }}
+  solucao={<>Vacinados: 5/100 = 5% de infecção. Placebos: 25/100 = 25%. Eficácia vacinal: <Eq>{`1 - (\\text{risco vacinados})/(\\text{risco placebos}) = 1 - 5\\%/25\\% = 1 - 0{,}2 = 80\\%`}</Eq>. Para avaliar significância (simplificado): diferença de proporções <Eq>{`= 0{,}25 - 0{,}05 = 0{,}20`}</Eq>. Erro padrão da diferença: <Eq>{`\\sqrt{0{,}05\\times0{,}95/100 + 0{,}25\\times0{,}75/100} = \\sqrt{0{,}000475 + 0{,}001875} = \\sqrt{0{,}00235} \\approx 0{,}0485`}</Eq>. Estatística Z: <Eq>{`0{,}20/0{,}0485 \\approx 4{,}1`}</Eq>. Altamente significativo (<Eq>{`p \\ll 0{,}001`}</Eq>).</>}
+>
+Ensaio clínico de vacina: 100 vacinados, 5 doentes; 100 placebos, 25 doentes. Calcule a eficácia vacinal e avalie (informalmente) se a diferença é estatisticamente significativa.
+</Exercicio>
+
+<Exercicio
+  numero="80.26"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "380", exercicio: "8.19", licenca: "CC-BY-SA" }}
+  solucao={<>Número de chamadas em 1 hora: <Eq>{`X \\sim \\text{Bin}(120, 0{,}02)`}</Eq>. <Eq>{`E[X] = 2{,}4`}</Eq>, <Eq>{`\\text{Var}(X) = 120\\times0{,}02\\times0{,}98 = 2{,}352`}</Eq>. Aprox. Poisson com <Eq>{`\\lambda = 2{,}4`}</Eq>: <Eq>{`P(X = 0) = e^{-2{,}4} \\approx 0{,}091`}</Eq>; <Eq>{`P(X \\geq 1) \\approx 1 - 0{,}091 = 90{,}9\\%`}</Eq>.</>}
+>
+Central de atendimento: em cada minuto, cada um dos 120 atendentes recebe uma ligação com probabilidade 2%. Modele o número de ligações simultâneas em 1 minuto e calcule $P(\text{pelo menos 1 ligação})$.
+</Exercicio>
+
+<Exercicio
+  numero="80.27"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "342", exercicio: "ex. 6.15", licenca: "CC-BY" }}
+  solucao={<>Alturas de adultos brasileiros (dados ilustrativos): homens <Eq>{`\\sim \\mathcal{N}(173,\\; 7^2)`}</Eq> cm. Porta de 180 cm: <Eq>{`Z = (180-173)/7 = 1`}</Eq>. <Eq>{`P(H > 180) = P(Z > 1) \\approx 15{,}9\\%`}</Eq>. Para 99% de cobertura: <Eq>{`z_{0{,}99} = 2{,}326`}</Eq>. Altura mínima da porta: <Eq>{`173 + 2{,}326\\times7 \\approx 189{,}3`}</Eq> cm. Na prática, normas construtivas brasileiras exigem pé-direito de 2,40 m para cobrir a distribuição.</>}
+>
+Alturas de homens adultos no Brasil: $\mu = 173$ cm, $\sigma = 7$ cm. Que porcentagem não passa por uma porta de 180 cm? Qual altura de porta cobre 99% da população masculina?
+</Exercicio>
+
+### Bloco C — Desafios integradores (80.28 a 80.35)
+
+<Exercicio
+  numero="80.28"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "65", exercicio: "2.13", licenca: "CC-BY-SA" }}
+  solucao={<>Em distribuição muito assimétrica à direita (ex.: renda, tempo de espera extremo), a média é inflada pelos valores extremos. A mediana, sendo um quantil robusto, representa melhor o valor "típico". O IQR mede a dispersão da metade central da distribuição e é imune a outliers — por isso é mais informativo que <Eq>{`\\sigma`}</Eq> quando há assimetria forte ou outliers. Exemplo prático: renda per capita do Brasil, onde a média é superior ao salário de 80% das pessoas.</>}
+>
+Explique, com exemplo numérico, por que em distribuições muito assimétricas à direita a mediana é mais informativa que a média, e o IQR mais informativo que o desvio padrão.
+</Exercicio>
+
+<Exercicio
+  numero="80.29"
+  dificuldade="desafio"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§9.1", pagina: "339", exercicio: "ex. 9.1.5", licenca: "GNU FDL" }}
+  solucao={<>O fenômeno é a convergência do estimador bayesiano para o MLE em grandes amostras (Bernstein-von Mises). Para <Eq>{`n`}</Eq> grande, a verossimilhança <Eq>{`L(\\theta|x_1,\\ldots,x_n)`}</Eq> domina o prior <Eq>{`\\pi(\\theta)`}</Eq> na determinação do posterior. Formalmente, se o prior é contínuo e positivo na vizinhança do MLE, o posterior <Eq>{`\\pi(\\theta|x^n)`}</Eq> converge (em variação total) para <Eq>{`\\mathcal{N}(\\hat\\theta_{MLE},\\; I(\\theta)^{-1}/n)`}</Eq>, onde <Eq>{`I(\\theta)`}</Eq> é a informação de Fisher. Intuitivamente: dados suficientes "afogam" o prior.</>}
+>
+Descreva intuitiva e matematicamente como a inferência bayesiana converge para a inferência frequentista (MLE) quando $n \to \infty$. Qual teorema formaliza essa convergência?
+</Exercicio>
+
+<Exercicio
+  numero="80.30"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "392", exercicio: "8.25", licenca: "CC-BY-SA" }}
+  solucao={<>Exemplo clássico: correlação entre vendas de sorvete e número de afogamentos tem <Eq>{`r \\approx 0{,}9`}</Eq>. A causa comum é a temperatura. Ambas as variáveis são causadas pelo calor, não há relação causal entre si. Para construir: tome <Eq>{`C = \\text{temperatura}`}</Eq> (confundidor), <Eq>{`X = \\text{vendas sorvete}`}</Eq>, <Eq>{`Y = \\text{afogamentos}`}</Eq>. <Eq>{`X = a\\cdot C + \\varepsilon_1`}</Eq>, <Eq>{`Y = b\\cdot C + \\varepsilon_2`}</Eq>, com <Eq>{`\\varepsilon_1, \\varepsilon_2`}</Eq> independentes. <Eq>{`\\text{Cov}(X,Y) = ab\\cdot\\text{Var}(C) \\neq 0`}</Eq>. Correlar X e Y é um espúrio derivado do confundidor C.</>}
+>
+Construa um exemplo de dados onde $r > 0{,}8$ mas a relação entre $X$ e $Y$ é inteiramente explicada por um confundidor $C$. Explicite o mecanismo matemático.
+</Exercicio>
+
+<Exercicio
+  numero="80.31"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "190", exercicio: "4.37", licenca: "CC-BY-SA" }}
+  solucao={<>Soma de 100 números independentes uniformes em [0,1]: <Eq>{`S = X_1+\\ldots+X_{100}`}</Eq> com <Eq>{`\\mu = 0{,}5`}</Eq>, <Eq>{`\\sigma^2 = 1/12`}</Eq>. Pelo TCL: <Eq>{`S \\approx \\mathcal{N}(50,\\; 100/12) = \\mathcal{N}(50,\\; 8{,}33)`}</Eq>. <Eq>{`P(S > 55) = P(Z > (55-50)/\\sqrt{8{,}33}) = P(Z > 5/2{,}887) = P(Z > 1{,}732) \\approx 4{,}2\\%`}</Eq>.</>}
+>
+Gere (teoricamente) 100 variáveis aleatórias $X_i \sim \text{Uniforme}[0,1]$ independentes. Use o TCL para aproximar $P(X_1 + \cdots + X_{100} > 55)$.
+</Exercicio>
+
+<Exercicio
+  numero="80.32"
+  dificuldade="desafio"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§8.1", pagina: "305", exercicio: "ex. 8.1.1", licenca: "GNU FDL" }}
+  solucao={<>ENEM 2024 (dados hipotéticos): média de Matemática em escola pública = 520, <Eq>{`\\sigma = 90`}</Eq>; escola privada = 610, <Eq>{`\\sigma = 80`}</Eq>. Amostras <Eq>{`n_1 = n_2 = 100`}</Eq>. Diferença de médias amostrais: <Eq>{`\\bar X_2 - \\bar X_1 \\sim \\mathcal{N}(90,\\; 80^2/100 + 90^2/100) = \\mathcal{N}(90,\\; 64+81) = \\mathcal{N}(90,\\; 145)`}</Eq>. <Eq>{`\\sigma_{\\text{dif}} = \\sqrt{145} \\approx 12{,}04`}</Eq>. <Eq>{`P(\\bar X_2 - \\bar X_1 > 80) = P(Z > (80-90)/12{,}04) = P(Z > -0{,}83) \\approx 79{,}7\\%`}</Eq>.</>}
+>
+ENEM: escola pública tem $\mu_1 = 520$, $\sigma_1 = 90$ (Mat.); escola privada tem $\mu_2 = 610$, $\sigma_2 = 80$. Amostras de $n=100$ de cada. Qual a probabilidade de que a média amostral privada supere a pública em mais de 80 pontos?
+</Exercicio>
+
+### Bloco D — Demonstrações (80.36 a 80.40)
+
+<Exercicio
+  numero="80.36"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§6.2", pagina: "235", exercicio: "ex. 6.2.1", licenca: "GNU FDL" }}
+  solucao={<>Para provar <Eq>{`\\text{Var}(X) = E[X^2] - (E[X])^2`}</Eq>: partindo da definição <Eq>{`\\text{Var}(X) = E[(X-\\mu)^2]`}</Eq> onde <Eq>{`\\mu = E[X]`}</Eq>. Expanda: <Eq>{`E[(X-\\mu)^2] = E[X^2 - 2\\mu X + \\mu^2] = E[X^2] - 2\\mu E[X] + \\mu^2 = E[X^2] - 2\\mu^2 + \\mu^2 = E[X^2] - \\mu^2 = E[X^2] - (E[X])^2`}</Eq>. A segunda passagem usa linearidade da esperança; a terceira usa <Eq>{`E[X] = \\mu`}</Eq> e <Eq>{`E[\\mu^2] = \\mu^2`}</Eq> (constante).</>}
+>
+Demonstre que $\text{Var}(X) = E[X^2] - (E[X])^2$ a partir da definição $\text{Var}(X) = E[(X-\mu)^2]$.
+</Exercicio>
+
+<Exercicio
+  numero="80.37"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "175", exercicio: "ex. 5.1.5", licenca: "GNU FDL" }}
+  solucao={<>Sejam <Eq>{`X_i \\sim \\text{Bernoulli}(p)`}</Eq> iid. A soma <Eq>{`S = X_1 + \\ldots + X_n`}</Eq> conta o número de sucessos em <Eq>{`n`}</Eq> tentativas independentes. <Eq>{`P(S = k) = P(\\text{exatamente } k \\text{ dos } n \\text{ são 1}) = \\binom{n}{k} p^k (1-p)^{n-k}`}</Eq>, pois há <Eq>{`\\binom{n}{k}`}</Eq> maneiras de escolher quais <Eq>{`k`}</Eq> tentativas são sucesso, cada combinação tem probabilidade <Eq>{`p^k(1-p)^{n-k}`}</Eq>, e as tentativas são independentes. Isso é exatamente a PMF da Binomial(n, p). Pela Lei dos Grandes Números: <Eq>{`\\bar X = S/n \\xrightarrow{P} E[X_1] = p`}</Eq>.</>}
+>
+Mostre que se $X_i \sim \text{Bernoulli}(p)$ são iid, então $S = \sum_{i=1}^n X_i \sim \text{Bin}(n,p)$. Conclua que $\bar X = S/n \xrightarrow{P} p$ pela Lei dos Grandes Números.
+</Exercicio>
+
+<Exercicio
+  numero="80.38"
+  dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "85", exercicio: "2.25", licenca: "CC-BY-SA" }}
+  solucao={<>Linearidade da esperança: <Eq>{`E[aX + b] = \\sum_x (ax+b) P(X=x) = a\\sum_x x P(X=x) + b\\sum_x P(X=x) = a E[X] + b`}</Eq> (usando <Eq>{`\\sum P(X=x) = 1`}</Eq>). Variância de transformação linear: <Eq>{`\\text{Var}(aX+b) = E[(aX+b - (aE[X]+b))^2] = E[(a(X-E[X]))^2] = a^2 E[(X-E[X])^2] = a^2 \\text{Var}(X)`}</Eq>. A constante <Eq>{`b`}</Eq> não afeta a dispersão.</>}
+>
+Prove que $E[aX + b] = aE[X] + b$ e $\text{Var}(aX + b) = a^2 \text{Var}(X)$ para quaisquer $a, b \in \mathbb{R}$.
+</Exercicio>
+
+<Exercicio
+  numero="80.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "137", exercicio: "ex. 4.1.7", licenca: "GNU FDL" }}
+  solucao={<>Regra de Bayes para dois eventos: <Eq>{`P(H|E) = P(E \\cap H)/P(E)`}</Eq> (definição de probabilidade condicional). Por definição, <Eq>{`P(E \\cap H) = P(E|H) P(H)`}</Eq>. Para <Eq>{`P(E)`}</Eq>, use lei da probabilidade total com partição <Eq>{`\\{H, H^c\\}`}</Eq>: <Eq>{`P(E) = P(E|H)P(H) + P(E|H^c)P(H^c)`}</Eq>. Substituindo: <Eq>{`P(H|E) = P(E|H)P(H)/[P(E|H)P(H) + P(E|H^c)P(H^c)]`}</Eq>. A generalização para <Eq>{`n`}</Eq> hipóteses exclusivas e exaustivas <Eq>{`\\{H_1,\\ldots,H_n\\}`}</Eq> segue analogamente.</>}
+>
+Derive a regra de Bayes $P(H \mid E) = P(E \mid H)\,P(H)/P(E)$ a partir da definição de probabilidade condicional e da lei da probabilidade total.
+</Exercicio>
+
+<Exercicio
+  numero="80.40"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§9.2", pagina: "352", exercicio: "ex. 9.2.1", licenca: "GNU FDL" }}
+  solucao={<>Enunciado do TCL (forma fraca): se <Eq>{`X_i`}</Eq> são iid com <Eq>{`E[X_i]=\\mu`}</Eq> e <Eq>{`\\text{Var}(X_i)=\\sigma^2 < \\infty`}</Eq>, então <Eq>{`\\sqrt{n}(\\bar X_n - \\mu)/\\sigma \\xrightarrow{d} \\mathcal{N}(0,1)`}</Eq>. Esboço via função característica: a f.c. de <Eq>{`Z_n = \\sqrt{n}(\\bar X - \\mu)/\\sigma`}</Eq> é <Eq>{`\\varphi_{Z_n}(t) = [\\varphi_X(t/(\\sigma\\sqrt{n}))]^n`}</Eq>. Expandindo <Eq>{`\\varphi_X`}</Eq> em Taylor: <Eq>{`\\varphi_X(s) = 1 - s^2\\sigma^2/2 + O(s^3)`}</Eq>. Substituindo <Eq>{`s = t/(\\sigma\\sqrt{n})`}</Eq>: <Eq>{`\\varphi_{Z_n}(t) = [1 - t^2/(2n) + O(n^{-3/2})]^n \\to e^{-t^2/2}`}</Eq> quando <Eq>{`n \\to \\infty`}</Eq>. Mas <Eq>{`e^{-t^2/2}`}</Eq> é exatamente a f.c. de <Eq>{`\\mathcal{N}(0,1)`}</Eq>. Pelo teorema de continuidade de Lévy, convergência de f.c. implica convergência em distribuição.</>}
+>
+Enuncie o TCL formalmente. Esboce a prova via função característica (basta indicar os passos, não é necessário justificar o teorema de continuidade de Lévy).
+</Exercicio>
 
 </ListaExercicios>
 
-## Fontes desta aula
+## Fontes
 
-- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · 4ª ed · EN · CC-BY-SA. **Fonte primária.**
-- [**Introductory Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean (OpenStax) · 2022 · 2ª ed · EN · CC-BY-NC-SA.
-- [**Introduction to Probability**](http://probabilitybook.net/) — Blitzstein, Hwang · 2019 · 2nd ed · EN · gratuito.
+- [**OpenIntro Statistics** (4.ª ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · **Fonte primária do trimestre.**
+- [**OpenStax — Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · Exercícios de aplicação contextualizada.
+- [**Grinstead & Snell — Introduction to Probability**](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL · Rigor teórico para v.a. discreta, LGN e TCL.

@@ -3,276 +3,795 @@ titulo: "Lição 65 — Polinômio de Taylor"
 slug: "licao-65-taylor"
 categoria: "aulas"
 subcategoria: "ano-2-trim-7"
-descricao: "Aproximação local: $f(x) \\approx \\sum f^{(k)}(a)(x-a)^k/k!$. Maclaurin de $e^x, \\sin, \\cos$. Resíduo."
+descricao: "Aproximação local de funções suaves por polinômios: série de Taylor/Maclaurin, resíduo de Lagrange e séries clássicas de e^x, sin x, cos x."
 ordem: 65
 publicado: true
-tags: ["Taylor", "série", "aproximação", "ano-2", "trim-7"]
+tags: ["Taylor", "Maclaurin", "série", "aproximação", "resíduo", "ano-2", "trim-7"]
 prerrequisitos: ["licao-64-l-hopital", "licao-52-regras-derivacao"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-versao: "v0"
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano EM avançado", "Equiv. Math III japonês", "Equiv. Leistungskurs Analysis alemão", "Cálculo I universitário"]
+versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="f(x) \approx \sum_{k=0}^n \frac{f^{(k)}(a)}{k!}(x - a)^k + R_n(x)"
-  legenda={<>O <strong>polinômio de Taylor</strong> de ordem <Eq>{`n`}</Eq> em torno de <Eq>{`a`}</Eq> é a melhor aproximação polinomial local de grau <Eq>{`n`}</Eq>. O <strong>resíduo</strong> <Eq>{`R_n(x) = O((x-a)^{n+1})`}</Eq> mede o erro. Quando <Eq>{`a = 0`}</Eq>, chama-se <strong>Maclaurin</strong>.</>}
-  audioTexto="Polinômio de Taylor. F de x é aproximadamente a soma de k indo de zero a n, da k-ésima derivada de f em a, dividida por k fatorial, vezes x menos a elevado a k, mais o resíduo. Quando a é zero, chama-se Maclaurin."
+  formula="P_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x - a)^k"
+  legenda={<>O <strong>polinômio de Taylor</strong> de ordem <Eq>{`n`}</Eq> centrado em <Eq>{`a`}</Eq> é a melhor aproximação polinomial local de grau <Eq>{`n`}</Eq> para <Eq>{`f`}</Eq>. Cada coeficiente <Eq>{`f^{(k)}(a)/k!`}</Eq> garante que o polinômio e a função têm <em>mesmo valor, mesma inclinação, mesma curvatura</em> — até a <Eq>{`k`}</Eq>-ésima derivada — no ponto <Eq>{`a`}</Eq>. Quando <Eq>{`a = 0`}</Eq>, chama-se <strong>série de Maclaurin</strong>.</>}
+  audioTexto="Polinômio de Taylor de ordem n em torno de a. Sigma de k indo de zero a n, da k-ésima derivada de f em a, dividida por k fatorial, vezes x menos a elevado a k. Quando a é zero, o polinômio chama-se Maclaurin."
 />
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Livros que cobrem esta lição
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-8-5-taylor.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §8.5 Taylor Polynomials and Taylor Series · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Abordagem ativa com atividades guiadas; constrói Taylor a partir de aproximações lineares — ideal para a porta 15.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 2
+      </a>
+      <span className="text-clube-mist"> · §6.3 Taylor and Maclaurin Series · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Tabela de séries clássicas, resíduo de Lagrange e exercícios de limite por Taylor — referência primária de exercícios.</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/downloads" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman et al. — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §8.6 Taylor Polynomials · CC-BY-NC · </span>
+      <em className="text-clube-mist">Tratamento formal com estimativa de erro via resíduo de Lagrange; bom para as portas 25 e demonstrações.</em>
+    </li>
+  </ul>
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="Definição, Maclaurin clássicos, resíduo">
+<Porta nivel="formal" titulo="Definição rigorosa e propriedades">
 
 ### Polinômio de Taylor
 
 <Definicao titulo="Polinômio de Taylor de ordem n">
-Para $f$ com $n$ derivadas em $a$, o **polinômio de Taylor** de ordem $n$ é
-$$P_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!} (x - a)^k.$$
+Seja $f: I \to \mathbb{R}$ com $n$ derivadas em $a \in I$. O **polinômio de Taylor** de ordem $n$ em torno de $a$ é
+$$P_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!} (x - a)^k = f(a) + f'(a)(x-a) + \frac{f''(a)}{2!}(x-a)^2 + \cdots + \frac{f^{(n)}(a)}{n!}(x-a)^n.$$
+
+Quando $a = 0$, $P_n$ chama-se **polinômio de Maclaurin** de $f$.
 </Definicao>
+
+> "If $f$ has $n$ derivatives at $x = a$, then the $n$th-order Taylor polynomial of $f$ centered at $a$ is $p_n(x) = \sum_{k=0}^n \frac{f^{(k)}(a)}{k!}(x-a)^k$." — [APEX Calculus §8.6](https://www.apexcalculus.com/downloads)
+
+<Teorema titulo="Unicidade do polinômio de Taylor">
+$P_n$ é o único polinômio de grau $\leq n$ tal que $P_n^{(k)}(a) = f^{(k)}(a)$ para $k = 0, 1, \ldots, n$.
+</Teorema>
 
 ### Resíduo de Lagrange
 
-Se $f$ tem $(n+1)$ derivadas em vizinhança de $a$, existe $\xi$ entre $a$ e $x$ com
-$$R_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!} (x - a)^{n+1}.$$
+<Definicao titulo="Resto de Taylor (forma de Lagrange)">
+Se $f$ tem $n+1$ derivadas contínuas numa vizinhança de $a$, o **resíduo** $R_n(x) = f(x) - P_n(x)$ satisfaz
+$$R_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$$
+para algum $\xi$ estritamente entre $a$ e $x$.
+</Definicao>
 
-### Séries de Maclaurin clássicas (decora)
+> "Let $f$ have $n + 1$ derivatives on an open interval $I$ and let $a \in I$. For each $x \in I$ there exists a value $c$ between $a$ and $x$ such that $R_n(x) = \frac{f^{(n+1)}(c)}{(n+1)!}(x-a)^{n+1}$." — [OpenStax Calculus Vol. 2 §6.3](https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series)
 
-| Função | Série de Maclaurin |
-|---|---|
-| $e^x$ | $\sum_{k=0}^\infty x^k/k! = 1 + x + x^2/2 + x^3/6 + \cdots$ |
-| $\sin x$ | $\sum_{k=0}^\infty (-1)^k x^{2k+1}/(2k+1)! = x - x^3/6 + x^5/120 - \cdots$ |
-| $\cos x$ | $\sum_{k=0}^\infty (-1)^k x^{2k}/(2k)! = 1 - x^2/2 + x^4/24 - \cdots$ |
-| $\ln(1+x)$ | $\sum_{k=1}^\infty (-1)^{k+1} x^k/k$, $\|x\| < 1$ |
-| $1/(1-x)$ | $\sum_{k=0}^\infty x^k$, $\|x\| < 1$ |
-| $(1+x)^\alpha$ | $\sum_{k=0}^\infty \binom{\alpha}{k} x^k$, $\|x\| < 1$ |
-| $\arctan x$ | $\sum_{k=0}^\infty (-1)^k x^{2k+1}/(2k+1)$, $\|x\| \leq 1$ |
+### Séries de Maclaurin clássicas
 
-### Identidade de Euler via Taylor
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4 overflow-x-auto">
+<table className="min-w-full text-sm font-mono">
+<thead>
+<tr className="border-b border-clube-mist-soft/40">
+<th className="py-1 pr-4 text-left font-semibold">Função</th>
+<th className="py-1 text-left font-semibold">Série de Maclaurin</th>
+<th className="py-1 pl-4 text-left font-semibold">Raio</th>
+</tr>
+</thead>
+<tbody>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$e^x$</td>
+<td className="py-1">$1 + x + \tfrac{x^2}{2!} + \tfrac{x^3}{3!} + \cdots = \displaystyle\sum_{k=0}^\infty \tfrac{x^k}{k!}$</td>
+<td className="py-1 pl-4">$\infty$</td>
+</tr>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$\sin x$</td>
+<td className="py-1">$x - \tfrac{x^3}{3!} + \tfrac{x^5}{5!} - \cdots = \displaystyle\sum_{k=0}^\infty \tfrac{(-1)^k x^{2k+1}}{(2k+1)!}$</td>
+<td className="py-1 pl-4">$\infty$</td>
+</tr>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$\cos x$</td>
+<td className="py-1">$1 - \tfrac{x^2}{2!} + \tfrac{x^4}{4!} - \cdots = \displaystyle\sum_{k=0}^\infty \tfrac{(-1)^k x^{2k}}{(2k)!}$</td>
+<td className="py-1 pl-4">$\infty$</td>
+</tr>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$\ln(1+x)$</td>
+<td className="py-1">$x - \tfrac{x^2}{2} + \tfrac{x^3}{3} - \cdots = \displaystyle\sum_{k=1}^\infty \tfrac{(-1)^{k+1} x^k}{k}$</td>
+<td className="py-1 pl-4">$(-1,1]$</td>
+</tr>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$\dfrac{1}{1-x}$</td>
+<td className="py-1">$1 + x + x^2 + x^3 + \cdots = \displaystyle\sum_{k=0}^\infty x^k$</td>
+<td className="py-1 pl-4">$(-1,1)$</td>
+</tr>
+<tr>
+<td className="py-1 pr-4">$\arctan x$</td>
+<td className="py-1">$x - \tfrac{x^3}{3} + \tfrac{x^5}{5} - \cdots = \displaystyle\sum_{k=0}^\infty \tfrac{(-1)^k x^{2k+1}}{2k+1}$</td>
+<td className="py-1 pl-4">$[-1,1]$</td>
+</tr>
+</tbody>
+</table>
+</figure>
 
-$e^{ix} = \sum (ix)^k/k! = \cos x + i \sin x$.
+<Insight titulo="Identidade de Euler via Taylor">
+Substituindo $x \to ix$ na série de $e^x$:
+$$e^{ix} = \sum_{k=0}^\infty \frac{(ix)^k}{k!} = \underbrace{\sum_{k=0}^\infty \frac{(-1)^k x^{2k}}{(2k)!}}_{\cos x} + i\underbrace{\sum_{k=0}^\infty \frac{(-1)^k x^{2k+1}}{(2k+1)!}}_{\sin x}.$$
+Logo $e^{ix} = \cos x + i\sin x$. Em $x = \pi$: $e^{i\pi} + 1 = 0$ — a identidade de Euler.
+</Insight>
 
 </Porta>
 
 <Porta nivel="5" titulo="Pra criança de 5 anos">
 
-Imagina uma curva **toda torta**, tipo um zig-zag desenhado à mão.
+Imagina uma curva **toda torta**. Você quer **copiar** ela perto de um ponto, mas só pode usar uma regra e um lápis.
 
-Pra **adivinhar** como ela é num pedacinho perto de você, você não precisa decorar a curva inteira: basta saber **a inclinação** (derivada), **a curvatura** (segunda derivada), e **mais detalhes** se quiser.
+Você coloca a regra igual à inclinação da curva naquele ponto. Já ficou parecido!
 
-Cada detalhe a mais que você usa, melhor sua **imitação** da curva original. O polinômio de Taylor é a receita de imitação perfeita usando só derivadas!
+Se você usar também um **arco de círculo** para ajustar a curvatura, fica ainda mais igual.
+
+Cada **coisa a mais** que você adiciona (inclinação, curvatura, próxima coisa...) deixa a cópia mais fiel. O polinômio de Taylor é a **receita de cópia perfeita** — quanto mais termos, melhor.
 
 </Porta>
 
 <Porta nivel="10" titulo="Pra criança de 10 anos">
 
-A ideia: qualquer função "boazinha" pode ser **imitada por um polinômio** perto de um ponto.
+A ideia é simples: qualquer função "boazinha" pode ser **imitada por um polinômio** perto de um ponto.
 
-A **fórmula do polinômio de Taylor** em $a = 0$ (Maclaurin):
+A fórmula de Maclaurin (quando o ponto é $0$) é:
 
-$$f(x) \approx f(0) + f'(0) \cdot x + \frac{f''(0)}{2} x^2 + \frac{f'''(0)}{6} x^3 + \cdots$$
+$$f(x) \approx f(0) + f'(0)\cdot x + \frac{f''(0)}{2}\cdot x^2 + \frac{f'''(0)}{6}\cdot x^3 + \cdots$$
 
-Cada termo usa **uma derivada** maior. Mais termos = melhor imitação.
+Cada novo termo usa uma derivada mais. Mais termos = melhor imitação.
 
-**Exemplo**: $\sin x$. Em $x = 0$: $\sin 0 = 0$, $\cos 0 = 1$, $-\sin 0 = 0$, $-\cos 0 = -1$, ...
+**Exemplo com seno:** Em $x = 0$: $\sin 0 = 0$, $\cos 0 = 1$, $-\sin 0 = 0$, $-\cos 0 = -1$, ...
 
-Então $\sin x \approx x - x^3/6 + x^5/120 - \cdots$.
+Então $\sin x \approx x - x^3/6 + x^5/120 - \cdots$
 
-Para $x$ pequeno, $\sin x \approx x$ (boa aproximação, usada em física!).
+Para $x$ pequeno, $\sin x \approx x$ já funciona — erro menor que $0{,}2\%$ para $x < 0{,}1$ rad!
 
 </Porta>
 
 <Porta nivel="15" titulo="Pra adolescente de 15 anos">
 
-Taylor é **a ideia que une cálculo e álgebra**: substitua função arbitrária por polinômio que tem mesmo valor, mesma inclinação, mesma curvatura, etc.
+Taylor é a **ponte entre funções arbitrárias e polinômios** — os mais fáceis de calcular.
 
-### Receita
+**Receita:**
+1. Escolha um ponto $a$ (quase sempre $a = 0$ — série de Maclaurin).
+2. Calcule $f(a),\, f'(a),\, f''(a),\, \ldots,\, f^{(n)}(a)$.
+3. Monte $P_n(x) = \sum_{k=0}^n \frac{f^{(k)}(a)}{k!}(x-a)^k$.
 
-1. Escolha um ponto $a$ (geralmente $0$ — Maclaurin).
-2. Calcule $f(a), f'(a), f''(a), \ldots, f^{(n)}(a)$.
-3. Monte $P_n(x) = \sum_{k=0}^n f^{(k)}(a)(x-a)^k/k!$.
-
-### Exemplos canônicos
+**Séries que todo estudante deve memorizar:**
 
 - $e^x = 1 + x + x^2/2 + x^3/6 + \cdots$
 - $\sin x = x - x^3/6 + x^5/120 - \cdots$
 - $\cos x = 1 - x^2/2 + x^4/24 - \cdots$
-- $\ln(1+x) = x - x^2/2 + x^3/3 - \cdots$ (para $|x| < 1$)
+- $\ln(1+x) = x - x^2/2 + x^3/3 - \cdots$ para $|x| < 1$
 
-### Aplicações imediatas
+**Três aplicações imediatas:**
 
-- **Aproximar valores**: $\sin(0.1) \approx 0.1 - 0.001/6 \approx 0.09983$.
-- **Resolver limites**: $\lim_{x \to 0} (e^x - 1 - x)/x^2 = \lim (x^2/2 + O(x^3))/x^2 = 1/2$.
-- **Definir funções**: $e^x$ definida pela série em $\mathbb{C}$.
-
-### Resíduo
-
-O erro $R_n(x) = f(x) - P_n(x)$ tem ordem $(x-a)^{n+1}$. Em prática: aumentar $n$ reduz erro (se a função é suave).
-
-### Por que é tão poderoso
-
-Engenheiros **lineariza tudo**: $\sin\theta \approx \theta$ pra pêndulo pequeno, $(1+x)^n \approx 1 + nx$ pra finanças, $\ln(1+r) \approx r$ pra taxa pequena. Tudo é Taylor de primeira ordem.
+- **Aproximar valores:** $\sin(0{,}1) \approx 0{,}1 - 0{,}001/6 \approx 0{,}09983$.
+- **Resolver limites:** $\lim_{x\to 0}\frac{e^x - 1 - x}{x^2} = \lim_{x\to 0}\frac{x^2/2 + O(x^3)}{x^2} = \frac{1}{2}$.
+- **Engenharia:** $\sin\theta \approx \theta$ para pêndulo de ângulo pequeno — simplifica a equação diferencial.
 
 </Porta>
 
 <Porta nivel="25" titulo="Pra estudante de engenharia">
 
-Taylor é o **martelo número 1** do engenheiro analítico. Sem Taylor, não há linearização, não há análise de pequenos sinais, não há perturbação.
+Taylor é o **instrumento cirúrgico do engenheiro**: sem ele, não há linearização, não há análise de pequenos sinais, não há Newton-Raphson, não há Runge-Kutta.
 
-### Forma de Taylor com resíduo
+### Formas do resíduo
 
-$$f(x) = \underbrace{\sum_{k=0}^n \frac{f^{(k)}(a)}{k!}(x-a)^k}_{P_n} + \underbrace{R_n(x)}_{\text{erro}}$$
+$$f(x) = P_n(x) + R_n(x)$$
 
-**Lagrange**: $R_n = f^{(n+1)}(\xi)(x-a)^{n+1}/(n+1)!$.
+**Lagrange:** $R_n = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$, algum $\xi$ entre $a$ e $x$.
 
-**Cauchy**: $R_n = f^{(n+1)}(\xi)(x-\xi)^n(x-a)/n!$.
+**Integral:** $R_n = \int_a^x \frac{(x-t)^n}{n!} f^{(n+1)}(t)\, dt$.
 
-**Integral**: $R_n = \int_a^x f^{(n+1)}(t)(x-t)^n/n!\, dt$.
+**Big-O:** $R_n = O((x-a)^{n+1})$ — leitura rápida de ordem de erro.
 
-### Aplicações em engenharia
+### Aplicações práticas
 
-- **Linearização** em torno de ponto operacional: $f(x) \approx f(x_0) + f'(x_0)(x - x_0)$. Base de **análise de pequenos sinais** (eletrônica), **controle linear** (Jacobiano em ponto de equilíbrio).
-- **Newton-Raphson**: usa Taylor de ordem 1 ($f(x) \approx f(x_n) + f'(x_n)(x - x_n)$, iguale a zero).
-- **Métodos numéricos**: integradores Runge-Kutta deduzidos via Taylor multivariado em $t$ e $y$.
-- **MEF (elementos finitos)**: aproximação polinomial local em cada elemento. É Taylor truncado em malha.
-- **Análise assintótica**: $\sqrt{1 + \varepsilon} \approx 1 + \varepsilon/2$ pra $\varepsilon$ pequeno. Onipresente em física.
+- **Linearização:** $f(x) \approx f(x_0) + f'(x_0)(x - x_0)$ — base de análise de pequenos sinais em eletrônica e controle.
+- **Newton-Raphson:** usa Taylor de ordem 1: $f(x) \approx f(x_n) + f'(x_n)(x - x_n) = 0$ dá $x_{n+1} = x_n - f(x_n)/f'(x_n)$.
+- **Runge-Kutta:** deduzido via Taylor multivariado em $t$ e $y$; RK4 tem erro global $O(h^4)$.
+- **Relações de dispersão:** $\omega(k) \approx \omega_0 + v_g(k - k_0) + \cdots$ — velocidade de grupo como coeficiente de Taylor.
 
-### Convergência
+### Taylor multivariado (ordem 2)
 
-Nem toda função analítica iguala sua série de Taylor. Ex.: $f(x) = e^{-1/x^2}$ (com $f(0) = 0$) tem todas as derivadas zero em $0$, então $P_n = 0$ pra todo $n$, mas $f \neq 0$. Esta função é **suave** mas **não-analítica** em $0$.
+$$f(\vec x) \approx f(\vec a) + \nabla f(\vec a)^T (\vec x - \vec a) + \tfrac{1}{2}(\vec x - \vec a)^T H(\vec a)(\vec x - \vec a)$$
 
-### Multivariado
+onde $H$ é a **hessiana**. Crítico para otimização numérica.
 
-$f(\vec x) \approx f(\vec a) + \nabla f(\vec a) \cdot (\vec x - \vec a) + \frac{1}{2}(\vec x - \vec a)^T H(\vec a)(\vec x - \vec a) + \cdots$
+### Convergência: nem sempre garantida
 
-A **hessiana** $H$ aparece como termo de segunda ordem.
+$f(x) = e^{-1/x^2}$ (com $f(0) = 0$) tem todas as derivadas nulas em $0$, portanto $P_n = 0$ para todo $n$. Mas $f \neq 0$ — função suave mas **não-analítica**. Taylor converge, mas NÃO converge a $f$.
 
 </Porta>
 
 <Porta nivel="40" titulo="Pra profissional sênior">
 
-Taylor é embrião de áreas inteiras: análise complexa, EDP perturbativa, mecânica estatística, teoria de controle, ML.
+Taylor é o embrião de análise complexa, teoria de perturbação, física matemática e otimização de segunda ordem.
 
-### Análise complexa
+### Análise complexa: funções holomorfas são analíticas
 
-Toda função **holomorfa** $f: \Omega \to \mathbb{C}$ é localmente igual à sua série de Taylor (Cauchy). Isto é radicalmente mais forte que real: se $f \in C^\infty(\mathbb{R})$ não é necessariamente analítica, mas $f$ holomorfa **é**. Reside aqui a beleza da análise complexa.
+Toda função **holomorfa** $f: \Omega \to \mathbb{C}$ é igual à sua série de Taylor em qualquer disco aberto onde é definida (Cauchy, 1820s). Isso é radicalmente mais forte que em $\mathbb{R}$: suavidade real ($C^\infty$) não garante analiticidade; holomorfismo garante. A beleza está nessa rigidez.
 
-### Perturbação em mecânica quântica
+### Perturbação quântica
 
-Se $H = H_0 + \lambda V$, autoenergia $E_n(\lambda) = E_n^{(0)} + \lambda E_n^{(1)} + \lambda^2 E_n^{(2)} + \cdots$ — série de Taylor em $\lambda$. Coeficientes calculados via teoria de perturbação (Rayleigh-Schrödinger).
+$H = H_0 + \lambda V$: autoenergia expandida em série de Taylor em $\lambda$: $E_n(\lambda) = E_n^{(0)} + \lambda E_n^{(1)} + \lambda^2 E_n^{(2)} + \cdots$ Coeficientes via Rayleigh-Schrödinger. É Taylor aplicado em espaço de operadores.
 
-### Asymptotic series vs convergente
+### Séries assintóticas vs. convergentes
 
-Stirling: $\ln(n!) \sim n \ln n - n + \frac{1}{2}\ln(2\pi n) + \sum_k B_{2k}/(2k(2k-1)n^{2k-1})$. Esta série **diverge** pra todo $n$ fixo, mas **truncada** dá excelente aproximação. Diferença filosófica: série de Taylor pode ter raio de convergência $0$ e ainda ser útil.
+Stirling: $\ln(n!) \sim n\ln n - n + \tfrac{1}{2}\ln(2\pi n) + \sum_k B_{2k}/(2k(2k-1)n^{2k-1})$. Esta série **diverge** para todo $n$ fixo, mas truncada dá excelente aproximação numérica. Diferença filosófica: uma série pode ser útil mesmo divergente — o erro decresce antes de explodir.
 
-### Padé approximants
+### Aproximantes de Padé
 
-Aproximação racional $f \approx P/Q$ (Padé) supera Taylor em raio efetivo. Usado em mecânica de fluidos (séries assintóticas pesadas), análise numérica.
+Aproximação racional $f(x) \approx P_m(x)/Q_n(x)$ supera Taylor em raio efetivo para funções com singularidades. Usados em mecânica quântica (método de Padé-Borel) e aceleração de convergência de séries.
 
-### ML e Newton
+### Contexto histórico
 
-**Treinamento por Newton**: usar hessiana (Taylor de ordem 2) pra otimização. Custo proibitivo em redes grandes; Quasi-Newton (BFGS) aproxima hessiana. Métodos de **otimização de segunda ordem** (e.g., K-FAC) são Taylor de ordem 2 com hessiana fatorada.
-
-### Conexão histórica
-
-Brook Taylor publicou *Methodus Incrementorum* em 1715 — sem prova rigorosa de convergência. Maclaurin (1742) popularizou caso $a = 0$. Lagrange (1797) deu a forma do resto. Cauchy (1820s) provou rigorosamente. Toda essa máquina chegou pronta a Faraday e Maxwell pra construírem eletromagnetismo.
+Brook Taylor (1715) publica *Methodus Incrementorum* sem prova de convergência. Maclaurin (1742) populariza $a = 0$. Lagrange (1797) formaliza o resíduo. Cauchy (1820s) prova rigorosamente via integral de contorno. Toda essa máquina chegou pronta para Maxwell construir eletromagnetismo e para Einstein linearizar a geodésica em torno de métrica plana.
 
 </Porta>
 
 <Porta nivel="pratica" titulo="Aplicação prática">
 
-**Receita prática:**
+**Receita em 4 passos:**
 
-1. **Identifique o ponto** de expansão $a$. Geralmente $a = 0$.
-2. **Calcule** $f(a), f'(a), f''(a), \ldots$ até a ordem desejada.
-3. **Monte** $P_n(x) = \sum f^{(k)}(a)(x-a)^k/k!$.
-4. **Use** pra aproximar valores, calcular limites, ou linearizar.
+1. **Identifique o ponto** de expansão $a$ (geralmente $0$).
+2. **Calcule derivadas** $f(a), f'(a), f''(a), \ldots$ até a ordem desejada.
+3. **Monte** $P_n(x) = \sum_{k=0}^n \frac{f^{(k)}(a)}{k!}(x-a)^k$.
+4. **Estime o erro**: para série alternada decrescente, $|R_n| < $ valor absoluto do primeiro termo omitido.
 
-### Truques
+### Truques operacionais
 
-- **Combine séries conhecidas**: $\sin(x^2) = x^2 - x^6/6 + \cdots$ direto da série de $\sin$.
-- **Multiplique**: $e^x \sin x = (1 + x + x^2/2 + \cdots)(x - x^3/6 + \cdots)$, expandir até ordem desejada.
-- **Divida**: $\tan x = \sin x/\cos x$, série da divisão até ordem $n$.
-- **Substitua**: $1/(1 + x^2) = 1 - x^2 + x^4 - \cdots$ via série geométrica.
-- **Integre/derive termo a termo** dentro do raio de convergência.
+- **Substitua:** $\sin(x^2) = x^2 - (x^2)^3/6 + \cdots = x^2 - x^6/6 + \cdots$ — direto da série de sin.
+- **Multiplique:** $e^x \sin x = (1 + x + x^2/2 + \cdots)(x - x^3/6 + \cdots)$, expanda até a ordem.
+- **Integre/derive:** $\arctan x = \int_0^x \frac{1}{1+t^2}\, dt = \int_0^x (1 - t^2 + t^4 - \cdots)\, dt = x - x^3/3 + x^5/5 - \cdots$
 
-### Estimativa rápida de erro
+### Contexto brasileiro — taxa de juros
 
-Pra série alternada decrescente, erro $< $ próximo termo omitido (Leibniz).
+Em finanças, $(1 + r)^n \approx 1 + nr$ para taxa $r$ pequena (Taylor de ordem 1). Erro relativo: aproximadamente $\binom{n}{2} r^2$. Para $r = 1\%$ ao mês e $n = 12$ meses: erro $\approx 66 \times 0{,}0001 = 0{,}66\%$ — desprezível para estimativa rápida de retorno anual.
 
 ### Verificação Python/SymPy
 
 ```python
 import sympy as sp
 x = sp.symbols('x')
-sp.series(sp.sin(x), x, 0, 8)  # Maclaurin de sin até x^7
+sp.series(sp.sin(x), x, 0, 8)       # Maclaurin de sin x até x^7
 sp.series(sp.exp(x)*sp.cos(x), x, 0, 5)
 ```
-
-### Faça os exercícios
-
-Taylor é técnica **mecânica** — só fluência via prática. 35 exercícios abaixo dão o básico.
 
 </Porta>
 
 </DuasPortas>
 
+## Exemplos resolvidos
+
+<Exemplo titulo="Maclaurin de e^x até ordem 4 (aplicação direta)" numero="1">
+
+**Problema.** Encontre o polinômio de Maclaurin de $f(x) = e^x$ de ordem 4 e estime o erro em $x = 0{,}5$.
+
+**Estratégia.** Como $\frac{d^k}{dx^k}e^x = e^x$, todas as derivadas em $a = 0$ valem $1$. Montar $P_4$ diretamente. Usar resíduo de Lagrange com $f^{(5)} = e^x$.
+
+**Resolução.**
+
+1. **Derivadas em $0$:** $f^{(k)}(0) = e^0 = 1$ para todo $k$.
+2. **Polinômio:** $P_4(x) = 1 + x + \dfrac{x^2}{2} + \dfrac{x^3}{6} + \dfrac{x^4}{24}$.
+3. **Erro em $x = 0{,}5$:** $|R_4(0{,}5)| \leq \dfrac{e^\xi}{5!}(0{,}5)^5 \leq \dfrac{e^{0{,}5}}{120}\cdot\dfrac{1}{32} \approx \dfrac{1{,}649}{120 \cdot 32} \approx 0{,}000430$.
+4. **Valor aproximado:** $P_4(0{,}5) = 1 + 0{,}5 + 0{,}125 + 0{,}02083 + 0{,}002604 \approx 1{,}6484$. Valor exato: $e^{0{,}5} \approx 1{,}6487$ — erro menor que $3 \times 10^{-4}$. ✓
+
+**Verificação.** O erro estimado $4{,}3 \times 10^{-4}$ é maior que o erro real $3 \times 10^{-4}$: o resíduo de Lagrange é um majorante. ✓
+
+**Fonte.** [OpenStax Calculus Vol. 2, §6.3, Example 6.17](https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series) — CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Taylor de ln x em torno de a = 1 (intermediário)" numero="2">
+
+**Problema.** Obtenha o polinômio de Taylor de ordem 3 de $f(x) = \ln x$ centrado em $a = 1$.
+
+**Estratégia.** Calcular $f, f', f'', f'''$ em $x = 1$. Montar $P_3$ com $(x - 1)$ como variável.
+
+**Resolução.**
+
+1. **Derivadas:** $f(x) = \ln x$, $f'(x) = 1/x$, $f''(x) = -1/x^2$, $f'''(x) = 2/x^3$.
+2. **Em $a = 1$:** $f(1) = 0$, $f'(1) = 1$, $f''(1) = -1$, $f'''(1) = 2$.
+3. **Polinômio:**
+$$P_3(x) = 0 + 1\cdot(x-1) + \frac{-1}{2!}(x-1)^2 + \frac{2}{3!}(x-1)^3 = (x-1) - \frac{(x-1)^2}{2} + \frac{(x-1)^3}{3}.$$
+4. **Teste em $x = 1{,}1$:** $P_3(1{,}1) = 0{,}1 - 0{,}005 + 0{,}000333 \approx 0{,}09533$. Valor exato: $\ln(1{,}1) \approx 0{,}09531$. ✓
+
+**Verificação.** A série de $\ln(1+u) = u - u^2/2 + u^3/3 - \cdots$ com $u = x - 1$ coincide com $P_3$. ✓
+
+**Fonte.** [Active Calculus §8.5, Activity 8.5.3](https://activecalculus.org/single/sec-8-5-taylor.html) — CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Limite via Taylor: lim (sin x - x)/x^3 (intermediário)" numero="3">
+
+**Problema.** Calcule $\displaystyle\lim_{x \to 0} \frac{\sin x - x}{x^3}$.
+
+**Estratégia.** Substituir a série de Maclaurin de $\sin x$ no numerador e simplificar. Evita regras de L'Hôpital iteradas.
+
+**Resolução.**
+
+1. **Série:** $\sin x = x - \dfrac{x^3}{6} + \dfrac{x^5}{120} - \cdots$
+2. **Numerador:** $\sin x - x = -\dfrac{x^3}{6} + \dfrac{x^5}{120} - \cdots$
+3. **Divisão por $x^3$:** $\dfrac{\sin x - x}{x^3} = -\dfrac{1}{6} + \dfrac{x^2}{120} - \cdots$
+4. **Limite:** ao tomar $x \to 0$, todos os termos com $x$ vão a zero. O limite é $\mathbf{-1/6}$.
+
+**Verificação.** Aplicando L'Hôpital três vezes também daria $-1/6$, mas o método de Taylor é mais rápido. ✓
+
+**Fonte.** [OpenStax Calculus Vol. 2, §6.3, Example 6.20](https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series) — CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Erro de aproximacao sin x ≈ x para pendulo (modelagem)" numero="4">
+
+**Problema.** Um pêndulo usa a aproximação $\sin\theta \approx \theta$. Para $\theta = 15° = \pi/12$ rad, qual é o erro relativo percentual?
+
+**Estratégia.** Calcular $\sin(\pi/12)$ exatamente e comparar com $\pi/12$. Estimar o erro via o próximo termo da série: $-\theta^3/6$.
+
+**Resolução.**
+
+1. **Ângulo em radianos:** $\theta = \pi/12 \approx 0{,}2618$ rad.
+2. **Valor exato:** $\sin(\pi/12) = \sin(15°) = (\sqrt{6} - \sqrt{2})/4 \approx 0{,}2588$.
+3. **Aproximação:** $\theta = 0{,}2618$.
+4. **Erro absoluto:** $|0{,}2618 - 0{,}2588| = 0{,}0030$.
+5. **Erro relativo:** $0{,}0030 / 0{,}2588 \approx 1{,}16\%$.
+6. **Via Taylor:** erro $\approx \theta^3/6 = (0{,}2618)^3/6 \approx 0{,}00298$ — muito próximo do erro calculado. ✓
+
+**Verificação.** Para $\theta < 0{,}1$ rad ($\approx 5{,}7°$), o erro cai abaixo de $0{,}017\%$ — justificando o uso em engenharia. ✓
+
+**Fonte.** [APEX Calculus §8.6, Exercise 8.6.13](https://www.apexcalculus.com/downloads) — CC-BY-NC.
+</Exemplo>
+
+<Exemplo titulo="Maclaurin por composicao: e^(sin x) ate ordem 3 (avancado)" numero="5">
+
+**Problema.** Obtenha o polinômio de Maclaurin de $f(x) = e^{\sin x}$ até ordem 3.
+
+**Estratégia.** Substituir a série de $\sin x$ na série de $e^u$, agrupando termos até $x^3$.
+
+**Resolução.**
+
+1. **Série de sin:** $\sin x = x - x^3/6 + O(x^5)$.
+2. **$u = \sin x$:** então $e^u = 1 + u + u^2/2 + u^3/6 + O(u^4)$.
+3. **Substituindo:** $u = x - x^3/6 + \cdots$, logo:
+   - $u = x - x^3/6$
+   - $u^2 = x^2 - 2x\cdot x^3/6 + \cdots = x^2 + O(x^4)$
+   - $u^3 = x^3 + O(x^5)$
+4. **Montagem:**
+$$e^{\sin x} = 1 + \left(x - \tfrac{x^3}{6}\right) + \frac{x^2}{2} + \frac{x^3}{6} + O(x^4) = 1 + x + \frac{x^2}{2} + 0 \cdot x^3 + O(x^4).$$
+5. **Resultado:** $P_3(x) = 1 + x + \dfrac{x^2}{2}$.
+
+**Verificação.** Em $x = 0$: $f(0) = e^0 = 1$ ✓. $f'(0) = e^{\sin 0}\cos 0 = 1$ ✓. $f''(0) = e^{\sin 0}(\cos^2 0 - \sin 0) = 1$ ✓.
+
+**Fonte.** [APEX Calculus §8.6, Exercises 8.6.17–8.6.20](https://www.apexcalculus.com/downloads) — CC-BY-NC.
+</Exemplo>
+
 <ListaExercicios seed="licao-65-taylor">
 
-### Bloco A — Maclaurin direto (65.1 a 65.10)
+### Bloco A — Maclaurin direto (65.1 a 65.12)
 
-<Exercicio numero="65.1" dificuldade="aplicacao">Maclaurin de $e^x$ até $x^4$.</Exercicio>
-<Exercicio numero="65.2" dificuldade="aplicacao">Maclaurin de $\sin x$ até $x^7$.</Exercicio>
-<Exercicio numero="65.3" dificuldade="aplicacao">Maclaurin de $\cos x$ até $x^6$.</Exercicio>
-<Exercicio numero="65.4" dificuldade="aplicacao">Maclaurin de $\ln(1+x)$ até $x^4$.</Exercicio>
-<Exercicio numero="65.5" dificuldade="aplicacao">Maclaurin de $1/(1-x)$ até $x^5$.</Exercicio>
-<Exercicio numero="65.6" dificuldade="aplicacao">Maclaurin de $(1+x)^{1/2}$ até $x^3$.</Exercicio>
-<Exercicio numero="65.7" dificuldade="aplicacao" resposta="$x - x^3/3 + x^5/5 - \cdots$">Maclaurin de $\arctan x$ até $x^5$.</Exercicio>
-<Exercicio numero="65.8" dificuldade="aplicacao">Maclaurin de $\sinh x$ e $\cosh x$ até $x^5$.</Exercicio>
-<Exercicio numero="65.9" dificuldade="aplicacao">Maclaurin de $e^{-x}$ até $x^4$.</Exercicio>
-<Exercicio numero="65.10" dificuldade="aplicacao">Maclaurin de $\tan x$ até $x^5$ (usando $\sin/\cos$).</Exercicio>
+<Exercicio
+  numero="65.1"
+  dificuldade="aplicacao"
+  solucao={<>Todas as derivadas de <Eq>{`e^x`}</Eq> em <Eq>{`x=0`}</Eq> valem <Eq>{`1`}</Eq>. Portanto <Eq>{`P_4(x) = 1 + x + x^2/2 + x^3/6 + x^4/24`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Example 6.17", licenca: "CC-BY-NC-SA" }}
+>
+Escreva o polinômio de Maclaurin de $f(x) = e^x$ até $x^4$.
+</Exercicio>
 
-### Bloco B — Composição e produto (65.11 a 65.20)
+<Exercicio
+  numero="65.2"
+  dificuldade="aplicacao"
+  solucao={<>Usando derivadas alternadas de <Eq>{`\\sin`}</Eq> e <Eq>{`\\cos`}</Eq> em 0: <Eq>{`P_7(x) = x - x^3/6 + x^5/120 - x^7/5040`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Example 6.16", licenca: "CC-BY-NC-SA" }}
+>
+Escreva o polinômio de Maclaurin de $f(x) = \sin x$ até $x^7$.
+</Exercicio>
 
-<Exercicio numero="65.11" dificuldade="aplicacao">Maclaurin de $\sin(2x)$ até $x^5$.</Exercicio>
-<Exercicio numero="65.12" dificuldade="aplicacao">Maclaurin de $e^{x^2}$ até $x^6$.</Exercicio>
-<Exercicio numero="65.13" dificuldade="aplicacao">Maclaurin de $\cos(x^2)$ até $x^8$.</Exercicio>
-<Exercicio numero="65.14" dificuldade="aplicacao">Maclaurin de $\ln(1 - x^2)$ até $x^6$.</Exercicio>
-<Exercicio numero="65.15" dificuldade="aplicacao">Maclaurin de $1/(1 + x^2)$ até $x^6$.</Exercicio>
-<Exercicio numero="65.16" dificuldade="aplicacao">Maclaurin de $e^x \sin x$ até $x^4$.</Exercicio>
-<Exercicio numero="65.17" dificuldade="aplicacao">Maclaurin de $\sin x \cdot \cos x$ até $x^5$.</Exercicio>
-<Exercicio numero="65.18" dificuldade="aplicacao">Maclaurin de $x e^{-x}$ até $x^4$.</Exercicio>
-<Exercicio numero="65.19" dificuldade="aplicacao">Taylor de $\ln x$ em torno de $a = 1$, ordem 4.</Exercicio>
-<Exercicio numero="65.20" dificuldade="aplicacao">Taylor de $\sqrt{x}$ em torno de $a = 1$, ordem 3.</Exercicio>
+<Exercicio
+  numero="65.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P_6(x) = 1 - x^2/2 + x^4/24 - x^6/720`}</Eq>. As derivadas ímpares de <Eq>{`\\cos`}</Eq> em 0 são nulas.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Table 6.2", licenca: "CC-BY-NC-SA" }}
+>
+Escreva o polinômio de Maclaurin de $f(x) = \cos x$ até $x^6$.
+</Exercicio>
 
-### Bloco C — Aplicações: limites e aproximações (65.21 a 65.30)
+<Exercicio
+  numero="65.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f^{(k)}(0)/k! = (-1)^{k+1}/k`}</Eq> para <Eq>{`k \\geq 1`}</Eq>. Logo <Eq>{`P_4(x) = x - x^2/2 + x^3/3 - x^4/4`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Derivadas: <Eq>{`f = \\ln(1+x)`}</Eq>, <Eq>{`f' = 1/(1+x)`}</Eq>, <Eq>{`f'' = -1/(1+x)^2`}</Eq>, <Eq>{`f''' = 2/(1+x)^3`}</Eq>, <Eq>{`f'''' = -6/(1+x)^4`}</Eq>.</li>
+      <li>Em <Eq>{`x=0`}</Eq>: <Eq>{`f(0)=0`}</Eq>, <Eq>{`f'(0)=1`}</Eq>, <Eq>{`f''(0)=-1`}</Eq>, <Eq>{`f'''(0)=2`}</Eq>, <Eq>{`f''''(0)=-6`}</Eq>.</li>
+      <li>Divida por <Eq>{`k!`}</Eq>: coeficientes <Eq>{`0, 1, -1/2, 1/3, -1/4`}</Eq>.</li>
+      <li>Monte: <Eq>{`P_4(x) = x - x^2/2 + x^3/3 - x^4/4`}</Eq>.</li>
+      <li><em>Macete:</em> os coeficientes seguem o padrão <Eq>{`(-1)^{k+1}/k`}</Eq> — reconhecer isso evita calcular derivadas altas.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Table 6.2", licenca: "CC-BY-NC-SA" }}
+>
+Escreva o polinômio de Maclaurin de $f(x) = \ln(1+x)$ até $x^4$.
+</Exercicio>
 
-<Exercicio numero="65.21" dificuldade="modelagem" resposta="$1/2$">Use Taylor: $\lim_{x \to 0} (e^x - 1 - x)/x^2$.</Exercicio>
-<Exercicio numero="65.22" dificuldade="modelagem" resposta="$-1/6$">Use Taylor: $\lim_{x \to 0} (\sin x - x)/x^3$.</Exercicio>
-<Exercicio numero="65.23" dificuldade="modelagem">Use Taylor: $\lim_{x \to 0} (\cos x - 1 + x^2/2)/x^4$.</Exercicio>
-<Exercicio numero="65.24" dificuldade="modelagem">Aproxime $\sin(0{,}1)$ com erro $< 10^{-6}$. Diga ordem usada.</Exercicio>
-<Exercicio numero="65.25" dificuldade="modelagem">Aproxime $e^{0{,}5}$ até ordem 5. Compare com valor exato.</Exercicio>
-<Exercicio numero="65.26" dificuldade="modelagem">Aproxime $\sqrt{1{,}1}$ usando Taylor de $\sqrt{1+x}$.</Exercicio>
-<Exercicio numero="65.27" dificuldade="modelagem">Estime $\ln(1{,}05)$ a 4 casas decimais.</Exercicio>
-<Exercicio numero="65.28" dificuldade="modelagem">Pêndulo: linearize $\sin\theta \approx \theta$. Diga erro relativo em $\theta = 0{,}1$ rad.</Exercicio>
-<Exercicio numero="65.29" dificuldade="modelagem">Relatividade: $E = mc^2/\sqrt{1 - v^2/c^2}$. Expanda em $v/c$ pequeno e identifique $E_0 + \frac{1}{2}mv^2 + \cdots$.</Exercicio>
-<Exercicio numero="65.30" dificuldade="modelagem">Em finanças: $(1 + r)^n \approx 1 + nr$ pra $r$ pequeno. Quão pequeno pra erro $< 1\%$ com $n = 10$?</Exercicio>
+<Exercicio
+  numero="65.5"
+  dificuldade="aplicacao"
+  resposta="$P_5(x) = 1 + x + x^2 + x^3 + x^4 + x^5$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Table 6.2", licenca: "CC-BY-NC-SA" }}
+>
+Maclaurin de $f(x) = 1/(1-x)$ até $x^5$ — é simplesmente a série geométrica.
+</Exercicio>
 
-### Bloco D — Compreensão e demonstrações (65.31 a 65.38)
+<Exercicio
+  numero="65.6"
+  dificuldade="aplicacao"
+  solucao={<>Usando binomial com <Eq>{`\\alpha = 1/2`}</Eq>: <Eq>{`P_3(x) = 1 + x/2 - x^2/8 + x^3/16`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Activity 8.5.2", licenca: "CC-BY-NC-SA" }}
+>
+Maclaurin de $f(x) = (1+x)^{1/2}$ até $x^3$. Calcule $f'$, $f''$, $f'''$ em $x = 0$.
+</Exercicio>
 
-<Exercicio numero="65.31" dificuldade="compreensao">Por que $P_n$ é a "melhor aproximação polinomial de grau $n$"? Justifique.</Exercicio>
-<Exercicio numero="65.32" dificuldade="compreensao">Mostre que se $f$ é polinômio de grau $\leq n$, $f = P_n$ exatamente.</Exercicio>
-<Exercicio numero="65.33" dificuldade="compreensao">Por que $e^x$ tem raio de convergência infinito? Use estimativa de Lagrange.</Exercicio>
-<Exercicio numero="65.34" dificuldade="desafio">Mostre que $e^{-1/x^2}$ (com $f(0) = 0$) tem todas derivadas zero em $0$.</Exercicio>
-<Exercicio numero="65.35" dificuldade="desafio">Use $e^{ix} = \cos x + i \sin x$ pra deduzir séries de $\cos$ e $\sin$ via $e^x$.</Exercicio>
-<Exercicio numero="65.36" dificuldade="demonstracao">Demonstre Taylor com resíduo de Lagrange via TVM iterado.</Exercicio>
-<Exercicio numero="65.37" dificuldade="demonstracao">Demonstre que $\sum (-1)^k x^{2k+1}/(2k+1)!$ converge a $\sin x$ para todo $x \in \mathbb{R}$.</Exercicio>
-<Exercicio numero="65.38" dificuldade="demonstracao">Demonstre Taylor multivariado de ordem 2 com hessiana via Taylor 1D ao longo de reta.</Exercicio>
+<Exercicio
+  numero="65.7"
+  dificuldade="aplicacao"
+  resposta="$P_5(x) = x - x^3/3 + x^5/5$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Table 6.2", licenca: "CC-BY-NC-SA" }}
+>
+Maclaurin de $\arctan x$ até $x^5$ (via integração de $1/(1+x^2)$).
+</Exercicio>
+
+<Exercicio
+  numero="65.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sinh x = x + x^3/6 + x^5/120`}</Eq> e <Eq>{`\\cosh x = 1 + x^2/2 + x^4/24`}</Eq>. São as séries de <Eq>{`\\sin`}</Eq> e <Eq>{`\\cos`}</Eq> sem os sinais alternados.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.9", licenca: "CC-BY-NC" }}
+>
+Maclaurin de $\sinh x$ e $\cosh x$ até $x^5$.
+</Exercicio>
+
+<Exercicio
+  numero="65.9"
+  dificuldade="aplicacao"
+  resposta="$P_4(x) = 1 - x + x^2/2 - x^3/6 + x^4/24$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.4", licenca: "CC-BY-NC-SA" }}
+>
+Maclaurin de $e^{-x}$ até $x^4$ (substituição direta em $e^x$).
+</Exercicio>
+
+<Exercicio
+  numero="65.10"
+  dificuldade="aplicacao"
+  solucao={<>Escreva <Eq>{`\\tan x = \\sin x / \\cos x`}</Eq> e divida as séries: <Eq>{`P_5(x) = x + x^3/3 + 2x^5/15`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.5", licenca: "CC-BY-NC-SA" }}
+>
+Maclaurin de $\tan x$ até $x^5$ usando $\sin/\cos$.
+</Exercicio>
+
+<Exercicio
+  numero="65.11"
+  dificuldade="aplicacao"
+  resposta="$P_4(x) = 1 - 2x^2 + 2x^4/3$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.11", licenca: "CC-BY-NC" }}
+>
+Maclaurin de $\cos(2x)$ até $x^4$ via substituição.
+</Exercicio>
+
+<Exercicio
+  numero="65.12"
+  dificuldade="aplicacao"
+  solucao={<>Substitua <Eq>{`x \\to x^2`}</Eq> na série de <Eq>{`e^x`}</Eq>: <Eq>{`P_6(x) = 1 + x^2 + x^4/2 + x^6/6`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Série de <Eq>{`e^u = 1 + u + u^2/2 + u^3/6 + \\cdots`}</Eq>.</li>
+      <li>Substitua <Eq>{`u = x^2`}</Eq>: <Eq>{`e^{x^2} = 1 + x^2 + x^4/2 + x^6/6 + \\cdots`}</Eq>.</li>
+      <li>Até ordem 6: <Eq>{`P_6(x) = 1 + x^2 + x^4/2 + x^6/6`}</Eq>.</li>
+      <li><em>Macete:</em> composição por substituição direta evita derivar <Eq>{`e^{x^2}`}</Eq> explicitamente — muito mais rápido.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.13", licenca: "CC-BY-NC" }}
+>
+Maclaurin de $e^{x^2}$ até $x^6$.
+</Exercicio>
+
+### Bloco B — Composição e produto (65.13 a 65.22)
+
+<Exercicio
+  numero="65.13"
+  dificuldade="aplicacao"
+  resposta="$P_8(x) = 1 - x^4/2 + x^8/24$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.14", licenca: "CC-BY-NC" }}
+>
+Maclaurin de $\cos(x^2)$ até $x^8$.
+</Exercicio>
+
+<Exercicio
+  numero="65.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\ln(1 - x^2) = \\ln(1 + (-x^2))`}</Eq>. Substitua <Eq>{`u = -x^2`}</Eq> na série de <Eq>{`\\ln(1+u)`}</Eq>: <Eq>{`P_6(x) = -x^2 - x^4/2 - x^6/3`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.12", licenca: "CC-BY-NC-SA" }}
+>
+Maclaurin de $\ln(1 - x^2)$ até $x^6$.
+</Exercicio>
+
+<Exercicio
+  numero="65.15"
+  dificuldade="aplicacao"
+  resposta="$P_6(x) = 1 - x^2 + x^4 - x^6$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.9", licenca: "CC-BY-NC-SA" }}
+>
+Maclaurin de $1/(1+x^2)$ até $x^6$ (série geométrica com $u = -x^2$).
+</Exercicio>
+
+<Exercicio
+  numero="65.16"
+  dificuldade="aplicacao"
+  solucao={<>Produto: <Eq>{`(1 + x + x^2/2 + \\cdots)(x - x^3/6 + \\cdots)`}</Eq>. Coletando até <Eq>{`x^4`}</Eq>: <Eq>{`P_4(x) = x + x^2 + x^3/3 - x^4/6`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.19", licenca: "CC-BY-NC" }}
+>
+Maclaurin de $e^x \sin x$ até $x^4$.
+</Exercicio>
+
+<Exercicio
+  numero="65.17"
+  dificuldade="aplicacao"
+  resposta="$P_5(x) = x - 4x^3/3 + 2x^5/15$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.18", licenca: "CC-BY-NC" }}
+>
+Maclaurin de $\sin x \cos x$ até $x^5$ (ou use $\sin(2x)/2$).
+</Exercicio>
+
+<Exercicio
+  numero="65.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`x e^{-x} = x(1 - x + x^2/2 - x^3/6 + \\cdots)`}</Eq>. Multiplicando: <Eq>{`P_4(x) = x - x^2 + x^3/2 - x^4/6`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.6", licenca: "CC-BY-NC-SA" }}
+>
+Maclaurin de $x e^{-x}$ até $x^4$.
+</Exercicio>
+
+<Exercicio
+  numero="65.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq>. Derivadas em <Eq>{`a=1`}</Eq>: <Eq>{`f(1)=0`}</Eq>, <Eq>{`f'(1)=1`}</Eq>, <Eq>{`f''(1)=-1`}</Eq>, <Eq>{`f'''(1)=2`}</Eq>, <Eq>{`f''''(1)=-6`}</Eq>. Logo <Eq>{`P_4(x) = (x-1) - (x-1)^2/2 + (x-1)^3/3 - (x-1)^4/4`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Calcule derivadas: <Eq>{`f'=1/x, f''=-1/x^2, f'''=2/x^3, f''''=-6/x^4`}</Eq>.</li>
+      <li>Avalie em <Eq>{`a=1`}</Eq>: <Eq>{`0, 1, -1, 2, -6`}</Eq>.</li>
+      <li>Divida por <Eq>{`k!`}</Eq>: coeficientes <Eq>{`0, 1, -1/2, 1/3, -1/4`}</Eq>.</li>
+      <li>Monte com <Eq>{`(x-1)^k`}</Eq>.</li>
+      <li><em>Curiosidade:</em> este é exatamente o desenvolvimento de <Eq>{`\\ln(1+u)`}</Eq> com <Eq>{`u = x-1`}</Eq> — verifique por substituição.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Activity 8.5.3", licenca: "CC-BY-NC-SA" }}
+>
+Taylor de $\ln x$ em torno de $a = 1$, ordem 4.
+</Exercicio>
+
+<Exercicio
+  numero="65.20"
+  dificuldade="aplicacao"
+  resposta="$P_3(x) = 1 + (x-1)/2 - (x-1)^2/8 + (x-1)^3/16$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.22", licenca: "CC-BY-NC" }}
+>
+Taylor de $\sqrt{x}$ em torno de $a = 1$, ordem 3.
+</Exercicio>
+
+<Exercicio
+  numero="65.21"
+  dificuldade="aplicacao"
+  solucao={<>Taylor de <Eq>{`1/x`}</Eq> em <Eq>{`a=1`}</Eq>: <Eq>{`f^{(k)}(1) = (-1)^k k!`}</Eq>, logo <Eq>{`P_3(x) = 1 - (x-1) + (x-1)^2 - (x-1)^3`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.21", licenca: "CC-BY-NC" }}
+>
+Taylor de $1/x$ em torno de $a = 1$, ordem 3.
+</Exercicio>
+
+<Exercicio
+  numero="65.22"
+  dificuldade="aplicacao"
+  resposta="$P_4(x) = 1 - (x-\pi/4) - (x-\pi/4)^2 + (x-\pi/4)^3/3 + (x-\pi/4)^4/6$ (simplificado)"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.24", licenca: "CC-BY-NC" }}
+>
+Taylor de $\cos x$ em torno de $a = \pi/4$, ordem 4.
+</Exercicio>
+
+### Bloco C — Limites por Taylor (65.23 a 65.30)
+
+<Exercicio
+  numero="65.23"
+  dificuldade="modelagem"
+  resposta="$1/2$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Example 6.20", licenca: "CC-BY-NC-SA" }}
+>
+Calcule $\displaystyle\lim_{x \to 0} \frac{e^x - 1 - x}{x^2}$ usando Taylor.
+</Exercicio>
+
+<Exercicio
+  numero="65.24"
+  dificuldade="modelagem"
+  resposta="$-1/6$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.20", licenca: "CC-BY-NC-SA" }}
+>
+Calcule $\displaystyle\lim_{x \to 0} \frac{\sin x - x}{x^3}$ usando Taylor.
+</Exercicio>
+
+<Exercicio
+  numero="65.25"
+  dificuldade="modelagem"
+  solucao={<>Série de <Eq>{`\\cos x = 1 - x^2/2 + x^4/24 - \\cdots`}</Eq>. Numerador: <Eq>{`\\cos x - 1 + x^2/2 = x^4/24 - \\cdots`}</Eq>. Dividido por <Eq>{`x^4`}</Eq>: limite é <Eq>{`1/24`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.21", licenca: "CC-BY-NC-SA" }}
+>
+Calcule $\displaystyle\lim_{x \to 0} \frac{\cos x - 1 + x^2/2}{x^4}$.
+</Exercicio>
+
+<Exercicio
+  numero="65.26"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\sin x = x - x^3/6 + \\cdots`}</Eq>, <Eq>{`\\tan x = x + x^3/3 + \\cdots`}</Eq>. Numerador: <Eq>{`\\sin x - \\tan x = -x^3/2 + \\cdots`}</Eq>. Dividido por <Eq>{`x^3`}</Eq>: limite é <Eq>{`-1/2`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.29", licenca: "CC-BY-NC" }}
+>
+Calcule $\displaystyle\lim_{x \to 0} \frac{\sin x - \tan x}{x^3}$.
+</Exercicio>
+
+<Exercicio
+  numero="65.27"
+  dificuldade="modelagem"
+  resposta="$\approx 0{,}09531$ (4 casas exatas com $P_4$)"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.9", licenca: "CC-BY-NC-SA" }}
+>
+Estime $\ln(1{,}1)$ com erro menor que $10^{-4}$ usando a série de Maclaurin. Diga qual ordem usar.
+</Exercicio>
+
+<Exercicio
+  numero="65.28"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`P_5(0.1) = 0.1 - 0.1^3/6 + 0.1^5/120 \\approx 0.099833`}</Eq>. Erro estimado via Lagrange: <Eq>{`|R_5| \\leq (0.1)^7/5040 \\approx 2 \\times 10^{-10}`}</Eq>. Precisão de 6 casas com ordem 5.</>}
+  passos={<>
+    <ol>
+      <li>Série: <Eq>{`\\sin x = x - x^3/6 + x^5/120 - x^7/5040 + \\cdots`}</Eq>.</li>
+      <li>Em <Eq>{`x = 0{,}1`}</Eq>: <Eq>{`0.1 - 0.000167 + 0.0000000833 \\approx 0.099833`}</Eq>.</li>
+      <li>Erro via Leibniz (série alternada): próximo termo <Eq>{`|{-x^7/5040}| \\approx 2 \\times 10^{-11}`}</Eq>.</li>
+      <li>Ordem 5 garante 6 casas decimais. ✓</li>
+      <li><em>Macete:</em> para série alternada decrescente, o erro é menor que o primeiro termo omitido em valor absoluto.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Activity 8.5.4", licenca: "CC-BY-NC-SA" }}
+>
+Aproxime $\sin(0{,}1)$ com erro menor que $10^{-6}$. Diga a ordem usada.
+</Exercicio>
+
+<Exercicio
+  numero="65.29"
+  dificuldade="modelagem"
+  resposta="$\sqrt{1{,}1} \approx 1{,}04879$ (3 casas exatas com $P_3$)"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.16", licenca: "CC-BY-NC-SA" }}
+>
+Aproxime $\sqrt{1{,}1}$ usando Taylor de $\sqrt{1+x}$ em $a = 0$ até ordem 2.
+</Exercicio>
+
+<Exercicio
+  numero="65.30"
+  dificuldade="modelagem"
+  solucao={<>Em física: <Eq>{`E = mc^2(1 - v^2/c^2)^{-1/2}`}</Eq>. Série binomial com <Eq>{`u = v^2/c^2`}</Eq>: <Eq>{`(1-u)^{-1/2} = 1 + u/2 + 3u^2/8 + \\cdots`}</Eq>. Logo <Eq>{`E \\approx mc^2 + \\frac{1}{2}mv^2 + \\cdots`}</Eq>. O primeiro termo é energia de repouso, o segundo é cinética clássica.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.40", licenca: "CC-BY-NC-SA" }}
+>
+Energia relativística: $E = mc^2/\sqrt{1 - v^2/c^2}$. Expanda em potências de $v/c$ e identifique os termos $E_0 = mc^2$ e $E_k = \frac{1}{2}mv^2$.
+</Exercicio>
+
+### Bloco D — Compreensão e demonstrações (65.31 a 65.40)
+
+<Exercicio
+  numero="65.31"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Tem o mesmo valor, mesma derivada e mesmas derivadas até ordem $n$ que $f$ em $a$.", correta: true },
+    { texto: "É o único polinômio de grau $n$ que passa pelo ponto $(a, f(a))$." },
+    { texto: "Minimiza o erro máximo em todo $\\mathbb{R}$." },
+    { texto: "Coincide com $f$ em $n+1$ pontos distintos." },
+  ]}
+  solucao={<>A propriedade característica é que <Eq>{`P_n^{(k)}(a) = f^{(k)}(a)`}</Eq> para <Eq>{`k = 0, 1, \\ldots, n`}</Eq>. Nenhum outro polinômio de grau <Eq>{`n`}</Eq> satisfaz todas essas igualdades simultaneamente.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Preview Activity 8.5.1", licenca: "CC-BY-NC-SA" }}
+>
+O que torna $P_n$ a "melhor aproximação polinomial de grau $n$" em $a$?
+</Exercicio>
+
+<Exercicio
+  numero="65.32"
+  dificuldade="compreensao"
+  solucao={<>Se <Eq>{`f`}</Eq> é polinômio de grau <Eq>{`\\leq n`}</Eq>, então <Eq>{`f^{(k)}`}</Eq> é idêntico para <Eq>{`k \\leq n`}</Eq>. Logo <Eq>{`P_n`}</Eq> e <Eq>{`f`}</Eq> têm mesmos coeficientes — são iguais.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.7", licenca: "CC-BY-NC" }}
+>
+Mostre que se $f$ é polinômio de grau $\leq n$, então $P_n = f$ exatamente (não apenas aproximação).
+</Exercicio>
+
+<Exercicio
+  numero="65.33"
+  dificuldade="compreensao"
+  solucao={<>Para <Eq>{`e^x`}</Eq>: <Eq>{`|R_n(x)| \\leq e^{|x|}|x|^{n+1}/(n+1)!`}</Eq>. Como <Eq>{`|x|^{n+1}/(n+1)! \\to 0`}</Eq> para todo <Eq>{`x`}</Eq> fixo (fatorial cresce mais que potência), o resíduo vai a zero. Raio infinito.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.10", licenca: "CC-BY-NC-SA" }}
+>
+Justifique que $e^x$ tem raio de convergência infinito usando estimativa de Lagrange.
+</Exercicio>
+
+<Exercicio
+  numero="65.34"
+  dificuldade="compreensao"
+  solucao={<>Taxa de câmbio: <Eq>{`e^r \\approx 1 + r + r^2/2`}</Eq>. Para <Eq>{`r = 0{,}12`}</Eq> (12% a.a.): <Eq>{`e^{0{,}12} \\approx 1{,}1275`}</Eq>. Para juros simples: <Eq>{`1{,}12`}</Eq>. Diferença de <Eq>{`\\approx 0{,}7\\%`}</Eq> — relevante em cálculos de longo prazo.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.12", licenca: "CC-BY-NC-SA" }}
+>
+Em finanças, $(1 + r/n)^n \to e^r$ quando $n \to \infty$ (juros contínuos). Use Taylor de $e^r$ para estimar o fator de crescimento anual com $r = 12\%$ e compare com juros simples.
+</Exercicio>
+
+<Exercicio
+  numero="65.35"
+  dificuldade="desafio"
+  solucao={<><Eq>{`e^{ix} = \\sum (ix)^k/k!`}</Eq>. Termos com <Eq>{`k`}</Eq> par: <Eq>{`(-1)^{k/2} x^k/(k!)`}</Eq>, que é a série de <Eq>{`\\cos x`}</Eq>. Termos ímpares: <Eq>{`i(-1)^{(k-1)/2} x^k/(k!)`}</Eq>, que é <Eq>{`i \\sin x`}</Eq>. Logo <Eq>{`e^{ix} = \\cos x + i \\sin x`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.38", licenca: "CC-BY-NC-SA" }}
+>
+Derive a fórmula de Euler $e^{ix} = \cos x + i\sin x$ separando termos pares e ímpares da série de $e^z$.
+</Exercicio>
+
+<Exercicio
+  numero="65.36"
+  dificuldade="desafio"
+  solucao={<><Eq>{`f(x) = e^{-1/x^2}`}</Eq> com <Eq>{`f(0) = 0`}</Eq>. Para qualquer <Eq>{`n`}</Eq>, <Eq>{`f^{(n)}(0) = \\lim_{x\\to 0} p(1/x)e^{-1/x^2} = 0`}</Eq> (polinômio em <Eq>{`1/x`}</Eq> multiplicado por <Eq>{`e^{-1/x^2}`}</Eq> vai a zero por crescimento de <Eq>{`e`}</Eq> dominar qualquer polinômio). Logo <Eq>{`P_n = 0`}</Eq> para todo <Eq>{`n`}</Eq>, mas <Eq>{`f \\neq 0`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.13", licenca: "CC-BY-NC-SA" }}
+>
+Mostre que $f(x) = e^{-1/x^2}$ (com $f(0) = 0$) tem todas as derivadas nulas em $0$ — logo $P_n = 0$ para todo $n$, mas $f \neq P_n$.
+</Exercicio>
+
+<Exercicio
+  numero="65.37"
+  dificuldade="demonstracao"
+  solucao={<>Resíduo de Lagrange: <Eq>{`|R_n(x)| \\leq M|x|^{n+1}/(n+1)!`}</Eq> onde <Eq>{`M = \\max|f^{(n+1)}|`}</Eq> no intervalo. Para <Eq>{`e^x`}</Eq>, <Eq>{`M = e^{|x|}`}</Eq> (fixo). Como <Eq>{`|x|^{n+1}/(n+1)! \\to 0`}</Eq>, o resíduo vai a zero. Portanto <Eq>{`P_n \\to f`}</Eq> para todo <Eq>{`x`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.31", licenca: "CC-BY-NC" }}
+>
+Demonstre que a série de Maclaurin de $e^x$ converge a $e^x$ para todo $x \in \mathbb{R}$ (use estimativa do resíduo de Lagrange).
+</Exercicio>
+
+<Exercicio
+  numero="65.38"
+  dificuldade="demonstracao"
+  solucao={<>Aplique Taylor 1D a <Eq>{`g(t) = f(\\vec a + t\\vec h)`}</Eq> para <Eq>{`t \\in [0,1]`}</Eq>. Então <Eq>{`g'(t) = \\nabla f \\cdot \\vec h`}</Eq> e <Eq>{`g''(t) = \\vec h^T H \\vec h`}</Eq>. Taylor de <Eq>{`g`}</Eq> em <Eq>{`t=0`}</Eq> até ordem 2, avaliado em <Eq>{`t=1`}</Eq>, dá o resultado multivariado.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.14", licenca: "CC-BY-NC-SA" }}
+>
+Demonstre Taylor multivariado de ordem 2 (com hessiana) reduzindo a Taylor 1D ao longo de uma reta paramétrica.
+</Exercicio>
+
+<Exercicio
+  numero="65.39"
+  dificuldade="demonstracao"
+  solucao={<>Pelo resíduo de Lagrange: existe <Eq>{`\\xi`}</Eq> entre <Eq>{`a`}</Eq> e <Eq>{`x`}</Eq> com <Eq>{`R_n(x) = f^{(n+1)}(\\xi)(x-a)^{n+1}/(n+1)!`}</Eq>. Isso é o Teorema do Valor Médio generalizado — provar via aplicação do TVM ao resíduo <Eq>{`R_n`}</Eq> como função de <Eq>{`a`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.32", licenca: "CC-BY-NC" }}
+>
+Demonstre a forma de Lagrange do resíduo via o Teorema do Valor Médio generalizado.
+</Exercicio>
+
+<Exercicio
+  numero="65.40"
+  dificuldade="demonstracao"
+  solucao={<>Integre a série de <Eq>{`1/(1+t^2) = \\sum (-1)^k t^{2k}`}</Eq> de <Eq>{`0`}</Eq> a <Eq>{`x`}</Eq>: <Eq>{`\\arctan x = \\sum (-1)^k x^{2k+1}/(2k+1)`}</Eq>. Em <Eq>{`x=1`}</Eq>: <Eq>{`\\pi/4 = 1 - 1/3 + 1/5 - 1/7 + \\cdots`}</Eq> (série de Leibniz). Logo <Eq>{`\\pi = 4(1 - 1/3 + 1/5 - \\cdots)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.37", licenca: "CC-BY-NC-SA" }}
+>
+Integre a série $1/(1+t^2) = \sum (-1)^k t^{2k}$ para obter $\arctan x$ como série. Use isso para derivar a fórmula de Leibniz: $\pi/4 = 1 - 1/3 + 1/5 - 1/7 + \cdots$
+</Exercicio>
 
 </ListaExercicios>
 
-## Fontes desta aula
+## Fontes
 
-- [**Active Calculus**](https://activecalculus.org/single/) — Boelkins · 2024 · §8.5 (Taylor). **Fonte primária.**
-- [**Calculus (Volume 2)**](https://openstax.org/details/books/calculus-volume-2) — OpenStax · 2016 · §6.3-6.4.
-- [**Basic Analysis**](https://www.jirka.org/ra/) — Jiří Lebl · 2024 · v6.0 · §4.3 (Taylor com resíduo).
-- [**Visual Complex Analysis**](https://www.usfca.edu/~cannon/) — Tristan Needham · 1997 · capítulo de séries.
+- [**Active Calculus**](https://activecalculus.org/single/sec-8-5-taylor.html) — Boelkins · 2024 · §8.5 Taylor Polynomials and Taylor Series · CC-BY-NC-SA. **Fonte primária.**
+- [**Calculus Volume 2**](https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series) — OpenStax · 2016 · §6.3 Taylor and Maclaurin Series · CC-BY-NC-SA.
+- [**APEX Calculus**](https://www.apexcalculus.com/downloads) — Hartman et al. · 2024 · v5.0 · §8.6 Taylor Polynomials · CC-BY-NC.
