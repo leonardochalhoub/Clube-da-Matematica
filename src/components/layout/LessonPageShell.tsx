@@ -18,6 +18,7 @@ interface LessonPageShellProps {
   meta: Conteudo
   isAula: boolean
   isFinancas: boolean
+  isEngenharia?: boolean
   /** Caminho do conteúdo (ex.: 'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos'). */
   caminho: string
   /** `<MDXContent />` PT-BR pré-renderizado. Fallback se não há tradução pro locale. */
@@ -35,6 +36,7 @@ export function LessonPageShell({
   meta,
   isAula,
   isFinancas,
+  isEngenharia,
   caminho,
   children,
   prevLicao,
@@ -56,6 +58,10 @@ export function LessonPageShell({
         ) : isFinancas ? (
           <Link href="/financas" className="hover:text-clube-teal">
             {t('nav.finance')}
+          </Link>
+        ) : isEngenharia ? (
+          <Link href="/engenharia" className="hover:text-clube-teal">
+            {t('nav.engineering')}
           </Link>
         ) : (
           <span className="text-clube-ink/70">
