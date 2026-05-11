@@ -1,0 +1,989 @@
+---
+titulo: "Lição 49 — Limite de sequências (formalizado)"
+slug: "licao-49-limite-sequencias"
+categoria: "aulas"
+subcategoria: "ano-2-trim-5"
+descricao: "Definição rigorosa épsilon-N de convergência. Teoremas fundamentais: unicidade, álgebra dos limites, confronto, monótona limitada, Bolzano-Weierstrass. Aplicações em algoritmos iterativos e finanças."
+ordem: 49
+publicado: true
+tags: ["limite", "sequência", "convergência", "épsilon-N", "ano-2", "trim-5"]
+prerrequisitos: ["licao-19-limite-intuitivo", "licao-48-intro-series"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano do programa (17 anos)", "Equiv. Math III japonês cap. 6", "Equiv. Klasse 12 LK Análise alemã", "Equiv. H2 Math singapurense — Sequences & Series"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\lim_{n \to \infty} a_n = L \iff \forall\,\varepsilon > 0,\; \exists N \in \mathbb{N} : n > N \Rightarrow |a_n - L| < \varepsilon"
+  legenda={<>Ciąg <Eq>{`(a_n)`}</Eq> <strong>zbieża do</strong> <Eq>{`L`}</Eq> jeżeli dla każdej tolerancji <Eq>{`\\varepsilon > 0`}</Eq>, wszystkie wyrazy po indeksie <Eq>{`N`}</Eq> są w odległości mniejszej niż <Eq>{`\\varepsilon`}</Eq> od <Eq>{`L`}</Eq>. Jest to dyskretny odpowiednik definicji <Eq>{`\\varepsilon`}</Eq>-<Eq>{`\\delta`}</Eq> — „N" zastępuje „delta", ponieważ dziedziną jest teraz <Eq>{`\\mathbb{N}`}</Eq>, a nie <Eq>{`\\mathbb{R}`}</Eq>.</>}
+  audioTexto="Granica a sub n, gdy n dąży do nieskończoności, równa się L, wtedy i tylko wtedy gdy dla każdego epsilona dodatniego istnieje N naturalne takie, że jeśli n jest większe od N, to moduł z a sub n minus L jest mniejszy niż epsilon. Definicja epsilon-N zbieżności ciągu."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Książki obejmujące tę lekcję
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://www.jirka.org/ra/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Lebl — Basic Analysis: Introduction to Real Analysis
+      </a>
+      <span className="text-clube-mist"> · §2.1–2.3 Sequences · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Rygorystyczna definicja epsilon-N, jednoznaczność, monotoniczna ograniczona, Bolzano-Weierstrass i zupełność ℝ przez Cauchy'ego. Odniesienie podstawowe dla portali formalnych i 25-letnich.</em>
+    </li>
+    <li>
+      <a href="https://activecalculus.org/single/sec-8-1-sequences.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §8.1 Sequences · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Podejście poprzez aktywności — ciągi rekurencyjne, stosunek Fibonacciego, algorytm Herona. Podstawa wszystkich ćwiczeń modelowania i rekursji.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-2/pages/5-1-sequences" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 2
+      </a>
+      <span className="text-clube-mist"> · §5.1 Sequences · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Znane granice, hierarchia wzrostu, przykłady z $(1+1/n)^n \to e$ i ćwiczenia drylowe z pełnymi rozwiązaniami.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definicja rygorystyczna i twierdzenia fundamentalne">
+
+### Definicja epsilon-N
+
+<Definicao titulo="Zbieżność ciągu">
+
+Niech <Eq>{`(a_n)_{n \\geq 1}`}</Eq> będzie ciągiem liczb rzeczywistych. Mówimy, że <Eq>{`(a_n)`}</Eq> **zbieża do** <Eq>{`L \\in \\mathbb{R}`}</Eq> i piszemy <Eq>{`\\lim_{n \\to \\infty} a_n = L`}</Eq> (lub <Eq>{`a_n \\to L`}</Eq>) jeśli:
+
+$$\forall\, \varepsilon > 0,\; \exists N \in \mathbb{N} : n > N \Rightarrow \lvert a_n - L \rvert < \varepsilon.$$
+
+Gdy żaden taki $L$ nie istnieje, ciąg jest **rozbieżny**.
+
+</Definicao>
+
+> "We say the sequence $(x_n)$ converges to a number $L$ if for every $\varepsilon > 0$, there exists an $M \in \mathbb{N}$ such that $|x_n - L| < \varepsilon$ for all $n \geq M$." — [Lebl, Basic Analysis Vol. I, §2.1](https://www.jirka.org/ra/)
+
+<Definicao titulo="Ciąg Cauchy'ego">
+
+$(a_n)$ jest ciągiem **Cauchy'ego**, jeśli $\forall\, \varepsilon > 0,\; \exists N \in \mathbb{N} : m, n > N \Rightarrow |a_m - a_n| < \varepsilon$.
+
+</Definicao>
+
+> "A sequence $(x_n)$ is a Cauchy sequence if for every $\varepsilon > 0$ there exists an $M \in \mathbb{N}$ such that for all $n, k \geq M$ we have $|x_n - x_k| < \varepsilon$." — [Lebl, Basic Analysis Vol. I, §2.4](https://www.jirka.org/ra/)
+
+### Interpretacja geometryczna
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 480 160" className="w-full">
+<defs>
+  <marker id="arr49" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="40" y1="80" x2="460" y2="80" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr49)"/>
+  <line x1="60" y1="20" x2="60" y2="140" stroke="currentColor" strokeOpacity="0.2" strokeWidth="1"/>
+  <text x="455" y="75" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">n</text>
+  <text x="62" y="15" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">a_n</text>
+  <rect x="60" y="55" width="400" height="50" fill="rgb(232 199 122 / 0.15)" stroke="rgb(232 199 122)" strokeWidth="1" strokeDasharray="4 3"/>
+  <text x="465" y="58" fontSize="9" fill="rgb(232 199 122)" fillOpacity="0.8">L+ε</text>
+  <text x="465" y="112" fontSize="9" fill="rgb(232 199 122)" fillOpacity="0.8">L-ε</text>
+  <line x1="60" y1="80" x2="460" y2="80" stroke="rgb(26 77 92)" strokeWidth="1.5" strokeDasharray="6 3"/>
+  <text x="10" y="83" fontSize="10" fontFamily="serif" fontStyle="italic" fill="rgb(26 77 92)">L</text>
+  <circle cx="90" cy="30" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="120" cy="115" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="155" cy="45" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="195" cy="100" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="240" cy="65" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="290" cy="92" r="3" fill="rgb(61 122 95)"/>
+  <circle cx="340" cy="74" r="3" fill="rgb(61 122 95)"/>
+  <circle cx="390" cy="83" r="3" fill="rgb(61 122 95)"/>
+  <circle cx="435" cy="79" r="3" fill="rgb(61 122 95)"/>
+  <line x1="260" y1="20" x2="260" y2="140" stroke="rgb(201 163 95)" strokeWidth="1.5" strokeDasharray="3 2"/>
+  <text x="263" y="150" fontSize="9" fill="rgb(201 163 95)">N</text>
+  <text x="130" y="150" fontSize="9" fill="rgb(199 107 63)" fillOpacity="0.8">wyrazy poza pasem</text>
+  <text x="300" y="150" fontSize="9" fill="rgb(61 122 95)" fillOpacity="0.8">wszystkie wewnątrz</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Pas poziomy $(L - \varepsilon, L + \varepsilon)$ zawiera wszystkie wyrazy z $n > N$. Dla każdego pasa, który wybierzesz (niezależnie jak wąski), istnieje takie $N$, które działa.
+</figcaption>
+</figure>
+
+### Twierdzenia fundamentalne
+
+<Teorema titulo="Jednoznaczność granicy">
+
+Jeśli $(a_n)$ zbieża, to granica jest jednoznaczna.
+
+**Dowód.** Załóżmy $a_n \to L$ i $a_n \to M$ gdzie $L \neq M$. Weźmy $\varepsilon = |L - M|/2 > 0$. Wtedy istnieją $N_1, N_2$ takie, że $n > N_1 \Rightarrow |a_n - L| < \varepsilon$ i $n > N_2 \Rightarrow |a_n - M| < \varepsilon$. Dla $n > \max(N_1, N_2)$:
+
+$$|L - M| \leq |a_n - L| + |a_n - M| < 2\varepsilon = |L - M|,$$
+
+sprzeczność. Zatem $L = M$. $\blacksquare$
+
+</Teorema>
+
+<Teorema titulo="Twierdzenie o ciągu monotonicznym ograniczonym">
+
+Każdy ciąg rosnący i ograniczony z góry zbieża. Każdy ciąg malejący i ograniczony z dołu zbieża.
+
+**Dowód (przypadek rosnący).** Niech $L = \sup\{a_n : n \geq 1\}$ (istnieje dzięki zupełności $\mathbb{R}$). Dla $\varepsilon > 0$, $L - \varepsilon$ nie jest ograniczeniem górnym, więc istnieje $N$ z $a_N > L - \varepsilon$. Dla $n > N$: $a_n \geq a_N > L - \varepsilon$ i $a_n \leq L$, zatem $|a_n - L| < \varepsilon$. $\blacksquare$
+
+</Teorema>
+
+| Twierdzenie | Sformułowanie skrócone |
+|---|---|
+| **Algebra granic** | $\lim(a_n \pm b_n) = \lim a_n \pm \lim b_n$; analogicznie dla iloczynu i ilorazu (mianownik $\neq 0$) |
+| **Twierdzenie o trzech ciągach** | $a_n \leq b_n \leq c_n$ i $\lim a_n = \lim c_n = L$ implikuje $\lim b_n = L$ |
+| **Bolzano-Weierstrass** | Każdy ciąg ograniczony zawiera podciąg zbieżny |
+| **Cauchy $\iff$ zbieżny** | W $\mathbb{R}$: każdy ciąg Cauchy'ego zbieża (równoważność definiująca zupełność) |
+
+### Granice znane
+
+<Equation explicacao="Sequências fundamentais cujos limites devem ser memorizados." latex="\lim_{n\to\infty}\frac{1}{n^p} = 0\;(p>0),\quad \lim_{n\to\infty}r^n = 0\;(|r|<1),\quad \lim_{n\to\infty}n^{1/n} = 1,\quad \lim_{n\to\infty}\left(1+\frac{1}{n}\right)^n = e." />
+
+### Hierarchia wzrostu
+
+<Equation explicacao="Każda funkcja po lewej stronie rośnie znacznie wolniej niż każda funkcja po prawej." latex="\ln n \ll n^a \ll b^n \ll n! \ll n^n \quad (a > 0,\; b > 1)." />
+
+<Insight>
+
+**Ciągi rekurencyjne.** Jeśli $a_{n+1} = f(a_n)$ i ciąg zbieża do $L$, to $L = f(L)$ (punkt stały $f$). Istnienie zbieżności musi być ustalane osobno — poprzez ciąg monotoniczny ograniczony lub kontrakcję — przed rozwiązaniem równania punktu stałego. Rozwiązanie $L = f(L)$ bez dowodu zbieżności jest błędem.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Dla dziecka w wieku 5 lat">
+
+Wyobraź sobie, że idziesz w kierunku ściany. Każdy krok jest połową poprzedniego kroku.
+
+Pierwszy krok: 1 metr. Drugi: pół metra. Trzeci: jedna czwarta metra. I tak dalej.
+
+Nigdy nie uderzyłeś w ścianę naraz, ale zbliżałeś się do niej **coraz bardziej**. Miejsce, do którego się zbliżasz — ściana — to **granica** ciągu.
+
+Niektóre liczby zbliżają się coraz bardziej do pewnego punktu. Ten punkt to granica. Inne skaczą bez osiągania gdziekolwiek — i wtedy nie mają granicy.
+
+</Porta>
+
+<Porta nivel="10" titulo="Dla dziecka w wieku 10 lat">
+
+**Ciąg** to lista liczb w określonym porządku: $a_1, a_2, a_3, \ldots$
+
+**Granica** to liczba, do której lista „zmierza" gdy wskaźniki stają się ogromne.
+
+Przykłady:
+- $1,\; \tfrac{1}{2},\; \tfrac{1}{3},\; \tfrac{1}{4},\ldots$ — coraz mniejsza, kierunku zera. Granica = **0**.
+- $1,\; \tfrac{3}{2},\; \tfrac{5}{3},\; \tfrac{7}{4},\ldots$ — zbliża się do 2. Granica = **2**.
+- $1,\; -1,\; 1,\; -1,\ldots$ — oscyluje, nigdy nie osiąga niczego. **Bez granicy**.
+
+Dokładna definicja mówi: ciąg ma granicę $L$, jeśli potrafisz sprawić, że wyrazy będą **tak bliskie L jak chcesz**, o ile czekasz wystarczająco długo w liście.
+
+**Trik praktyczny**: jeśli ciąg rośnie, ale ma górny limit, to zbieża. Nie musisz wiedzieć dokąd — wystarczy wiedzieć, że gdzieś się zatrzyma.
+
+</Porta>
+
+<Porta nivel="15" titulo="Dla nastolatka w wieku 15 lat">
+
+Ciągi są **funkcjami z dziedziną w $\mathbb{N}$**: $a : \mathbb{N} \to \mathbb{R}$, $n \mapsto a_n$. Definicja granicy jest taka sama jak z Lekcji 41 (epsilon-delta), ale „delta" zamieniło się na „N", ponieważ domena jest dyskretna.
+
+### Dlaczego ciągi są ważne teraz
+
+Wszystko, czego nauczysz się w ciągu następnych dwóch trimestrów, zależy od ciągów:
+
+- **Szeregi** $\sum a_n$ są granicami sum częściowych.
+- **Całki Riemanna** są granicami sum prostokątnych.
+- **Metoda Newtona** dla pierwiastków: $a_{n+1} = a_n - f(a_n)/f'(a_n)$.
+- **Prawdopodobieństwo**: prawo wielkich liczb mówi $\bar X_n \to E[X]$.
+
+### Granice znane — tabela konsultacyjna
+
+| Ciąg | Granica | Warunek |
+|---|---|---|
+| $1/n$ | $0$ | — |
+| $1/n^p$ | $0$ | $p > 0$ |
+| $r^n$ | $0$ | $\|r\| < 1$ |
+| $(1 + 1/n)^n$ | $e \approx 2{,}718$ | — |
+| $n^{1/n}$ | $1$ | — |
+| $a^n/n!$ | $0$ | dowolne $a > 0$ |
+| $(-1)^n$ | nie istnieje | oscyluje |
+
+### Jak obliczać granice w praktyce
+
+1. **Podziel wszystko przez największą potęgę $n$**, gdy masz stosunek wielomianów.
+2. **Twierdzenie o trzech ciągach**: jeśli $-b_n \leq a_n \leq b_n$ i $b_n \to 0$, to $a_n \to 0$.
+3. **Algebra**: $\lim (a_n + b_n) = \lim a_n + \lim b_n$ (jeśli obie istnieją).
+4. **Ciąg monotoniczny ograniczony**: wykaż, że ciąg rośnie i ma górny limit; zbieżność jest gwarantowana, nawet jeśli nie znajdziesz dokładnej wartości.
+
+<Insight>
+
+Definicja epsilon-$N$ ma prostą interpretację geometryczną: umieść „pas poziomy" $(L - \varepsilon, L + \varepsilon)$ na wykresie $a_n$ względem $n$. Granica istnieje, jeśli dla każdego pasa, który wybierzesz (niezależnie jak wąski), istnieje takie $N$, że wszystkie punkty wykresu z $n > N$ są wewnątrz pasa.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="Dla studenta inżynierii">
+
+Ciągi są matematyczną podstawą **algorytmów iteracyjnych** — Newton, gradient descent, MCMC, iteracja potęgowa dla wartości własnych.
+
+### Demonstracja: $\lim 1/n = 0$ przez epsilon-$N$
+
+Dla $\varepsilon > 0$, wybierz $N = \lceil 1/\varepsilon \rceil$. Wtedy dla $n > N$:
+
+$$|a_n - 0| = \frac{1}{n} < \frac{1}{N} \leq \varepsilon. \quad \blacksquare$$
+
+### Demonstracja: twierdzenie o trzech ciągach
+
+Dane $a_n \leq b_n \leq c_n$ z $a_n \to L$ i $c_n \to L$. Dla $\varepsilon > 0$, istnieje $N$ takie, że $n > N \Rightarrow |a_n - L| < \varepsilon$ i $|c_n - L| < \varepsilon$. Stąd $L - \varepsilon < a_n \leq b_n \leq c_n < L + \varepsilon$, tzn. $|b_n - L| < \varepsilon$. $\blacksquare$
+
+### Zastosowania w algorytmach
+
+- **Metoda Herona** (pierwiastek kwadratowy): $a_{n+1} = \tfrac{1}{2}(a_n + N/a_n)$. Zbieżność **kwadratowa** do $\sqrt N$ — liczba poprawnych cyfr podwaja się z każdą iteracją.
+- **Gradient descent**: $w_{n+1} = w_n - \eta \nabla f(w_n)$. Zbieża (dla $f$ wypukłej ze stałą Lipschitza $L$), jeśli krok $\eta < 2/L$.
+- **Iteracja potęgowa**: $v_{n+1} = A v_n / \|A v_n\|$ zbieża do wektora własnego największej wartości własnej gdy istnieje luka spektralna.
+
+### Szereg geometryczny — zastosowanie finansowe
+
+Raty miesięczne $P$ przez $n$ miesięcy na oprocentowanie $r$ na miesiąc. Wartość bieżąca:
+
+$$V = P \sum_{k=1}^n \frac{1}{(1+r)^k} = P \cdot \frac{1 - (1+r)^{-n}}{r}.$$
+
+Gdy $n \to \infty$ i $r > 0$: $V \to P/r$ (renta wieczna).
+
+### Zbieżność Cauchy'ego w $\mathbb{Q}$
+
+Ciąg $a_n = \lfloor \sqrt 2 \cdot 10^n \rfloor / 10^n$ (przybliżenia dziesiętne $\sqrt 2$) jest Cauchy'ego w $\mathbb{Q}$, ale **nie zbieża w $\mathbb{Q}$** — granica to $\sqrt 2 \notin \mathbb{Q}$. To zmotywowało konstrukcję $\mathbb{R}$ jako **uzupełnienie** $\mathbb{Q}$.
+
+</Porta>
+
+<Porta nivel="40" titulo="Dla starszego profesjonalisty">
+
+### Przestrzenie ciągów
+
+- $\ell^p = \{(a_n) : \sum |a_n|^p < \infty\}$, Banach z normą $\|(a_n)\|_p = (\sum |a_n|^p)^{1/p}$ dla $p \geq 1$.
+- $\ell^\infty = \{(a_n) : \sup|a_n| < \infty\}$, Banach z normą $\sup$.
+- $c_0 = \{(a_n) : a_n \to 0\}$, podprzestrzeń zamknięta $\ell^\infty$; dualem jest $\ell^1$.
+
+### Zbieżność słaba vs. mocna w $\ell^2$
+
+Baza kanoniczna $e_n$ (wektor z 1 na pozycji $n$, reszta 0) zbieża **słabo** do 0 w $\ell^2$ (bo $\langle e_n, f \rangle \to 0$ dla każdego $f \in \ell^2$), ale **nie mocno** ($\|e_n\| = 1$ dla każdego $n$). W wymiarze skończonym, słaba i mocna są równoważne.
+
+### Uzupełnienie i konstrukcja $\mathbb{R}$
+
+Każda przestrzeń metryczna ma jednoznaczne uzupełnienie (aż do izometrii). $\mathbb{R}$ jest uzupełnieniem $\mathbb{Q}$ poprzez klasy równoważności ciągów Cauchy'ego. Ta sama zasada daje $L^2[a,b]$ jako uzupełnienie $C[a,b]$ pod normą $L^2$.
+
+### Zwartość sekwencyjna
+
+W $\mathbb{R}^n$: zwartość $\iff$ domknięty i ograniczony (Heine-Borel) $\iff$ zwartość sekwencyjna (Bolzano-Weierstrass). W wymiarze nieskończonym, domknięty i ograniczony nie implikuje zwartości sekwencyjnej (kontrprzykład: kula jednostkowa $\ell^2$). Zwartość w wymiarze nieskończonym wymaga **całkowitej ograniczoności** (totally bounded).
+
+### Zaawansowane metody iteracyjne
+
+- **Przyspieszenie Aitkena** ($\Delta^2$): $\hat a_n = a_n - (a_{n+1} - a_n)^2/(a_{n+2} - 2a_{n+1} + a_n)$. Zmienia zbieżność liniową w superliniową.
+- **MCMC i czas mieszania**: ciąg stanów procesu Markowa zbieża do rozkładu stacjonarnego z szybkością $\rho^n$, gdzie $\rho = |\lambda_2|/|\lambda_1|$ (luka spektralna).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktyka — jak obliczać i weryfikować granice">
+
+### Przepis obliczeniowy
+
+**Krok 1 — Stosunek wielomianów.** Podziel licznik i mianownik przez największy stopień $n$:
+
+$$\lim_{n \to \infty} \frac{3n^2 + 2n}{5n^2 - 1} = \lim_{n \to \infty} \frac{3 + 2/n}{5 - 1/n^2} = \frac{3}{5}.$$
+
+**Krok 2 — Rozpoznaj granice znane.** $(1 + x/n)^n \to e^x$; $n^{1/n} \to 1$; $r^n \to 0$ dla $|r| < 1$.
+
+**Krok 3 — Twierdzenie o trzech ciągach.** Jeśli $|a_n| \leq b_n$ i $b_n \to 0$, to $a_n \to 0$. Przykład: $|\sin(n)/n| \leq 1/n \to 0$.
+
+**Krok 4 — Rekurencyjny.** Załóż $a_n \to L$ i wyprowadź $L = f(L)$. Uwaga: istnienie zbieżności musi być udowodnione osobno.
+
+### Zastosowanie finansowe — procent składany
+
+Inwestycja R\$ 1.000 przy rocznym oprocentowaniu $r$ kapitalizowanym $n$ razy rocznie:
+
+$$A_n = 1000 \cdot \left(1 + \frac{r}{n}\right)^n \to 1000 \cdot e^r \quad (n \to \infty).$$
+
+Dla $r = 10\%$: $A_{12} \approx 1104{,}71$ (miesięczny); $A_\infty = 1000 e^{0,1} \approx 1105{,}17$ (ciągły). Różnica między kapitalizacją miesięczną a ciągłą to mniej niż R\$ 0,50 rocznie — ale rośnie proporcjonalnie do kapitału i okresu.
+
+### Stosunek Fibonacciego i złoty podział
+
+$F_1 = 1$, $F_2 = 1$, $F_{n+1} = F_n + F_{n-1}$. Stosunek $F_{n+1}/F_n$ zbieża do:
+
+$$\varphi = \frac{1 + \sqrt 5}{2} \approx 1{,}618 \quad \text{(złoty podział)}.$$
+
+Demonstracja: jeśli $r_n = F_{n+1}/F_n \to L$, to $L = 1 + 1/L$, stąd $L^2 - L - 1 = 0$, pierwiastek dodatni $\varphi$.
+
+### Częste ostrzeżenia
+
+- **Nieokreśloność $1^\infty$**: $(1 + 1/n)^n$ **nie** zbieża do 1. Używa się $e$.
+- **Istnienie przed obliczeniem**: w ciągu rekurencyjnym, obliczenie $L = f(L)$ bez dowodu zbieżności jest błędem.
+- **Oscylacja vs. rozbieżność**: $(-1)^n$ oscyluje ale jest ograniczony; $n$ rozbieża do $+\infty$. Obie są „rozbieżne" w sensie technicznym.
+
+</Porta>
+
+</DuasPortas>
+
+## Przykłady rozwiązane
+
+<Exemplo titulo="Granica ciągu wymiernego poprzez dzielenie potęgi" numero="1">
+
+**Problem.** Oblicz $\displaystyle\lim_{n \to \infty} \frac{2n^2 - 3n + 1}{n^2 + 5}$.
+
+**Strategia.** Dzielenie licznika i mianownika przez największy stopień $n$, który się pojawia ($n^2$). Potem każda część z $n$ w mianowniku zmierza do zera.
+
+**Rozwiązanie.**
+
+1. Podziel licznik i mianownik przez $n^2$:
+
+$$\frac{2n^2 - 3n + 1}{n^2 + 5} = \frac{2 - 3/n + 1/n^2}{1 + 5/n^2}.$$
+
+2. Zastosuj granicę używając algebry granic. Każdy ułamek $c/n^k \to 0$:
+
+$$\lim_{n \to \infty} \frac{2 - 3/n + 1/n^2}{1 + 5/n^2} = \frac{2 - 0 + 0}{1 + 0} = 2.$$
+
+**Weryfikacja.** Dla $n = 100$: $(20000 - 300 + 1)/(10000 + 5) = 19701/10005 \approx 1{,}969$. Dla $n = 10000$: $(2 \cdot 10^8 - 30000 + 1)/(10^8 + 5) \approx 2{,}0003$. Zbieżność do 2.
+
+**Źródło.** [OpenStax Calculus Volume 2, §5.1](https://openstax.org/books/calculus-volume-2/pages/5-1-sequences) — CC-BY-NC-SA 4.0.
+
+</Exemplo>
+
+<Exemplo titulo="Twierdzenie o trzech ciągach: oscylujący ciąg dzielony przez n" numero="2">
+
+**Problem.** Oblicz $\displaystyle\lim_{n \to \infty} \frac{\sin n}{n}$.
+
+**Strategia.** Funkcja $\sin n$ oscyluje bez zbieżności, ale zawsze jest między $-1$ a $1$. Używamy twierdzenia o trzech ciągach, zaciskając ciąg między $-1/n$ i $1/n$.
+
+**Rozwiązanie.**
+
+1. Użyj podstawowej nierówności $-1 \leq \sin n \leq 1$:
+
+$$-\frac{1}{n} \leq \frac{\sin n}{n} \leq \frac{1}{n} \quad \text{dla każdego } n \geq 1.$$
+
+2. Oblicz granice ciągów ograniczających:
+
+$$\lim_{n \to \infty} \left(-\frac{1}{n}\right) = 0 \quad \text{i} \quad \lim_{n \to \infty} \frac{1}{n} = 0.$$
+
+3. Z twierdzenia o trzech ciągach, ciąg pośrodku też zmierza do 0:
+
+$$\lim_{n \to \infty} \frac{\sin n}{n} = 0.$$
+
+**Weryfikacja.** Dla $n = 100$: $\sin(100)/100 \approx -0{,}00506$. Dla $n = 1000$: $\sin(1000)/1000 \approx 0{,}000827$. Oba bliskie zeru.
+
+**Źródło.** [OpenStax Calculus Volume 2, §5.1, Example 5.7](https://openstax.org/books/calculus-volume-2/pages/5-1-sequences) — CC-BY-NC-SA 4.0.
+
+</Exemplo>
+
+<Exemplo titulo="Ciąg monotoniczny ograniczony: zbieżność (1+1/n)^n" numero="3">
+
+**Problem.** Wykaż, że ciąg $a_n = (1 + 1/n)^n$ jest rosnący i ograniczony z góry przez 3, zatem zbieża. Zidentyfikuj granicę.
+
+**Strategia.** Rozwinięcie dwumianowe pokazujące wzrost; porównanie z szeregiem geometrycznym dla górnego ograniczenia.
+
+**Rozwiązanie.**
+
+1. **Rozwinięcie dwumianowe:**
+
+$$a_n = \sum_{k=0}^{n} \binom{n}{k} \frac{1}{n^k} = \sum_{k=0}^{n} \frac{1}{k!} \cdot \prod_{j=0}^{k-1}\left(1 - \frac{j}{n}\right).$$
+
+2. **Każdy wyraz rośnie z $n$:** iloczyn $\prod_{j=0}^{k-1}(1 - j/n)$ zwiększa się gdy $n$ się zwiększa. Stąd $a_n$ jest rosnący.
+
+3. **Górne ograniczenie:** każdy wyraz jest co najmniej $1/k!$, zatem:
+
+$$a_n \leq \sum_{k=0}^{n} \frac{1}{k!} \leq 1 + 1 + \frac{1}{2} + \frac{1}{4} + \frac{1}{8} + \cdots = 1 + \frac{1}{1 - 1/2} = 3.$$
+
+4. **Z twierdzenia o ciągu monotonicznym ograniczonym**, $(a_n)$ zbieża. Z definicji, jego granica to $e \approx 2{,}71828$.
+
+**Weryfikacja.** $a_{10} \approx 2{,}5937$, $a_{100} \approx 2{,}7048$, $a_{1000} \approx 2{,}7169$. Rosnąc w kierunku $e$.
+
+**Źródło.** [OpenStax Calculus Volume 2, §5.1, Example 5.9](https://openstax.org/books/calculus-volume-2/pages/5-1-sequences) — CC-BY-NC-SA 4.0.
+
+</Ejemplo>
+
+<Exemplo titulo="Ciąg rekurencyjny: punkt stały i złoty podział" numero="4">
+
+**Problem.** Niech $F_n$ będzie ciągiem Fibonacciego z $F_1 = F_2 = 1$ i $F_{n+2} = F_{n+1} + F_n$. Określ $\displaystyle\lim_{n \to \infty} \frac{F_{n+1}}{F_n}$.
+
+**Strategia.** Definiujemy $r_n = F_{n+1}/F_n$ i wyprowadzamy rekurencję dla $r_n$. Jeśli ciąg $r_n$ zbieża, jego granica spełnia równanie punktu stałego.
+
+**Rozwiązanie.**
+
+1. **Rekurencja dla $r_n$:** Ze tożsamości $F_{n+2} = F_{n+1} + F_n$, dzieląc przez $F_{n+1}$:
+
+$$r_{n+1} = \frac{F_{n+2}}{F_{n+1}} = 1 + \frac{F_n}{F_{n+1}} = 1 + \frac{1}{r_n}.$$
+
+2. **Wartości początkowe:** $r_1 = 1$, $r_2 = 2$, $r_3 = 3/2 = 1{,}5$, $r_4 = 5/3 \approx 1{,}667$, $r_5 = 8/5 = 1{,}6$, $r_6 = 13/8 = 1{,}625$. Ciąg oscyluje zbiegając.
+
+3. **Równanie punktu stałego:** Jeśli $r_n \to L$, biorąc granicę w rekurencji:
+
+$$L = 1 + \frac{1}{L} \implies L^2 - L - 1 = 0 \implies L = \frac{1 + \sqrt 5}{2} = \varphi \approx 1{,}618.$$
+
+(Pierwiastek ujemny odrzucony bo $L > 0$.)
+
+**Weryfikacja.** $r_{10} = 89/55 \approx 1{,}6182$, $r_{15} = 987/610 \approx 1{,}6180$. Zbieżność do $\varphi$.
+
+**Źródło.** [Active Calculus, §8.1, Activity 8.1.6](https://activecalculus.org/single/sec-8-1-sequences.html) — Boelkins · CC-BY-NC-SA 4.0.
+
+</Ejemplo>
+
+<Exemplo titulo="Procent składany i granica e^r (modelowanie finansowe)" numero="5">
+
+**Problem.** Bank oferuje 12% rocznie z kapitalizacją $n$ razy rocznie. Jaka jest końcowa suma w R\$ 1.000 gdy $n \to \infty$? Porównaj z kapitalizacją roczną ($n = 1$) i miesięczną ($n = 12$).
+
+**Strategia.** Wyrażamy sumę jako $A_n = 1000 \cdot (1 + r/n)^n$ i obliczamy granicę używając fundamentalnej granicy $(1 + x/n)^n \to e^x$.
+
+**Rozwiązanie.**
+
+1. Zidentyfikuj $r = 0{,}12$. Suma po 1 roku z $n$ kapitalizacjami to:
+
+$$A_n = 1000 \cdot \left(1 + \frac{0{,}12}{n}\right)^n.$$
+
+2. Użyj granicy: $\left(1 + r/n\right)^n \to e^r$ gdy $n \to \infty$:
+
+$$A_\infty = 1000 \cdot e^{0{,}12} = 1000 \cdot 1{,}12749\ldots \approx \mathrm{R\$}\ 1127{,}50.$$
+
+3. Porównaj trzy sytuacje:
+
+| Kapitalizacja | Formuła | Suma |
+|---|---|---|
+| Roczna ($n=1$) | $1000 \cdot (1{,}12)^1$ | R\$ 1.120,00 |
+| Miesięczna ($n=12$) | $1000 \cdot (1{,}01)^{12}$ | R\$ 1.126,83 |
+| Ciągła ($n \to \infty$) | $1000 \cdot e^{0{,}12}$ | R\$ 1.127,50 |
+
+4. Różnica między kapitalizacją ciągłą a miesięczną to zaledwie R\$ 0,67 rocznie.
+
+**Weryfikacja.** $e^{0{,}12} = 1{,}12749...$. Dla $n = 365$ (dzienne): $(1 + 0{,}12/365)^{365} \approx 1{,}12747$ — praktycznie równe ciągłemu.
+
+**Źródło.** [Active Calculus, §8.1, Preview Activity 8.1](https://activecalculus.org/single/sec-8-1-sequences.html) — Boelkins · CC-BY-NC-SA 4.0.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-49-limite-sequencias">
+
+### Blok A — Zbieżność bezpośrednia i granice wymierne (49.1 do 49.12)
+
+<Exercicio
+  numero="49.1"
+  dificuldade="aplicacao"
+  solucao={<>Podziel licznik i mianownik przez <Eq>{`n`}</Eq>: <Eq>{`\\frac{1}{n+1} \\leq \\frac{1}{n} \\to 0`}</Eq>. Granica = 0.</>}
+  passos={<>
+    <ol>
+      <li><strong>Przepisz.</strong> <Eq>{`a_n = 1/(n+1)`}</Eq>. Mianownik rośnie bez ograniczeń gdy <Eq>{`n \\to \\infty`}</Eq>.</li>
+      <li><strong>Zastosuj hierarchię.</strong> <Eq>{`1/(n+1) \\leq 1/n \\to 0`}</Eq> przez fundamentalną granicę <Eq>{`1/n^p \\to 0`}</Eq> z <Eq>{`p=1`}</Eq>.</li>
+      <li><strong>Potwierdź numerycznie.</strong> Dla <Eq>{`n = 100`}</Eq>: <Eq>{`1/101 \\approx 0{,}0099`}</Eq>. Dla <Eq>{`n = 10000`}</Eq>: <Eq>{`1/10001 \\approx 0{,}0001`}</Eq>.</li>
+      <li><em>Sztuczka:</em> każdy ciąg postaci <Eq>{`c/(n+k)`}</Eq> ze stałymi <Eq>{`c, k`}</Eq> zbieża do 0.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Określ $\displaystyle\lim_{n \to \infty} \frac{1}{n+1}$. Rozwiąż w zeszycie i zweryfikuj dla $n = 100$ i $n = 10000$.
+</Exercicio>
+
+<Exercicio
+  numero="49.2"
+  dificuldade="aplicacao"
+  resposta="3"
+  solucao={<>Podziel przez <Eq>{`n^2`}</Eq>: <Eq>{`\\frac{3n^2 + n}{n^2 + 2} = \\frac{3 + 1/n}{1 + 2/n^2} \\to 3/1 = 3`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 5", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{3n^2 + n}{n^2 + 2}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.3"
+  dificuldade="aplicacao"
+  resposta="0"
+  solucao={<>Podziel przez <Eq>{`n^2`}</Eq>: <Eq>{`\\frac{n}{n^2 + 1} = \\frac{1/n}{1 + 1/n^2} \\to 0/1 = 0`}</Eq>. Mianownik rośnie szybciej niż licznik.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 7", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{n}{n^2 + 1}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.4"
+  dificuldade="aplicacao"
+  solucao={<>Z twierdzenia o trzech ciągach: <Eq>{`-1/n \\leq (-1)^n/n \\leq 1/n`}</Eq>. Ponieważ <Eq>{`1/n \\to 0`}</Eq>, twierdzenie gwarantuje <Eq>{`(-1)^n/n \\to 0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Zidentyfikuj trudność.</strong> <Eq>{`(-1)^n`}</Eq> zmienia się między +1 i -1, więc ciąg oscyluje. Bezpośrednia granica nie działa.</li>
+      <li><strong>Użyj wartości bezwzględnej.</strong> <Eq>{`|(-1)^n/n| = 1/n`}</Eq>, zatem <Eq>{`-1/n \\leq (-1)^n/n \\leq 1/n`}</Eq>.</li>
+      <li><strong>Twierdzenie o trzech ciągach.</strong> <Eq>{`\\lim(-1/n) = 0`}</Eq> i <Eq>{`\\lim(1/n) = 0`}</Eq>, więc z twierdzenia o trzech ciągach, <Eq>{`\\lim (-1)^n/n = 0`}</Eq>.</li>
+      <li><em>Sztuczka:</em> gdy ciąg oscyluje ale jest „ściskany" przez ciągi zmierzające do zera, on także zmierza do zera.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 13", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{(-1)^n}{n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.5"
+  dificuldade="aplicacao"
+  resposta="0"
+  solucao={<>Użyj że <Eq>{`0 \\leq \\cos^2(n)/n \\leq 1/n \\to 0`}</Eq>. Z twierdzenia o trzech ciągach, granica to 0.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 15", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{\cos^2 n}{n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.6"
+  dificuldade="aplicacao"
+  resposta="1"
+  solucao={<>Napisz <Eq>{`\\frac{n+1}{n} = 1 + 1/n \\to 1`}</Eq>. Prosta algebra granic.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 3", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{n+1}{n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.7"
+  dificuldade="aplicacao"
+  resposta="0"
+  solucao={<>Dla każdego stałego <Eq>{`|r| < 1`}</Eq>, <Eq>{`r^n \\to 0`}</Eq>. Tutaj <Eq>{`r = 1/2`}</Eq>, więc <Eq>{`(1/2)^n \\to 0`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-1-sequences.html", secao: "§8.1", exercicio: "Activity 8.1.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \left(\frac{1}{2}\right)^n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.8"
+  dificuldade="aplicacao"
+  solucao={<>Z definicji, <Eq>{`\\lim_{n\\to\\infty}(1 + 1/n)^n = e \\approx 2{,}71828`}</Eq>. To jedna z fundamentalnych granic rachunku. Patrz Przykład 3 w tej lekcji dla pełnego dowodu.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 21", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \left(1 + \frac{1}{n}\right)^n$. Naszkicuj pierwsze 10 wyrazów w zeszycie i narysuj przybliżenie do $e$.
+</Exercicio>
+
+<Exercicio
+  numero="49.9"
+  dificuldade="aplicacao"
+  resposta="e^2"
+  solucao={<>Napisz <Eq>{`(1 + 2/n)^n = ((1 + 2/n)^{n/2})^2`}</Eq>. Ponieważ <Eq>{`(1 + 2/n)^{n/2} \\to e`}</Eq> (podstawienie <Eq>{`m = n/2 \\to \\infty`}</Eq>), granica to <Eq>{`e^2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 23", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \left(1 + \frac{2}{n}\right)^n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.10"
+  dificuldade="aplicacao"
+  solucao={<>Napisz <Eq>{`n^{1/n} = e^{(\\ln n)/n}`}</Eq>. Ponieważ <Eq>{`(\\ln n)/n \\to 0`}</Eq> (hierarchia: <Eq>{`\\ln n \\ll n`}</Eq>), mamy <Eq>{`e^0 = 1`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Przepisz używając eksponencjalnej.</strong> <Eq>{`n^{1/n} = e^{(1/n)\\ln n} = e^{(\\ln n)/n}`}</Eq>.</li>
+      <li><strong>Oblicz wykładnik.</strong> <Eq>{`\\lim (\\ln n)/n`}</Eq>. Z hierarchii, <Eq>{`\\ln n`}</Eq> rośnie znacznie wolniej niż <Eq>{`n`}</Eq>, więc <Eq>{`(\\ln n)/n \\to 0`}</Eq>.</li>
+      <li><strong>Użyj ciągłości <Eq>{`e^x`}</Eq>.</strong> <Eq>{`\\lim e^{(\\ln n)/n} = e^{\\lim(\\ln n)/n} = e^0 = 1`}</Eq>.</li>
+      <li><em>Ciekawostka:</em> ta granica pojawia się w kryterium pierwiastka (Cauchy'ego) dla zbieżności szeregów.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 25", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} n^{1/n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.11"
+  dificuldade="aplicacao"
+  resposta="0"
+  solucao={<>Dla każdego stałego <Eq>{`a > 0`}</Eq>, <Eq>{`a^n/n! \\to 0`}</Eq>. Wynika z hierarchii <Eq>{`a^n \\ll n!`}</Eq>. Dla <Eq>{`a = 3`}</Eq>, już dla <Eq>{`n = 10`}</Eq>: <Eq>{`3^{10}/10! \\approx 0{,}016`}</Eq>, i ciągle maleje.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-1-sequences.html", secao: "§8.1", exercicio: "Activity 8.1.3 (b)", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{3^n}{n!}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.12"
+  dificuldade="aplicacao"
+  resposta="0"
+  solucao={<>Z hierarchii wzrostu: <Eq>{`\\ln n \\ll n`}</Eq>, zatem <Eq>{`(\\ln n)/n \\to 0`}</Eq>. Formalnie: zastosuj regułę de l'Hôpitala do ciągłej funkcji analogicznej <Eq>{`(\\ln x)/x`}</Eq> — pochodna licznika to <Eq>{`1/x`}</Eq> i mianownika to 1, dając <Eq>{`1/x \\to 0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 27", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{\ln n}{n}$.
+</Exercicio>
+
+### Blok B — Twierdzenie o trzech ciągach i ciągi oscylujące (49.13 do 49.20)
+
+<Exercicio
+  numero="49.13"
+  dificuldade="aplicacao"
+  resposta="0"
+  solucao={<>Ponieważ <Eq>{`|\\sin n| \\leq 1`}</Eq>, mamy <Eq>{`|\\sin(n)/n| \\leq 1/n \\to 0`}</Eq>. Z twierdzenia o trzech ciągach, granica to 0.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 31", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{\sin n}{n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.14"
+  dificuldade="aplicacao"
+  solucao={<>Racjonalizuj: <Eq>{`\\sqrt{n+1} - \\sqrt{n} = \\frac{1}{\\sqrt{n+1}+\\sqrt{n}}`}</Eq>. Mianownik rośnie jak <Eq>{`2\\sqrt{n} \\to \\infty`}</Eq>, zatem granica to 0.</>}
+  passos={<>
+    <ol>
+      <li><strong>Racjonalizuj.</strong> Pomnóż przez sprzężenie: <Eq>{`(\\sqrt{n+1}-\\sqrt{n})\\cdot\\frac{\\sqrt{n+1}+\\sqrt{n}}{\\sqrt{n+1}+\\sqrt{n}} = \\frac{(n+1)-n}{\\sqrt{n+1}+\\sqrt{n}} = \\frac{1}{\\sqrt{n+1}+\\sqrt{n}}`}</Eq>.</li>
+      <li><strong>Oszacuj mianownik.</strong> <Eq>{`\\sqrt{n+1}+\\sqrt{n} \\geq 2\\sqrt{n} \\to \\infty`}</Eq>.</li>
+      <li><strong>Wnioskuj.</strong> <Eq>{`0 \\leq \\frac{1}{\\sqrt{n+1}+\\sqrt{n}} \\leq \\frac{1}{2\\sqrt{n}} \\to 0`}</Eq>. Zatem granica to 0.</li>
+      <li><em>Umysłowa skrótka:</em> różnica pierwiastków kolejnych — technika sprzężenia zamienia na ułamek i ujawnia rosnący mianownik.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 35", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} (\sqrt{n+1} - \sqrt{n})$.
+</Exercicio>
+
+<Exercicio
+  numero="49.15"
+  dificuldade="aplicacao"
+  resposta="1/2"
+  solucao={<>Używając poprzedniego wyniku: <Eq>{`n(\\sqrt{n+1}-\\sqrt{n}) = \\frac{n}{\\sqrt{n+1}+\\sqrt{n}} = \\frac{1}{\\sqrt{1+1/n}+1} \\to \\frac{1}{1+1} = \\frac{1}{2}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 37", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} n(\sqrt{n+1} - \sqrt{n})$.
+</Exercicio>
+
+<Exercicio
+  numero="49.16"
+  dificuldade="aplicacao"
+  solucao={<>Rozbij <Eq>{`4^n`}</Eq>: <Eq>{`(3^n + 4^n)^{1/n} = 4(1 + (3/4)^n)^{1/n}`}</Eq>. Ponieważ <Eq>{`(3/4)^n \\to 0`}</Eq> i <Eq>{`(1+0)^{1/n} \\to 1`}</Eq>, granica to <Eq>{`4`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-1-sequences.html", secao: "§8.1", exercicio: "Activity 8.1.4", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} (3^n + 4^n)^{1/n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.17"
+  dificuldade="aplicacao"
+  resposta="1"
+  solucao={<>Napisz <Eq>{`n\\sin(1/n) = \\sin(1/n)/(1/n)`}</Eq>. Robiąc <Eq>{`t = 1/n \\to 0^+`}</Eq>, to jest <Eq>{`\\sin(t)/t \\to 1`}</Eq> (fundamentalna granica).</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 41", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} n \sin\!\left(\frac{1}{n}\right)$.
+</Exercicio>
+
+<Exercicio
+  numero="49.18"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Rozbieża — ciąg sum częściowych rośnie bez ograniczeń", correta: true },
+    { texto: "Zbieża do 1" },
+    { texto: "Zbieża do $\\ln 2$" },
+    { texto: "Zbieża do wartości między 1 i 2" },
+  ]}
+  solucao={<>Szereg harmoniczny <Eq>{`H_n = \\sum_{k=1}^n 1/k`}</Eq> rozbieża. Dowód przez grupowanie: <Eq>{`H_{2^m} \\geq 1 + m/2`}</Eq>, bo każdy blok <Eq>{`2^{k-1}`}</Eq> wyrazów sumuje się co najmniej do <Eq>{`1/2`}</Eq>. Zatem <Eq>{`H_n \\to \\infty`}</Eq>. Odpychacze B i C to wartości skończone, które wydają się rozsądne — <Eq>{`\\ln 2`}</Eq> pojawia się w szeregu naprzemiennym <Eq>{`\\sum (-1)^{n+1}/n`}</Eq>, nie w harmonicznym.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.3", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Ciąg sum częściowych $H_n = 1 + \tfrac{1}{2} + \tfrac{1}{3} + \cdots + \tfrac{1}{n}$ (szereg harmoniczny): czy zbieża czy rozbieża?
+</Exercicio>
+
+<Exercicio
+  numero="49.19"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Zbieża — do $\\pi^2/6$ (Problem Bazylei Eulera, 1734)", correta: true },
+    { texto: "Rozbieża — jak harmoniczna, wszystkie szeregi $\\sum 1/n^p$ rozbiegają" },
+    { texto: "Zbieża — do $1$" },
+    { texto: "Zbieża — do $e$" },
+  ]}
+  solucao={<>Szereg <Eq>{`\\sum 1/n^2`}</Eq> zbieża (szereg-p z <Eq>{`p = 2 > 1`}</Eq>). Euler (1734) obliczył jego dokładną wartość: <Eq>{`\\pi^2/6 \\approx 1{,}6449`}</Eq>. Odpychacz B myli się z harmonicznym (<Eq>{`p=1`}</Eq>, który rozbieża). Kryterium szeregu-p: <Eq>{`\\sum 1/n^p`}</Eq> zbieża wtedy i tylko wtedy gdy <Eq>{`p > 1`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.4", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Ciąg sum częściowych $S_n = \sum_{k=1}^n \frac{1}{k^2}$: czy zbieża? Na jaką wartość?
+</Exercicio>
+
+<Exercicio
+  numero="49.20"
+  dificuldade="aplicacao"
+  solucao={<>Ciąg <Eq>{`(-1)^n`}</Eq> zmienia się między <Eq>{`+1`}</Eq> (wyrazy parzyste) i <Eq>{`-1`}</Eq> (wyrazy nieparzyste). Ma dwa podciągi zbieżne z różnymi granicami (1 i -1), zatem z twierdzenia o jednoznaczności granicy nie zbieża. Formalnie: dla każdego kandydata <Eq>{`L`}</Eq>, wybierz <Eq>{`\\varepsilon = 1/2`}</Eq> i pokaż, że warunek epsilon-N zawodzi.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 43", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Ustal czy $a_n = (-1)^n$ zbieża czy rozbieża. Uzasadnij używając definicji epsilon-$N$ lub argumentu jednoznaczności.
+</Exercicio>
+
+### Blok C — Ciągi rekurencyjne i punkt stały (49.21 do 49.30)
+
+<Exercicio
+  numero="49.21"
+  dificuldade="aplicacao"
+  solucao={<>Metoda Herona: <Eq>{`a_{n+1} = (a_n + 2/a_n)/2`}</Eq> z <Eq>{`a_1 = 1`}</Eq>. Jeśli zbieża do <Eq>{`L`}</Eq>, to <Eq>{`L = (L + 2/L)/2`}</Eq>, zatem <Eq>{`L^2 = 2`}</Eq>, więc <Eq>{`L = \\sqrt{2}`}</Eq>. Numerycznie: <Eq>{`a_1=1`}</Eq>, <Eq>{`a_2=1{,}5`}</Eq>, <Eq>{`a_3\\approx1{,}4167`}</Eq>, <Eq>{`a_4\\approx1{,}4142`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Oblicz pierwsze wyrazy.</strong> <Eq>{`a_1 = 1`}</Eq>, <Eq>{`a_2 = (1 + 2/1)/2 = 1{,}5`}</Eq>, <Eq>{`a_3 = (1{,}5 + 2/1{,}5)/2 = (1{,}5 + 1{,}3\overline{3})/2 \\approx 1{,}4167`}</Eq>.</li>
+      <li><strong>Załóż zbieżność do L.</strong> Biorąc granicę w rekurencji: <Eq>{`L = (L + 2/L)/2`}</Eq>, zatem <Eq>{`2L = L + 2/L`}</Eq>, wtedy <Eq>{`L^2 = 2`}</Eq>.</li>
+      <li><strong>Pierwiastek dodatni.</strong> <Eq>{`L = \\sqrt{2} \\approx 1{,}4142`}</Eq>. (Istnienie zbieżności można dowieść pokazując, że ciąg maleje i jest ograniczony z dołu przez <Eq>{`\\sqrt{2}`}</Eq>.)</li>
+      <li><em>Ciekawostka:</em> zbieżność kwadratowa — każda iteracja podwaja liczbę poprawnych cyfr. Babilończycy używali tej metody 2000 lat przed Heronem.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-1-sequences.html", secao: "§8.1", exercicio: "Activity 8.1.5 (b)", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Niech $a_1 = 1$ i $a_{n+1} = \dfrac{1}{2}\!\left(a_n + \dfrac{2}{a_n}\right)$ (metoda Herona dla $\sqrt{2}$). Oblicz $\lim a_n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.22"
+  dificuldade="aplicacao"
+  resposta="2"
+  solucao={<>Ciąg <Eq>{`a_{n+1} = \\sqrt{2 + a_n}`}</Eq> z <Eq>{`a_1 = 1`}</Eq> jest rosnący i ograniczony przez 2 (przez indukcję). Zatem zbieża do <Eq>{`L`}</Eq> spełniającego <Eq>{`L = \\sqrt{2 + L}`}</Eq>, tzn. <Eq>{`L^2 - L - 2 = 0`}</Eq>, pierwiastkami są <Eq>{`L = 2`}</Eq> lub <Eq>{`L = -1`}</Eq>. Ponieważ <Eq>{`L > 0`}</Eq>, granica to <Eq>{`L = 2`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-1-sequences.html", secao: "§8.1", exercicio: "Activity 8.1.5", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Niech $a_1 = 1$ i $a_{n+1} = \sqrt{2 + a_n}$. Określ $\lim_{n \to \infty} a_n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.23"
+  dificuldade="aplicacao"
+  resposta="3"
+  solucao={<>Jeśli <Eq>{`L`}</Eq> jest granicą, to <Eq>{`L = (L + 3)/2`}</Eq>, zatem <Eq>{`2L = L + 3`}</Eq>, wtedy <Eq>{`L = 3`}</Eq>. Ciąg jest rosnący (dla <Eq>{`a_0 = 0 < 3`}</Eq>) i ograniczony z góry przez 3 (weryfikowalne przez indukcję).</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 69", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Niech $a_0 = 0$ i $a_{n+1} = \dfrac{a_n + 3}{2}$. Określ $\lim a_n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.24"
+  dificuldade="aplicacao"
+  solucao={<>Niech <Eq>{`r_n = F_{n+1}/F_n`}</Eq>. Z rekurencji <Eq>{`F_{n+2} = F_{n+1} + F_n`}</Eq>, mamy <Eq>{`r_{n+1} = 1 + 1/r_n`}</Eq>. Jeśli <Eq>{`r_n \\to L`}</Eq>, to <Eq>{`L = 1 + 1/L`}</Eq>, zatem <Eq>{`L^2 - L - 1 = 0`}</Eq>, pierwiastek dodatni <Eq>{`\\varphi = (1+\\sqrt{5})/2 \\approx 1{,}618`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Stosunek wyrazów kolejnych.</strong> <Eq>{`r_1 = 1`}</Eq>, <Eq>{`r_2 = 2`}</Eq>, <Eq>{`r_3 = 1{,}5`}</Eq>, <Eq>{`r_4 \\approx 1{,}667`}</Eq>, <Eq>{`r_5 = 1{,}6`}</Eq>.</li>
+      <li><strong>Rekurencja.</strong> <Eq>{`r_{n+1} = F_{n+2}/F_{n+1} = (F_{n+1}+F_n)/F_{n+1} = 1 + 1/r_n`}</Eq>.</li>
+      <li><strong>Punkt stały.</strong> <Eq>{`L = 1 + 1/L \\Rightarrow L^2 - L - 1 = 0 \\Rightarrow L = (1+\\sqrt{5})/2 = \\varphi`}</Eq>.</li>
+      <li><em>Ciekawostka:</em> złoty podział <Eq>{`\\varphi`}</Eq> pojawia się w liściach roślin (filotaksja), w spirali Nautilusa i w pięciokącie foremnym. Fibonacci tego nie wiedział.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-1-sequences.html", secao: "§8.1", exercicio: "Activity 8.1.6", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Niech $F_n$ będzie ciągiem Fibonacciego. Określ $\displaystyle\lim_{n \to \infty} \frac{F_{n+1}}{F_n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.25"
+  dificuldade="aplicacao"
+  resposta="0"
+  solucao={<>Dla <Eq>{`n > 2 \\cdot 2`}</Eq>, czynniki <Eq>{`2^n/n!`}</Eq> począwszy od <Eq>{`n=5`}</Eq> są mniejsze niż <Eq>{`1/2`}</Eq>. Zatem <Eq>{`0 \\leq 2^n/n! \\leq (2^4/4!) \\cdot (1/2)^{n-4} \\to 0`}</Eq>. Hierarchia: <Eq>{`a^n \\ll n!`}</Eq> dla każdego stałego <Eq>{`a > 0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 45", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \frac{2^n}{n!}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.26"
+  dificuldade="aplicacao"
+  resposta="e^3"
+  solucao={<>Napisz <Eq>{`(1 + 3/n)^n = ((1 + 3/n)^{n/3})^3 \\to e^3`}</Eq>, bo <Eq>{`(1 + x/m)^m \\to e^x`}</Eq> z <Eq>{`m = n/3 \\to \\infty`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 47", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \left(1 + \frac{3}{n}\right)^n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.27"
+  dificuldade="aplicacao"
+  resposta="1/e"
+  solucao={<><Eq>{`(1 - 1/n)^n = (1 + (-1)/n)^n \\to e^{-1}`}</Eq> z fundamentalnej granicy <Eq>{`(1 + x/n)^n \\to e^x`}</Eq> z <Eq>{`x = -1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 49", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \left(1 - \frac{1}{n}\right)^n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.28"
+  dificuldade="aplicacao"
+  resposta="e"
+  solucao={<>Napisz <Eq>{`(1 + 1/n)^{n+1} = (1+1/n)^n \\cdot (1+1/n) \\to e \\cdot 1 = e`}</Eq>, z algebry granic.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 51", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\lim_{n \to \infty} \left(1 + \frac{1}{n}\right)^{n+1}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.29"
+  dificuldade="aplicacao"
+  solucao={<>Ciąg <Eq>{`a_{n+1} = 1/(1 + a_n)`}</Eq> z <Eq>{`a_1 = 1`}</Eq>. Jeśli zbieża do <Eq>{`L`}</Eq>: <Eq>{`L = 1/(1+L) \\Rightarrow L^2 + L - 1 = 0 \\Rightarrow L = (-1+\\sqrt{5})/2 \\approx 0{,}618`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-1-sequences.html", secao: "§8.1", exercicio: "Activity 8.1.7", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Niech $a_1 = 1$ i $a_{n+1} = \dfrac{1}{1 + a_n}$. Oblicz $\lim a_n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.30"
+  dificuldade="compreensao"
+  solucao={<>Dla <Eq>{`0 < r < 1`}</Eq>, suma częściowa <Eq>{`S_n = \\sum_{k=0}^n r^k = (1-r^{n+1})/(1-r)`}</Eq> jest rosnąca (każdy wyraz <Eq>{`r^k > 0`}</Eq> jest dodawany) i ograniczona z góry przez <Eq>{`1/(1-r)`}</Eq>. Z twierdzenia o ciągu monotonicznym ograniczonym, zbieża. Granicą jest dokładnie <Eq>{`1/(1-r)`}</Eq> (szereg geometryczny).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Preview Activity 8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Dla $0 < r < 1$, ciąg sum częściowych $S_n = \sum_{k=0}^n r^k$: pokaż, że jest rosnący i ograniczony z góry, zatem zbieżny. Do jakiej wartości?
+</Exercicio>
+
+### Blok D — Modelowanie i zastosowania finansowe (49.31 do 49.38)
+
+<Exercicio
+  numero="49.31"
+  dificuldade="modelagem"
+  solucao={<>Z kapitalizacją <Eq>{`n`}</Eq> razy w roku: <Eq>{`A_n = 1000(1+0{,}06/n)^n \\to 1000 e^{0{,}06} \\approx \\mathrm{R\\$}\\; 1061{,}84`}</Eq>. Kapitalizacja roczna daje R\$ 1.060,00. Różnica: R\$ 1,84.</>}
+  passos={<>
+    <ol>
+      <li><strong>Suma z kapitalizacją <Eq>{`n`}</Eq> razy.</strong> Stopa za okres: <Eq>{`r/n = 0{,}06/n`}</Eq>. Po 1 roku: <Eq>{`A_n = 1000(1 + 0{,}06/n)^n`}</Eq>.</li>
+      <li><strong>Oblicz granicę.</strong> <Eq>{`\\lim_{n\\to\\infty}(1 + 0{,}06/n)^n = e^{0{,}06}`}</Eq>. Zatem <Eq>{`A_\\infty = 1000 e^{0{,}06}`}</Eq>.</li>
+      <li><strong>Wartość numeryczna.</strong> <Eq>{`e^{0{,}06} \\approx 1{,}06184`}</Eq>, więc <Eq>{`A_\\infty \\approx \\mathrm{R\\$}\\; 1061{,}84`}</Eq>.</li>
+      <li><strong>Porównaj.</strong> Kapitalizacja roczna: <Eq>{`A_1 = 1000 \\cdot 1{,}06 = \\mathrm{R\\$}\\; 1060{,}00`}</Eq>. Różnica: zaledwie R\$ 1,84 rocznie — ale procent rośnie z okresem i kapitałem.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-1-sequences.html", secao: "§8.1", exercicio: "Preview Activity 8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+R\$ 1.000 inwestowane na 1 rok przy 6% rocznie z kapitalizacją $n$ razy w roku. Jaka suma gdy $n \to \infty$?
+</Exercicio>
+
+<Exercicio
+  numero="49.32"
+  dificuldade="modelagem"
+  solucao={<>Renta wieczna: <Eq>{`V = P/r = 10/0{,}05 = \\mathrm{R\\$}\\; 200`}</Eq>. Wartość bieżąca przepływu wiecznego z R\$ 10 przy 5% miesięcznie to R\$ 200. Dla miesięcznej stopy 0,8% (bardziej realistycznie): <Eq>{`V = 10/0{,}008 = \\mathrm{R\\$}\\; 1250`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Aktywa płacą R\$ 10 miesięcznie na zawsze (renta wieczna). Przy stopie procentowej 5% miesięcznie, jaka jest wartość bieżąca tego przepływu? Użyj formuły szeregu geometrycznego.
+</Exercicio>
+
+<Exercicio
+  numero="49.33"
+  dificuldade="modelagem"
+  solucao={<>Szereg geometryczny: <Eq>{`\\sum_{n=0}^\\infty (1/2)^n = 1/(1-1/2) = 2`}</Eq>. Szereg geometryczny z <Eq>{`r = 1/2 < 1`}</Eq>, pierwszy wyraz 1. Suma to 2.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.1 (a)", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Szereg $\displaystyle\sum_{n=0}^{\infty} \left(\frac{1}{2}\right)^n$ zbieża? Jeśli tak, oblicz sumę.
+</Exercicio>
+
+<Exercicio
+  numero="49.34"
+  dificuldade="modelagem"
+  solucao={<>Kula wznosi się <Eq>{`5 \\cdot 0{,}9 = 4{,}5`}</Eq> m, pada 4,5 m, wznosi się <Eq>{`4{,}05`}</Eq> m, itd. Całkowita odległość: <Eq>{`5 + 2 \\sum_{n=1}^\\infty 5 \\cdot (0{,}9)^n = 5 + 2 \\cdot \\frac{4{,}5}{1-0{,}9} = 5 + 90 = 95`}</Eq> metrów.</>}
+  passos={<>
+    <ol>
+      <li><strong>Początkowy upadek.</strong> Kula pada 5 m.</li>
+      <li><strong>Ciąg odbić.</strong> Każde odbicie ma wzniesienie i upadek. <Eq>{`k`}</Eq>-te odbicie pokonuje <Eq>{`2 \\cdot 5 \\cdot (0{,}9)^k`}</Eq> metrów.</li>
+      <li><strong>Suma całkowita.</strong> <Eq>{`D = 5 + 2\\sum_{k=1}^\\infty 5(0{,}9)^k = 5 + 10 \\cdot \\frac{0{,}9}{1-0{,}9} = 5 + 90 = 95`}</Eq> metrów.</li>
+      <li><em>Obserwacja:</em> mimo nieskończenie wielu odbić, całkowita odległość jest skończona. To dokładnie to, co oznacza zbieżny szereg geometryczny.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Kula jest upuszczona z 5 metrów wysokości i każde odbicie osiąga 90% poprzedniej wysokości. Jaka jest całkowita odległość przebyta?
+</Exercicio>
+
+<Exercicio
+  numero="49.35"
+  dificuldade="modelagem"
+  solucao={<>Wartość bieżąca renty wiecznej: <Eq>{`V = P/r = 100/0{,}01 = \\mathrm{R\\$}\\; 10{,}000`}</Eq>. Przy stopie 1% miesięcznie, przepływ wieczny R\$ 100/miesiąc równa się kapitałowi R\$ 10.000 dzisiaj.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.2 (b)", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Spółka płaci dywidendę R\$ 100 miesięcznie na zawsze. Przy stopie dyskontowej 1% miesięcznie, jaka jest godziwa wartość spółki dzisiaj?
+</Exercicio>
+
+<Exercicio
+  numero="49.36"
+  dificuldade="modelagem"
+  solucao={<>Z kapitalizacją ciągłą: <Eq>{`A = 1000 e^{0{,}12} = 1000 \\cdot 1{,}1275 \\approx \\mathrm{R\\$}\\; 1127{,}50`}</Eq>. Z kapitalizacją roczną: <Eq>{`1000 \\cdot 1{,}12 = \\mathrm{R\\$}\\; 1120{,}00`}</Eq>. Różnica to R\$ 7,50 w pierwszym roku.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 77", licenca: "CC-BY-NC-SA 4.0" }}
+>
+R\$ 1.000 inwestowane przy 12% rocznie z kapitalizacją ciągłą zarabia ile po 1 roku? Porównaj z kapitalizacją roczną.
+</Exercicio>
+
+<Exercicio
+  numero="49.37"
+  dificuldade="modelagem"
+  solucao={<>W ekonomii keynesowskiej, jeśli krańcowa skłonność do konsumpcji <Eq>{`c = 2/3`}</Eq>, mnożnik fiskalny to <Eq>{`1/(1-c) = 1/(1/3) = 3`}</Eq>. Wzrost R\$ 1 w wydatkach publicznych generuje R\$ 3 w sumie dochodów poprzez rundy konsumpcji. Szereg: <Eq>{`1 + c + c^2 + \\cdots = 1/(1-c)`}</Eq> z <Eq>{`c = 2/3`}</Eq> daje <Eq>{`3`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.5", licenca: "CC-BY-NC-SA 4.0" }}
+>
+W ekonomii, każdy R\$ dochodu wydaje się $2/3$ i oszczędza się $1/3$ (krańcowa skłonność do konsumpcji $c = 2/3$). Jaki jest całkowity efekt (mnożnik keynesowski) wzrostu początkowego o R\$ 1 w dochodzie?
+</Exercicio>
+
+<Exercicio
+  numero="49.38"
+  dificuldade="modelagem"
+  solucao={<>Dla <Eq>{`n`}</Eq> rat miesięcznych <Eq>{`P`}</Eq> przy miesięcznej stopie <Eq>{`r`}</Eq>, wartość bieżąca to: <Eq>{`VP_n = P \\sum_{k=1}^n (1+r)^{-k} = P \\cdot \\frac{1-(1+r)^{-n}}{r}`}</Eq>. Gdy <Eq>{`n \\to \\infty`}</Eq>: <Eq>{`VP = P/r`}</Eq> (renta wieczna). Dla <Eq>{`P = 500`}</Eq>, <Eq>{`r = 0{,}01`}</Eq>: <Eq>{`VP = 500/0{,}01 = \\mathrm{R\\$}\\; 50{,}000`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.2 (c)", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Finansowanie płaci R\$ 500 miesięcznie na zawsze przy 1% miesięcznie. Oblicz całkowitą wartość bieżącą używając granicy szeregu geometrycznego.
+</Exercicio>
+
+### Blok E — Dowody i wyzwania (49.39 do 49.44)
+
+<Exercicio
+  numero="49.39"
+  dificuldade="compreensao"
+  solucao={<>Ciąg <Eq>{`a_n = n`}</Eq> jest rosnący i nieograniczony. Dla każdego kandydata <Eq>{`L`}</Eq>, weź <Eq>{`\\varepsilon = 1`}</Eq>: dla <Eq>{`n > L + 1`}</Eq> mamy <Eq>{`|a_n - L| = n - L > 1 = \\varepsilon`}</Eq>. Warunek epsilon-N nie może być spełniony dla żadnego <Eq>{`L`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 53", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Czy ciąg $a_n = n$ jest zbieżny? Uzasadnij używając definicji epsilon-$N$.
+</Exercicio>
+
+<Exercicio
+  numero="49.40"
+  dificuldade="compreensao"
+  solucao={<>Ciąg sum częściowych <Eq>{`S_n = \\sum_{k=0}^n (1/2)^k`}</Eq> spełnia: (i) <Eq>{`S_{n+1} = S_n + (1/2)^{n+1} > S_n`}</Eq> (rosnący); (ii) <Eq>{`S_n < \\sum_{k=0}^\\infty (1/2)^k = 2`}</Eq> (ograniczony). Zatem zbieża z twierdzenia o ciągu monotonicznym ograniczonym. Granica to <Eq>{`2`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Preview Activity 8.2 (c)", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Udowodnij, że ciąg sum częściowych $S_n = \sum_{k=0}^n (1/2)^k$ jest rosnący i ograniczony z góry, zatem zbieżny z twierdzenia o ciągu monotonicznym ograniczonym.
+</Exercicio>
+
+<Exercicio
+  numero="49.41"
+  dificuldade="desafio"
+  solucao={<>Szereg geometryczny <Eq>{`\\sum_{n=0}^\\infty (2/3)^n`}</Eq>: iloraz <Eq>{`r = 2/3`}</Eq>, <Eq>{`|r| < 1`}</Eq>. Suma: <Eq>{`1/(1 - 2/3) = 1/(1/3) = 3`}</Eq>. Sumy częściowe: <Eq>{`S_0=1`}</Eq>, <Eq>{`S_1=5/3`}</Eq>, <Eq>{`S_2=19/9 \\approx 2{,}11`}</Eq>, <Eq>{`S_5 \\approx 2{,}74`}</Eq>, <Eq>{`S_{10} \\approx 2{,}97`}</Eq>. Zbieżność do 3.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.1 (b)", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Oblicz $\displaystyle\sum_{n=0}^{\infty} \left(\frac{2}{3}\right)^n$. Oblicz pierwsze 5 sum częściowych w zeszycie aby potwierdzić zbieżność.
+</Exercicio>
+
+<Exercicio
+  numero="49.42"
+  dificuldade="desafio"
+  solucao={<>Szereg <Eq>{`\\sum_{n=1}^\\infty 1/n^2`}</Eq> zbieża (szereg-p, <Eq>{`p=2>1`}</Eq>). Porównaj: <Eq>{`1/n^2 \\leq 1/(n(n-1)) = 1/(n-1) - 1/n`}</Eq> (suma teleskopowa zbiegająca). Euler (1734) obliczył <Eq>{`\\pi^2/6 \\approx 1{,}6449`}</Eq>. Oblicz <Eq>{`S_{10} = 1 + 1/4 + 1/9 + \\cdots + 1/100 \\approx 1{,}5498`}</Eq> — już bliskie <Eq>{`\\pi^2/6`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-2-geometric.html", secao: "§8.2", exercicio: "Activity 8.2.4", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Pokaż, że $\displaystyle\sum_{n=1}^{\infty} \frac{1}{n^2}$ zbieża. Oblicz $S_{10}$ i porównaj z $\pi^2/6$.
+</Exercicio>
+
+<Exercicio
+  numero="49.43"
+  dificuldade="demonstracao"
+  solucao={<>Dado <Eq>{`\\varepsilon > 0`}</Eq>, escolha <Eq>{`N = \\lceil 1/\\varepsilon \\rceil`}</Eq>. Para <Eq>{`n > N`}</Eq>: <Eq>{`|1/n - 0| = 1/n \\leq 1/N \\leq 1/(1/\\varepsilon) = \\varepsilon`}</Eq>. Ponieważ <Eq>{`\\varepsilon`}</Eq> był arbitralny, wynika <Eq>{`\\lim 1/n = 0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Napisz cel.</strong> Chcemy: <Eq>{`\\forall \\varepsilon > 0, \\exists N : n > N \\Rightarrow |1/n - 0| < \\varepsilon`}</Eq>.</li>
+      <li><strong>Uprość.</strong> <Eq>{`|1/n - 0| = 1/n`}</Eq>. Potrzebujemy <Eq>{`1/n < \\varepsilon`}</Eq>, czyli <Eq>{`n > 1/\\varepsilon`}</Eq>.</li>
+      <li><strong>Wybierz N.</strong> Weź <Eq>{`N = \\lceil 1/\\varepsilon \\rceil`}</Eq>. Wtedy <Eq>{`N \\geq 1/\\varepsilon`}</Eq>.</li>
+      <li><strong>Zweryfikuj.</strong> Dla <Eq>{`n > N \\geq 1/\\varepsilon`}</Eq>, mamy <Eq>{`n > 1/\\varepsilon`}</Eq>, stąd <Eq>{`1/n < \\varepsilon`}</Eq>. QED.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 57", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Udowodnij rygorystycznie poprzez epsilon-$N$ że $\displaystyle\lim_{n \to \infty} \frac{1}{n} = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="49.44"
+  dificuldade="demonstracao"
+  solucao={<>Dado <Eq>{`\\varepsilon > 0`}</Eq>: existem <Eq>{`N_1, N_2`}</Eq> tais que <Eq>{`n > N_1 \\Rightarrow |a_n - L| < \\varepsilon/2`}</Eq> e <Eq>{`n > N_2 \\Rightarrow |b_n - M| < \\varepsilon/2`}</Eq>. Para <Eq>{`n > N = \\max(N_1, N_2)`}</Eq>: <Eq>{`|(a_n + b_n) - (L+M)| \\leq |a_n - L| + |b_n - M| < \\varepsilon/2 + \\varepsilon/2 = \\varepsilon`}</Eq>. Logo <Eq>{`\\lim(a_n + b_n) = L + M`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Hipotezy.</strong> <Eq>{`\\lim a_n = L`}</Eq> i <Eq>{`\\lim b_n = M`}</Eq>.</li>
+      <li><strong>Cel.</strong> Dado <Eq>{`\\varepsilon > 0`}</Eq>, znaleźć <Eq>{`N`}</Eq> taki że <Eq>{`n > N \\Rightarrow |(a_n+b_n)-(L+M)| < \\varepsilon`}</Eq>.</li>
+      <li><strong>Użyj hipotez z <Eq>{`\\varepsilon/2`}</Eq>.</strong> Istnieją <Eq>{`N_1, N_2`}</Eq> z powyższymi warunkami.</li>
+      <li><strong>Weź <Eq>{`N = \\max(N_1, N_2)`}</Eq>.</strong> Z nierówności trójkąta: <Eq>{`|(a_n+b_n)-(L+M)| \\leq |a_n-L| + |b_n-M| < \\varepsilon/2 + \\varepsilon/2 = \\varepsilon`}</Eq>. QED.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", exercicio: "ex. 59", licenca: "CC-BY-NC-SA 4.0" }}
+>
+Udowodnij twierdzenie algebry granic: jeśli $\lim a_n = L$ i $\lim b_n = M$, to $\lim (a_n + b_n) = L + M$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Źródła
+
+- [**Lebl — Basic Analysis: Introduction to Real Analysis**](https://www.jirka.org/ra/) — Jiří Lebl · CC-BY-NC-SA · §2.1–2.4 (Sequences). Definicja epsilon-N, jednoznaczność, Cauchy, Bolzano-Weierstrass. **Odniesienie podstawowe dla rygoru.**
+- [**Active Calculus**](https://activecalculus.org/single/sec-8-1-sequences.html) — Matt Boelkins · 2024 · CC-BY-NC-SA · §8.1 (Sequences) i §8.2 (Geometric Series). Aktywności z ciągami rekurencyjnymi, Fibonaccim, zastosowaniami finansowymi.
+- [**OpenStax Calculus Volume 2**](https://openstax.org/books/calculus-volume-2/pages/5-1-sequences) — Strang et al. · CC-BY-NC-SA 4.0 · §5.1 (Sequences). Znane granice, dryl ćwiczeń z pełnymi rozwiązaniami.
