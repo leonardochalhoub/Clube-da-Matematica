@@ -1,0 +1,871 @@
+---
+titulo: "Lição 41 — Limite formal: definição ε-δ"
+slug: "licao-41-limite-formal"
+categoria: "aulas"
+subcategoria: "ano-2-trim-5"
+descricao: "A definição ε-δ de limite. Cauchy 1821, Weierstrass 1872. O ponto onde o cálculo se torna rigoroso."
+ordem: 41
+publicado: true
+tags: ["limite", "épsilon-delta", "ano-2", "trim-5"]
+prerrequisitos: ["licao-19-limite-intuitivo"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano EM (16-17 anos)", "Equiv. Math II japonês", "Equiv. Klasse 11 alemã (Analysis)", "A-Level Further Maths — Limits"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\forall\varepsilon>0,\;\exists\delta>0:\;0<|x-a|<\delta\;\Rightarrow\;|f(x)-L|<\varepsilon"
+  legenda={<>ε-δ <strong>極限の定義</strong>：<Eq>{`\\lim_{x\\to a}f(x)=L`}</Eq> であるとは、あなたが選んだどんな許容誤差 <Eq>{`\\varepsilon>0`}</Eq> に対しても、距離 <Eq>{`\\delta>0`}</Eq> が存在して、<Eq>{`0<|x-a|<\\delta`}</Eq> を満たすすべての <Eq>{`x`}</Eq> に対して <Eq>{`|f(x)-L|<\\varepsilon`}</Eq> が成り立つときをいいます。これが微積分学の厳密な基礎です。これなしに導関数も、導関数なしに微積分学も存在しません。</>}
+  audioTexto="ε-δ（エプシロン・デルタ）極限の定義。すべての正のエプシロンに対して、正のデルタが存在して、0は x マイナス a の絶対値より小さく、その絶対値はデルタより小さいならば、f(x) マイナス L の絶対値はエプシロンより小さい。この形式的な極限の定義はコーシーによって1821年に導入され、ワイエルシュトラスによって1872年に完成されました。直感的な「接近」という概念を数学的に正確な命題に変えています。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    この授業をカバーする教科書
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-1-2-lim.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §1.1–1.2 平均変化率と極限の定義 · CC-BY-SA · </span>
+      <em className="text-clube-mist">帰納的アプローチ：数値表 → グラフ → 形式的定義。ε-δ への最適な入口です。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/2-5-the-precise-definition-of-a-limit" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §2.2–2.5 極限、法則、連続性、厳密な定義 · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">形式的な ε-δ 証明の例と複数の代数技法を用いた演習を含む完全な説明。</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §1.1–1.6 極限への導入と無限での極限 · CC-BY-NC · </span>
+      <em className="text-clube-mist">厳密な進行を備えた従来のテキストスタイル。有理関数の極限と無限での極限に優れています。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="厳密な定義">
+
+### ε-δ 極限の定義
+
+<Definicao titulo="点での関数の極限（Cauchy 1821 年 / Weierstrass 1872 年）">
+
+$f$ を $a$ の穴あき近傍で定義された関数とします（$a$ でその定義を必須としません）。次のように言います：
+
+$$\lim_{x \to a} f(x) = L$$
+
+は、かつ、すべての $\varepsilon > 0$ に対して、$\delta > 0$ が存在して
+
+$$0 < |x - a| < \delta \;\Longrightarrow\; |f(x) - L| < \varepsilon.$$
+
+条件 $0 < |x - a|$ は $x \neq a$ を意味します。値 $f(a)$ は極限の存在に無関係です。
+
+</Definicao>
+
+> "We say that the limit of $f(x)$, as $x$ approaches $a$, equals $L$, …if we can make the values of $f(x)$ arbitrarily close to $L$ …by restricting $x$ to be sufficiently close to $a$ (on either side of $a$) but not equal to $a$." — [OpenStax Calculus Vol. 1 §2.2](https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function)
+
+### ε-δ 法：証明を構成する方法
+
+1. $|f(x) - L|$ を書き、$|x - a|$ の倍数が現れるまで代数的に操作します。
+2. $|x - a| < 1$（または他の定数）に制限して追加因子を制御します。
+3. $\delta = \min\bigl(1,\; \varepsilon / C\bigr)$ を選択します。$C$ は得られた係数です。
+4. $0 < |x - a| < \delta \Rightarrow |f(x) - L| < \varepsilon$ の鎖が閉じることを確認します。
+
+### モデル証明：$\lim_{x \to 2}(3x + 1) = 7$
+
+**下書き：** $|3x + 1 - 7| = |3x - 6| = 3|x - 2|$。$3|x-2| < \varepsilon$ となるには、$|x-2| < \varepsilon/3$ で十分です。
+
+**形式的証明：** $\varepsilon > 0$ が与えられたとき、$\delta = \varepsilon/3$ とします。$0 < |x - 2| < \delta$ ならば
+$$|f(x) - 7| = 3|x - 2| < 3 \cdot \frac{\varepsilon}{3} = \varepsilon. \quad \square$$
+
+### 片側極限
+
+<Definicao titulo="一方向極限">
+
+- **右極限：** $\displaystyle\lim_{x \to a^+} f(x) = L$ とは、$\forall\varepsilon>0,\,\exists\delta>0: 0 < x - a < \delta \Rightarrow |f(x)-L|<\varepsilon$ を意味します。
+- **左極限：** $\displaystyle\lim_{x \to a^-} f(x) = L$ とは、$\forall\varepsilon>0,\,\exists\delta>0: 0 < a - x < \delta \Rightarrow |f(x)-L|<\varepsilon$ を意味します。
+
+</Definicao>
+
+<Teorema titulo="両側極限が存在するための条件">
+$$\lim_{x \to a} f(x) = L \;\iff\; \lim_{x \to a^+} f(x) = L \;\text{ かつ } \; \lim_{x \to a^-} f(x) = L.$$
+</Teorema>
+
+### 無限での極限と無限が極限である場合
+
+<Definicao titulo="4 つのタイプの極限">
+
+| タイプ | 定義 |
+|---|---|
+| $\lim_{x \to a} f(x) = L$ | $\forall\varepsilon>0,\,\exists\delta>0: 0<\|x-a\|<\delta \Rightarrow \|f(x)-L\|<\varepsilon$ |
+| $\lim_{x \to a} f(x) = +\infty$ | $\forall M>0,\,\exists\delta>0: 0<\|x-a\|<\delta \Rightarrow f(x)>M$ |
+| $\lim_{x \to +\infty} f(x) = L$ | $\forall\varepsilon>0,\,\exists N>0: x>N \Rightarrow \|f(x)-L\|<\varepsilon$ |
+| $\lim_{x \to +\infty} f(x) = +\infty$ | $\forall M>0,\,\exists N>0: x>N \Rightarrow f(x)>M$ |
+
+</Definicao>
+
+### 極限の代数的性質
+
+$\lim_{x \to a} f(x) = L$ と $\lim_{x \to a} g(x) = M$ とします。その場合：
+
+<Equation explicacao="極限の和と積。三角不等式を用いて ε-δ を直接示すことができます。" latex="\lim_{x\to a}[f(x)+g(x)]=L+M, \qquad \lim_{x\to a}[f(x)\cdot g(x)]=L\cdot M" />
+
+<Equation explicacao="商の極限：分母の極限がゼロでないときに有効。" latex="\lim_{x\to a}\frac{f(x)}{g(x)}=\frac{L}{M}, \quad M\neq 0" />
+
+<Teorema titulo="はさみ込みの定理（サンドイッチ定理）">
+$a$ の近傍で $g(x) \leq f(x) \leq h(x)$ で、$\lim_{x\to a} g(x) = \lim_{x\to a} h(x) = L$ ならば、$\lim_{x\to a} f(x) = L$。
+
+**古典的な応用：** $|x\sin(1/x)| \leq |x| \to 0$ なので、$\lim_{x\to 0} x\sin(1/x) = 0$ です。
+</Teorema>
+
+### 重要な極限
+
+<Equation explicacao="微積分学の 4 つの基本的な極限。これらは不定形を簡潔にするすべての計算で使用されます。" latex="\lim_{x\to 0}\frac{\sin x}{x}=1,\quad \lim_{x\to 0}\frac{1-\cos x}{x^2}=\tfrac{1}{2},\quad \lim_{x\to 0}\frac{e^x-1}{x}=1,\quad \lim_{x\to\infty}\!\Bigl(1+\tfrac{1}{x}\Bigr)^{\!x}=e" />
+
+<Insight>
+
+ε-δ 定義は対話の順序を反転させます：**あなた** が許容誤差 $\varepsilon$ を選び（$f(x)$ を $L$ にどれだけ近づけたいか）、**数学者** が $\delta$ で応えます（$x$ が $a$ にどれだけ近づく必要があるか）。極限が存在するのは、数学者がいかに小さい $\varepsilon$ を要求されても常に応えられるときです。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="5 歳の子どもへ">
+
+包まれたプレゼントに近づくゲームをしていて、それを開けることができないと想像してください。
+
+**すごく近く** にいたいのです。私は言います：「いいよ、1 歩までで」。あなたは言います：「もっと近く！」 私は言います：「いいよ、半歩」。
+
+あなたがどんな「近さ」を思いつくと、私はいつでも何歩歩くべきかを言うことができます。これが数学者が **極限** と呼ぶものです：$x$ が $a$ に近づくと、$f(x)$ は $L$ に近づきます。
+
+</Porta>
+
+<Porta nivel="10" titulo="10 歳の子どもへ">
+
+GPS のことを考えてください。あなたは地図上の目的地 $L$ に向かっています。車は確実に目的地で止まりませんが、近づいていきます。
+
+数学者が聞きます：「$L$ の周りにどんな小さい泡を描いても、車がその泡に入りますか？」
+
+答えが常に **はい** なら、**極限が存在して $L$ に等しい** と言います。
+
+文字 $\varepsilon$ は $L$ の周りの泡の半径です。文字 $\delta$ は目的地 $a$ に向けて $x$ がどのくらい近づく必要があるかです。
+
+**あなたが $\varepsilon$ を選びます**（1 でも $0.001$ でも何でもかまいません）。**数学者が $\delta$ で応えます** それが機能します。彼がいつも応えられるなら、極限が存在します。
+
+</Porta>
+
+<Porta nivel="15" titulo="15 歳の十代へ">
+
+授業 19 では、直感的な極限を見ました。今、それが厳密になります。
+
+中心的な考え：$\lim_{x \to a} f(x) = L$ とは、$f(x)$ を $L$ に **好きなだけ近く** 近づけられるということで、$x$ を $a$ に **十分** 近づけるだけです。
+
+2 つのギリシャ文字で形式化します：
+- **$\varepsilon$**（エプシロン）：$f(x)$ の許容誤差—あなたが選びます。
+- **$\delta$**（デルタ）：$x$ の許容誤差—私が保証します。
+
+**すべての** $\varepsilon > 0$（どんなに小さくても）に対して、$0 < |x - a| < \delta$ が $|f(x) - L| < \varepsilon$ を保証する $\delta > 0$ が見つかるなら、極限は存在して値は $L$ です。
+
+**$\lim_{x \to 1} x^2 = 1$ の数値表：**
+
+| $x$ | $x^2$ | $\lvert x^2 - 1 \rvert$ |
+|---|---|---|
+| $0.9$ | $0.81$ | $0.19$ |
+| $0.99$ | $0.9801$ | $0.0199$ |
+| $0.999$ | $0.998001$ | $0.001999$ |
+| $1.001$ | $1.002001$ | $0.002001$ |
+| $1.01$ | $1.0201$ | $0.0201$ |
+
+$x$ が 1 に近づくほど、$|x^2 - 1|$ は小さくなります。$|x^2 - 1| < 0.01$ なら、$|x - 1| < 0.003$（約）です。これが $\delta$ の動作です。
+
+**極限が存在しない場合：**
+- $\lim_{x \to 0} 1/x$：右から $+\infty$、左から $-\infty$ へ—片側極限が異なります。
+- $\lim_{x \to 0} \sin(1/x)$：$-1$ と $1$ の間で無限に振動—収束しません。
+
+<Insight>
+
+極限は $f(a)$ に **依存しません**。関数は $a$ で定義される必要はありません—重要なのは $a$ 近くの点での動作だけです。ですから $\lim_{x \to 2} (x^2 - 4)/(x-2) = 4$ です。分数は $x = 2$ で定義されていないのに。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="工学学生向け">
+
+ε-δ 定義は厳密な微積分学の基礎です。その前に、ニュートンとライプニッツは「無限小」を使いました—どの正の数より小さいが、ゼロではない量です。実際には機能していましたが、論理的に脆弱でした（バークレー、1734：「去った量の幽霊」）。
+
+コーシーは 1821 年に [*Cours d'analyse*](https://gallica.bnf.fr/ark:/12148/bpt6k90196z) で形式化しました。ワイエルシュトラスは 1872 年に改善しました。すべての現代解析学はそこから始まります。
+
+### モデル証明：$\lim_{x \to 3} x^2 = 9$
+
+**下書き：** $|x^2 - 9| = |x - 3|\cdot|x + 3|$。$|x - 3| < 1$ に制限すると、$|x| < 4$、つまり $|x + 3| < 7$。よって $|x^2 - 9| < 7|x - 3|$。$7|x - 3| < \varepsilon$ には、$|x - 3| < \varepsilon/7$ が必要。
+
+**形式的証明：** $\varepsilon > 0$ が与えられたとき、$\delta = \min(1, \varepsilon/7)$ とします。$0 < |x - 3| < \delta$ ならば $|x + 3| \leq |x - 3| + 6 < 1 + 6 = 7$ で
+
+$$|x^2 - 9| = |x-3|\cdot|x+3| < \frac{\varepsilon}{7}\cdot 7 = \varepsilon. \quad\square$$
+
+### 不定形と代数技法
+
+| 形式 | 技法 |
+|---|---|
+| $0/0$ — 多項式 | 因数分解して約分 |
+| $0/0$ — 根号含む | 共役を掛ける |
+| $\infty/\infty$ | 最高次で割る |
+| $0 \cdot \infty$ | $0/0$ または $\infty/\infty$ に書き直す |
+| 重要な極限 | $\sin x/x = 1$、$(e^x-1)/x = 1$ |
+
+### 工学での直接応用
+
+- **瞬間速度：** $v(t) = \lim_{\Delta t \to 0} \bigl(s(t+\Delta t) - s(t)\bigr)/\Delta t$。
+- **回路電流：** $i(t) = \lim_{\Delta t \to 0} \Delta q/\Delta t$。
+- **離散化誤差：** $\lim_{h \to 0} (f(x+h) - f(x))/h = f'(x)$ が検証されます（オイラー法の基礎）。
+- **制御：** システムが安定 $\iff$ $\lim_{t \to \infty} y(t) = 0$（インパルス応答が減衰）。
+
+### 列による特性化（ハイネ）
+
+$\lim_{x \to a} f(x) = L$ $\iff$ $x_n \to a$ かつ $x_n \neq a$ のすべての列 $(x_n)$ に対して、$f(x_n) \to L$。極限が存在しないことを **証明するのに有用**：異なる極限を持つ 2 つの列を示すだけ。
+
+</Porta>
+
+<Porta nivel="40" titulo="シニア専門家向け">
+
+ε-δ 定義は **計量空間** $(X, d)$ での極限の特殊例です：$\lim_{x \to a} f(x) = L$ は $\forall\varepsilon>0, \exists\delta>0: 0 < d_X(x,a) < \delta \Rightarrow d_Y(f(x),L) < \varepsilon$ を意味します。微積分学理論全体が、バナッハ空間、フレシェ空間、およびそれ以上に拡張します。
+
+### 位相的定式化（計量なし）
+
+一般位相空間では、$x \to a$ のとき $f(x) \to L$ は、$L$ のすべての開近傍 $V$ に対して、$a$ の近傍 $U$ が存在して $f(U \setminus \{a\}) \subseteq V$ を満たすとき言います。これは：$f$ が $a$ で連続（点を除いて）に等価です。
+
+### 非標準解析（ロビンソン 1966）
+
+ε-δ 定義は **超実数** $^*\mathbb{R}$ で等価な定式化を持ちます：$\lim_{x \to a} f(x) = L$ $\iff$ すべての無限小 $\delta \neq 0$ に対して、$f(a+\delta) - L$ が無限小。記号がライプニッツに近づきます—しかし論理的な力はワイエルシュトラスと同じ。
+
+### 一様収束 vs. 点収束
+
+関数列 $f_n \to f$：
+- **点収束：** $\forall x, \forall\varepsilon, \exists N(\varepsilon,x)$。$N$ は $x$ に依存。
+- **一様収束：** $\forall\varepsilon, \exists N(\varepsilon), \forall x$。$N$ は $x$ に依存しない。
+
+量子化子の順序が すべてを変えます：一様収束は連続性を保存し、極限と積分の交換を許可。点収束は不可。古典的反例：$f_n(x) = x^n$ on $[0,1]$ は $\{1\}$ の示唆関数に点収束しますが、一様には収束しません。
+
+### 数値許容誤差を ε-δ 有限として
+
+科学計算では（NumPy、MATLAB、SciPy）、`atol` と `rtol` は $\varepsilon$ の離散版です。反復収束（ニュートン、共役勾配）は残差が `tol` 以下に落ちるときに宣言されます。$\delta$ がユーザーに固定された ε-δ です—理論は、任意の $\varepsilon$ に対して、十分に小さい $\delta$ で方法が常に収束することを保証します。
+
+### 分布理論（シュワルツ）
+
+分布は関数の概念を拡張します：$\delta_0$（ディラックのデルタ）は関数ではなく、$C_c^\infty(\mathbb{R})$ の連続線形関数形です。位相弱-* で $f_n \to T$ での収束は、関数形の収束で ε-δ を置き換えます。中心的応用：数学物理での PDE の解。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="実践的応用">
+
+### レシピ：極限を計算する方法
+
+**ステップ 1 — 直接代入。** $f(a)$ を試してください。定義済みで $f$ が連続なら、完了。
+
+**ステップ 2 — 代数的操作**（不定形 $0/0$ のとき）：
+- **因数分解して約分：** $(x^2 - 4)/(x - 2) = (x+2)(x-2)/(x-2) = x + 2$ for $x \neq 2$。つまり $\lim_{x\to 2} = 4$。
+- **共役：** $(\sqrt{x+1}-1)/x \cdot (\sqrt{x+1}+1)/(\sqrt{x+1}+1) = 1/(\sqrt{x+1}+1) \to 1/2$。
+- **重要な極限：** $\lim_{x\to 0}\sin(5x)/(3x) = (5/3)\lim_{x\to 0}\sin(5x)/(5x) = 5/3$。
+
+**ステップ 3 — 無限での極限：** 分子と分母を $x$ の最高次で割ります。
+
+**ステップ 4 — 確認用 SymPy：**
+
+```python
+import sympy as sp
+x = sp.Symbol('x')
+sp.limit((x**2 - 4)/(x - 2), x, 2)           # 4
+sp.limit(sp.sin(x)/x, x, 0)                  # 1
+sp.limit((1 + 1/x)**x, x, sp.oo)             # E
+sp.limit(1/x, x, 0, '+')                     # oo
+sp.limit(1/x, x, 0, '-')                     # -oo
+```
+
+### 極限が存在しない場合
+
+1. **片側極限が異なる：** $\lim_{x\to 0^+}1/x = +\infty \neq -\infty = \lim_{x\to 0^-}1/x$。
+2. **振動：** $\sin(1/x)$ は 0 の近く無限に振動—値に収束しません。
+3. **符号なしのブローアップ：** $1/x^2 \to +\infty$（無限極限だが振る舞いは良好—両側が一致）。
+
+### 瞬間速度：導関数を生成する極限
+
+位置 $s(t) = t^2$（メートル）。$t$ と $t + h$ 間の平均速度：
+
+$$\frac{s(t+h) - s(t)}{h} = \frac{(t+h)^2 - t^2}{h} = \frac{2th + h^2}{h} = 2t + h.$$
+
+$h \to 0$ としてから：$v(t) = \lim_{h\to 0}(2t + h) = 2t$。この極限が導関数です—第 6 四半期の中心概念。
+
+</Porta>
+
+</DuasPortas>
+
+## 解答例
+
+<Exemplo titulo="数値表による直感的計算（応用）" numero="1">
+
+**問題。** $\displaystyle\lim_{x \to 2} \frac{x^2 - 4}{x - 2}$ を数値的に推定し、代数的に確認します。
+
+**戦略。** 直接代入が $0/0$ を生成するとき、数値表が値を示唆し、因数分解が確認します。
+
+**解答：**
+
+$x = 2$ の近い値の表（$x \neq 2$ で）：
+
+| $x$ | $(x^2-4)/(x-2)$ |
+|---|---|
+| $1.9$ | $3.9$ |
+| $1.99$ | $3.99$ |
+| $1.999$ | $3.999$ |
+| $2.001$ | $4.001$ |
+| $2.01$ | $4.01$ |
+| $2.1$ | $4.1$ |
+
+表は $\lim = 4$ を示唆しています。
+
+**代数的確認：** $x \neq 2$ のとき、
+$$\frac{x^2 - 4}{x - 2} = \frac{(x-2)(x+2)}{x-2} = x + 2.$$
+つまり $\displaystyle\lim_{x\to 2}(x+2) = 4$。
+
+**確認：** 因数分解が不定形を引き起こす因子 $(x-2)$ を約分します。値 $f(2)$ は未定義ですが、極限が存在して値は 4 です。
+
+**出典。** [Active Calculus §1.2, Preview Activity 1.2.1](https://activecalculus.org/single/sec-1-2-lim.html) — ライセンス CC-BY-SA。
+</Exemplo>
+
+<Exemplo titulo="線形関数の形式的 ε-δ 証明（形式的）" numero="2">
+
+**問題。** $\displaystyle\lim_{x \to 3}(5x - 2) = 13$ を ε-δ を介して厳密に証明します。
+
+**戦略。** $|f(x) - L|$ を $|x - a|$ の観点から表現し、線形関係を特定して $\delta = \varepsilon / C$ を選択します。
+
+**解答：**
+
+**下書き（$\delta$ の選択を指導する）：**
+$$|f(x) - 13| = |5x - 2 - 13| = |5x - 15| = 5|x - 3|.$$
+$5|x-3| < \varepsilon$ なら、$|x - 3| < \varepsilon/5$ が必要。
+
+**形式的証明：** $\varepsilon > 0$ が与えられたとします。$\delta = \varepsilon/5$ とします。$0 < |x - 3| < \delta$ と仮定します。その場合：
+$$|(5x - 2) - 13| = 5|x - 3| < 5\cdot\frac{\varepsilon}{5} = \varepsilon.$$
+したがって、定義により、$\displaystyle\lim_{x\to 3}(5x - 2) = 13$。$\square$
+
+**観察：** 線形関数 $f(x) = mx + b$ の場合、$|f(x) - (ma+b)| = |m|\cdot|x-a|$ の関係は常に直接的です。$\delta = \varepsilon/|m|$ は追加制限なく機能します。
+
+**確認：** $\varepsilon = 0.1$ として：$\delta = 0.02$。$|x - 3| < 0.02$ のとき、$|5x - 15| = 5|x-3| < 5(0.02) = 0.1 = \varepsilon$。チェック。
+
+**出典。** [OpenStax Calculus Vol. 1 §2.5, Example 2.39](https://openstax.org/books/calculus-volume-1/pages/2-5-the-precise-definition-of-a-limit) — ライセンス CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="片側極限と極限の存在（理解）" numero="3">
+
+**問題。** 関数 $f(x) = |x|/x$（$x \neq 0$）を考えます。$x = 0$ での片側極限を計算し、$\lim_{x \to 0} f(x)$ が存在するか決定します。
+
+**戦略。** 右極限と左極限を別々に計算します。両側極限は両方が一致する場合にのみ存在します。
+
+**解答：**
+
+次のことに注意：
+$$f(x) = \frac{|x|}{x} = \begin{cases} 1, & x > 0, \\ -1, & x < 0. \end{cases}$$
+
+**右極限**（$x \to 0^+$、つまり $x > 0$）：$f(x) = 1$ for all $x > 0$、したがって $\lim_{x \to 0^+} f(x) = 1$。
+
+**左極限**（$x \to 0^-$、つまり $x < 0$）：$f(x) = -1$ for all $x < 0$、したがって $\lim_{x \to 0^-} f(x) = -1$。
+
+$\lim_{x \to 0^+} f(x) = 1 \neq -1 = \lim_{x \to 0^-} f(x)$ なので、片側極限は異なります。
+
+**結論：** $\displaystyle\lim_{x \to 0} f(x)$ は **存在しません**。
+
+**確認：** $f$ のグラフは $x = 0$ でのステップとの「階段」です。これは可能な最もシンプルなジャンプ不連続です。
+
+**出典。** [OpenStax Calculus Vol. 1 §2.2, Example 2.7](https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function) — ライセンス CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="有理関数の無限での極限（応用）" numero="4">
+
+**問題。** $\displaystyle\lim_{x \to +\infty} \frac{3x^2 + 5x - 1}{2x^2 - 7}$ を計算します。
+
+**戦略。** 分子と分母を $x$ の最高次で割ります（$x^2$）、および $x \to \infty$ のとき、任意の定数 $k$ と $n > 0$ に対して $k/x^n \to 0$ という事実を使用します。
+
+**解答：**
+
+すべてを $x^2$ で割ります：
+$$\frac{3x^2 + 5x - 1}{2x^2 - 7} = \frac{3 + 5/x - 1/x^2}{2 - 7/x^2}.$$
+
+$x \to +\infty$ のとき：$5/x \to 0$、$1/x^2 \to 0$、$7/x^2 \to 0$。したがって：
+$$\lim_{x \to +\infty} \frac{3 + 5/x - 1/x^2}{2 - 7/x^2} = \frac{3 + 0 - 0}{2 - 0} = \frac{3}{2}.$$
+
+**一般ルール：** $\displaystyle\lim_{x\to\infty}\frac{a_n x^n + \cdots}{b_m x^m + \cdots}$ の場合、結果は $n$ vs. $m$ に依存：
+- $n < m$：極限 $= 0$。
+- $n = m$：極限 $= a_n/b_m$。
+- $n > m$：極限 $= \pm\infty$（符号に依存）。
+
+**確認：** $x = 1000$ で：$(3 \cdot 10^6 + 5000 - 1)/(2 \cdot 10^6 - 7) \approx 3005000/1999993 \approx 1.5025$ — $3/2$ に収束します。✓
+
+**出典。** [APEX Calculus §1.6, Example 1.6.1](https://www.apexcalculus.com/) — ライセンス CC-BY-NC。
+</Exemplo>
+
+<Exemplo titulo="極限が存在しない場合—振動（挑戦）" numero="5">
+
+**問題。** $\displaystyle\lim_{x \to 0} \sin\!\left(\frac{1}{x}\right)$ が存在しないことを示します。
+
+**戦略。** ハイネの列特性化を使用：極限が存在するなら、$x_n \to 0$ で $x_n \neq 0$ のすべての列 $(x_n)$ が $f(x_n) \to L$ を生成するはず。異なる像極限を持つ 2 つの列を示します。
+
+**解答：**
+
+2 つの列を考えます：
+$$x_n = \frac{1}{2n\pi} \quad \text{かつ} \quad y_n = \frac{2}{(4n+1)\pi}, \quad n \in \mathbb{N}.$$
+
+両方とも $x_n \to 0$ かつ $y_n \to 0$ を満たします（分母は制限なく成長）。
+
+**$x_n$ の場合：**
+$$\sin\!\left(\frac{1}{x_n}\right) = \sin(2n\pi) = 0 \quad \text{すべての } n.$$
+つまり $f(x_n) \to 0$。
+
+**$y_n$ の場合：**
+$$\sin\!\left(\frac{1}{y_n}\right) = \sin\!\left(\frac{(4n+1)\pi}{2}\right) = \sin\!\left(2n\pi + \frac{\pi}{2}\right) = 1 \quad \text{すべての } n.$$
+つまり $f(y_n) \to 1$。
+
+2 つの列が $x_n \to 0$ でも異なる極限（$0$ と $1$）を生成するので、ハイネ特性化により $\displaystyle\lim_{x\to 0}\sin(1/x)$ は **存在しません**。$\square$
+
+**注：** グラフは $x \to 0$ のとき $-1$ と $1$ の間で無限に振動—どの特定の値も優先されません。
+
+**出典。** [Active Calculus §1.2, Activity 1.2.3](https://activecalculus.org/single/sec-1-2-lim.html) — ライセンス CC-BY-SA。
+</Exemplo>
+
+<ListaExercicios seed="licao-41-limite-formal">
+
+> **ノートブックリスト。** 40 の演習を 4 つの増加する難度ブロックに分割。紙で解く；確認用のみ「解決策を見る」と「ステップバイステップで見る」を使う。出典：Active Calculus §1.1–1.3、OpenStax Calculus Vol. 1 §2.2–2.5、APEX Calculus §1.1–1.6。
+
+### ブロック A — 直接計算と因数分解（41.1 から 41.18）
+
+<Exercicio numero="41.1" dificuldade="aplicacao"
+  solucao={<>関数 <Eq>{`f(x)=2x+1`}</Eq> は連続です。直接代入：<Eq>{`2(3)+1=7`}</Eq>。答え：7。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "148", exercicio: "ex. 60", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 3}(2x + 1)$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.2" dificuldade="aplicacao"
+  solucao={<>因数分解：<Eq>{`\\frac{x^2-4}{x-2}=\\frac{(x-2)(x+2)}{x-2}=x+2`}</Eq> for <Eq>{`x\\neq 2`}</Eq>。したがって <Eq>{`\\lim_{x\\to 2}(x+2)=4`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>直接代入は 0/0 を生成します。</strong> <Eq>{`(4-4)/(2-2)`}</Eq> — 不定形。直接代入できません。操作が必要です。</li>
+      <li><strong>分子を因数分解します。</strong> <Eq>{`x^2 - 4 = (x-2)(x+2)`}</Eq>（和と差の積）。</li>
+      <li><strong>共通因子をキャンセルします。</strong> <Eq>{`\\frac{(x-2)(x+2)}{x-2}=x+2`}</Eq>, valid since <Eq>{`x\\neq 2`}</Eq>。極限は <Eq>{`f(2)`}</Eq> を必要としません—2 の近い動作のみ。</li>
+      <li><strong>代入を適用します。</strong> <Eq>{`\\lim_{x\\to 2}(x+2)=2+2=4`}</Eq>。今は機能します。</li>
+    </ol>
+    <p><em>トリック：直接代入が 0/0 を与えるときは常に因数分解を試してください。分母の問題因子はほぼ常に分子と約分します。</em></p>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-2-lim.html", secao: "§1.2", pagina: "22", exercicio: "Activity 1.2.2", licenca: "CC-BY-SA" }}
+>
+$\displaystyle\lim_{x \to 2} \frac{x^2 - 4}{x - 2}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.3" dificuldade="aplicacao"
+  solucao={<>因数分解：<Eq>{`\\frac{x^2-1}{x-1}=x+1`}</Eq> for <Eq>{`x\\neq 1`}</Eq>。つまり <Eq>{`\\lim_{x\\to 1}(x+1)=2`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-3-the-limit-laws", secao: "§2.3", pagina: "170", exercicio: "ex. 106", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 1} \frac{x^2 - 1}{x - 1}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.4" dificuldade="aplicacao"
+  solucao={<>共役を掛けます：<Eq>{`\\frac{\\sqrt{x+1}-1}{x}\\cdot\\frac{\\sqrt{x+1}+1}{\\sqrt{x+1}+1}=\\frac{x}{x(\\sqrt{x+1}+1)}=\\frac{1}{\\sqrt{x+1}+1}`}</Eq>。<Eq>{`x\\to 0`}</Eq> をとると：<Eq>{`\\frac{1}{\\sqrt{1}+1}=\\frac{1}{2}`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>直接代入。</strong> <Eq>{`(\\sqrt{0+1}-1)/0 = 0/0`}</Eq> — 不定形。分母のゼロを排除する必要があります。</li>
+      <li><strong>共役を掛けます。</strong> 分子の共役は <Eq>{`\\sqrt{x+1}+1`}</Eq>。積は <Eq>{`(\\sqrt{x+1}-1)(\\sqrt{x+1}+1) = (x+1)-1 = x`}</Eq>。</li>
+      <li><strong>簡潔にします。</strong> <Eq>{`\\frac{x}{x(\\sqrt{x+1}+1)} = \\frac{1}{\\sqrt{x+1}+1}`}</Eq>。<Eq>{`x`}</Eq> は約分（有効 since <Eq>{`x\\neq 0`}</Eq>）。</li>
+      <li><strong>極限。</strong> <Eq>{`\\lim_{x\\to 0} \\frac{1}{\\sqrt{x+1}+1} = \\frac{1}{1+1} = \\frac{1}{2}`}</Eq>。直接代入が今は機能します。</li>
+    </ol>
+    <p><em>トリック：分子または分母に根号の差がある場合、共役はほぼ常に不定形を解決します。</em></p>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-3-the-limit-laws", secao: "§2.3", pagina: "167", exercicio: "ex. 84", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{\sqrt{x+1} - 1}{x}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.5" dificuldade="aplicacao"
+  solucao={<><Eq>{`x`}</Eq> で割ります：<Eq>{`\\frac{3x+1}{x+5}=\\frac{3+1/x}{1+5/x}\\to\\frac{3+0}{1+0}=3`}</Eq> when <Eq>{`x\\to\\infty`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§1.6", pagina: "60", exercicio: "ex. 7", licenca: "CC-BY-NC" }}
+>
+$\displaystyle\lim_{x \to +\infty} \frac{3x + 1}{x + 5}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.6" dificuldade="aplicacao"
+  solucao={<><Eq>{`x^2`}</Eq> で割ります：<Eq>{`\\frac{2x^2+3}{x^2-1}=\\frac{2+3/x^2}{1-1/x^2}\\to 2`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§1.6", pagina: "61", exercicio: "ex. 11", licenca: "CC-BY-NC" }}
+>
+$\displaystyle\lim_{x \to +\infty} \frac{2x^2 + 3}{x^2 - 1}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.7" dificuldade="aplicacao"
+  solucao={<>重要な極限：<Eq>{`\\lim_{x\\to 0}\\frac{\\sin x}{x}=1`}</Eq>。答え：1。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-2-lim.html", secao: "§1.2", pagina: "24", exercicio: "ex. 1.2.4", licenca: "CC-BY-SA" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{\sin x}{x}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.8" dificuldade="aplicacao"
+  solucao={<><Eq>{`\\frac{\\sin(2x)}{x} = 2\\cdot\\frac{\\sin(2x)}{2x}`}</Eq> と書きます。<Eq>{`2x\\to 0`}</Eq> when <Eq>{`x\\to 0`}</Eq>、重要な極限は <Eq>{`2\\cdot 1=2`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>ターゲットフォームを識別します。</strong> 重要な極限は <Eq>{`\\sin(u)/u\\to 1`}</Eq> when <Eq>{`u\\to 0`}</Eq>。このフォームを強制する必要があります。</li>
+      <li><strong>書き直します。</strong> <Eq>{`\\frac{\\sin(2x)}{x} = 2\\cdot\\frac{\\sin(2x)}{2x}`}</Eq>。分子と分母に 2 を掛けます。</li>
+      <li><strong><Eq>{`u = 2x`}</Eq> とします。</strong> <Eq>{`x\\to 0`}</Eq> のとき、<Eq>{`u\\to 0`}</Eq>。したがって <Eq>{`\\lim_{u\\to 0}\\frac{\\sin u}{u} = 1`}</Eq>。</li>
+      <li><strong>結果。</strong> <Eq>{`2\\times 1 = 2`}</Eq>。</li>
+    </ol>
+    <p><em>トリック：<Eq>{`\\sin(kx)/x`}</Eq> の場合、結果は常に <Eq>{`k`}</Eq>。<Eq>{`k`}</Eq> で乗算・除算して <Eq>{`\\sin(kx)/(kx)`}</Eq> を強制します。</em></p>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-3-the-limit-laws", secao: "§2.3", pagina: "171", exercicio: "ex. 117", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{\sin(2x)}{x}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.9" dificuldade="aplicacao"
+  solucao={<>重要な極限：<Eq>{`\\lim_{x\\to 0}\\frac{1-\\cos x}{x^2} = \\frac{1}{2}`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-3-the-limit-laws", secao: "§2.3", pagina: "171", exercicio: "ex. 119", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{1 - \cos x}{x^2}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.10" dificuldade="aplicacao"
+  solucao={<>重要な極限：<Eq>{`\\lim_{x\\to\\infty}\\left(1+\\frac{1}{x}\\right)^x = e \\approx 2.718`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-2-lim.html", secao: "§1.2", pagina: "25", exercicio: "ex. 1.2.6", licenca: "CC-BY-SA" }}
+>
+$\displaystyle\lim_{x \to +\infty} \left(1 + \frac{1}{x}\right)^{\!x}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.11" dificuldade="aplicacao"
+  solucao={<>重要な極限：<Eq>{`\\lim_{x\\to 0}\\frac{e^x-1}{x}=1`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-3-the-limit-laws", secao: "§2.3", pagina: "170", exercicio: "ex. 113", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{e^x - 1}{x}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.12" dificuldade="aplicacao"
+  solucao={<><Eq>{`x\\to 0^+`}</Eq> のとき、<Eq>{`x>0`}</Eq> で小さいので、<Eq>{`1/x\\to +\\infty`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "151", exercicio: "ex. 73", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 0^+} \frac{1}{x}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.13" dificuldade="aplicacao"
+  solucao={<><Eq>{`x\\to 0^-`}</Eq> のとき、<Eq>{`x<0`}</Eq> で係数内で小さいので、<Eq>{`1/x\\to -\\infty`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "151", exercicio: "ex. 74", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 0^-} \frac{1}{x}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.14" dificuldade="aplicacao"
+  solucao={<>分子：<Eq>{`x^2-4=(x-2)(x+2)`}</Eq>。分母：<Eq>{`x^2-5x+6=(x-2)(x-3)`}</Eq>。約分：<Eq>{`\\frac{x+2}{x-3}`}</Eq>。<Eq>{`x\\to 2`}</Eq> として：<Eq>{`4/(-1)=-4`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>分子を因数分解します。</strong> <Eq>{`x^2-4=(x-2)(x+2)`}</Eq>（平方差）。</li>
+      <li><strong>分母を因数分解します。</strong> <Eq>{`x^2-5x+6=(x-2)(x-3)`}</Eq>（根定理で根 2 と 3）。</li>
+      <li><strong>共通因子をキャンセルします。</strong> <Eq>{`\\frac{(x-2)(x+2)}{(x-2)(x-3)}=\\frac{x+2}{x-3}`}</Eq>, valid for <Eq>{`x\\neq 2`}</Eq>。</li>
+      <li><strong>極限を適用します。</strong> <Eq>{`\\frac{2+2}{2-3}=\\frac{4}{-1}=-4`}</Eq>。</li>
+    </ol>
+    <p><em>好奇心：分子と分母に等しい 2 つの因子が現れる場合、関数が点で定義されていなくても極限が存在します—これが「可除特異点除去」の本質です。</em></p>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-3-the-limit-laws", secao: "§2.3", pagina: "168", exercicio: "ex. 90", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 2} \frac{x^2 - 4}{x^2 - 5x + 6}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.15" dificuldade="aplicacao"
+  solucao={<>重要な極限を 2 回使用：<Eq>{`\\frac{\\sin(5x)}{\\sin(3x)}=\\frac{\\sin(5x)}{5x}\\cdot\\frac{5x}{3x}\\cdot\\frac{3x}{\\sin(3x)}\\to 1\\cdot\\frac{5}{3}\\cdot 1=\\frac{5}{3}`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§1.3", pagina: "35", exercicio: "ex. 19", licenca: "CC-BY-NC" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{\sin(5x)}{\sin(3x)}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.16" dificuldade="aplicacao"
+  solucao={<>共役：<Eq>{`\\frac{\\sqrt{x}-2}{x-4}\\cdot\\frac{\\sqrt{x}+2}{\\sqrt{x}+2}=\\frac{x-4}{(x-4)(\\sqrt{x}+2)}=\\frac{1}{\\sqrt{x}+2}`}</Eq>。<Eq>{`x\\to 4`}</Eq> として：<Eq>{`1/(2+2)=1/4`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-3-the-limit-laws", secao: "§2.3", pagina: "169", exercicio: "ex. 99", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 4} \frac{\sqrt{x} - 2}{x - 4}$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.17" dificuldade="aplicacao"
+  solucao={<>共役：<Eq>{`(\\sqrt{x^2+1}-x)\\cdot\\frac{\\sqrt{x^2+1}+x}{\\sqrt{x^2+1}+x}=\\frac{1}{\\sqrt{x^2+1}+x}\\to 0`}</Eq> when <Eq>{`x\\to\\infty`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§1.6", pagina: "62", exercicio: "ex. 17", licenca: "CC-BY-NC" }}
+>
+$\displaystyle\lim_{x \to +\infty} \left(\sqrt{x^2 + 1} - x\right)$ を計算します。
+</Exercicio>
+
+<Exercicio numero="41.18" dificuldade="aplicacao"
+  solucao={<>はさみ込み：<Eq>{`|\\sin(x^2)/x|\\leq|x^2/x|=|x|\\to 0`}</Eq>, therefore <Eq>{`\\lim_{x\\to 0}\\sin(x^2)/x=0`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-2-lim.html", secao: "§1.2", pagina: "26", exercicio: "ex. 1.2.7", licenca: "CC-BY-SA" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{\sin(x^2)}{x}$ を計算します。
+</Exercicio>
+
+### ブロック B — 概念的理解（41.19 から 41.28）
+
+<Exercicio numero="41.19" dificuldade="compreensao"
+  opcoes={[
+    { texto: "いいえ—極限は $a$ での値ではなく、$a$ の近い動作にのみ依存します。", correta: true },
+    { texto: "はい—常に $f(a)$ が定義されている必要があります。" },
+    { texto: "極限が有限の場合にのみ $f(a)$ が必要です。" },
+    { texto: "はい—そうでなければ定義により極限が存在しません。" },
+  ]}
+  solucao={<>ε-δ 定義は <Eq>{`0 < |x-a| < \\delta`}</Eq> のみを使用し、明示的に <Eq>{`x=a`}</Eq> を除外します。値 <Eq>{`f(a)`}</Eq> は干渉しません。例：<Eq>{`f(x)=(x^2-1)/(x-1)`}</Eq> は <Eq>{`x=1`}</Eq> で定義されていませんが、<Eq>{`x=1`}</Eq> での極限は 2 です。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "143", exercicio: "conceptual 1", licenca: "CC-BY-NC-SA" }}
+>
+$\lim_{x \to a} f(x)$ が存在するには、$f(a)$ が定義されている必要がありますか？
+</Exercicio>
+
+<Exercicio numero="41.20" dificuldade="compreensao"
+  opcoes={[
+    { texto: "はい—両側極限が存在して等しい場合のみ。", correta: true },
+    { texto: "いいえ—右極限の存在で十分です。" },
+    { texto: "はい—両側極限が存在する場合、異なっていても。" },
+    { texto: "片側極限なしでも両側極限が存在できます。" },
+  ]}
+  solucao={<>定理は：<Eq>{`\\lim_{x\\to a}f(x)=L`}</Eq> iff <Eq>{`\\lim_{x\\to a^+}f(x)=L`}</Eq> and <Eq>{`\\lim_{x\\to a^-}f(x)=L`}</Eq>。必要かつ十分条件：2 つの片側極限の等しさ。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-2-lim.html", secao: "§1.2", pagina: "20", exercicio: "ex. 1.2.1", licenca: "CC-BY-SA" }}
+>
+$\lim_{x \to a} f(x)$ が存在するための条件は何ですか？
+</Exercicio>
+
+<Exercicio numero="41.21" dificuldade="compreensao"
+  solucao={<>右極限：<Eq>{`|x|/x=x/x=1`}</Eq> for <Eq>{`x>0`}</Eq>, so <Eq>{`\\lim_{x\\to 0^+}=1`}</Eq>。左極限：<Eq>{`|x|/x=-x/x=-1`}</Eq> for <Eq>{`x<0`}</Eq>。<Eq>{`1\\neq -1`}</Eq> なので、両側極限は存在しません。</>}
+  passos={<>
+    <ol>
+      <li><strong>右側で x の符号を分析します。</strong> <Eq>{`x>0`}</Eq> の場合：<Eq>{`|x|=x`}</Eq>, so <Eq>{`|x|/x = x/x = 1`}</Eq>。</li>
+      <li><strong>左側で x の符号を分析します。</strong> <Eq>{`x<0`}</Eq> の場合：<Eq>{`|x|=-x`}</Eq>, so <Eq>{`|x|/x = -x/x = -1`}</Eq>。</li>
+      <li><strong>片側極限を計算します。</strong> <Eq>{`\\lim_{x\\to 0^+}|x|/x = 1`}</Eq> and <Eq>{`\\lim_{x\\to 0^-}|x|/x = -1`}</Eq>。</li>
+      <li><strong>結論。</strong> <Eq>{`1 \\neq -1`}</Eq> なので、両側極限は存在しません。必要条件は片側極限の等しさです。</li>
+    </ol>
+    <p><em>トリック：絶対値関数はほぼ常に場合分析が必要。常に聞く：x が符号を変えるとき何が変わるか？</em></p>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "149", exercicio: "ex. 67", licenca: "CC-BY-NC-SA" }}
+>
+極限 $\displaystyle\lim_{x \to 0} \frac{|x|}{x}$ が存在しますか？片側極限を計算して結論を出します。
+</Exercicio>
+
+<Exercicio numero="41.22" dificuldade="compreensao"
+  opcoes={[
+    { texto: "存在しません—関数は無限に振動して収束しません。", correta: true },
+    { texto: "存在します、値は 0。" },
+    { texto: "存在します、値は 1。" },
+    { texto: "存在します、値は -1。" },
+  ]}
+  solucao={<>列特性化を使用：<Eq>{`x_n=1/(2n\\pi)\\to 0`}</Eq> は <Eq>{`\\sin(1/x_n)=\\sin(2n\\pi)=0`}</Eq> を与え、<Eq>{`y_n=2/((4n+1)\\pi)\\to 0`}</Eq> は <Eq>{`\\sin(1/y_n)=1`}</Eq> を与えます。異なる極限、したがって極限は存在しません。（選択肢 B、C、D はわな：関数は各値を 0 の近くで無限に仮定しますが、どれにも収束しません。）</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-2-lim.html", secao: "§1.2", pagina: "21", exercicio: "Activity 1.2.3", licenca: "CC-BY-SA" }}
+>
+極限 $\displaystyle\lim_{x \to 0} \sin\!\left(\frac{1}{x}\right)$ が存在しますか？
+</Exercicio>
+
+<Exercicio numero="41.23" dificuldade="compreensao"
+  opcoes={[
+    { texto: "$\\lim_{x\\to 2^+}f=3$ と $\\lim_{x\\to 2^-}f=-1$ の関数。", correta: true },
+    { texto: "$x=2$ で連続な関数。" },
+    { texto: "$f(2)=5$ だが $\\lim_{x\\to 2}f=5$ の関数。" },
+    { texto: "$f(2)$ が未定義だが $\\lim_{x\\to 2}f=4$ の関数。" },
+  ]}
+  solucao={<><Eq>{`x=2`}</Eq> での極限は片側極限が異なるとき存在しません。オプション A はまさにそれを説明：右極限 3 と左極限 <Eq>{`-1`}</Eq>，<Eq>{`3\\neq -1`}</Eq>。オプション B、C、D は極限が存在する状況（または連続性がある場合）を説明。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "148", exercicio: "ex. 61", licenca: "CC-BY-NC-SA" }}
+>
+どの状況が $x = 2$ での極限なしの関数を説明していますか？
+</Exercicio>
+
+<Exercicio numero="41.24" dificuldade="compreensao"
+  solucao={<>ε-δ 定義はまさにこれを捉えます：すべての許容誤差 <Eq>{`\\varepsilon>0`}</Eq> around <Eq>{`L`}</Eq> に対して、距離 <Eq>{`\\delta>0`}</Eq> が存在して、<Eq>{`x`}</Eq> within <Eq>{`\\delta`}</Eq> of <Eq>{`a`}</Eq> (with <Eq>{`x\\neq a`}</Eq>) は <Eq>{`f(x)`}</Eq> within <Eq>{`\\varepsilon`}</Eq> of <Eq>{`L`}</Eq> を保証。値 <Eq>{`f(a)`}</Eq> は無関係。記号で完全な定義を書く、量化子を正しい順序で：<Eq>{`\\forall\\varepsilon>0, \\exists\\delta>0: 0<|x-a|<\\delta \\Rightarrow |f(x)-L|<\\varepsilon`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-2-lim.html", secao: "§1.2", pagina: "18", exercicio: "ex. 1.2.2", licenca: "CC-BY-SA" }}
+>
+ε-δ 定義を暗記で書く：$\lim_{x \to a} f(x) = L$ と各量化子の役割を説明してください。
+</Exercicio>
+
+<Exercicio numero="41.25" dificuldade="compreensao"
+  solucao={<><Eq>{`f(x)=1`}</Eq> when <Eq>{`x>0`}</Eq> and <Eq>{`f(x)=-3`}</Eq> when <Eq>{`x\\leq 0`}</Eq> の場合：右極限は 1、左極限は <Eq>{`-3`}</Eq>。<Eq>{`1\\neq -3`}</Eq> なので両側極限は存在しません。<Eq>{`f(0)=-3`}</Eq>（関数で定義）だが、これは極限の非存在に関係ありません。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "147", exercicio: "ex. 55", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = 1$ for $x > 0$ と $f(x) = -3$ for $x \leq 0$ を考えます。$x = 0$ での片側極限を計算して、両側極限が存在するか決定してください。
+</Exercicio>
+
+<Exercicio numero="41.26" dificuldade="compreensao"
+  solucao={<>はさみ込みで：<Eq>{`-|x|\\leq x\\sin(1/x)\\leq|x|`}</Eq> for <Eq>{`x\\neq 0`}</Eq>。<Eq>{`\\lim_{x\\to 0}(-|x|)=0=\\lim_{x\\to 0}|x|`}</Eq> なので、はさみ込み定理により <Eq>{`\\lim_{x\\to 0}x\\sin(1/x)=0`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>サインを観察します。</strong> <Eq>{`-1\\leq\\sin(1/x)\\leq 1`}</Eq> すべての <Eq>{`x\\neq 0`}</Eq>。サイン関数は常に -1 と 1 の間。</li>
+      <li><strong><Eq>{`|x|\\geq 0`}</Eq> で乗算します。</strong> <Eq>{`-|x|\\leq x\\sin(1/x)\\leq|x|`}</Eq>。正による乗算は不等式を保存。</li>
+      <li><strong>上限と下限の極限を計算します。</strong> <Eq>{`\\lim_{x\\to 0}|x|=0`}</Eq> and <Eq>{`\\lim_{x\\to 0}(-|x|)=0`}</Eq>。</li>
+      <li><strong>はさみ込みを適用します。</strong> 両方の隣人が同じ値 0 に収束。したがって <Eq>{`\\lim_{x\\to 0}x\\sin(1/x)=0`}</Eq>。</li>
+    </ol>
+    <p><em>好奇心：41.22 と比較してください。<Eq>{`\\sin(1/x)`}</Eq> 単独には極限がない。因子 <Eq>{`x`}</Eq> は「支配」振動して極限をゼロに強制。</em></p>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-2-lim.html", secao: "§1.2", pagina: "26", exercicio: "ex. 1.2.8", licenca: "CC-BY-SA" }}
+>
+はさみ込み定理を使用して正当化する：$\displaystyle\lim_{x \to 0} x\sin\!\left(\frac{1}{x}\right)$ を計算してください。
+</Exercicio>
+
+<Exercicio numero="41.27" dificuldade="compreensao"
+  solucao={<>因数分解：<Eq>{`(x^2-9)/(x-3)=(x-3)(x+3)/(x-3)=x+3`}</Eq> for <Eq>{`x\\neq 3`}</Eq>。極限：<Eq>{`3+3=6`}</Eq>。<Eq>{`f(3)`}</Eq> が未定義でも極限は存在します。値 <Eq>{`f(a)`}</Eq> は極限の存在に無関係—ε-δ 定義の中心結論。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "146", exercicio: "ex. 53", licenca: "CC-BY-NC-SA" }}
+>
+関数 $f(x) = (x^2 - 9)/(x-3)$ は $x = 3$ で定義されていません。$\lim_{x \to 3} f(x)$ を計算して、極限が存在する理由を説明してください。
+</Exercicio>
+
+<Exercicio numero="41.28" dificuldade="compreensao"
+  solucao={<><Eq>{`x\\to 0`}</Eq> のとき、<Eq>{`x^2>0`}</Eq> は x の符号に関わらず。したがって <Eq>{`1/x^2\\to +\\infty`}</Eq> 両側から。無限極限は存在（拡張意味で）で値は <Eq>{`+\\infty`}</Eq>。<Eq>{`1/x`}</Eq> と対比：ここで両側は一致、分母が常に正だから。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function", secao: "§2.2", pagina: "152", exercicio: "ex. 77", licenca: "CC-BY-NC-SA" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{1}{x^2}$ を計算して、結果が $\lim_{x\to 0}1/x$ と異なる理由を説明してください。
+</Exercicio>
+
+### ブロック C — モデリングと応用（41.29 から 41.35）
+
+<Exercicio numero="41.29" dificuldade="modelagem"
+  solucao={<>RC 回路では、<Eq>{`V(t)=V_\\infty(1-e^{-t/\\tau})`}</Eq>。<Eq>{`t\\to\\infty`}</Eq> のとき：<Eq>{`e^{-t/\\tau}\\to 0`}</Eq>, thus <Eq>{`V(t)\\to V_\\infty(1-0)=V_\\infty`}</Eq>。キャパシタは定常状態でソース電圧まで完全に充電。</>}
+  passos={<>
+    <ol>
+      <li><strong>構造を特定します。</strong> <Eq>{`V(t)=V_\\infty(1-e^{-t/\\tau})`}</Eq>。<Eq>{`t\\to\\infty`}</Eq> のとき、<Eq>{`t/\\tau\\to\\infty`}</Eq> since <Eq>{`\\tau>0`}</Eq>。</li>
+      <li><strong>指数の極限。</strong> <Eq>{`e^{-t/\\tau}\\to 0`}</Eq> when <Eq>{`t/\\tau\\to\\infty`}</Eq>。減少指数がゼロに。</li>
+      <li><strong>電圧の極限。</strong> <Eq>{`V(t)\\to V_\\infty(1-0)=V_\\infty`}</Eq>。定常状態：キャパシタ完全充電。</li>
+    </ol>
+    <p><em>好奇心：時定数 <Eq>{`\\tau=RC`}</Eq>（抵抗×容量）は充電速度を決定。<Eq>{`5\\tau`}</Eq> 後、キャパシタは <Eq>{`V_\\infty`}</Eq> の 99.3%—技術的にはまだ到達していませんが、形式的極限は <Eq>{`V_\\infty`}</Eq>。</em></p>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "8", exercicio: "Activity 1.1.2", licenca: "CC-BY-SA" }}
+>
+RC 回路では、キャパシタの電圧は $V(t) = V_\infty(1 - e^{-t/\tau})$（$\tau > 0$）。$\lim_{t \to +\infty} V(t)$ を計算して、結果を物理的に解釈してください。
+</Exercicio>
+
+<Exercicio numero="41.30" dificuldade="modelagem"
+  solucao={<>瞬間速度：<Eq>{`v(t)=\\lim_{h\\to 0}\\frac{(t+h)^2-t^2}{h}=\\lim_{h\\to 0}\\frac{2th+h^2}{h}=\\lim_{h\\to 0}(2t+h)=2t`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>展開します。</strong> <Eq>{`(t+h)^2 = t^2+2th+h^2`}</Eq>。</li>
+      <li><strong>減算します。</strong> <Eq>{`s(t+h)-s(t)=(t^2+2th+h^2)-t^2=2th+h^2`}</Eq>。</li>
+      <li><strong>割ります。</strong> <Eq>{`(2th+h^2)/h = 2t+h`}</Eq>, valid for <Eq>{`h\\neq 0`}</Eq>。</li>
+      <li><strong>極限。</strong> <Eq>{`\\lim_{h\\to 0}(2t+h)=2t`}</Eq>。これは <Eq>{`s`}</Eq> の導関数の定義、<Eq>{`t`}</Eq> で。</li>
+    </ol>
+    <p><em>好奇心：この計算は第 6 四半期の胚。導関数は極限—その極限は「平均速度」を「瞬間速度」に変えます。</em></p>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "5", exercicio: "Preview Activity 1.1.1", licenca: "CC-BY-SA" }}
+>
+物体の位置は $s(t) = t^2$ メートル。極限の定義を使用して、瞬間速度 $v(t) = \lim_{h \to 0}\dfrac{s(t+h)-s(t)}{h}$ を計算してください。
+</Exercicio>
+
+<Exercicio numero="41.31" dificuldade="modelagem"
+  solucao={<>薬物動態では、<Eq>{`C(t)=C_0 e^{-kt}`}</Eq> with <Eq>{`k>0`}</Eq>。<Eq>{`t\\to\\infty`}</Eq> のとき：<Eq>{`e^{-kt}\\to 0`}</Eq>, thus <Eq>{`C(t)\\to 0`}</Eq>。医薬品は長期的に完全に排除。実際には、有効濃度閾値以下で「排除」と見なされます。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "9", exercicio: "Activity 1.1.3", licenca: "CC-BY-SA" }}
+>
+薬物動態では、医薬品の濃度は $C(t) = C_0 e^{-kt}$（$k > 0$）。$\lim_{t \to +\infty} C(t)$ を計算して結果を解釈してください。
+</Exercicio>
+
+<Exercicio numero="41.32" dificuldade="modelagem"
+  solucao={<><Eq>{`H(s)=K/(s+1)`}</Eq> の DC ゲイン：<Eq>{`s\\to 0`}</Eq> とします。<Eq>{`H(0)=K/(0+1)=K`}</Eq>。直接代入は有効、分母がゼロでないから。DC ゲイン測定はシステムが定数入力（ゼロ周波数）をどの程度増幅するか。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§1.1", pagina: "15", exercicio: "ex. application 1", licenca: "CC-BY-NC" }}
+>
+制御理論では、一次システムの伝達関数は $H(s) = K/(s+1)$。DC ゲイン $\lim_{s \to 0} H(s)$ を計算して、それが表す内容を言ってください。
+</Exercicio>
+
+<Exercicio numero="41.33" dificuldade="modelagem"
+  solucao={<><Eq>{`\\lim_{x\\to\\infty}(\\ln x)/x = 0`}</Eq> 結果を適用。なぜかを見る：<Eq>{`\\ln x`}</Eq> は x の正のどの累乗より遅く成長。形式的に、<Eq>{`x>e`}</Eq> のとき：<Eq>{`\\ln x < x^{1/2}`}</Eq>, so <Eq>{`(\\ln x)/x < x^{-1/2}\\to 0`}</Eq>。人口当たり成長率は低下ゼロ—人口は成長しますが、相対的にサイズに対してますます遅く。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "187", exercicio: "ex. 175", licenca: "CC-BY-NC-SA" }}
+>
+人口成長モデルでは、人口当たり成長率は $r(x) = (\ln x)/x$ で減少。$\lim_{x \to +\infty} r(x)$ を計算して解釈してください。
+</Exercicio>
+
+<Exercicio numero="41.34" dificuldade="modelagem"
+  solucao={<><Eq>{`f(x)=e^x`}</Eq>, <Eq>{`x=0`}</Eq> のとき：<Eq>{`e^h=1+h+h^2/2+O(h^3)`}</Eq> を使用して、<Eq>{`e^h-1-h=h^2/2+O(h^3)`}</Eq>。したがって <Eq>{`(e^h-1-h)/h^2\\to 1/2`}</Eq>。これはテイラー展開の 2 次項の係数—<Eq>{`e^h`}</Eq> を <Eq>{`1+h`}</Eq> で線形に近似するときの誤差を測定。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "38", exercicio: "Activity 1.3.1", licenca: "CC-BY-SA" }}
+>
+テイラー切り捨て誤差は $\lim_{h \to 0}\dfrac{f(0+h)-f(0)-hf'(0)}{h^2}$ を満たします。$f(x) = e^x$ のとき、この極限を計算して解釈してください。
+</Exercicio>
+
+<Exercicio numero="41.35" dificuldade="modelagem"
+  solucao={<>定義により、<Eq>{`f'(a)=\\lim_{h\\to 0}\\frac{f(a+h)-f(a)}{h}`}</Eq>。これは導関数の概念—極限が極限と微積分の橋です。極限が存在すると、$f$ は $a$ で微分可能で $f'(a)$ はその点でのグラフの接線の傾きです。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "35", exercicio: "Preview Activity 1.3.1", licenca: "CC-BY-SA" }}
+>
+極限が存在するとき、$\displaystyle\lim_{h \to 0} \frac{f(a+h) - f(a)}{h}$ が表す内容は何ですか？名前、幾何学的解釈、物理的解釈を与えてください。
+</Exercicio>
+
+### ブロック D — ε-δ 証明と挑戦（41.36 から 41.40）
+
+<Exercicio numero="41.36" dificuldade="demonstracao"
+  solucao={<>下書き：<Eq>{`|(5x-2)-13|=5|x-3|`}</Eq>。<Eq>{`5|x-3|<\\varepsilon`}</Eq> なら、<Eq>{`|x-3|<\\varepsilon/5`}</Eq> で十分。<Eq>{`\\delta=\\varepsilon/5`}</Eq> とします。確認：<Eq>{`0<|x-3|<\\delta`}</Eq> なら、<Eq>{`|(5x-2)-13|=5|x-3|<5(\\varepsilon/5)=\\varepsilon`}</Eq>。<Eq>{`\\square`}</Eq></>}
+  passos={<>
+    <ol>
+      <li><strong>ターゲット式を簡潔にします。</strong> <Eq>{`|(5x-2)-13|=|5x-15|=5|x-3|`}</Eq>。<Eq>{`|x-a|`}</Eq> で表現。</li>
+      <li><strong>デルタを決定します。</strong> <Eq>{`5|x-3|<\\varepsilon`}</Eq> のとき、<Eq>{`|x-3|<\\varepsilon/5`}</Eq> が必要。両辺を 5 で割る。</li>
+      <li><strong>選択。</strong> <Eq>{`\\delta=\\varepsilon/5`}</Eq>。これが「機能する」選択。</li>
+      <li><strong>形式的に確認。</strong> <Eq>{`0<|x-3|<\\delta=\\varepsilon/5`}</Eq> なら、<Eq>{`5|x-3|<5(\\varepsilon/5)=\\varepsilon`}</Eq>。鎖は閉じる。<Eq>{`\\square`}</Eq></li>
+    </ol>
+    <p><em>トリック：線形関数 <Eq>{`f(x)=mx+b`}</Eq> のとき、デルタは常に <Eq>{`\\varepsilon/|m|`}</Eq>。高次多項式のとき、<Eq>{`\\delta=\\min(1,\\varepsilon/C)`}</Eq> に追加制限が必要。</em></p>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-5-the-precise-definition-of-a-limit", secao: "§2.5", pagina: "213", exercicio: "Example 2.39", licenca: "CC-BY-NC-SA" }}
+>
+ε-δ を介して厳密に $\lim_{x \to 3}(5x - 2) = 13$ を証明してください。下書き、$\delta$ の選択、形式的証明を示してください。
+</Exercicio>
+
+<Exercicio numero="41.37" dificuldade="demonstracao"
+  solucao={<>下書き：<Eq>{`|x^2-9|=|x-3||x+3|`}</Eq>。<Eq>{`|x-3|<1`}</Eq> に制限：<Eq>{`2<x<4`}</Eq>, so <Eq>{`5<x+3<7`}</Eq>, thus <Eq>{`|x+3|<7`}</Eq>。したがって <Eq>{`|x^2-9|<7|x-3|`}</Eq>。<Eq>{`7|x-3|<\\varepsilon`}</Eq> のとき、<Eq>{`\\delta=\\min(1,\\varepsilon/7)`}</Eq> とします。形式的確認：<Eq>{`0<|x-3|<\\delta`}</Eq> なら、<Eq>{`|x+3|<7`}</Eq>（1 への制限で）かつ <Eq>{`|x^2-9|<7\\cdot(\\varepsilon/7)=\\varepsilon`}</Eq>。<Eq>{`\\square`}</Eq></>}
+  passos={<>
+    <ol>
+      <li><strong>因数分解。</strong> <Eq>{`|x^2-9|=|(x-3)(x+3)|=|x-3|\\cdot|x+3|`}</Eq>（平方差）。</li>
+      <li><strong>制限。</strong> <Eq>{`|x-3|<1`}</Eq> を課す：<Eq>{`2<x<4`}</Eq>, then <Eq>{`5<x+3<7`}</Eq>, so <Eq>{`|x+3|<7`}</Eq>。1 への制限は任意ですが便利。</li>
+      <li><strong>推定。</strong> この制限で：<Eq>{`|x^2-9|<7|x-3|`}</Eq>。変動因子の上限推定。</li>
+      <li><strong>デルタ選択。</strong> <Eq>{`7|x-3|<\\varepsilon`}</Eq> のとき、<Eq>{`|x-3|<\\varepsilon/7`}</Eq>。<Eq>{`\\delta=\\min(1,\\varepsilon/7)`}</Eq> とします。最小は両条件を保証：制限と許容誤差。</li>
+    </ol>
+    <p><em>トリック：min(1, ...) は 2 次以上多項式証明の商標。「1」は制限、「ε/C」は許容誤差を制御。</em></p>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-5-the-precise-definition-of-a-limit", secao: "§2.5", pagina: "214", exercicio: "Example 2.41", licenca: "CC-BY-NC-SA" }}
+>
+ε-δ で $\lim_{x \to 3} x^2 = 9$ を証明してください。$\delta$ の選択でなぜ $\min$ が必要かを示してください。
+</Exercicio>
+
+<Exercicio numero="41.38" dificuldade="desafio"
+  solucao={<>級数展開：<Eq>{`\\tan x = x + x^3/3 + O(x^5)`}</Eq>。したがって <Eq>{`\\tan x - x = x^3/3 + O(x^5)`}</Eq> and <Eq>{`(\\tan x-x)/x^3\\to 1/3`}</Eq>。テイラー級数なしで、ロピタルの定理を 3 回適用：各応用が不定形の次数を排除。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§1.3", pagina: "33", exercicio: "ex. 25", licenca: "CC-BY-NC" }}
+>
+$\displaystyle\lim_{x \to 0} \frac{\tan x - x}{x^3}$ を計算してください。
+</Exercicio>
+
+<Exercicio numero="41.39" dificuldade="desafio"
+  solucao={<>共役を掛けます：<Eq>{`(\\sqrt{x^2+x}-x)\\cdot\\frac{\\sqrt{x^2+x}+x}{\\sqrt{x^2+x}+x}=\\frac{(x^2+x)-x^2}{\\sqrt{x^2+x}+x}=\\frac{x}{\\sqrt{x^2+x}+x}`}</Eq>。分子と分母を <Eq>{`x`}</Eq> で割ります（<Eq>{`x>0`}</Eq> で）：<Eq>{`\\frac{1}{\\sqrt{1+1/x}+1}\\to\\frac{1}{\\sqrt{1}+1}=\\frac{1}{2}`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>不定形を特定します。</strong> <Eq>{`\\infty-\\infty`}</Eq>。標準戦略は共役。</li>
+      <li><strong>共役を掛けます。</strong> <Eq>{`(\\sqrt{x^2+x}-x)(\\sqrt{x^2+x}+x)=(x^2+x)-x^2=x`}</Eq>。</li>
+      <li><strong>簡潔な式。</strong> <Eq>{`\\frac{x}{\\sqrt{x^2+x}+x}`}</Eq>。すべてを <Eq>{`x>0`}</Eq> で割ります。</li>
+      <li><strong>極限。</strong> <Eq>{`\\frac{1}{\\sqrt{1+1/x}+1}\\to\\frac{1}{\\sqrt{1}+1}=\\frac{1}{2}`}</Eq>, since <Eq>{`1/x\\to 0`}</Eq>。</li>
+    </ol>
+    <p><em>トリック：<Eq>{`\\infty-\\infty`}</Eq> 型不定形はほぼ常に共役またはファクタリング。決して <Eq>{`\\infty-\\infty=0`}</Eq> をキャンセルしない—重大な誤り。</em></p>
+  </>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§1.6", pagina: "63", exercicio: "ex. 23", licenca: "CC-BY-NC" }}
+>
+$\displaystyle\lim_{x \to +\infty} \left(\sqrt{x^2 + x} - x\right)$ を計算してください。
+</Exercicio>
+
+<Exercicio numero="41.40" dificuldade="desafio"
+  solucao={<>下書き：<Eq>{`|1/x-1/2|=|2-x|/(2|x|)=|x-2|/(2|x|)`}</Eq>。<Eq>{`|x-2|<1`}</Eq> に制限：then <Eq>{`1<x<3`}</Eq>, so <Eq>{`|x|>1`}</Eq> and <Eq>{`1/(2|x|)<1/2`}</Eq>, thus <Eq>{`|1/x-1/2|<|x-2|/2`}</Eq>。<Eq>{`|x-2|/2<\\varepsilon`}</Eq> のとき、<Eq>{`\\delta=\\min(1,2\\varepsilon)`}</Eq> とします。確認：<Eq>{`0<|x-2|<\\delta`}</Eq> なら、<Eq>{`1<x<3`}</Eq>（1 への制限）かつ <Eq>{`|1/x-1/2|<|x-2|/2<2\\varepsilon/2=\\varepsilon`}</Eq>。<Eq>{`\\square`}</Eq></>}
+  passos={<>
+    <ol>
+      <li><strong>共通分母に置きます。</strong> <Eq>{`|1/x-1/2| = |2/(2x) - x/(2x)| = |2-x|/(2|x|) = |x-2|/(2|x|)`}</Eq>。</li>
+      <li><strong>制限。</strong> <Eq>{`|x-2|<1`}</Eq> を課す：<Eq>{`1<x<3`}</Eq>, so <Eq>{`|x|>1`}</Eq>。</li>
+      <li><strong>推定。</strong> <Eq>{`1/(2|x|)<1/2`}</Eq>, so <Eq>{`|1/x-1/2|<|x-2|/2`}</Eq>。</li>
+      <li><strong>デルタ選択。</strong> <Eq>{`|x-2|/2<\\varepsilon`}</Eq> のとき：<Eq>{`|x-2|<2\\varepsilon`}</Eq>。<Eq>{`\\delta=\\min(1,2\\varepsilon)`}</Eq> とします。</li>
+    </ol>
+    <p><em>観察：<Eq>{`1/x`}</Eq> のような有理関数の証明は「余分な因子」が定数でないからより大変。初期制限がその因子を定数で制御。</em></p>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-5-the-precise-definition-of-a-limit", secao: "§2.5", pagina: "216", exercicio: "ex. 2.5.9", licenca: "CC-BY-NC-SA" }}
+>
+ε-δ で $\lim_{x \to 2} \dfrac{1}{x} = \dfrac{1}{2}$ を証明してください。完全な戦略を示してください：下書き、制限、$\delta$ 選択、形式的証明。
+</Exercicio>
+
+</ListaExercicios>
+
+## 出典
+
+- [**Active Calculus 2.0**](https://activecalculus.org/single/) — Matt Boelkins · Grand Valley State University · 2024 · §1.1–1.3 · CC-BY-SA。**主要出典。** 例 1、3、5 とブロック A、C の演習がこの著作から適応。
+- [**Calculus, Volume 1**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · 2016 · §2.2–2.5 · CC-BY-NC-SA。形式的定義 §2.5、ブロック A、B、D の演習。
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Gregory Hartman · Virginia Military Institute · 2023 · §1.1–1.6 · CC-BY-NC。無限での極限と挑戦ブロック D 演習。
+- [**Cours d'analyse**](https://gallica.bnf.fr/ark:/12148/bpt6k90196z) — Augustin-Louis Cauchy · 1821 · 公開著作物。形式的極限の定義の歴史的起源。

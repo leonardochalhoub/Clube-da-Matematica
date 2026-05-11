@@ -1,0 +1,888 @@
+---
+titulo: "Lição 73 — Quartili, percentili e boxplot"
+slug: "licao-73-quartis"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Riepilogo di 5 numeri: min, Q1, mediana, Q3, max. IQR, boxplot e regola 1,5 IQR per rilevare outlier. Misure robuste in dati asimmetrici."
+ordem: 73
+publicado: true
+tags: ["estatística", "quartis", "boxplot", "percentil", "ano-2", "trim-8"]
+prerrequisitos: ["licao-72"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math Statistics — Singapura", "AP Statistics — EUA", "Math B — Japão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="IQR = Q_3 - Q_1, \quad \text{outlier se } x < Q_1 - 1{,}5\,IQR \text{ o } x > Q_3 + 1{,}5\,IQR"
+  legenda={<>L'<strong>intervallo interquartile</strong> <Eq>{`IQR = Q_3 - Q_1`}</Eq> copre il 50% centrale dei dati. La <strong>regola di Tukey</strong> (1977) segnala come outlier qualsiasi punto al di là di <Eq>{`1{,}5 \\times IQR`}</Eq> da ogni quartile — criterio robusto, perché non dipende né dalla media né dalla deviazione standard.</>}
+  audioTexto="L'intervallo interquartile è Q tre meno Q uno. La regola di Tukey classifica come outlier qualsiasi valore minore di Q uno meno uno virgola cinque volte l'IQR, o maggiore di Q tre più uno virgola cinque volte l'IQR."
+/>
+
+<aside>
+
+**Libri che coprono questa lezione**
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §2.1–2.2 · CC-BY-SA · <em>Copertura completa di boxplot, IQR e regola di Tukey con dati reali e esercizi graduati.</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §2.3–2.4 · CC-BY · <em>Percentili, quartili e rappresentazioni grafiche con tabelle di dati reali; copre il calcolo per interpolazione lineare.</em>
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §5.1 · GNU FDL · <em>Fondazione probabilistica delle statistiche di ordine; quartili come casi speciali di percentili di distribuzioni continue.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definizione rigorosa">
+
+### Statistiche di ordine e percentili
+
+<Definicao titulo="Percentile P_p">
+
+Dato un insieme di $n$ osservazioni ordinate $x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$, il **percentile $P_p$** ($0 \leq p \leq 100$) è il valore al di sotto del quale si trovano approssimativamente il $p\%$ dei dati.
+
+Metodo di interpolazione lineare (Hyndman-Fan tipo 7, default in NumPy e R):
+
+$$L = \frac{p}{100}(n - 1) + 1$$
+
+Se $L$ è un intero, $P_p = x_{(L)}$. Se $L = j + d$ con $d \in (0,1)$:
+
+$$P_p = x_{(j)} + d\,(x_{(j+1)} - x_{(j)})$$
+
+</Definicao>
+
+> "The first quartile, $Q_1$, is the value such that 25% of the data fall below it, and the third quartile, $Q_3$, is such that 75% of the data fall below it." — [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/)
+
+<Definicao titulo="Quartili e riepilogo di 5 numeri">
+
+- $Q_1 = P_{25}$: separa il primo quarto inferiore.
+- $Q_2 = P_{50}$: la **mediana**.
+- $Q_3 = P_{75}$: separa i tre quarti inferiori.
+
+Il **riepilogo di 5 numeri** di Tukey (1977):
+
+$$(\min,\; Q_1,\; Q_2,\; Q_3,\; \max)$$
+
+Descrive localizzazione e dispersione senza assumere la forma della distribuzione.
+
+</Definicao>
+
+<Definicao titulo="Intervallo interquartile e regola di Tukey">
+
+$$IQR = Q_3 - Q_1$$
+
+I **baffi** (whiskers) del boxplot si estendono fino all'ultimo dato entro:
+
+$$[Q_1 - 1{,}5 \cdot IQR,\quad Q_3 + 1{,}5 \cdot IQR]$$
+
+I punti al di là di questo intervallo sono segnalati come **outlier potenziali** (marcati individualmente).
+
+> "When a data set includes values that appear much larger or smaller than the rest of the data, they are called outliers... A commonly used rule says that a data point is considered a suspected outlier if it is more than 1.5 × IQR below the first quartile or more than 1.5 × IQR above the third quartile." — [OpenStax Statistics §2.4](https://openstax.org/books/statistics/pages/2-4-box-plots)
+
+</Definicao>
+
+<Teorema titulo="Robustezza dell'IQR">
+
+Il **punto di rottura** (breakdown point) di uno stimatore è la frazione di dati corrotti che lo rende arbitrariamente grande.
+
+- Media: punto di rottura 0% (un singolo outlier infinito la distrugge).
+- Mediana: punto di rottura 50% (il più robusto tra gli stimatori di localizzazione).
+- IQR: punto di rottura 25% (robusto alla contaminazione fino a un quarto dei dati).
+
+Conseguenza: in distribuzioni asimmetriche o con outlier, la mediana e l'IQR sono preferibili alla media e alla deviazione standard.
+
+</Teorema>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 160" className="w-full">
+<defs><marker id="arr73" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+<g>
+  <line x1="60" x2="520" y1="80" y2="80" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr73)"/>
+  <line x1="130" x2="130" y1="60" y2="100" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.6"/>
+  <line x1="480" x2="480" y1="60" y2="100" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.6"/>
+  <rect x="220" y="55" width="170" height="50" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="2"/>
+  <line x1="305" x2="305" y1="55" y2="105" stroke="rgb(232 199 122)" strokeWidth="3"/>
+  <line x1="130" x2="220" y1="80" y2="80" stroke="currentColor" strokeWidth="2"/>
+  <line x1="390" x2="480" y1="80" y2="80" stroke="currentColor" strokeWidth="2"/>
+  <circle cx="95" cy="80" r="4" fill="rgb(199 107 63)" stroke="rgb(199 107 63)"/>
+  <circle cx="510" cy="80" r="4" fill="rgb(199 107 63)" stroke="rgb(199 107 63)"/>
+  <text x="130" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">min</text>
+  <text x="220" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₁</text>
+  <text x="305" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₂</text>
+  <text x="390" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₃</text>
+  <text x="480" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">max</text>
+  <text x="95" y="120" textAnchor="middle" fontSize="10" fill="rgb(199 107 63)" fillOpacity="0.9">outlier</text>
+  <text x="510" y="120" textAnchor="middle" fontSize="10" fill="rgb(199 107 63)" fillOpacity="0.9">outlier</text>
+  <text x="305" y="42" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">IQR</text>
+  <line x1="222" x2="388" y1="42" y2="42" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1"/>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Anatomia del boxplot: scatola (Q1 a Q3), linea di mediana, baffi fino all'estremo non-outlier, punti isolati per outlier.
+</figcaption>
+</figure>
+
+<Insight>
+
+Per dati normali, la regola 1,5 IQR segnala solo $\approx 0{,}7\%$ delle osservazioni come outlier — rare, ma plausibili. Tukey ha scelto deliberatamente 1,5: abbastanza raro da meritare indagine, non così raro che non appaia mai in campioni reali.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Per un bambino di 5 anni">
+
+Metti tutti i bambini della classe in fila, dal più basso al più alto.
+
+Il bambino proprio nel **mezzo** della fila è la **mediana** — metà della classe è più bassa, metà è più alta.
+
+Ora dividi la fila in due gruppi. Il bambino nel mezzo del gruppo più basso è il **Q1**. Quello del mezzo del gruppo più alto è il **Q3**.
+
+Il **boxplot** disegna una scatola da Q1 a Q3 — dove sta la classe "di mezzo". I bambini molto bassi o molto alti diventano **pallini separati**: sono gli outlier, i "fuori dalla curva".
+
+</Porta>
+
+<Porta nivel="10" titulo="Per un bambino di 10 anni">
+
+Immagina 11 studenti con voti: 2, 4, 5, 5, 6, **7**, 8, 8, 9, 9, 10.
+
+- **Mediana** ($Q_2$): il voto nel mezzo, in 6ª posizione = **7**.
+- **$Q_1$**: mediana dei 5 voti minori (2, 4, 5, 5, 6) = **5**.
+- **$Q_3$**: mediana dei 5 voti maggiori (8, 8, 9, 9, 10) = **9**.
+- **IQR** = 9 − 5 = **4**.
+- Limite inferiore: $5 - 1{,}5 \times 4 = -1$. Limite superiore: $9 + 1{,}5 \times 4 = 15$.
+- Nessun voto esce da questi limiti → nessun outlier.
+
+Il **boxplot** disegna una scatola da 5 a 9, linea a 7, baffi fino a 2 e 10. Se uno studente prendesse 0, apparirebbe come un pallino separato.
+
+**Perché il boxplot è utile?** In un singolo piccolo grafico vedi: dov'è il centro, quanto è dispersa la classe, se la distribuzione è asimmetrica, e chi è outlier.
+
+</Porta>
+
+<Porta nivel="15" titulo="Per un adolescente di 15 anni">
+
+Quartili e boxplot sono **strumenti robusti** — poco affetti da valori estremi. Confronta:
+
+| Misura | Robustezza | Quando usare |
+|---|---|---|
+| Media e deviazione standard | Fragile (1 outlier può cambiare tutto) | Distribuzioni simmetriche, senza outlier |
+| Mediana e IQR | Robusta (fino al 25-50% di outlier non distruggono) | Distribuzioni asimmetriche o con outlier |
+
+### Regola 1,5 IQR — perché 1,5?
+
+Tukey (1977) ha scelto 1,5 perché in dati normali questo segnala solo lo 0,7% delle osservazioni. È abbastanza raro da meritare attenzione, ma non così raro che non appaia mai.
+
+### Esempio: stipendi in azienda
+
+Squadra con stipendi (R$ migliaia): 3, 4, 4, 5, 5, 5, 6, 6, 7, 7, 80 (CEO).
+
+- Media: R$ 11,1 migliaia — ingannevole, tirata su dal CEO.
+- Mediana: R$ 5 migliaia — rappresenta meglio lo stipendio tipico.
+
+L'IBGE divulga la mediana del reddito esattamente per questo: la media del reddito è distorta da chi guadagna molto.
+
+### Quartili in variabili aleatorie continue
+
+Per v.a. continua $X$ con CDF $F$, il percentile $p$ è $Q_p = F^{-1}(p/100)$. Per la normale standard: $Q_1 \approx -0{,}674$, $Q_3 \approx 0{,}674$, $IQR \approx 1{,}349$.
+
+</Porta>
+
+<Porta nivel="25" titulo="Per uno studente di ingegneria">
+
+### EDA con boxplot affiancati
+
+Lo strumento centrale in **Exploratory Data Analysis** (Tukey, 1977): confrontare distribuzioni per categoria. Esempio: latenze di 5 server, tempi di attesa di 3 medici, throughput di 4 algoritmi. Un'occhiata mostra chi è più variabile, chi ha outlier, chi ha mediana più alta.
+
+### Diverse definizioni di quartile
+
+Ci sono 9 metodi di calcolo del percentile (Hyndman-Fan). Due comuni:
+
+1. **Tukey (hinges)**: $Q_1$ è la mediana della metà inferiore, senza includere la mediana globale se $n$ dispari.
+2. **Interpolazione lineare** (NumPy `np.percentile` con `method='linear'`): posizione $L = 1 + (p/100)(n-1)$.
+
+Per $n$ grande ($> 30$), le divergenze sono trascurabili. In esami e relazioni, dichiara il metodo.
+
+### Stimatore robusto di $\sigma$
+
+Per normale: $IQR \approx 1{,}349\,\sigma$. Quindi:
+
+$$\hat\sigma_{\text{robusto}} = \frac{IQR}{1{,}349}$$
+
+Utile quando c'è il sospetto che gli outlier contaminino la deviazione standard classica.
+
+### Boxplot vs. violin plot
+
+Il boxplot nasconde **multimodalità**: una distribuzione bimodale può avere lo stesso riepilogo di 5 numeri di una unimodale. Il **violin plot** sovrappone una stima della densità kernel (KDE) — più informativo, computazionalmente più costoso.
+
+### Implementazione Python
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+data = np.array([...])
+q1, q2, q3 = np.percentile(data, [25, 50, 75])
+iqr = q3 - q1
+lower = q1 - 1.5 * iqr
+upper = q3 + 1.5 * iqr
+outliers = data[(data < lower) | (data > upper)]
+
+# Visualizzazione
+plt.boxplot(data)
+plt.show()
+```
+
+`pandas.DataFrame.describe()` fornisce automaticamente min, 25%, 50%, 75%, max.
+
+</Porta>
+
+<Porta nivel="40" titulo="Per un professionista senior">
+
+### Statistiche di ordine — fondamento teorico
+
+I quartili sono casi particolari di **statistiche di ordine** $X_{(k)}$. Per campione di taglia $n$ da popolazione con densità $f$ e CDF $F$, la densità di $X_{(k)}$ è:
+
+$$f_{X_{(k)}}(x) = \frac{n!}{(k-1)!(n-k)!}\, F(x)^{k-1}\, (1-F(x))^{n-k}\, f(x)$$
+
+Permette di derivare la varianza asintotica dei quartili e costruire intervalli di confidenza non-parametrici per mediana e IQR.
+
+### Punto di rottura (Hampel, 1971)
+
+Il **breakdown point** formalizza la robustezza: la più piccola frazione di dati corrotti che rende lo stimatore arbitrariamente distante dal valore vero.
+
+| Stimatore | Punto di rottura |
+|---|---|
+| Media | 0% |
+| Mediana | 50% |
+| IQR | 25% |
+| Media rifilata 10% | 10% |
+
+Le medie rifilate ($\alpha$-trimmed mean) sono un compromesso tra efficienza statistica e robustezza.
+
+### Quartili di distribuzioni teoriche
+
+| Distribuzione | $Q_1$ | $Q_2$ | $Q_3$ | $IQR$ |
+|---|---|---|---|---|
+| Normale(0,1) | $-0{,}674$ | $0$ | $0{,}674$ | $1{,}349$ |
+| Esponenziale(1) | $0{,}288$ | $0{,}693$ | $1{,}386$ | $1{,}099$ |
+| Uniforme(0,1) | $0{,}25$ | $0{,}50$ | $0{,}75$ | $0{,}50$ |
+
+### Outlier in alta dimensione
+
+In $\mathbb{R}^p$ con $p$ grande, il boxplot 1D non funziona: la **maledizione della dimensionalità** fa sì che praticamente ogni osservazione sia outlier in qualche proiezione. Strumenti moderni: **distanza di Mahalanobis** con covarianza robusta (MCD — Minimum Covariance Determinant), Local Outlier Factor (LOF), Isolation Forest.
+
+### Contesto storico
+
+John W. Tukey ha introdotto il boxplot in *Exploratory Data Analysis* (1977) come parte di una filosofia di analisi iterativa e visuale, prima dei modelli formali. L'approccio EDA ha influenzato tutta l'analisi moderna dei dati e il contrasto con la tradizione confermatoria classica (test di ipotesi).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Applicazione pratica">
+
+### Ricetta di 6 passi
+
+1. **Ordina** i dati da minore a maggiore.
+2. **Mediana** ($Q_2$): valore centrale (o media dei due centrali se $n$ pari).
+3. **$Q_1$ e $Q_3$**: mediane delle metà inferiore e superiore.
+4. **IQR**: $Q_3 - Q_1$.
+5. **Limiti di Tukey**: $Q_1 - 1{,}5 \cdot IQR$ e $Q_3 + 1{,}5 \cdot IQR$.
+6. **Outlier**: qualsiasi dato fuori da questi limiti.
+
+### In fogli di calcolo (Excel / LibreOffice)
+
+| Funzione | Risultato |
+|---|---|
+| `QUARTILE.INC(intervallo; 1)` | $Q_1$ |
+| `QUARTILE.INC(intervallo; 3)` | $Q_3$ |
+| `MEDIANA(intervallo)` | Mediana |
+| `PERCENTILE.INC(intervallo; 0,9)` | $P_{90}$ |
+
+### Errori comuni da evitare
+
+- **Calcolare $Q_1$ senza interpolare**: $n/4$ spesso non è intero — interpola tra i due vicini più prossimi.
+- **Riportare la media in distribuzione asimmetrica**: stipendi, reddito, proprietà immobiliari — preferisci sempre la mediana.
+- **Scartare gli outlier senza indagine**: un outlier può essere il dato più prezioso dell'insieme (frode, guasto raro, scoperta).
+- **Usare lo stesso boxplot per dati di scale molto diverse**: normalizza prima di confrontare.
+
+</Porta>
+
+</DuasPortas>
+
+## Esempi risolti
+
+<Esempio numero="73.1" titulo="Riepilogo di 5 numeri (insieme piccolo)" dificuldade="basico">
+
+**Problema.** Calcola il riepilogo di 5 numeri per i dati: 4, 7, 2, 9, 5, 11, 3, 8, 6, 10.
+
+**Strategia.** Ordinare, localizzare posizioni di Q1, Q2, Q3 per interpolazione.
+
+**Risoluzione.** Ordinati: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ($n = 10$).
+
+- Mediana ($Q_2$): media dei valori in posizione 5 e 6 = $(6 + 7)/2 = 6{,}5$.
+- $Q_1$: mediana dei 5 minori (2, 3, 4, 5, 6) = 4.
+- $Q_3$: mediana dei 5 maggiori (7, 8, 9, 10, 11) = 9.
+- $\min = 2$, $\max = 11$.
+
+**Riepilogo di 5 numeri**: $(2,\; 4,\; 6{,}5,\; 9,\; 11)$.
+
+**Verifica.** $IQR = 9 - 4 = 5$. Limiti: $4 - 7{,}5 = -3{,}5$ e $9 + 7{,}5 = 16{,}5$. Tutti i dati entro — nessun outlier. Coerente con dati uniformemente distribuiti in $[2, 11]$.
+
+**Fonte.** [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Esempio>
+
+<Esempio numero="73.2" titulo="Rilevamento di outlier (stipendi)" dificuldade="basico">
+
+**Problema.** Stipendi mensili di 9 dipendenti (R$ migliaia): 3, 3, 4, 4, 5, 5, 6, 7, 45. C'è un outlier?
+
+**Strategia.** Calcolare i quartili e applicare la regola 1,5 IQR.
+
+**Risoluzione.** $n = 9$, dati già ordinati.
+
+- $Q_2$: posizione 5 = 5.
+- $Q_1$: mediana di (3, 3, 4, 4) = 3,5.
+- $Q_3$: mediana di (5, 6, 7, 45) = 6,5.
+- $IQR = 6{,}5 - 3{,}5 = 3$.
+- Limite superiore: $6{,}5 + 1{,}5 \times 3 = 11$.
+- Stipendio di R$ 45 migliaia > R$ 11 migliaia: **outlier**.
+
+**Verifica.** La media sarebbe R$ 9,1 migliaia — tirata su dall'outlier. La mediana = R$ 5 migliaia rappresenta meglio lo stipendio tipico. La distinzione è esattamente il punto dell'IBGE quando divulga il reddito mediano.
+
+**Fonte.** [OpenStax Statistics §2.4](https://openstax.org/books/statistics/pages/2-4-box-plots) — CC-BY.
+
+</Esempio>
+
+<Esempio numero="73.3" titulo="Calcolo di percentile per interpolazione" dificuldade="intermediario">
+
+**Problema.** Voti di 20 studenti (ordinati): 28, 35, 42, 48, 51, 55, 58, 61, 63, 65, 68, 70, 72, 74, 77, 80, 83, 87, 91, 96. Calcola $P_{80}$.
+
+**Strategia.** Usa la formula di posizione $L = 1 + (p/100)(n-1)$.
+
+**Risoluzione.** $p = 80$, $n = 20$.
+
+$$L = 1 + 0{,}80 \times 19 = 1 + 15{,}2 = 16{,}2$$
+
+$j = 16$, $d = 0{,}2$. I dati in posizione 16 e 17 sono $x_{(16)} = 80$ e $x_{(17)} = 83$.
+
+$$P_{80} = 80 + 0{,}2 \times (83 - 80) = 80 + 0{,}6 = 80{,}6$$
+
+**Verifica.** L'80% di 20 studenti = 16 studenti sotto. I primi 16 sono: 28, 35, ..., 80. Il punto $P_{80} = 80{,}6$ è appena sopra 80, corretto.
+
+**Fonte.** [OpenStax Statistics §2.3](https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data) — CC-BY.
+
+</Esempio>
+
+<Esempio numero="73.4" titulo="Boxplot comparativo (A/B)" dificuldade="intermediario">
+
+**Problema.** Tempi di caricamento (ms) di due server:
+- Server A: 120, 125, 128, 130, 132, 135, 138, 140, 142, 500.
+- Server B: 200, 210, 215, 220, 222, 225, 228, 230, 235, 240.
+
+Confronta usando il riepilogo di 5 numeri e identifica gli outlier.
+
+**Strategia.** Calcolare i quartili di ogni server, applicare la regola 1,5 IQR, interpretare comparativamente.
+
+**Risoluzione.**
+
+*Server A* ($n = 10$):
+- $Q_1$: media posizioni 2–3 = $(125 + 128)/2 = 126{,}5$.
+- $Q_2$: media posizioni 5–6 = $(132 + 135)/2 = 133{,}5$.
+- $Q_3$: media posizioni 8–9 = $(140 + 142)/2 = 141$.
+- $IQR_A = 141 - 126{,}5 = 14{,}5$. Limite superiore: $141 + 21{,}75 = 162{,}75$.
+- **500 ms è outlier** in A.
+
+*Server B* ($n = 10$):
+- $Q_1 = 212{,}5$, $Q_2 = 223{,}5$, $Q_3 = 231{,}5$.
+- $IQR_B = 19$. Limiti: $[184{,}0;\; 260{,}0]$. Nessun outlier.
+
+**Verifica.** Il server A ha mediana più bassa (133,5 vs. 223,5 ms) e minore variabilità ($IQR = 14{,}5$ vs. 19), ma ha un outlier grave (500 ms). Il server A è preferibile se gli outlier sono rari e accettabili; il server B se la coerenza è critica.
+
+**Fonte.** [OpenIntro Statistics §2.2](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Esempio>
+
+<Esempio numero="73.5" titulo="IQR di distribuzione continua" dificuldade="avancado">
+
+**Problema.** Per $X \sim \text{Esponenziale}(\lambda = 1)$, calcola analiticamente $Q_1$, $Q_3$ e $IQR$.
+
+**Strategia.** Invertire la CDF nei punti 0,25 e 0,75.
+
+**Risoluzione.** $F(x) = 1 - e^{-x}$ per $x \geq 0$.
+
+$$Q_1 = F^{-1}(0{,}25): \quad 1 - e^{-Q_1} = 0{,}25 \implies Q_1 = -\ln(0{,}75) \approx 0{,}288$$
+
+$$Q_3 = F^{-1}(0{,}75): \quad 1 - e^{-Q_3} = 0{,}75 \implies Q_3 = -\ln(0{,}25) = \ln 4 \approx 1{,}386$$
+
+$$IQR = \ln 4 - \ln(4/3) = \ln 3 \approx 1{,}099$$
+
+**Verifica.** La mediana è $-\ln(0{,}5) = \ln 2 \approx 0{,}693$. Si noti che $Q_2 - Q_1 \approx 0{,}405$ e $Q_3 - Q_2 \approx 0{,}693$: distribuzione asimmetrica a destra, conferma che la coda superiore è più lunga.
+
+**Fonte.** [Introduction to Probability — Grinstead, Snell §5.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL.
+
+</Esempio>
+
+<ListaExercicios seed="licao-73-quartis">
+
+### Blocco A — Calcolo diretto (73.1 a 73.12)
+
+<Exercicio
+  numero="73.1"
+  dificuldade="aplicacao"
+  solucao={<>Ordinati: 1, 3, 5, 7, 9 (<Eq>{`n = 5`}</Eq>). Mediana: posizione 3 = <strong>5</strong>. <Eq>{`Q_1`}</Eq>: mediana di (1, 3) = <strong>2</strong>. <Eq>{`Q_3`}</Eq>: mediana di (7, 9) = <strong>8</strong>. Riepilogo di 5: (1, 2, 5, 8, 9).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "53", exercicio: "2.1", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>Ordina: 1, 3, 5, 7, 9. Con <Eq>{`n = 5`}</Eq> dispari, la mediana è il 3.º valore: 5.</li><li><Eq>{`Q_1`}</Eq> = mediana della metà inferiore (1, 3) = media di 1 e 3 = 2.</li><li><Eq>{`Q_3`}</Eq> = mediana della metà superiore (7, 9) = media di 7 e 9 = 8.</li></ol><em>Trucco:</em> per <Eq>{`n`}</Eq> dispari, escludi la mediana prima di dividere le metà.</>}
+>
+
+Dati: 1, 3, 5, 7, 9. Calcola mediana, $Q_1$ e $Q_3$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.2"
+  dificuldade="aplicacao"
+  solucao={<>Ordinati: 2, 4, 6, 8, 10, 12 (<Eq>{`n = 6`}</Eq>). Mediana: <Eq>{`(6+8)/2 = 7`}</Eq>. <Eq>{`Q_1`}</Eq>: mediana di (2, 4, 6) = 4. <Eq>{`Q_3`}</Eq>: mediana di (8, 10, 12) = 10. Riepilogo: (2, 4, 7, 10, 12).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "54", exercicio: "2.3", licenca: "CC-BY-SA" }}
+>
+
+Dati: 2, 4, 6, 8, 10, 12. Calcola il riepilogo di 5 numeri.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.3"
+  dificuldade="aplicacao"
+  solucao={<>Ordinati: 4, 5, 6, 6, 7, 7, 8, 8, 9, 10 (<Eq>{`n = 10`}</Eq>). <Eq>{`Q_2 = (7+7)/2 = 7`}</Eq>. <Eq>{`Q_1`}</Eq>: mediana di (4, 5, 6, 6, 7) = 6. <Eq>{`Q_3`}</Eq>: mediana di (7, 8, 8, 9, 10) = 8.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "72", exercicio: "2.3.1", licenca: "CC-BY" }}
+>
+
+Voti: 4, 5, 6, 6, 7, 7, 8, 8, 9, 10. Calcola $Q_1$, $Q_2$, $Q_3$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.4"
+  dificuldade="aplicacao"
+  resposta="14"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "55", exercicio: "2.5", licenca: "CC-BY-SA" }}
+  solucao={<>Ordinati: 12, 14, 18, 22, 25, 28, 32 (<Eq>{`n = 7`}</Eq>). <Eq>{`Q_1`}</Eq> = 14 (2.º valore). <Eq>{`Q_3`}</Eq> = 28 (6.º valore). <Eq>{`IQR = 28 - 14 = 14`}</Eq>.</>}
+>
+
+Calcola l'$IQR$ dei dati: 12, 14, 18, 22, 25, 28, 32.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.5"
+  dificuldade="aplicacao"
+  solucao={<>Dati ordinati: 18, 20, 21, 22, 23, 24, 25, 27, 30, 35, 60 (<Eq>{`n = 11`}</Eq>). <Eq>{`Q_1 = 21`}</Eq>, <Eq>{`Q_3 = 30`}</Eq>, <Eq>{`IQR = 9`}</Eq>. Limite superiore: <Eq>{`30 + 13{,}5 = 43{,}5`}</Eq>. Il valore 60 è oltre: <strong>outlier</strong>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "84", exercicio: "2.4.3", licenca: "CC-BY" }}
+  passos={<><ol><li>Ordina e localizza: <Eq>{`Q_1 = 21`}</Eq> (3ª posizione), mediana = 24, <Eq>{`Q_3 = 30`}</Eq> (9ª posizione).</li><li><Eq>{`IQR = 30 - 21 = 9`}</Eq>.</li><li>Limite superiore: <Eq>{`Q_3 + 1{,}5 \\times IQR = 30 + 13{,}5 = 43{,}5`}</Eq>.</li><li>Il valore 60 è maggiore di 43,5 — classificato come outlier secondo la regola di Tukey.</li></ol><em>Osservazione:</em> Limite inferiore = <Eq>{`21 - 13{,}5 = 7{,}5`}</Eq>; tutti gli altri valori sono maggiori di 7,5, quindi nessun outlier inferiore.</>}
+>
+
+Età: 18, 20, 21, 22, 23, 24, 25, 27, 30, 35, 60. Applica la regola 1,5 IQR. C'è un outlier?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.6"
+  dificuldade="aplicacao"
+  solucao={<>Dati: 2, 3, 3, 4, 4, 5, 5, 6, 8, 50 (<Eq>{`n = 10`}</Eq>). Mediana = <Eq>{`(4+5)/2 = 4{,}5`}</Eq>. <Eq>{`Q_1`}</Eq> = mediana di (2, 3, 3, 4, 4) = 3. <Eq>{`Q_3`}</Eq> = mediana di (5, 5, 6, 8, 50) = 6. <Eq>{`IQR = 3`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "56", exercicio: "2.7", licenca: "CC-BY-SA" }}
+>
+
+Stipendi (R$ migliaia): 2, 3, 3, 4, 4, 5, 5, 6, 8, 50. Calcola mediana e $IQR$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.7"
+  dificuldade="aplicacao"
+  solucao={<>Usando la formula <Eq>{`L = 1 + (p/100)(n-1)`}</Eq> con <Eq>{`p = 75`}</Eq>, <Eq>{`n = 100`}</Eq>: <Eq>{`L = 1 + 0{,}75 \\times 99 = 1 + 74{,}25 = 75{,}25`}</Eq>. Interpola tra le posizioni 75 e 76.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "73", exercicio: "2.3.5", licenca: "CC-BY" }}
+>
+
+Per $n = 100$ dati ordinati, qual è la posizione di $Q_3$ secondo il metodo di interpolazione lineare?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.8"
+  dificuldade="aplicacao"
+  solucao={<>Dati: 10, 11, 11, 12, 13, 13, 14, 14, 15, 100 (<Eq>{`n = 10`}</Eq>). <Eq>{`Q_1 = 11`}</Eq>, <Eq>{`Q_3 = 14`}</Eq>, <Eq>{`IQR = 3`}</Eq>. Limite superiore: <Eq>{`14 + 4{,}5 = 18{,}5`}</Eq>. Il valore 100 è outlier.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "85", exercicio: "2.4.5", licenca: "CC-BY" }}
+>
+
+Tempi (s): 10, 11, 11, 12, 13, 13, 14, 14, 15, 100. Calcola i limiti di Tukey e identifica l'outlier/gli outlier.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.9"
+  dificuldade="aplicacao"
+  solucao={<>Pesi ordinati: 60, 62, 64, 65, 65, 67, 70, 72, 75, 80. <Eq>{`Q_1 = 64{,}5`}</Eq>, mediana = 66, <Eq>{`Q_3 = 71`}</Eq>. Scatola da 64,5 a 71, linea a 66. Baffi da 60 a 80 (nessun outlier). Distribuzione leggermente asimmetrica a destra.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "60", exercicio: "2.11", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>Ordinare: 60, 62, 64, 65, 65, 67, 70, 72, 75, 80 (<Eq>{`n = 10`}</Eq>).</li><li>Mediana: media delle posizioni 5 e 6 = <Eq>{`(65+67)/2 = 66`}</Eq>.</li><li><Eq>{`Q_1`}</Eq>: mediana di (60, 62, 64, 65, 65) = 64; <Eq>{`Q_3`}</Eq>: mediana di (67, 70, 72, 75, 80) = 72. Attenzione: alcuni libri escludono la mediana centrale — verifica il tuo metodo.</li><li><Eq>{`IQR = 72 - 64 = 8`}</Eq>. Limiti: <Eq>{`64 - 12 = 52`}</Eq> e <Eq>{`72 + 12 = 84`}</Eq>. Tutti i pesi sono entro.</li></ol><em>Curiosità:</em> la posizione della mediana entro la scatola indica l'asimmetria: se vicina a <Eq>{`Q_1`}</Eq>, coda lunga a destra.</>}
+>
+
+Pesi (kg): 60, 62, 64, 65, 65, 67, 70, 72, 75, 80. Descrivi tutti gli elementi del boxplot.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.10"
+  dificuldade="aplicacao"
+  resposta="1,349"
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "183", exercicio: "5.1.12", licenca: "GNU FDL" }}
+  solucao={<>Per <Eq>{`Z \\sim \\mathcal N(0,1)`}</Eq>: <Eq>{`Q_1 = \\Phi^{-1}(0{,}25) \\approx -0{,}674`}</Eq> e <Eq>{`Q_3 = \\Phi^{-1}(0{,}75) \\approx 0{,}674`}</Eq>. Per simmetria <Eq>{`IQR = 2 \\times 0{,}674 = 1{,}348 \\approx 1{,}349`}</Eq>.</>}
+>
+
+Per $Z \sim \mathcal N(0,1)$, $Q_3 - Q_1 = ?$
+
+</Exercicio>
+
+<Exercicio
+  numero="73.11"
+  dificuldade="aplicacao"
+  solucao={<>Stimatore robusto: <Eq>{`\\hat\\sigma = IQR / 1{,}349 = 6{,}7 / 1{,}349 \\approx 4{,}97`}</Eq>. Utile quando il sospetto di outlier contamina la deviazione standard classica.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "87", exercicio: "2.4.11", licenca: "CC-BY" }}
+>
+
+Dati con $IQR = 6{,}7$. Usando lo stimatore robusto $\hat\sigma = IQR/1{,}349$, calcola $\hat\sigma$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.12"
+  dificuldade="aplicacao"
+  solucao={<>La regola <Eq>{`Q_3 + 3 \\cdot IQR`}</Eq> equivale a <Eq>{`\\approx Q_3 + 3 \\times 1{,}349\\sigma = \\mu + 0{,}674\\sigma + 4{,}047\\sigma = \\mu + 4{,}721\\sigma`}</Eq>. <Eq>{`P(Z > 4{,}72) \\approx 0{,}00001`}</Eq>. In 1000 osservazioni normali, ci aspettiamo <Eq>{`\\approx 0{,}01`}</Eq> — essenzialmente zero.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "184", exercicio: "5.1.14", licenca: "GNU FDL" }}
+>
+
+Quanti punti al di sopra di $Q_3 + 3 \cdot IQR$ ci aspettiamo in un campione di 1000 osservazioni normali?
+
+</Exercicio>
+
+### Blocco B — Interpretazione e confronto (73.13 a 73.22)
+
+<Exercicio
+  numero="73.13"
+  dificuldade="aplicacao"
+  solucao={<>Boxplot A: scatola stretta (<Eq>{`IQR`}</Eq> piccolo) con mediana centrata → bassa dispersione e simmetria. Boxplot B: scatola larga (<Eq>{`IQR`}</Eq> grande) con mediana vicina a <Eq>{`Q_1`}</Eq> → alta dispersione e asimmetria a destra (coda lunga superiore).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "61", exercicio: "2.13", licenca: "CC-BY-SA" }}
+>
+
+Boxplot A: scatola stretta, mediana centrata. Boxplot B: scatola larga, mediana vicina a $Q_1$. Confronta dispersione e asimmetria dei due insiemi.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.14"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "Sopra la mediana", correta: true}, {texto: "Sotto la mediana"}, {texto: "Uguale alla mediana"}, {texto: "Non è possibile determinare"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "57", exercicio: "2.9", licenca: "CC-BY-SA" }}
+  solucao={<>In una distribuzione con coda lunga a destra, la coda tira la media verso l'alto. La mediana, essendo posizionale, non è influenzata dalla coda. Quindi la media sta <strong>sopra</strong> la mediana.</>}
+>
+
+Distribuzione con coda lunga a destra. La media è in quale posizione in relazione alla mediana?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.15"
+  dificuldade="aplicacao"
+  resposta="B"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "86", exercicio: "2.4.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`IQR`}</Eq> misura la dispersione del 50% centrale. <Eq>{`IQR = 20`}</Eq> in B è 4 volte più grande di <Eq>{`IQR = 5`}</Eq> in A — l'insieme B ha molto più dispersione.</>}
+>
+
+L'insieme A ha $IQR = 5$, l'insieme B ha $IQR = 20$. In quale c'è più dispersione nei dati centrali?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.16"
+  dificuldade="aplicacao"
+  solucao={<>Entrambi hanno mediana 50. In A, <Eq>{`Q_3 - Q_2 = 55 - 50 = 5`}</Eq> (metà superiore stretta). In B, <Eq>{`Q_3 - Q_2 = 80 - 50 = 30`}</Eq> (metà superiore larga). L'insieme B è molto più asimmetrico a destra.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "62", exercicio: "2.15", licenca: "CC-BY-SA" }}
+>
+
+Mediana di $A = B = 50$. $Q_3$ di $A = 55$, di $B = 80$. Quale dei due ha distribuzione più asimmetrica a destra?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P_{90}`}</Eq> di stipendi = R$ 30 migliaia significa: il 90% dei dipendenti guadagna fino a R$ 30 migliaia al mese, e il 10% guadagna più di questo.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "74", exercicio: "2.3.7", licenca: "CC-BY" }}
+>
+
+$P_{90}$ dei stipendi dell'azienda = R$ 30 migliaia. Interpreta questa informazione.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.18"
+  dificuldade="aplicacao"
+  solucao={<>Lo studente nel <Eq>{`P_{85}`}</Eq> dell'ENEM significa: ha ottenuto una nota maggiore o uguale all'85% dei candidati che hanno fatto l'esame quell'anno.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "75", exercicio: "2.3.9", licenca: "CC-BY" }}
+>
+
+Uno studente è nel $P_{85}$ dell'ENEM. Cosa significa?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.19"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "Tutti i dati sono uguali o molto concentrati", correta: true}, {texto: "I dati hanno molti outlier"}, {texto: "La distribuzione è bimodale"}, {texto: "La media è zero"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "58", exercicio: "2.8", licenca: "CC-BY-SA" }}
+  solucao={<>Se <Eq>{`Q_1 = Q_2 = Q_3`}</Eq>, allora <Eq>{`IQR = 0`}</Eq>. Questo significa che almeno metà dei dati ha esattamente lo stesso valore — massima concentrazione nei 50% centrali. Può indicare che tutti i dati sono uguali o che c'è grande concentrazione di valori ripetuti.</>}
+>
+
+Se $Q_1 = Q_2 = Q_3$, cosa si può concludere sui dati?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.20"
+  dificuldade="compreensao"
+  solucao={<>No. In dati normali, la regola 1,5 IQR segnala solo <Eq>{`\\approx 0{,}7\\%`}</Eq> delle osservazioni come outlier — non il 5%. Il criterio "5% come outlier" userebbe approssimativamente <Eq>{`Q_1 - 0{,}69 \\cdot IQR`}</Eq>, non 1,5 IQR. La regola di Tukey è stata calibrata appositamente così che gli outlier siano rari, non ordinari.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "63", exercicio: "2.17", licenca: "CC-BY-SA" }}
+>
+
+L'affermazione "la regola 1,5 IQR segnala il 5% dei dati come outlier" è corretta per dati normali?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.21"
+  dificuldade="aplicacao"
+  solucao={<>Riepilogo di 5 numeri per insieme di 7 valori: min = 40, <Eq>{`Q_1 = 52`}</Eq>, mediana = 58, <Eq>{`Q_3 = 64`}</Eq>, max = 72. <Eq>{`IQR = 12`}</Eq>. Limite superiore: <Eq>{`64 + 18 = 82`}</Eq>. Nessun outlier.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "89", exercicio: "2.4.15", licenca: "CC-BY" }}
+>
+
+Età (anni): 40, 52, 55, 58, 62, 66, 72. Calcola il riepilogo di 5 numeri e verifica se ci sono outlier.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.22"
+  dificuldade="aplicacao"
+  solucao={<>Voti: 3, 5, 6, 7, 7, 8, 8, 9, 10, 10. Mediana = <Eq>{`(7+8)/2 = 7{,}5`}</Eq>. <Eq>{`Q_1 = 6`}</Eq>, <Eq>{`Q_3 = 9`}</Eq>. <Eq>{`IQR = 3`}</Eq>. Limiti: <Eq>{`[6 - 4{,}5;\\; 9 + 4{,}5] = [1{,}5;\\; 13{,}5]`}</Eq>. Nessun outlier.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "64", exercicio: "2.19", licenca: "CC-BY-SA" }}
+>
+
+Voti di 10 studenti: 3, 5, 6, 7, 7, 8, 8, 9, 10, 10. Boxplot completo (con verifica degli outlier).
+
+</Exercicio>
+
+### Blocco C — Modellazione con dati brasiliani (73.23 a 73.32)
+
+<Exercicio
+  numero="73.23"
+  dificuldade="modelagem"
+  solucao={<>Con <Eq>{`Q_1 = 5`}</Eq> e <Eq>{`Q_3 = 8`}</Eq>, il voto 9,5 è sopra <Eq>{`Q_3`}</Eq>. Questo significa che lo studente è nel top 25% della classe — sì, top 25%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "90", exercicio: "2.4.17", licenca: "CC-BY" }}
+>
+
+Classe di 100 studenti: $Q_1 = 5$, $Q_3 = 8$. Uno studente ha preso 9,5 — è nel top 25%?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.24"
+  dificuldade="modelagem"
+  solucao={<>Il reddito in Brasile ha una distribuzione fortemente asimmetrica a destra: pochi milionari tirano la media verso l'alto, distorcendola come misura del salario "tipico". La mediana non è colpita da valori estremi e rappresenta meglio quello che il lavoratore mediano guadagna. Esempio: nel 2023, il reddito medio familiare in Brasile era R$ 3.459 e la mediana era R$ 1.850 — differenza dell'87%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "56", exercicio: "2.6", licenca: "CC-BY-SA" }}
+>
+
+Perché l'IBGE divulga la mediana del reddito, e non solo la media, nei rapporti sulla disuguaglianza in Brasile?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.25"
+  dificuldade="modelagem"
+  solucao={<>Pezzi con <Eq>{`Q_1 = 9{,}98`}</Eq> mm e <Eq>{`Q_3 = 10{,}02`}</Eq> mm: il 50% dei pezzi è tra 9,98 e 10,02 mm. La specifica è <Eq>{`10{,}00 \\pm 0{,}05`}</Eq>, cioè 9,95 a 10,05 mm. Poiché i quartili sono ben dentro i limiti, il processo sembra centrato e la maggior parte dei pezzi dovrebbe essere conforme. Per una decisione completa, calcolare <Eq>{`C_p`}</Eq> e <Eq>{`C_{pk}`}</Eq> richiede <Eq>{`\\sigma`}</Eq> o assumere la normalità.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "91", exercicio: "2.4.19", licenca: "CC-BY" }}
+>
+
+Pezzi prodotti con diametro: $Q_1 = 9{,}98$ mm, $Q_3 = 10{,}02$ mm. Specifica: $10{,}00 \pm 0{,}05$ mm. Il processo è centrato? C'è rischio di rifiuto significativo?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.26"
+  dificuldade="modelagem"
+  solucao={<>Variante A: mediana 1,2 s, <Eq>{`IQR = 0{,}3`}</Eq> (coerente, ma un po' più lenta). Variante B: mediana 1,1 s, <Eq>{`IQR = 1{,}5`}</Eq> (più veloce in mediana, ma molto variabile — probabilmente ha outlier pesanti). Per UX, preferisci A: l'utente preferisce un caricamento costantemente veloce a uno che a volte è veloce e a volte demora molto.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "65", exercicio: "2.21", licenca: "CC-BY-SA" }}
+>
+
+Test A/B di sito: variante A ha mediana 1,2 s e $IQR = 0{,}3$; variante B ha mediana 1,1 s e $IQR = 1{,}5$. Quale preferisci lanciare in produzione? Giustifica usando le statistiche di dispersione.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.27"
+  dificuldade="modelagem"
+  solucao={<>Non si deve rimuovere l'outlier senza indagine. Un outlier nelle transazioni finanziarie può essere: (a) errore di registrazione (rimuovi, con giustificazione documentata); (b) transazione fraudolenta reale (conserva — è il punto più informativo); (c) cliente di alto valore. Rimuovere gli outlier di frode dal training set di un modello di rilevamento è specialmente dannoso: il modello non imparerà a rilevare esattamente i casi di rischio maggiore.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "92", exercicio: "2.4.21", licenca: "CC-BY" }}
+>
+
+Rilevi un outlier nelle transazioni finanziarie che sembra essere una frode. Devi rimuoverlo prima di analizzare i dati? Giustifica con argomenti statistici.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.28"
+  dificuldade="modelagem"
+  solucao={<>Tempo di risposta del sistema: 120, 130, 135, 140, 142, 145, 148, 150, 155, 380 ms. <Eq>{`Q_1 = 134`}</Eq>, <Eq>{`Q_3 = 149`}</Eq>, <Eq>{`IQR = 15`}</Eq>. Limite: <Eq>{`149 + 22{,}5 = 171{,}5`}</Eq>. Il valore 380 ms è outlier — probabilmente timeout o guasto di rete. Per un SLA di 200 ms, il sistema sta bene, tranne per l'outlier.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "66", exercicio: "2.23", licenca: "CC-BY-SA" }}
+>
+
+Tempi di risposta (ms): 120, 130, 135, 140, 142, 145, 148, 150, 155, 380. Calcola il riepilogo di 5 numeri e valuta se il sistema rispetta l'SLA di 200 ms basandoti sui quartili.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.29"
+  dificuldade="modelagem"
+  solucao={<>Ospedale con 4 reparti. Tempi medi di degenza (giorni) per reparto: A(5,8,9,10,12), B(3,4,4,5,20), C(7,8,8,9,10), D(2,3,15,18,25). I reparti B e D hanno outlier (casi complessi). Il reparto A ha distribuzione più uniforme (<Eq>{`IQR = 3`}</Eq>), il reparto C ha minore variabilità (<Eq>{`IQR = 1`}</Eq>). La decisione di allocazione dei posti letto dovrebbe prioritarizzare <Eq>{`IQR`}</Eq> basso (più prevedibile) sulla sola mediana.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "93", exercicio: "2.4.23", licenca: "CC-BY" }}
+>
+
+Ospedale con 4 reparti. Tempi di degenza (giorni): Reparto A: 5, 8, 9, 10, 12; Reparto B: 3, 4, 4, 5, 20; Reparto C: 7, 8, 8, 9, 10; Reparto D: 2, 3, 15, 18, 25. Costruisci i riepiloghi di 5 numeri e identifica quale reparto è più prevedibile nella gestione dei posti letto.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.30"
+  dificuldade="modelagem"
+  solucao={<>Dati di voto dell'ENEM per scuola. Scuola A: mediana 650, <Eq>{`IQR = 80`}</Eq>. Scuola B: mediana 620, <Eq>{`IQR = 200`}</Eq>. La scuola A ha prestazioni più omogenee (minore <Eq>{`IQR`}</Eq>) e mediana maggiore. La scuola B ha maggiore disuguaglianza interna — probabilmente studenti molto bravi e molto deboli. Per politiche pubbliche, la scuola B ha bisogno di livellamento; la scuola A di approfondimento per studenti mediani.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "67", exercicio: "2.25", licenca: "CC-BY-SA" }}
+>
+
+Voti dell'ENEM per scuola. Scuola A: mediana 650, $IQR = 80$. Scuola B: mediana 620, $IQR = 200$. Quale scuola ha prestazioni più uniformi? Cosa ogni modello suggerisce per la politica pedagogica?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.31"
+  dificuldade="modelagem"
+  solucao={<>Precipitazione mensile (mm) a San Paolo: 234, 181, 130, 83, 68, 52, 44, 47, 82, 122, 145, 201. Ordinati: 44, 47, 52, 68, 82, 83, 122, 130, 145, 181, 201, 234. <Eq>{`Q_1 = 60`}</Eq>, mediana = <Eq>{`(83+122)/2 = 102{,}5`}</Eq>, <Eq>{`Q_3 = 163`}</Eq>. <Eq>{`IQR = 103`}</Eq>. Nessun outlier (limiti: [-94,5 e 317,5]). Distribuzione asimmetrica a destra: piogge concentrate nei mesi estivi.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "94", exercicio: "2.4.25", licenca: "CC-BY" }}
+>
+
+Precipitazione mensile media a San Paolo (mm): 234, 181, 130, 83, 68, 52, 44, 47, 82, 122, 145, 201. Calcola il riepilogo di 5 numeri e interpreta la stagionalità.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.32"
+  dificuldade="modelagem"
+  solucao={<>Prezzi immobiliari: R$ 250 migliaia, 280 migliaia, 310 migliaia, 320 migliaia, 340 migliaia, 350 migliaia, 380 migliaia, 390 migliaia, 420 migliaia, 1,8 milioni. Mediana = R$ 345 migliaia, media = R$ 484 migliaia — differenza enorme tirata dalla proprietà di lusso. Per il prezzo di una proprietà tipica nel quartiere, la mediana è il riferimento corretto. La proprietà di R$ 1,8 milioni è outlier (<Eq>{`Q_3 + 1{,}5 \\cdot IQR`}</Eq> = R$ 550 migliaia).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "59", exercicio: "2.10", licenca: "CC-BY-SA" }}
+>
+
+Prezzi immobiliari in un quartiere (R$ migliaia): 250, 280, 310, 320, 340, 350, 380, 390, 420, 1800. Calcola mediana e media. Perché un acquirente dovrebbe usare la mediana come riferimento del prezzo tipico?
+
+</Exercicio>
+
+### Blocco D — Comprensione e dimostrazione (73.33 a 73.40)
+
+<Exercicio
+  numero="73.33"
+  dificuldade="compreensao"
+  solucao={<>La mediana e l'IQR sono robusti perché dipendono solo dall'ordine dei dati, non dai loro valori assoluti. Un'osservazione diventa infinitamente grande: la mediana non cambia (rimane nel valore centrale), l'IQR non cambia (continua a misurare il 50% centrale). La media e la deviazione standard, al contrario, sommano i valori direttamente — un outlier infinito li rende infiniti.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "68", exercicio: "2.27", licenca: "CC-BY-SA" }}
+>
+
+Spiega, con parole tue, perché la mediana e l'IQR sono "robusti" mentre la media e la deviazione standard non lo sono. Usa un esempio concreto.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.34"
+  dificuldade="compreensao"
+  solucao={<>Sì. Esempio: distribuzione bimodale con picchi a 10 e 90, e valori intermedi rari. Se ogni picco ha il 25% dei dati, il quartile <Eq>{`Q_1 \\approx 10`}</Eq>, <Eq>{`Q_2 \\approx 50`}</Eq>, <Eq>{`Q_3 \\approx 90`}</Eq> — identico a una distribuzione uniforme in [10, 90]. Il boxplot "vede" la scatola larga ma non distingue i due modi. Per questo, l'istogramma e il violin plot complementano il boxplot.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "69", exercicio: "2.29", licenca: "CC-BY-SA" }}
+>
+
+Un boxplot può nascondere una distribuzione bimodale? Costruisci un esempio concreto di distribuzione bimodale che ha lo stesso boxplot di una distribuzione unimodale.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.35"
+  dificuldade="compreensao"
+  opcoes={[{texto: "IQR = 0,5", correta: true}, {texto: "IQR = 1,0"}, {texto: "IQR = 0,25"}, {texto: "IQR = 2,0"}]}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "185", exercicio: "5.1.15", licenca: "GNU FDL" }}
+  solucao={<>Per <Eq>{`X \\sim \\text{Uniforme}(0, 1)`}</Eq>, la CDF è <Eq>{`F(x) = x`}</Eq>. Quindi <Eq>{`Q_1 = F^{-1}(0{,}25) = 0{,}25`}</Eq> e <Eq>{`Q_3 = 0{,}75`}</Eq>. Perciò <Eq>{`IQR = 0{,}75 - 0{,}25 = 0{,}5`}</Eq>.</>}
+>
+
+Per $X \sim \text{Uniforme}(0, 1)$, l'$IQR$ è:
+
+</Exercicio>
+
+<Exercicio
+  numero="73.36"
+  dificuldade="desafio"
+  solucao={<>Per <Eq>{`X \\sim \\text{Esponenziale}(\\lambda)`}</Eq>: CDF <Eq>{`F(x) = 1 - e^{-\\lambda x}`}</Eq>. <Eq>{`Q_1 = -\\ln(0{,}75)/\\lambda`}</Eq>, <Eq>{`Q_3 = -\\ln(0{,}25)/\\lambda = \\ln(4)/\\lambda`}</Eq>. <Eq>{`IQR = (\\ln 4 - \\ln(4/3))/\\lambda = \\ln 3/\\lambda \\approx 1{,}099/\\lambda`}</Eq>. Per <Eq>{`\\lambda = 1`}</Eq>: <Eq>{`IQR = \\ln 3 \\approx 1{,}099`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "186", exercicio: "5.1.17", licenca: "GNU FDL" }}
+>
+
+Calcola analiticamente l'$IQR$ di $X \sim \text{Esponenziale}(\lambda)$. Esprimi in funzione di $\lambda$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.37"
+  dificuldade="desafio"
+  solucao={<>Punto di rottura dell'IQR: considera campioni di taglia <Eq>{`n`}</Eq>. Per "distruggere" <Eq>{`Q_1`}</Eq>, dobbiamo spostare almeno <Eq>{`n/4`}</Eq> punti al di là di qualsiasi limite. Quindi il punto di rottura è <Eq>{`1/4 = 25\\%`}</Eq>. Per la mediana, un argomento analogo dà 50%. Per la media, basta 1 punto (0%).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "70", exercicio: "2.31", licenca: "CC-BY-SA" }}
+>
+
+Argomenta perché il punto di rottura dell'$IQR$ è 25%, quello della mediana è 50% e quello della media è 0%.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.38"
+  dificuldade="demonstracao"
+  solucao={<>Per <Eq>{`X`}</Eq> continua simmetrica attorno a <Eq>{`\\mu`}</Eq>: la simmetria implica <Eq>{`f(\\mu + t) = f(\\mu - t)`}</Eq> per ogni <Eq>{`t`}</Eq>. Quindi <Eq>{`P(X \\leq \\mu) = \\int_{-\\infty}^\\mu f(x)\\,dx`}</Eq>. Per cambio di variabile <Eq>{`u = 2\\mu - x`}</Eq>: l'integrale diventa <Eq>{`\\int_\\mu^\\infty f(u)\\,du = P(X \\geq \\mu)`}</Eq>. Quindi <Eq>{`P(X \\leq \\mu) = P(X \\geq \\mu) = 1/2`}</Eq>, perciò <Eq>{`\\mu`}</Eq> è la mediana.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "187", exercicio: "5.1.19", licenca: "GNU FDL" }}
+>
+
+Dimostra: se $X$ è v.a. continua con densità simmetrica attorno a $\mu$, allora $\mu$ è la mediana di $X$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.39"
+  dificuldade="demonstracao"
+  solucao={<>Per <Eq>{`X \\sim \\text{Uniforme}(0,1)`}</Eq>, le statistiche di ordine hanno distribuzione <Eq>{`X_{(k)} \\sim \\text{Beta}(k, n-k+1)`}</Eq>. In particolare, <Eq>{`X_{(\\lceil n/4 \\rceil)} \\to Q_1 = 0{,}25`}</Eq> quasi certamente quando <Eq>{`n \\to \\infty`}</Eq> per la legge dei grandi numeri. La varianza di <Eq>{`X_{(k)}`}</Eq> è <Eq>{`k(n-k+1)/[(n+1)^2(n+2)]`}</Eq>, che va a zero quando <Eq>{`n \\to \\infty`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "188", exercicio: "5.1.21", licenca: "GNU FDL" }}
+>
+
+Mostra che per $n \to \infty$ e campioni iid da Uniforme(0,1), lo stimatore campionario di $Q_1$ converge a 0,25. Usa proprietà delle statistiche di ordine.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.40"
+  dificuldade="demonstracao"
+  solucao={<>La mediana minimizza <Eq>{`E[|X - c|]`}</Eq>. Prova: sia <Eq>{`g(c) = E[|X - c|] = \\int_{-\\infty}^c (c-x)f(x)\\,dx + \\int_c^\\infty (x-c)f(x)\\,dx`}</Eq>. Derivando: <Eq>{`g'(c) = \\int_{-\\infty}^c f(x)\\,dx - \\int_c^\\infty f(x)\\,dx = F(c) - (1 - F(c)) = 2F(c) - 1`}</Eq>. Uguagliando a zero: <Eq>{`F(c) = 1/2`}</Eq>, cioè <Eq>{`c = \\text{mediana}`}</Eq>. Poiché <Eq>{`g''(c) = 2f(c) > 0`}</Eq>, è un minimo.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "189", exercicio: "5.1.23", licenca: "GNU FDL" }}
+>
+
+Dimostra che la mediana minimizza $E[|X - c|]$ su tutti i valori $c \in \mathbb{R}$.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Fonti
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · EN · CC-BY-SA. **Fonte primaria — §2.1 (quartili, percentili) e §2.2 (boxplot, outlier).**
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · EN · CC-BY. **§2.3 (percentili per interpolazione) e §2.4 (boxplot e regola 1,5 IQR).**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · 1997 · EN · GNU FDL. **§5.1 — quartili di distribuzioni continue, statistiche di ordine.**

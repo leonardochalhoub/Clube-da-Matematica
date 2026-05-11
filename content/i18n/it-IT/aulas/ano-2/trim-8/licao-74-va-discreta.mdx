@@ -1,0 +1,846 @@
+---
+titulo: "Lição 74 — Variável aleatória discreta"
+slug: "licao-74-va-discreta"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "PMF, esperança, variância e LOTUS. O conceito que unifica probabilidade e estatística e abre caminho para todas as distribuições nomeadas."
+ordem: 74
+publicado: true
+tags: ["estatística", "probabilidade", "variável aleatória", "esperança", "variância", "ano-2", "trim-8"]
+prerrequisitos: ["licao-73"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math — Singapura", "AP Statistics — EUA", "Math B — Japão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="E[X] = \sum_x x \cdot P(X = x), \quad \text{Var}(X) = E[X^2] - (E[X])^2"
+  legenda={<>Una <strong>variabile aleatoria discreta</strong> <Eq>{`X`}</Eq> mappa i risultati dello spazio campionario in valori numerici numerabili. L'<strong>aspettativa</strong> è la media ponderata di lungo periodo di <Eq>{`X`}</Eq>; la <strong>varianza</strong> misura la sua dispersione. Ogni distribuzione nominata — binomiale, Poisson, geometrica — è un caso particolare di questa struttura.</>}
+  audioTexto="Variabile aleatoria discreta. L'aspettativa è la somma di ogni valore moltiplicato per la sua probabilità. La varianza è l'aspettativa di X al quadrato, meno l'aspettativa di X, elevata al quadrato."
+/>
+
+<aside>
+
+**Libri che coprono questa lezione**
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §3.1–3.2 · CC-BY-SA · <em>Introduzione chiara alle variabili aleatorie discrete con PMF, aspettativa e varianza; esempi di dati reali e distribuzioni nominative.</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §4.1–4.3 · CC-BY · <em>PMF, aspettativa, varianza, CDF discreta; esercizi graduati con scommesse, assicurazioni e giochi; notazione compatibile con il curriculum AP.</em>
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §5.1–5.2 · GNU FDL · <em>Fondazione rigorosa con aspettativa condizionata, legge dell'aspettativa totale e momenti; esercizi dimostrativi.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definizione rigorosa">
+
+### Variabile aleatoria discreta
+
+<Definicao titulo="Variabile aleatoria discreta">
+
+Dato uno spazio di probabilità $(\Omega, \mathcal F, P)$, una **variabile aleatoria** $X$ è una funzione $X: \Omega \to \mathbb{R}$ misurabile ($X^{-1}(B) \in \mathcal F$ per ogni insieme boreliano $B$). $X$ è **discreta** se assume valori in un insieme numerabile $\{x_1, x_2, \ldots\}$.
+
+</Definicao>
+
+> "Una variabile aleatoria è una misura numerica dell'esito di un esperimento di probabilità... una variabile aleatoria discreta ha un numero numerabile di valori." — [OpenStax Statistics §4.1](https://openstax.org/books/statistics/pages/4-1-probability-distribution-function-pdf-for-a-discrete-random-variable)
+
+<Definicao titulo="Funzione di massa di probabilità (PMF)">
+
+La **PMF** di $X$ è $p_X: \mathbb{R} \to [0,1]$ definita da:
+
+$$p_X(x) = P(X = x)$$
+
+Soddisfa:
+1. $p_X(x) \geq 0$ per ogni $x$.
+2. $\displaystyle\sum_{x} p_X(x) = 1$ (somma su tutti i valori con $p_X(x) > 0$).
+
+La **CDF** discreta è $F_X(x) = P(X \leq x) = \displaystyle\sum_{x_i \leq x} p_X(x_i)$ — funzione a gradini, continua a destra.
+
+</Definicao>
+
+<Definicao titulo="Aspettativa e varianza">
+
+L'**aspettativa** (valore atteso) di $X$, quando $\sum_x |x| p_X(x) < \infty$:
+
+$$E[X] = \sum_x x \cdot p_X(x)$$
+
+**Legge dello statistico inconscio (LOTUS):** per qualsiasi funzione $g$:
+
+$$E[g(X)] = \sum_x g(x) \cdot p_X(x)$$
+
+La **varianza** e la **deviazione standard**:
+
+$$\text{Var}(X) = E\!\left[(X - E[X])^2\right] = E[X^2] - (E[X])^2, \quad \sigma_X = \sqrt{\text{Var}(X)}$$
+
+</Definicao>
+
+> "Il valore atteso di una variabile aleatoria è indicato dalla lettera greca mu ($\mu$). Il valore atteso è spesso chiamato media a lungo termine o media." — [OpenStax Statistics §4.2](https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation)
+
+<Teorema titulo="Linearità dell'aspettativa">
+
+Per qualsiasi variabile aleatoria $X, Y$ (anche dipendenti) e costanti $a, b, c \in \mathbb{R}$:
+
+$$E[aX + bY + c] = a\,E[X] + b\,E[Y] + c$$
+
+**Conseguenza:** $\text{Var}(aX + b) = a^2\,\text{Var}(X)$.
+
+Per $X, Y$ **indipendenti**: $\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$.
+
+</Teorema>
+
+<Insight>
+
+La linearità dell'aspettativa è valida **anche senza indipendenza** — questo è sorprendente e estremamente potente. Se estrai 5 carte da un mazzo senza reinserimento e vuoi l'aspettativa del numero di assi, puoi usare indicatori $I_k = \mathbf{1}[\text{carta }k \text{ è asso}]$ e applicare la linearità direttamente: $E[\text{assi}] = 5 \cdot 4/52$, senza dover calcolare la distribuzione ipergeometrica.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Per un bambino di 5 anni">
+
+Immagina un gioco di dadi. Ogni volta che lanci, guadagni il numero di caramelle che esce.
+
+- Puoi guadagnare 1, 2, 3, 4, 5 o 6 caramelle.
+- Ogni numero ha la stessa possibilità: 1 su 6.
+
+Quante caramelle guadagni **in media**, nel corso di molti lanci?
+
+Somma tutto: 1 + 2 + 3 + 4 + 5 + 6 = 21. Dividi per 6 = **3,5 caramelle in media**.
+
+Non puoi guadagnare 3,5 caramelle in un solo lancio — ma se lanci 100 volte, guadagnerai circa 350 caramelle in totale. Questo numero 3,5 è il **valore atteso**: quello che succede in media da molti lanci.
+
+</Porta>
+
+<Porta nivel="10" titulo="Per un bambino di 10 anni">
+
+**Variabile aleatoria** è un nome sofisticato per "numero che esce da un lancio". Esempio: somma due dadi. Il risultato può essere 2, 3, ..., 12 — ognuno con una probabilità diversa.
+
+| $X$ (somma) | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| $P$ | 1/36 | 2/36 | 3/36 | 4/36 | 5/36 | **6/36** | 5/36 | 4/36 | 3/36 | 2/36 | 1/36 |
+
+**Aspettativa**: moltiplica ogni valore per la sua probabilità e somma. Dà **7** — il più probabile e la media a lungo termine.
+
+**Varianza**: misura quanto i risultati variano intorno al 7 (al quadrato, per non cancellarsi).
+
+Se lanci 1000 volte, la somma media rimarrà molto vicina a 7. Questo è il valore atteso in azione.
+
+</Porta>
+
+<Porta nivel="15" titulo="Per un adolescente di 15 anni">
+
+Ogni volta che dici "in media" riguardo a un esperimento casuale, stai calcolando l'aspettativa.
+
+### Differenza tra v.a. e dati osservati
+
+- **V.a.**: non ancora osservata — descritta da probabilità teoriche.
+- **Dati**: già osservati — descritti da statistiche (media campionaria, $s$).
+
+Aspettativa $\approx$ media teorica della popolazione. Varianza $\approx \sigma^2$ teorico.
+
+### Esempio: scommessa corretta vs. sfavorevole
+
+Vinci 10 real con prob. 0,3 e perdi 3 real con prob. 0,7:
+
+$$E[X] = 10 \cdot 0{,}3 + (-3) \cdot 0{,}7 = 3 - 2{,}1 = +0{,}90$$
+
+Scommessa favorevole — in media, vinci 0,90 real per giocata.
+
+Roulette americana: scommetti 1 real sul rosso (18/38 di probabilità):
+
+$$E[X] = 1 \cdot \frac{18}{38} + (-1) \cdot \frac{20}{38} = \frac{-2}{38} \approx -0{,}053$$
+
+Il casinò trattiene il 5,3% in media — per questo lucra miliardi.
+
+### La linearità è il superpotere
+
+$E[X+Y] = E[X] + E[Y]$ **sempre** (anche dipendenti). Se un dado ha $E[X_i] = 3{,}5$, allora 100 dadi sommati hanno aspettativa $100 \times 3{,}5 = 350$. Non serve calcolare la distribuzione della somma.
+
+</Porta>
+
+<Porta nivel="25" titulo="Per uno studente di ingegneria">
+
+Le v.a. discrete sono il "Lego" della modellizzazione probabilistica.
+
+### Distribuzioni fondamentali (approfondite nelle lezioni successive)
+
+| Distribuzione | PMF | $E[X]$ | $\text{Var}(X)$ | Applicazione tipica |
+|---|---|---|---|---|
+| Bernoulli($p$) | $P(X=1)=p$ | $p$ | $p(1-p)$ | Successo/fallimento binario |
+| Binomiale($n,p$) | $\binom{n}{k}p^k(1-p)^{n-k}$ | $np$ | $np(1-p)$ | $n$ prove indipendenti |
+| Geometrica($p$) | $(1-p)^{k-1}p$ | $1/p$ | $(1-p)/p^2$ | Prove fino al 1.º successo |
+| Poisson($\lambda$) | $e^{-\lambda}\lambda^k/k!$ | $\lambda$ | $\lambda$ | Eventi rari in intervallo |
+
+### Funzione generatrice di momenti (MGF)
+
+$$M_X(t) = E[e^{tX}] = \sum_x e^{tx} p_X(x)$$
+
+Quando esiste in un intorno di zero, determina la distribuzione unicamente. Le derivate in $t=0$ danno momenti: $E[X^k] = M_X^{(k)}(0)$. Strumento centrale per somme di v.a. indipendenti (la MGF della somma è il prodotto delle MGF).
+
+### Variabili indipendenti vs. non correlate
+
+$X, Y$ **indipendenti** $\iff P(X=x, Y=y) = P(X=x)P(Y=y)$ per ogni $x,y$.
+
+Indipendenza $\Rightarrow$ $\text{Cov}(X,Y) = 0$. Il contrario non vale: correlazione zero non implica indipendenza.
+
+### Stima
+
+Per $X_1, \ldots, X_n$ iid da $X$, lo stimatore non distorto di $E[X]$ è la **media campionaria** $\bar X = (1/n)\sum X_i$, con $\text{Var}(\bar X) = \sigma^2/n$ — diminuisce con $n$ (Legge dei Grandi Numeri).
+
+</Porta>
+
+<Porta nivel="40" titulo="Per un professionista senior">
+
+### Aspettativa come integrale di Lebesgue
+
+In uno spazio di probabilità $(\Omega, \mathcal F, P)$, l'aspettativa è integrale di Lebesgue:
+
+$$E[X] = \int_\Omega X(\omega)\,dP(\omega)$$
+
+Nel caso discreto, questo si riduce alla somma usuale. L'unificazione con il caso continuo (integrale di Riemann) e il caso misto è automatica — stessa formula.
+
+### Aspettativa condizionata come v.a.
+
+$E[X \mid Y = y]$ è una funzione deterministica di $y$. $E[X \mid Y]$ è una **variabile aleatoria** (funzione di $Y$). **Legge dell'aspettativa totale** (Torre Property):
+
+$$E[X] = E\!\left[E[X \mid Y]\right]$$
+
+Generalizzazione rigorosa della stratificazione: calcola $E[X]$ condizionando su $Y$ e poi prendi la media.
+
+### Convergenze e disuguaglianze
+
+- **Markov**: $P(X \geq a) \leq E[X]/a$ per $X \geq 0$.
+- **Chebyshev**: $P(|X - \mu| \geq k\sigma) \leq 1/k^2$.
+- **Jensen**: $\phi$ convessa $\Rightarrow \phi(E[X]) \leq E[\phi(X)]$. Base di prove in inferenza e ML (es.: log-verosimiglianza).
+
+### V.a. senza aspettativa finita
+
+Distribuzione di Cauchy: $f(x) = 1/[\pi(1+x^2)]$. L'integrale $\int |x| f(x)\,dx$ diverge — nessuna aspettativa. La legge dei grandi numeri fallisce per Cauchy: le medie campionarie non convergono alla "media teorica della popolazione". In finanza, i rendimenti con coda di Pareto ($\alpha < 1$) mostrano comportamento simile.
+
+### Funzioni generatrici
+
+| Tipo | Definizione | Supporto | Uso principale |
+|---|---|---|---|
+| MGF | $E[e^{tX}]$ | $\mathbb{R}$ | Momenti, somme indipendenti |
+| PGF | $E[z^X]$ | $\mathbb{N}$ | Processi di ramificazione, code |
+| Funzione caratteristica | $E[e^{itX}]$ | sempre esiste | TCL, continuità di Lévy |
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Applicazione pratica">
+
+### Ricetta in 5 passi
+
+1. **Identificare la v.a. $X$** e elencare il suo supporto (valori possibili).
+2. **Costruire la PMF**: probabilità di ogni valore. Verifica: somma = 1.
+3. **Aspettativa**: $\sum x \cdot p(x)$.
+4. **$E[X^2]$**: $\sum x^2 \cdot p(x)$.
+5. **Varianza**: $E[X^2] - (E[X])^2$.
+
+### In fogli di calcolo (Excel / LibreOffice)
+
+Colonna A: valori di $X$. Colonna B: probabilità $p(X)$. Colonna C: $= A \times B$ (contributo all'aspettativa). `=SOMMA(C:C)` = aspettativa. Colonna D: $= A^2 \times B$. `=SOMMA(D:D) - SOMMA(C:C)^2` = varianza.
+
+### In Python (scipy)
+
+```python
+from scipy import stats
+import numpy as np
+
+# Dado onesto
+valori = np.arange(1, 7)
+probs = np.ones(6) / 6
+media = np.dot(valori, probs)          # 3.5
+varianza = np.dot(valori**2, probs) - media**2  # 2.917
+
+# Distribuzione discreta generica con scipy
+X = stats.rv_discrete(values=(valori, probs))
+print(X.mean(), X.var())   # 3.5, 2.9166
+```
+
+### Errori frequenti
+
+- **Confondere $E[g(X)]$ con $g(E[X])$**: solo uguali se $g$ è lineare (Jensen!). $E[X^2] \neq (E[X])^2$.
+- **Dimenticare $\sum p(x) = 1$**: verifica prima di calcolare l'aspettativa.
+- **Aggiungere varianze senza verificare l'indipendenza**: $\text{Var}(X+Y) = \text{Var}(X) + \text{Var}(Y)$ vale solo se $X, Y$ indipendenti.
+- **Usare l'aspettativa di v.a. senza aspettativa finita**: Cauchy, Pareto con $\alpha < 1$.
+
+</Porta>
+
+</DuasPortas>
+
+## Esempi risolti
+
+<Esempio numero="74.1" titulo="PMF, aspettativa e varianza di v.a. con 3 valori" dificuldade="basico">
+
+**Problema.** $X$ assume valori 1, 2, 3 con probabilità 0,2; 0,5; 0,3. Calcola $E[X]$ e $\text{Var}(X)$.
+
+**Strategia.** Applicare le definizioni direttamente. Calcolare $E[X^2]$ via LOTUS e usare la formula della varianza.
+
+**Risoluzione.**
+
+$$E[X] = 1 \cdot 0{,}2 + 2 \cdot 0{,}5 + 3 \cdot 0{,}3 = 0{,}2 + 1{,}0 + 0{,}9 = 2{,}1$$
+
+$$E[X^2] = 1^2 \cdot 0{,}2 + 2^2 \cdot 0{,}5 + 3^2 \cdot 0{,}3 = 0{,}2 + 2{,}0 + 2{,}7 = 4{,}9$$
+
+$$\text{Var}(X) = 4{,}9 - (2{,}1)^2 = 4{,}9 - 4{,}41 = 0{,}49$$
+
+**Verifica.** $\sigma = \sqrt{0{,}49} = 0{,}7$. Intervallo $[E[X] \pm \sigma] = [1{,}4;\; 2{,}8]$ — contiene il valore 2 e parte di 1 e 3. Ha senso con distribuzione centrata in 2,1 con dispersione moderata.
+
+**Fonte.** [OpenStax Statistics §4.2](https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="74.2" titulo="Dado onesto — PMF completa e momenti" dificuldade="basico">
+
+**Problema.** $X$ è il risultato di un dado onesto. Calcola $E[X]$, $E[X^2]$ e $\text{Var}(X)$.
+
+**Strategia.** PMF uniforme: $p_X(x) = 1/6$ per $x \in \{1, 2, 3, 4, 5, 6\}$. Usa somme di progressioni aritmetiche.
+
+**Risoluzione.**
+
+$$E[X] = \frac{1}{6}(1 + 2 + 3 + 4 + 5 + 6) = \frac{21}{6} = 3{,}5$$
+
+$$E[X^2] = \frac{1}{6}(1 + 4 + 9 + 16 + 25 + 36) = \frac{91}{6}$$
+
+$$\text{Var}(X) = \frac{91}{6} - \left(\frac{7}{2}\right)^2 = \frac{91}{6} - \frac{49}{4} = \frac{182 - 147}{12} = \frac{35}{12} \approx 2{,}917$$
+
+**Verifica.** $\sigma = \sqrt{35/12} \approx 1{,}71$. I valori estremi (1 e 6) sono a $\approx 1{,}5\sigma$ dalla media — coerente con distribuzione uniforme discreta simmetrica.
+
+**Fonte.** [OpenIntro Statistics §3.1](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Esempio numero="74.3" titulo="Linearità dell'aspettativa — somma di due dadi" dificuldade="intermediario">
+
+**Problema.** Lancia due dadi onesti. Calcola l'aspettativa e la varianza della somma $S = X_1 + X_2$.
+
+**Strategia.** Usa la linearità dell'aspettativa e, per la varianza, l'indipendenza dei dadi.
+
+**Risoluzione.**
+
+Per linearità: $E[S] = E[X_1] + E[X_2] = 3{,}5 + 3{,}5 = 7$.
+
+Poiché $X_1$ e $X_2$ sono indipendenti: $\text{Var}(S) = \text{Var}(X_1) + \text{Var}(X_2) = \frac{35}{12} + \frac{35}{12} = \frac{35}{6} \approx 5{,}83$.
+
+**Verifica.** $E[S] = 7$ è il valore più probabile (6 combinazioni sommano a 7 su 36 possibili). $\sigma_S = \sqrt{35/6} \approx 2{,}42$. L'intervallo $[4{,}58;\; 9{,}42]$ contiene i risultati più comuni — plausibile.
+
+**Fonte.** [OpenIntro Statistics §3.2](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Esempio>
+
+<Esempio numero="74.4" titulo="Scommessa corretta — assicurazione e lotteria" dificuldade="intermediario">
+
+**Problema.** Un'assicuratrice addebitaria un premio di 800 real all'anno per un'assicurazione che paga 50.000 real in caso di sinistro (prob. 1%). Qual è il profitto atteso dell'assicuratrice per polizza?
+
+**Strategia.** Modellare il profitto come variabile aleatoria e calcolare l'aspettativa.
+
+**Risoluzione.** Sia $L$ il profitto dell'assicuratrice per polizza.
+
+- Con prob. 0,99 (senza sinistro): $L = 800$ (riceve il premio, non paga nulla).
+- Con prob. 0,01 (sinistro): $L = 800 - 50.000 = -49.200$.
+
+$$E[L] = 800 \cdot 0{,}99 + (-49.200) \cdot 0{,}01 = 792 - 492 = 300$$
+
+**Verifica.** Il premio attuarialmente equo sarebbe $E[\text{indennizzo}] = 50.000 \times 0{,}01 = 800$ real. L'assicuratrice addebitaria 800 real, quindi il profitto atteso di 300 real copre le spese amministrative e il margine. Ha senso commercialmente.
+
+**Fonte.** [OpenStax Statistics §4.2](https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="74.5" titulo="LOTUS e varianza di funzione non-lineare" dificuldade="avancado">
+
+**Problema.** $X$ assume valori 0, 1, 2 con probabilità 0,3; 0,5; 0,2. Calcola $E[(X - E[X])^2]$ direttamente via LOTUS e verifica con $E[X^2] - (E[X])^2$.
+
+**Strategia.** Calcola $E[X]$ e $\text{Var}(X)$ per entrambi i metodi.
+
+**Risoluzione.** $E[X] = 0 \cdot 0{,}3 + 1 \cdot 0{,}5 + 2 \cdot 0{,}2 = 0{,}9$.
+
+**Via LOTUS** con $g(x) = (x - 0{,}9)^2$:
+
+$$E[(X-0{,}9)^2] = (0-0{,}9)^2 \cdot 0{,}3 + (1-0{,}9)^2 \cdot 0{,}5 + (2-0{,}9)^2 \cdot 0{,}2$$
+$$= 0{,}81 \cdot 0{,}3 + 0{,}01 \cdot 0{,}5 + 1{,}21 \cdot 0{,}2 = 0{,}243 + 0{,}005 + 0{,}242 = 0{,}49$$
+
+**Via formula alternativa:**
+
+$$E[X^2] = 0 \cdot 0{,}3 + 1 \cdot 0{,}5 + 4 \cdot 0{,}2 = 1{,}3$$
+$$\text{Var}(X) = 1{,}3 - 0{,}81 = 0{,}49 \checkmark$$
+
+**Verifica.** I due metodi coincidono. La formula $E[X^2] - (E[X])^2$ è computazionalmente preferibile (una passata sui dati); LOTUS nella definizione è concettualmente più trasparente.
+
+**Fonte.** [Introduction to Probability — Grinstead, Snell §5.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-74-va-discreta">
+
+### Blocco A — PMF e calcoli base (74.1 a 74.14)
+
+<Exercicio
+  numero="74.1"
+  dificuldade="aplicacao"
+  resposta="2,1"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "224", exercicio: "4.2.1", licenca: "CC-BY" }}
+  solucao={<><Eq>{`E[X] = 1 \\cdot 0{,}2 + 2 \\cdot 0{,}5 + 3 \\cdot 0{,}3 = 0{,}2 + 1{,}0 + 0{,}9 = 2{,}1`}</Eq>.</>}
+>
+
+$X$ assume valori 1, 2, 3 con probabilità 0,2; 0,5; 0,3. Calcola $E[X]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.2"
+  dificuldade="aplicacao"
+  resposta="4,9"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "224", exercicio: "4.2.3", licenca: "CC-BY" }}
+  solucao={<>Via LOTUS: <Eq>{`E[X^2] = 1 \\cdot 0{,}2 + 4 \\cdot 0{,}5 + 9 \\cdot 0{,}3 = 0{,}2 + 2{,}0 + 2{,}7 = 4{,}9`}</Eq>.</>}
+  passos={<><ol><li>Applica LOTUS con <Eq>{`g(x) = x^2`}</Eq>: <Eq>{`E[X^2] = \\sum_x x^2 p(x)`}</Eq>.</li><li>Calcola: <Eq>{`1^2 \\times 0{,}2 + 2^2 \\times 0{,}5 + 3^2 \\times 0{,}3 = 0{,}2 + 2{,}0 + 2{,}7`}</Eq>.</li></ol><em>Trucco:</em> LOTUS = stessa PMF di <Eq>{`X`}</Eq>, solo sostituisci <Eq>{`x`}</Eq> con <Eq>{`g(x)`}</Eq> nella somma. Non serve derivare la distribuzione di <Eq>{`X^2`}</Eq>.</>}
+>
+
+Stessa $X$ dell'esercizio precedente. Calcola $E[X^2]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.3"
+  dificuldade="aplicacao"
+  resposta="0,49"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "225", exercicio: "4.2.5", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\text{Var}(X) = E[X^2] - (E[X])^2 = 4{,}9 - (2{,}1)^2 = 4{,}9 - 4{,}41 = 0{,}49`}</Eq>.</>}
+>
+
+Stessa $X$. Calcola $\text{Var}(X)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.4"
+  dificuldade="aplicacao"
+  solucao={<>Dado onesto: <Eq>{`E[X] = (1+2+3+4+5+6)/6 = 21/6 = 3{,}5`}</Eq>. <Eq>{`E[X^2] = (1+4+9+16+25+36)/6 = 91/6`}</Eq>. <Eq>{`\\text{Var}(X) = 91/6 - 49/4 = (182-147)/12 = 35/12 \\approx 2{,}917`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "96", exercicio: "3.1", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>PMF: <Eq>{`p(x) = 1/6`}</Eq> per <Eq>{`x \\in \\{1,2,3,4,5,6\\}`}</Eq>.</li><li><Eq>{`E[X] = \\frac{1}{6}\\sum_{k=1}^6 k = \\frac{21}{6} = \\frac{7}{2}`}</Eq>.</li><li><Eq>{`E[X^2] = \\frac{1}{6}\\sum_{k=1}^6 k^2 = \\frac{91}{6}`}</Eq> (usa la formula <Eq>{`\\sum k^2 = n(n+1)(2n+1)/6`}</Eq> con <Eq>{`n=6`}</Eq>).</li><li><Eq>{`\\text{Var}(X) = \\frac{91}{6} - \\frac{49}{4} = \\frac{35}{12}`}</Eq>.</li></ol><em>Scorciatoia mentale:</em> per uniforme su <Eq>{`\\{1,\\ldots,n\\}`}</Eq>: <Eq>{`E = (n+1)/2`}</Eq>, <Eq>{`\\text{Var} = (n^2-1)/12`}</Eq>. Per <Eq>{`n=6`}</Eq>: <Eq>{`35/12`}</Eq>. ✓</>}
+>
+
+Dado onesto ($X \in \{1,2,3,4,5,6\}$, $p = 1/6$). Calcola $E[X]$ e $\text{Var}(X)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.5"
+  dificuldade="aplicacao"
+  solucao={<>Moneta onesta: <Eq>{`X=1`}</Eq> (testa) con prob. 0,5; <Eq>{`X=0`}</Eq> con prob. 0,5. <Eq>{`E[X] = 1 \\cdot 0{,}5 + 0 \\cdot 0{,}5 = 0{,}5`}</Eq>. <Eq>{`E[X^2] = 1 \\cdot 0{,}5 + 0 \\cdot 0{,}5 = 0{,}5`}</Eq>. <Eq>{`\\text{Var}(X) = 0{,}5 - 0{,}25 = 0{,}25 = p(1-p)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "226", exercicio: "4.2.7", licenca: "CC-BY" }}
+>
+
+Moneta onesta: $X = 1$ se testa, $X = 0$ se croce. Calcola $E[X]$ e $\text{Var}(X)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.6"
+  dificuldade="aplicacao"
+  resposta="7"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "97", exercicio: "3.3", licenca: "CC-BY-SA" }}
+  solucao={<>Per linearità: <Eq>{`E[X_1 + X_2] = E[X_1] + E[X_2] = 3{,}5 + 3{,}5 = 7`}</Eq>.</>}
+>
+
+Somma $S = X_1 + X_2$ di due dadi onesti. Calcola $E[S]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.7"
+  dificuldade="aplicacao"
+  solucao={<>Per indipendenza: <Eq>{`\\text{Var}(S) = \\text{Var}(X_1) + \\text{Var}(X_2) = 35/12 + 35/12 = 35/6 \\approx 5{,}83`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "104", exercicio: "3.9", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>Dadi indipendenti: <Eq>{`\\text{Var}(X_1 + X_2) = \\text{Var}(X_1) + \\text{Var}(X_2)`}</Eq>.</li><li>Ogni dado: <Eq>{`\\text{Var}(X_i) = 35/12`}</Eq>.</li><li>Somma: <Eq>{`35/12 + 35/12 = 70/12 = 35/6`}</Eq>.</li></ol><em>Attenzione:</em> le varianze si sommano solo con indipendenza. Se c'è dipendenza, è necessario calcolare via covarianza.</>}
+>
+
+Somma $S = X_1 + X_2$ di due dadi indipendenti. Calcola $\text{Var}(S)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.8"
+  dificuldade="aplicacao"
+  solucao={<>Uniforme discreta su <Eq>{`\\{1, 2, \\ldots, n\\}`}</Eq>: <Eq>{`E[X] = \\frac{1}{n}\\sum_{k=1}^n k = \\frac{n(n+1)/2}{n} = \\frac{n+1}{2}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "227", exercicio: "4.2.9", licenca: "CC-BY" }}
+>
+
+$X$ uniforme su $\{1, 2, \ldots, n\}$. Calcola $E[X]$ in funzione di $n$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.9"
+  dificuldade="aplicacao"
+  solucao={<>Per sommare a 1: <Eq>{`c(1+2+3+4) = 10c = 1 \\Rightarrow c = 1/10`}</Eq>. <Eq>{`E[X] = (1 \\cdot 1 + 2 \\cdot 2 + 3 \\cdot 3 + 4 \\cdot 4)/10 = 30/10 = 3`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "98", exercicio: "3.5", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>Condizione <Eq>{`\\sum p(x) = 1`}</Eq>: <Eq>{`c(1+2+3+4) = 1 \\Rightarrow c = 1/10`}</Eq>.</li><li>PMF: <Eq>{`p(k) = k/10`}</Eq> per <Eq>{`k=1,2,3,4`}</Eq>.</li><li><Eq>{`E[X] = \\sum k \\cdot (k/10) = (1+4+9+16)/10 = 30/10 = 3`}</Eq>.</li></ol><em>Trucco:</em> normalizza sempre prima di calcolare l'aspettativa: <Eq>{`\\sum p(x) = 1`}</Eq> determina la costante.</>}
+>
+
+$P(X = k) = c \cdot k$ per $k \in \{1, 2, 3, 4\}$. Trova $c$ e calcola $E[X]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.10"
+  dificuldade="aplicacao"
+  solucao={<>Somma geometrica: <Eq>{`\\sum_{k=1}^\\infty (1/2)^k = \\frac{1/2}{1-1/2} = 1`}</Eq> ✓. <Eq>{`E[X] = \\sum_{k=1}^\\infty k(1/2)^k`}</Eq>. Usando <Eq>{`\\sum k r^k = r/(1-r)^2`}</Eq> con <Eq>{`r = 1/2`}</Eq>: <Eq>{`E[X] = (1/2)/(1/2)^2 = 2`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "191", exercicio: "5.1.1", licenca: "GNU FDL" }}
+>
+
+$P(X = k) = (1/2)^k$ per $k = 1, 2, \ldots$ Verifica che è PMF valida e calcola $E[X]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.11"
+  dificuldade="aplicacao"
+  solucao={<>Profitto per biglietto: vinci <Eq>{`1.000.000`}</Eq> real con probabilità <Eq>{`10^{-7}`}</Eq>, costa 5 real. <Eq>{`E[\\text{profitto}] = 10^6 \\cdot 10^{-7} - 5 = 0{,}10 - 5{,}00 = -4{,}90`}</Eq>. In media, perdi 4,90 real per biglietto. Non conviene dal punto di vista del valore atteso.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "228", exercicio: "4.2.11", licenca: "CC-BY" }}
+>
+
+Lotteria: vinci 1 milione di real con prob. $10^{-7}$, ogni biglietto costa 5 real. Calcola $E[\text{profitto}]$ per biglietto. Conviene comprare?
+
+</Exercicio>
+
+<Exercicio
+  numero="74.12"
+  dificuldade="aplicacao"
+  resposta="4"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "99", exercicio: "3.7", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`E[X] = 100 \\cdot 0{,}4 + (-60) \\cdot 0{,}6 = 40 - 36 = 4`}</Eq>. Scommessa leggermente favorevole (profitto atteso positivo).</>}
+>
+
+Scommessa: vinci 100 real con prob. 0,4 e perdi 60 real con prob. 0,6. Calcola $E[X]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.13"
+  dificuldade="aplicacao"
+  resposta="18"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "229", exercicio: "4.2.13", licenca: "CC-BY" }}
+  solucao={<>Per linearità: <Eq>{`E[2X + 3Y - 1] = 2E[X] + 3E[Y] - 1 = 10 + 9 - 1 = 18`}</Eq>.</>}
+>
+
+$E[X] = 5$, $E[Y] = 3$. Calcola $E[2X + 3Y - 1]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.14"
+  dificuldade="aplicacao"
+  resposta="26"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "105", exercicio: "3.11", licenca: "CC-BY-SA" }}
+  solucao={<>Dalla formula della varianza: <Eq>{`\\text{Var}(X) = E[X^2] - (E[X])^2 \\Rightarrow E[X^2] = \\text{Var}(X) + (E[X])^2 = 9 + 16 = 25`}</Eq>. Allora <Eq>{`E[X^2 + 1] = E[X^2] + 1 = 26`}</Eq>.</>}
+>
+
+$X$ ha $E[X] = 4$ e $\text{Var}(X) = 9$. Calcola $E[X^2 + 1]$.
+
+</Exercicio>
+
+### Blocco B — Linearità e LOTUS (74.15 a 74.24)
+
+<Exercicio
+  numero="74.15"
+  dificuldade="aplicacao"
+  resposta="350"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "230", exercicio: "4.2.15", licenca: "CC-BY" }}
+  solucao={<>100 dadi indipendenti: <Eq>{`E[\\sum_{i=1}^{100} X_i] = 100 \\cdot E[X] = 100 \\cdot 3{,}5 = 350`}</Eq>.</>}
+>
+
+100 dadi indipendenti. Aspettativa della somma totale.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.16"
+  dificuldade="aplicacao"
+  solucao={<>Per indipendenza: <Eq>{`\\text{Var}(\\sum X_i) = 100 \\cdot \\text{Var}(X) = 100 \\cdot 35/12 = 3500/12 \\approx 291{,}7`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "106", exercicio: "3.13", licenca: "CC-BY-SA" }}
+>
+
+100 dadi indipendenti. Varianza della somma totale.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[X^2] = 0 \\cdot 0{,}3 + 1 \\cdot 0{,}5 + 4 \\cdot 0{,}2 = 0 + 0{,}5 + 0{,}8 = 1{,}3`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "231", exercicio: "4.2.17", licenca: "CC-BY" }}
+>
+
+$X \in \{0, 1, 2\}$ con probabilità 0,3; 0,5; 0,2. Calcola $E[X^2]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[X] = 0{,}9`}</Eq>. Per linearità: <Eq>{`E[3X + 2] = 3 \\cdot 0{,}9 + 2 = 2{,}7 + 2 = 4{,}7`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "107", exercicio: "3.15", licenca: "CC-BY-SA" }}
+>
+
+Stessa $X$. Calcola $E[3X + 2]$ via linearità.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.19"
+  dificuldade="aplicacao"
+  solucao={<>Via LOTUS con <Eq>{`g(x) = (x-1)^2`}</Eq>: <Eq>{`E[(X-1)^2] = (0-1)^2 \\cdot 0{,}3 + (1-1)^2 \\cdot 0{,}5 + (2-1)^2 \\cdot 0{,}2 = 0{,}3 + 0 + 0{,}2 = 0{,}5`}</Eq>. Nota: <Eq>{`\\text{Var}(X) = E[(X-E[X])^2] = E[(X-0{,}9)^2] = 0{,}49 \\neq 0{,}5`}</Eq> — attenzione: <Eq>{`E[(X-1)^2]`}</Eq> non è varianza perché 1 non è la media.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "192", exercicio: "5.1.3", licenca: "GNU FDL" }}
+>
+
+Stessa $X$. Calcola $E[(X-1)^2]$ via LOTUS.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.20"
+  dificuldade="aplicacao"
+  solucao={<>Sia <Eq>{`I_k = 1`}</Eq> se la carta <Eq>{`k`}</Eq> è asso, 0 altrimenti. <Eq>{`P(I_k = 1) = 4/52`}</Eq> per ognuna delle 5 carte estratte. Per linearità: <Eq>{`E[\\text{assi}] = \\sum_{k=1}^5 E[I_k] = 5 \\cdot 4/52 = 20/52 \\approx 0{,}385`}</Eq>. La linearità funziona anche senza indipendenza (estrazione senza reinserimento).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "108", exercicio: "3.17", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>Definisci indicatore <Eq>{`I_k = 1`}</Eq> se la <Eq>{`k`}</Eq>-esima carta è asso.</li><li><Eq>{`P(I_k = 1) = 4/52`}</Eq> per simmetria (ogni posizione ha stessa prob. di essere asso).</li><li>Linearità: <Eq>{`E[I_1 + \\ldots + I_5] = 5 \\times 4/52 = 5/13`}</Eq>.</li></ol><em>Curiosità:</em> questo trucco degli indicatori (Waring, 1792; Boole) è universalmente utile per calcolare l'aspettativa di conteggi.</>}
+>
+
+Estrai 5 carte da un mazzo senza reinserimento. Usa indicatori e linearità per calcolare l'aspettativa del numero di assi.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.21"
+  dificuldade="aplicacao"
+  solucao={<>Coppie di compleanni: <Eq>{`\\binom{n}{2}`}</Eq> coppie possibili. Ogni coppia condivide il compleanno con prob. <Eq>{`1/365`}</Eq>. Per linearità: <Eq>{`E[\\text{coppie}] = \\binom{n}{2}/365 = n(n-1)/730`}</Eq>. Per <Eq>{`n=30`}</Eq>: <Eq>{`E = 30 \\cdot 29/730 \\approx 1{,}19`}</Eq> coppia attesa.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "193", exercicio: "5.1.5", licenca: "GNU FDL" }}
+>
+
+Tra $n$ persone, aspettativa del numero di coppie che condividono lo stesso compleanno. Usa indicatori.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.22"
+  dificuldade="aplicacao"
+  solucao={<>10 palline da un'urna con 5 rosse e 15 blu (senza reinserimento). Indicatore <Eq>{`I_k = 1`}</Eq> se la <Eq>{`k`}</Eq>-esima pallina estratta è rossa. <Eq>{`P(I_k = 1) = 5/20 = 1/4`}</Eq> per simmetria. <Eq>{`E[\\text{rosse}] = 10 \\cdot 1/4 = 2{,}5`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "232", exercicio: "4.2.19", licenca: "CC-BY" }}
+>
+
+Urna con 5 palline rosse e 15 blu. Estrai 10 senza reinserimento. Aspettativa del numero di rosse.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.23"
+  dificuldade="aplicacao"
+  solucao={<>Assicurazione: paga 100 mila real con probabilità 1% = 0,01. <Eq>{`E[\\text{indennizzo}] = 100.000 \\times 0{,}01 = 1.000`}</Eq>. Premio attuarialmente equo = 1.000 real. In pratica, l'assicuratrice addebitaria di più (1.200 a 1.500 real) per coprire i costi e il profitto.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "233", exercicio: "4.2.21", licenca: "CC-BY" }}
+>
+
+Assicurazione: 1% di possibilità di pagare 100 mila real. Qual è il premio attuarialmente equo?
+
+</Exercicio>
+
+<Exercicio
+  numero="74.24"
+  dificuldade="aplicacao"
+  solucao={<>Roulette europea: 37 caselle (0 a 36). Scommettendo 1 real su un numero: vinci 35 real con prob. 1/37, perdi 1 real con prob. 36/37. <Eq>{`E[X] = 35 \\cdot (1/37) - 1 \\cdot (36/37) = (35-36)/37 = -1/37 \\approx -0{,}027`}</Eq>. La casa trattiene il 2,7% in media.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "100", exercicio: "3.8", licenca: "CC-BY-SA" }}
+>
+
+Roulette europea (37 caselle): scommetti 1 real su un numero, paga 35:1. Calcola $E[X]$ per giro.
+
+</Exercicio>
+
+### Blocco C — Modellizzazione con dati brasiliani (74.25 a 74.34)
+
+<Exercicio
+  numero="74.25"
+  dificuldade="modelagem"
+  solucao={<>Ricavo per visitante: 200 real con prob. 10% = 0,10; 0 real con prob. 0,90. <Eq>{`E[\\text{ricavo/visitante}] = 200 \\cdot 0{,}1 + 0 \\cdot 0{,}9 = 20`}</Eq>. Per 1.000 visitanti: ricavo totale = 20.000 real.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "234", exercicio: "4.2.23", licenca: "CC-BY" }}
+>
+
+E-commerce: 10% dei visitanti compra; ticket medio 200 real. Calcola il ricavo atteso per 1.000 visitanti.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.26"
+  dificuldade="modelagem"
+  solucao={<>Costo per classificazione: 50 real con prob. 5% (errore), 0 real con prob. 95%. <Eq>{`E[\\text{costo/classificazione}] = 50 \\times 0{,}05 = 2{,}50`}</Eq>. In 1.000 classificazioni: costo totale = 2.500 real.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "101", exercicio: "3.9", licenca: "CC-BY-SA" }}
+>
+
+Modello ML con accuratezza 95%. Ogni errore costa 50 real. Aspettativa del costo totale in 1.000 classificazioni.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.27"
+  dificuldade="modelagem"
+  solucao={<>Linea di produzione: 2% difettose, lotto di 50. <Eq>{`X \\sim \\text{Bin}(50, 0{,}02)`}</Eq> (anticipando la prossima lezione). <Eq>{`E[X] = 50 \\times 0{,}02 = 1`}</Eq>. <Eq>{`\\text{Var}(X) = 50 \\times 0{,}02 \\times 0{,}98 = 0{,}98`}</Eq>. Atteso: 1 pezzo difettoso per lotto, varianza vicino a 1.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-3-binomial-distribution", secao: "§4.3", pagina: "244", exercicio: "4.3.1", licenca: "CC-BY" }}
+>
+
+Linea di produzione: 2% dei pezzi sono difettosi. Lotto di 50 pezzi. Aspettativa e varianza del numero di difettosi.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.28"
+  dificuldade="modelagem"
+  solucao={<>Per operatore per minuto: <Eq>{`E[X] = 1 \\times 0{,}2 + 2 \\times 0{,}5 + 3 \\times 0{,}3 = 0{,}2 + 1{,}0 + 0{,}9 = 2{,}1`}</Eq> clienti/min. Per ora (60 min): <Eq>{`E[\\text{clienti/ora}] = 60 \\times 2{,}1 = 126`}</Eq> servizi.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "102", exercicio: "3.11", licenca: "CC-BY-SA" }}
+>
+
+Call center: operatore serve 1, 2 o 3 clienti/min con probabilità 0,2; 0,5; 0,3. Aspettativa di servizi per ora.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.29"
+  dificuldade="modelagem"
+  solucao={<>Lancia fino alla prima testa: <Eq>{`X \\sim \\text{Geometrica}(p = 0{,}5)`}</Eq>. <Eq>{`E[X] = 1/p = 2`}</Eq>. In media, 2 lanci per la prima testa. La distribuzione geometrica modella "prove fino al primo successo".</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "235", exercicio: "4.2.25", licenca: "CC-BY" }}
+  passos={<><ol><li><Eq>{`P(X = k) = (1/2)^{k-1} \\cdot (1/2) = (1/2)^k`}</Eq> per <Eq>{`k = 1, 2, \\ldots`}</Eq></li><li><Eq>{`E[X] = \\sum_{k=1}^\\infty k (1/2)^k`}</Eq>. Usando <Eq>{`\\sum kr^k = r/(1-r)^2`}</Eq> con <Eq>{`r = 1/2`}</Eq>: <Eq>{`E[X] = (1/2)/(1/2)^2 = 2`}</Eq>.</li></ol><em>Scorciatoia mentale:</em> geometrica con prob. di successo <Eq>{`p`}</Eq> ha <Eq>{`E[X] = 1/p`}</Eq> — memorizza questo risultato.</>}
+>
+
+Lancia una moneta onesta fino a quando esce testa. Aspettativa del numero di lanci.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.30"
+  dificuldade="modelagem"
+  solucao={<>Poisson con <Eq>{`\\lambda = 5`}</Eq>/s. In 1 min = 60 s, aspettativa = <Eq>{`60 \\times 5 = 300`}</Eq> richieste. Per linearità: somma di 60 v.a. Poisson(5) iid ha aspettativa <Eq>{`60 \\times 5 = 300`}</Eq> e varianza 300 (Poisson è auto-scaling).</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "236", exercicio: "4.2.27", licenca: "CC-BY" }}
+>
+
+Server riceve 5 richieste/s in media (Poisson). Aspettativa di richieste in 1 minuto.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.31"
+  dificuldade="modelagem"
+  solucao={<>INSS: aliquota 7,5% su stipendi fino a 1.320 real. Lavoratore con stipendio variabile: 1.500 real (30% delle volte) o 1.000 real (70% delle volte). Contributo: 127,50 o 75,00 real. <Eq>{`E[\\text{contributo}] = 127{,}50 \\times 0{,}3 + 75 \\times 0{,}7 = 38{,}25 + 52{,}50 = 90{,}75`}</Eq>, cioè 90,75 real.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "103", exercicio: "3.12", licenca: "CC-BY-SA" }}
+>
+
+Lavoratore autonomo: riceve 1.500 real (30% del tempo) o 1.000 real (70% del tempo). Aliquota INSS semplificata: 7,5% sullo stipendio mensile. Calcola il contributo atteso mensile.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.32"
+  dificuldade="modelagem"
+  solucao={<>Fondo con rendimento mensile: <Eq>{`X`}</Eq> assume +2% (prob. 0,6), -1% (prob. 0,4). <Eq>{`E[X] = 0{,}02 \\times 0{,}6 + (-0{,}01) \\times 0{,}4 = 0{,}012 - 0{,}004 = 0{,}008`}</Eq> o 0,8% al mese. <Eq>{`E[X^2] = 0{,}0004 \\times 0{,}6 + 0{,}0001 \\times 0{,}4 = 0{,}00028`}</Eq>. <Eq>{`\\text{Var}(X) = 0{,}00028 - 0{,}000064 = 0{,}000216`}</Eq>. <Eq>{`\\sigma \\approx 1{,}47\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "237", exercicio: "4.2.29", licenca: "CC-BY" }}
+>
+
+Fondo di investimento: rendimento mensile di +2% con prob. 0,6 o -1% con prob. 0,4. Calcola rendimento atteso e varianza mensile.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.33"
+  dificuldade="modelagem"
+  solucao={<>Negozio con 3 fornitori: A (40% ordini, consegna in 3 giorni), B (35%, consegna in 5 giorni), C (25%, consegna in 7 giorni). <Eq>{`E[\\text{consegna}] = 3 \\times 0{,}4 + 5 \\times 0{,}35 + 7 \\times 0{,}25 = 1{,}2 + 1{,}75 + 1{,}75 = 4{,}7`}</Eq> giorni. <Eq>{`E[\\text{consegna}^2] = 9 \\times 0{,}4 + 25 \\times 0{,}35 + 49 \\times 0{,}25 = 3{,}6 + 8{,}75 + 12{,}25 = 24{,}6`}</Eq>. <Eq>{`\\text{Var} = 24{,}6 - 22{,}09 = 2{,}51`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "109", exercicio: "3.14", licenca: "CC-BY-SA" }}
+>
+
+Negozio con 3 fornitori: A (40% degli ordini, 3 giorni), B (35%, 5 giorni), C (25%, 7 giorni). Calcola tempo medio di consegna e varianza.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.34"
+  dificuldade="modelagem"
+  solucao={<>Cashback: 5 real in 20% degli acquisti, 0 real in 80%. <Eq>{`E[\\text{cashback/acquisto}] = 5 \\times 0{,}2 = 1{,}00`}</Eq>. In 50 acquisti/mese: cashback mensile = 50 real. Varianza per acquisto: <Eq>{`E[X^2] - (E[X])^2 = 25 \\times 0{,}2 - 1 = 4`}</Eq>. Varianza mensile (indipendente): <Eq>{`50 \\times 4 = 200`}</Eq>. <Eq>{`\\sigma \\approx 14{,}14`}</Eq> real.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "238", exercicio: "4.2.31", licenca: "CC-BY" }}
+>
+
+Carta con cashback casuale: 5 real in 20% degli acquisti, 0 real altrimenti. Con 50 acquisti/mese, calcola cashback atteso mensile e deviazione standard.
+
+</Exercicio>
+
+### Blocco D — Comprensione e dimostrazione (74.35 a 74.40)
+
+<Exercicio
+  numero="74.35"
+  dificuldade="compreensao"
+  solucao={<>LOTUS funziona perché l'aspettativa di una funzione di <Eq>{`X`}</Eq> è calcolata sulla distribuzione di <Eq>{`X`}</Eq> — non serve derivare la distribuzione di <Eq>{`g(X)`}</Eq>. Formalmente: <Eq>{`E[g(X)] = \\sum_x g(x) p_X(x)`}</Eq>. La PMF di <Eq>{`X`}</Eq> già codifica tutte le informazioni necessarie — basta sostituire <Eq>{`x`}</Eq> con <Eq>{`g(x)`}</Eq> nella somma.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "194", exercicio: "5.1.7", licenca: "GNU FDL" }}
+>
+
+Perché LOTUS funziona? Spiega in 2–3 righe senza usare formule.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.36"
+  dificuldade="compreensao"
+  opcoes={[{texto: "La linearità dell'aspettativa vale per definizione di integrale/somma — non richiede indipendenza", correta: true}, {texto: "La linearità vale solo per variabili indipendenti"}, {texto: "La linearità vale solo per variabili con la stessa distribuzione"}, {texto: "La linearità dell'aspettativa non vale in generale, solo per casi speciali"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "110", exercicio: "3.16", licenca: "CC-BY-SA" }}
+  solucao={<>La linearità dell'aspettativa segue dalla linearità della somma: <Eq>{`E[X+Y] = \\sum_{x,y}(x+y)p(x,y) = \\sum_x x p_X(x) + \\sum_y y p_Y(y) = E[X]+E[Y]`}</Eq>. Questa algebra di somme non richiede alcuna ipotesi sulla relazione tra <Eq>{`X`}</Eq> e <Eq>{`Y`}</Eq>.</>}
+>
+
+Perché la linearità dell'aspettativa $E[X+Y] = E[X] + E[Y]$ vale anche quando $X$ e $Y$ sono dipendenti?
+
+</Exercicio>
+
+<Exercicio
+  numero="74.37"
+  dificuldade="desafio"
+  solucao={<>Vogliamo <Eq>{`X`}</Eq> con 2 valori <Eq>{`a, b`}</Eq>, <Eq>{`E[X] = 0`}</Eq>, <Eq>{`\\text{Var}(X) = 1`}</Eq>. Sia <Eq>{`P(X=a) = p`}</Eq>. Condizioni: <Eq>{`ap + b(1-p) = 0`}</Eq> e <Eq>{`a^2p + b^2(1-p) - 0 = 1`}</Eq>. Soluzione semplice: <Eq>{`a = 1`}</Eq>, <Eq>{`b = -1`}</Eq>, <Eq>{`p = 1/2`}</Eq>. Verifica: <Eq>{`E[X] = 0`}</Eq>, <Eq>{`E[X^2] = 1`}</Eq>, <Eq>{`\\text{Var} = 1`}</Eq>. Altra: <Eq>{`a = \\sqrt{2}`}</Eq>, <Eq>{`b = -\\sqrt{2}`}</Eq>, <Eq>{`p = 1/2`}</Eq> funziona anche se <Eq>{`b = -\\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "198", exercicio: "5.2.1", licenca: "GNU FDL" }}
+>
+
+Costruisci una v.a. discreta con solo 2 valori che soddisfi $E[X] = 0$ e $\text{Var}(X) = 1$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.38"
+  dificuldade="demonstracao"
+  solucao={<>Prova: <Eq>{`\\text{Var}(X) = E[(X - \\mu)^2]`}</Eq> per definizione, con <Eq>{`\\mu = E[X]`}</Eq>. Espandi: <Eq>{`E[X^2 - 2\\mu X + \\mu^2] = E[X^2] - 2\\mu E[X] + \\mu^2`}</Eq> (linearità). Sostituisci <Eq>{`E[X] = \\mu`}</Eq>: <Eq>{`= E[X^2] - 2\\mu^2 + \\mu^2 = E[X^2] - \\mu^2 = E[X^2] - (E[X])^2`}</Eq>. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "111", exercicio: "3.18", licenca: "CC-BY-SA" }}
+>
+
+Dimostra l'identità $\text{Var}(X) = E[X^2] - (E[X])^2$ a partire dalla definizione $\text{Var}(X) = E[(X - \mu)^2]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.39"
+  dificuldade="demonstracao"
+  solucao={<>Per discrete indipendenti: <Eq>{`E[XY] = \\sum_x \\sum_y xy \\cdot P(X=x, Y=y) = \\sum_x \\sum_y xy \\cdot P(X=x)P(Y=y)`}</Eq> (per indipendenza) <Eq>{`= \\left(\\sum_x x P(X=x)\\right)\\left(\\sum_y y P(Y=y)\\right) = E[X] E[Y]`}</Eq>. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "199", exercicio: "5.2.3", licenca: "GNU FDL" }}
+>
+
+Dimostra che se $X, Y$ sono discrete e indipendenti, allora $E[XY] = E[X]\,E[Y]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="74.40"
+  dificuldade="demonstracao"
+  solucao={<>Disuguaglianza di Markov: sia <Eq>{`X \\geq 0`}</Eq> e <Eq>{`a > 0`}</Eq>. <Eq>{`E[X] = \\sum_x x p(x) \\geq \\sum_{x \\geq a} x p(x) \\geq a \\sum_{x \\geq a} p(x) = a P(X \\geq a)`}</Eq>. Quindi <Eq>{`P(X \\geq a) \\leq E[X]/a`}</Eq>. Per Chebyshev: applica Markov a <Eq>{`Y = (X - \\mu)^2`}</Eq> con soglia <Eq>{`k^2 \\sigma^2`}</Eq>: <Eq>{`P(Y \\geq k^2\\sigma^2) \\leq E[Y]/(k^2\\sigma^2) = \\sigma^2/(k^2\\sigma^2) = 1/k^2`}</Eq>. Poiché <Eq>{`Y \\geq k^2\\sigma^2 \\iff |X-\\mu| \\geq k\\sigma`}</Eq>, si conclude Chebyshev. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "200", exercicio: "5.2.5", licenca: "GNU FDL" }}
+>
+
+Dimostra le disuguaglianze di Markov ($P(X \geq a) \leq E[X]/a$ per $X \geq 0$) e Chebyshev ($P(|X - \mu| \geq k\sigma) \leq 1/k^2$).
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Fonti
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · EN · CC-BY-SA. **Fonte primaria — §3.1 (PMF, aspettativa) e §3.2 (varianza, linearità, indipendenza).**
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · EN · CC-BY. **§4.1–4.3 — v.a. discreta, PMF, CDF, aspettativa, varianza; esercizi di livello AP.**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · 1997 · EN · GNU FDL. **§5.1–5.2 — aspettativa, varianza, LOTUS, disuguaglianze di Markov e Chebyshev; esercizi dimostrativi.**
