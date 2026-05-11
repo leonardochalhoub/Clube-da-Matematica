@@ -1,0 +1,993 @@
+---
+titulo: "Lição 46 — TVI e Taxa de Variação Média"
+slug: "licao-46-tvi-tvm"
+categoria: "aulas"
+subcategoria: "ano-2-trim-5"
+descricao: "Teorema do Valor Intermediário (existência de raízes, bisseção) e Taxa de Variação Média (inclinação da secante, ponte para a derivada)."
+ordem: 46
+publicado: true
+tags: ["TVI", "taxa-de-variacao-media", "continuidade", "secante", "derivada", "ano-2", "trim-5"]
+prerrequisitos: ["licao-43-continuidade"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano do EM (cálculo intro)", "Equiv. Math II japonês §5", "Equiv. Analysis/Klasse 11 alemã"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{TVM}_{[a,b]} = \frac{f(b) - f(a)}{b - a}"
+  legenda={<>区間 <Eq>{`[a, b]`}</Eq> における <strong>平均変化率</strong> は、点 <Eq>{`(a,\\, f(a))`}</Eq> と <Eq>{`(b,\\, f(b))`}</Eq> を通る割線の傾きです。<Eq>{`b \\to a`}</Eq> のとき、この率は<em>瞬間変化率</em>、すなわち導関数に近づきます。</>}
+  audioTexto="区間 a から b における f の平均変化率は、f(b) マイナス f(a) を b マイナス a で割った値に等しい。幾何学的には、グラフの2点を結ぶ直線の傾きです。b が a に近づくと、この傾きは a における導関数に収束します。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    この授業に関連する書籍
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §1.1–1.3 速度、平均変化率、導関数 · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">第一次資料：速度の平均と極限への移行に関する発見活動。導関数を生成する極限の計算。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/calculus-volume-1" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §2.4 連続性と中間値定理 · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">中間値定理の正式な陳述と系、超越方程式の例、根の位置付けに関する練習。</em>
+    </li>
+    <li>
+      <a href="https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        REAMAT — Cálculo Numérico (UFRGS)
+      </a>
+      <span className="text-clube-mist"> · §3.1 二分法 · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Python での実装、誤差解析、内部収益率と工学方程式の根の例。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="定義と定理">
+
+### 中間値定理 (TVI)
+
+<Definicao titulo="中間値定理">
+
+$f : [a, b] \to \mathbb{R}$ を連続関数とします。$k$ が $f(a)$ と $f(b)$ の間の任意の値、つまり $\min\{f(a), f(b)\} \leq k \leq \max\{f(a), f(b)\}$ を満たすとき、ある $c \in (a, b)$ が存在して $f(c) = k$ です。
+
+</Definicao>
+
+> 「$f$ が $[a, b]$ で連続であり、$k$ が $f(a)$ と $f(b)$ の間の任意の値であれば、$(a, b)$ に少なくとも1つの数 $c$ が存在して $f(c) = k$ です。」— [OpenStax Calculus Volume 1, §2.4, Theorem 2.13](https://openstax.org/books/calculus-volume-1/pages/2-4-continuity)
+
+**系（根の存在）。** $f \in C([a, b])$ で $f(a) \cdot f(b) < 0$ であれば、ある $c \in (a, b)$ が存在して $f(c) = 0$ です。
+
+<Equation explicacao="負の積は符号が反対であることを意味します：f(a) と f(b) がゼロの反対側にあるため、f はある内部点を通過する必要があります。" latex="f(a) \cdot f(b) < 0 \implies \exists\, c \in (a,b) : f(c) = 0" />
+
+**証明（完全性による概略）。** $f(a) < 0 < f(b)$ と仮定します。$S = \{x \in [a, b] : f(x) < 0\}$ と定義します。集合 $S$ は空ではなく（$a \in S$）、$b$ によって上から有界です。$\mathbb{R}$ の完全性により、$c = \sup S \in [a, b]$ が存在します。$f$ の連続性により、$f(c) \neq 0$ ならば矛盾が生じます。したがって $f(c) = 0$ です。$\square$
+
+**連続性が不可欠な理由。** ヘヴィサイド関数 $H(x) = 0$ （$x < 0$）、$H(x) = 1$ （$x \geq 0$）は $H(-1) = 0$、$H(1) = 1$ を満たしますが、$1/2$ を取りません。なぜなら $x = 0$ で不連続跳躍があるからです。
+
+<Insight>
+
+中間値定理は根の存在のための十分条件ですが必要条件ではありません。$f(a)$ と $f(b)$ が同じ符号であれば、中間値定理は適用されません。しかし内部に根がある可能性はあります。例：$f(x) = (x-1)^2$ は $f(0) = f(2) = 1 > 0$ ですが、$x = 1$ は重根です。中間値定理は根を保証しますが、排除しません。
+
+</Insight>
+
+### 二分法
+
+$f \in C([a, b])$ で $f(a)f(b) < 0$ が与えられたとき、二分法は反復的に根を位置付けます。各ステップで、中点を計算し、$f$ が符号を変える部分を保持します：
+
+<Equation explicacao="各反復で、中点 m_n が現在の区間を分割します。誤差は各ステップで半分になり、収束が保証され、定量化可能です。" latex="m_n = \frac{a_n + b_n}{2}, \qquad |c - m_n| \leq \frac{b - a}{2^{n+1}}" />
+
+精度 $\varepsilon$ では、$n \geq \lceil \log_2((b-a)/\varepsilon) \rceil - 1$ 回の反復が必要です。
+
+### 平均変化率 (TVM)
+
+<Definicao titulo="平均変化率">
+
+$f$ が $[a, b]$ で定義され $a \neq b$ のとき、この区間での **平均変化率** は：
+
+$$\text{TVM}_{[a,b]} = \frac{f(b) - f(a)}{b - a}$$
+
+幾何学的には、これはグラフ上の点 $(a, f(a))$ と $(b, f(b))$ を通る **割線の傾き** です。
+
+</Definicao>
+
+> 「区間 $[a, b]$ における $f$ の平均変化率は $\text{AV}_{[a,b]} = \dfrac{f(b)-f(a)}{b-a}$ です。幾何学的には、平均変化率は点 $(a, f(a))$ と $(b, f(b))$ を通る直線の傾きを表します。」— [Active Calculus, §1.1, Definition 1.1.4](https://activecalculus.org/single/sec-1-1-vel.html)
+
+$h = b - a$ という記法は等価です：
+
+<Equation explicacao="b = a + h を代入すると、TVM は増分 h で表現されます。h → 0 のとき、この式は導関数（瞬間変化率）を定義します。" latex="\text{TVM} = \frac{f(a + h) - f(a)}{h}, \quad h = b - a \neq 0" />
+
+**極限への移行。** $f$ が $a$ で微分可能なら：
+
+$$f'(a) = \lim_{h \to 0} \frac{f(a+h) - f(a)}{h} = \lim_{b \to a} \frac{f(b) - f(a)}{b - a}$$
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 420 260" className="w-full max-w-[480px] mx-auto block">
+  <defs>
+    <marker id="arr46" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <line x1="30" y1="220" x2="400" y2="220" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr46)"/>
+  <line x1="60" y1="240" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr46)"/>
+  <text x="395" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">x</text>
+  <text x="65" y="18" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">y</text>
+  <path d="M 80,200 Q 180,60 380,100" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+  <circle cx="140" cy="140" r="4" fill="rgb(26 77 92)"/>
+  <circle cx="320" cy="105" r="4" fill="rgb(26 77 92)"/>
+  <line x1="100" y1="172" x2="370" y2="86" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4,3"/>
+  <text x="135" y="158" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">(a, f(a))</text>
+  <text x="325" y="102" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">(b, f(b))</text>
+  <text x="195" y="125" fontSize="9" fontFamily="serif" fill="rgb(201 163 95)">secante: inclinação = TVM</text>
+  <text x="80" y="250" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.5">a</text>
+  <text x="315" y="250" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.5">b</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+割線は <em>(a, f(a))</em> から <em>(b, f(b))</em> を結びます。その傾きは TVM です。<em>b → a</em> のとき、割線は <em>a</em> での接線に収束し、その傾きは <em>f'(a)</em> です。
+</figcaption>
+</figure>
+
+<Teorema titulo="平均変化率 — 導関数の関係">
+$f$ が $a$ で微分可能であれば：
+$$\lim_{b \to a} \text{TVM}_{[a,b]} = f'(a)$$
+導関数は、区間が一点に縮小する際の平均変化率の極限です。TVM はグローバル版（割線）、導関数はローカル版（接線）です。
+</Teorema>
+
+</Porta>
+
+<Porta nivel="5" titulo="5歳の子どもに">
+
+階段を登っていることを想像してください。最初は **下** にいて、最後は **上** にいます。そこに到達するには、**中間のすべての段を通らなければいけません** — 地面から頂上へ直接ジャンプすることはできません。
+
+中間値定理は連続関数について正確にこれを言っています：関数が小さい値で始まり大きい値で終わるなら、**その間のすべての値を通らなければいけません**。
+
+平均変化率は坂道の傾斜を計算することのようなものです。2歩で4メートル上昇するなら、平均傾斜は4を2で割った値です：1歩あたり2メートル。
+
+</Porta>
+
+<Porta nivel="10" titulo="10歳の子どもに">
+
+**中間値定理：** 温度計が夜中に $-3^\circ$ を示し、正午に $+12^\circ$ を示したとします。どこかの時点で正確に $0^\circ$ を示しました。これは確実です — 温度は飛びません、ゆっくり変化します。
+
+数学的には：連続関数が負で始まり正で終わるなら、**中間のどこかでゼロを通ります**。これが中間値定理です。
+
+例：$f(x) = x^3 - x - 1$。
+- $f(1) = 1 - 1 - 1 = -1$（負）
+- $f(2) = 8 - 2 - 1 = 5$（正）
+
+中間値定理は 1 と 2 の間に根が存在することを保証します。
+
+**平均変化率：** 自動車が2時間で120 km 走行するなら、平均速度は：
+
+$$\text{平均速度} = \frac{120}{2} = 60 \text{ km/h}$$
+
+これは位置の平均変化率です：位置がどのくらい変化したかを時間で割った値。位置が関数 $s(t)$ であれば、区間 $[0, 2]$ での TVM は $(s(2) - s(0))/(2 - 0)$ です。
+
+</Porta>
+
+<Porta nivel="15" titulo="15歳の十代に">
+
+この授業には微積分へ向かう2つの考えがあります。
+
+### 中間値定理 — 根の存在保証
+
+方程式 $g(x) = h(x)$ が $[a, b]$ に解を持つことを示すには：
+1. $f(x) = g(x) - h(x)$ を定義します。
+2. $f$ が $[a, b]$ で連続であることを確認します（多項式、サイン、コサイン、指数は常に連続）。
+3. $f(a)$ と $f(b)$ を計算します。
+4. 符号が反対なら、中間値定理は $(a, b)$ に $f(c) = 0$ を持つ $c$ が存在することを保証します。
+
+**例：$[0, \pi/2]$ で $\cos x = x$。**
+
+$f(x) = \cos x - x$ を定義します。
+- $f(0) = \cos 0 - 0 = 1 > 0$
+- $f(\pi/2) = \cos(\pi/2) - \pi/2 = 0 - 1.57 \approx -1.57 < 0$
+
+符号の変化があります。したがって $(0, \pi/2)$ に $\cos c = c$ を持つ $c$ が存在します（数値的には $c \approx 0.739$）。
+
+### 平均変化率 (TVM)
+
+$$\text{TVM} = \frac{f(b) - f(a)}{b - a}$$
+
+**幾何学：** 点 $(a, f(a))$ と $(b, f(b))$ を通る直線の傾きです — **割線**。
+
+**物理学：** $s(t)$ が物体の位置なら、区間 $[t_1, t_2]$ での平均速度は、まさに $s$ の TVM です。
+
+**導関数への橋：** 区間 $[a, b]$ が縮小すると（$b \to a$）、割線は **接線** に近づきます。接線の傾きは **導関数** — 瞬間変化率です。微積分はまさここから始まります。
+
+<Insight>
+
+TVM は微分計算なしで計算できるものです。導関数は区間がゼロに向かうときの TVM の極限です。導関数理論全体がこの1文に圧縮されています。
+
+</Insight>
+
+### 二分法
+
+$f(a)$ と $f(b)$ が反対の符号を持つなら、二分法は根を位置付けます：
+
+| 反復 | $a$ | $b$ | $m = (a+b)/2$ | $f(m)$ | 次の探索 |
+|---|---|---|---|---|---|
+| 0 | 1 | 2 | $1.5$ | $+0.875$ | $[1; 1.5]$ |
+| 1 | 1 | $1.5$ | $1.25$ | $-0.297$ | $[1.25; 1.5]$ |
+| 2 | $1.25$ | $1.5$ | $1.375$ | $+0.225$ | $[1.25; 1.375]$ |
+| 3 | $1.25$ | $1.375$ | $1.3125$ | $-0.051$ | $[1.3125; 1.375]$ |
+
+各反復で誤差が2で除算されます。10回の反復後、誤差は $(b - a)/1024$ より小さい。
+
+</Porta>
+
+<Porta nivel="25" titulo="工学学生に">
+
+### 中間値定理 — 帰結と計算応用
+
+**中間値定理が $\mathbb{Q}$ で失敗する理由。** 関数 $f(x) = x^2 - 2$ は $\mathbb{Q}$ 上で連続（有理数に制限された関数として）で、$f(1) = -1 < 0$、$f(2) = 2 > 0$ です。古典的な中間値定理は根を要求しますが、それは $\sqrt{2}$ です — しかし $\sqrt{2} \notin \mathbb{Q}$。これは実数の完全性が中間値定理に不可欠であることを示します。
+
+**二分法：誤差解析。** $n$ 回の反復後：$|c - m_n| \leq (b - a)/2^{n+1}$。精度 $\varepsilon$ には：$n \geq \log_2\!\left(\frac{b-a}{\varepsilon}\right) - 1$。$[1, 2]$ で $\varepsilon = 10^{-9}$：$n \geq \log_2(10^9) - 1 \approx 29$ 回の反復。
+
+**工学応用：**
+- オプションの暗黙ボラティリティ：$C(\sigma) = C_{\text{mkt}}$、ニュートン法が振動するときに二分法で解決。
+- 内部収益率 (IRR)：$\text{NPV}(r) = 0$、$r \in [0, 1]$ で二分法。
+- 動的システム安定性分析用の特性多項式の根。
+
+**中間値定理からの固定点。** $g \in C([a, b])$ で $g([a, b]) \subseteq [a, b]$ なら、$f(x) = g(x) - x$ を定義します。すると $f(a) = g(a) - a \geq 0$ で $f(b) = g(b) - b \leq 0$ です。中間値定理により、$(a, b)$ に $g(c) = c$ を持つ $c$ が存在します。$\square$
+
+### 平均変化率 — 定量分析
+
+**局所線形化。** $b = a + h$（$h$ が小さい）なら：
+
+$$f(b) \approx f(a) + f'(a) \cdot h$$
+
+これは1次テイラー展開（切り詰め）です。誤差は $O(h^2)$ です。
+
+**金融での平均変化率。** $P(t)$ を資産の価格とします：
+
+$$\text{絶対平均リターン} = \frac{P(t_2) - P(t_1)}{t_2 - t_1}, \qquad \text{パーセントリターン} = \frac{P(t_2) - P(t_1)}{P(t_1)}$$
+
+対数導関数 $(\ln P)'$ は、連続瞬間リターン — Black-Scholes モデルの基盤（Lição 119）です。
+
+**速度と加速度。**
+
+$$\text{平均速度} = \frac{s(b) - s(a)}{b - a} \xrightarrow{b \to a} s'(a) = \text{瞬間速度}$$
+
+$$\text{平均加速度} = \frac{v(b) - v(a)}{b - a} \xrightarrow{b \to a} v'(a) = s''(a)$$
+
+</Porta>
+
+<Porta nivel="40" titulo="シニア専門家に">
+
+### 位相空間的性質としての中間値定理
+
+中間値定理は一般的な事実の例です：**連続関数による連結の像は連結である**。$\mathbb{R}$ では、連結集合は正確に区間です。したがって $f([a, b])$ は $f(a)$ と $f(b)$ を含む区間であり、したがってそれらの間のすべての値を含みます。上限による証明はこの位相的事実の解析版です。
+
+**一般化 (Brouwer, 1912)。** すべての連続関数 $g : B^n \to B^n$（$\mathbb{R}^n$ の閉じた単位球）は固定点を持ちます。次元1では、これは中間値定理から導かれた固定点の系です。より高い次元では、証明はホモロジーを使用します。
+
+有限ゲームのナッシュ均衡は Kakutani（Brouwer の多値一般化）経由で存在します。この線は中間値定理 → 固定点 → ナッシュ均衡を接続します — 結果は [1994年のノーベル経済学賞に授与されました](https://www.nobelprize.org/prizes/economic-sciences/1994/summary/)。
+
+### 平均変化率 — 計算と金融の視点
+
+**有限差分。** 科学計算では、導関数は常に平均変化率で近似されます：
+
+$$f'(a) \approx \frac{f(a+h) - f(a)}{h} \quad \text{（前進差分、} O(h)\text{）}$$
+$$f'(a) \approx \frac{f(a+h) - f(a-h)}{2h} \quad \text{（中央差分、} O(h^2)\text{）}$$
+
+最適な $h$ は切り詰め誤差（$O(h)$ または $O(h^2)$）と丸め誤差（$O(\varepsilon_{\text{machine}}/h)$）のバランスを取ります：前進差分で $h^* = O(\sqrt{\varepsilon_{\text{machine}}})$、中央で $h^* = O(\varepsilon_{\text{machine}}^{1/3})$。
+
+**時系列。** 計量経済学では、$\Delta y_t = y_t - y_{t-1}$ は差分演算子（$h = 1$ の離散 TVM）です。差分後に定常になる非定常系列は I(1) と呼ばれます — 共積分と ARIMA モデルの基盤。
+
+**二分法を超えた方法：**
+- 二分法：$O(\log 1/\varepsilon)$ — 堅牢、連続性以上の条件不要。
+- ニュートン-ラフソン法：2次収束、$f'(c) \neq 0$ と良い初期推定を要求。
+- Brent (1973)：二分法と補間を結合、実用標準。
+- ITP (Oliveira-Takahashi, 2020)：最悪ケースで $O(\log 1/\varepsilon)$ を保証し、経験的レートはニュートン法に近い。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="実践 — 実データを使ったルーティンと例">
+
+### ルーティン：中間値定理 — 根の存在を証明
+
+1. **$f$ を特定**：方程式が $g(x) = h(x)$ なら、$f(x) = g(x) - h(x)$ を定義します。
+2. **連続性を確認**：$f$ は $[a, b]$ で連続ですか？（多項式、サイン、コサイン、$e^x$、適切な定義域の $\ln x$：はい。）
+3. **$f(a)$ と $f(b)$ を計算**：符号は反対ですか？
+4. **結論**：「中間値定理により、$(a, b)$ に $f(c) = 0$ を持つ $c$ が存在するため、$g(c) = h(c)$ です。」
+
+### ルーティン：平均変化率 — 変化率を計算
+
+1. **$f$、$a$、$b$ を特定**：何が変わりますか？どの区間で？
+2. **公式を適用**：$\text{TVM} = \dfrac{f(b) - f(a)}{b - a}$。
+3. **単位を解釈**：$f$ が位置（m）で引数が時間（s）なら、TVM は m/s 単位です。
+4. **導関数と比較**：小さい区間では、TVM $\approx f'(a)$。
+
+### 実例：インターネット料金
+
+サンパウロの2つの住宅インターネットプラン（2026年の概算値）：
+- プランA：R\$ 89.90/月（光ファイバー 100 Mbps）。
+- プランB：R\$ 129.90/月（光ファイバー 500 Mbps）。
+
+$C(v) = $ 速度 $v$（Mbps 単位）の月額費用と定義します。2つのプラン間の TVM は：
+
+$$\text{TVM} = \frac{129.90 - 89.90}{500 - 100} = \frac{40.00}{400} = 0.10 \text{ R\$/Mbps}$$
+
+解釈：この範囲で速度の1 Mbps あたり、月額R\$ 0.10 の費用増加があります。
+
+### 一般的な落とし穴
+
+- **中間値定理は存在を保証するが、一意性を保証しない。** $f(x) = x^3 - x$ は $[-2, 2]$ に3つの根を持ちます。
+- **$f(a)f(b) > 0$ は根の不在を証明しません。** $f(x) = (x-1)^2$ は $1$ に重根を持ちますが、$f(0) = f(2) = 1 > 0$ です。
+- **平均変化率は区間に依存します。** 同じ $f$ でも $[0, 1]$ と $[0, 10]$ では大きく異なる TVM を持つことがあります。
+
+</Porta>
+
+</DuasPortas>
+
+## 解かれた例
+
+<Exemplo titulo="中間値定理 — 多項式根の存在" numero="1">
+
+**問題。** $f(x) = x^3 - x - 1$ が区間 $(1, 2)$ に少なくとも1つの根を持つことを示してください。
+
+**戦略。** $f$ が連続であること（多項式）と $f(1)$、$f(2)$ が反対の符号を持つことを確認します。そうであれば、中間値定理が存在性を保証します。
+
+**解法。**
+
+1. **連続性：** $f(x) = x^3 - x - 1$ は多項式なため、$\mathbb{R}$ で連続、特に $[1, 2]$ で連続です。
+
+2. **端点を計算：**
+
+$$f(1) = 1^3 - 1 - 1 = -1 < 0$$
+$$f(2) = 2^3 - 2 - 1 = 5 > 0$$
+
+3. **中間値定理を適用：** $f(1) < 0 < f(2)$ で $f$ が $[1, 2]$ で連続なため、中間値定理により、$f(c) = 0$ を満たす $(1, 2)$ に $c$ が存在します。
+
+**検証。** $f(1.3) = 2.197 - 1.3 - 1 = -0.103 < 0$、$f(1.4) = 2.744 - 1.4 - 1 = 0.344 > 0$。根が $(1.3; 1.4)$ で確認されました。数値的に $c \approx 1.3247$ です。
+
+**出典。** [Active Calculus §1.1, Example 1.1.2](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA. 適応版。
+
+</Exemplo>
+
+<Exemplo titulo="二分法 — 4回の反復と誤差解析" numero="2">
+
+**問題。** 二分法を使用して $(1, 2)$ の $f(x) = x^3 - x - 1$ の根を4回の反復で近似してください。これらの反復後の最大誤差は何ですか？
+
+**戦略。** 各ステップで中点 $m$ を計算し、$f(m)$ を評価し、符号が変わる部分を保持します。
+
+**解法。**
+
+初期データ：$a_0 = 1$、$b_0 = 2$、$f(1) = -1 < 0$、$f(2) = 5 > 0$。
+
+**反復 1：** $m_1 = (1 + 2)/2 = 1.5$。$f(1.5) = 3.375 - 1.5 - 1 = 0.875 > 0$。新しい区間：$[1; 1.5]$。
+
+**反復 2：** $m_2 = (1 + 1.5)/2 = 1.25$。$f(1.25) = 1.953 - 1.25 - 1 = -0.297 < 0$。新しい区間：$[1.25; 1.5]$。
+
+**反復 3：** $m_3 = (1.25 + 1.5)/2 = 1.375$。$f(1.375) = 2.600 - 1.375 - 1 = 0.225 > 0$。新しい区間：$[1.25; 1.375]$。
+
+**反復 4：** $m_4 = (1.25 + 1.375)/2 = 1.3125$。$f(1.3125) = 2.259 - 1.3125 - 1 = -0.053 < 0$。新しい区間：$[1.3125; 1.375]$。
+
+**4回反復後の最大誤差：**
+
+$$|c - m_4| \leq \frac{b - a}{2^4} = \frac{1}{16} = 0.0625$$
+
+**検証。** $[1.3125; 1.375]$ の中点は $1.34375 \approx 1.34$、$f(1.34375) \approx -0.0059 < 0$。実根 $c \approx 1.3247$ は区間内です — 確認されました。
+
+**出典。** [REAMAT — Cálculo Numérico §3.1, Exemplo 3.1](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · CC-BY 4.0.
+
+</Exemplo>
+
+<Exemplo titulo="平均変化率 — 運動学と平均速度" numero="3">
+
+**問題。** 粒子の位置（メートル単位）は $s(t) = t^2 + 3t$（秒単位）です。区間 $[1, 4]$ での $s$ の TVM を計算し、解釈してください。
+
+**戦略。** $\text{TVM} = (s(4) - s(1))/(4 - 1)$ を直接適用します。その後、$s'(t) = 2t + 3$ と比較して、TVM に等しい瞬間速度を持つ時点を見つけます。
+
+**解法。**
+
+1. **$s(1)$ と $s(4)$ を計算：**
+
+$$s(1) = 1 + 3 = 4 \text{ m}, \qquad s(4) = 16 + 12 = 28 \text{ m}$$
+
+2. **TVM を計算：**
+
+$$\text{TVM} = \frac{28 - 4}{4 - 1} = \frac{24}{3} = 8 \text{ m/s}$$
+
+3. **解釈：** 粒子は3秒で24 m 移動し、平均速度は8 m/s です。
+
+4. **導関数との接続：** $s'(t) = 2t + 3$。$s'(c) = 8$ を求めます：$2c + 3 = 8 \Rightarrow c = 2.5 \in (1, 4)$。微積分の平均値定理（Lição 56）がこの $c$ の存在を正式に保証します。
+
+**検証。** $s'(1) = 5$ m/s、$s'(4) = 11$ m/s。TVM の8 m/s は端点での瞬間速度間にあります — 正しい。
+
+**出典。** [Active Calculus §1.1, Preview Activity 1.1.1](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="代数的平均変化率と極限への移行" numero="4">
+
+**問題。** $f(x) = x^2$ について、区間 $[2, 2+h]$ ($h \neq 0$) での TVM を計算し、$h \to 0$ のときに何が起きるかを示してください。
+
+**戦略。** $h$ の関数として TVM を計算し、代数的に簡略化し、極限を取ります — これは $f'(2)$ を明らかにします。
+
+**解法。**
+
+1. **$[2, 2+h]$ での TVM：**
+
+$$\text{TVM} = \frac{f(2+h) - f(2)}{h} = \frac{(2+h)^2 - 4}{h}$$
+
+2. **$(2+h)^2 = 4 + 4h + h^2$ を展開：**
+
+$$\text{TVM} = \frac{4 + 4h + h^2 - 4}{h} = \frac{4h + h^2}{h} = 4 + h \quad (h \neq 0)$$
+
+3. **極限を取る：**
+
+$$\lim_{h \to 0}(4 + h) = 4 = f'(2)$$
+
+**検証。** $h = 1$：TVM $= 5$。$h = 0.1$：TVM $= 4.1$。$h = 0.01$：TVM $= 4.01$。割線は $(2, 4)$ での傾き4の接線に収束します。
+
+**出典。** [Active Calculus §1.3, Example 1.3.1](https://activecalculus.org/single/sec-1-3-derivative-pt.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="平均変化率と中間値定理を組み合わせ — 表形式データ" numero="5">
+
+**問題。** 車両の位置（km）が時間（時間）の関数として与えられている場合：
+
+| $t$ (h) | 0 | 0.5 | 1 | 1.5 | 2 |
+|---|---|---|---|---|---|
+| $s(t)$ (km) | 0 | 20 | 50 | 90 | 140 |
+
+(a) 各0.5時間の部分区間での TVM を計算してください。(b) $[0, 2]$ での総 TVM を計算してください。(c) 瞬間速度はいつかの時点で80 km/h に達しましたか？
+
+**戦略。** 各区間で TVM 公式を適用します。(c) では、速度関数に適用された中間値定理を使用します。
+
+**解法。**
+
+(a) **各部分区間での TVM：**
+
+$$\text{TVM}_{[0; 0.5]} = \frac{20}{0.5} = 40 \text{ km/h}, \quad \text{TVM}_{[0.5; 1]} = \frac{30}{0.5} = 60 \text{ km/h}$$
+$$\text{TVM}_{[1; 1.5]} = \frac{40}{0.5} = 80 \text{ km/h}, \quad \text{TVM}_{[1.5; 2]} = \frac{50}{0.5} = 100 \text{ km/h}$$
+
+(b) **総 TVM：**
+
+$$\text{TVM}_{[0; 2]} = \frac{140 - 0}{2} = 70 \text{ km/h}$$
+
+(c) **80 km/h での速度。** $s$ が微分可能と仮定すると、速度 $v(t) = s'(t)$ は連続です。平均変化率により：$v$ は $[0.5; 1]$ で平均60 km/h、$[1; 1.5]$ で80 km/h です。$v$ に適用された中間値定理により、$[0.5; 1.5]$ のどこかに $v(t) = 80$ km/h を持つ時点が少なくとも1つ存在します。答え：**はい**。
+
+**検証。** $[0.5; 1.5]$ での平均速度は $(90 - 20)/1 = 70$ km/h < 80 km/h ですが、速度は60から100 km/h に上昇しました — 80 km/h を通過した必要があります。
+
+**出典。** [Active Calculus §1.1, Example 1.1.3 and Exercises 1.1.3–1.1.5](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-46-tvi-tvm">
+
+### ブロックA — 中間値定理：根の存在（46.1～46.10）
+
+<Exercicio
+  numero="46.1"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^3 - x - 1$ は多項式なので連続です。<Eq>{`f(1) = -1 < 0`}</Eq> かつ <Eq>{`f(2) = 5 > 0`}</Eq>。$f$ が $[1, 2]$ で符号を変えるため、中間値定理は $[1, 2]$ に $f(c) = 0$ を持つ $c$ の存在を保証します。</>}
+  passos={<>
+    <ol>
+      <li>$f$ を特定します：<Eq>{`f(x) = x^3 - x - 1`}</Eq>。<em>理由：</em>方程式は既に $f(x) = 0$ の形です。</li>
+      <li>連続性：$f$ は多項式なので $\mathbb{R}$ 全体で連続です。<em>理由：</em>多項式は連続です — ジャンプ、穴なし。</li>
+      <li><Eq>{`f(1) = 1 - 1 - 1 = -1 < 0`}</Eq> と <Eq>{`f(2) = 8 - 2 - 1 = 5 > 0`}</Eq> を計算します。<em>理由：</em>端点での符号が必要です。</li>
+      <li>結論：<Eq>{`f(1) \\cdot f(2) = -5 < 0`}</Eq> — 反対の符号。中間値定理は <Eq>{`c \\in (1, 2)`}</Eq> で <Eq>{`f(c) = 0`}</Eq> を保証します。<em>コツ：</em>負の積 = 符号変化 = 根が保証されます。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "178", exercicio: "Example 2.38", licenca: "CC-BY-NC-SA" }}
+>
+中間値定理を使用して、$f(x) = x^3 - x - 1$ が区間 $(1, 2)$ に少なくとも1つの実根を持つことを示してください。$f$ のどの性質が必要ですか？ステップで正当化してください。
+</Exercicio>
+
+<Exercicio
+  numero="46.2"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) $(-2, -1)$" },
+    { texto: "B) $(0, 1)$" },
+    { texto: "C) $(1, 2)$" },
+    { texto: "D) $(2, 3)$", correta: true },
+  ]}
+  solucao={<><Eq>{`f(x) = x^3 - 2x - 5`}</Eq>。テスト <Eq>{`f(2) = 8 - 4 - 5 = -1 < 0`}</Eq> と <Eq>{`f(3) = 27 - 6 - 5 = 16 > 0`}</Eq>。$(2, 3)$ で符号変化。答え：D。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "178", exercicio: "Example 2.38 variant", licenca: "CC-BY-NC-SA" }}
+>
+関数 $f(x) = x^3 - 2x - 5$ が根を持つ長さ1の区間はどれですか。中間値定理で保証されています。答え：$(2, 3)$。
+</Exercicio>
+
+<Exercicio
+  numero="46.3"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) はい。$f(0) > 0$ かつ $f(\\pi/2) < 0$ であるため。", correta: true },
+    { texto: "B) いいえ。$\\cos x > 0$ が $[0, \\pi/2]$ で成り立つため。" },
+    { texto: "C) はい。ただし中間値定理は $\\cos$ が微分可能であることを要求します。" },
+    { texto: "D) 数値的に解かないと結論できません。" },
+  ]}
+  solucao={<><Eq>{`f(x) = \\cos x - x`}</Eq> を定義します。<Eq>{`f(0) = 1 > 0`}</Eq>。<Eq>{`f(\\pi/2) \\approx -1.57 < 0`}</Eq>。符号変化、$f$ は連続。中間値定理は $(0, \pi/2)$ に $\cos c = c$ を持つ $c$ を保証します。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "179", exercicio: "Example 2.39", licenca: "CC-BY-NC-SA" }}
+>
+方程式 $\cos x = x$ は $(0, \pi/2)$ に解を持ちますか？答え：はい。
+</Exercicio>
+
+<Exercicio
+  numero="46.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = e^x + x - 3`}</Eq> を定義します。<Eq>{`f(0) = 1 + 0 - 3 = -2 < 0`}</Eq>。<Eq>{`f(1) = e + 1 - 3 \\approx 0.72 > 0`}</Eq>。$[0, 1]$ で符号変化、$f$ は連続。中間値定理により、$(0, 1)$ に $e^c + c = 3$ を持つ $c$ が存在します。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "180", exercicio: "Checkpoint 2.30", licenca: "CC-BY-NC-SA" }}
+>
+方程式 $e^x + x = 3$ が区間 $(0, 1)$ に解を持つことを示してください。$f$ を適切に定義し、連続性を確認し、中間値定理を適用してください。
+</Exercicio>
+
+<Exercicio
+  numero="46.5"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) いいえ。$f(0)$ と $f(1)$ は同じ符号です。" },
+    { texto: "B) はい。$f(0) < 0$ かつ $f(1) > 0$。", correta: true },
+    { texto: "C) はい。ただし中間値定理とは異なる理由で。" },
+    { texto: "D) グラフなしでは判断できません。" },
+  ]}
+  solucao={<><Eq>{`f(x) = x^5 + x^3 - 1`}</Eq>。<Eq>{`f(0) = -1 < 0`}</Eq>。<Eq>{`f(1) = 1 + 1 - 1 = 1 > 0`}</Eq>。符号変化、$f$ は連続。中間値定理は $(0, 1)$ に根を保証します。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "2", exercicio: "Exercise 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+中間値定理は $f(x) = x^5 + x^3 - 1$ が $(0, 1)$ に根を持つことを保証しますか？答え：はい。
+</Exercicio>
+
+<Exercicio
+  numero="46.6"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 多項式が負の主係数を持たない場合のみ。" },
+    { texto: "B) 任意の奇数次多項式について常に。", correta: true },
+    { texto: "C) 多項式が単多項式（主係数が1）の場合のみ。" },
+    { texto: "D) 次数1または3についてのみ。" },
+  ]}
+  solucao={<><Eq>{`P(x) = a_n x^n + \\ldots`}</Eq> で <Eq>{`n`}</Eq> が奇数、<Eq>{`a_n > 0`}</Eq>：<Eq>{`P(x) \\to +\\infty`}</Eq> （$x \\to +\\infty$ のとき）、<Eq>{`P(x) \\to -\\infty`}</Eq> （$x \\to -\\infty$ のとき）。したがって $P$ は符号を変え、連続なため（中間値定理）、実根を持ちます。<Eq>{`a_n < 0`}</Eq> であれば、符号は逆ですが結論は同じです。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "181", exercicio: "Exercise 2.173", licenca: "CC-BY-NC-SA" }}
+>
+すべての奇数次多項式は少なくとも1つの実根を持ちます。なぜですか？
+</Exercicio>
+
+<Exercicio
+  numero="46.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = \\ln x - e^{-x}`}</Eq> を定義します。<Eq>{`f(1) = 0 - e^{-1} \\approx -0.37 < 0`}</Eq>。<Eq>{`f(e) = 1 - e^{-e} \\approx 0.93 > 0`}</Eq>。符号変化、$f$ は $[1, e]$ で連続。中間値定理は $(1, e)$ に $\ln c = e^{-c}$ を持つ $c$ を保証します。</>}
+  passos={<>
+    <ol>
+      <li>再構成：<Eq>{`f(x) = \\ln x - e^{-x}`}</Eq>。<em>理由：</em>方程式を根の問題に変換します。</li>
+      <li><Eq>{`f(1) = \\ln 1 - e^{-1} = 0 - 0.368 = -0.368 < 0`}</Eq>。左端が負。</li>
+      <li><Eq>{`f(e) = \\ln e - e^{-e} = 1 - 0.066 = 0.934 > 0`}</Eq>。<em>理由：</em>$\ln e = 1$ は対数の定義。</li>
+      <li>符号変化 + $[1, e]$ での $f$ の連続性 → 中間値定理は $\ln c = e^{-c}$ を持つ $c$ を保証します。<em>コツ：</em><Eq>{`\\ln`}</Eq> と <Eq>{`e^{-x}`}</Eq> は $x > 0$ で連続なため、$f$ も連続です。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "179", exercicio: "Example 2.40", licenca: "CC-BY-NC-SA" }}
+>
+方程式 $\ln x = e^{-x}$ が区間 $(1, e)$ に解を持つことを示してください。
+</Exercicio>
+
+<Exercicio
+  numero="46.8"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) いいえ。$f(a)$ と $f(b)$ が同じ符号なら根はありません。" },
+    { texto: "B) いいえ。a と b で同じ符号は内部の根を除きません。", correta: true },
+    { texto: "C) はい。中間値定理は両方向に機能します（存在と不在）。" },
+    { texto: "D) $f$ が単調かどうかに依存します。" },
+  ]}
+  solucao={<>$f(a)f(b) > 0$ なら、中間値定理は適用されません — しかし根が存在する可能性があります。例：$f(x) = (x-1)^2$ を $[0, 2]$ で。$f(0) = 1 > 0$、$f(2) = 1 > 0$（同じ符号）ですが、$x = 1$ は重根です。中間値定理は根の存在のための十分条件であり、必要条件ではありません。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "181", exercicio: "Exercise 2.174", licenca: "CC-BY-NC-SA" }}
+>
+$f(a)$ と $f(b)$ が同じ符号を持つ場合、$f$ は $(a, b)$ に根を持たないと結論できますか？
+</Exercicio>
+
+<Exercicio
+  numero="46.9"
+  dificuldade="desafio"
+  solucao={<>$[0, 1/2]$ で $g(x) = f(x) - f(x + 1/2)$ を定義します。$g(0) = f(0) - f(1/2)$ で $g(1/2) = f(1/2) - f(1)$。加算：$g(0) + g(1/2) = f(0) - f(1) = 0$、したがって $g(0) = -g(1/2)$。$g \not\equiv 0$ なら、$g$ は符号を変えます。中間値定理（$[0, 1/2]$ で $g$ は連続）により、$g(c) = 0$ を持つ $(0, 1/2)$ に $c$ が存在します。つまり $f(c) = f(c + 1/2)$ です。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "4", exercicio: "Exercise 1.1.6 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+$f$ は $[0, 1]$ で連続で $f(0) = f(1)$。$[0, 1/2]$ に $f(c) = f(c + 1/2)$ を持つ $c$ が存在することを示してください。ヒント：$g(x) = f(x) - f(x + 1/2)$ を定義し、中間値定理を適用してください。
+</Exercicio>
+
+<Exercicio
+  numero="46.10"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^4 - 2x - 1$。$(-1, 0)$ で：<Eq>{`f(-1) = 1 + 2 - 1 = 2 > 0`}</Eq> かつ <Eq>{`f(0) = -1 < 0`}</Eq> — $(-1, 0)$ に根。$(1, 2)$ で：<Eq>{`f(1) = 1 - 2 - 1 = -2 < 0`}</Eq> かつ <Eq>{`f(2) = 16 - 4 - 1 = 11 > 0`}</Eq> — $(1, 2)$ に根。合計：少なくとも2つの実根。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "180", exercicio: "Checkpoint 2.31", licenca: "CC-BY-NC-SA" }}
+>
+中間値定理を適用して、$f(x) = x^4 - 2x - 1$ が区間 $(-1, 0)$ と $(1, 2)$ のそれぞれに少なくとも1つの根を持つことを示してください。
+</Exercicio>
+
+### ブロックB — 二分法：反復と誤差（46.11～46.18）
+
+<Exercicio
+  numero="46.11"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) $[1; 1.5]$", correta: true },
+    { texto: "B) $[1.5; 2]$" },
+    { texto: "C) 根はちょうど $1.5$ です。" },
+    { texto: "D) 1回の反復だけで二分法を適用することは不可能です。" },
+  ]}
+  solucao={<><Eq>{`m = (1 + 2)/2 = 1.5`}</Eq>。<Eq>{`f(1.5) = 3.375 - 1.5 - 1 = 0.875 > 0`}</Eq>。<Eq>{`f(1) = -1 < 0`}</Eq> で <Eq>{`f(1.5) > 0`}</Eq> なので、根は <Eq>{`[1; 1.5]`}</Eq> にあります。答え：A。</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`m_1 = (1 + 2)/2 = 1.5`}</Eq> を計算します。<em>理由：</em>二分法は区間を半分に分割します。</li>
+      <li><Eq>{`f(1.5) = (1.5)^3 - 1.5 - 1 = 3.375 - 2.5 = 0.875 > 0`}</Eq> を評価します。</li>
+      <li><Eq>{`f(1) = -1 < 0`}</Eq> かつ <Eq>{`f(1.5) = 0.875 > 0`}</Eq> — 左側の半分で符号変化。</li>
+      <li>新しい区間：<Eq>{`[1; 1.5]`}</Eq>。<em>コツ：</em>常に符号が反対になる部分を保持します。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "45", exercicio: "Exemplo 3.1", licenca: "CC-BY 4.0" }}
+>
+$f(x) = x^3 - x - 1$ を $[1, 2]$ で1回二分法を適用します。新しい区間は何ですか？答え：$[1; 1.5]$。
+</Exercicio>
+
+<Exercicio
+  numero="46.12"
+  dificuldade="aplicacao"
+  solucao={<>反復1後、$[1; 1.5]$ を持ちます。反復2：<Eq>{`m_2 = (1 + 1.5)/2 = 1.25`}</Eq>。<Eq>{`f(1.25) = 1.953 - 1.25 - 1 = -0.297 < 0`}</Eq>。<Eq>{`f(1.25) < 0 < f(1.5)`}</Eq> なので、新しい区間：<Eq>{`[1.25; 1.5]`}</Eq>。</>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "45", exercicio: "Exemplo 3.1 continuação", licenca: "CC-BY 4.0" }}
+>
+$f(x) = x^3 - x - 1$ を $[1, 2]$ で二分法の2回目の反復後、区間は何ですか？答え：$[1.25; 1.5]$。
+</Exercicio>
+
+<Exercicio
+  numero="46.13"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) 誤差 $\\leq 0.5$" },
+    { texto: "B) 誤差 $\\leq 0.25$" },
+    { texto: "C) 誤差 $\\leq 0.125$", correta: true },
+    { texto: "D) 誤差 $\\leq 0.0625$" },
+  ]}
+  solucao={<>$n$ 回の反復後 $[a, b]$ で、最大誤差は $(b - a)/2^n$ です。$n = 3$ で $[1, 2]$（長さ1）：誤差 <Eq>{`\\leq 1/2^3 = 1/8 = 0.125`}</Eq>。答え：C。</>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "47", exercicio: "Proposição 3.1", licenca: "CC-BY 4.0" }}
+>
+$[1, 2]$ で二分法の3回反復後、最大誤差は何ですか？答え：$0.125$。
+</Exercicio>
+
+<Exercicio
+  numero="46.14"
+  dificuldade="aplicacao"
+  solucao={<>誤差 <Eq>{`\\leq (b-a)/2^n < 10^{-5}`}</Eq>。$b - a = 1$ で：<Eq>{`2^n > 10^5`}</Eq>。<Eq>{`n > \\log_2(10^5) = 5\\log_2 10 \\approx 5 \\times 3.322 = 16.6`}</Eq>。したがって $n \geq 17$ 回の反復。</>}
+  passos={<>
+    <ol>
+      <li>条件を書きます：<Eq>{`(b - a)/2^n < 10^{-5}`}</Eq>。<em>理由：</em>二分法の誤差公式。</li>
+      <li>$b - a = 1$ で：<Eq>{`2^n > 10^5`}</Eq>。<em>理由：</em>$2^n$ を分離。</li>
+      <li>$\log_2$ を適用：<Eq>{`n > \\log_2(10^5) = 5 \\log_2 10 \\approx 16.6`}</Eq>。</li>
+      <li>上に丸める：$n \geq 17$。<em>コツ：</em>小数精度の各桁には <Eq>{`\\log_2 10 \\approx 3.32`}</Eq> 回の反復がかかります。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "48", exercicio: "Exercício 3.1", licenca: "CC-BY 4.0" }}
+>
+$[1, 2]$ で二分法の何回反復が誤差 $10^{-5}$ より小さいことを保証しますか？計算を示してください。答え：17。
+</Exercicio>
+
+<Exercicio
+  numero="46.15"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "A) いいえ。中間値定理は $f$ が微分可能であることを要求します。" },
+    { texto: "B) はい。$f(0) < 0 < f(1)$ で $f$ は連続であるため。", correta: true },
+    { texto: "C) はい。ただし二分法はここに適用しません。" },
+    { texto: "D) $f(x) = x \\cdot 2^x - 1$ には実根がありません。" },
+  ]}
+  solucao={<>$f(x) = x \cdot 2^x - 1$。<Eq>{`f(0) = 0 \\cdot 1 - 1 = -1 < 0`}</Eq>。<Eq>{`f(1) = 1 \\cdot 2 - 1 = 1 > 0`}</Eq>。符号変化、$f$ は連続。中間値定理は $(0, 1)$ に根を保証します。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "5", exercicio: "Exercise 1.1.3", licenca: "CC-BY-NC-SA" }}
+>
+方程式 $x \cdot 2^x = 1$ は区間 $(0, 1)$ に解を持ちますか？答え：はい。
+</Exercicio>
+
+<Exercicio
+  numero="46.16"
+  dificuldade="aplicacao"
+  solucao={<>誤差 <Eq>{`\\leq 1/2^n < 10^{-6}`}</Eq>。<Eq>{`2^n > 10^6`}</Eq>。<Eq>{`n > 6\\log_2 10 \\approx 19.93`}</Eq>。したがって $n \geq 20$ 回の反復。</>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "48", exercicio: "Exercício 3.2", licenca: "CC-BY 4.0" }}
+>
+$[1, 2]$ で二分法の何回反復が誤差 $10^{-6}$ より小さいことを保証しますか？答え：20。
+</Exercicio>
+
+<Exercicio
+  numero="46.17"
+  dificuldade="desafio"
+  solucao={<>$f(x) = \cos x - x$ を $[0, \pi/2]$ で。反復1：<Eq>{`m = \\pi/4 \\approx 0.785`}</Eq>、<Eq>{`f(0.785) = \\cos(0.785) - 0.785 \\approx 0.707 - 0.785 = -0.078 < 0`}</Eq>。根は <Eq>{`[0; 0.785]`}</Eq> にあります。反復2：<Eq>{`m = 0.393`}</Eq>、<Eq>{`f(0.393) = \\cos(0.393) - 0.393 \\approx 0.924 - 0.393 = 0.531 > 0`}</Eq>。根は <Eq>{`[0.393; 0.785]`}</Eq> にあります。4回反復後、区間は <Eq>{`c \\approx 0.739`}</Eq> を含みます。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "5", exercicio: "Exercise 1.1.4 (adapted)", licanca: "CC-BY-NC-SA" }}
+>
+$f(x) = \cos x - x$ を $[0, \pi/2]$ で4回二分法を適用します。紙上で計算を実行し、各反復で得られた区間を書いてください。
+</Exercicio>
+
+<Exercicio
+  numero="46.18"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "A) 二分法は適用できません。$f$ が多項式ではないため。" },
+    { texto: "B) $\\text{NPV}$ が符号を変えるどの区間でも二分法が適用されます。", correta: true },
+    { texto: "C) 中間値定理は金融関数に適用されません。" },
+    { texto: "D) ニュートン-ラフソン法だけが IRR に機能します。" },
+  ]}
+  solucao={<>IRR は <Eq>{`\\text{NPV}(r) = 0`}</Eq> の解です。<Eq>{`\\text{NPV}(r) = \\sum_{t=0}^{n} C_t/(1+r)^t`}</Eq> は $r > -1$ で連続です。$r_1 < r_2$ で <Eq>{`\\text{NPV}(r_1) > 0`}</Eq> かつ <Eq>{`\\text{NPV}(r_2) < 0`}</Eq> なら、中間値定理は $(r_1, r_2)$ に IRR の存在を保証し、二分法で位置付けられます。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "3", exercicio: "Exercise 1.1.5 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+プロジェクトの内部収益率 (IRR) は $\text{NPV}(r) = 0$ として定義されます。中間値定理と二分法を使用して位置付けることができますか？
+</Exercicio>
+
+### ブロックC — 平均変化率：直接計算（46.19～46.28）
+
+<Exercicio
+  numero="46.19"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^2 + 3$。$f(1) = 1 + 3 = 4$。$f(4) = 16 + 3 = 19$。TVM $= (19 - 4)/(4 - 1) = 15/3 = 5$。</>}
+  passos={<>
+    <ol>
+      <li>$f(1) = 1^2 + 3 = 4$ と $f(4) = 4^2 + 3 = 19$ を計算します。<em>理由：</em>区間の端点での値が必要です。</li>
+      <li>公式を適用：TVM $= (f(4) - f(1))/(4 - 1) = (19 - 4)/3 = 15/3 = 5$。</li>
+      <li>解釈：$x$ が 1 から 4 に変わるとき、$f$ は 15 単位増加し、$x$ の 3 単位 — 単位あたりの平均率は 5。<em>コツ：</em>TVM = 割線の傾き。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "6", exercicio: "Exercise 1.1.7", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = x^2 + 3$ の $[1, 4]$ での TVM を計算してください。答え：5。
+</Exercicio>
+
+<Exercicio
+  numero="46.20"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = -x^2 + 4x$。$f(2) = -4 + 8 = 4$。$f(4) = -16 + 16 = 0$。TVM $= (0 - 4)/(4 - 2) = -4/2 = -2$。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "6", exercicio: "Exercise 1.1.8", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = -x^2 + 4x$ の $[2, 4]$ での TVM を計算してください。答え：$-2$。
+</Exercicio>
+
+<Exercicio
+  numero="46.21"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = 2x^2 + 1$。$f(2) = 8 + 1 = 9$。$f(4) = 32 + 1 = 33$。TVM $= (33 - 9)/(4 - 2) = 24/2 = 12$。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "7", exercicio: "Exercise 1.1.9", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = 2x^2 + 1$ の $[2, 4]$ での TVM を計算してください。答え：12。
+</Exercicio>
+
+<Exercicio
+  numero="46.22"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) $4 + h$", correta: true },
+    { texto: "B) $4$" },
+    { texto: "C) $2h + 4$" },
+    { texto: "D) $h^2 + 4h$" },
+  ]}
+  solucao={<>$f(x) = x^2$。$[2, 2+h]$ での TVM：<Eq>{`\\dfrac{(2+h)^2 - 4}{h} = \\dfrac{4 + 4h + h^2 - 4}{h} = \\dfrac{4h + h^2}{h} = 4 + h`}</Eq>。答え：A。</>}
+  passos={<>
+    <ol>
+      <li>$f(2) = 4$、$f(2+h) = (2+h)^2 = 4 + 4h + h^2$。<em>理由：</em>注目すべき積 $(a+b)^2$ で展開。</li>
+      <li>TVM <Eq>{`= \\dfrac{(4 + 4h + h^2) - 4}{h} = \\dfrac{4h + h^2}{h}`}</Eq>。</li>
+      <li>$h$ を因数分解：<Eq>{`\\dfrac{h(4 + h)}{h} = 4 + h`}</Eq> ($h \neq 0$ で有効)。<em>コツ：</em>$h \to 0$ のとき、TVM $\to 4 = f'(2)$。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "28", exercicio: "Example 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = x^2$ の区間 $[2, 2+h]$ ($h \neq 0$) での TVM を計算してください。答え：$4 + h$。
+</Exercicio>
+
+<Exercicio
+  numero="46.23"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^2 + x$。$f(0) = 0$。$f(h) = h^2 + h$。TVM $= (h^2 + h - 0)/h = h + 1 = 1 + h$。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "29", exercicio: "Exercise 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = x^2 + x$ の区間 $[0, h]$ ($h \neq 0$) での TVM を計算してください。答え：$1 + h$。
+</Exercicio>
+
+<Exercicio
+  numero="46.24"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>。$f(1) = 1$、<Eq>{`f(3) = \\sqrt{3}`}</Eq>。TVM <Eq>{`= (\\sqrt{3} - 1)/(3 - 1) = (\\sqrt{3} - 1)/2 \\approx 0.366`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "8", exercicio: "Exercise 1.1.10", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = \sqrt{x}$ の $[1, 3]$ での TVM を計算してください。答えを正確な形で残してください。答え：$(\sqrt{3}-1)/2$。
+</Exercicio>
+
+<Exercicio
+  numero="46.25"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = 1/x$。$f(1/2) = 2$、$f(1) = 1$。TVM $= (1 - 2)/(1 - 1/2) = (-1)/(1/2) = -2$。</>}
+  passos={<>
+    <ol>
+      <li>$f(1/2) = 1/(1/2) = 2$ と $f(1) = 1$。<em>理由：</em>区間 $[1/2, 1]$ の端点で評価。</li>
+      <li>TVM $= (f(1) - f(1/2))/(1 - 1/2) = (1 - 2)/(1/2) = -1 \div (1/2) = -2$。</li>
+      <li>解釈：$f(x) = 1/x$ はゼロの近くで急速に減少します。この区間での平均率は $x$ の単位あたり $-2$ です。<em>好奇心：</em>$x \to 0^+$ のとき、TVM $\to -\infty$、これは $1/x$ の極を反映します。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "8", exercicio: "Exercise 1.1.11", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = 1/x$ の $[1/2, 1]$ での TVM を計算してください。答え：$-2$。
+</Exercicio>
+
+<Exercicio
+  numero="46.26"
+  dificuldade="aplicacao"
+  solucao={<>$s(t) = 5t^2$。$s(1) = 5$ m。$s(4) = 80$ m。TVM $= (80 - 5)/(4 - 1) = 75/3 = 25$ m/s。解釈：区間 $[1, 4]$ 秒での平均速度 25 m/s。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "9", exercicio: "Preview Activity 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+物体の位置は $s(t) = 5t^2$ メートル（$t$ は秒）です。区間 $[1, 4]$ 秒での平均速度は何ですか？答え：25 m/s。
+</Exercicio>
+
+<Exercicio
+  numero="46.27"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^2$。$[a, a+h]$ での TVM：<Eq>{`\\dfrac{(a+h)^2 - a^2}{h} = \\dfrac{2ah + h^2}{h} = 2a + h`}</Eq>。$h \to 0$ のとき：$2a = f'(a)$。</>}
+  passos={<>
+    <ol>
+      <li>展開：$f(a+h) = (a+h)^2 = a^2 + 2ah + h^2$。<em>理由：</em>注目すべき積。</li>
+      <li>TVM <Eq>{`= \\dfrac{a^2 + 2ah + h^2 - a^2}{h} = \\dfrac{2ah + h^2}{h}`}</Eq>。分子：$a^2$ はキャンセル。</li>
+      <li>$h$ を因数分解：TVM $= 2a + h$。<em>理由：</em>$h \neq 0$ なので $h/h = 1$。</li>
+      <li>$h \to 0$ のとき：TVM $\to 2a = f'(a)$。<em>洞察：</em>これは $x^2$ の導関数を定義する計算です。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "30", exercicio: "Example 1.3.2", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = x^2$ の区間 $[a, a+h]$ での TVM を $a$ と $h$ の関数として計算してください。$h \to 0$ のときに何が起きますか？答え：$2a + h$；極限は $f'(a) = 2a$。
+</Exercicio>
+
+<Exercicio
+  numero="46.28"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = 1/x$。$f(a+h) - f(a) = 1/(a+h) - 1/a = (a - (a+h))/(a(a+h)) = -h/(a(a+h))$。TVM $= [-h/(a(a+h))]/h = -1/(a(a+h))$。$h \to 0$ のとき：TVM $\to -1/a^2 = f'(a)$。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "31", exercicio: "Exercise 1.3.2", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = 1/x$ の区間 $[a, a+h]$ での TVM を $a$ と $h$ の関数として計算してください。答え：$-1/(a(a+h))$；極限は $-1/a^2$。
+</Exercicio>
+
+### ブロックD — 平均変化率：モデリングと物理（46.29～46.37）
+
+<Exercicio
+  numero="46.29"
+  dificuldade="modelagem"
+  solucao={<>$s(t) = t^2 + t$。$s(2) = 4 + 2 = 6$。$s(5) = 25 + 5 = 30$。TVM $= (30 - 6)/(5 - 2) = 24/3 = 8$ m/s。解釈：$t = 2$ 秒から $t = 5$ 秒での平均速度 8 m/s。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "12", exercicio: "Activity 1.1.3 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+粒子の位置は $s(t) = t^2 + t$ メートル（$t$ は秒）です。区間 $[2, 5]$ 秒での平均速度は何ですか？答え：8 m/s。
+</Exercicio>
+
+<Exercicio
+  numero="46.30"
+  dificuldade="modelagem"
+  solucao={<>TVM $= (T(6) - T(0))/(6 - 0) = (15 - 27)/6 = -12/6 = -2\,^\circ$C/h。気温は6時間で12度低下しました — 平均時間あたり2度。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-1-a-preview-of-calculus", secao: "§2.1", pagina: "134", exercicio: "Example 2.1 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+都市の気温は午前0時に $27\,^\circ$C、午前6時に $15\,^\circ$C でした。その期間の気温の平均変化率は何ですか？答え：$-2\,^\circ$C/h。
+</Exercicio>
+
+<Exercicio
+  numero="46.31"
+  dificuldade="modelagem"
+  solucao={<>平均限界費用 <Eq>{`= (C(200) - C(100))/(200 - 100) = (1{.}500 - 1{.}000)/100 = 500/100 =`}</Eq> R\$ 5.00 当たりの単位。</>}
+  passos={<>
+    <ol>
+      <li>$f = C$（費用）、$a = 100$、$b = 200$ を特定します。</li>
+      <li>TVM <Eq>{`= (C(200) - C(100))/(200 - 100) = (1{.}500 - 1{.}000)/100`}</Eq>。</li>
+      <li>$= 500/100 =$ R\<Eq>{` 5.00 当たりの単位。<em>解釈：</em>この範囲で生産される追加単位ごとに平均 R\\`}</Eq> 5.00 の費用がかかります。これが平均限界費用です。</li>
+      <li><em>接続：</em>生産スケール $\to 0$ のとき、平均限界費用は瞬間限界費用 $C'(q)$（費用の導関数）に収束します。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "13", exercicio: "Exercise 1.1.14 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+生産費用関数は $C(q)$（R\$ 単位）です。$C(100) = 1{.}000$ で $C(200) = 1{.}500$ です。100～200単位の生産の平均限界費用は何ですか？
+</Exercicio>
+
+<Exercicio
+  numero="46.32"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`h(t) = -4.9t^2 + 20`}</Eq> m。$h(0) = 20$ m。<Eq>{`h(3) = -4.9 \\times 9 + 20 = -44.1 + 20 = -24.1`}</Eq> m。TVM <Eq>{`= (-24.1 - 20)/3 = -44.1/3 = -14.7`}</Eq> m/s。負の符号は下降を示します。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-1-a-preview-of-calculus", secao: "§2.1", pagina: "135", exercicio: "Example 2.2", licenca: "CC-BY-NC-SA" }}
+>
+自由落下物体の高さは $h(t) = -4.9t^2 + 20$ メートルです。区間 $[0, 3]$ 秒での平均速度は何ですか？答え：$-14.7$ m/s。
+</Exercicio>
+
+<Exercicio
+  numero="46.33"
+  dificuldade="modelagem"
+  solucao={<>TVM <Eq>{`= (P(2030) - P(2020))/(2030 - 2020) = (1{.}030{.}000 - 1{.}000{.}000)/10 = 30{.}000/10 = 3{.}000`}</Eq> 住民/年。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "14", exercicio: "Exercise 1.1.15 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+都市の人口は2020年に1,000,000人、2030年に1,030,000人でした。人口の平均年間変化率は何ですか？答え：3,000 住民/年。
+</Exercicio>
+
+<Exercicio
+  numero="46.34"
+  dificuldade="modelagem"
+  solucao={<>TVM $= (s(t_2) - s(t_1))/(t_2 - t_1)$。$[1, 1+h]$ で：$s(1) = 5$、$s(1+h) = 5(1+h)^2 = 5 + 10h + 5h^2$。TVM $= (5 + 10h + 5h^2 - 5)/h = 10 + 5h$。$h \to 0$ のとき：TVM $\to 10$ m/s $= s'(1)$。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "10", exercicio: "Activity 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = 5t^2$ m について、区間 $[1, 1+h]$ での TVM を $h$ の関数として計算してください。$h \to 0$ のときに何が起きますか？答え：$10 + 5h$；極限は 10 m/s。
+</Exercicio>
+
+<Exercicio
+  numero="46.35"
+  dificuldade="modelagem"
+  solucao={<>総パーセントリターン $= (P_f - P_i)/P_i = (115 - 100)/100 = 15\%$。これは2年間の期間での平均変化率のパーセントです。年間化リターンは <Eq>{`(1.15)^{1/2} - 1 \\approx 7.24\\%`}</Eq> 年間（複利）であり、異なります。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "14", exercicio: "Exercise 1.1.16 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+株式が R\$ 100 で購入され、2年後に R\$ 115 で売却されました。その期間の総パーセントリターンは何ですか？答え：15%。
+</Exercicio>
+
+<Exercicio
+  numero="46.36"
+  dificuldade="desafio"
+  solucao={<>$s(t) = t^2 + 3t$ について、$[1, 4]$ での TVM：$s(4) = 28$、$s(1) = 4$。TVM $= (28-4)/3 = 8$ m/s。導関数は $s'(t) = 2t + 3$。$s'(c) = 8$ を求めます：<Eq>{`2c + 3 = 8 \\Rightarrow c = 2.5 \\in (1, 4)`}</Eq>。はい、そのような $c$ が存在します — これは微積分の平均値定理（Lição 56）を予想します。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "15", exercicio: "Activity 1.1.4 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = t^2 + 3t$ について、$[1, 4]$ での TVM は 8 m/s です。$s'(t)$ を計算し、$s'(c) = 8$ を満たす $(1, 4)$ に $c$ を見つけてください。この結果は何を予想しますか？
+</Exercicio>
+
+<Exercicio
+  numero="46.37"
+  dificuldade="modelagem"
+  solucao={<>売上は1月の R\$ 700 から7月の R\$ 2,800 に6ヶ月で増加しました。TVM $= (2.800 - 700)/6 = 2.100/6 = 350$ R\$/月。解釈：その期間での月間平均成長率 R\$ 350/月。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "11", exercicio: "Exercise 1.1.12 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+企業の月間売上は1月の R\$ 700 から7月の R\$ 2,800 に増加しました（6ヶ月）。売上の平均月間変化率は何ですか？答え：R\$ 350/月。
+</Exercicio>
+
+### ブロックE — 理解と実証（46.38～46.40）
+
+<Exercicio
+  numero="46.38"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) TVM は $[a, b]$ のどの点でも導関数に等しい。" },
+    { texto: "B) TVM は点 $(a, f(a))$ と $(b, f(b))$ を通る割線の傾き。", correta: true },
+    { texto: "C) TVM は区間が減少するとき常に増加する。" },
+    { texto: "D) TVM は微分可能な関数に対してのみ定義されます。" },
+  ]}
+  solucao={<>TVM $= (f(b) - f(a))/(b - a)$ は点 $(a, f(a))$ と $(b, f(b))$ を通る直線の傾きです — 割線。これは導関数ではありません（導関数は TVM の極限）。2つの点が評価可能な任意の $f$ に対して定義されます — 微分可能性を要求しません。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "27", exercicio: "Preview Activity 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+平均変化率 $\dfrac{f(b) - f(a)}{b - a}$ の幾何学的意味は何ですか？
+</Exercicio>
+
+<Exercicio
+  numero="46.39"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 中間値定理は $f$ が $f(a)$ と $f(b)$ の間のすべての値を通ることを保証します。", correta: true },
+    { texto: "B) 中間値定理は $f$ が区間で単調であることを保証します。" },
+    { texto: "C) 中間値定理は $f$ がすべての点で導関数を持つことを保証します。" },
+    { texto: "D) 中間値定理は TVM がある点での導関数に等しいことを主張します。" },
+  ]}
+  solucao={<>中間値定理は主張：$f$ が $[a, b]$ で連続ならば、$f(a)$ と $f(b)$ の間のすべての値を仮定します。これは単調性や微分可能性を暗示しません。導関数についての主張は微積分の平均値定理です — 異なる結果で、Lição 56 にあります。</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "177", exercicio: "Theorem 2.13 (contexto)", licenca: "CC-BY-NC-SA" }}
+>
+中間値定理は $[a, b]$ で連続な $f$ について何を保証しますか？
+</Exercicio>
+
+<Exercicio
+  numero="46.40"
+  dificuldade="demonstracao"
+  solucao={<>定義により、<Eq>{`f'(a) = \\lim_{h \\to 0} \\dfrac{f(a+h) - f(a)}{h}`}</Eq>、これはちょうど <Eq>{`\\lim_{b \\to a} \\text{TVM}_{[a,b]}`}</Eq> です（$b = a + h$ で）。したがって：導関数は区間が一点に縮小する際の TVM の極限です。TVM はグローバル版（割線）、導関数はローカル版（接線）です。これが微積分の基盤です。</>}
+  passos={<>
+    <ol>
+      <li>導関数の定義を書きます：<Eq>{`f'(a) = \\lim_{h \\to 0} \\dfrac{f(a+h) - f(a)}{h}`}</Eq>。</li>
+      <li>商が TVM であることを認識します：<Eq>{`\\text{TVM}_{[a,\\, a+h]} = \\dfrac{f(a+h) - f(a)}{h}`}</Eq>。<em>理由：</em>$b = a + h$ を識別するだけ。</li>
+      <li>したがって：<Eq>{`f'(a) = \\lim_{b \\to a} \\text{TVM}_{[a,b]}`}</Eq>。<em>洞察：</em>導関数は「TVM の一種」ではありません — 導関数は TVM の極限です。</li>
+      <li><em>コツ：</em>割線（2点）$\to$ 接線（1点）2点が融合するとき。これが微積分です。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "28", exercicio: "Definition 1.3.1 (contexto)", licenca: "CC-BY-NC-SA" }}
+>
+導関数 $f'(a)$ が、区間 $[a, b]$ が点 $a$ に縮小する際の平均変化率の極限であることを正式に実証してください。
+</Exercicio>
+
+</ListaExercicios>
+
+## 出典
+
+- [**Active Calculus 2.0**](https://activecalculus.org/single/) — Matt Boelkins · Grand Valley State University · 2024 · CC-BY-NC-SA. **第一次資料。** §1.1 (*How Do We Measure Velocity?*) と §1.3 (*The Derivative at a Point*) — 例 3、4、5、ブロック C、D、E の基盤。
+- [**OpenStax Calculus: Volume 1**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · Rice University · 2016 · CC-BY-NC-SA. §2.4 (*Continuity* と TVI) — 例 1 とブロック A、E の基盤。§2.1 (*A Preview of Calculus*) — ブロック D の基盤。
+- [**REAMAT — Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · 2024 · CC-BY 4.0. §3.1 (*Método da Bisseção*) — 例 2 とブロック B の基盤。
+- [**Basic Analysis I**](https://www.jirka.org/ra/) — Jiří Lebl · 2024 · CC-BY-SA. §3.3 — $\mathbb{R}$ の完全性を経由した TVI の実証（正式な門）。

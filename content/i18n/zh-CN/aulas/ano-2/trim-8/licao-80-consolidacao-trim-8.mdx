@@ -1,0 +1,890 @@
+---
+titulo: "Lição 80 — Consolidação Trim 8 — Estatística e probabilidade aplicada"
+slug: "licao-80-consolidacao-trim-8"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "综合工作坊：集中趋势度量、方差、四分位数、离散随机变量、二项分布、正态分布、中心极限定理、相关性与贝叶斯定理在巴西真实问题中的应用。"
+ordem: 80
+publicado: true
+tags: ["estatística", "probabilidade", "consolidacao", "ano-2", "trim-8"]
+prerrequisitos: ["licao-79-bayes"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "Equiv. H2 Maths Statistics (Singapura)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{Dados} \xrightarrow{\text{descrever}} \hat\mu,\,\hat\sigma \xrightarrow{\text{modelar}} P(X) \xrightarrow{\text{inferir}} P(H \mid E)"
+  legenda={<>本学期的<strong>完整流程</strong>：用 <Eq>{`\\hat\\mu`}</Eq> 和 <Eq>{`\\hat\\sigma`}</Eq> 汇总数据，选择概率模型（二项分布、正态分布），再通过贝叶斯规则 <Eq>{`P(H\\mid E)`}</Eq> 更新信念。每一个箭头对应一节课；本课将这些箭头串联成一条链。</>}
+  audioTexto="第8学期流程。数据导出描述性统计量：估计均值与标准差。统计量导出概率模型：X的概率分布。模型导出贝叶斯推断：在证据E下H的概率。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    涵盖本课内容的教材
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://www.openintro.org/book/os/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenIntro Statistics（第4版）
+      </a>
+      <span className="text-clube-mist"> · 第2–3、6–8章 · CC-BY-SA · </span>
+      <em className="text-clube-mist">本学期主要参考书：描述性度量、分布族、中心极限定理、回归与贝叶斯定理，配有真实数据示例。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/statistics" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Statistics
+      </a>
+      <span className="text-clube-mist"> · 第2–9章 · CC-BY · </span>
+      <em className="text-clube-mist">结合公共卫生、商业与自然科学的情境练习；完整覆盖二项分布、正态分布与置信区间。</em>
+    </li>
+    <li>
+      <a href="https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Grinstead &amp; Snell — Introduction to Probability
+      </a>
+      <span className="text-clube-mist"> · 第1、5–9章 · GNU FDL · </span>
+      <em className="text-clube-mist">离散随机变量、大数定律与中心极限定理的严格理论阐述，证明清晰易懂。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="本学期正式综述">
+
+### 描述性统计
+
+<Definicao titulo="位置度量与离散度量">
+
+给定样本 $\{x_1, x_2, \ldots, x_n\}$：
+
+- **样本均值**：$\bar x = \dfrac{1}{n}\sum_{i=1}^n x_i$
+- **样本方差**：$s^2 = \dfrac{1}{n-1}\sum_{i=1}^n (x_i - \bar x)^2$
+- **标准差**：$s = \sqrt{s^2}$
+- **中位数**：排序后的中间值（$Q_2$）
+- **四分位数** $Q_1, Q_3$：下半部分/上半部分的中位数
+- **四分位距**：$Q_3 - Q_1$
+- **Tukey围栏**：若 $\lvert x - Q \rvert > 1.5 \cdot \text{IQR}$，则为异常值
+
+</Definicao>
+
+> "方差是各数据点与均值之偏差的平方的平均值。对于样本，除以 $n-1$（贝塞尔修正）而非 $n$。" — [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/)
+
+### 离散随机变量
+
+<Definicao titulo="离散随机变量的期望与方差">
+
+对于具有有限或可数支撑的随机变量 $X$：
+
+$$E[X] = \sum_x x \cdot P(X = x)$$
+$$\text{Var}(X) = E[X^2] - (E[X])^2 = \sum_x x^2 P(X=x) - \mu^2$$
+
+**期望的线性性**（始终成立）：
+$$E[aX + bY] = a\,E[X] + b\,E[Y]$$
+
+**方差的可加性**（仅对独立变量成立）：
+$$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$$
+
+</Definicao>
+
+> "期望是 $X$ 所有可能取值以概率为权重的加权平均。" — [Grinstead & Snell §6.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html)
+
+### 参数分布族
+
+<Definicao titulo="二项分布、正态分布与近似">
+
+**二项分布** $X \sim \text{Bin}(n,p)$：
+$$P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}, \quad E[X]=np, \quad \text{Var}(X)=np(1-p)$$
+
+**正态分布** $X \sim \mathcal{N}(\mu, \sigma^2)$：密度函数为
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+
+**标准化**：$Z = (X - \mu)/\sigma \sim \mathcal{N}(0,1)$
+
+**68-95-99.7法则**：$P(\mu - k\sigma \leq X \leq \mu + k\sigma)$ 在 $k = 1, 2, 3$ 时分别约为 $68\%$、$95\%$、$99.7\%$。
+
+**二项分布的正态近似**：若 $np \geq 10$ 且 $n(1-p) \geq 10$，则 $X \approx \mathcal{N}(np,\; np(1-p))$。
+
+</Definicao>
+
+### 中心极限定理
+
+<Teorema titulo="中心极限定理（CLT）">
+
+设 $X_1, X_2, \ldots, X_n$ 为独立同分布的随机变量，$E[X_i] = \mu$，$\text{Var}(X_i) = \sigma^2 < \infty$。当 $n$ 较大时：
+
+$$\bar X = \frac{1}{n}\sum_{i=1}^n X_i \;\xrightarrow{\;d\;}\; \mathcal{N}\!\left(\mu,\; \frac{\sigma^2}{n}\right)$$
+
+等价地，$Z_n = \dfrac{\bar X - \mu}{\sigma/\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1)$。
+
+*$\bar X$ 的标准差为 $\sigma/\sqrt{n}$，称为标准误差。*
+
+</Teorema>
+
+> "中心极限定理无疑是整个概率论中最重要的结论。它表明，无论 $X$ 的原始分布如何，样本均值的分布都趋近于正态分布。" — [OpenIntro Statistics §4.4](https://www.openintro.org/book/os/)
+
+### 相关性与回归
+
+<Definicao titulo="皮尔逊系数与最小二乘直线">
+
+**皮尔逊相关系数**：
+$$r = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sqrt{\sum(x_i-\bar x)^2 \cdot \sum(y_i - \bar y)^2}} \in [-1, 1]$$
+
+**回归直线** $\hat y = b_0 + b_1 x$：
+$$b_1 = r \cdot \frac{s_y}{s_x}, \quad b_0 = \bar y - b_1 \bar x$$
+
+$r^2$ 表示 $Y$ 的方差中由 $X$ 解释的比例。
+
+</Definicao>
+
+### 贝叶斯规则
+
+<Definicao titulo="贝叶斯更新">
+
+对于假设 $H$ 和证据 $E$：
+$$P(H \mid E) = \frac{P(E \mid H)\, P(H)}{P(E)}$$
+
+其中 $P(E) = P(E \mid H)P(H) + P(E \mid H^c)P(H^c)$（全概率公式，两个分支）。
+
+- $P(H)$：**先验概率**（观测证据之前的信念）
+- $P(E \mid H)$：**似然**（灵敏度）
+- $P(H \mid E)$：**后验概率**（更新后的信念）
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<defs>
+  <marker id="arr80" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="75" width="90" height="50" rx="6" fill="rgb(26 77 92 / 0.2)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="55" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">数据</text>
+  <text x="55" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">样本</text>
+</g>
+<g>
+  <line x1="100" x2="138" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="119" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">EDA</text>
+</g>
+<g>
+  <rect x="140" y="75" width="100" height="50" rx="6" fill="rgb(232 199 122 / 0.25)" stroke="rgb(201 163 95)" strokeWidth="1.5"/>
+  <text x="190" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">描述统计</text>
+  <text x="190" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">μ, σ, Q, r</text>
+</g>
+<g>
+  <line x1="240" x2="278" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="259" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">建模</text>
+</g>
+<g>
+  <rect x="280" y="75" width="100" height="50" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.5"/>
+  <text x="330" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">概率论</text>
+  <text x="330" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">P(X), CLT</text>
+</g>
+<g>
+  <line x1="380" x2="418" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="399" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">贝叶斯</text>
+</g>
+<g>
+  <rect x="420" y="75" width="120" height="50" rx="6" fill="rgb(199 107 63 / 0.2)" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+  <text x="480" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">推断</text>
+  <text x="480" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">P(H|E), 决策</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+第8学期流程。每个方块对应一组课程（第72–73、74–76、77、78–79课）。
+</figcaption>
+</figure>
+
+<Insight>
+
+**贝叶斯如何闭合循环。** 描述性统计汇总*已发生*的事情。概率分布为*可能发生*的事情建模。贝叶斯则反转这一逻辑：根据*观测到的*结果，更新我们对数据生成机制的*信念*。三个阶段合在一起，构成了所有定量科学推理的核心。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="给5岁小朋友讲">
+
+想象你有一袋彩色弹珠。
+
+- **均值**是："如果我把所有弹珠平均分给朋友们，每人能得到多少颗？"
+- **标准差**是："每个朋友得到的弹珠数量和均值差很多，还是差不多？"
+- **概率**是："如果我闭着眼睛摸一颗弹珠，摸到红色的可能性有多大？"
+- **正态分布**是：当你有好多好多弹珠时，大多数落在中间，很少的落在两端——这就形成了一个小山包（钟形）。
+- **贝叶斯**是：你发现一颗湿漉漉的弹珠。这会改变你对它来自哪个盒子的判断吗？
+
+这整个学期都在学习用真实生活中的"弹珠"来做计算——学校成绩、市场价格、体检结果。
+
+</Porta>
+
+<Porta nivel="10" titulo="给10岁小朋友讲">
+
+我们用一个真实案例来把所有知识串起来：你是一家连锁快餐店的数据科学家。
+
+1. **数据收集**：你测量了200笔订单的等待时间，计算得出**均值 = 8分钟**、**标准差 = 2分钟**（第72–73课）。
+2. **箱线图**（第73课）：发现某个区域的IQR异常大——那个门店有问题。
+3. **建模**：等待时间 $\approx \mathcal{N}(8, 4)$（第76课）。因此95%的订单在 $8 + 2 \times 2 = 12$ 分钟内送达。
+4. **中心极限定理**（第77课）：某天25笔订单的均值服从 $\mathcal{N}(8,\; 4/25) = \mathcal{N}(8,\; 0.16)$，精度更高。
+5. **相关性**（第78课）：当天气温与冰淇淋销量：$r = 0.85$，强正相关。
+6. **贝叶斯**（第79课）：如果一位顾客投诉，订单确实延误的概率是多少？这取决于延误的发生率和误报投诉率。
+7. **决策**：在炎热天气里为问题区域的门店增派员工。
+
+</Porta>
+
+<Porta nivel="15" titulo="给15岁青少年讲">
+
+### 第8学期的学习脉络
+
+整个学期遵循一条递进的逻辑：
+
+| 课次 | 主题 | 核心问题 |
+|---|---|---|
+| 72–73 | 描述性度量 | 如何汇总一个样本？ |
+| 74 | 离散随机变量与期望 | 如何对随机计数建模？ |
+| 75 | 二项分布 | $n$ 次概率为 $p$ 的试验中，成功次数是多少？ |
+| 76 | 正态分布 | 如何对对称的连续量建模？ |
+| 77 | 中心极限定理 | 为什么样本均值趋向于正态分布？ |
+| 78 | 相关性与回归 | 如何度量和建模线性关联？ |
+| 79 | 贝叶斯定理 | 如何用证据更新信念？ |
+
+### 常见错误与避坑指南
+
+1. **未检验就直接用正态分布**：先画直方图和Q-Q图。
+2. **混淆相关性与因果关系**：冰淇淋销量与溺水人数有 $r \approx 0.9$——混淆变量是天气。
+3. **基率谬误**：一个准确率99%的检测，若疾病罕见，阳性预测值可能很低（第79课）。
+4. **在偏态数据中报告均值**：巴西的平均工资具有误导性——中位数更合适。
+5. **在高度偏态分布中用小样本近似**：经验规则 $n \geq 30$，但有时需要更多。
+6. **未检验 $np \geq 10$ 且 $n(1-p) \geq 10$ 就用正态近似二项分布**。
+
+### 与后续内容的联系
+
+第9–12学期将深入探讨：
+- 置信区间与正式假设检验（高三）。
+- 多元回归模型。
+- 时间序列（ARIMA）与资产波动率。
+- 计算贝叶斯推断（MCMC、Stan）。
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程专业学生讲">
+
+### 本学期的正式层级结构
+
+第72–79课构建了一条严格的推断链：
+
+**第1层——描述性统计**（插件估计量）：$\bar x, s^2, r$ 是总体矩的矩估计量。由大数定律保证一致性：$\bar x \xrightarrow{P} \mu$。
+
+**第2层——参数模型**：$\text{Binomial}(n, p)$ 与 $\mathcal{N}(\mu, \sigma^2)$ 属于指数族。最大似然估计：二项分布的 $\hat p = \bar x / n$，正态分布的 $\hat\mu = \bar x$（两者均为BLUE，由Gauss-Markov定理保证）。
+
+**第3层——中心极限定理与标准误差**：收敛性 $\sqrt{n}(\bar X - \mu) \xrightarrow{d} \mathcal{N}(0, \sigma^2)$ 强于大数定律，可用于构造置信区间：$\bar x \pm z_{\alpha/2} \cdot s/\sqrt{n}$。
+
+**第4层——贝叶斯推断**：先验 $\pi(\theta)$ 加似然 $\ell(\theta \mid x)$ 得到后验 $\pi(\theta \mid x) \propto \ell(\theta \mid x)\pi(\theta)$。当 $n$ 很大时，贝叶斯后验与最大似然估计渐近一致（Bernstein-von Mises定理）。
+
+### 工程中的典型应用
+
+- **六西格玛**：$C_p = (\text{USL} - \text{LSL})/(6\sigma)$——过程能力指数。目标：$C_p \geq 1.33$。
+- **统计过程控制**：基于中心极限定理的 $\bar X$ 控制图与 $R$ 控制图。
+- **可靠性工程**：平均故障间隔时间（MTBF）、指数分布/威布尔分布。
+- **金融投资组合**：$\sigma_p^2 = w_A^2 \sigma_A^2 + w_B^2 \sigma_B^2 + 2w_A w_B \rho_{AB}\sigma_A\sigma_B$。
+- **模型诊断**：残差应满足 $\sim\mathcal{N}(0,\sigma^2)$ 独立同分布。Q-Q图与Shapiro-Wilk检验。
+
+### 跨领域联系
+
+- **线性代数**：协方差矩阵 $\Sigma$ 是 $\sigma^2$ 的推广；主成分分析（PCA）是 $\Sigma$ 的特征分解。
+- **微积分**（第52课起）：通过梯度/黑塞矩阵优化对数似然函数。
+- **常微分方程**：随机微分方程（SDE）以高斯噪声对确定性常微分方程进行推广。
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士讲">
+
+### 本学期未覆盖的内容——以及其重要性
+
+经典内容属于"20世纪统计学"。当代实践需要关键扩展：
+
+**因果推断（Pearl/Rubin框架）：** 相关性不等于因果性。通过有向无环图（DAG）、do算子、工具变量识别因果效应。**Angrist和Imbens——2021年诺贝尔经济学奖**（[nobelprize.org/prizes/economic-sciences/2021/summary/](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/)）——因工具变量方法与双重差分法而获奖。
+
+**重尾分布与金融：** 经典中心极限定理假设 $\sigma^2 < \infty$。金融时间序列具有重尾特征（Lévy $\alpha$-稳定分布，$\alpha < 2$）。未修正重尾的VaR低估了2008年的系统性风险。
+
+**非渐近集中不等式：** Hoeffding、McDiarmid、Talagrand给出有限样本下的PAC界——机器学习泛化理论的基础，无需令 $n \to \infty$。
+
+**可重复性危机：** p值操纵、"结果后假设"（HARK）、"数据叉路花园"。预注册运动与注册报告机制兴起。贝叶斯因子作为p值的替代方案。
+
+**计算贝叶斯统计：** MCMC（Metropolis-Hastings、HMC/NUTS）、变分推断、归一化流。实现框架：Stan、PyMC、NumPyro。可扩展至具有数千个参数的层次模型。
+
+**算法偏见：** 不鲁棒的估计量会放大训练数据中的系统性偏差。公平性是工程要求，而不仅仅是伦理诉求。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实践应用——巴西数据案例">
+
+### 案例1——INSS养老金工资
+
+巴西2025年INSS缴费工资上限为R\$ 8,157.41（巴西雷亚尔）。假设某机构公务员的工资服从 $\mathcal{N}(6000, 800^2)$。
+
+- 超过上限的比例：$Z = (8157 - 6000)/800 = 2.70$。查正态表：$P(Z > 2.70) \approx 0.35\%$。
+- 中位数 = 均值 = R\$ 6,000（对称分布）。
+- 四分位距：$Q_1 = \mu - 0.675\sigma = 5460$，$Q_3 = 6540$。IQR = R\$ 1,080。
+
+### 案例2——ENEM：不同群体的比较
+
+2024年，公立学校考生数学成绩均值为520分，标准差为90分（数据为演练用假设数值）；私立学校考生：均值610分，标准差80分。
+
+由中心极限定理，各取100名学生样本时，均值之差近似服从：
+$$\bar X_{\text{私立}} - \bar X_{\text{公立}} \sim \mathcal{N}\!\left(90,\; \frac{80^2}{100} + \frac{90^2}{100}\right) = \mathcal{N}(90,\; 145)$$
+
+差值的标准差：$\sqrt{145} \approx 12$。观测差值90分处于 $90/12 = 7.5$ 个标准误差之外——在统计上无可置疑。
+
+### 案例3——新冠病毒诊断
+
+PCR检测：灵敏度95%，特异度99%。2020年3月，巴西估计患病率：0.5%。
+
+$$P(\text{新冠} \mid +) = \frac{0.95 \times 0.005}{0.95 \times 0.005 + 0.01 \times 0.995} \approx \frac{0.00475}{0.00475 + 0.00995} \approx 32\%$$
+
+在患病率较低的情况下，单次阳性检测结果仍有68%的概率为假阳性。这正是部分临床方案要求进行两次检测的原因。
+
+</Porta>
+
+</DuasPortas>
+
+## 解题示例
+
+<Exemplo titulo="方差、四分位距与异常值检测" numero="1">
+
+**问题：** 考虑以下服务时间样本（单位：分钟）：5、7、8、8、9、10、10、11、12、30。计算均值、样本方差、中位数、$Q_1$、$Q_3$、IQR，并用Tukey围栏方法识别异常值。
+
+**策略：** 依序应用各定义：排序、确定四分位数、计算IQR、应用 $1.5 \cdot \text{IQR}$ 判据。
+
+**解题过程：**
+
+排序后的样本：5、7、8、8、9、**10**、10、11、12、30。（$n = 10$）
+
+*均值：* $\bar x = (5+7+8+8+9+10+10+11+12+30)/10 = 110/10 = 11$。
+
+*样本方差：*
+
+$$s^2 = \frac{1}{9}\sum(x_i - 11)^2 = \frac{(−6)^2+(−4)^2+(−3)^2+(−3)^2+(−2)^2+(-1)^2+(-1)^2+0^2+1^2+19^2}{9}$$
+
+$$= \frac{36+16+9+9+4+1+1+0+1+361}{9} = \frac{438}{9} \approx 48.7 \implies s \approx 6.98$$
+
+*中位数（位置5.5处）：* $(9 + 10)/2 = 9.5$。
+
+*$Q_1$（前5个数的中位数）：* 8。
+
+*$Q_3$（后5个数的中位数）：* 11。
+
+*IQR：* $11 - 8 = 3$。
+
+*下围栏：* $8 - 1.5 \times 3 = 3.5$。*上围栏：* $11 + 1.5 \times 3 = 15.5$。
+
+数值30为异常值（超过15.5）。数值5在围栏内（高于3.5）。
+
+**验证：** 均值（11）被异常值30拉高；中位数（9.5）更能代表数据的中心。IQR（3）在存在异常值的情况下比 $s$（6.98）更稳健。
+
+**来源.** [OpenIntro Statistics §2.1–2.2](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo titulo="离散随机变量的期望与方差" numero="2">
+
+**问题：** 一个正四面体骰子，$X \in \{1, 2, 3, 4\}$，各面概率相等，均为 $1/4$。计算 $E[X]$、$\text{Var}(X)$ 以及 $E[3X - 2]$。
+
+**策略：** 应用期望的定义；用 $\text{Var}(X) = E[X^2] - (E[X])^2$ 计算方差；用线性性计算 $E[3X - 2]$。
+
+**解题过程：**
+
+$$E[X] = \frac{1}{4}(1 + 2 + 3 + 4) = \frac{10}{4} = 2.5$$
+
+$$E[X^2] = \frac{1}{4}(1 + 4 + 9 + 16) = \frac{30}{4} = 7.5$$
+
+$$\text{Var}(X) = 7.5 - (2.5)^2 = 7.5 - 6.25 = 1.25$$
+
+$$E[3X - 2] = 3 E[X] - 2 = 3 \times 2.5 - 2 = 5.5$$
+
+**验证：** 由对称性，$E[X] = (1+4)/2 = 2.5$。对于方差：$\{1,\ldots,n\}$ 上离散均匀分布的公式为 $(n^2-1)/12 = (16-1)/12 = 1.25$，结果吻合。
+
+**来源.** [Grinstead & Snell, Introduction to Probability §6.1，第224页](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL。
+
+</Exemplo>
+
+<Exemplo titulo="二项分布与正态近似" numero="3">
+
+**问题：** 某生产线的次品率 $p = 0.04$。在 $n = 200$ 件产品的批次中，计算 $E[X]$、$\text{Var}(X)$，并用正态近似求 $P(X \geq 12)$。
+
+**策略：** 验证近似条件（$np \geq 10$ 且 $n(1-p) \geq 10$），用连续性修正进行标准化。
+
+**解题过程：**
+
+$X \sim \text{Bin}(200, 0.04)$。
+
+$E[X] = 200 \times 0.04 = 8$。$\text{Var}(X) = 200 \times 0.04 \times 0.96 = 7.68$。$\sigma = \sqrt{7.68} \approx 2.77$。
+
+*判断条件：* $np = 8 < 10$。正态近似处于边界情况——结果为估计值。本练习中仍用此方法练习技巧。
+
+*带连续性修正：* $P(X \geq 12) \approx P\!\left(Z \geq \dfrac{11.5 - 8}{2.77}\right) = P(Z \geq 1.26)$。
+
+查表：$P(Z \geq 1.26) = 1 - \Phi(1.26) \approx 1 - 0.8962 = 0.1038 \approx 10.4\%$。
+
+**验证：** 二项分布精确值：$P(X \geq 12) \approx 10.6\%$。近似合理，误差为0.2个百分点。
+
+**来源.** [OpenStax Statistics §4.3 — Binomial Distribution, ex. 4.15](https://openstax.org/books/statistics/pages/4-3-geometric-distribution) 及 §6.3 — CC-BY 许可。
+
+</Exemplo>
+
+<Exemplo titulo="中心极限定理——样本均值" numero="4">
+
+**问题：** 某品牌咖啡包装袋的重量满足 $\mu = 500$ g、$\sigma = 8$ g（分布未知）。质检部门抽取64包样品。样本均值小于498 g的概率是多少？
+
+**策略：** 应用中心极限定理：对 $n = 64$（足够大），$\bar X \sim \mathcal{N}(500,\; 8^2/64)$。
+
+**解题过程：**
+
+标准误差：$\sigma_{\bar X} = 8/\sqrt{64} = 8/8 = 1$ g。
+
+$$P(\bar X < 498) = P\!\left(Z < \frac{498 - 500}{1}\right) = P(Z < -2) = \Phi(-2) \approx 0.0228$$
+
+概率 $\approx 2.3\%$。
+
+**验证：** 此概率较低，符合预期：498 g比期望样本均值低2个标准差。注意，即使不知道原始分布，$n = 64$ 已足够应用中心极限定理。
+
+**来源.** [OpenIntro Statistics §4.4 — Central Limit Theorem，第181页](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo titulo="贝叶斯规则——低患病率下的诊断检测" numero="5">
+
+**问题：** 某疾病在人群中的患病率为1%。某检测的灵敏度为90%，特异度为95%。某人检测结果为阳性。该人患病的概率（阳性预测值，VPP）是多少？
+
+**策略：** 应用贝叶斯规则，令 $H = $ "患病"，$E = $ "检测阳性"。用全概率公式计算 $P(E)$。
+
+**解题过程：**
+
+已知：$P(H) = 0.01$，$P(H^c) = 0.99$，$P(E \mid H) = 0.90$，$P(E \mid H^c) = 0.05$。
+
+$$P(E) = P(E \mid H)P(H) + P(E \mid H^c)P(H^c) = 0.90 \times 0.01 + 0.05 \times 0.99 = 0.009 + 0.0495 = 0.0585$$
+
+$$P(H \mid E) = \frac{P(E \mid H)\,P(H)}{P(E)} = \frac{0.009}{0.0585} \approx 0.1538 \approx 15.4\%$$
+
+**验证：** 用决策树直观验证：在10,000人中，100人患病，9,900人健康。患病者中：$0.9 \times 100 = 90$ 人检测阳性。健康者中：$0.05 \times 9,900 = 495$ 人检测阳性。阳性总数：585人。阳性预测值 = $90/585 \approx 15.4\%$，结果一致。
+
+**来源.** [OpenIntro Statistics §2.2 — Conditional Probability, ex. 2.29，第88页](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-80-consolidacao-trim-8">
+
+> **练习册说明。** 共40道题，分4组。请在纸上作答；以正式门的公式表为参考。来源：OpenIntro Statistics（OIS）、OpenStax Statistics（OST）、Grinstead-Snell（GS）。
+
+### A组——描述性统计与分布（80.1至80.14）
+
+<Exercicio
+  numero="80.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "51", exercicio: "2.1", licenca: "CC-BY-SA" }}
+  solucao={<>排序后的数据：4、6、8、8、9、10、10、11、12、22。中位数 = <Eq>{`(9+10)/2 = 9.5`}</Eq>。<Eq>{`Q_1`}</Eq> = 前5个数的中位数 = 8。<Eq>{`Q_3`}</Eq> = 后5个数的中位数 = 11。<Eq>{`\\text{IQR} = 3`}</Eq>。上围栏：<Eq>{`11 + 1.5\\times3 = 15.5`}</Eq>。异常值：22（超过15.5）。</>}
+  passos={<>
+    <ol>
+      <li>对样本排序：4、6、8、8、9、10、10、11、12、22。共10个值，中位数在第5和第6位之间：<Eq>{`(9+10)/2 = 9.5`}</Eq>。</li>
+      <li>下半部分（第1–5位）：4、6、8、8、9——中位数 = 8 = <Eq>{`Q_1`}</Eq>。上半部分（第6–10位）：10、10、11、12、22——中位数 = 11 = <Eq>{`Q_3`}</Eq>。</li>
+      <li>IQR = <Eq>{`Q_3 - Q_1 = 11 - 8 = 3`}</Eq>。围栏：下围栏 = <Eq>{`8 - 1.5\\times3 = 3.5`}</Eq>，上围栏 = <Eq>{`11 + 1.5\\times3 = 15.5`}</Eq>。</li>
+      <li>逐一检验：4高于3.5（正常）；22高于15.5（异常值）。</li>
+    </ol>
+    <em>技巧提示：</em>当 <Eq>{`n`}</Eq> 为偶数时，<Eq>{`Q_1`}</Eq> 和 <Eq>{`Q_3`}</Eq> 分别是两半数据的中位数（不包含中间中位数，视具体约定而定）。OpenIntro 使用"前 <Eq>{`n/2`}</Eq> 个数的中位数"。
+  </>}
+>
+样本：4、6、8、8、9、10、10、11、12、22。计算中位数、$Q_1$、$Q_3$、IQR，并用Tukey围栏方法识别异常值。
+</Exercicio>
+
+<Exercicio
+  numero="80.2"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "52", exercicio: "2.3", licenca: "CC-BY-SA" }}
+  solucao={<>均值 = <Eq>{`(4+6+8+8+9+10+10+11+12+22)/10 = 100/10 = 10`}</Eq>。样本方差：各偏差的平方和除以9。<Eq>{`s^2 = [(−6)^2+(−4)^2+(−2)^2+(−2)^2+(−1)^2+0^2+0^2+1^2+2^2+12^2]/9 = (36+16+4+4+1+0+0+1+4+144)/9 = 210/9 \\approx 23.3`}</Eq>。标准差：<Eq>{`s \\approx 4.83`}</Eq>。比较：均值（10）受22的影响偏高；中位数（9.5）更具代表性。</>}
+>
+与第80.1题相同的样本。计算均值和样本标准差。与中位数相比，哪个更能代表数据的中心位置？为什么？
+</Exercicio>
+
+<Exercicio
+  numero="80.3"
+  dificuldade="aplicacao"
+  resposta="$E[X]=6;\; \text{Var}(X)=4.2;\; \sigma\approx2.05$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "218", exercicio: "ex. 4.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\text{Bin}(20, 0.3)`}</Eq>。<Eq>{`E[X] = np = 20\\times0.3 = 6`}</Eq>。<Eq>{`\\text{Var}(X) = np(1-p) = 20\\times0.3\\times0.7 = 4.2`}</Eq>。标准差：<Eq>{`\\sigma = \\sqrt{4.2} \\approx 2.05`}</Eq>。</>}
+>
+$X \sim \text{Bin}(20,\, 0.3)$。计算 $E[X]$、$\text{Var}(X)$ 和 $\sigma$。
+</Exercicio>
+
+<Exercicio
+  numero="80.4"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "352", exercicio: "ex. 6.11", licenca: "CC-BY" }}
+  solucao={<>条件判断：<Eq>{`np = 6`}</Eq>，<Eq>{`n(1-p) = 14`}</Eq>。条件 <Eq>{`np \\geq 10`}</Eq> 不满足（np = 6），因此正态近似较粗糙。为练习该技巧，仍继续计算：<Eq>{`\\mu = 6`}</Eq>，<Eq>{`\\sigma = \\sqrt{4.2} \\approx 2.05`}</Eq>。带连续性修正：<Eq>{`P(X \\geq 10) \\approx P(Z \\geq (9.5-6)/2.05) = P(Z \\geq 1.71) \\approx 4.4\\%`}</Eq>。</>}
+>
+对于 $X \sim \text{Bin}(20,\, 0.3)$：验证正态近似条件，即使处于边界情况，仍用带连续性修正的正态近似估计 $P(X \geq 10)$。
+</Exercicio>
+
+<Exercicio
+  numero="80.5"
+  dificuldade="aplicacao"
+  resposta="$P(X > 65) \approx 6.7\%$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "318", exercicio: "ex. 6.3", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\mathcal{N}(50, 100)`}</Eq>，故 <Eq>{`\\sigma = 10`}</Eq>。<Eq>{`Z = (65-50)/10 = 1.5`}</Eq>。<Eq>{`P(X > 65) = P(Z > 1.5) = 1 - \\Phi(1.5) \\approx 1 - 0.9332 = 0.0668 \\approx 6.7\\%`}</Eq>。</>}
+>
+$X \sim \mathcal{N}(50,\, 100)$。计算 $P(X > 65)$。
+</Exercicio>
+
+<Exercicio
+  numero="80.6"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "183", exercicio: "4.27", licenca: "CC-BY-SA" }}
+  solucao={<>由中心极限定理，<Eq>{`\\bar X \\sim \\mathcal{N}(10,\\; 9/100) = \\mathcal{N}(10,\\; 0.09)`}</Eq>。标准误差：<Eq>{`\\sigma_{\\bar X} = 3/\\sqrt{100} = 0.3`}</Eq>。<Eq>{`P(\\bar X > 10.3) = P(Z > (10.3-10)/0.3) = P(Z > 1.0) = 1 - \\Phi(1) \\approx 15.9\\%`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>识别参数：<Eq>{`\\mu = 10`}</Eq>，<Eq>{`\\sigma = 3`}</Eq>，<Eq>{`n = 100`}</Eq>。</li>
+      <li>由中心极限定理，样本均值服从：<Eq>{`\\bar X \\sim \\mathcal{N}(\\mu,\\; \\sigma^2/n) = \\mathcal{N}(10,\\; 9/100)`}</Eq>。</li>
+      <li>计算标准误差：<Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n} = 3/10 = 0.3`}</Eq>。</li>
+      <li>标准化：<Eq>{`Z = (10.3 - 10)/0.3 = 1.0`}</Eq>。查表：<Eq>{`P(Z > 1) \\approx 15.9\\%`}</Eq>。</li>
+    </ol>
+    <em>记忆技巧：</em>标准误差随 <Eq>{`\\sqrt{n}`}</Eq> 减小。样本量扩大4倍，标准误差减半。
+  </>}
+>
+样本 $n = 100$，总体参数 $\mu = 10$，$\sigma = 3$。计算 $P(\bar X > 10.3)$。
+</Exercicio>
+
+<Exercicio
+  numero="80.7"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "350", exercicio: "8.1", licenca: "CC-BY-SA" }}
+  solucao={<>数据点：<Eq>{`(1,2),(2,4),(3,5),(4,4),(5,7)`}</Eq>。<Eq>{`\\bar x = 3`}</Eq>，<Eq>{`\\bar y = 4.4`}</Eq>。<Eq>{`\\sum(x_i-\\bar x)(y_i-\\bar y) = (-2)(-2.4)+(-1)(-0.4)+(0)(0.6)+(1)(-0.4)+(2)(2.6) = 4.8+0.4+0-0.4+5.2 = 10`}</Eq>。<Eq>{`\\sum(x_i-\\bar x)^2 = 4+1+0+1+4 = 10`}</Eq>。<Eq>{`\\sum(y_i-\\bar y)^2 = 5.76+0.16+0.36+0.16+6.76 = 13.2`}</Eq>。<Eq>{`r = 10/\\sqrt{10 \\times 13.2} = 10/\\sqrt{132} \\approx 10/11.49 \\approx 0.870`}</Eq>。回归直线：<Eq>{`b_1 = r\\cdot s_y/s_x \\approx 1.0`}</Eq>；<Eq>{`b_0 = 4.4 - 1\\times3 = 1.4`}</Eq>。故 <Eq>{`\\hat y = 1.4 + x`}</Eq>。</>}
+>
+数据点 $(x, y)$：(1, 2)、(2, 4)、(3, 5)、(4, 4)、(5, 7)。计算皮尔逊相关系数 $r$ 和回归直线 $\hat y = b_0 + b_1 x$。
+</Exercicio>
+
+<Exercicio
+  numero="80.8"
+  dificuldade="aplicacao"
+  resposta="$\text{VPP} \approx 26\%$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "88", exercicio: "2.29", licenca: "CC-BY-SA" }}
+  solucao={<>患病率2%：<Eq>{`P(D) = 0.02`}</Eq>。灵敏度90%：<Eq>{`P(+|D) = 0.90`}</Eq>。特异度95%：<Eq>{`P(-|D^c) = 0.95`}</Eq>，故 <Eq>{`P(+|D^c) = 0.05`}</Eq>。<Eq>{`P(+) = 0.9\\times0.02 + 0.05\\times0.98 = 0.018 + 0.049 = 0.067`}</Eq>。<Eq>{`\\text{VPP} = P(D|+) = 0.018/0.067 \\approx 0.268 \\approx 26.8\\%`}</Eq>。</>}
+>
+某疾病患病率2%，检测灵敏度90%，特异度95%。计算阳性预测值（VPP）。
+</Exercicio>
+
+<Exercicio
+  numero="80.9"
+  dificuldade="aplicacao"
+  resposta="$Y \sim \mathcal{N}(25,\; 16)$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "337", exercicio: "ex. 6.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\mathcal{N}(10, 4)`}</Eq>。线性变换：<Eq>{`E[Y] = 2\\times10 + 5 = 25`}</Eq>。<Eq>{`\\text{Var}(Y) = 2^2 \\times 4 = 16`}</Eq>（常数不影响方差）。故 <Eq>{`Y \\sim \\mathcal{N}(25, 16)`}</Eq>。</>}
+>
+$Y = 2X + 5$，其中 $X \sim \mathcal{N}(10,\, 4)$。确定 $Y$ 的分布。
+</Exercicio>
+
+<Exercicio
+  numero="80.10"
+  dificuldade="aplicacao"
+  resposta="$E[S]=175;\; \sigma_S \approx 12.08$"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§6.2", pagina: "242", exercicio: "ex. 6.2.5", licenca: "GNU FDL" }}
+  solucao={<>对于正六面体骰子：<Eq>{`E[X] = 3.5`}</Eq>，<Eq>{`\\text{Var}(X) = 35/12 \\approx 2.917`}</Eq>。50个独立骰子之和 <Eq>{`S = X_1+\\ldots+X_{50}`}</Eq>：<Eq>{`E[S] = 50\\times3.5 = 175`}</Eq>；<Eq>{`\\text{Var}(S) = 50\\times35/12 \\approx 145.83`}</Eq>；<Eq>{`\\sigma_S = \\sqrt{145.83} \\approx 12.08`}</Eq>。由中心极限定理，<Eq>{`S \\approx \\mathcal{N}(175,\\; 145.83)`}</Eq>。</>}
+>
+掷一个正六面体骰子50次。计算总和 $S = X_1 + \cdots + X_{50}$ 的期望和标准差。
+</Exercicio>
+
+<Exercicio
+  numero="80.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "均值始终大于中位数" },
+    { texto: "若数据为负数，方差可以为负" },
+    { texto: "四分位距对极端异常值免疫，而标准差则不然", correta: true },
+    { texto: "标准差和四分位距衡量同一事物，只是量纲不同" },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "60", exercicio: "2.5", licenca: "CC-BY-SA" }}
+  solucao={<>IQR仅依赖于四分位数，而四分位数是稳健的分位数——只要极端异常值不侵入数据的中间区域，<Eq>{`Q_1`}</Eq> 和 <Eq>{`Q_3`}</Eq> 就不受影响。标准差使用所有偏差的平方，因此一个极端异常值就可以大幅增大标准差。其他选项：（A）错误——在对称分布中，均值 = 中位数；（B）错误——方差是平方和，始终非负；（D）错误——两者衡量的概念不同。</>}
+>
+以下关于离散度量的说法，哪个是**正确的**？
+</Exercicio>
+
+<Exercicio
+  numero="80.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$P(\\text{Bin}(10,0.5) = 5) > P(\\text{Bin}(100,0.5) = 50)$", correta: true },
+    { texto: "$P(\\text{Bin}(10,0.5) = 5) < P(\\text{Bin}(100,0.5) = 50)$" },
+    { texto: "$P(\\text{Bin}(10,0.5) = 5) = P(\\text{Bin}(100,0.5) = 50)$" },
+    { texto: "两个概率均等于0.5" },
+  ]}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "174", exercicio: "ex. 5.1.1", licenca: "GNU FDL" }}
+  solucao={<>由中心极限定理，随着 <Eq>{`n`}</Eq> 增大，标准化后的二项分布收敛于正态分布，任意单点的概率下降（分布"变扁"）。计算：<Eq>{`P(\\text{Bin}(10,0.5)=5) = \\binom{10}{5}(0.5)^{10} = 252/1024 \\approx 0.246`}</Eq>。对于 <Eq>{`n=100`}</Eq>：<Eq>{`\\binom{100}{50}(0.5)^{100} \\approx 0.0796`}</Eq>（由中心极限定理近似：<Eq>{`f(50) \\approx 1/(5\\sqrt{2\\pi}) \\approx 0.0798`}</Eq>）。故点概率随 <Eq>{`n`}</Eq> 增大而减小。</>}
+>
+以下哪个关系对众数处的二项分布点概率是正确的？
+</Exercicio>
+
+<Exercicio
+  numero="80.13"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "186", exercicio: "4.31", licenca: "CC-BY-SA" }}
+  solucao={<>中心极限定理针对的是 <Eq>{`\\bar X`}</Eq>（样本均值）的分布，而非单个 <Eq>{`X`}</Eq> 的分布。对于任何满足 <Eq>{`\\sigma^2 < \\infty`}</Eq> 的分布，当 <Eq>{`n \\to \\infty`}</Eq> 时，<Eq>{`\\sqrt{n}(\\bar X - \\mu)/\\sigma`}</Eq> 的分布收敛于 <Eq>{`\\mathcal{N}(0,1)`}</Eq>。个体数据仍然服从原始分布。收敛速度取决于原始分布的偏度——对于接近正态的分布，<Eq>{`n=5`}</Eq> 即已足够；对于 Bernoulli(0.01)，可能需要 <Eq>{`n > 1000`}</Eq>。</>}
+>
+请用自己的话解释：中心极限定理是否断言当 $n$ 较大时，个体数据服从正态分布？如果不是，究竟什么收敛于正态分布？
+</Exercicio>
+
+<Exercicio
+  numero="80.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "相关性度量X与Y之间任意类型的关联强度" },
+    { texto: "若 $r = 0$，则X与Y相互独立" },
+    { texto: "皮尔逊系数只度量线性关联；$r = 0$ 不意味着独立", correta: true },
+    { texto: "若 $r = 1$，则每个数据点恰好落在回归直线上" },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "356", exercicio: "8.7", licenca: "CC-BY-SA" }}
+  solucao={<>皮尔逊系数只度量关联的线性分量。经典反例：若 <Eq>{`X`}</Eq> 关于零点对称，令 <Eq>{`Y = X^2`}</Eq>，则 <Eq>{`r = 0`}</Eq>，但Y在函数意义上依赖于X。其他选项：（A）错误——皮尔逊只检测线性关联；（B）错误——<Eq>{`r=0`}</Eq> 不意味着独立；（D）错误——<Eq>{`r = 1`}</Eq> 意味着点落在直线上，但题目是从系数的值推断结论，并非其逆。</>}
+>
+以下关于皮尔逊相关系数的说法，哪个是**正确的**？
+</Exercicio>
+
+### B组——综合建模（80.15至80.27）
+
+<Exercicio
+  numero="80.15"
+  dificuldade="modelagem"
+  resposta="$P(T > 40.2\,\text{分钟}) \approx 5\%$；SLA上限约为 $40.2$ 分钟"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "337", exercicio: "ex. 6.9", licenca: "CC-BY" }}
+  solucao={<>配送时间 <Eq>{`T \\sim \\mathcal{N}(32,25)`}</Eq>。覆盖95%所需：<Eq>{`z_{0.95} = 1.645`}</Eq>。上限：<Eq>{`32 + 1.645 \\times 5 = 32 + 8.2 = 40.2`}</Eq> 分钟。因此，95%的订单在40.2分钟内送达。</>}
+  passos={<>
+    <ol>
+      <li>识别：<Eq>{`T \\sim \\mathcal{N}(32, 5^2)`}</Eq>。求 <Eq>{`t^*`}</Eq> 使得 <Eq>{`P(T \\leq t^*) = 0.95`}</Eq>。</li>
+      <li>标准化：<Eq>{`P(Z \\leq (t^* - 32)/5) = 0.95`}</Eq>。查正态表：<Eq>{`z_{0.95} \\approx 1.645`}</Eq>。</li>
+      <li>求解：<Eq>{`(t^* - 32)/5 = 1.645 \\implies t^* = 32 + 5 \\times 1.645 = 40.2`}</Eq> 分钟。</li>
+    </ol>
+    <em>说明：</em>这是该分布的<em>第95百分位数</em>。在物流管理中，这是针对95%订单的SLA（服务水平协议）上限。
+  </>}
+>
+某披萨店配送时间：$T \sim \mathcal{N}(32,\, 5^2)$ 分钟。能覆盖95%配送的最长时限是多少？
+</Exercicio>
+
+<Exercicio
+  numero="80.16"
+  dificuldade="modelagem"
+  resposta="违约期望次数 = 5"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "220", exercicio: "ex. 4.9", licenca: "CC-BY" }}
+  solucao={<>每笔订单违反SLA（超过40.2分钟）的概率为5%。100笔订单中，违约次数 <Eq>{`V \\sim \\text{Bin}(100, 0.05)`}</Eq>。<Eq>{`E[V] = 100 \\times 0.05 = 5`}</Eq>。</>}
+>
+基于第80.15题的模型（SLA为40.2分钟，违约率5%），计算100笔订单中违约次数的期望值。
+</Exercicio>
+
+<Exercicio
+  numero="80.17"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "353", exercicio: "8.3", licenca: "CC-BY-SA" }}
+  solucao={<>房产市场假设数据：<Eq>{`\\bar x = 80\\,\\text{m}^2`}</Eq>，<Eq>{`\\bar y = 450\\,000`}</Eq>（巴西雷亚尔），<Eq>{`s_x = 20`}</Eq>，<Eq>{`s_y = 80\\,000`}</Eq>，<Eq>{`r = 0.8`}</Eq>。斜率：<Eq>{`b_1 = 0.8 \\times 80000/20 = 3200`}</Eq>（每平方米巴西雷亚尔）。截距：<Eq>{`b_0 = 450000 - 3200\\times80 = 194000`}</Eq>。回归方程：<Eq>{`\\hat p = 194000 + 3200 \\cdot \\text{面积}`}</Eq>。对均值面积（80平方米）：<Eq>{`\\hat p = 450000`}</Eq>（显然，直线过均值点）。</>}
+>
+房地产市场：面积与价格的相关系数 $r = 0.8$。均值 $\bar x = 80\,\text{m}^2$，$\bar y = 450.000$（R\$）；标准差 $s_x = 20$，$s_y = 80.000$。求回归直线并预测均值面积对应的房价。
+</Exercicio>
+
+<Exercicio
+  numero="80.18"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "352", exercicio: "ex. 6.13", licenca: "CC-BY" }}
+  solucao={<>100只独立股票的日收益率，每只 <Eq>{`\\sim \\mathcal{N}(0.001,\\; 0.02^2)`}</Eq>。等权重组合的收益率：<Eq>{`R = (1/100)\\sum X_i`}</Eq>。由中心极限定理：<Eq>{`E[R] = 0.001`}</Eq>；<Eq>{`\\text{Var}(R) = (0.02)^2/100 = 4\\times10^{-6}`}</Eq>；<Eq>{`\\sigma_R = 0.002`}</Eq>。故 <Eq>{`R \\sim \\mathcal{N}(0.001,\\; 4\\times10^{-6})`}</Eq>。</>}
+>
+金融投资组合：100只独立股票，每只日收益率 $\sim \mathcal{N}(0.001,\; 0.02^2)$。确定等权重组合日收益率的分布。
+</Exercicio>
+
+<Exercicio
+  numero="80.19"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "340", exercicio: "ex. 6.11", licenca: "CC-BY" }}
+  solucao={<>零部件：<Eq>{`X \\sim \\mathcal{N}(10,\\; 0.02^2)`}</Eq>。公差范围：<Eq>{`[9.9,\\; 10.1]`}</Eq>。<Eq>{`P(9.9 \\leq X \\leq 10.1) = P(-5 \\leq Z \\leq 5) \\approx 1 - 5.7\\times10^{-7}`}</Eq>。每百万件次品数：<Eq>{`\\approx 0.57`}</Eq>（极低，过程处于六西格玛水平）。</>}
+>
+六西格玛：零部件尺寸 $X \sim \mathcal{N}(10,\; 0.02^2)$ mm，公差为 $10 \pm 0.1$ mm。计算次品率并估计每百万件次品数。
+</Exercicio>
+
+<Exercicio
+  numero="80.20"
+  dificuldade="modelagem"
+  resposta="95% CI：$\hat p \pm 0.0196$，即 $(0.460;\; 0.500)$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§6.1", pagina: "248", exercicio: "6.1", licenca: "CC-BY-SA" }}
+  solucao={<>选举民调：<Eq>{`n = 2500`}</Eq>，<Eq>{`\\hat p = 0.48`}</Eq>。标准误差：<Eq>{`\\text{SE} = \\sqrt{\\hat p (1-\\hat p)/n} = \\sqrt{0.48\\times0.52/2500} \\approx 0.01`}</Eq>。95%置信区间：<Eq>{`\\hat p \\pm 1.96 \\times 0.01 = 0.48 \\pm 0.0196`}</Eq>，即 <Eq>{`(0.460;\\; 0.500)`</Eq>。置信区间包含0.50，因此无法从该结果判断哪位候选人领先。</>}
+  passos={<>
+    <ol>
+      <li>比例置信区间公式：<Eq>{`\\hat p \\pm z_{\\alpha/2} \\cdot \\sqrt{\\hat p (1-\\hat p)/n}`}</Eq>。95%置信水平下，<Eq>{`z_{0.025} = 1.96`}</Eq>。</li>
+      <li>计算SE：<Eq>{`\\sqrt{0.48 \\times 0.52 / 2500} = \\sqrt{9.984\\times10^{-5}} \\approx 0.01`}</Eq>。</li>
+      <li>置信区间：<Eq>{`0.48 \\pm 1.96 \\times 0.01 = 0.48 \\pm 0.0196`}</Eq>。区间：0.4604至0.4996。</li>
+      <li>解读：0.50刚好在置信区间外（差距极小）。有边际证据表明不足50%的人支持该候选人，但把握较低。</li>
+    </ol>
+    <em>知识拓展：</em>巴西选举民调的误差幅度为正负2个百分点，对应 <Eq>{`n \\approx 2500`}</Eq>——恰好是本题的设置。
+  </>}
+>
+选举民调：$n = 2500$，$\hat p = 0.48$。构造真实比例 $p$ 的95%置信区间。
+</Exercicio>
+
+<Exercicio
+  numero="80.21"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "87", exercicio: "2.27", licenca: "CC-BY-SA" }}
+  solucao={<>垃圾邮件：<Eq>{`P(\\text{spam}) = 0.3`}</Eq>，<Eq>{`P(\\text{"GRÁTIS"}|\\text{spam}) = 0.80`}</Eq>，<Eq>{`P(\\text{"GRÁTIS"}|\\text{ham}) = 0.05`}</Eq>。<Eq>{`P(\\text{"GRÁTIS"}) = 0.80\\times0.3 + 0.05\\times0.7 = 0.24 + 0.035 = 0.275`}</Eq>。<Eq>{`P(\\text{spam}|\\text{"GRÁTIS"}) = 0.24/0.275 \\approx 0.872 = 87.2\\%`}</Eq>。判定为垃圾邮件。</>}
+>
+垃圾邮件过滤器：80%的垃圾邮件包含"GRÁTIS"，5%的正常邮件包含。$P(\text{spam}) = 0.3$。一封邮件包含"GRÁTIS"——用贝叶斯定理进行分类。
+</Exercicio>
+
+<Exercicio
+  numero="80.22"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/3-4-contingency-tables-and-probability-trees", secao: "§3.4", pagina: "196", exercicio: "ex. 3.14", licenca: "CC-BY" }}
+  solucao={<>生产线次品率2%（<Eq>{`p = 0.02`}</Eq>），批次 <Eq>{`n=200`}</Eq>。泊松近似，<Eq>{`\\lambda = 200\\times0.02 = 4`}</Eq>：<Eq>{`P(X \\leq 4) \\approx 0.629`}</Eq>，故 <Eq>{`P(X \\geq 5) \\approx 0.371`}</Eq>。正态近似：<Eq>{`\\mu=4`}</Eq>，<Eq>{`\\sigma=2`}</Eq>；<Eq>{`P(X \\geq 5) \\approx P(Z \\geq (4.5-4)/2) = P(Z \\geq 0.25) \\approx 40.1\\%`}</Eq>。两种估计结果有差异；泊松近似在此更精确（<Eq>{`n`}</Eq> 大，<Eq>{`p`}</Eq> 小）。</>}
+>
+生产线：次品率2%，批次200件。分别用泊松近似和正态近似估计 $P(X \geq 5\text{ 件次品})$，并比较结果。
+</Exercicio>
+
+<Exercicio
+  numero="80.23"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "370", exercicio: "8.13", licenca: "CC-BY-SA" }}
+  solucao={<>50/50组合的方差：<Eq>{`\\sigma_p^2 = (0.5)^2(0.01)^2 + (0.5)^2(0.02)^2 + 2(0.5)(0.5)(0.3)(0.01)(0.02)`}</Eq>。<Eq>{`= 0.25\\times0.0001 + 0.25\\times0.0004 + 0.5\\times0.3\\times0.0002`}</Eq>。<Eq>{`= 0.000025 + 0.0001 + 0.00003 = 0.000155`}</Eq>。<Eq>{`\\sigma_p = \\sqrt{0.000155} \\approx 0.01245 = 1.245\\%`}</Eq>。与加权平均标准差相比：<Eq>{`0.5\\times1\\% + 0.5\\times2\\% = 1.5\\%`}</Eq>。部分相关（<Eq>{`\\rho=0.3`}</Eq>）使风险低于加权平均——分散化的收益。</>}
+>
+金融投资组合：资产A（$\sigma_A = 1\%$）与B（$\sigma_B = 2\%$），相关系数 $\rho_{AB} = 0.3$。计算50%/50%组合的标准差。
+</Exercicio>
+
+<Exercicio
+  numero="80.24"
+  dificuldade="modelagem"
+  resposta="最终VPP $\approx 61\%$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "90", exercicio: "2.33", licenca: "CC-BY-SA" }}
+  solucao={<>两次独立检测均为阳性，患病率1%。第一次检测：灵敏度90%，特异度95%。第一次检测后的后验：<Eq>{`P(D|+_1) = (0.9\\times0.01)/(0.9\\times0.01 + 0.05\\times0.99) = 0.009/0.0585 \\approx 0.154`}</Eq>。第二次检测以该后验为新先验（灵敏度85%，特异度90%）：<Eq>{`P(D|+_1,+_2) = (0.85\\times0.154)/(0.85\\times0.154 + 0.10\\times0.846) = 0.1309/(0.1309+0.0846) \\approx 0.607`}</Eq>。最终VPP ≈ 61%。</>}
+>
+两次独立诊断检测均为阳性：检测1（灵敏度90%，特异度95%），检测2（灵敏度85%，特异度90%）。患病率1%。依序应用贝叶斯定理，计算最终阳性预测值。
+</Exercicio>
+
+<Exercicio
+  numero="80.25"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "430", exercicio: "ex. 8.7", licenca: "CC-BY" }}
+  solucao={<>接种组：5/100 = 5%感染率。安慰剂组：25/100 = 25%。疫苗有效率：<Eq>{`1 - (\\text{接种组风险})/(\\text{安慰剂组风险}) = 1 - 5\\%/25\\% = 1 - 0.2 = 80\\%`}</Eq>。显著性评估（简化）：比例差 <Eq>{`= 0.25 - 0.05 = 0.20`}</Eq>。差值的标准误差：<Eq>{`\\sqrt{0.05\\times0.95/100 + 0.25\\times0.75/100} = \\sqrt{0.000475 + 0.001875} = \\sqrt{0.00235} \\approx 0.0485`}</Eq>。Z统计量：<Eq>{`0.20/0.0485 \\approx 4.1`}</Eq>。统计上高度显著（<Eq>{`p \\ll 0.001`}</Eq>）。</>}
+>
+疫苗临床试验：100名接种者中5人患病；100名安慰剂组中25人患病。计算疫苗有效率，并（非正式地）评估差异是否具有统计显著性。
+</Exercicio>
+
+<Exercicio
+  numero="80.26"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "380", exercicio: "8.19", licenca: "CC-BY-SA" }}
+  solucao={<>1分钟内的来电数：<Eq>{`X \\sim \\text{Bin}(120, 0.02)`}</Eq>。<Eq>{`E[X] = 2.4`}</Eq>，<Eq>{`\\text{Var}(X) = 120\\times0.02\\times0.98 = 2.352`}</Eq>。泊松近似，<Eq>{`\\lambda = 2.4`}</Eq>：<Eq>{`P(X = 0) = e^{-2.4} \\approx 0.091`}</Eq>；<Eq>{`P(X \\geq 1) \\approx 1 - 0.091 = 90.9\\%`}</Eq>。</>}
+>
+客户服务中心：每分钟内，120名客服人员中每人接到来电的概率为2%。对1分钟内同时来电数建模，并计算 $P(\text{至少1个来电})$。
+</Exercicio>
+
+<Exercicio
+  numero="80.27"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "342", exercicio: "ex. 6.15", licenca: "CC-BY" }}
+  solucao={<>巴西成年男性身高（示意数据）：男性 <Eq>{`\\sim \\mathcal{N}(173,\\; 7^2)`}</Eq> cm。180 cm门口：<Eq>{`Z = (180-173)/7 = 1`}</Eq>。<Eq>{`P(H > 180) = P(Z > 1) \\approx 15.9\\%`}</Eq>。覆盖99%所需：<Eq>{`z_{0.99} = 2.326`}</Eq>。门的最低高度：<Eq>{`173 + 2.326\\times7 \\approx 189.3`}</Eq> cm。实际上，巴西建筑规范要求净高2.40 m以覆盖人群分布。</>}
+>
+巴西成年男性身高：$\mu = 173$ cm，$\sigma = 7$ cm。通不过180 cm门洞的比例是多少？覆盖99%男性的门洞高度应是多少？
+</Exercicio>
+
+### C组——综合挑战题（80.28至80.35）
+
+<Exercicio
+  numero="80.28"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "65", exercicio: "2.13", licenca: "CC-BY-SA" }}
+  solucao={<>在高度右偏分布中（如收入、极端等待时间），均值被极端值抬高。中位数作为稳健的分位数，更能代表"典型"值。IQR只衡量数据中间一半的离散程度，对异常值免疫——因此在存在强偏态或异常值时，比 <Eq>{`\\sigma`}</Eq> 更具参考价值。实际例子：巴西人均收入均值高于80%人群的实际收入。</>}
+>
+请用数值示例解释：为何在高度右偏分布中，中位数比均值更具信息量，四分位距比标准差更具信息量。
+</Exercicio>
+
+<Exercicio
+  numero="80.29"
+  dificuldade="desafio"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§9.1", pagina: "339", exercicio: "ex. 9.1.5", licenca: "GNU FDL" }}
+  solucao={<>该现象是贝叶斯估计量在大样本下收敛于最大似然估计（Bernstein-von Mises定理）。当 <Eq>{`n`}</Eq> 较大时，似然函数 <Eq>{`L(\\theta|x_1,\\ldots,x_n)`}</Eq> 在决定后验分布时主导先验 <Eq>{`\\pi(\\theta)`}</Eq>。形式上，若先验在最大似然估计邻域内连续且为正，则后验 <Eq>{`\\pi(\\theta|x^n)`}</Eq> 在全变差意义下收敛于 <Eq>{`\\mathcal{N}(\\hat\\theta_{MLE},\\; I(\\theta)^{-1}/n)`}</Eq>，其中 <Eq>{`I(\\theta)`}</Eq> 为费雪信息量。直观理解：足够的数据会"淹没"先验。</>}
+>
+直观地和数学地描述：当 $n \to \infty$ 时，贝叶斯推断如何收敛于频率派推断（最大似然估计）？哪个定理将这种收敛形式化？
+</Exercicio>
+
+<Exercicio
+  numero="80.30"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "392", exercicio: "8.25", licenca: "CC-BY-SA" }}
+  solucao={<>经典案例：冰淇淋销量与溺水人数的相关系数 <Eq>{`r \\approx 0.9`}</Eq>。共同原因是气温。两个变量都由天气驱动，彼此之间无因果关系。构造方式：令 <Eq>{`C = \\text{气温}`}</Eq>（混淆变量），<Eq>{`X = \\text{冰淇淋销量}`}</Eq>，<Eq>{`Y = \\text{溺水人数}`}</Eq>。<Eq>{`X = a\\cdot C + \\varepsilon_1`}</Eq>，<Eq>{`Y = b\\cdot C + \\varepsilon_2`}</Eq>，其中 <Eq>{`\\varepsilon_1, \\varepsilon_2`}</Eq> 独立。<Eq>{`\\text{Cov}(X,Y) = ab\\cdot\\text{Var}(C) \\neq 0`}</Eq>。X与Y的相关性是由混淆变量C产生的伪相关。</>}
+>
+构造一个数据示例，其中 $r > 0.8$，但X与Y之间的关系完全由混淆变量 $C$ 解释。请明确说明数学机制。
+</Exercicio>
+
+<Exercicio
+  numero="80.31"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "190", exercicio: "4.37", licenca: "CC-BY-SA" }}
+  solucao={<>100个独立的 $[0,1]$ 均匀分布随机变量之和：<Eq>{`S = X_1+\\ldots+X_{100}`}</Eq>，<Eq>{`\\mu = 0.5`}</Eq>，<Eq>{`\\sigma^2 = 1/12`}</Eq>。由中心极限定理：<Eq>{`S \\approx \\mathcal{N}(50,\\; 100/12) = \\mathcal{N}(50,\\; 8.33)`}</Eq>。<Eq>{`P(S > 55) = P(Z > (55-50)/\\sqrt{8.33}) = P(Z > 5/2.887) = P(Z > 1.732) \\approx 4.2\\%`}</Eq>。</>}
+>
+（理论上）生成100个独立随机变量 $X_i \sim \text{Uniforme}[0,1]$。用中心极限定理近似 $P(X_1 + \cdots + X_{100} > 55)$。
+</Exercicio>
+
+<Exercicio
+  numero="80.32"
+  dificuldade="desafio"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§8.1", pagina: "305", exercicio: "ex. 8.1.1", licenca: "GNU FDL" }}
+  solucao={<>ENEM 2024（假设数据）：公立学校数学均值 = 520，<Eq>{`\\sigma = 90`}</Eq>；私立学校 = 610，<Eq>{`\\sigma = 80`}</Eq>。各取 <Eq>{`n_1 = n_2 = 100`}</Eq> 的样本。样本均值之差：<Eq>{`\\bar X_2 - \\bar X_1 \\sim \\mathcal{N}(90,\\; 80^2/100 + 90^2/100) = \\mathcal{N}(90,\\; 64+81) = \\mathcal{N}(90,\\; 145)`}</Eq>。<Eq>{`\\sigma_{\\text{差}} = \\sqrt{145} \\approx 12.04`}</Eq>。<Eq>{`P(\\bar X_2 - \\bar X_1 > 80) = P(Z > (80-90)/12.04) = P(Z > -0.83) \\approx 79.7\\%`}</Eq>。</>}
+>
+ENEM：公立学校 $\mu_1 = 520$，$\sigma_1 = 90$（数学）；私立学校 $\mu_2 = 610$，$\sigma_2 = 80$。各取 $n=100$ 的样本。私立学校样本均值超过公立学校80分以上的概率是多少？
+</Exercicio>
+
+### D组——证明题（80.36至80.40）
+
+<Exercicio
+  numero="80.36"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§6.2", pagina: "235", exercicio: "ex. 6.2.1", licenca: "GNU FDL" }}
+  solucao={<>证明 <Eq>{`\\text{Var}(X) = E[X^2] - (E[X])^2`}</Eq>：从定义 <Eq>{`\\text{Var}(X) = E[(X-\\mu)^2]`}</Eq> 出发，其中 <Eq>{`\\mu = E[X]`}</Eq>。展开：<Eq>{`E[(X-\\mu)^2] = E[X^2 - 2\\mu X + \\mu^2] = E[X^2] - 2\\mu E[X] + \\mu^2 = E[X^2] - 2\\mu^2 + \\mu^2 = E[X^2] - \\mu^2 = E[X^2] - (E[X])^2`}</Eq>。第二步用到期望的线性性；第三步用到 <Eq>{`E[X] = \\mu`}</Eq> 及 <Eq>{`E[\\mu^2] = \\mu^2`}</Eq>（常数）。</>}
+>
+从定义 $\text{Var}(X) = E[(X-\mu)^2]$ 出发，证明 $\text{Var}(X) = E[X^2] - (E[X])^2$。
+</Exercicio>
+
+<Exercicio
+  numero="80.37"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "175", exercicio: "ex. 5.1.5", licenca: "GNU FDL" }}
+  solucao={<>设 <Eq>{`X_i \\sim \\text{Bernoulli}(p)`}</Eq> 独立同分布。和 <Eq>{`S = X_1 + \\ldots + X_n`}</Eq> 计算 <Eq>{`n`}</Eq> 次独立试验中的成功次数。<Eq>{`P(S = k) = P(\\text{恰好 } k \\text{ 个为1}) = \\binom{n}{k} p^k (1-p)^{n-k}`}</Eq>，因为有 <Eq>{`\\binom{n}{k}`}</Eq> 种选法选出哪 <Eq>{`k`}</Eq> 次试验成功，每种组合的概率为 <Eq>{`p^k(1-p)^{n-k}`}</Eq>，且各次试验独立。这正是 Binomial(n, p) 的概率质量函数。由大数定律：<Eq>{`\\bar X = S/n \\xrightarrow{P} E[X_1] = p`}</Eq>。</>}
+>
+证明：若 $X_i \sim \text{Bernoulli}(p)$ 独立同分布，则 $S = \sum_{i=1}^n X_i \sim \text{Bin}(n,p)$。并由大数定律推出 $\bar X = S/n \xrightarrow{P} p$。
+</Exercicio>
+
+<Exercicio
+  numero="80.38"
+  dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "85", exercicio: "2.25", licenca: "CC-BY-SA" }}
+  solucao={<>期望的线性性：<Eq>{`E[aX + b] = \\sum_x (ax+b) P(X=x) = a\\sum_x x P(X=x) + b\\sum_x P(X=x) = a E[X] + b`}</Eq>（利用 <Eq>{`\\sum P(X=x) = 1`}</Eq>）。线性变换的方差：<Eq>{`\\text{Var}(aX+b) = E[(aX+b - (aE[X]+b))^2] = E[(a(X-E[X]))^2] = a^2 E[(X-E[X])^2] = a^2 \\text{Var}(X)`}</Eq>。常数 <Eq>{`b`}</Eq> 不影响离散程度。</>}
+>
+证明对任意 $a, b \in \mathbb{R}$，有 $E[aX + b] = aE[X] + b$ 且 $\text{Var}(aX + b) = a^2 \text{Var}(X)$。
+</Exercicio>
+
+<Exercicio
+  numero="80.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "137", exercicio: "ex. 4.1.7", licenca: "GNU FDL" }}
+  solucao={<>两事件的贝叶斯规则：<Eq>{`P(H|E) = P(E \\cap H)/P(E)`}</Eq>（条件概率定义）。由定义，<Eq>{`P(E \\cap H) = P(E|H) P(H)`}</Eq>。对 <Eq>{`P(E)`}</Eq>，用全概率公式（划分为 <Eq>{`\\{H, H^c\\}`}</Eq>）：<Eq>{`P(E) = P(E|H)P(H) + P(E|H^c)P(H^c)`}</Eq>。代入得：<Eq>{`P(H|E) = P(E|H)P(H)/[P(E|H)P(H) + P(E|H^c)P(H^c)]`}</Eq>。对 <Eq>{`n`}</Eq> 个互斥且穷举的假设 <Eq>{`\\{H_1,\\ldots,H_n\\}`}</Eq> 的推广类似可得。</>}
+>
+从条件概率的定义和全概率公式出发，推导贝叶斯规则 $P(H \mid E) = P(E \mid H)\,P(H)/P(E)$。
+</Exercicio>
+
+<Exercicio
+  numero="80.40"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§9.2", pagina: "352", exercicio: "ex. 9.2.1", licenca: "GNU FDL" }}
+  solucao={<>中心极限定理（弱形式）：若 <Eq>{`X_i`}</Eq> 独立同分布，<Eq>{`E[X_i]=\\mu`}</Eq>，<Eq>{`\\text{Var}(X_i)=\\sigma^2 < \\infty`}</Eq>，则 <Eq>{`\\sqrt{n}(\\bar X_n - \\mu)/\\sigma \\xrightarrow{d} \\mathcal{N}(0,1)`}</Eq>。特征函数证明要点：<Eq>{`Z_n = \\sqrt{n}(\\bar X - \\mu)/\\sigma`}</Eq> 的特征函数为 <Eq>{`\\varphi_{Z_n}(t) = [\\varphi_X(t/(\\sigma\\sqrt{n}))]^n`}</Eq>。将 <Eq>{`\\varphi_X`}</Eq> 在零点作泰勒展开：<Eq>{`\\varphi_X(s) = 1 - s^2\\sigma^2/2 + O(s^3)`}</Eq>。令 <Eq>{`s = t/(\\sigma\\sqrt{n})`}</Eq>：<Eq>{`\\varphi_{Z_n}(t) = [1 - t^2/(2n) + O(n^{-3/2})]^n \\to e^{-t^2/2}`}</Eq>（当 <Eq>{`n \\to \\infty`}</Eq>）。而 <Eq>{`e^{-t^2/2}`}</Eq> 恰好是 <Eq>{`\\mathcal{N}(0,1)`}</Eq> 的特征函数。由Lévy连续性定理，特征函数收敛意味着依分布收敛。</>}
+>
+正式陈述中心极限定理。用特征函数方法概述证明思路（只需说明各步骤，无需证明Lévy连续性定理）。
+</Exercicio>
+
+</ListaExercicios>
+
+## 参考来源
+
+- [**OpenIntro Statistics**（第4版）](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · **本学期主要参考书。**
+- [**OpenStax — Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · 情境化应用练习。
+- [**Grinstead & Snell — Introduction to Probability**](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL · 离散随机变量、大数定律与中心极限定理的严格理论。

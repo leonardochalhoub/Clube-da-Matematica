@@ -1,0 +1,843 @@
+---
+titulo: "Lição 68 — Cinemática: posição, velocidade e aceleração"
+slug: "licao-68-cinematica"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Derivadas sucessivas da posição dão velocidade, aceleração e jerk. MRU, MUV, MHS e resistência do ar com rigor de cálculo."
+ordem: 68
+publicado: true
+versao: "v1"
+tags: ["cinemática", "física", "derivada", "velocidade", "aceleração", "ano-2", "trim-7"]
+prerrequisitos: ["licao-52-regras-derivacao", "licao-66-concavidade"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Math III — Japão (aplicações de derivadas: taxa de variação)", "Leistungskurs Mathematik — Alemanha Klasse 12 (Differentialrechnung: Weg, Geschwindigkeit, Beschleunigung)", "H2 Mathematics — Singapura (applications of differentiation: rates of change)", "AP Calculus AB/BC — EUA (FUN-4: using derivatives to analyze motion)"]
+---
+
+<EquacaoCanonica
+  formula="v(t) = s'(t), \quad a(t) = v'(t) = s''(t), \quad j(t) = a'(t) = s'''(t)"
+  legenda={<><strong>運動学</strong>では、<strong>位置</strong><Eq>{`s(t)`}</Eq>がすべてを決定します。その1次導関数は<strong>速度</strong><Eq>{`v(t)`}</Eq>、2次導関数は<strong>加速度</strong><Eq>{`a(t)`}</Eq>、3次導関数は<strong>ジャーク</strong><Eq>{`j(t)`}</Eq>です。ジャークは加速度の変化率であり、車両の乗り心地や ロボット制御に決定的な役割を果たします。</>}
+  audioTexto="運動学。位置はtの関数sで表されます。速度はその1次導関数、つまりsの1階導関数です。加速度は2次導関数、つまりsの2階導関数です。ジャークは加速度の変化率で、3階導関数です。各階の導関数は、運動に関する情報の層を加えていきます。"
+/>
+
+<aside>
+
+**この授業を扱う教科書**
+
+- [**Active Calculus**](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · 2024 · §1.1–§1.5 · CC-BY-NC-SA · <em>速度を導関数として提示する最も直接的な説明であり、グラフによる予備的な視覚化と段階的な活動が特徴です。このレッスンの位置から速度への問題に関する主要な資料源です。</em>
+- [**Calculus Volume 1**](https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change) — OpenStax · 2016 · §3.4 Derivatives as Rates of Change · CC-BY-NC-SA · <em>速度、加速度、および周辺領域の完全な展開であり、物理的および経済的な例が並列で示されています。等速直線運動(MRU)、一定加速度直線運動(MUV)、および自由落下をカバーしています。</em>
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman et al. · 2023 · §2.4 Velocity and Position · CC-BY-NC · <em>微積分学の基本定理を用いたより形式的なアプローチであり、位置、速度、および変位の関係を積分を通じて説明します。運動学から積分への移行に最適です。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="微分学による運動学">
+
+### 基本的な定義
+
+<Definicao titulo="位置、速度、加速度、ジャーク">
+$s: I \subset \mathbb{R} \to \mathbb{R}$を時間$t$に関する微分可能な位置関数とします。
+
+$$v(t) = \frac{ds}{dt} = s'(t), \qquad a(t) = \frac{dv}{dt} = s''(t), \qquad j(t) = \frac{da}{dt} = s'''(t).$$
+
+- **速さ**: $|v(t)|$（非負スカラー；速度が負の場合と異なります）。
+- **変位** ($[t_1, t_2]$区間)：$\Delta s = s(t_2) - s(t_1)$（負になることがあります）。
+- **移動距離**: $\int_{t_1}^{t_2} |v(t)|\, dt$（常に非負です）。
+</Definicao>
+
+> "The instantaneous velocity of an object is the limit of the average velocities of the object over shorter and shorter time intervals." — [Active Calculus §1.1](https://activecalculus.org/single/sec-1-1-vel.html)
+
+> "The position function $s(t)$ gives the position of an object along a number line at time $t$. The velocity function $v(t) = s'(t)$ gives the velocity of the object at time $t$." — [OpenStax Calculus Vol.1 §3.4](https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change)
+
+### 標準的な運動パターン
+
+| 運動 | $s(t)$ | $v(t)$ | $a(t)$ | 備考 |
+|---|---|---|---|---|
+| 静止 | $s_0$ | $0$ | $0$ | 固定点 |
+| 等速(MRU) | $s_0 + v_0 t$ | $v_0$ | $0$ | $s \times t$グラフで直線 |
+| 一定加速度(MUV) | $s_0 + v_0 t + \tfrac{1}{2}a_0 t^2$ | $v_0 + a_0 t$ | $a_0$ | 放物線 |
+| 単振動(MHS) | $A\cos(\omega t + \phi)$ | $-A\omega\sin(\omega t + \phi)$ | $-A\omega^2\cos(\omega t + \phi)$ | $a = -\omega^2 s$ |
+| 空気抵抗付き | 微分方程式で解く | $v_\infty(1-e^{-kt/m})$ | 0に減衰 | 終端速度 |
+
+### トリチェリの定理（微積分による導出）
+
+<Teorema titulo="トリチェリの方程式">
+一定加速度$a_0$のMUVで、変位$\Delta s$および速度$v_0, v_f$は次を満たします。
+$$v_f^2 = v_0^2 + 2a_0\,\Delta s.$$
+**証明：** $v(t) = v_0 + a_0 t$、$s(t) = s_0 + v_0 t + \tfrac{1}{2}a_0 t^2$から $t = (v - v_0)/a_0$を導き出し、$\Delta s$に代入すると
+$$\Delta s = v_0 \cdot \frac{v_f - v_0}{a_0} + \frac{1}{2}a_0\left(\frac{v_f - v_0}{a_0}\right)^2 = \frac{v_f^2 - v_0^2}{2a_0}. \quad \blacksquare$$
+</Teorema>
+
+### 単振動(MHS)
+
+$x(t) = A\cos(\omega t + \phi)$は微分方程式 $\ddot x + \omega^2 x = 0$を満たします。
+
+- 周期：$T = 2\pi/\omega$。
+- 周波数：$f = 1/T$。
+- ばね系：$\omega = \sqrt{k/m}$；小角度振動する振り子：$\omega = \sqrt{g/L}$。
+
+<Insight>
+MHSでは、加速度は常に変位に**比例し反対向き**です：$a = -\omega^2 x$。加速度の大きさは極値（$|x| = A$）で最大、平衡点で零です。速度の大きさは平衡点で最大、極値で零です。完全に逆転しています。
+</Insight>
+
+### 図：MHSの$s$、$v$、$a$グラフ
+
+<svg viewBox="0 0 480 220" width="480" height="220" aria-label="単振動における位置、速度、加速度のグラフ">
+  <defs>
+    <marker id="arr68" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#555" />
+    </marker>
+  </defs>
+  {/* eixos s(t) */}
+  <g transform="translate(20,10)">
+    <line x1="0" y1="50" x2="130" y2="50" stroke="#555" strokeWidth="1" markerEnd="url(#arr68)" />
+    <line x1="10" y1="0" x2="10" y2="100" stroke="#555" strokeWidth="1" markerEnd="url(#arr68)" />
+    <text x="132" y="54" fontSize="10" fill="#555">t</text>
+    <text x="12" y="10" fontSize="10" fill="#1e6a8a">s(t)</text>
+    {/* coseno: amplitude 35, período ~110px */}
+    <path d="M10,50 C32,15 55,15 75,50 C95,85 118,85 138,50" stroke="#1e6a8a" strokeWidth="2" fill="none" />
+    <text x="40" y="98" fontSize="9" fill="#666">A cos(ωt)</text>
+  </g>
+  {/* eixos v(t) */}
+  <g transform="translate(170,10)">
+    <line x1="0" y1="50" x2="130" y2="50" stroke="#555" strokeWidth="1" markerEnd="url(#arr68)" />
+    <line x1="10" y1="0" x2="10" y2="100" stroke="#555" strokeWidth="1" markerEnd="url(#arr68)" />
+    <text x="132" y="54" fontSize="10" fill="#555">t</text>
+    <text x="12" y="10" fontSize="10" fill="#b8860b">v(t)</text>
+    {/* -seno: fase adiantada 90° */}
+    <path d="M10,50 C32,85 55,85 75,50 C95,15 118,15 138,50" stroke="#b8860b" strokeWidth="2" fill="none" />
+    <text x="30" y="98" fontSize="9" fill="#666">-Aω sin(ωt)</text>
+  </g>
+  {/* eixos a(t) */}
+  <g transform="translate(320,10)">
+    <line x1="0" y1="50" x2="130" y2="50" stroke="#555" strokeWidth="1" markerEnd="url(#arr68)" />
+    <line x1="10" y1="0" x2="10" y2="100" stroke="#555" strokeWidth="1" markerEnd="url(#arr68)" />
+    <text x="132" y="54" fontSize="10" fill="#555">t</text>
+    <text x="12" y="10" fontSize="10" fill="#8b1a1a">a(t)</text>
+    {/* -coseno: fase 180° */}
+    <path d="M10,50 C32,85 55,85 75,50 C95,15 118,15 138,50" stroke="#8b1a1a" strokeWidth="2" fill="none" strokeDasharray="4,2" />
+    <text x="25" y="98" fontSize="9" fill="#666">-Aω² cos(ωt)</text>
+  </g>
+  {/* legenda */}
+  <text x="20" y="210" fontSize="9" fill="#666">位相差：sとvは90°ずれており、sとaは180°ずれている（反対向き）</text>
+</svg>
+
+### $\mathbb{R}^n$での運動学
+
+$\vec{r}(t) = (x(t), y(t), z(t)) \in \mathbb{R}^3$に対して：
+
+$$\vec{v}(t) = \dot{\vec{r}}(t), \qquad \vec{a}(t) = \ddot{\vec{r}}(t), \qquad |\vec{v}| = \text{速さ}.$$
+
+各成分は独立に導関数が求められます。曲線軌道での向心加速度：$a_c = v^2/\rho$（$\rho$は曲率半径）。
+
+</Porta>
+
+<Porta nivel="5" titulo="5歳の子ども向け">
+
+直線路上のおもちゃの車を想像してください。
+
+**車はどこにある？**これは**位置**です。定規の上のどの数字か。
+
+**どのくらい速く動いている？**これは**速度**です。毎秒何センチ進むか。
+
+**加速しているか、それとも減速しているか？**これは**加速度**です。速度が増えているか減っているか。
+
+3つすべてが繋がっています。速度は毎秒ごとの位置の変わり方です。加速度は毎秒ごとの速度の変わり方です。階段のようなものです：位置 → 速度 → 加速度。
+
+</Porta>
+
+<Porta nivel="10" titulo="10歳の子ども向け">
+
+物理では、時間が経つと物体は動きます。**運動学**はこれを数学で研究します。
+
+- **位置** $s(t)$：物体がそれぞれの瞬間にどこにあるか。
+- **速度** $v(t) = s'(t)$：位置がどのくらい速く変わるか。負になることがあります（後ろに動く）。
+- **加速度** $a(t) = v'(t)$：速度がどのくらい速く変わるか。正 = 加速、負 = 減速。
+
+**例**：石がビルから落ちます。$s(t) = 100 - 5t^2$メートル。
+- $v(t) = -10t$（毎秒、下方向に毎秒10 m/sより速くなる）。
+- $a(t) = -10$ m/s²（定数：重力です！）。
+- 地面に当たるのは$s = 0 \Rightarrow t = \sqrt{20} \approx 4.5$秒。
+
+導関数は位置を速度に、速度を加速度に変換します。2回適用される同じ操作です。
+
+</Porta>
+
+<Porta nivel="15" titulo="15歳の少年少女向け">
+
+運動学は微積分の**最も直接的な応用**です。同じ微積分の公式が、自動車、惑星、バネを説明します。
+
+### 3つの基本的な関数
+
+| 量 | 定義 | 解釈 |
+|---|---|---|
+| 位置 $s(t)$ | 与えられた | 物体がどこにあるか |
+| 速度 $v(t) = s'(t)$ | 1次導関数 | どのくらい速く、どの方向へ |
+| 加速度 $a(t) = s''(t)$ | 2次導関数 | 速度の変化 |
+
+### 標準的な運動
+
+**MRU**：$a = 0$、$v$定数、$s(t) = s_0 + v_0 t$（直線）。
+
+**MUV**（自由落下、傾斜面）：$a$定数、$s(t) = s_0 + v_0 t + \tfrac{1}{2}at^2$（放物線）。
+
+トリチェリ：$v^2 = v_0^2 + 2a\Delta s$ — 時間が不要な場合に使用。
+
+**MHS**（バネ、振り子）：$s(t) = A\cos(\omega t + \phi)$。加速度は$a = -\omega^2 s$ -- 常に平衡点へ指向します。周期 $T = 2\pi/\omega$。
+
+### よくある注意点
+
+- 速度**ゼロ**は加速度ゼロを意味しません（投げ上げた球は最高点で$v = 0$ですが$a = -g$）。
+- **変位**（$\int v\, dt$）はゼロでも移動距離（$\int |v|\, dt > 0$）はゼロでない可能性があります。
+- 符号は方向を示します；速さは速度の絶対値です。
+
+</Porta>
+
+<Porta nivel="25" titulo="工学部生向け">
+
+運動学は古典力学、制御、ロボティックス、および数値シミュレーションの基礎です。
+
+### ベクトル表現
+
+$\vec{r}(t) \in \mathbb{R}^3$：$\vec{v} = \dot{\vec{r}}$、$\vec{a} = \ddot{\vec{r}}$、$\vec{j} = \dddot{\vec{r}}$。
+
+Frenet-Serret座標系：$\vec{a} = \dot{v}\,\hat{T} + (v^2/\rho)\,\hat{N}$ -- 接線加速度と向心加速度。
+
+### 一様円運動
+
+$\vec{r} = R(\cos\omega t, \sin\omega t)$：$\vec{v} = R\omega(-\sin\omega t, \cos\omega t)$、$|\vec{v}| = R\omega$。
+
+$\vec{a} = -\omega^2\vec{r}$ -- 向心加速度、常に中心を指向、大きさ$a_c = R\omega^2 = v^2/R$。
+
+### 常微分方程式と位相空間
+
+一般的な力での運動学：$m\ddot{s} = F(t, s, \dot{s})$ -- 2階常微分方程式。
+
+システムとして書き直す：$\dot{s} = v$、$\dot{v} = F/m$。空間$(s, v)$は**位相空間**です。位相空間の軌道は交差しません（常微分方程式の解の一意性）。
+
+### 空気抵抗（抵抗を伴う落下）
+
+$m\dot{v} = -mg - bv$（線形抵抗）。解：$v(t) = v_\infty + (v_0 - v_\infty)e^{-bt/m}$、ここで$v_\infty = -mg/b$は**終端速度**です。二次抵抗（$bv^2$）：単純な閉形式解がなく、数値積分が必要です。
+
+### ジャーク工学への応用
+
+エレベーター（快適性）、ABS（アンチロック）、ロボットアーム（機械的磨耗）、高速鉄道レール制御の際にジャーク制限があります。現代の制御器は最大ジャークを指定する加速度プロフィールを規定します。
+
+### 数値近似（有限差分）
+
+$v_n \approx (s_{n+1} - s_n)/\Delta t$、$a_n \approx (v_{n+1} - v_n)/\Delta t$。Verlet法：$s_{n+1} = 2s_n - s_{n-1} + a_n (\Delta t)^2$ -- 保存系で安定。
+
+</Porta>
+
+<Porta nivel="40" titulo="シニア専門家向け">
+
+運動学は、導関数が形式主義から物理的測定へと転じる場所です。
+
+### 歴史的展望
+
+**ガリレイ（1638年）** *Discorsi*で幾何学的な比例を使用して自由落下は$s \propto t^2$であることを実験的に推論しました（微積分なし）。**ニュートン（1687年）** *Principia*で$F = ma$を形式化し、それを記述するために微積分を発明しました。**ラグランジュ（1788年）** と**ハミルトン（1835年）** はすべてを変分的に書き直しました：軌道は$\int L\, dt$の極値です。
+
+### 特殊相対論
+
+$v \to c$の場合：位置と時間が混在します。固有速度$u^\mu = dx^\mu/d\tau$（四元ベクトル）。四元運動量保存$p^\mu = mu^\mu$は$F = ma$を一般化します。「導関数」はChristoffel記号による共変導関数になります。
+
+### 量子力学
+
+位置演算子$\hat{X}$と運動量演算子$\hat{P}$は$[\hat{X}, \hat{P}] = i\hbar$に従います。Heisenberg方程式：$d\hat{A}/dt = \frac{i}{\hbar}[\hat{H}, \hat{A}]$ -- 古典力学のPoisson括弧$\{A, H\}_\text{Poisson}$の量子類似物。
+
+### 流体力学
+
+物質微分$D/Dt = \partial_t + \vec{v}\cdot\nabla$は流体と共に移動する粒子の加速度を捉えます。Navier-Stokes：$\rho D\vec{v}/Dt = -\nabla p + \mu\nabla^2\vec{v} + \rho\vec{g}$。
+
+### ロボティクスと最適制御
+
+最適軌跡問題：$\int_0^T j(t)^2\, dt$を境界条件下で最小化 -- 5次多項式（*minimum-jerk trajectory*）につながります。工業用マニピュレータ、自律型、および手術用アームで使用されています。
+
+### Nobel賞と導関数
+
+[1921年ノーベル物理学賞](https://www.nobelprize.org/prizes/physics/1921/)はEinsteinに光電効果で授与されましたが、特殊相対論（1905年）-- 時空の導関数を再定義する -- は既に完成していました。すべての相対論的運動学は、Minkowski時空の微分構造の上に成立しています。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="実践的な応用">
+
+**6ステップのレシピ：**
+
+1. **$s(t)$を特定**します -- 直接与えられる、または$v$の積分として。
+2. **導関数を求める**：$v = s'$、$a = s'' = v'$。
+3. **物体が静止**：$v(t) = 0$を$t$について解きます。
+4. **最大高さ/位置**：$v = 0$かつ$a < 0$のとき。
+5. **距離（変位ではなく）**：$\int |v|\, dt$ -- $v$が符号を変える場所で符号を切り替えます。
+6. **時間なしのMUV**：トリチェリ $v^2 = v_0^2 + 2a\Delta s$。
+
+### 注意事項
+
+- **速度ゼロ $\neq$ 加速度ゼロ**：球が最上位にあるとき$v = 0$かつ$a = -10$ m/s²。
+- **変位対距離**：往復5 kmの自動車は変位ゼロですが距離は10 km。
+- **$a$の符号**：$v$の符号と反対は減速を意味します。
+
+### ブラジルの実データ
+
+**ENEM 2023 — 物理**：自動車が$v_0 = 20$ m/sで$a = -4$ m/s²で制動します。制動距離：
+$v^2 = v_0^2 + 2a\Delta s \Rightarrow 0 = 400 - 8\Delta s \Rightarrow \Delta s = 50$ m。
+
+**0-100テスト**：Fiat Pulse (2023)は0-100 km/hを10.5秒で加速します。
+$a_{\text{med}} = \Delta v / \Delta t = (100/3.6)/10.5 \approx 2.6$ m/s²。
+
+### クイック検証 (Python/SymPy)
+
+```python
+import sympy as sp
+t = sp.symbols('t', positive=True)
+s = 100 - 5*t**2
+v, a = sp.diff(s, t), sp.diff(s, t, 2)
+t_chao = sp.solve(s, t)[0]
+print(f"v(t)={v}, a(t)={a}, t_chao={t_chao}, v_chao={v.subs(t, t_chao)}")
+```
+
+</Porta>
+
+</DuasPortas>
+
+## 解答付き例
+
+<Exemplo titulo="3次位置関数：速度、停止点、移動距離">
+
+**問題。** 物体の位置が$s(t) = t^3 - 6t^2 + 9t$メートル、$t \geq 0$です。(a) $v(t)$と$a(t)$を求めてください。(b) 物体はいつ静止していますか？(c) $[0, 4]$で移動した距離は？
+
+**戦略。** $s$を導関数して$v$と$a$を得ます。$v$のゼロが停止の瞬間です。距離のために、$|v|$を積分します -- 各ゼロで符号を切り替えます。
+
+**解。**
+
+(a) $v(t) = 3t^2 - 12t + 9 = 3(t-1)(t-3)$。 $a(t) = 6t - 12$。
+
+(b) $v = 0 \Rightarrow t = 1$または$t = 3$。
+
+(c) $v > 0$ ($[0,1)$で)；$v < 0$ ($(1,3)$で)；$v > 0$ ($(3,4]$で)。
+
+$d = |s(1)-s(0)| + |s(3)-s(1)| + |s(4)-s(3)|$
+
+$= |4 - 0| + |0 - 4| + |4 - 0| = 4 + 4 + 4 = 12$ m。
+
+全体の変位：$s(4) - s(0) = 4$ m（距離よりずっと小さい！）。
+
+**検証。** $v(1) = 3(0)(-2) = 0$ ✓；$v(3) = 3(2)(0) = 0$ ✓；$a(1) = -6 < 0$（$t=1$で減速） ✓。
+
+**出典。** [Active Calculus §1.1, Exercise 1.1.4](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA。
+
+</Exemplo>
+
+<Exemplo titulo="初速度付き自由落下：落下時間と衝撃速度">
+
+**問題。** 石が$h = 80$ m の塔から初速度$v_0 = 10$ m/sで下へ投げられます。$g = 10$ m/s²を採用し、原点を地面に取る（正は上向き）とき、以下を求めてください：(a) $s(t)$、(b) 衝撃時刻$t^*$、(c) 衝撃時の速度。
+
+**戦略。** 初期条件$s(0) = 80$、$v(0) = -10$（負は下向き）で$s(t)$を立てます。$s(t^*) = 0$を解きます。
+
+**解。**
+
+$s(t) = 80 - 10t - 5t^2$。
+
+$s(t^*) = 0 \Rightarrow 5t^2 + 10t - 80 = 0 \Rightarrow t^2 + 2t - 16 = 0$。
+
+$t^* = \dfrac{-2 + \sqrt{4 + 64}}{2} = \dfrac{-2 + \sqrt{68}}{2} \approx \dfrac{-2 + 8.25}{2} \approx 3.12$ s。
+
+$v(t^*) = -10 - 10(3.12) \approx -41.2$ m/s。 速さ： $\approx 41.2$ m/s $\approx 148$ km/h。
+
+**検証。** $s(3.12) = 80 - 31.2 - 48.7 \approx 0.1 \approx 0$ ✓。 トリチェリ：$v^2 = 100 + 2(10)(80) = 1700 \Rightarrow v \approx 41.2$ m/s ✓。
+
+**出典。** [OpenStax Calculus Vol. 1 §3.4, Example 3.33](https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change) — CC-BY-NC-SA。
+
+</Exemplo>
+
+<Exemplo titulo="単振動：振幅、周期、およびエネルギー">
+
+**問題。** 質量$m = 2$ kgがばね定数$k = 50$ N/mのばねに取り付けられており、$A = 0.2$ mだけずれて静かに放されます。(a) $x(t)$を書き出してください。(b) 最大速度。(c) 機械エネルギー$E = \frac{1}{2}mv^2 + \frac{1}{2}kx^2$が定数であることを示してください。
+
+**戦略。** $\omega = \sqrt{k/m}$。$x(0) = A$と$v(0) = 0$を使用：位相$\phi = 0$。エネルギー：$x$と$v$を代入し、三角恒等式で単純化します。
+
+**解。**
+
+$\omega = \sqrt{50/2} = 5$ rad/s。 $T = 2\pi/5 \approx 1.26$ s。
+
+$x(t) = 0.2\cos(5t)$。
+
+$v(t) = -0.2 \cdot 5 \sin(5t) = -\sin(5t)$ m/s。
+
+最大速度：$|v|_{\max} = A\omega = 0.2 \cdot 5 = 1$ m/s（平衡点）。
+
+エネルギー：
+$$E = \tfrac{1}{2}(2)(-\sin 5t)^2 + \tfrac{1}{2}(50)(0.2\cos 5t)^2 = \sin^2(5t) + \cos^2(5t) = 1 \text{ J (定数)。 ✓}$$
+
+**検証。** $t = 0$：$x = 0.2$、$v = 0$、$E = 0 + \frac{1}{2}(50)(0.04) = 1$ J ✓。
+
+**出典。** [Active Calculus §1.5, Exercise 1.5.3](https://activecalculus.org/single/sec-1-5-units.html) — Boelkins · CC-BY-NC-SA。
+
+</Exemplo>
+
+<Exemplo titulo="空気抵抗：終端速度と解析解">
+
+**問題。** 質量$m = 1$ kg の粒子が重力$g = 10$ m/s²で線形抵抗$F_{\text{arr}} = bv$、$b = 0.5$ kg/sで落下を始めます。(a) $v(t)$の常微分方程式を書いて解いてください。(b) 終端速度。(c) $v$が$v_\infty$の90%に達するのに何秒ですか？
+
+**戦略。** 1階の分離可能な常微分方程式：$m\dot{v} = mg - bv$。変数分離。
+
+**解。**
+
+$\dot{v} = 10 - 0.5v$。解：$v(t) = v_\infty(1 - e^{-bt/m})$ただし$v_\infty = mg/b = 10/0.5 = 20$ m/s。
+
+$v(t) = 20(1 - e^{-0.5t})$。
+
+$v_\infty$の90%：$20(1 - e^{-0.5 t_{90}}) = 18 \Rightarrow e^{-0.5 t_{90}} = 0.1 \Rightarrow t_{90} = 2\ln(10)/0.5 \approx 4.6$ s。
+
+**検証。** $v(0) = 0$ ✓。 $\lim_{t\to\infty} v(t) = 20$ m/s ✓。 $v'(0) = 20 \cdot 0.5 = 10$ m/s² = $g$ ✓。
+
+**出典。** [APEX Calculus §2.4, Example 2.4.4](https://www.apexcalculus.com/) — Hartman et al. · CC-BY-NC。
+
+</Exemplo>
+
+<Exemplo titulo="円運動：導関数による向心加速度">
+
+**問題。** 点が半径$R = 3$ m の円周を一定の角周波数$\omega = 2$ rad/sで通過します。位置は$\vec{r}(t) = 3(\cos 2t, \sin 2t)$です。以下を計算してください：(a) $\vec{v}(t)$と$|\vec{v}|$、(b) $\vec{a}(t)$そして$\vec{a} = -\omega^2\vec{r}$であることを示してください。
+
+**戦略。** 各成分を独立に導関数します。$\vec{a}$の方向を特定します。
+
+**解。**
+
+$\vec{v}(t) = 3(-2\sin 2t, 2\cos 2t) = (-6\sin 2t, 6\cos 2t)$。
+
+$|\vec{v}| = 6$ m/s（定数）= $R\omega = 3 \cdot 2$ ✓。
+
+$\vec{a}(t) = (-12\cos 2t, -12\sin 2t) = -4(3\cos 2t, 3\sin 2t) = -4\vec{r}$。
+
+$\omega^2 = 4$なので：$\vec{a} = -\omega^2\vec{r}$。大きさ：$|\vec{a}| = 12 = R\omega^2 = 3 \cdot 4$ ✓。
+
+**検証。** $\vec{v} \cdot \vec{r} = 3 \cdot(-6\sin 2t\cos 2t + 6\cos 2t\sin 2t) = 0$ -- 等速円運動で速度は位置に垂直 ✓。
+
+**出典。** [OpenStax Calculus Vol. 1 §3.4, Example 3.35](https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change) — CC-BY-NC-SA。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-68-cinematica">
+
+### ブロックA — 位置 → 速度 → 加速度 (68.1 a 68.12)
+
+<Exercicio
+  numero="68.1"
+  dificuldade="aplicacao"
+  resposta="v(t) = 4t - 6, a(t) = 4"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "Exercise 1.1.1", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = 2t^2 - 6t$です。$v(t)$と$a(t)$を計算してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`v(t) = 3t^2 - 12t + 9 = 3(t-1)(t-3)`}</Eq>。 <Eq>{`v = 0`}</Eq>は<Eq>{`t = 1`}</Eq>と<Eq>{`t = 3`}</Eq>です。 <Eq>{`t=1`}</Eq>：<Eq>{`a(1) = 6(1)-12 = -6 < 0`}</Eq>（減速）。 <Eq>{`t=3`}</Eq>：<Eq>{`a(3) = 6`}</Eq>（加速）。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "Exercise 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = t^3 - 6t^2 + 9t$です。いつ$v = 0$ですか？各瞬間に、物体は加速していますか、それとも減速していますか？
+</Exercicio>
+
+<Exercicio
+  numero="68.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`v(t) = -10t`}</Eq>、<Eq>{`a(t) = -10`}</Eq>。地面：<Eq>{`s = 0 \Rightarrow 100 - 5t^2 = 0 \Rightarrow t = \sqrt{20} \approx 4.47`}</Eq> s。 <Eq>{`v(\sqrt{20}) = -10\sqrt{20} \approx -44.7`}</Eq> m/s（速さ：44.7 m/s）。</>}
+  passos={<>
+    <ol>
+      <li>導関数：<Eq>{`v(t) = s'(t) = -10t`}</Eq>。もう一度導関数：<Eq>{`a(t) = -10`}</Eq>（定数重力）。</li>
+      <li>地面<Eq>{`s(t) = 0`}</Eq>：<Eq>{`100 - 5t^2 = 0 \Rightarrow t^2 = 20 \Rightarrow t = \sqrt{20}`}</Eq>。</li>
+      <li>速度：<Eq>{`v(\sqrt{20}) = -10\sqrt{20} \approx -44.7`}</Eq> m/s。</li>
+      <li><em>ショートカット：</em>トリチェリ：<Eq>{`v^2 = 0 + 2(10)(100) = 2000 \Rightarrow |v| = \sqrt{2000} \approx 44.7`}</Eq> ✓。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.1", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = 100 - 5t^2$（自由落下、$g = 10$ m/s²）。いつ地面に当たりますか？その瞬間の速度は。
+</Exercicio>
+
+<Exercicio
+  numero="68.4"
+  dificuldade="aplicacao"
+  resposta="v(2) = 17 m/s, a(2) = 6 m/s²"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "Exercise 1.1.3", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = 5t + \frac{3}{2}t^2 + \frac{1}{2}t^3$です。$t = 2$での速度と加速度。
+</Exercicio>
+
+<Exercicio
+  numero="68.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`v(t) = e^{-t}(\cos t - \sin t)`}</Eq>。 <Eq>{`a(t) = e^{-t}(-\sin t - \cos t) + e^{-t}(-\sin t - \cos t) \cdot(-1)`}</Eq>。より単純：<Eq>{`a(t) = -2e^{-t}\sin t`}</Eq>。振幅減衰 -- 減衰振動子。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.1", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = e^{-t}\sin t$です。$v(t)$と$a(t)$を計算してください。振幅減衰は何を明かしていますか？
+</Exercicio>
+
+<Exercicio
+  numero="68.6"
+  dificuldade="aplicacao"
+  resposta="A = 10, omega = 2 rad/s, T = pi s, v(t) = 20 cos(2t)"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.3", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = 10\sin(2t)$です。$A$、$\omega$、周期$T$を特定してください。$v(t)$を書き出してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`v(t) = 4t^3 - 12t^2 + 12t = 4t(t^2 - 3t + 3)`}</Eq>。 $t^2 - 3t + 3$の判別式：<Eq>{`\Delta = 9 - 12 < 0`}</Eq> -- 実根がない。 したがって<Eq>{`v(t) \geq 0`}</Eq>は$[0,3]$で最小値$t = 0$です。最大値は極値：<Eq>{`v(3) = 4\cdot3\cdot(9-9+3) = 36`}</Eq> m/s。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "Exercise 1.1.5", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = t^4 - 4t^3 + 6t^2$です。$[0, 3]$での最大速度。
+</Exercicio>
+
+<Exercicio
+  numero="68.8"
+  dificuldade="aplicacao"
+  resposta="v(t) = 2t/(1+t²); v(1) = 1 m/s"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.5", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = \ln(1 + t^2)$です。$v(t)$を計算して、$t = 1$で評価してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`v(t) = 2t - 4`}</Eq>。 $t = 2$で符号変わり。距離：<Eq>{`|s(2) - s(0)| + |s(4) - s(2)| = |{-4} - 0| + |0 - ({-4})| = 4 + 4 = 8`}</Eq> m。変位：<Eq>{`s(4) - s(0) = 0`}</Eq> m。</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`v(t) = 2t - 4`}</Eq>。 $t = 2$でゼロ。</li>
+      <li><Eq>{`s(0) = 0`}</Eq>、<Eq>{`s(2) = 4 - 8 = -4`}</Eq>、<Eq>{`s(4) = 16 - 16 = 0`}</Eq>。</li>
+      <li>距離：<Eq>{`|{-4} - 0| + |0 - ({-4})| = 8`}</Eq> m。</li>
+      <li><em>ショートカット：</em>変位は最後から最初；距離はキャンセルなしでセグメントを合計します。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "Exercise 1.1.6", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = t^2 - 4t$です。$t = 0$と$t = 4$間の移動距離（注意：$v$は符号変わり）。
+</Exercicio>
+
+<Exercicio
+  numero="68.10"
+  dificuldade="aplicacao"
+  resposta="j(t) = A*omega³ * sin(omega*t)"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.7", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = A\cos(\omega t)$です。ジャーク$j(t) = s'''(t)$を計算してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`v(t) = 6t^2 - 6`}</Eq>。ゼロ：<Eq>{`t = 1`}</Eq>（$t \geq 0$）。<Eq>{`a(t) = 12t`}</Eq>；$t = 0$：<Eq>{`a = 0`}</Eq>（変曲点）；$t = 1$：<Eq>{`a = 12 > 0`}</Eq>（速度の最小値）。物体は$t = 1$で反転、位置<Eq>{`s(1) = 2 - 6 + 1 = -3`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "Exercise 1.1.7", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = 2t^3 - 6t + 1$です。速度はいつゼロですか？方向反転がありますか？
+</Exercicio>
+
+<Exercicio
+  numero="68.12"
+  dificuldade="aplicacao"
+  resposta="v(t) = 2t*cos(t²); v(pi^(1/2)) = -2*pi^(1/2)"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.9", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = \sin(t^2)$です。$v(t)$を計算してください（連鎖律）そして$t = \sqrt{\pi}$で評価してください。
+</Exercicio>
+
+### ブロックB — MUVと自由落下 (68.13 a 68.22)
+
+<Exercicio
+  numero="68.13"
+  dificuldade="modelagem"
+  solucao={<>上向きが正。<Eq>{`v(t) = 20 - 10t`}</Eq>。最大は$t = 2$ s：<Eq>{`s(2) = 40 - 20 = 20`}</Eq> m投げ地点の上方。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.11", licenca: "CC-BY-NC-SA" }}
+>
+ボールは地面から$v_0 = 20$ m/sで上へ投げられます。最大高さ（$g = 10$ m/s²）。
+</Exercicio>
+
+<Exercicio
+  numero="68.14"
+  dificuldade="modelagem"
+  resposta="停止距離：90 m"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.5", licenca: "CC-BY-NC-SA" }}
+>
+自動車は$v_0 = 30$ m/sで$a = -5$ m/s²で均等に制動します。停止距離（トリチェリ）。
+</Exercicio>
+
+<Exercicio
+  numero="68.15"
+  dificuldade="modelagem"
+  solucao={<>トリチェリ：<Eq>{`v^2 = v_0^2 + 2a\Delta s`}</Eq>。<Eq>{`v_0 = 0`}</Eq>、<Eq>{`v_f = 80`}</Eq> m/s、<Eq>{`\Delta s = 1000`}</Eq> m。<Eq>{`6400 = 0 + 2000a \Rightarrow a = 3.2`}</Eq> m/s²。時間：<Eq>{`v_f = at \Rightarrow t = 80/3.2 = 25`}</Eq> s。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.13", licenca: "CC-BY-NC-SA" }}
+>
+飛行機は静止から始まり、1000 m走路後$v_f = 80$ m/sで離陸します。平均加速度および走行時間。
+</Exercicio>
+
+<Exercicio
+  numero="68.16"
+  dificuldade="modelagem"
+  resposta="t* = 4 s, v = 40 m/s (速さ)"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.7", licenca: "CC-BY-NC-SA" }}
+>
+石は$h = 80$ mから落ちます。落下時間と衝撃時の速さ（$g = 10$ m/s²）。
+</Exercicio>
+
+<Exercicio
+  numero="68.17"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`v_0 = 100/3.6 \approx 27.78`}</Eq> m/s。<Eq>{`a_{\\text{med}} = v_0/t = 27.78/10.5 \approx 2.6`}</Eq> m/s²。距離：<Eq>{`\Delta s = v_0^2/(2a) \approx 771.8/5.2 \approx 148`}</Eq> m；または直接：<Eq>{`\Delta s = \frac{1}{2}(v_0 + 0) t = \frac{1}{2}(27.78)(10.5) \approx 146`}</Eq> m。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.15", licenca: "CC-BY-NC-SA" }}
+>
+自動車は0→100 km/hを10.5秒で加速します。平均加速度と加速中の移動距離。
+</Exercicio>
+
+<Exercicio
+  numero="68.18"
+  dificuldade="modelagem"
+  resposta="水平飛距離 = 125*sqrt(3) m ≈ 216 m"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.9", licenca: "CC-BY-NC-SA" }}
+>
+斜発射：$v_0 = 50$ m/s水平から30°。水平飛距離（$g = 10$ m/s²）。
+</Exercicio>
+
+<Exercicio
+  numero="68.19"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`a(t) = 30 - 0.5t`}</Eq>。<Eq>{`v(t) = \int_0^t a\, dt = 30t - 0.25t^2`}</Eq>。$t = 60$で：<Eq>{`v(60) = 1800 - 900 = 900`}</Eq> m/s。<Eq>{`s(60) = 15(60)^2 - \frac{0.25}{3}(60)^3 = 54000 - 18000 = 36000`}</Eq> m = 36 km。</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`a(t) = 30 - 0.5t`}</Eq>を$v(0) = 0$で積分：<Eq>{`v(t) = 30t - 0.25t^2`}</Eq>。</li>
+      <li><Eq>{`v(t)`}</Eq>を$s(0) = 0$で積分：<Eq>{`s(t) = 15t^2 - t^3/12`}</Eq>。</li>
+      <li>$t = 60$：<Eq>{`v = 1800 - 900 = 900`}</Eq> m/s；<Eq>{`s = 15(3600) - 216000/12 = 54000 - 18000 = 36000`}</Eq> m。</li>
+      <li><em>豆知識：</em>900 m/s ≈ Mach 2.6 -- 打上げロケット第2段階の速度。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.4", pagina: "Example 2.4.2", licenca: "CC-BY-NC" }}
+>
+ロケット：$a(t) = 30 - 0.5t$ m/s²は$t = 60$ sまで（エンジン停止）。エンジン停止時の速度と位置。
+</Exercicio>
+
+<Exercicio
+  numero="68.20"
+  dificuldade="modelagem"
+  resposta="v0 = 20 m/s（公式で：v = (2*delta_s)/t - 0 = 2*200/20 = 20 m/s）"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.17", licenca: "CC-BY-NC-SA" }}
+>
+列車は均等に制動し、200 mを20秒で走行して停止します。$v_0$は何でしたか？
+</Exercicio>
+
+<Exercicio
+  numero="68.21"
+  dificuldade="modelagem"
+  solucao={<>ボール$h = 50$mの高さから$v_0 = 20$ m/sで上へ投げられます。<Eq>{`s(t) = 50 + 20t - 5t^2`}</Eq>。<Eq>{`s(t^*) = 0 \Rightarrow 5t^2 - 20t - 50 = 0 \Rightarrow t^2 - 4t - 10 = 0`}</Eq>。<Eq>{`t^* = (4 + \sqrt{16+40})/2 = (4+\sqrt{56})/2 \approx 5.74`}</Eq> s。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.4", pagina: "Exercise 2.4.3", licenca: "CC-BY-NC" }}
+>
+ボールは50 m塔の頂上から$v_0 = 20$ m/sで上へ投げられます。地面に当たるまでの時間。
+</Exercicio>
+
+<Exercicio
+  numero="68.22"
+  dificuldade="modelagem"
+  resposta="終端 = mg/b = 1*10/0.2 = 50 m/s"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.11", licenca: "CC-BY-NC-SA" }}
+>
+質量$m = 1$ kgの物体は抵抗$b = 0.2$ kg/sで落下します。終端速度（$g = 10$ m/s²）。
+</Exercicio>
+
+### ブロックC — MHS と振動 (68.23 a 68.30)
+
+<Exercicio
+  numero="68.23"
+  dificuldade="modelagem"
+  resposta="omega = 10 rad/s, T = 0.628 s approx, f ≈ 1.59 Hz"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.19", licenca: "CC-BY-NC-SA" }}
+>
+バネ・質量：$m = 1$ kg、$k = 100$ N/m。角周波数$\omega$、周期$T$、周波数$f$。
+</Exercicio>
+
+<Exercicio
+  numero="68.24"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\omega = 2\pi`}</Eq> rad/s。<Eq>{`v(t) = -0.1 \cdot 2\pi \sin(2\pi t) = -0.2\pi\sin(2\pi t)`}</Eq>。最大速度：<Eq>{`|v|_{\\max} = 0.2\pi \approx 0.628`}</Eq> m/s（平衡点$x = 0$）。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.13", licenca: "CC-BY-NC-SA" }}
+>
+$x(t) = 0.1\cos(2\pi t)$です。振幅、周期、$v(t)$、最大速度。
+</Exercicio>
+
+<Exercicio
+  numero="68.25"
+  dificuldade="modelagem"
+  resposta="omega = sqrt(10) rad/s, T = 2*pi/sqrt(10) ≈ 1.99 s"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.4", pagina: "Exercise 2.4.7", licenca: "CC-BY-NC" }}
+>
+長さ$L = 1$ mの振り子。角周波数$\omega = \sqrt{g/L}$と周期（$g = 10$ m/s²）。
+</Exercicio>
+
+<Exercicio
+  numero="68.26"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`x(t) = A\cos(\omega t + \phi)`}</Eq>。<Eq>{`\dot x = -A\omega\sin(\omega t+\phi)`}</Eq>。<Eq>{`\ddot x = -A\omega^2\cos(\omega t+\phi) = -\omega^2 x`}</Eq>。したがって<Eq>{`\ddot x + \omega^2 x = 0`}</Eq>。証毕。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.21", licenca: "CC-BY-NC-SA" }}
+>
+$x(t) = A\cos(\omega t + \phi)$が微分方程式$\ddot{x} + \omega^2 x = 0$を満たすことを確認してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.27"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`E = \frac{1}{2}m\dot x^2 + \frac{1}{2}kx^2`}</Eq>。導関数：<Eq>{`\dot E = m\dot x \ddot x + kx\dot x = \dot x(m\ddot x + kx) = \dot x \cdot 0 = 0`}</Eq>（$m\ddot x + kx = 0$なので）。したがって<Eq>{`E`}</Eq>は定数。</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`E(t) = \frac{1}{2}m v^2 + \frac{1}{2}k x^2`}</Eq>を書きます。</li>
+      <li>導関数：<Eq>{`\dot E = mv\dot v + kx v = v(m\ddot x + kx)`}</Eq>。</li>
+      <li>常微分方程式$m\ddot x = -kx$により、括弧内がゼロです。</li>
+      <li>したがって<Eq>{`\dot E = 0`}</Eq> -- エネルギーは定数。<em>豆知識：</em>この議論はどんな保存力にも有効です。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.15", licenca: "CC-BY-NC-SA" }}
+>
+MHS：$E = \frac{1}{2}m\dot{x}^2 + \frac{1}{2}kx^2$です。$E$が時間で導関数を求めることで定数であることを示してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.28"
+  dificuldade="modelagem"
+  resposta="x(t) = e^(-t)*cos(5t);見かけの周波数 = 5/(2*pi) ≈ 0.8 Hz;振幅は指数関数的に減衰"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.4", pagina: "Exercise 2.4.9", licenca: "CC-BY-NC" }}
+>
+$x(t) = e^{-t}\cos(5t)$（減衰振動子）。見かけの周波数と振幅の振る舞い。
+</Exercicio>
+
+<Exercicio
+  numero="68.29"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`v(t) = -A\omega\sin(\omega t + \phi)`}</Eq>、<Eq>{`x(t) = A\cos(\omega t + \phi)`}</Eq>。位相差：<Eq>{`v = -A\omega\sin(\omega t + \phi) = A\omega\cos(\omega t + \phi + \pi/2)`}</Eq>。したがって<Eq>{`v`}</Eq>は$x$に対して90°ずれている（先行）。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.23", licenca: "CC-BY-NC-SA" }}
+>
+$x(t) = A\cos(\omega t + \phi)$と$v(t)$の間の位相差。90°を確認してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.30"
+  dificuldade="modelagem"
+  resposta="a(t) = -A*omega²*cos(omega*t + phi) = -omega²*x。位相差 = 180°（反対）。"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.17", licenca: "CC-BY-NC-SA" }}
+>
+MHSで$a(t)$と$x(t)$が180°ずれていることを示してください。つまり、$a = -\omega^2 x$。
+</Exercicio>
+
+### ブロックD — 理解、2D運動学、チャレンジ (68.31 a 68.40)
+
+<Exercicio
+  numero="68.31"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "物体が瞬間的に静止しているので加速度はゼロ。", correta: false },
+    { texto: "速度がゼロでも加速度はg下向き。", correta: true },
+    { texto: "加速度は最高点でg上向き。", correta: false },
+    { texto: "加速度はゼロで、その後g下向きに反転。", correta: false },
+  ]}
+  solucao={<>自由落下では<Eq>{`a = -g`}</Eq>は常に定数です -- 速度に関わらず。最高点<Eq>{`v = 0`}</Eq>でも、<Eq>{`a = -g`}</Eq>はまだ。選択肢Aは速度ゼロと加速度ゼロを混同します -- 典型的な誤り。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.25 (conceitual)", licenca: "CC-BY-NC-SA" }}
+>
+ボールが上へ投げられます。最高点での加速度は：
+</Exercicio>
+
+<Exercicio
+  numero="68.32"
+  dificuldade="compreensao"
+  solucao={<>平均速度：<Eq>{`\\bar v = \Delta s / \Delta t`}</Eq>（全体の比率）。速度の平均：<Eq>{`\int v\, dt / \Delta t`}</Eq>またはサンプル平均。これらは等速（$v$定数）でのみ等しい。例：自動車が1時間60 km/h、次に1時間120 km/h -- 平均速度 = 90 km/h；ただし60 kmと120 km各区間で異なる時間をかけた場合、平均は異なります。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "Exercise 1.1.8", licenca: "CC-BY-NC-SA" }}
+>
+なぜ平均速度（$\Delta s/\Delta t$）が一般的に速度の平均と異なるかを説明してください。数値例を与えてください。
+</Exercicio>
+
+<Exercicio
+  numero="68.33"
+  dificuldade="compreensao"
+  resposta="符号は方向を示します。v < 0は負の方向での運動を意味します（例：下向き）。速さ = |v| ≥ 0常に。"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.27 (conceitual)", licenca: "CC-BY-NC-SA" }}
+>
+速度（1D符号付きベクトル量）と速さ（スカラー）の違いを説明してください。なぜ$v < 0$が可能か？
+</Exercicio>
+
+<Exercicio
+  numero="68.34"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\vec r(t) = R(\cos\omega t, \sin\omega t)`}</Eq>。<Eq>{`\vec v = R\omega(-\sin\omega t, \cos\omega t)`}</Eq>。<Eq>{`|\vec v| = R\omega`}</Eq>。<Eq>{`\vec a = -R\omega^2(\cos\omega t, \sin\omega t) = -\omega^2\vec r`}</Eq>。したがって<Eq>{`|\vec a| = R\omega^2`}</Eq>、中心を指向。✓</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.4", pagina: "Exercise 2.4.11", licenca: "CC-BY-NC" }}
+>
+円運動：$\vec{r} = R(\cos\omega t, \sin\omega t)$です。$\vec{a} = -\omega^2\vec{r}$と$|\vec{a}| = R\omega^2$を示してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.35"
+  dificuldade="modelagem"
+  solucao={<>成分：<Eq>{`x(t) = v_0\cos\theta\, t`}</Eq>、<Eq>{`y(t) = v_0\sin\theta\, t - \frac{g}{2}t^2`}</Eq>。飛距離：<Eq>{`y = 0 \Rightarrow t = 2v_0\sin\theta/g`}</Eq>。<Eq>{`R = x(t^*) = v_0^2\sin(2\theta)/g`}</Eq>。最大は$\theta = 45°$。</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`v_x = v_0\cos\theta`}</Eq>（定数）、<Eq>{`v_y = v_0\sin\theta - gt`}</Eq>。</li>
+      <li><Eq>{`y = 0`}</Eq>：<Eq>{`t = 2v_0\sin\theta/g`}</Eq>。</li>
+      <li>飛距離：<Eq>{`R = v_0\cos\theta \cdot 2v_0\sin\theta/g = v_0^2\sin(2\theta)/g`}</Eq>。</li>
+      <li><em>ショートカット：</em><Eq>{`\sin(2\theta)`}</Eq>は$2\theta = 90° \Rightarrow \theta = 45°$で最大。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.19", licenca: "CC-BY-NC-SA" }}
+>
+発射体は$v_0$と角度$\theta$で発射されます。飛距離の公式$R = v_0^2\sin(2\theta)/g$を導き出し、最適角度を求めてください。
+</Exercicio>
+
+<Exercicio
+  numero="68.36"
+  dificuldade="modelagem"
+  resposta="v_media（時間当たり）= 90 km/h；v_media（等距離当たり）= 80 km/h（調和：2/(1/60+1/120)）"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.29", licenca: "CC-BY-NC-SA" }}
+>
+自動車：1時間60 km/h、次に1時間120 km/h。時間当たりの平均速度？等距離走行当たりの平均速度？
+</Exercicio>
+
+<Exercicio
+  numero="68.37"
+  dificuldade="desafio"
+  solucao={<>二次抵抗：<Eq>{`m\dot v = -g - (b/m)v^2`}</Eq>。変数分離：<Eq>{`\int dv/(g + bv^2/m) = -\int dt`}</Eq>。積分：<Eq>{`\frac{1}{\sqrt{gb/m}}\arctan(v\sqrt{b/(gm)}) = -t + C`}</Eq>。終端速度：<Eq>{`v_\infty = -\sqrt{mg/b}`}</Eq>。一般的に$s(t)$の閉形式解がない -- 数値積分が必要。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.4", pagina: "Exercise 2.4.13", licenca: "CC-BY-NC" }}
+>
+二次抵抗での落下：$m\dot{v} = -mg - bv^2$です。終端速度と$v(t)$の解析解（変数分離で）。
+</Exercicio>
+
+<Exercicio
+  numero="68.38"
+  dificuldade="desafio"
+  solucao={<><Eq>{`\vec r(t) = (R\cos\omega t, R\sin\omega t, vt)`}</Eq>。<Eq>{`\vec v = (-R\omega\sin\omega t, R\omega\cos\omega t, v)`}</Eq>。<Eq>{`|\vec v| = \sqrt{R^2\omega^2 + v^2}`}</Eq>。<Eq>{`\vec a = -R\omega^2(\cos\omega t, \sin\omega t, 0)`}</Eq> -- 水平向心加速度、大きさ$R\omega^2$。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.21", licenca: "CC-BY-NC-SA" }}
+>
+ヘリックス：$\vec{r}(t) = (R\cos\omega t, R\sin\omega t, vt)$です。$\vec{v}$、$|\vec{v}|$、$\vec{a}$を計算してください。
+</Exercicio>
+
+<Exercicio
+  numero="68.39"
+  dificuldade="demonstracao"
+  solucao={<>MUV：$v(t) = v_0 + a_0 t$、$s(t) = s_0 + v_0 t + \frac{1}{2}a_0 t^2$。$v = v_0 + a_0 t$から：$t = (v - v_0)/a_0$。代入：<Eq>{`\Delta s = v_0\frac{v_f - v_0}{a_0} + \frac{1}{2}a_0\left(\frac{v_f - v_0}{a_0}\right)^2 = \frac{v_f^2 - v_0^2}{2a_0}`}</Eq>。整理：<Eq>{`v_f^2 = v_0^2 + 2a_0\Delta s`}</Eq>。証毕。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change", secao: "§3.4", pagina: "Exercise 3.4.31 (demonstração)", licenca: "CC-BY-NC-SA" }}
+>
+MUV方程式からトリチェリ方程式$v_f^2 = v_0^2 + 2a\,\Delta s$を導き出してください。時間$t$を消去します。
+</Exercicio>
+
+<Exercicio
+  numero="68.40"
+  dificuldade="demonstracao"
+  solucao={<>MHS：$x = A\cos(\omega t)$、$v = -A\omega\sin(\omega t)$。運動エネルギー：<Eq>{`K = \frac{1}{2}mv^2 = \frac{1}{2}mA^2\omega^2\sin^2(\omega t)`}</Eq>。ポテンシャルエネルギー：<Eq>{`U = \frac{1}{2}kx^2 = \frac{1}{2}kA^2\cos^2(\omega t) = \frac{1}{2}mA^2\omega^2\cos^2(\omega t)`}</Eq>（$k = m\omega^2$）。平均値（周期上）：<Eq>{`\langle\sin^2\rangle = \langle\cos^2\rangle = 1/2`}</Eq>。したがって<Eq>{`\langle K\rangle = \langle U\rangle = E/2`}</Eq>。証毕。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-5-units.html", secao: "§1.5", pagina: "Exercise 1.5.23", licenca: "CC-BY-NC-SA" }}
+>
+MHSで運動エネルギーとポテンシャルエネルギーの時間平均が$\langle\sin^2\rangle = \langle\cos^2\rangle = 1/2$を使用して各々$E/2$に等しいことを示してください。
+</Exercicio>
+
+</ListaExercicios>
+
+## 出典
+
+- [**Active Calculus**](https://activecalculus.org/single/sec-1-1-vel.html) — Matt Boelkins et al. · 2024 · §1.1–§1.5 速度の測定と導関数の解釈 · CC-BY-NC-SA。**主要出典。**
+- [**Calculus Volume 1**](https://openstax.org/books/calculus-volume-1/pages/3-4-derivatives-as-rates-of-change) — OpenStax · 2016 · §3.4 Derivatives as Rates of Change · CC-BY-NC-SA。
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman, Heinold, Siemers, Chalishajar · 2023 · §2.4 Velocity and Position · CC-BY-NC。
+- [1921年ノーベル物理学賞（Einstein）](https://www.nobelprize.org/prizes/physics/1921/) — 相対論と時空の定式化は現代運動学の背景です。
