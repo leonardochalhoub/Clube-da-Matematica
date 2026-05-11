@@ -1,0 +1,927 @@
+---
+titulo: "Lição 110 — Consolidação Trim 11: Inferência Estatística"
+slug: "licao-110-consolidacao-trim-11"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Workshop de síntese do trim 11: IC para média, testes z e t, ANOVA, qui-quadrado, regressão simples e múltipla, e inferência bayesiana — todos os pilares da estatística inferencial em um mapa integrado."
+ordem: 110
+publicado: true
+tags: ["estatística inferencial", "intervalo de confiança", "teste de hipótese", "regressão", "ANOVA", "qui-quadrado", "bayes", "ano-3", "trim-11"]
+prerrequisitos: ["licao-109-bayes"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM / Stochastik LK alemão", "Math B japonês (Estatística)", "H2 Mathematics (Singapura) — Statistics"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\hat\theta \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}};\quad T = \frac{\bar X - \mu_0}{s/\sqrt{n}};\quad P(\theta \mid D) \propto P(D \mid \theta)\,P(\theta)"
+  legenda={<>Ósmy semestr w trzech równaniach: przedział ufności do szacowania, statystyka <Eq>{`T`}</Eq> do testowania i reguła Bayesa do aktualizacji przekonań. Cała wnioskowanie statystyczne jest wariacją tych trzech form.</>}
+  audioTexto="Semestr jedenasty w trzech równaniach. Pierwsze: estymator plus lub minus zet razy sigma przez pierwiastek z ene — przedział ufności. Drugie: ene wielkie równa się ics barra minus mu zero przez ess podzielone pierwiastkiem z ene — statystyka testowa. Trzecie: prawdopodobieństwo teты dado dę jest proporcjonalne do prawdopodobieństwa dę dado teta razy prawdopodobieństwo teta — reguła Bayesa. Cała wnioskowanie statystyczne jest wariacją tych trzech form."
+/>
+
+<aside>
+
+**Livros que cobrem esta lição**
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §5–8 (IC, testes, regressão, qui-quadrado) · **CC-BY-SA** · <em>O texto mais pedagógico para síntese de inferência em nível EM avançado; cada capítulo tem exercícios contextualizados com dados reais.</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §8–13 (IC, t, ANOVA, qui-quadrado, regressão) · **CC-BY** · <em>Cobertura sistemática de todos os tópicos do trim 11 com exemplos do cotidiano e tabelas de distribuição integradas.</em>
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Poldrack · Ch. 7–15 (testes, regressão, Bayes) · **CC-BY-NC** · <em>Abordagem moderna com ênfase em reprodutibilidade, tamanho de efeito e crítica ao p-valor — ideal para a porta 40.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Síntese formal do trim 11">
+
+### Os três pilares da inferência estatística
+
+<Definicao titulo="Pilar 1 — Estimação por intervalo de confiança">
+
+Niech <Eq>{`X_1, \\ldots, X_n \\overset{iid}{\\sim} N(\\mu, \\sigma^2)`}</Eq>.
+
+**Przedział ufności dwustronny poziomu <Eq>{`1-\\alpha`}</Eq> dla <Eq>{`\\mu`}</Eq>** (<Eq>{`\\sigma`}</Eq> znany):
+
+<Equation explicacao="Intervalo de confiança para média com desvio-padrão populacional conhecido." latex="\bar X \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}}" />
+
+**Przedział ufności z <Eq>{`\\sigma`}</Eq> nieznanym** — wykorzystuje rozkład $t$ Studenta z $n-1$ stopniami swobody:
+
+<Equation explicacao="Intervalo de confiança para média com desvio-padrão amostral (uso prático mais comum)." latex="\bar X \pm t_{\alpha/2;\,n-1}\frac{s}{\sqrt{n}}" />
+
+**Rozmiar próbki** dla maksymalnego marginesu błędu $E$:
+
+<Equation explicacao="Fórmula do tamanho de amostra: quadrado de z vezes sigma, dividido por E ao quadrado." latex="n \geq \left(\frac{z_{\alpha/2}\,\sigma}{E}\right)^2" />
+
+</Definicao>
+
+> "Przedział ufności zapewnia zakres wartości, które mogą być rozsądnymi szacunkami parametru populacji. Prawidłowa interpretacja: jeśli powtórzymy procedurę wiele razy, $(1-\alpha)100\%$ skonstruowanych przedziałów będzie zawierać prawdziwy parametr." — [OpenIntro Statistics §5.2](https://www.openintro.org/book/os/)
+
+<Definicao titulo="Pilar 2 — Test hipotezy (ujednolicony pogląd)">
+
+Każdy test hipotezy postępuje według tego samego schematu:
+
+1. Sformułuj <Eq>{`H_0`}</Eq> i <Eq>{`H_1`}</Eq>.
+2. Oblicz **statystykę testową** przy założeniu <Eq>{`H_0`}</Eq>.
+3. Oblicz **p-wartość** = <Eq>{`P(\\text{wynik równie lub bardziej skrajny niż obserwowany} \\mid H_0)`}</Eq>.
+4. Jeśli <Eq>{`p \\leq \\alpha`}</Eq>, odrzuć <Eq>{`H_0`}</Eq>.
+
+**Mapa testów:**
+
+| Scenariusz | Statystyka | Rozkład |
+|---|---|---|
+| 1 średnia, <Eq>{`\\sigma`}</Eq> znany | <Eq>{`Z = (\\bar X - \\mu_0)/(\\sigma/\\sqrt{n})`}</Eq> | <Eq>{`N(0,1)`}</Eq> |
+| 1 średnia, <Eq>{`\\sigma`}</Eq> nieznanej | <Eq>{`T = (\\bar X - \\mu_0)/(s/\\sqrt{n})`}</Eq> | <Eq>{`t_{n-1}`}</Eq> |
+| 2 średnie niezależne | Welch <Eq>{`T`}</Eq> | <Eq>{`t_{\\nu}`}</Eq> (stopnie swobody Welcha) |
+| <Eq>{`k`}</Eq> średnich | <Eq>{`F = MS_B/MS_W`}</Eq> | <Eq>{`F_{k-1,\\,N-k}`}</Eq> |
+| Tabela kontyngencji | <Eq>{`\\chi^2 = \\sum (O-E)^2/E`}</Eq> | <Eq>{`\\chi^2_{(r-1)(c-1)}`}</Eq> |
+| Proporcja vs wartość referencyjna | <Eq>{`Z = (\\hat p - p_0)/\\sqrt{p_0(1-p_0)/n}`}</Eq> | <Eq>{`N(0,1)`}</Eq> |
+
+</Definicao>
+
+<Definicao titulo="Pilar 3 — Regresja i modelowanie predykcyjne">
+
+**Regresja liniowa prosta** <Eq>{`\\hat Y = \\hat\\beta_0 + \\hat\\beta_1 X`}</Eq>:
+
+<Equation explicacao="Estimadores de mínimos quadrados ordinárias para regressão simples." latex="\hat\beta_1 = \frac{S_{xy}}{S_{xx}},\quad \hat\beta_0 = \bar Y - \hat\beta_1 \bar X" />
+
+**Regresja wielokrotna** <Eq>{`\\hat{\\mathbf{y}} = X\\hat{\\boldsymbol\\beta}`}</Eq>:
+
+<Equation explicacao="Estimador vetorial de mínimos quadrados para regressão múltipla." latex="\hat{\boldsymbol\beta} = (X^\top X)^{-1} X^\top \mathbf{y}" />
+
+**Współczynnik determinacji** i jego wersja skorygowana:
+
+<Equation explicacao="R-quadrado ajustado penaliza preditores extras que não contribuem para o ajuste." latex="R^2_{\text{adj}} = 1 - \frac{(1-R^2)(n-1)}{n-p-1}" />
+
+</Definicao>
+
+<Teorema titulo="Reguła Bayesa dla aktualizacji przekonań">
+
+Niech <Eq>{`\\theta`}</Eq> będzie parametrem interesującym, <Eq>{`D`}</Eq> zaobserwowanymi danymi:
+
+<Equation explicacao="A distribuição posterior é proporcional à verossimilhança vezes o prior." latex="P(\theta \mid D) = \frac{P(D \mid \theta)\,P(\theta)}{P(D)} \propto P(D \mid \theta)\,P(\theta)" />
+
+**Sprzężona Beta-Binomialny:** jeśli <Eq>{`\\theta \\sim \\text{Beta}(\\alpha, \\beta)`}</Eq> i <Eq>{`X \\mid \\theta \\sim \\text{Bin}(n, \\theta)`}</Eq>, wtedy:
+
+<Equation explicacao="Distribuição posterior quando o prior é Beta e a verossimilhança é binomial — o prior se atualiza somando sucessos e fracassos." latex="\theta \mid X \sim \text{Beta}(\alpha + X,\; \beta + n - X)" />
+
+</Teorema>
+
+<Insight>
+
+**Głęboka jedność.** Regresja liniowa, ANOVA, test <Eq>{`t`}</Eq> i logarytmiczno-liniowy model dla <Eq>{`\\chi^2`}</Eq> są wszystkie przypadkami **Uogólnionego Modelu Liniowego**: <Eq>{`g(E[Y]) = X\\beta`}</Eq>. Opanowanie GLM to opanowanie klasycznego wnioskowania parametrycznego.
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<defs>
+  <marker id="arr110" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="70" width="110" height="36" rx="6" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="65" y="83" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Pytanie:</text>
+  <text x="65" y="97" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Szacować μ?</text>
+</g>
+<g>
+  <line x1="120" x2="165" y1="88" y2="88" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="167" y="55" width="110" height="36" rx="6" fill="rgb(232 199 122 / 0.25)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="222" y="68" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">PU: X̄ ± t·s/√n</text>
+  <text x="222" y="82" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">n ≥ (z·σ/E)²</text>
+</g>
+<g>
+  <line x1="120" x2="165" y1="95" y2="115" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="167" y="105" width="110" height="36" rx="6" fill="rgb(61 122 95 / 0.25)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="222" y="118" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Test H₀</text>
+  <text x="222" y="132" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">z / t / F / χ²</text>
+</g>
+<g>
+  <line x1="277" y1="88" x2="322" y2="65" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="324" y="50" width="110" height="36" rx="6" fill="rgb(199 107 63 / 0.25)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="379" y="63" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Prognozować Y?</text>
+  <text x="379" y="77" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Regresja OLS</text>
+</g>
+<g>
+  <line x1="277" y1="123" x2="322" y2="123" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="324" y="105" width="110" height="36" rx="6" fill="rgb(100 80 160 / 0.25)" stroke="rgb(100 80 160)" strokeWidth="1.2"/>
+  <text x="379" y="118" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Aktualizować wiarę?</text>
+  <text x="379" y="132" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">Twierdzenie Bayesa</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Przepływ decyzji semestru 11 — każde pytanie statystyczne ma swoją metodę.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Dla pięciolatka">
+
+Wyobraź sobie, że chcesz wiedzieć **ile cukierków jest w ogromnym słoiku**.
+
+- Nie liczysz wszystkich — bierzesz garść, liczysz, i **zgadujesz zakres**: "powinno być między 200 a 300 cukierkami". To jest **przedział ufności**.
+- Twój przyjaciel mówi "jest dokładnie 150". Patrzysz na swoją garść i myślisz: "to byłoby bardzo mało prawdopodobne, gdyby było 150". Wtedy mówisz "nie wierzę!" — to jest **test hipotezy**.
+- Wczoraj wiedziałeś już trochę o słoiku. Dziś połączyłeś to "wczorajsze wiedzenie" z tym, co liczyłeś dziś, i stałeś się mądrzejszy. To jest **Bayes** — uczyć się, łącząc to, co widziałeś z tym, co wiedziałeś.
+
+Te trzy razem to być jak **dobry detektyw liczb**.
+
+</Porta>
+
+<Porta nivel="10" titulo="Dla dziesięciolatka">
+
+Przeszedłeś semestr 11 ucząc się **wyciągać wnioski z próbek**.
+
+**Co było a co jest teraz:**
+
+Przedtem obliczałeś średnią całej klasy — miałeś **wszystkie dane**. Teraz ucz się z **próbki** i robisz stwierdzenia o **świecie**.
+
+**Trzy metody:**
+
+1. **Przedział ufności:** "Z 95% pewnością średnia ocena szkoły wynosi między 6,2 a 7,1." Nie znasz dokładnej wartości — dajesz wiarygodny zakres.
+
+2. **Test hipotezy:** "Nowy podręcznik poprawił średnią?" Zbierasz dane, obliczasz prawdopodobieństwo tego wyniku, gdyby nic się nie zmieniło (p-wartość), i decydujesz, czy wierzysz w zmianę.
+
+3. **Bayes:** Już wcześniej znałeś coś przed zbieraniem danych. Za pomocą Bayesa łączysz to, co wiedziałeś (prior) z tym, co obserwowałeś (dane) i aktualizujesz przekonanie.
+
+**Wybieranie metody:**
+
+- Chcę szacować średnią: PU z <Eq>{`t`}</Eq>.
+- Chcę porównać dwie grupy: test <Eq>{`t`}</Eq>.
+- Chcę porównać wiele grup: ANOVA.
+- Chcę skrzyżować dwie zmienne kategoryczne: chi-kwadrat.
+- Chcę prognozować <Eq>{`Y`}</Eq> na podstawie <Eq>{`X`}</Eq>: regresja.
+- Chcę aktualizować moje przekonanie: Bayes.
+
+</Porta>
+
+<Porta nivel="15" titulo="Dla piętnastolatka">
+
+### Synteza: częstościowość vs bayesjanizm
+
+**Perspektywa częstościowa** (lekcje 102–108):
+
+- Parametry (<Eq>{`\\mu`}</Eq>, <Eq>{`\\sigma`}</Eq>, <Eq>{`\\beta`}</Eq>) są **nieznanymi stałymi** — nie mają rozkładu.
+- PU: pokrycie nad powtarzanymi, hipotetycznymi eksperymentami.
+- <Eq>{`p`}</Eq>-wartość: "jak mało prawdopodobny byłby ten wynik, gdyby <Eq>{`H_0`}</Eq> było prawdziwe?"
+
+**Perspektywa bayesowska** (lekcja 109):
+
+- Parametry mają **rozkład prawdopodobieństwa** odzwierciedlający niepewność.
+- Wiarygodny PU: "z prawdopodobieństwem 95% <Eq>{`\\theta \\in [a, b]`}</Eq> biorąc pod uwagę obserwowane dane."
+- Aktualizacja: prior + wiarogodność = posterior.
+
+### Połączenia ujawnione w semestrze 11
+
+| Relacja | Szczegóły |
+|---|---|
+| Regresja ze zmienną dummy = test <Eq>{`t`}</Eq> | 1 predyktor binarny → przecięcie i współczynnik to średnie grup |
+| ANOVA = regresja z <Eq>{`k-1`}</Eq> zmiennymi dummy | Ogólne <Eq>{`F`}</Eq> modelu = <Eq>{`F`}</Eq> ANOVA |
+| <Eq>{`F = T^2`}</Eq> gdy <Eq>{`k = 2`}</Eq> | ANOVA z 2 grupami jest identyczna z dwustronnym testem <Eq>{`t`}</Eq> |
+| MAP z uniformnym priorem = MLE | częstościowość i bayesjanizm zbiegają się, gdy brakuje informacji wstępnej |
+
+### Powtarzające się błędy (nigdy ich nie rób)
+
+1. **<Eq>{`p = 0{,}06`}</Eq> to nie jest dowód <Eq>{`H_0`}</Eq>** — to tylko "nie odrzucamy <Eq>{`H_0`}</Eq> na poziomie 5%".
+2. **Istotność statystyczna ≠ istotność praktyczna** — minimalny efekt może być istotny przy dużym <Eq>{`n`}</Eq>.
+3. **Korelacja ≠ przyczynowość** — regresja nie dowodzi przyczyny.
+4. **Wysokie <Eq>{`R^2`}</Eq> ≠ dobry model** — mogą być wzorce w rezydualach.
+5. **p-hacking** — testowanie wielu hipotez bez korekcji na wiele porównań zawyża błąd typu I.
+
+</Porta>
+
+<Porta nivel="25" titulo="Dla studenta inżynierii">
+
+### Wszystko to uogólniony model liniowy (GLM)
+
+Regresja liniowa, ANOVA, test <Eq>{`t`}</Eq> i logarytmiczno-liniowy model dla <Eq>{`\\chi^2`}</Eq> są przypadkami **uogólnionego modelu liniowego**:
+
+$$g(E[Y]) = X\beta$$
+
+| Metoda | Rozkład <Eq>{`Y`}</Eq> | Funkcja połączenia <Eq>{`g`}</Eq> |
+|---|---|---|
+| Regresja liniowa | Normalny | Tożsamość |
+| ANOVA | Normalny | Tożsamość |
+| Regresja logistyczna | Bernoulli | Logit |
+| Regresja Poissona | Poisson | Logarytm |
+| Regresja wielomianowa | Wielomianowy | Wielomianowy logit |
+
+Opanowanie GLM = opanowanie całego klasycznego wnioskowania parametrycznego.
+
+### Resampling: alternatywa nieparametryczna
+
+- **Bootstrap:** PU i błąd standardowy dowolnej statystyki bez założenia rozkładu.
+- **Permutacja:** p-wartość bez założenia normalności.
+- **Cross-validation:** solidna ocena predykcyjna.
+
+### Analiza mocy (niedoużywana w praktyce)
+
+Przed jakąkolwiek zbieraniem danych oblicz rozmiar próbki, aby wydetektować minimalny efekt z mocą 80%:
+
+$$n = \frac{2\sigma^2(z_\alpha + z_\beta)^2}{\delta^2}$$
+
+gdzie <Eq>{`\\delta`}</Eq> to minimalna różnica do wykrycia, <Eq>{`z_\\alpha`}</Eq> i <Eq>{`z_\\beta`}</Eq> odpowiadają błędom typu I i II.
+
+Bez analizy mocy eksperymenty umierają zanim się urodz — lub dają wyniki niezweryfikowane, których nikt nie potrafi replikować.
+
+### Checklist analizy zawodowej
+
+1. Wstępnie zarejestrować hipotezy (OSF, AsPredicted).
+2. Analiza mocy i obliczenie <Eq>{`n`}</Eq>.
+3. Zbieranie z kontrolowanym projektem (randomizacja, zaślepienie).
+4. Weryfikacja założeń (normalność, homocedasyczność, niezależność).
+5. Raportuj: szacunek + PU + rozmiar efektu + p-wartość.
+6. Diagnoza rezydualów (regresja).
+7. Korekta na wiele porównań (Bonferroni, FDR).
+
+</Porta>
+
+<Porta nivel="40" titulo="Dla profesjonalisty seniora">
+
+### Filozofia wnioskowania statystycznego
+
+Cztery szkoły tworzą dzisiejszą mapę:
+
+- **Częstościowa Neyman-Pearson:** kontroluje długoterminowe błędy (<Eq>{`\\alpha`}</Eq>, <Eq>{`\\beta`}</Eq>). PU ma częstościowe pokrycie, nie prawdopodobieństwo zawierania parametru.
+- **Fisheriana:** p-wartość jako ciągła miara dowodu przeciwko <Eq>{`H_0`}</Eq>. Bez dychotomii odrzuć/nie-odrzuć.
+- **Likelihoodista (Edwards):** stosunek wiarogodności jako miara dowodu między modelami. Bez prioru.
+- **Bayesowska (Jeffreys, Lindley, McElreath):** parametry mają rozkłady; posterior to pełna odpowiedź. Pozwala na bezpośrednie stwierdzenia prawdopodobieństwa o hipotezach.
+
+Żadna nie jest uniwersalnie lepsza. Wybór zależy od kontekstu, celów i założeń, które analizator przyjmuje.
+
+### Kryzys replikacji i czego się nauczyliśmy
+
+W 2015 roku Open Science Collaboration zreplikowała 100 badań z psychologii — tylko 36% zreplikowała. Przyczyny są instrumentalne:
+
+1. P-hacking i HARKing (tworzenie hipotez po poznaniu wyników).
+2. Analiza mocy ignorowana — małe efekty, niewystarczające próbki.
+3. Wiele porównań bez korekcji.
+4. Dane i kod nie są dzielone.
+5. Błąd publikacji (wyniki negatywne się nie pojawiają).
+
+Rozwiązania wdrożone w społeczności: wstępna rejestracja, bezpośrednia replikacja, nauka otwarta, raporty zarejestrowane, metryki poza <Eq>{`p < 0{,}05`}</Eq> (rozmiar efektu, BIC, Bayes Factor).
+
+### Obecna granica
+
+- **Wnioskowanie przyczynowe (Pearl, Rubin):** DAGs, do-calculus, zmienne instrumentalne, RDD, różnica-w-różnicach. Klasyczna statystyka szacuje powiązania; przyczynowe wnioskowanie szacuje kontrafakty.
+- **Wysokowymiarowe:** <Eq>{`p \\gg n`}</Eq>. Lasso, ridge, elastic net, knockoffs (Candès) do kontroli FDR.
+- **Wnioskowanie selektywne:** p-wartości ważne po selekcji zmiennych.
+- **Obliczenia bayesowskie:** HMC (Stan), wnioskowanie wariacyjne, ABC. Uczyniło złożone modele hierarchiczne obsługiwalne.
+- **Modele predykcyjne vs inferencyjne:** ML maksymalizuje dokładność predykcyjną; wnioskowanie maksymalizuje interpretacyjność i ważność przyczynową. Breiman (2001) nazwał to "dwie kultury".
+
+### Etyka w statystyce
+
+Manipulacja danymi, wybieranie testów post-hoc bez ujawnienia, brak raportowania wstępnie określonych analiz — to praktyki, które przekraczają granicę uczciwości naukowej. ASA Statement on P-Values (2016) to obowiązkowa lektura dla każdego profesjonalisty.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplikacja praktyczna">
+
+### Przypadek 1 — Średnia cena wynajmu w São Paulo
+
+Agencja nieruchomości próbkowała <Eq>{`n = 49`}</Eq> mieszkań 2-pokojowych na południu. Średnia próbkowa R\$ 2 850/miesiąc, odchylenie standardowe próbkowe R\$ 420/miesiąc.
+
+**PU 95% dla średniej ceny:**
+<Eq>{`t_{0,025;\\,48} \\approx 2{,}011`}</Eq>. Margines: <Eq>{`2{,}011 \\times 420/7 = 120{,}66`}</Eq>.
+PU: R\$ 2 729 a R\$ 2 971.
+
+**Test:** Prefektura twierdzi, że średni wynajem wynosi R\$ 2 700. <Eq>{`T = (2850 - 2700)/(420/7) = 2{,}50`}</Eq>. p-wartość dwustronna <Eq>{`\\approx 0{,}016 < 0{,}05`}</Eq>. Odrzucamy <Eq>{`H_0`}</Eq>.
+
+### Przypadek 2 — Porównanie grup w ENEM
+
+Uczniowie szkoły publicznej (grupa 1, <Eq>{`n_1 = 200`}</Eq>, <Eq>{`\\bar X_1 = 540`}</Eq>, <Eq>{`s_1 = 80`}</Eq>) vs prywatne (grupa 2, <Eq>{`n_2 = 200`}</Eq>, <Eq>{`\\bar X_2 = 590`}</Eq>, <Eq>{`s_2 = 75`}</Eq>). Welch <Eq>{`T`}</Eq>, PU 95% dla różnicy.
+
+### Przypadek 3 — A/B testing strony docelowej
+
+Wersja A: 120 konwersji na 1000 odwiedzin. Wersja B: 150/1000. Test z dla różnicy proporcji:
+<Eq>{`\\hat p_A = 0{,}12`}</Eq>, <Eq>{`\\hat p_B = 0{,}15`}</Eq>, <Eq>{`\\hat p = 0{,}135`}</Eq>.
+<Eq>{`Z = (0{,}15 - 0{,}12)/\\sqrt{0{,}135 \\cdot 0{,}865 \\cdot (1/1000 + 1/1000)} = 2{,}09`}</Eq>.
+p-wartość dwustronna <Eq>{`\\approx 0{,}037 < 0{,}05`}</Eq>. B jest lepsze na poziomie 5%.
+
+### Przypadek 4 — Nawozy i produktywność (ANOVA)
+
+4 nawozy, 25 roślin każdy, produktywność (kg/ha). ANOVA <Eq>{`F(3, 96)`}</Eq>. Jeśli <Eq>{`F > F_{0,05;\\,3,96} \\approx 2{,}70`}</Eq>, jakiś nawóz się różni. Post-hoc: Tukey HSD.
+
+### Przypadek 5 — Regresja ceny nieruchomości
+
+<Eq>{`Y`}</Eq> = cena (R\$ tys.), <Eq>{`X_1 = m^2`}</Eq>, <Eq>{`X_2`}</Eq> = liczba pokoi, <Eq>{`X_3`}</Eq> = wiek (lat). Dopasowanie OLS z <Eq>{`n = 200`}</Eq> nieruchomościami. Interpretacja każdego <Eq>{`\\hat\\beta_i`}</Eq>, <Eq>{`R^2_{\\text{adj}}`}</Eq> i diagnoza rezydualów.
+
+### Przypadek 6 — Bayes w kontroli jakości
+
+Proporcja wad <Eq>{`\\theta`}</Eq> w partii części. Prior: <Eq>{`\\text{Beta}(2, 18)`}</Eq> (doświadczenie: ~10% wad). Inspekcja <Eq>{`n = 50`}</Eq>, znaleziono <Eq>{`x = 8`}</Eq> wad. Posterior: <Eq>{`\\text{Beta}(10, 60)`}</Eq>. Średnia posterior: <Eq>{`10/70 \\approx 14{,}3\\%`}</Eq>. Wiarygodny PU 95% przez kwantyle Beta.
+
+</Porta>
+
+</DuasPortas>
+
+## Exempla rozwiązane
+
+<Exemplo titulo="PU 95% dla średniej oceny ENEM (odchylenie nieznane)" numero="1">
+
+**Problem.** Próbka <Eq>{`n = 36`}</Eq> kandydatów ENEM 2023 z przedmiotu Matematyka wykazała średnią <Eq>{`\\bar X = 580`}</Eq> punktów i odchylenie standardowe próbkowe <Eq>{`s = 90`}</Eq> punktów. Skonstruuj PU 95% dla średniej populacji <Eq>{`\\mu`}</Eq>.
+
+**Strategia.** Ponieważ <Eq>{`\\sigma`}</Eq> jest nieznane, używamy rozkładu <Eq>{`t`}</Eq> z <Eq>{`n - 1 = 35`}</Eq> stopniami swobody. Zlokalizuj <Eq>{`t_{0,025;\\,35}`}</Eq> w tabeli.
+
+**Rozwiązanie.**
+
+<Eq>{`t_{0,025;\\,35} = 2{,}030`}</Eq>.
+
+Margines błędu: <Eq>{`E = 2{,}030 \\times \\frac{90}{\\sqrt{36}} = 2{,}030 \\times 15 = 30{,}45`}</Eq>.
+
+PU 95%: <Eq>{`(580 - 30{,}45\\;;\\; 580 + 30{,}45) = (549{,}55\\;;\\; 610{,}45)`}</Eq>.
+
+**Weryfikacja.** Margines rośnie z <Eq>{`s`}</Eq> i maleje z <Eq>{`\\sqrt{n}`}</Eq>. Za <Eq>{`n = 144`}</Eq> margines wynosiłby <Eq>{`2{,}030 \\times 90/12 = 15{,}2`}</Eq> — połowę, ponieważ czterokrotnie zwiększyliśmy <Eq>{`n`}</Eq>.
+
+**Źródło.** [OpenIntro Statistics §5.2](https://www.openintro.org/book/os/) — Ćwiczenie 5.5, s. 222 · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Test t jednej próbki vs cel rządowy" numero="2">
+
+**Problem.** Rząd twierdzi, że średni czas obsługi w POZ wynosi <Eq>{`\\mu_0 = 20`}</Eq> minut. Audyt próbuje <Eq>{`n = 25`}</Eq> obsług: <Eq>{`\\bar X = 24{,}8`}</Eq> min, <Eq>{`s = 7{,}2`}</Eq> min. Na poziomie <Eq>{`\\alpha = 5\\%`}</Eq>, czy jest dowód, że średnia rzeczywista przekracza 20 min?
+
+**Strategia.** Test <Eq>{`t`}</Eq> jednostronny w prawo (<Eq>{`H_1: \\mu > 20`}</Eq>), z <Eq>{`df = 24`}</Eq>.
+
+**Rozwiązanie.**
+
+<Eq>{`T = \\frac{24{,}8 - 20}{7{,}2/\\sqrt{25}} = \\frac{4{,}8}{1{,}44} = 3{,}33`}</Eq>.
+
+<Eq>{`t_{0,05;\\,24} = 1{,}711`}</Eq> (jednostronny). Ponieważ <Eq>{`3{,}33 > 1{,}711`}</Eq>, odrzucamy <Eq>{`H_0`}</Eq>.
+
+p-wartość: <Eq>{`P(t_{24} \\geq 3{,}33) \\approx 0{,}001 < 0{,}05`}</Eq>. Jest dowód, że średni czas przekracza 20 minut.
+
+**Weryfikacja.** PU 95% jednostronny dolny: <Eq>{`24{,}8 - 1{,}711 \\times 1{,}44 = 22{,}33`}</Eq> min. Wartość <Eq>{`\\mu_0 = 20`}</Eq> jest poniżej tej granicy, potwierdzając odrzucenie.
+
+**Źródło.** [Statistics, OpenStax §9.4](https://openstax.org/books/statistics/pages/9-4-comparing-two-independent-population-means) — dostosowanie przykładu 9.10, s. 476 · CC-BY.
+
+</Exemplo>
+
+<Exemplo titulo="ANOVA jednoczynnikowa — produktywność z 3 nawozami" numero="3">
+
+**Problem.** Trzy nawozy zostały przetestowane w grupach <Eq>{`n_i = 10`}</Eq> roślin każdy. Produktywność (kg): <Eq>{`\\bar X_1 = 12{,}0`}</Eq>, <Eq>{`\\bar X_2 = 14{,}5`}</Eq>, <Eq>{`\\bar X_3 = 13{,}2`}</Eq>. Ogólna średnia <Eq>{`\\bar X = 13{,}23`}</Eq>. <Eq>{`SS_W = 162`}</Eq> (suma kwadratów wewnątrz grup). Na poziomie 5%, czy różnica między nawozami?
+
+**Strategia.** ANOVA: oblicz <Eq>{`SS_B`}</Eq>, uzyskaj <Eq>{`F`}</Eq>, porównaj z <Eq>{`F_{0,05;\\,2,\\,27}`}</Eq>.
+
+**Rozwiązanie.**
+
+<Eq>{`SS_B = 10[(12{,}0 - 13{,}23)^2 + (14{,}5 - 13{,}23)^2 + (13{,}2 - 13{,}23)^2]`}</Eq>
+<Eq>{`= 10[1{,}513 + 1{,}613 + 0{,}001] = 31{,}27`}</Eq>.
+
+<Eq>{`MS_B = 31{,}27/2 = 15{,}64`}</Eq>; <Eq>{`MS_W = 162/27 = 6{,}00`}</Eq>.
+
+<Eq>{`F = 15{,}64 / 6{,}00 = 2{,}61`}</Eq>.
+
+<Eq>{`F_{0,05;\\,2,\\,27} \\approx 3{,}35`}</Eq>. Ponieważ <Eq>{`2{,}61 < 3{,}35`}</Eq>, **nie odrzucamy <Eq>{`H_0`}</Eq>** — nie ma dowodu różnicy między nawozami na poziomie 5%.
+
+**Weryfikacja.** p-wartość <Eq>{`\\approx 0{,}092 > 0{,}05`}</Eq>. Wynik konsystentny. Z <Eq>{`n_i = 20`}</Eq> na grupę moc byłaby wyższa i mogłoby być odrzucenie.
+
+**Źródło.** [OpenIntro Statistics §7.5](https://www.openintro.org/book/os/) — struktura oparta na przykładzie ANOVA, s. 319 · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Regresja liniowa prosta — pensja vs lata doświadczenia" numero="4">
+
+**Problem.** Z <Eq>{`n = 20`}</Eq> profesjonalistów: <Eq>{`\\bar X = 8`}</Eq> lat, średnia pensja R\$ 6 200 (<Eq>{`\\bar Y = 6200`}</Eq>), <Eq>{`S_{xx} = 180`}</Eq>, <Eq>{`S_{xy} = 54 000`}</Eq>. Dopasuj model regresji i zinterpretuj współczynniki.
+
+**Strategia.** Oblicz <Eq>{`\\hat\\beta_1`}</Eq> i <Eq>{`\\hat\\beta_0`}</Eq> wzorami najmniejszych kwadratów; zinterpretuj w kontekście.
+
+**Rozwiązanie.**
+
+<Eq>{`\\hat\\beta_1 = S_{xy}/S_{xx} = 54 000/180 = 300`}</Eq>.
+
+<Eq>{`\\hat\\beta_0 = \\bar Y - \\hat\\beta_1 \\bar X = 6200 - 300 \\times 8 = 3 800`}</Eq>.
+
+Model: <Eq>{`\\hat Y = 3 800 + 300\\,X`}</Eq> (w reais, <Eq>{`X`}</Eq> w latach).
+
+**Interpretacja.** Każdy dodatkowy rok doświadczenia jest powiązany ze średnim wzrostem o R\$ 300 w pensji. Przesunięcie R\$ 3 800 to szacunkowa pensja za 0 lat doświadczenia (ekstrapolacja — używaj ostrożnie).
+
+**Weryfikacja.** Za <Eq>{`X = 10`}</Eq> lat: <Eq>{`\\hat Y = 3 800 + 3 000 = 6 800`}</Eq> reais (R\$ 6 800). Wiarygodne biorąc pod uwagę <Eq>{`\\bar Y = 6 200`}</Eq> za <Eq>{`\\bar X = 8`}</Eq>.
+
+**Źródło.** [OpenIntro Statistics §8.2](https://www.openintro.org/book/os/) — na podstawie Ćwiczenia 8.13 (dane pensji), s. 360 · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Aktualizacja bayesowska — proporcja wad w linii produkcji" numero="5">
+
+**Problem.** Inżynier jakości wierzy a priori, że proporcja wad <Eq>{`\\theta`}</Eq> w linii ma rozkład <Eq>{`\\text{Beta}(3, 17)`}</Eq> (średnia prior <Eq>{`= 3/20 = 15\\%`}</Eq>). Inspekcja <Eq>{`n = 40`}</Eq> części i znalezienie <Eq>{`X = 4`}</Eq> wad. Jaki jest rozkład posterior i jaka jest nowa szacunkowa wartość dla <Eq>{`\\theta`}</Eq>?
+
+**Strategia.** Użyj sprzężoną Beta-Binomialną: posterior <Eq>{`= \\text{Beta}(\\alpha + X, \\beta + n - X)`}</Eq>.
+
+**Rozwiązanie.**
+
+Posterior: <Eq>{`\\text{Beta}(3 + 4,\\; 17 + 40 - 4) = \\text{Beta}(7, 53)`}</Eq>.
+
+Średnia posterior: <Eq>{`7/(7+53) = 7/60 \\approx 11{,}7\\%`}</Eq>.
+
+Wiarygodny PU 95%: kwantyle 2,5% i 97,5% rozkładu <Eq>{`\\text{Beta}(7, 53)`}</Eq>, w przybliżeniu <Eq>{`[0{,}049;\\; 0{,}221]`}</Eq>.
+
+**Weryfikacja.** Wcześniej: średnia prior 15%. Po obejrzeniu 4 wad na 40 (MLE = 10%), posterior przesuwa się na 11,7% — średnia ważona między priorem a danymi. Przy większych próbkach posterior zbliżałby się coraz bardziej do MLE.
+
+**Źródło.** [Statistical Thinking for the 21st Century, Ch. 15](https://statsthinking21.org/) — struktura przykładu Beta-Binomial, §15.3 · CC-BY-NC.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-110-consolidacao-trim-11">
+
+<Exercicio
+  numero="110.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.1", pagina: "213", exercicio: "5.1", licenca: "CC-BY-SA" }}
+  solucao={<>PU 95%: <Eq>{`\\bar X \\pm z_{0,025}\\,\\sigma/\\sqrt{n} = 50 \\pm 1{,}96 \\times 8/8 = 50 \\pm 1{,}96`}</Eq>. Przedział: <Eq>{`(48{,}04\\;;\\; 51{,}96)`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Zidentyfikuj: <Eq>{`n=64`}</Eq>, <Eq>{`\\bar x = 50`}</Eq>, <Eq>{`\\sigma = 8`}</Eq> (znany). <em>Dlaczego:</em> <Eq>{`\\sigma`}</Eq> znany → używamy <Eq>{`z`}</Eq>, nie <Eq>{`t`}</Eq>.</li>
+      <li>Wartość krytyczna: <Eq>{`z_{0,025} = 1{,}96`}</Eq>.</li>
+      <li>Margines: <Eq>{`E = 1{,}96 \\times 8/\\sqrt{64} = 1{,}96`}</Eq>.</li>
+      <li>PU: <Eq>{`(48{,}04\\;;\\; 51{,}96)`}</Eq>.</li>
+    </ol>
+    <p><em>Trik:</em> z <Eq>{`n = 64`}</Eq>, <Eq>{`\\sqrt{n} = 8`}</Eq> — szybki rachunek umysłowy.</p>
+  </>}
+>
+<Eq>{`n = 64`}</Eq>, <Eq>{`\\bar x = 50`}</Eq>, <Eq>{`\\sigma = 8`}</Eq> (znany). Skonstruuj PU 95% dla <Eq>{`\\mu`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="110.2"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "234", exercicio: "5.15", licenca: "CC-BY-SA" }}
+  solucao={<>Z tymi samymi danymi (<Eq>{`\\bar x = 50`}</Eq>, <Eq>{`s = 8`}</Eq>, <Eq>{`n=64`}</Eq>): <Eq>{`T = (50-48)/(8/8) = 2`}</Eq>. p-wartość dwustronna <Eq>{`\\approx 0{,}046`}</Eq>. Odrzucamy <Eq>{`H_0`}</Eq> na poziomie 5%.</>}
+>
+Z danymi z poprzedniego ćwiczenia (<Eq>{`\\bar x = 50`}</Eq>, <Eq>{`s = 8`}</Eq>, <Eq>{`n = 64`}</Eq>), testuj <Eq>{`H_0: \\mu = 48`}</Eq> vs <Eq>{`H_1: \\mu \\neq 48`}</Eq> na poziomie 5%. Oblicz <Eq>{`T`}</Eq> i zdecyduj.
+</Exercicio>
+
+<Exercicio
+  numero="110.3"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/10-1-comparing-two-independent-population-means", secao: "§10.1", pagina: "497", exercicio: "ex. 10.1", licenca: "CC-BY" }}
+  solucao={<>Welch: <Eq>{`T = (100-95)/\\sqrt{100/50 + 144/60} = 5/\\sqrt{4{,}4} \\approx 5/2{,}098 \\approx 2{,}38`}</Eq>. Ze stopniami swobody Welcha <Eq>{`\\approx 106`}</Eq>, p-wartość <Eq>{`\\approx 0{,}019`}</Eq>. Odrzucamy <Eq>{`H_0`}</Eq>.</>}
+>
+Dwie niezależne próbki: <Eq>{`\\bar x_1 = 100`}</Eq>, <Eq>{`s_1 = 10`}</Eq>, <Eq>{`n_1 = 50`}</Eq>; <Eq>{`\\bar x_2 = 95`}</Eq>, <Eq>{`s_2 = 12`}</Eq>, <Eq>{`n_2 = 60`}</Eq>. Wykonaj dwustronny test Welch <Eq>{`t`}</Eq> na poziomie 5%.
+</Exercicio>
+
+<Exercicio
+  numero="110.4"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "318", exercicio: "7.27", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`SS_B = 20[(10-12)^2+(12-12)^2+(14-12)^2] = 20 \\cdot 8 = 160`}</Eq>. <Eq>{`MS_B = 80`}</Eq>. Jeśli <Eq>{`MS_W = \\sigma^2 = 4`}</Eq>, to <Eq>{`F = 80/4 = 20`}</Eq>. <Eq>{`F_{0,05;2,57} \\approx 3{,}16`}</Eq>. Odrzucamy <Eq>{`H_0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Średnia ogólna: <Eq>{`\\bar X = (10+12+14)/3 = 12`}</Eq>.</li>
+      <li><Eq>{`SS_B = 20\\sum(\\bar X_i - \\bar X)^2 = 20(4+0+4) = 160`}</Eq>. <em>Dlaczego:</em> <Eq>{`n_i = 20`}</Eq> roślin na grupę.</li>
+      <li><Eq>{`MS_B = SS_B/(k-1) = 160/2 = 80`}</Eq>.</li>
+      <li><Eq>{`F = MS_B/MS_W = 80/4 = 20 \\gg 3{,}16`}</Eq>. Silnie odrzucam.</li>
+    </ol>
+    <p><em>Obserwacja:</em> Z <Eq>{`F = 20`}</Eq> i <Eq>{`F_{crit} \\approx 3{,}16`}</Eq>, p-wartość jest znikoma — efekt ogromny.</p>
+  </>}
+>
+Trzy grupy z <Eq>{`n_i = 20`}</Eq> roślinami każdy, średnie <Eq>{`\\bar X_1 = 10`}</Eq>, <Eq>{`\\bar X_2 = 12`}</Eq>, <Eq>{`\\bar X_3 = 14`}</Eq>. Zakładając <Eq>{`\\sigma^2 = 4`}</Eq> (wariancja wewnątrz grup), oblicz <Eq>{`F`}</Eq> ANOVA i zdecyduj na poziomie 5%.
+</Exercicio>
+
+<Exercicio
+  numero="110.5"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "348", exercicio: "8.1", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`\\hat Y = 5 + 2 \\times 10 = 25`}</Eq>.</>}
+>
+Dopasowany model: <Eq>{`\\hat Y = 5 + 2X`}</Eq>. Jaka jest punktowa prognoza dla <Eq>{`X = 10`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="110.6"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "655", exercicio: "ex. 12.9", licenca: "CC-BY" }}
+  solucao={<><Eq>{`R^2_{\\text{adj}} = 1 - (1 - 0{,}8)(50-1)/(50-4-1) = 1 - 0{,}2 \\times 49/45 = 1 - 0{,}2178 \\approx 0{,}782`}</Eq>.</>}
+>
+<Eq>{`R^2 = 0{,}8`}</Eq>, <Eq>{`n = 50`}</Eq>, <Eq>{`p = 4`}</Eq> predyktory. Oblicz <Eq>{`R^2_{\\text{adj}}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="110.7"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "291", exercicio: "6.33", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela <Eq>{`2 \\times 3`}</Eq>: <Eq>{`df = (2-1)(3-1) = 2`}</Eq>. <Eq>{`\\chi^2_{0,05;\\,2} = 5{,}991`}</Eq>. Ponieważ <Eq>{`\\chi^2 = 8 > 5{,}991`}</Eq>, odrzucamy hipotezę niezależności.</>}
+>
+Tabela kontyngencji <Eq>{`2 \\times 3`}</Eq> wyprodukowała <Eq>{`\\chi^2 = 8`}</Eq>. Ile stopni swobody? Czy jest powiązanie na poziomie 5%?
+</Exercicio>
+
+<Exercicio
+  numero="110.8"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "ex. 15.1", licenca: "CC-BY-NC" }}
+  solucao={<>Prior: <Eq>{`\\text{Beta}(2, 2)`}</Eq>. Wiarogodność: <Eq>{`\\text{Bin}(10, \\theta)`}</Eq>, <Eq>{`X = 8`}</Eq>. Posterior: <Eq>{`\\text{Beta}(2+8, 2+10-8) = \\text{Beta}(10, 4)`}</Eq>.</>}
+>
+Prior <Eq>{`\\theta \\sim \\text{Beta}(2, 2)`}</Eq>. Obserwujesz <Eq>{`X = 8`}</Eq> sukcesów w <Eq>{`n = 10`}</Eq> próbach. Jaki jest rozkład posterior <Eq>{`\\theta`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="110.9"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "ex. 15.2", licenca: "CC-BY-NC" }}
+  solucao={<>Posterior <Eq>{`\\text{Beta}(10, 4)`}</Eq>: średnia <Eq>{`= 10/(10+4) = 10/14 \\approx 0{,}714`}</Eq>. Szacunkowa wartość MAP = tryb = <Eq>{`(10-1)/(14-2) = 9/12 = 0{,}75`}</Eq>.</>}
+>
+Z posteriorem <Eq>{`\\text{Beta}(10, 4)`}</Eq> z poprzedniego ćwiczenia, oblicz średnią posterior i MAP (tryb rozkładu posterior).
+</Exercicio>
+
+<Exercicio
+  numero="110.10"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela z", pagina: "A-1", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`z_{0,025} = 1{,}960`}</Eq>. Wartość krytyczna dwustronna dla PU 95%.</>}
+>
+Zlokalizuj w tabeli rozkładu normalnego standardowego: jaki jest <Eq>{`z_{0,025}`}</Eq>? (Odp: <Eq>{`1{,}960`}</Eq>.)
+</Exercicio>
+
+<Exercicio
+  numero="110.11"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela t", pagina: "A-3", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`t_{0,025;\\,19} = 2{,}093`}</Eq>. Rozkład <Eq>{`t`}</Eq> z 19 stopniami swobody, obszar dwustronny 5%.</>}
+>
+Zlokalizuj w tabeli <Eq>{`t`}</Eq>: <Eq>{`t_{0,025;\\,19}`}</Eq>. (Odp: <Eq>{`2{,}093`}</Eq>.)
+</Exercicio>
+
+<Exercicio
+  numero="110.12"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela F", pagina: "A-5", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`F_{0,05;\\,2,\\,27} \\approx 3{,}35`}</Eq>. Wartość krytyczna ANOVA z <Eq>{`k=3`}</Eq> grupami i <Eq>{`N-k=27`}</Eq> stopniami swobody błędu.</>}
+>
+Zlokalizuj <Eq>{`F_{0,05;\\,2,\\,27}`}</Eq> w tabeli F. (Odp: <Eq>{`{\\approx}\\,3{,}35`}</Eq>.)
+</Exercicio>
+
+<Exercicio
+  numero="110.13"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela chi²", pagina: "A-7", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\chi^2_{0,05;\\,4} = 9{,}488`}</Eq>.</>}
+>
+Zlokalizuj <Eq>{`\\chi^2_{0,05;\\,4}`}</Eq>. (Odp: <Eq>{`9{,}488`}</Eq>.)
+</Exercicio>
+
+<Exercicio
+  numero="110.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Test chi-kwadrat niezależności", correta: false },
+    { texto: "B) ANOVA jednoczynnikowa", correta: false },
+    { texto: "C) Test t dwóch niezależnych próbek (Welch)", correta: true },
+    { texto: "D) Test t jednej próbki", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "300", exercicio: "ex. 7.10", licenca: "CC-BY-SA" }}
+  solucao={<>Dwie niezależne średnie i ciągłe, z nieznanymi odchyleniami: prawidłowa metoda to test <strong>Welch t</strong> (C). Chi-kwadrat dotyczy kategorialne; ANOVA służy 3+ grupy; test <Eq>{`t`}</Eq> jednej próbki porównuje ze stałą wartością.</>}
+>
+Jaki test jest odpowiedni do porównania średniej pensji mężczyzn i kobiet w firmie, z niezależnymi próbkami i nieznanymi wariancjami?
+</Exercicio>
+
+<Exercicio
+  numero="110.15"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) ANOVA", correta: false },
+    { texto: "B) Chi-kwadrat niezależności", correta: true },
+    { texto: "C) Regresja liniowa", correta: false },
+    { texto: "D) Test t parami", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "285", exercicio: "ex. 6.25", licenca: "CC-BY-SA" }}
+  solucao={<>Płeć i partia to dwie zmienne <strong>kategoryczne</strong> — odpowiedni test to <strong>chi-kwadrat niezależności</strong> (B). ANOVA i test <Eq>{`t`}</Eq> wymagają zmiennej ciągłej; regresja liniowa przewiduje wartości numeryczne.</>}
+>
+Badanie z 100 osobami rejestruje płeć (M/F) i preferowaną partię (A/B/C). Jaki test weryfikuje powiązanie między zmiennymi?
+</Exercicio>
+
+<Exercicio
+  numero="110.16"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Test t jednej próbki", correta: false },
+    { texto: "B) Chi-kwadrat dopasowania", correta: false },
+    { texto: "C) ANOVA jednoczynnikowa", correta: true },
+    { texto: "D) Welch t dwustronny", correta: false },
+  ]}
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-4-test-of-two-variances", secao: "§13.1", pagina: "658", exercicio: "ex. 13.2", licenca: "CC-BY" }}
+  solucao={<>Cztery dawki (cztery grupy) i ciągła zmienna (strata wagi): <strong>ANOVA jednoczynnikowa</strong> (C). Welch <Eq>{`t`}</Eq> służy tylko dla 2 grupy; chi-kwadrat nie ma zastosowania do zmiennych ciągłych.</>}
+>
+Badanie testuje 4 dawki leku (niska, średnia, wysoka, placebo) w stracie wagi (kg) u 20 pacjentów na grupę. Jaka jest metoda analizy?
+</Exercicio>
+
+<Exercicio
+  numero="110.17"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Welch t dwóch niezależnych próbek", correta: false },
+    { texto: "B) Test t parami", correta: true },
+    { texto: "C) ANOVA", correta: false },
+    { texto: "D) Chi-kwadrat niezależności", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "308", exercicio: "ex. 7.17", licenca: "CC-BY-SA" }}
+  solucao={<>Waga przed i po w <em>tej samej osobie</em>: dane są <strong>sprzężone</strong>. Stosuje się <strong>test t parami</strong> (B), który analizuje różnicę <Eq>{`D_i = X_{i,\\text{po}} - X_{i,\\text{przed}}`}</Eq>.</>}
+>
+Mierzysz wagę 20 osób przed i po 3-miesięcznej diecie. Dane są sprzężone. Jaki jest właściwy test?
+</Exercicio>
+
+<Exercicio
+  numero="110.18"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/9-1-null-and-alternative-hypotheses", secao: "§9.1", pagina: "454", exercicio: "ex. 9.3", licenca: "CC-BY" }}
+  solucao={<>p-wartość dwustronna: <Eq>{`2 \\times P(Z \\geq 2{,}1) = 2 \\times (1 - 0{,}9821) = 2 \\times 0{,}0179 = 0{,}036`}</Eq>. Odrzucamy <Eq>{`H_0`}</Eq> na poziomie 5%.</>}
+>
+Statystyka <Eq>{`Z = 2{,}1`}</Eq> została uzyskana w teście dwustronnym. Oblicz p-wartość i zdecyduj na poziomie <Eq>{`\\alpha = 5\\%`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="110.19"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "244", exercicio: "5.23", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`n \\geq (z_{0,025}\\,\\sigma/E)^2 = (1{,}96 \\times 10/2)^2 = (9{,}8)^2 = 96{,}04`}</Eq>. Dlatego <Eq>{`n \\geq 97`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Formuła: <Eq>{`n \\geq (z_{\\alpha/2}\\,\\sigma/E)^2`}</Eq>. <em>Dlaczego:</em> pochodzi z PU — izoluje <Eq>{`n`}</Eq> w nierówności <Eq>{`z \\cdot \\sigma/\\sqrt{n} \\leq E`}</Eq>.</li>
+      <li>Podstaw: <Eq>{`n \\geq (1{,}96 \\times 10/2)^2 = 9{,}8^2 = 96{,}04`}</Eq>.</li>
+      <li>Zaokrąglij w górę: <Eq>{`n = 97`}</Eq>. <em>Trik:</em> zawsze zaokrąglij w górę, nigdy w dół — gwarantuje margines.</li>
+    </ol>
+  </>}
+>
+Do PU 95% z marginesem błędu <Eq>{`E = 2`}</Eq> i <Eq>{`\\sigma = 10`}</Eq>, jaki jest minimalny rozmiar próbki?
+</Exercicio>
+
+<Exercicio
+  numero="110.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Mały — efekt nieistotny", correta: false },
+    { texto: "B) Średni — efekt umiarkowany", correta: true },
+    { texto: "C) Duży — efekt silny", correta: false },
+    { texto: "D) Ogromny — Cohen d > 1", correta: false },
+  ]}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.3", exercicio: "klasyfikacja Cohen", licenca: "CC-BY-NC" }}
+  solucao={<>Według konwencji Cohena (1988): <Eq>{`d = 0{,}2`}</Eq> = mały; <Eq>{`d = 0{,}5`}</Eq> = <strong>średni</strong> (B); <Eq>{`d = 0{,}8`}</Eq> = duży. Rozpraszacze A i C mają wspólne nieporozumienia na granicach.</>}
+>
+Cohen's <Eq>{`d = 0{,}5`}</Eq>. Jaki jest rozmiar efektu według konwencji Cohena?
+</Exercicio>
+
+<Exercicio
+  numero="110.21"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "293", exercicio: "6.37", licenca: "CC-BY-SA" }}
+  solucao={<>Cramér's <Eq>{`V = 0{,}25`}</Eq>: efekt <strong>średni</strong>. Konwencja: <Eq>{`V \\leq 0{,}1`}</Eq> mały; <Eq>{`0{,}1 < V \\leq 0{,}3`}</Eq> średni; <Eq>{`V > 0{,}3`}</Eq> duży.</>}
+>
+Tabela kontyngencji wyprodukowała Cramér's <Eq>{`V = 0{,}25`}</Eq>. Sklasyfikuj rozmiar efektu.
+</Exercicio>
+
+<Exercicio
+  numero="110.22"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.3", exercicio: "eta2", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`\\eta^2 = 0{,}10`}</Eq>: efekt <strong>średni</strong>. Konwencja: <Eq>{`\\eta^2 = 0{,}01`}</Eq> mały; <Eq>{`0{,}06`}</Eq> średni; <Eq>{`0{,}14`}</Eq> duży (Cohen, 1988).</>}
+>
+ANOVA wyprodukowała <Eq>{`\\eta^2 = 0{,}10`}</Eq>. Jaki jest rozmiar efektu?
+</Exercicio>
+
+<Exercicio
+  numero="110.23"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Słaby dowód na rzecz H₁", correta: false },
+    { texto: "B) Umiarkowany dowód na rzecz H₁", correta: true },
+    { texto: "C) Silny dowód na rzecz H₁", correta: false },
+    { texto: "D) Dowód anegdotyczny — nieistotny", correta: false },
+  ]}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.4", exercicio: "Bayes Factor", licenca: "CC-BY-NC" }}
+  solucao={<>Według skali Jeffreysa: <Eq>{`BF_{10} = 5`}</Eq> wskazuje <strong>umiarkowany dowód</strong> na rzecz <Eq>{`H_1`}</Eq> (B). <Eq>{`BF < 3`}</Eq> to słabe; <Eq>{`3 \\leq BF < 10`}</Eq> to umiarkowane; <Eq>{`10 \\leq BF < 30`}</Eq> to silne.</>}
+>
+<Eq>{`BF_{10} = 5`}</Eq>. Jaką siłę dowodu na rzecz <Eq>{`H_1`}</Eq> reprezentuje to, według skali Jeffreysa?
+</Exercicio>
+
+<Exercicio
+  numero="110.24"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "220", exercicio: "5.9", licenca: "CC-BY-SA" }}
+  solucao={<>PU częstościowy: stwierdzenie o procedurze — w 95% hipotetycznych próbek przedział będzie zawierać <Eq>{`\\mu`}</Eq>. Wiarygodny PU bayesowski: stwierdzenie o parametrze — "z prawdopodobieństwem 95%, <Eq>{`\\theta \\in [a,b]`}</Eq>" biorąc pod uwagę obserwowane dane.</>}
+>
+W jednym zdaniu każdy: jaka jest różnica interpretacji między częstościowym PU (95%) a wiarygodnym PU bayesowskim (95%)?
+</Exercicio>
+
+<Exercicio
+  numero="110.25"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "231", exercicio: "5.13", licenca: "CC-BY-SA" }}
+  solucao={<>Błąd typu I: odrzucanie <Eq>{`H_0`}</Eq> gdy jest ona prawdziwa (fałszywie pozytywne) — prawdopodobieństwo <Eq>{`\\alpha`}</Eq>. Błąd typu II: nieodrzucanie <Eq>{`H_0`}</Eq> gdy jest ona fałszywa (fałszywie negatywne) — prawdopodobieństwo <Eq>{`\\beta = 1 - \\text{moc}`}</Eq>.</>}
+>
+Rozróżnij w jednym zdaniu: błąd typu I vs błąd typu II w teście hipotezy.
+</Exercicio>
+
+<Exercicio
+  numero="110.26"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.2", exercicio: "efekt praktyczny", licenca: "CC-BY-NC" }}
+  solucao={<>Istotność statystyczna (<Eq>{`p < \\alpha`}</Eq>) wskazuje, że efekt prawdopodobnie nie jest zerowy. Istotność praktyczna ocenia, czy efekt jest wystarczająco duży, aby miał znaczenie w rzeczywistym świecie — z dużym <Eq>{`n`}</Eq>, znikome efekty są statystycznie istotne, ale praktycznie nieistotne.</>}
+>
+Rozróżnij: istotność statystyczna vs istotność praktyczna. Dlaczego wynik może być statystycznie istotny, ale praktycznie nieistotny?
+</Exercicio>
+
+<Exercicio
+  numero="110.27"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "378", exercicio: "8.29", licenca: "CC-BY-SA" }}
+  solucao={<>Powiązanie: zmienne wahają się razem (korelacja, współczynnik <Eq>{`r`}</Eq>). Przyczynowość: zmiana w <Eq>{`X`}</Eq> <em>powoduje</em> zmianę w <Eq>{`Y`}</Eq>. Regresja i korelacja mierzą powiązanie — wnioskowanie przyczynowe wymaga projektu eksperymentalnego lub specjalnych metod (zmienne instrumentalne, RCT).</>}
+>
+Rozróżnij: powiązanie statystyczne vs przyczynowość. Dlaczego regresja liniowa mierzy powiązanie, a nie przyczynę?
+</Exercicio>
+
+<Exercicio
+  numero="110.28"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "305", exercicio: "7.15", licenca: "CC-BY-SA" }}
+  solucao={<>Dane sprzężone: obserwacje dwóch grup są naturalnie sparowane (ta sama osoba przed/po, bliźniacy, itp.) — analizuje się różnicę <Eq>{`D_i`}</Eq>. Próbki niezależne: grupy nie mają odpowiedności między obserwacjami — porównuje się średnie bezpośrednio.</>}
+>
+Rozróżnij: dane sprzężone vs próbki niezależne. Podaj przykład każdego.
+</Exercicio>
+
+<Exercicio
+  numero="110.29"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "641", exercicio: "ex. 12.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`R^2`}</Eq> to proporcja wariancji <Eq>{`Y`}</Eq> wyjaśniona przez model — rośnie (lub pozostaje) przy dodaniu dowolnego predyktora. <Eq>{`R^2_{\\text{adj}}`}</Eq> karze każdy dodatkowy predyktor: rośnie tylko, jeśli predyktor poprawia dopasowanie poza zmienną losową.</>}
+>
+Rozróżnij: <Eq>{`R^2`}</Eq> vs <Eq>{`R^2_{\\text{adj}}`}</Eq> w regresji wielokrotnej. Dlaczego drugi jest bardziej wiarygodny do porównania modeli z inną liczbą predyktorów?
+</Exercicio>
+
+<Exercicio
+  numero="110.30"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.1", exercicio: "prior/posterior", licenca: "CC-BY-NC" }}
+  solucao={<>Prior: rozkład prawdopodobieństwa nad <Eq>{`\\theta`}</Eq> <em>przed</em> obejrzeniem danych — koduje wcześniejszą wiedzę. Posterior: rozkład zaktualizowany <em>po</em> połączeniu prioru z wiarogodnością danych poprzez twierdzenie Bayesa.</>}
+>
+Rozróżnij: rozkład prior vs rozkład posterior w wnioskowaniu bayesowskim.
+</Exercicio>
+
+<Exercicio
+  numero="110.31"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "265", exercicio: "6.13", licenca: "CC-BY-SA" }}
+  solucao={<>Test z dla proporcji: <Eq>{`\\hat p_A = 0{,}08`}</Eq>, <Eq>{`\\hat p_B = 0{,}11`}</Eq>, <Eq>{`\\hat p = 0{,}095`}</Eq>. <Eq>{`Z = (0{,}11-0{,}08)/\\sqrt{0{,}095 \\times 0{,}905 \\times 2/1000} \\approx 2{,}30`}</Eq>. p-wartość dwustronna <Eq>{`\\approx 0{,}021`}</Eq>. Częstościowy: odrzuć <Eq>{`H_0`}</Eq>. Bayesowski: <Eq>{`\\text{Beta}(81, 921)`}</Eq> vs <Eq>{`\\text{Beta}(111, 891)`}</Eq> — <Eq>{`P(\\theta_B > \\theta_A)`}</Eq> przez symulację.</>}
+  passos={<>
+    <ol>
+      <li>Częstościowy: oblicz <Eq>{`\\hat p`}</Eq> połączony, statystykę <Eq>{`Z`}</Eq>, p-wartość dwustronną.</li>
+      <li>Bayesowski: prior <Eq>{`\\text{Beta}(1,1)`}</Eq> (nieinformacyjny). Posterior A: <Eq>{`\\text{Beta}(81, 921)`}</Eq>; posterior B: <Eq>{`\\text{Beta}(111, 891)`}</Eq>.</li>
+      <li>Symuluj 100 000 par <Eq>{`(\\theta_A, \\theta_B)`}</Eq> i oblicz <Eq>{`P(\\theta_B > \\theta_A)`}</Eq>. <em>Obserwacja:</em> prawdopodobieństwo, że B przekroczy A, jest bardziej bezpośrednie dla decyzji biznesowej niż p-wartość.</li>
+    </ol>
+  </>}
+>
+A/B testing: wersja A uzyskała 80 konwersji na 1000 odwiedzin; wersja B uzyskała 110/1000. Zastosuj test z dla proporcji (częstościowy) i szacuj <Eq>{`P(\\theta_B > \\theta_A)`}</Eq> bayesowsko z priorem <Eq>{`\\text{Beta}(1,1)`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="110.32"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "309", exercicio: "7.19", licenca: "CC-BY-SA" }}
+  solucao={<>Różnica <Eq>{`D_i`}</Eq> = ciśnienie po minus ciśnienie przed; średnia <Eq>{`\\bar D = -7`}</Eq> mmHg. <Eq>{`T = -7/(5/8) = -11{,}2`}</Eq>. <Eq>{`t_{0,025;63} \\approx 1{,}998`}</Eq>. Odrzucamy <Eq>{`H_0`}</Eq>. PU 95%: <Eq>{`-7 \\pm 1{,}998 \\times 5/8 = -7 \\pm 1{,}25 = (-8{,}25\\;;\\; -5{,}75)`}</Eq> mmHg.</>}
+>
+Próba kliniczna: lek obniża ciśnienie. Za <Eq>{`n = 64`}</Eq> pacjentów, sparowana różnica (przed$-$po) ma <Eq>{`\\bar D = 7`}</Eq> mmHg i <Eq>{`s_D = 5`}</Eq> mmHg. Wykonaj test t parami (jednostronny: <Eq>{`H_1: \\mu_D > 0`}</Eq>) i skonstruuj PU 95% dla średniego obniżenia.
+</Exercicio>
+
+<Exercicio
+  numero="110.33"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§9.1", pagina: "396", exercicio: "9.3", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`R^2`}</Eq> wzrósł z 0,70 do 0,78 przy dodaniu pokoi. <Eq>{`R^2_{\\text{adj}}`}</Eq> (z <Eq>{`p=1`}</Eq> i <Eq>{`p=2`}</Eq>, <Eq>{`n=200`}</Eq>): 0,699 i 0,778. Przyrost dostosowany jest znaczny. Zmienna pokoje istotnie przyczynia się. Warto ją uwzględnić, ale sprawdź VIF dla współliniowości.</>}
+>
+Regresja ceny nieruchomości: model z tylko <Eq>{`m^2`}</Eq> ma <Eq>{`R^2 = 0{,}70`}</Eq> (<Eq>{`n = 200`}</Eq>). Przy dodaniu liczby pokoi, <Eq>{`R^2 = 0{,}78`}</Eq>. Oblicz <Eq>{`R^2_{\\text{adj}}`}</Eq> dla każdego modelu i zdecyduj, czy dodatkowy predyktor jest uzasadniony.
+</Exercicio>
+
+<Exercicio
+  numero="110.34"
+  dificuldade="modelagem"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "665", exercicio: "ex. 13.5", licenca: "CC-BY" }}
+  solucao={<>Weryfikuj: Levene (homocedasyczność), Shapiro-Wilk na grupę. ANOVA: <Eq>{`F(4, 145)`}</Eq>, <Eq>{`F_{crit} \\approx 2{,}44`}</Eq>. Jeśli <Eq>{`F > 2{,}44`}</Eq>, Tukey HSD do porównań wielokrotnych. Raportuj: <Eq>{`F`}</Eq>, <Eq>{`df`}</Eq>, p-wartość, <Eq>{`\\eta^2`}</Eq> i które pary różnią się z PU 95% dla różnic.</>}
+>
+Pięć diet, 30 osób na grupę. Naszkicuj protokół analizy kompletnej: weryfikacja założeń, ANOVA, post-hoc i co raportować.
+</Exercicio>
+
+<Exercicio
+  numero="110.35"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "290", exercicio: "6.29", licenca: "CC-BY-SA" }}
+  solucao={<>Tabela <Eq>{`4 \\times 3`}</Eq>: <Eq>{`df = (4-1)(3-1) = 6`}</Eq>. Oblicz <Eq>{`\\chi^2 = \\sum (O-E)^2/E`}</Eq> z <Eq>{`E_{ij} = R_i C_j / N`}</Eq>. Cramér's <Eq>{`V = \\sqrt{\\chi^2 / (N \\cdot \\min(r-1, c-1))}`}</Eq>. Rezydua standaryzowane: <Eq>{`e_{ij} = (O_{ij} - E_{ij})/\\sqrt{E_{ij}}`}</Eq> identyfikują komórki, które najbardziej przyczyniają się do powiązania.</>}
+>
+Ankieta wyborcza: 4 regiony (Północ, Północny Wschód, Południowy Wschód, Południe) <Eq>{`\\times`}</Eq> 3 kandydaci. Tabela kontyngencji z <Eq>{`N = 400`}</Eq>. Oblicz stopnie swobody, wykonaj <Eq>{`\\chi^2`}</Eq>, Cramér's <Eq>{`V`}</Eq> i zidentyfikuj komórki z największym rezyduum standaryzowanym.
+</Exercicio>
+
+<Exercicio
+  numero="110.36"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.5", exercicio: "p-hacking", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`p = 0{,}06`}</Eq> oznacza: "jeśli <Eq>{`H_0`}</Eq> był prawdziwy, byłoby 6% szansy na uzyskanie tego wyniku lub bardziej skrajnego". To nie jest dowód na <Eq>{`H_0`}</Eq> — brak odrzucenia może być spowodowany niewystarczającą wielkością próbki (niska moc). Brak dowodu to nie jest dowód braku.</>}
+>
+Uzasadnij, dlaczego <Eq>{`p = 0{,}06`}</Eq> nie stanowi dowodu, że <Eq>{`H_0`}</Eq> jest prawdziwe.
+</Exercicio>
+
+<Exercicio
+  numero="110.37"
+  dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§9.3", pagina: "410", exercicio: "demonstração regressão-t", licenca: "CC-BY-SA" }}
+  solucao={<>Niech <Eq>{`X`}</Eq> będzie zmienną dummy: <Eq>{`X_i = 0`}</Eq> (grupa 1) lub <Eq>{`X_i = 1`}</Eq> (grupa 2). Najmniejsze kwadraty: <Eq>{`\\hat\\beta_0 = \\bar Y_1`}</Eq>, <Eq>{`\\hat\\beta_1 = \\bar Y_2 - \\bar Y_1`}</Eq>. Statystyka <Eq>{`t`}</Eq> współczynnika: <Eq>{`t = \\hat\\beta_1/SE(\\hat\\beta_1)`}</Eq>. Z <Eq>{`SE(\\hat\\beta_1) = s_p\\sqrt{1/n_1 + 1/n_2}`}</Eq> (równe wariancje), to dokładnie test <Eq>{`t`}</Eq> dwóch próbek.</>}
+>
+Wykaż, że regresja liniowa prosta ze zmienną dummy binarną (0/1 wskazującą grupę) daje dokładnie taki sam wynik jak test t dwóch niezależnych próbek (równe wariancje).
+</Exercicio>
+
+<Exercicio
+  numero="110.38"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "662", exercicio: "relacja F-T", licenca: "CC-BY" }}
+  solucao={<>ANOVA z <Eq>{`k=2`}</Eq> grupami: <Eq>{`SS_B = n_1 n_2 (\\bar X_1 - \\bar X_2)^2/(n_1+n_2)`}</Eq>. <Eq>{`MS_B = SS_B`}</Eq> (1 df). <Eq>{`T^2 = (\\bar X_1 - \\bar X_2)^2 / [s_p^2(1/n_1+1/n_2)]`}</Eq>. Rozwijając: <Eq>{`F = MS_B/MS_W = T^2`}</Eq>. Dlatego <Eq>{`F_{1, N-2} = T^2_{N-2}`}</Eq>.</>}
+>
+Wykaż, że gdy ANOVA ma tylko <Eq>{`k = 2`}</Eq> grupy, statystyka <Eq>{`F`}</Eq> równa się kwadratowi statystyki <Eq>{`T`}</Eq> z dwustronnego testu t. Podaj stopnie swobody.
+</Exercicio>
+
+<Exercicio
+  numero="110.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.2", exercicio: "MAP = MLE", licenca: "CC-BY-NC" }}
+  solucao={<>MAP: <Eq>{`\\hat\\theta_{MAP} = \\arg\\max_\\theta [\\log P(D|\\theta) + \\log P(\\theta)]`}</Eq>. Z uniform priorem <Eq>{`P(\\theta) = c`}</Eq> (stała), <Eq>{`\\log P(\\theta) = \\log c`}</Eq> nie zależy od <Eq>{`\\theta`}</Eq>. Wtedy <Eq>{`\\hat\\theta_{MAP} = \\arg\\max_\\theta \\log P(D|\\theta) = \\hat\\theta_{MLE}`}</Eq>.</>}
+>
+Pokaż, że estymator MAP z uniform priorem jest dokładnie równy estymatorowi maksymalnego wiarygodności (MLE). Zacznij od definicji MAP.
+</Exercicio>
+
+<Exercicio
+  numero="110.40"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "247", exercicio: "power analysis", licenca: "CC-BY-SA" }}
+  solucao={<>Analiza mocy: biorąc <Eq>{`\\delta`}</Eq> (minimalna istotna różnica), <Eq>{`\\sigma`}</Eq>, <Eq>{`\\alpha = 0{,}05`}</Eq> i moc 80%, oblicz <Eq>{`n \\geq 2\\sigma^2(z_\\alpha + z_\\beta)^2/\\delta^2`}</Eq>. Pełny przepływ: 1) analiza mocy → <Eq>{`n`}</Eq>; 2) zbieranie do <Eq>{`n`}</Eq> z randomizacją; 3) test z/t z PU; 4) rozmiar efektu; 5) raport ze wszystkimi elementami; 6) diagnoza i ograniczenia.</>}
+>
+Opisz, w pseudokodzie lub strukturowanej liście, pełny przepływ analizy A/B testingu dla kursu konwersji e-commerce: od analizy mocy (minimalny efekt do zaobserwowania 2 p.p., <Eq>{`\\alpha = 5\\%`}</Eq>, moc 80%) po ostateczny raport ze wszystkimi elementami, które recenzent statystyczny wymagałby.
+</Exercicio>
+
+<Exercicio
+  numero="110.41"
+  dificuldade="desafio"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.5", exercicio: "bayes vs freq", licenca: "CC-BY-NC" }}
+  solucao={<>Częstościowy: kontroluje długoterminową stopę błędu typu I; odpowiedni, gdy analityk nie ma informacyjnego prioru i chce gwarancji długoterminowego false positive rate. Bayesowski: zapewnia <Eq>{`P(\\theta_B > \\theta_A \\mid \\text{dane})`}</Eq> bezpośrednio — bardziej naturalny do decyzji sekwencyjnych (można zatrzymać w interim), włącza wcześniejszą wiedzę i nie wymaga wcześniejszej definicji stałego <Eq>{`n`}</Eq>. W online A/B testing Bayes jest preferowany dzięki sekwencyjnemu podejmowaniu decyzji i interpretacyjności dla niewykwalifikowanych stakeholderów.</>}
+>
+Porównaj szczegółowo (co najmniej 200 słów), kiedy preferować podejście częstościowe vs bayesowskie w testowaniu A/B online. Rozważ: interpretacyjność, sekwencyjne podejmowanie decyzji, włączenie priorów i gwarancje błędu.
+</Exercicio>
+
+<Exercicio
+  numero="110.42"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "conjugada Beta-Bin", licenca: "CC-BY-NC" }}
+  solucao={<>Prior: <Eq>{`P(\\theta) \\propto \\theta^{\\alpha-1}(1-\\theta)^{\\beta-1}`}</Eq>. Wiarogodność: <Eq>{`P(X|\\theta) \\propto \\theta^X(1-\\theta)^{n-X}`}</Eq>. Posterior: <Eq>{`P(\\theta|X) \\propto \\theta^{\\alpha+X-1}(1-\\theta)^{\\beta+n-X-1}`}</Eq> — jądro <Eq>{`\\text{Beta}(\\alpha+X, \\beta+n-X)`}</Eq>. Stała normalizacyjna to <Eq>{`B(\\alpha+X, \\beta+n-X)^{-1}`}</Eq>, potwierdzająca formę beta.</>}
+  passos={<>
+    <ol>
+      <li>Napisz prior <Eq>{`\\text{Beta}(\\alpha,\\beta)`}</Eq> bez stałej normalizacji: <Eq>{`P(\\theta) \\propto \\theta^{\\alpha-1}(1-\\theta)^{\\beta-1}`}</Eq>.</li>
+      <li>Napisz wiarogodność binarną: <Eq>{`P(X|\\theta) = \\binom{n}{X}\\theta^X(1-\\theta)^{n-X} \\propto \\theta^X(1-\\theta)^{n-X}`}</Eq>. <em>Dlaczego:</em> dwumian <Eq>{`\\binom{n}{X}`}</Eq> nie zależy od <Eq>{`\\theta`}</Eq>, spada w proporcjonalności.</li>
+      <li>Pomnóż: <Eq>{`P(\\theta|X) \\propto \\theta^{\\alpha+X-1}(1-\\theta)^{\\beta+n-X-1}`}</Eq>.</li>
+      <li>Rozpoznaj jądro: to jest funkcja gęstości <Eq>{`\\text{Beta}(\\alpha+X, \\beta+n-X)`}</Eq>.</li>
+    </ol>
+    <p><em>Ciekawostka:</em> rozkład Beta jest sprzężony do dwumianu dokładnie dlatego, że prior i posterior mają tę samą rodzinę — aktualizacja to tylko sumowanie wykładników.</p>
+  </>}
+>
+Wykaż przez integrację (lub przez rozpoznanie jądra), że jeśli <Eq>{`\\theta \\sim \\text{Beta}(\\alpha, \\beta)`}</Eq> i <Eq>{`X \\mid \\theta \\sim \\text{Bin}(n, \\theta)`}</Eq>, wtedy <Eq>{`\\theta \\mid X \\sim \\text{Beta}(\\alpha + X,\\; \\beta + n - X)`}</Eq>.
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · CC-BY-SA. **Fonte primária** para IC, testes, ANOVA, qui-quadrado e regressão (§5–9).
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY. Fonte para exemplos práticos de IC, testes $z$ e $t$, tabelas de distribuição (§8–13).
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC. Fonte para inferência bayesiana, tamanho de efeito, reprodutibilidade e crise de replicação (Ch. 9, 15).

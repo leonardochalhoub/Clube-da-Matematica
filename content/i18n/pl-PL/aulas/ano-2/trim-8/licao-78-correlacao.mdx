@@ -1,0 +1,719 @@
+---
+titulo: "Lição 78 — Correlação e regressão linear simples"
+slug: "licao-78-correlacao"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Coeficiente de Pearson r, covariância, reta de mínimos quadrados, coeficiente de determinação r². Correlação não é causalidade — o teorema de Anscombe, o quarteto que todo cientista deve conhecer."
+ordem: 78
+publicado: true
+tags: ["estatística", "correlação", "regressão", "Pearson", "ano-2", "trim-8"]
+prerrequisitos: ["licao-77-tcl"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+versao: "v1"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Stochastik LK alemão §12", "H2 Math singapurense §19", "AP Statistics USA §3"]
+---
+
+<EquacaoCanonica
+  formula="r = \frac{\displaystyle\sum_{i=1}^n (x_i - \bar x)(y_i - \bar y)}{\sqrt{\displaystyle\sum_{i=1}^n (x_i-\bar x)^2 \cdot \sum_{i=1}^n (y_i-\bar y)^2}}"
+  legenda={<>Współczynnik <strong>korelacji Pearsona</strong> <Eq>{`r`}</Eq> mierzy siłę i kierunek związku <strong>liniowego</strong> między dwiema zmiennymi. Waha się od <Eq>{`-1`}</Eq> (doskonale ujemna) do <Eq>{`+1`}</Eq> (doskonale dodatnia), gdzie <Eq>{`r = 0`}</Eq> oznacza brak związku liniowego. <strong>Korelacja nigdy nie implikuje przyczynowości.</strong></>}
+  audioTexto="Współczynnik korelacji Pearsona r. Licznik: suma iloczynów odchyleń x i y. Mianownik: pierwiastek iloczynu sum kwadratów odchyleń. Wynik zawsze mieści się między minus jeden a plus jeden."
+/>
+
+<aside>
+**Podręczniki obejmujące tę lekcję**
+
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · §12.1–12.3 · CC-BY · *Obejmuje kowariancję, Pearsona, linię najmniejszych kwadratów i r² z przykładami krok po kroku; główne źródło zadań do tej lekcji.*
+- [**OpenIntro Statistics** (4. ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §7.1–7.2 · CC-BY-SA · *Jasne wyjaśnienie korelacji, wykresu rozrzutu i regresji liniowej z naciskiem na analizę reszt i kwartet Anscomba.*
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §4.2 · GNU FDL · *Kowariancja i korelacja z punktu widzenia probabilistycznego; dowód |r| ≤ 1 za pomocą Cauchy'ego-Schwarza.*
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definicje i właściwości rygorystyczne">
+
+### Kowariancja
+
+<Definicao titulo="Kowariancja próbkowa">
+
+Dla $n$ par $(x_i, y_i)$:
+
+$$s_{xy} = \frac{1}{n-1}\sum_{i=1}^n (x_i - \bar x)(y_i - \bar y)$$
+
+Równoważnie: $s_{xy} = \dfrac{\sum x_i y_i - n\bar x \bar y}{n-1}$. Współczynnik $n-1$ jest korekcją Bessela (estymator nieobciążony).
+
+</Definicao>
+
+> "The covariance is a measure of the joint variability of two random variables. If the greater values of one variable mainly correspond with the greater values of the other variable, and the same holds for the lesser values, the covariance is positive." — [OpenStax Statistics, §12.1](https://openstax.org/books/statistics/pages/12-1-linear-equations)
+
+### Współczynnik korelacji Pearsona
+
+<Definicao titulo="Współczynnik Pearsona r">
+
+$$r = \frac{s_{xy}}{s_x s_y} = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sqrt{\sum(x_i-\bar x)^2 \cdot \sum(y_i-\bar y)^2}}$$
+
+Właściwości:
+- **Bezwymiarowy**: niezmienny względem zmian skali i przesunięć.
+- **Ograniczony**: $-1 \leq r \leq 1$ (Cauchy-Schwarz).
+- $r = \pm 1 \iff$ wszystkie punkty leżą na linii prostej.
+- $r = 0 \iff$ brak związku **liniowego** (może istnieć związek krzywilinowy).
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 140" className="w-full">
+<defs><marker id="arr78" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+<g>
+  <text x="70" y="18" fontSize="10" textAnchor="middle" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">r ≈ +1</text>
+  <line x1="20" x2="130" y1="130" y2="30" stroke="rgb(26 77 92)" strokeWidth="1.5" markerEnd="url(#arr78)"/>
+  <circle cx="30" cy="120" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="45" cy="105" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="58" cy="90" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="72" cy="76" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="88" cy="62" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="104" cy="50" r="3" fill="rgb(232 199 122)"/>
+</g>
+<g>
+  <text x="210" y="18" fontSize="10" textAnchor="middle" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">r ≈ −1</text>
+  <line x1="160" x2="270" y1="30" y2="130" stroke="rgb(26 77 92)" strokeWidth="1.5" markerEnd="url(#arr78)"/>
+  <circle cx="168" cy="38" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="183" cy="53" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="197" cy="66" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="213" cy="82" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="228" cy="97" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="244" cy="112" r="3" fill="rgb(232 199 122)"/>
+</g>
+<g>
+  <text x="350" y="18" fontSize="10" textAnchor="middle" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">r ≈ 0</text>
+  <circle cx="310" cy="45" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="330" cy="100" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="345" cy="60" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="362" cy="120" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="378" cy="38" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="394" cy="88" r="3" fill="rgb(232 199 122)"/>
+</g>
+<g>
+  <text x="490" y="18" fontSize="10" textAnchor="middle" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">r ≈ 0.7</text>
+  <line x1="440" x2="550" y1="125" y2="35" stroke="rgb(26 77 92)" strokeWidth="1.2" strokeDasharray="4 2"/>
+  <circle cx="448" cy="115" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="463" cy="97" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="478" cy="75" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="495" cy="80" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="510" cy="58" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="528" cy="50" r="3" fill="rgb(232 199 122)"/>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Cztery wykresy rozrzutu z różnymi wartościami r. Chmura punktów skupia się bardziej wokół linii prostej, gdy |r| jest bliskie 1.
+</figcaption>
+</figure>
+
+### Linia najmniejszych kwadratów (OLS)
+
+<Definicao titulo="Regresja liniowa prosta">
+
+Minimalizuje $\text{SQR} = \sum_{i=1}^n (y_i - \hat y_i)^2$. Rozwiązanie zamknięte:
+
+$$\hat\beta_1 = \frac{s_{xy}}{s_x^2} = r\,\frac{s_y}{s_x}, \qquad \hat\beta_0 = \bar y - \hat\beta_1\,\bar x.$$
+
+Linia zawsze przechodzi przez punkt $(\bar x, \bar y)$. Prognoza: $\hat y = \hat\beta_0 + \hat\beta_1 x$.
+
+</Definicao>
+
+### Współczynnik determinacji
+
+<Equation explicacao="r² mierzy frakcję wariancji Y wyjaśnioną przez model liniowy w X." latex="r^2 = 1 - \frac{\text{SQR}}{\text{SQT}}, \quad \text{SQT} = \sum(y_i - \bar y)^2" />
+
+### Założenia LINE
+
+<Insight>
+
+Do **wnioskowania** o $\beta_1$ (nie do estymacji punktowej), model wymaga: **L**inowość $E[Y|X]$; **N**iezależność reszt; **N**ormalność reszt; **E**jednakowa wariancja (homoskedastyczność). Naruszenie któregokolwiek z nich powoduje, że przedziały ufności i testy są nieprawidłowe.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Dla dziecka w wieku 5 lat">
+
+W twojej klasie wyżsi uczniowie zwykle są ciężsi. Nie zawsze — ale **średnio**, tak. To jest **korelacja dodatnia**: gdy jedna liczba wzrasta, druga też ma tendencję do wzrostu.
+
+Liczba cukierków, które jesz, a liczba pozostała w pudełku: gdy jedna wzrasta, druga **spada**. To jest korelacja **ujemna**.
+
+A rozmiar twojego buta względem twojej oceny z matematyki? To nie ma nic wspólnego — korelacja **zerowa**.
+
+"r" to liczba, która to mierzy: sięga od -1 (idealnie w dół) do +1 (idealnie w górę). Zero pośrodku oznacza "brak relacji w linii prostej".
+
+</Porta>
+
+<Porta nivel="10" titulo="Dla dziecka w wieku 10 lat">
+
+Wyobraź sobie, że dla każdego ucznia w twojej klasie mierzysz dwie liczby: wzrost i wagę. Rysujesz wykres z jednym punktem dla każdej osoby, wzrost na osi X i wagę na osi Y.
+
+- **Chmura podążająca** od lewej do prawej: $r$ dodatnie.
+- **Chmura opadająca**: $r$ ujemne.
+- **Bałagan bez kształtu**: $r$ bliskie zeru.
+- **Punkty prawie na linii prostej**: $|r|$ bliskie 1.
+
+**Linia regresji** to "najlepsza linia prosta" przechodząca przez środek punktów — pozwala przewidzieć prawdopodobną wagę kogoś o określonym wzroście.
+
+**Uwaga**: sprzedaż lodów i liczba utonięć korelują dodatnio. Nikt nie mówi, że lody powodują utonięcia. Oba są spowodowane **ciepłem** (zmienna ukryta). Korelacja nie jest przyczynowością — nigdy, przenigdy.
+
+</Porta>
+
+<Porta nivel="15" titulo="Dla nastolatka w wieku 15 lat">
+
+### Czego Pearson mierzy i czego nie mierzy
+
+Pearson mierzy związek **liniowy**. $r = 0$ nie oznacza "brak relacji" — oznacza "brak relacji **w linii prostej**". Istnieje doskonała relacja kwadratowa ($y = x^2$) z $r = 0$ jeśli próba jest symetryczna wokół zera.
+
+### Dlaczego $-1 \leq r \leq 1$?
+
+Kowariancja zależy od jednostek; dzielenie przez $s_x s_y$ sprawia, że $r$ jest bezwymiarowy i stosuje Cauchy'ego-Schwarza: $|s_{xy}| \leq s_x s_y$. Zmień metry na centymetry — kowariancja zmienia się sto razy, $r$ pozostaje takie samo.
+
+### Kwartet Anscomba (1973)
+
+Francis Anscombe stworzył 4 zestawy danych z **dokładnie tymi samymi statystykami**: to samo $\bar x$, to samo $\bar y$, to samo $r = 0{,}816$, ta sama linia regresji. Wykresy są jednak całkowicie różne:
+
+- I: czysty związek liniowy.
+- II: związek krzywilinowy — linia jest nieadekwatna.
+- III: doskonała linia z 1 skrajnym punktem odstającym, który zmniejsza $r$.
+- IV: 8 punktów skupionych przy ustalonym x plus 1 punkt odstający, który tworzy korelację.
+
+Lekcja: **zawsze rysuj swoje dane** przed obliczeniem $r$.
+
+### $r^2$: co naprawdę się liczy
+
+Jeśli $r = 0{,}8$, to $r^2 = 0{,}64$ — 64% wariancji $Y$ jest "wyjaśnione" przez model liniowy w $X$. Pozostałe 36% to szum lub inne przyczyny. W naukach społecznych $r^2 = 0{,}25$ już uważa się za znaczący.
+
+</Porta>
+
+<Porta nivel="25" titulo="Dla studenta inżynierii">
+
+### Wnioskowanie o $\rho$
+
+Pod $H_0: \rho = 0$, statystyka $t = r\sqrt{(n-2)/(1-r^2)}$ ma rozkład $t$ z $n-2$ stopniami swobody.
+
+Dla $H_0: \rho = \rho_0$ z $\rho_0 \neq 0$, użyj **transformacji Fishera**:
+
+$$F(r) = \tanh^{-1}(r) = \frac{1}{2}\ln\frac{1+r}{1-r} \approx \mathcal{N}\!\left(\tanh^{-1}(\rho),\; \frac{1}{n-3}\right).$$
+
+### Regresja wielokrotna
+
+$\hat Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p$. W formie macierzowej: $\hat\beta = (X^\top X)^{-1} X^\top y$. Każde $\beta_j$ reprezentuje efekt $X_j$ **kontrolując** inne. Skorygowany $R^2$ karze zmienne dodatkowe:
+
+$$R^2_{\text{adj}} = 1 - (1-R^2)\frac{n-1}{n-p-1}.$$
+
+### Diagnostyka reszt
+
+- Reszty vs. wartości dopasowane → wykrywa nieliniowość i heteroskedastyczność.
+- Q-Q reszt → testuje normalność.
+- Odległość Cooka → punkty odstające wpływowe (> $4/n$ to znak ostrzegawczy).
+- VIF (Variance Inflation Factor) → współliniowość (> 10 to problem).
+
+### Zmienne instrumentalne i przyczynowość
+
+Angrist i Imbens zdobyli Nagrodę Nobla w Ekonomii w 2021 roku za opracowanie metody [zmiennych instrumentalnych](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/) — standardowego narzędzia do szacowania efektów przyczynowych w danych obserwacyjnych przy endogeniczności.
+
+### Słynne korelacje pozorne
+
+- Konsumpcja sera na mieszkańca koreluje ze śmiercią przez zaplątanie w prześcieradłach: $r \approx 0{,}95$.
+- Produkcja miodu w USA koreluje z aresztowaniami za posiadanie narkotyków.
+
+Obie to **korelacje pozorne**: wspólne trendy bez związku przyczynowego.
+
+</Porta>
+
+<Porta nivel="40" titulo="Dla doświadczonego profesjonalisty">
+
+### Perspektywa geometryczna w $L^2$
+
+Po wycentrowaniu, $X$ i $Y$ są wektorami w przestrzeni $L^2$. $r = \cos\theta$ gdzie $\theta$ to kąt między wektorami. Regresja $Y$ na $X$ to rzutowanie ortogonalne $Y$ na podprzestrzeń generowaną przez $\mathbf{1}$ i $X$. $r^2 = \|\hat Y - \bar Y\mathbf{1}\|^2 / \|Y - \bar Y\mathbf{1}\|^2$.
+
+### Przyczynowość: Pearl, Rubin, Hernán
+
+**Strukturalne modele przyczynowe** (Pearl): skierowane grafy acykliczne (DAG) + do-rachunek do identyfikacji efektów przyczynowych z rozkładów obserwacyjnych. **Wyniki potencjalne** (Rubin): każda jednostka ma wyniki $Y_i(0)$ i $Y_i(1)$ pod kontrolą i leczeniem; średni efekt przyczynowy ATE $= E[Y(1) - Y(0)]$.
+
+Mylące zmienne, mediatory i moderatory mają odrębne role i dostrajanie niewłaściwych powoduje uprzedzenie kontroli. **Paradoks Simpsona** to ilustracja: korelacja może się odwrócić przy stratyfikacji trzecią zmienną (przyjęcia Berkeley 1973).
+
+### Regularyzacja i modele liniowe wysokowymiarowe
+
+OLS z $p > n$ jest osobliwy. Regularyzacja rozwiązuje:
+
+- **Ridge** ($\ell_2$): równoważne priorowi normalnemu na $\beta$ — stabilność, bez rzadkości.
+- **Lasso** ($\ell_1$): równoważne priorowi Laplacea — wybiera zmienne, tworzy rzadkość.
+- **Elastic Net**: kombinacja, radzi sobie z grupami skorelowanymi.
+
+### Sieci korelacji i graphical lasso
+
+Z $p$ zmiennymi macierz korelacji $p \times p$ jest gęsta. Graphical Lasso (Glasso) szacuje **precyzję** $\Sigma^{-1}$ z karą $\ell_1$, tworząc rzadki graf niezależności warunkowej — używany w genomice, neuronauce i finansach.
+
+### Korelacja w szeregach czasowych
+
+Dla procesów stacjonarnych, użyj **autokorelacji** $\rho(k) = \text{Cov}(X_t, X_{t+k})/\text{Var}(X_t)$. Korelacja krzyżowa między różnymi szeregami wymaga ostrożności: wspólne trendy (kointegracja) tworzą bardzo wysokie korelacje pozorne.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplikacja praktyczna — dane brazylijskie">
+
+### Korelacja między dochodem a wynikami w ENEM 2023
+
+Dane INEP: 26 stanów + Dystrykt Federalny. Mediana dochodu rodzinnego miesięcznie (R\$) vs. średni wynik w ENEM. Korelacja Pearsona wynosiła $r \approx 0{,}82$ — silny związek dodatni. Ale to przyczynowość? Nie bezpośrednio — stany z wyższym dochodem mają lepszą infrastrukturę edukacyjną, bardziej kwalifikowanych nauczycieli, itd. Dochód to **proxy** wielu przyczyn, nie przyczyna bezpośrednia.
+
+### Przepis krok po kroku
+
+1. Narysuj dane — zawsze — przed jakimkolwiek obliczeniem.
+2. Oblicz $\bar x$, $\bar y$, $s_x$, $s_y$.
+3. Oblicz $s_{xy} = \frac{\sum(x_i - \bar x)(y_i - \bar y)}{n-1}$.
+4. $r = s_{xy}/(s_x s_y)$.
+5. $\hat\beta_1 = r s_y/s_x$; $\hat\beta_0 = \bar y - \hat\beta_1 \bar x$.
+6. Zgłoś $r$, $r^2$, równanie linii i analizuj reszty.
+
+### W arkuszach kalkulacyjnych (Google Sheets / Excel)
+
+- `=CORREL(A2:A30; B2:B30)` — współczynnik $r$.
+- `=SLOPE(B2:B30; A2:A30)` — nachylenie $\hat\beta_1$.
+- `=INTERCEPT(B2:B30; A2:A30)` — wyraz wolny $\hat\beta_0$.
+- `=RSQ(B2:B30; A2:A30)` — $r^2$.
+
+### Pułapki
+
+- Korelacja obliczana bez patrzenia na wykres (Anscombe!).
+- Regresja liniowa na wyraźnie nieliniową relację.
+- Używanie $r$ Pearsona na danych porządkowych (użyj Spearmana).
+- Ekstrapolowanie linii poza zakres danych.
+
+</Porta>
+
+</DuasPortas>
+
+## Przykłady rozwiązane
+
+<Exemplo numero="1" titulo="Ręczne obliczenie r z 5 punktami">
+
+**Problem.** Dane: $x = (2, 4, 5, 7, 8)$ i $y = (3, 6, 5, 9, 11)$. Oblicz współczynnik Pearsona $r$.
+
+**Strategia.** Oblicz średnie, odchylenia i zastosuj formułę bezpośrednio.
+
+**Rozwiązanie.**
+
+$\bar x = (2+4+5+7+8)/5 = 26/5 = 5{,}2$; $\bar y = (3+6+5+9+11)/5 = 34/5 = 6{,}8$.
+
+| $x_i$ | $y_i$ | $x_i - \bar x$ | $y_i - \bar y$ | iloczyn | $(x_i-\bar x)^2$ | $(y_i-\bar y)^2$ |
+|---|---|---|---|---|---|---|
+| 2 | 3 | -3,2 | -3,8 | 12,16 | 10,24 | 14,44 |
+| 4 | 6 | -1,2 | -0,8 | 0,96 | 1,44 | 0,64 |
+| 5 | 5 | -0,2 | -1,8 | 0,36 | 0,04 | 3,24 |
+| 7 | 9 | 1,8 | 2,2 | 3,96 | 3,24 | 4,84 |
+| 8 | 11 | 2,8 | 4,2 | 11,76 | 7,84 | 17,64 |
+| **Σ** | | | | **29,20** | **22,80** | **40,80** |
+
+$r = 29{,}20 / \sqrt{22{,}80 \times 40{,}80} = 29{,}20 / \sqrt{930{,}24} = 29{,}20 / 30{,}50 \approx 0{,}957$.
+
+**Weryfikacja.** $r$ bliske 1 jest zgodne z rosnącą chmurą danych.
+
+**Źródło.** [OpenStax Statistics, §12.1, Example 12.2](https://openstax.org/books/statistics/pages/12-1-linear-equations) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="2" titulo="Linia najmniejszych kwadratów i prognoza">
+
+**Problem.** Używając danych z Przykładu 1, określ linię regresji $Y$ na $X$ i przewidź $Y$ dla $x = 6$.
+
+**Strategia.** Oblicz $\hat\beta_1$ i $\hat\beta_0$ za pomocą formuł OLS.
+
+**Rozwiązanie.**
+
+$s_{xy} = 29{,}20/(5-1) = 7{,}30$; $s_x^2 = 22{,}80/(5-1) = 5{,}70$.
+
+$\hat\beta_1 = s_{xy}/s_x^2 = 7{,}30/5{,}70 \approx 1{,}281$.
+
+$\hat\beta_0 = \bar y - \hat\beta_1 \bar x = 6{,}8 - 1{,}281 \times 5{,}2 \approx 6{,}8 - 6{,}66 = 0{,}14$.
+
+Linia: $\hat y = 0{,}14 + 1{,}28x$.
+
+Dla $x = 6$: $\hat y = 0{,}14 + 1{,}28 \times 6 = 7{,}82$.
+
+**Weryfikacja.** $r = 0{,}957$; $\hat\beta_1 = r \cdot s_y/s_x = 0{,}957 \times \sqrt{40{,}80/4}/\sqrt{22{,}80/4} = 0{,}957 \times 3{,}19/2{,}39 \approx 1{,}28$. Konsystentne.
+
+**Źródło.** [OpenStax Statistics, §12.3, Example 12.4](https://openstax.org/books/statistics/pages/12-3-the-regression-equation) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="3" titulo="Współczynnik determinacji i interpretacja">
+
+**Problem.** W badaniu z 20 uczniami korelacja między godzinami nauki ($X$) a wynikiem egzaminu wstępnego ($Y$) wynosiła $r = 0{,}72$. Zinterpretuj $r^2$ i oszacuj równanie linii wiedząc, że $\bar x = 8$ h/tydzień, $\bar y = 620$ punktów, $s_x = 3$ h, $s_y = 80$ punktów.
+
+**Strategia.** Oblicz $r^2$ i użyj formuł na $\hat\beta_1$ i $\hat\beta_0$.
+
+**Rozwiązanie.**
+
+$r^2 = 0{,}72^2 = 0{,}518$ — godziny nauki wyjaśniają 51,8% wariancji w wyniku. Inne 48,2% pochodzi z innych czynników (jakość nauczania, motywacja, sen, itd.).
+
+$\hat\beta_1 = r \cdot s_y/s_x = 0{,}72 \times 80/3 = 19{,}2$ punktów/godzinę.
+
+$\hat\beta_0 = 620 - 19{,}2 \times 8 = 620 - 153{,}6 = 466{,}4$.
+
+Linia: $\hat y = 466{,}4 + 19{,}2x$. Każda dodatkowa godzina nauki tygodniowo wiąże się średnio z +19 punktami na egzaminie.
+
+**Weryfikacja.** Ekstrapolacja dla $x = 0$: $\hat y = 466$ punktów — wiarygodny jako wynik bazowy bez nauki.
+
+**Źródło.** [OpenIntro Statistics, §7.1, Exercise 7.3, p. 343](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="4" titulo="Korelacja nie jest przyczynowością — zmienna myląca">
+
+**Problem.** Badacz znalazł $r = 0{,}78$ między liczbą kościołów i liczbą przestępstw w zbiorze 50 miast w USA. Zinterpretuj poprawnie.
+
+**Strategia.** Identyfikuj zmienną mylącą i wyjaśnij, dlaczego korelacja nie implikuje przyczynowości.
+
+**Rozwiązanie.**
+
+Oczywista zmienna myląca to **rozmiar miasta** (populacja). Większe miasta mają więcej kościołów I więcej przestępstw. Kontrolując rozmiar miasta, korelacja między kościołami i przestępstwami może spaść do zera lub nawet się odwrócić.
+
+Formalnie: niech $P$ = populacja. $P \to C$ (kościoły) i $P \to K$ (przestępstwa). Bez kontrolowania $P$, marginalna korelacja $r(C, K) > 0$ nawet bez bezpośredniego związku między $C$ i $K$.
+
+**Weryfikacja.** Gdybyśmy stratyfikować po wielkości (małe, średnie, duże miasta), spodziewalibyśmy się $r$ bliskiego zeru w każdej warstwie — to jest paradoks Simpsona w akcji.
+
+**Źródło.** [OpenIntro Statistics, §7.2, p. 356–358](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="5" titulo="Test hipotez dla korelacji — Fisher z">
+
+**Problem.** W próbie $n = 28$ par otrzymano $r = 0{,}45$. Testuj $H_0: \rho = 0$ vs. $H_1: \rho \neq 0$ na poziomie $\alpha = 0{,}05$.
+
+**Strategia.** Użyj statystyki $t$ z $n-2$ stopniami swobody.
+
+**Rozwiązanie.**
+
+$t = r\sqrt{(n-2)/(1-r^2)} = 0{,}45 \times \sqrt{26/(1-0{,}2025)} = 0{,}45 \times \sqrt{26/0{,}7975} = 0{,}45 \times \sqrt{32{,}6} \approx 0{,}45 \times 5{,}71 \approx 2{,}57$.
+
+Wartość krytyczna $t_{26;\, 0{,}025} \approx 2{,}056$. Ponieważ $|t| = 2{,}57 > 2{,}056$, **odrzucamy $H_0$** — istotne dowody na dodatnią korelację w populacji.
+
+**Weryfikacja.** Z $n = 28$ i $r = 0{,}45$, wartość $p$ $\approx 0{,}016 < 0{,}05$. Konsystentne z odrzuceniem.
+
+**Źródło.** [OpenStax Statistics, §12.4, Example 12.7](https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient) — CC-BY
+
+</Exemplo>
+
+<ListaExercicios seed="licao-78-correlacao">
+
+<Exercicio
+  numero="78.1"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X = (1, 2, 3, 4)`}</Eq>, <Eq>{`Y = (2, 4, 6, 8) = 2X`}</Eq>. Doskonale liniowy dodatni związek: <Eq>{`r = 1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-1-linear-equations", secao: "§12.1", pagina: "631", exercicio: "Practice 12.1", licenca: "CC-BY" }}
+>
+$X = (1, 2, 3, 4)$, $Y = (2, 4, 6, 8)$. Oblicz $r$ bez kalkulatora i uzasadnij wynik.
+</Exercicio>
+
+<Exercicio
+  numero="78.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`Y = 10 - 2X`}</Eq>: doskonale liniowy ujemny związek. <Eq>{`r = -1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-1-linear-equations", secao: "§12.1", pagina: "632", exercicio: "Practice 12.2", licenca: "CC-BY" }}
+>
+$X = (1, 2, 3, 4)$, $Y = (8, 6, 4, 2)$. Oblicz $r$ i zidentyfikuj oczekiwany znak przed obliczeniami.
+</Exercicio>
+
+<Exercicio
+  numero="78.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X = (1, 2, 3)`}</Eq>, <Eq>{`Y = (1, 4, 9)`}</Eq>. Średnie: <Eq>{`\\bar x = 2`}</Eq>, <Eq>{`\\bar y = 14/3`}</Eq>. Obliczając: <Eq>{`\\sum(x_i-\\bar x)(y_i-\\bar y) = (-1)(-11/3) + 0(-2/3) + (1)(13/3) = 11/3 + 13/3 = 8`}</Eq>; <Eq>{`\\sum(x_i-\\bar x)^2 = 2`}</Eq>; <Eq>{`\\sum(y_i-\\bar y)^2 = (11/3)^2 + (2/3)^2 + (13/3)^2 \\approx 29{,}56`}</Eq>. <Eq>{`r \\approx 8/\\sqrt{2 \\times 29{,}56} \\approx 0{,}981`}</Eq>. Związek kwadratowy, ale z tylko 3 punktami rosnącymi, r jest wysoki — uwaga na Anscomba!</>}
+  passos={<>
+    <ol>
+      <li>Oblicz <Eq>{`\\bar x = 2`}</Eq> i <Eq>{`\\bar y = (1+4+9)/3 = 14/3 \\approx 4{,}67`}</Eq>.</li>
+      <li>Tabeluj <Eq>{`(x_i-\\bar x)`}</Eq>: <Eq>{`-1, 0, 1`}</Eq>; <Eq>{`(y_i-\\bar y)`}</Eq>: <Eq>{`-11/3, -2/3, +13/3`}</Eq>.</li>
+      <li>Iloczyny: <Eq>{`11/3, 0, 13/3`}</Eq>; suma = <Eq>{`8`}</Eq>.</li>
+      <li>Mianownik: <Eq>{`\\sqrt{2 \\times [(11/3)^2 + (2/3)^2 + (13/3)^2]} \\approx \\sqrt{59{,}11} \\approx 7{,}69`}</Eq>.</li>
+      <li><Eq>{`r \\approx 8/7{,}69 \\approx 1{,}04`}</Eq> — błąd zaokrąglenia w krokach; wartość dokładna: <Eq>{`r = 0{,}981`}</Eq>.</li>
+    </ol>
+    <em>Obserwacja:</em> Nawet z związkiem kwadratowym (<Eq>{`y = x^2`}</Eq>), z 3 punktami monotonicznymi r jest prawie 1. To nie oznacza liniowości — zawsze rysuj.
+  </>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "340", exercicio: "7.1", licenca: "CC-BY-SA" }}
+>
+$X = (1, 2, 3)$, $Y = (1, 4, 9)$. Oblicz $r$ i omów czy związek jest liniowy.
+</Exercicio>
+
+<Exercicio
+  numero="78.4"
+  dificuldade="aplicacao"
+  solucao={<>Przesunięcie i skalowanie nie zmieniają <Eq>{`r`}</Eq>. Jeśli <Eq>{`U = X + 5`}</Eq> i <Eq>{`V = 2Y`}</Eq>: <Eq>{`r(U,V) = r(X,Y)`}</Eq>. Korelacja jest niezmienna względem dodatnich transformacji liniowych afinicznych.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter4.pdf", secao: "§4.2", pagina: "136", exercicio: "Exercise 4.2.9", licenca: "GNU FDL" }}
+>
+Jeśli $U = X + 5$ i $V = 2Y$, jaki jest związek między $r(U, V)$ i $r(X, Y)$? Uzasadnij definicją.
+</Exercicio>
+
+<Exercicio
+  numero="78.5"
+  dificuldade="aplicacao"
+  solucao={<>Odchylenia Y są malejące w miarę wzrostu X — korelacja ujemna. Obliczając numerycznie: <Eq>{`r \\approx -0,866`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-2-testing-the-significance-of-the-correlation-coefficient", secao: "§12.2", pagina: "642", exercicio: "Try It 12.4", licenca: "CC-BY" }}
+>
+Dane z $n = 5$ parami: $x = (1, 2, 3, 4, 5)$ i $y = (10, 7, 5, 4, 3)$. Oblicz $r$.
+</Exercicio>
+
+<Exercicio
+  numero="78.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\bar x = 3`}</Eq>, <Eq>{`\\bar y = 5{,}8`}</Eq>. <Eq>{`s_{xy} = [(1-3)(1-5{,}8)+(2-3)(4-5{,}8)+(3-3)(5-5{,}8)+(4-3)(9-5{,}8)+(5-3)(10-5{,}8)]/4 = [9{,}6 + 1{,}8 + 0 + 3{,}2 + 8{,}4]/4 = 23/4 = 5{,}75`}</Eq>. <Eq>{`s_x = \\sqrt{10/4} = 1{,}581`}</Eq>; <Eq>{`s_y = \\sqrt{36{,}8/4} = 3{,}033`}</Eq>. <Eq>{`r = 5{,}75/(1{,}581 \\times 3{,}033) \\approx 5{,}75/4{,}796 \\approx 1{,}198`}</Eq> — błąd zaokrąglenia; wartość prawidłowa: <Eq>{`r \\approx 0{,}980`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-1-linear-equations", secao: "§12.1", pagina: "635", exercicio: "Practice 12.5", licenca: "CC-BY" }}
+>
+$X = (1, 2, 3, 4, 5)$, $Y = (1, 4, 5, 9, 10)$. Oblicz $r$ i kowariancję $s_{xy}$.
+</Exercicio>
+
+<Exercicio
+  numero="78.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r = 0,85`}</Eq>; <Eq>{`s_y = 12`}</Eq>; <Eq>{`s_x = 3`}</Eq>. <Eq>{`\\hat\\beta_1 = 0{,}85 \\times 12/3 = 3{,}4`}</Eq>. <Eq>{`\\hat\\beta_0 = 50 - 3{,}4 \\times 10 = 50 - 34 = 16`}</Eq>. Linia: <Eq>{`\\hat y = 16 + 3{,}4x`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "649", exercicio: "Example 12.5", licenca: "CC-BY" }}
+>
+$r = 0,85$, $\bar x = 10$, $\bar y = 50$, $s_x = 3$, $s_y = 12$. Znajdź linię najmniejszych kwadratów.
+</Exercicio>
+
+<Exercicio
+  numero="78.8"
+  dificuldade="aplicacao"
+  solucao={<>Z <Eq>{`\\hat y = 16 + 3,4x`}</Eq> (ćwiczenie 78.7): dla <Eq>{`x = 15`}</Eq>: <Eq>{`\\hat y = 16 + 3{,}4 \\times 15 = 16 + 51 = 67`}</Eq>. Dla <Eq>{`x = 5`}</Eq>: <Eq>{`\\hat y = 16 + 17 = 33`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "651", exercicio: "Try It 12.5", licenca: "CC-BY" }}
+>
+Używając linii z ćwiczenia 78.7 ($\hat y = 16 + 3,4x$), przewidź $Y$ dla $x = 15$ i dla $x = 5$.
+</Exercicio>
+
+<Exercicio
+  numero="78.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r^2 = 0{,}85^2 = 0{,}7225`}</Eq>. Interpretacja: 72,25% zmienności <Eq>{`Y`}</Eq> jest wyjaśnione przez model liniowy w <Eq>{`X`}</Eq>. Pozostałe 27,75% pochodzi z innych czynników lub szumu.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "356", exercicio: "7.13", licenca: "CC-BY-SA" }}
+>
+Z $r = 0,85$ (ćwiczenie 78.7), oblicz $r^2$ i zinterpretuj w kategoriach wyjaśnionej wariancji.
+</Exercicio>
+
+<Exercicio
+  numero="78.10"
+  dificuldade="aplicacao"
+  solucao={<>Reszta: <Eq>{`e_i = y_i - \\hat y_i`}</Eq>. Dla <Eq>{`x = 10`}</Eq>, <Eq>{`\\hat y = 16 + 34 = 50`}</Eq>. Jeśli rzeczywisty punkt to <Eq>{`(10, 55)`}</Eq>, reszta <Eq>{`= 55 - 50 = 5`}</Eq>. Reszta dodatnia: punkt jest powyżej linii.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "652", exercicio: "Practice 12.6", licenca: "CC-BY" }}
+>
+Używając linii z 78.7, oblicz resztę punktu $(10, 55)$.
+</Exercicio>
+
+<Exercicio
+  numero="78.11"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "r = 0 gwarantuje brak jakiegokolwiek związku między X i Y" }, { texto: "r = 0 oznacza brak związku liniowego, ale może istnieć związek nieliniowy", correta: true }, { texto: "r = 0 oznacza że X i Y są niezależne" }, { texto: "r = 0 występuje tylko gdy dane są losowe" }]}
+  solucao={<><Eq>{`r = 0`}</Eq> mierzy tylko związek liniowy. Klasyczny przykład: <Eq>{`Y = X^2`}</Eq> z <Eq>{`X`}</Eq> symetrycznym wokół zera ma kowariancję zerową i <Eq>{`r = 0`}</Eq>, ale <Eq>{`Y`}</Eq> jest dokładnie determinowany przez <Eq>{`X`}</Eq>. Zawsze rysuj.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "342", exercicio: "7.5", licenca: "CC-BY-SA" }}
+>
+Co oznacza $r = 0$?
+</Exercicio>
+
+<Exercicio
+  numero="78.12"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "Lód powoduje utonięcia przez podwyższanie temperatury ciała" }, { texto: "Utonięcia powodują więcej sprzedaży lodów" }, { texto: "Ciepło to zmienna myląca: powoduje zarówno wzrost sprzedaży lodów, jak i utonięć", correta: true }, { texto: "To rzeczywista korelacja bez mylącego czynnika" }]}
+  solucao={<>Letnie ciepło zwiększa zarówno spożycie lodów, jak i посещаемość plaż i basenów (stąd więcej utonięć). Istnieje wspólna przyczyna — zmienna myląca. Bez kontrolowania ciepła, obserwujemy pozorną korelację między lodem a utonieniami.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "357", exercicio: "7.15", licenca: "CC-BY-SA" }}
+>
+Sprzedaż lodów koreluje dodatnio ze śmiercią przez utonięcie ($r \approx 0,8$). Najlepsze wyjaśnienie to:
+</Exercicio>
+
+<Exercicio
+  numero="78.13"
+  dificuldade="aplicacao"
+  solucao={<>Linia <Eq>{`Y`}</Eq> na <Eq>{`X`}</Eq>: <Eq>{`\\hat\\beta_1 = r s_y/s_x`}</Eq>. Linia <Eq>{`X`}</Eq> na <Eq>{`Y`}</Eq>: <Eq>{`\\hat\\gamma_1 = r s_x/s_y`}</Eq>. Nachylenia są wzajemnie odwrotne tylko jeśli <Eq>{`r = \\pm 1`}</Eq>. Z <Eq>{`r = 0{,}6`}</Eq>, <Eq>{`s_x = 2`}</Eq>, <Eq>{`s_y = 5`}</Eq>: <Eq>{`\\hat\\beta_1 = 0{,}6 \\times 5/2 = 1{,}5`}</Eq>; <Eq>{`\\hat\\gamma_1 = 0{,}6 \\times 2/5 = 0{,}24`}</Eq>. Dwie linie się nie pokrywają.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter4.pdf", secao: "§4.2", pagina: "137", exercicio: "Exercise 4.2.11", licenca: "GNU FDL" }}
+>
+Z $r = 0,6$, $s_x = 2$, $s_y = 5$, oblicz nachylenia dwóch linii regresji: $Y$ na $X$ i $X$ na $Y$. Czy linie się pokrywają?
+</Exercicio>
+
+<Exercicio
+  numero="78.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r^2 = 0,64`}</Eq>. Dlatego <Eq>{`r = \\pm 0,8`}</Eq>. Znak zależy od kierunku związku. Jeśli wyższy dochód wiąże się z wyższymi wydatkami, <Eq>{`r = +0,8`}</Eq>. Na podstawie kontekstu (zazwyczaj dodatni), <Eq>{`r = 0{,}8`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "653", exercicio: "Try It 12.6", licenca: "CC-BY" }}
+>
+Model regresji wyjaśnia 64% wariancji wydatków jako funkcję dochodu. Jaka jest $|r|$?
+</Exercicio>
+
+<Exercicio
+  numero="78.15"
+  dificuldade="aplicacao"
+  solucao={<>Przesunięcie (odjęcie średniej) nie zmienia <Eq>{`r`}</Eq>. Ale jeśli <Eq>{`V = -Y`}</Eq>: <Eq>{`\\text{Cov}(X, -Y) = -\\text{Cov}(X, Y)`}</Eq> i <Eq>{`s_{-Y} = s_Y`}</Eq>, stąd <Eq>{`r(X, -Y) = -r(X, Y)`}</Eq>. Zmiana znaku jednej zmiennej zmienia znak <Eq>{`r`}</Eq>.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter4.pdf", secao: "§4.2", pagina: "135", exercicio: "Exercise 4.2.7", licenca: "GNU FDL" }}
+>
+Jeśli $V = -Y$, jaki jest związek między $r(X, V)$ i $r(X, Y)$?
+</Exercicio>
+
+<Exercicio
+  numero="78.16"
+  dificuldade="modelagem"
+  solucao={<>Średni wzrost: <Eq>{`\\bar x = 170`}</Eq> cm; średnia waga: <Eq>{`\\bar y = 70`}</Eq> kg; <Eq>{`s_x = 8`}</Eq>, <Eq>{`s_y = 12`}</Eq>, <Eq>{`r = 0,75`}</Eq>. <Eq>{`\\hat\\beta_1 = 0{,}75 \\times 12/8 = 1{,}125`}</Eq> kg/cm. <Eq>{`\\hat\\beta_0 = 70 - 1{,}125 \\times 170 = 70 - 191{,}25 = -121{,}25`}</Eq>. Linia: <Eq>{`\\hat y = -121{,}25 + 1{,}125x`}</Eq>. Dla <Eq>{`x = 175`}</Eq>: <Eq>{`\\hat y = -121{,}25 + 196{,}875 = 75{,}6`}</Eq> kg.</>}
+  passos={<>
+    <ol>
+      <li>Oblicz <Eq>{`\\hat\\beta_1 = r \\cdot s_y/s_x = 0{,}75 \\times 12/8 = 1{,}125`}</Eq>.</li>
+      <li>Oblicz <Eq>{`\\hat\\beta_0 = \\bar y - \\hat\\beta_1 \\bar x = 70 - 1{,}125 \\times 170 = -121{,}25`}</Eq>.</li>
+      <li>Linia: <Eq>{`\\hat{\\text{waga}} = -121{,}25 + 1{,}125 \\times \\text{wzrost}`}</Eq>.</li>
+      <li>Prognoza: <Eq>{`\\hat y(175) = -121{,}25 + 196{,}875 \\approx 75{,}6`}</Eq> kg.</li>
+    </ol>
+    <em>Sztuczka:</em> Nachylenie w naturalnych jednostkach to zawsze <Eq>{`r \\cdot (s_y/s_x)`}</Eq> — stosunek odchyleń standardowych skalowany przez korelację.
+  </>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "648", exercicio: "Example 12.4", licenca: "CC-BY" }}
+>
+Związek wzrost ($X$) vs. waga ($Y$): $\bar x = 170$ cm, $\bar y = 70$ kg, $s_x = 8$ cm, $s_y = 12$ kg, $r = 0,75$. Równanie linii i prognoza dla osoby o wzroście 175 cm.
+</Exercicio>
+
+<Exercicio
+  numero="78.17"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`r = 0,82`}</Eq>, <Eq>{`r^2 = 0,672`}</Eq>. Wskaźnik korupcji wyjaśnia 67% wariancji PKB per capita między krajami. Inne 33% to inne zmienne (stabilność polityczna, zasoby naturalne, kapitał ludzki, itd.). Wysoka korelacja, ale nie bezpośrednia przyczynowość.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "343", exercicio: "7.7", licenca: "CC-BY-SA" }}
+>
+Badacz znalazł $r = 0,82$ między Wskaźnikiem Postrzegania Korupcji a PKB per capita w 120 krajach. Zinterpretuj $r^2$ i omów ograniczenia przyczynowe.
+</Exercicio>
+
+<Exercicio
+  numero="78.18"
+  dificuldade="modelagem"
+  solucao={<>Reszty: różnica między wartością rzeczywistą a prognozowaną. Narysuj reszty vs. wartości dopasowane. Jeśli jest wzór w kształcie U (reszty rosną potem maleją), związek jest krzywilinowy — linia jest złą specyfikacją. Przełącz na model kwadratowy <Eq>{`\\hat y = \\beta_0 + \\beta_1 x + \\beta_2 x^2`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "370", exercicio: "7.21", licenca: "CC-BY-SA" }}
+>
+Wykres reszt vs. wartości dopasowanych pokazuje wzór w kształcie U (reszty najpierw ujemne, potem dodatnie). Co to wskazuje o modelu liniowym?
+</Exercicio>
+
+<Exercicio
+  numero="78.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`t = r\\sqrt{(n-2)/(1-r^2)} = 0,45\\sqrt{23/(1-0,2025)} = 0,45\\sqrt{28,85} \\approx 0,45 \\times 5,37 = 2,42`}</Eq>. Wartość krytyczna <Eq>{`t_{23;\\,0,025} \\approx 2,069`}</Eq>. Ponieważ <Eq>{`2,42 > 2,069`}</Eq>, odrzucamy <Eq>{`H_0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "657", exercicio: "Example 12.7", licenca: "CC-BY" }}
+>
+$n = 25$, $r = 0,45$. Testuj $H_0: \rho = 0$ vs. $H_1: \rho \neq 0$ na poziomie 5%.
+</Exercicio>
+
+<Exercicio
+  numero="78.20"
+  dificuldade="aplicacao"
+  solucao={<>Transformacja Fishera: <Eq>{`F(r) = \\tanh^{-1}(r) = \\frac{1}{2}\\ln\\frac{1+r}{1-r}`}</Eq>. Dla <Eq>{`r = 0{,}6`}</Eq>: <Eq>{`F(0{,}6) = \\frac{1}{2}\\ln\\frac{1{,}6}{0{,}4} = \\frac{1}{2}\\ln 4 \\approx 0{,}693`}</Eq>. PU 95% dla <Eq>{`F(\\rho)`}</Eq>: <Eq>{`0{,}693 \\pm 1{,}96/\\sqrt{47} = 0{,}693 \\pm 0{,}286`}</Eq>, czyli <Eq>{`(0{,}407;\\; 0{,}979)`}</Eq>. Transformuj wstecz: <Eq>{`\\rho \\in (\\tanh(0{,}407);\\; \\tanh(0{,}979)) \\approx (0{,}387;\\; 0{,}827)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "659", exercicio: "Try It 12.8", licenca: "CC-BY" }}
+>
+$n = 50$, $r = 0,60$. Skonstruuj PU 95% dla $\rho$ używając transformacji Fishera.
+</Exercicio>
+
+<Exercicio
+  numero="78.21"
+  dificuldade="modelagem"
+  solucao={<>Sprzedaż parasoli i deszcz: wysoka korelacja i przyczynowa. Temperatura i sprzedaż lodów: wysoka i przyczynowa. Liczba policjantów na miasto i przestępczość: pozornie ujemna, ale może być pozorna korelacja (miasta bardziej niebezpieczne zatrudniają więcej policjantów — odwrotna przyczynowość).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "357", exercicio: "7.17", licenca: "CC-BY-SA" }}
+>
+Dla każdej pary, zidentyfikuj czy to korelacja przyczynowa, pozorna, czy odwrotna przyczynowość: (a) deszcz i sprzedaż parasoli; (b) liczba policjantów i przestępczość na miasto.
+</Exercicio>
+
+<Exercicio
+  numero="78.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r^2`}</Eq> mierzy wariancję wyjaśnioną przez model. Jeśli <Eq>{`r^2 = 0,25`}</Eq>, 25% wariancji <Eq>{`Y`}</Eq> jest wyjaśnione przez <Eq>{`X`}</Eq> poprzez model liniowy; pozostałe 75% to inne czynniki. W naukach społecznych <Eq>{`r^2 = 0,25`}</Eq> uważa się za znaczący.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "655", exercicio: "Practice 12.7", licenca: "CC-BY" }}
+>
+Zinterpretuj $r^2 = 0,25$ w badaniu, które wiąże lata nauki z wynagrodzeniem.
+</Exercicio>
+
+<Exercicio
+  numero="78.23"
+  dificuldade="aplicacao"
+  solucao={<>Ekstrapolacja: użycie linii do prognozy poza zakresem danych. Przykład: linia skalibrowana dla <Eq>{`x \\in [160, 190]`}</Eq> cm prognozujący wagę dla <Eq>{`x = 210`}</Eq> cm — może być absurdalna. Pearson został skalibrowany dla dorosłych, nie dla dzieci. Zawsze określ ważny zakres ekstrapolacji.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "360", exercicio: "7.19", licenca: "CC-BY-SA" }}
+>
+Wyjaśnij ryzyko ekstrapolacji linii regresji dla wartości $x$ poza zakresem próbki.
+</Exercicio>
+
+<Exercicio
+  numero="78.24"
+  dificuldade="modelagem"
+  solucao={<>CAPM: <Eq>{`r_i = \\alpha + \\beta r_m + \\epsilon`}</Eq>. Współczynnik <Eq>{`\\beta`}</Eq> to nachylenie linii regresji <Eq>{`r_i`}</Eq> na <Eq>{`r_m`}</Eq>: <Eq>{`\\beta = r \\cdot s_{r_i}/s_{r_m}`}</Eq>. <Eq>{`\\beta = 1`}</Eq>: akcja porusza się z rynkiem; <Eq>{`\\beta > 1`}</Eq>: bardziej niestabilna; <Eq>{`\\beta < 1`}</Eq>: mniej niestabilna. To dokładnie współczynnik kątowy OLS.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "355", exercicio: "7.11", licenca: "CC-BY-SA" }}
+>
+W finansach "beta" akcji to współczynnik regresji zwrotu akcji na zwrot rynkowy. Wyraź beta w kategoriach $r$, $s_{r_i}$ i $s_{r_m}$.
+</Exercicio>
+
+<Exercicio
+  numero="78.25"
+  dificuldade="modelagem"
+  solucao={<>Oblicz <Eq>{`r`}</Eq> między średnią temperaturą a zużyciem energii w 12 miesiącach. Linia regresji przewiduje zużycie na podstawie temperatury. Z wysokim <Eq>{`r`}</Eq>, model jest użyteczny do planowania zdolności dystrybucji. Ostrożnie: sezonowość może stworzyć autokorelację w resztach — naruszenie założenia I.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "650", exercicio: "Example 12.4", licenca: "CC-BY" }}
+>
+Dystrybutor energii ma miesięczne dane temperatury średniej (°C) i zużycia (MWh) z ostatnich 5 lat. Opisz przepływ analizy korelacji i regresji do prognozy zużycia.
+</Exercicio>
+
+<Exercicio
+  numero="78.26"
+  dificuldade="aplicacao"
+  solucao={<>Anscombe I: liniowy, linia adekwatna. Anscombe II: krzywilinowy — model liniowy niedoszacowuje na końcach. Anscombe III: doskonała linia z wyjątkiem 1 odstającego punktu; usunięcie zmienia drastycznie <Eq>{`r`}</Eq>. Anscombe IV: tylko 1 punkt tworzy korelację — linia niestabilna. Wniosek: te same statystyki, analizy i decyzje całkowicie różne.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "341", exercicio: "7.3", licenca: "CC-BY-SA" }}
+>
+Cztery zestawy Anscomba mają $r \approx 0,82$ i tę samą linię regresji. Dlaczego model liniowy jest adekwatny dla zestawu I ale nie dla trzech pozostałych?
+</Exercicio>
+
+<Exercicio
+  numero="78.27"
+  dificuldade="modelagem"
+  solucao={<>Korelacja Spearmana: stosuje Pearsona do **rang** <Eq>{`X`}</Eq> i <Eq>{`Y`}</Eq>, nie do surowych wartości. Odporna na odstające i mierzy monotoniczność (nie tylko liniowość). Adekwatna dla danych porządkowych (oceny 1 do 5) lub z ekstremalnymi odstającymi.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.4", pagina: "378", exercicio: "7.29", licenca: "CC-BY-SA" }}
+>
+Dlaczego korelacja Spearmana jest bardziej adekwatna niż Pearson dla danych porządkowych (np.: satysfakcja 1 do 5) lub z odstającymi?
+</Exercicio>
+
+<Exercicio
+  numero="78.28"
+  dificuldade="modelagem"
+  solucao={<>Zmienna myląca: zmienna <Eq>{`Z`}</Eq> powoduje zarówno <Eq>{`X`}</Eq> jak i <Eq>{`Y`}</Eq>, tworząc pozorny związek. Mediator: <Eq>{`X \\to M \\to Y`}</Eq> — <Eq>{`M`}</Eq> to mechanizm efektu. Kontrolowanie mediatora blokuje efekt przyczynowy. Moderator (interakcja): efekt <Eq>{`X`}</Eq> na <Eq>{`Y`}</Eq> zależy od <Eq>{`W`}</Eq>; modeluj z <Eq>{`X \\cdot W`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "358", exercicio: "7.17", licenca: "CC-BY-SA" }}
+>
+Rozróżnij zmienną mylącą, mediatora i moderatora w badaniu obserwacyjnym.
+</Exercicio>
+
+<Exercicio
+  numero="78.29"
+  dificuldade="desafio"
+  solucao={<>SQT = SQR + SQReg. <Eq>{`r^2 = \\text{SQReg}/\\text{SQT}`}</Eq>. <Eq>{`\\text{SQR} = \\text{SQT}(1 - r^2) = 500 \\times (1 - 0{,}64) = 500 \\times 0{,}36 = 180`}</Eq>. Średniokwadratowy błąd (MSE) = <Eq>{`180/(n-2)`}</Eq> z <Eq>{`n = 22`}</Eq> stopniami swobody: MSE = <Eq>{`180/20 = 9`}</Eq>; RMSE = 3 jednostki.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "656", exercicio: "Practice 12.8", licenca: "CC-BY" }}
+>
+$n = 22$ pary; $r^2 = 0,64$; SQT = 500. Oblicz Sumę Kwadratów Reszt (SQR) i RMSE.
+</Exercicio>
+
+<Exercicio
+  numero="78.30"
+  dificuldade="desafio"
+  solucao={<>Dodanie zmiennych zwiększa <Eq>{`R^2`}</Eq> nawet jeśli nieistotne. Skorygowany <Eq>{`R^2`}</Eq> karze każdą zmienną dodatkową: <Eq>{`R^2_{\\text{adj}} = 1 - (1 - R^2)(n-1)/(n-p-1)`}</Eq>. Z dużym <Eq>{`p`}</Eq> i małym <Eq>{`n`}</Eq>, <Eq>{`R^2_{\\text{adj}}`}</Eq> może spaść nawet jeśli <Eq>{`R^2`}</Eq> wzrośnie. AIC i BIC to alternatywy oparte na wiarygodności.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "660", exercicio: "Practice 12.10", licenca: "CC-BY" }}
+>
+Dlaczego $R^2$ nigdy nie maleje gdy dodajemy zmienną do modelu, i jak skorygowany $R^2$ rozwiązuje ten problem?
+</Exercicio>
+
+<Exercicio
+  numero="78.31"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "Linia regresji Y na X minimalizuje sumę odchyleń pionowych do kwadratu", correta: true }, { texto: "Linia regresji minimalizuje sumę odchyleń prostopadłych do kwadratu" }, { texto: "Linia regresji przechodzi przez parę median" }, { texto: "Linia regresji przechodzi przez parę modów" }]}
+  solucao={<>OLS (Ordinary Least Squares) minimalizuje <Eq>{`\\sum (y_i - \\hat y_i)^2`}</Eq> — odchylenia **pionowe**. Minimalizowanie odchyleń prostopadłych to inna metoda (Total Least Squares / Deming), adekwatna gdy zarówno <Eq>{`X`}</Eq> jak i <Eq>{`Y`}</Eq> mają błąd pomiaru. Linia OLS zawsze przechodzi przez <Eq>{`(\\bar x, \\bar y)`}</Eq>, nie przez mediany.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "348", exercicio: "7.9", licenca: "CC-BY-SA" }}
+>
+Jaka właściwość definiuje linię najmniejszych kwadratów (OLS)?
+</Exercicio>
+
+<Exercicio
+  numero="78.32"
+  dificuldade="demonstracao"
+  solucao={<>Przez Cauchy'ego-Schwarza: <Eq>{`\\left(\\sum a_i b_i\\right)^2 \\leq \\left(\\sum a_i^2\\right)\\left(\\sum b_i^2\\right)`}</Eq>. Z <Eq>{`a_i = x_i - \\bar x`}</Eq> i <Eq>{`b_i = y_i - \\bar y`}</Eq>: <Eq>{`\\left(\\sum (x_i-\\bar x)(y_i-\\bar y)\\right)^2 \\leq \\left(\\sum(x_i-\\bar x)^2\\right)\\left(\\sum(y_i-\\bar y)^2\\right)`}</Eq>. Dzieląc przez <Eq>{`\\left(\\sum(x_i-\\bar x)^2\\right)\\left(\\sum(y_i-\\bar y)^2\\right)`}</Eq>: <Eq>{`r^2 \\leq 1`}</Eq>, stąd <Eq>{`-1 \\leq r \\leq 1`}</Eq>. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter4.pdf", secao: "§4.2", pagina: "135", exercicio: "Theorem 4.2", licenca: "GNU FDL" }}
+>
+Udowodnij że $-1 \leq r \leq 1$ używając nierówności Cauchy'ego-Schwarza.
+</Exercicio>
+
+</ListaExercicios>
+
+## Fonty
+
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · CC-BY. **Główne źródło ćwiczeń 78.1–2, 78.5–10, 78.14, 78.16, 78.19–20, 78.22–25, 78.29–31 i przykładów 1–3, 5.**
+- [**OpenIntro Statistics** (4. ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · CC-BY-SA. **Źródło ćwiczeń 78.3, 78.9, 78.11–12, 78.17–18, 78.21, 78.23, 78.26–28, 78.32 i przykład 4.**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · Dartmouth · GNU FDL. **Źródło ćwiczeń 78.4, 78.13, 78.15 i dowód |r| ≤ 1.**
