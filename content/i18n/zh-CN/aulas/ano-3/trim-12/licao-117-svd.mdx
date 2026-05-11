@@ -1,0 +1,726 @@
+---
+titulo: "Lição 117 — Decomposição em valores singulares (SVD)"
+slug: "licao-117-svd"
+categoria: "aulas"
+subcategoria: "ano-3-trim-12"
+descricao: "A = U Σ Vᵀ funciona para qualquer matriz real. Valores singulares revelam a estrutura geométrica. Base de compressão de imagens, recomendação, PCA e pseudoinversa."
+ordem: 117
+publicado: true
+tags: ["álgebra linear", "SVD", "valores singulares", "compressão", "ano-3", "trim-12"]
+prerrequisitos: ["licao-116-matrizes-especiais"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+versao: "v1"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Lineare Algebra LK alemão", "Equiv. H2 Math singapurense", "Equiv. Math III japonês avançado"]
+---
+
+<EquacaoCanonica
+  formula="A = U\Sigma V^T"
+  legenda={<>奇异值分解（<strong>SVD</strong>）是线性代数中最普遍的分解：任何 <Eq>{`m \\times n`}</Eq> 矩阵都可以写成 <Eq>{`A = U\\Sigma V^T`}</Eq>，其中 <Eq>{`U`}</Eq> 和 <Eq>{`V`}</Eq> 是正交矩阵，<Eq>{`\\Sigma`}</Eq> 是对角矩阵，对角元为**奇异值** <Eq>{`\\sigma_1 \\geq \\sigma_2 \\geq \\cdots \\geq 0`}</Eq>。该分解对任何实矩阵（甚至复矩阵）都存在——即便是非方阵。它是主成分分析（PCA）、图像压缩、推荐系统和稳定回归的理论基础。</>}
+  audioTexto="奇异值分解：A 等于 U 乘以 Sigma 乘以 V 转置。U 和 V 是正交矩阵。Sigma 是对角矩阵，对角元为非负奇异值，按递减排列。对任何实矩阵都成立，包括非方阵。它是谱定理的推广。"
+/>
+
+<aside>
+
+**本课题涵盖的教材**
+
+- [**Understanding Linear Algebra**](https://understandinglinearalgebra.org/chap6.html) — David Austin · §6.3–6.4 · CC-BY-SA · *SVD 的几何呈现附完整数值例子和椭球变换图；对第 10 和 15 级门户特别有益。*
+- [**A First Course in Linear Algebra**](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · §SVD · GNU FDL · *严谨的 SVD 存在性和唯一性证明附辅助引理；构成正式门户的基础。*
+- [**Álgebra Linear** (REAMAT UFRGS)](https://www.ufrgs.br/reamat/AlgebraLinear/index.html) — Reamat Colaborativo · cap. SVD · CC-BY-SA · *含压缩和伪逆例子的 PT-BR 源；适合数值计算练习。*
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="定义与定理">
+
+### SVD 定理
+
+<Definicao titulo="奇异值分解 (SVD)">
+
+对任何 <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq>，存在：
+
+- <Eq>{`U \\in \\mathbb{R}^{m \\times m}`}</Eq> 正交矩阵（列为**左奇异向量**），
+- <Eq>{`V \\in \\mathbb{R}^{n \\times n}`}</Eq> 正交矩阵（列为**右奇异向量**），
+- <Eq>{`\\Sigma \\in \\mathbb{R}^{m \\times n}`}</Eq>，对角元为 <Eq>{`\\sigma_1 \\geq \\sigma_2 \\geq \\cdots \\geq \\sigma_r > 0 = \\sigma_{r+1} = \\cdots`}</Eq>，
+
+使得 <Eq>{`A = U \\Sigma V^T`}</Eq>。整数 <Eq>{`r = \\text{rank}(A)`}</Eq>。
+
+</Definicao>
+
+> "Any matrix A with rank r can be written as a product $A = U \Sigma V^T$ where U is orthogonal ($m \times m$), $\Sigma$ is diagonal ($m \times n$, nonnegative entries decreasing), and V is orthogonal ($n \times n$). The diagonal entries $\sigma_1 \geq \cdots \geq \sigma_r > 0$ are the singular values of A." — [Understanding Linear Algebra, §6.3](https://understandinglinearalgebra.org/chap6.html)
+
+<Definicao titulo="紧凑 SVD 与秩-1 展开">
+
+**紧凑（经济）SVD** 仅保留 <Eq>{`r`}</Eq> 个非平凡列：
+
+<Equation explicacao="展开：A 是 r 个秩-1 矩阵的加权和，权重为奇异值。" latex="A = U_r \Sigma_r V_r^T = \sum_{i=1}^r \sigma_i\, u_i v_i^T" />
+
+每一项 <Eq>{`\\sigma_i u_i v_i^T`}</Eq> 都是**秩-1 矩阵**——一个列向量与一个行向量的外积。
+
+</Definicao>
+
+> "Theorem (Existence of SVD). Every real matrix A has a singular value decomposition. The singular values are the positive square roots of the nonzero eigenvalues of $A^T A$." — [A First Course in Linear Algebra, §SVD](http://linear.ups.edu/html/section-SVD.html)
+
+### 与特征值的联系
+
+<Definicao titulo="SVD 与矩阵 A^T A 和 A A^T">
+
+- <Eq>{`A^T A = V (\\Sigma^T \\Sigma) V^T`}</Eq>：<Eq>{`A^T A`}</Eq> 的**特征值**为 <Eq>{`\\sigma_i^2`}</Eq>，特征向量是 <Eq>{`V`}</Eq> 的列。
+- <Eq>{`A A^T = U (\\Sigma \\Sigma^T) U^T`}</Eq>：<Eq>{`A A^T`}</Eq> 的**特征值**同样为 <Eq>{`\\sigma_i^2`}</Eq>，特征向量是 <Eq>{`U`}</Eq> 的列。
+- 奇异值**始终是非负实数**，即使 <Eq>{`A`}</Eq> 有复特征值。
+
+</Definicao>
+
+### 通过 SVD 理解 4 个基本子空间
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 170" className="w-full">
+<defs>
+  <marker id="arr117" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="20" width="240" height="60" rx="8" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="130" y="42" textAnchor="middle" fontSize="12" fontFamily="serif" fontWeight="bold" fill="currentColor">输入空间 (R^n)</text>
+  <text x="60" y="62" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)">Row(A) = V 的前 r 列</text>
+  <text x="60" y="76" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">ker(A) = V 的后 n-r 列</text>
+</g>
+<g>
+  <rect x="310" y="20" width="240" height="60" rx="8" fill="rgb(201 163 95 / 0.2)" stroke="rgb(201 163 95)" strokeWidth="1.5"/>
+  <text x="430" y="42" textAnchor="middle" fontSize="12" fontFamily="serif" fontWeight="bold" fill="currentColor">输出空间 (R^m)</text>
+  <text x="360" y="62" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(201 163 95)">Col(A) = U 的前 r 列</text>
+  <text x="360" y="76" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">ker(A^T) = U 的后 m-r 列</text>
+</g>
+<g>
+  <line x1="250" y1="50" x2="308" y2="50" stroke="rgb(61 122 95)" strokeWidth="2" markerEnd="url(#arr117)"/>
+  <text x="279" y="44" textAnchor="middle" fontSize="10" fontFamily="serif" fill="rgb(61 122 95)">A</text>
+</g>
+<text x="280" y="130" textAnchor="middle" fontSize="11" fontFamily="serif" fill="currentColor" fillOpacity="0.7">U 和 V 的列构成 A 的 4 个子空间的标准正交基。</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">Strang 的 4 个基本子空间直接从 SVD 读出。</figcaption>
+</figure>
+
+### Eckart-Young 定理
+
+<Teorema titulo="最优秩-k 逼近 (Eckart-Young, 1936)">
+
+<Eq>{`A`}</Eq> 的最优秩-<Eq>{`k`}</Eq> 逼近（在 Frobenius 范数和谱范数下）为：
+
+<Equation explicacao="在前 k 个最大奇异值处截断 SVD 给出最优秩-k 逼近（最小二乘意义下）。" latex="A_k = \sum_{i=1}^k \sigma_i\, u_i v_i^T" />
+
+误差：<Eq>{`\\|A - A_k\\|_F^2 = \\sigma_{k+1}^2 + \\cdots + \\sigma_r^2`}</Eq>，<Eq>{`\\|A - A_k\\|_2 = \\sigma_{k+1}`}</Eq>。
+
+</Teorema>
+
+### Moore-Penrose 伪逆
+
+<Definicao titulo="通过 SVD 计算伪逆">
+
+<Equation explicacao="反演 Sigma 中的正奇异值；零奇异值置零。求解 min ||Ax - b||，得最小范数解。" latex="A^+ = V \Sigma^+ U^T" />
+
+其中 <Eq>{`\\Sigma^+`}</Eq> 通过将每个 <Eq>{`\\sigma_i > 0`}</Eq> 替换为 <Eq>{`1/\\sigma_i`}</Eq> 后转置得到。解 <Eq>{`x^* = A^+ b`}</Eq> 最小化 <Eq>{`\\|Ax - b\\|`}</Eq>，且在所有最小化子中具有最小范数 <Eq>{`\\|x\\|`}</Eq>。
+
+</Definicao>
+
+<Insight>
+
+<Eq>{`A`}</Eq> 的**条件数**是 <Eq>{`\\kappa_2(A) = \\sigma_1 / \\sigma_r`}</Eq>。当 <Eq>{`\\kappa_2`}</Eq> 很大时，系统 <Eq>{`Ax = b`}</Eq> 称为病态的：<Eq>{`b`}</Eq> 中的小误差会在 <Eq>{`x`}</Eq> 中产生大误差。SVD 是诊断病态性的标准工具。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="对 5 岁儿童">
+
+想象你有一张**彩色狗狗照片**。照片充满了色彩点——太多了！SVD 是一个**魔法整理术**：它将照片分解成**重要性分层**。
+
+第一层捕捉最重要的部分——狗狗的轮廓。第二层捕捉小一些的细节。依此类推。
+
+如果你只合并最重要的前几层，仍然能认出狗狗——但使用的**内存少得多**。这就是计算机保存较小图片而不失太多质量的方式。
+
+</Porta>
+
+<Porta nivel="10" titulo="对 10 岁儿童">
+
+任何矩阵都能拆成三块：<Eq>{`A = U \\Sigma V^T`}</Eq>。
+
+- <Eq>{`V^T`}</Eq> 是输入空间的**旋转**。
+- <Eq>{`\\Sigma`}</Eq> 是**缩放**——每个方向被一个数字 <Eq>{`\\sigma_i \\geq 0`}</Eq> 拉伸或压缩。
+- <Eq>{`U`}</Eq> 是输出空间中的另一个**旋转**。
+
+这些数字 <Eq>{`\\sigma_i`}</Eq>——**奇异值**——表示每个方向的重要性。最大的 <Eq>{`\\sigma_1`}</Eq> 是最重要的方向；最小的是最不重要的。
+
+**压缩技巧**：在 <Eq>{`1000 \\times 1000`}</Eq> 像素的照片中，仅保留前 50 个最大奇异值，你存储 <Eq>{`50 \\times 1000 + 50 + 50 \\times 1000 = 100050`}</Eq> 个数而不是 1 百万——**少 10 倍**。图像仍然看起来不错。
+
+</Porta>
+
+<Porta nivel="15" titulo="对 15 岁青少年">
+
+SVD 是应用线性代数中最重要的分解。它同时具有三个特性是其他分解所没有的：**普遍性**（适用于任何矩阵）、**正交性**（基 <Eq>{`U, V`}</Eq> 是标准正交的）和**唯一性**（奇异值是唯一的）。
+
+### 几何学
+
+任何线性映射 <Eq>{`A: \\mathbb{R}^n \\to \\mathbb{R}^m`}</Eq> 将单位球面变换成**椭球体**。椭球体的半轴长为 <Eq>{`\\sigma_1 \\geq \\cdots \\geq \\sigma_r`}</Eq>，指向方向 <Eq>{`u_1, \\ldots, u_r`}</Eq>。
+
+- <Eq>{`V^T`}</Eq> 旋转输入空间（对齐向量 <Eq>{`v_i`}</Eq> 与坐标轴）。
+- <Eq>{`\\Sigma`}</Eq> 将每个轴拉伸 <Eq>{`\\sigma_i`}</Eq>。
+- <Eq>{`U`}</Eq> 将结果旋转到输出空间。
+
+### 与对角化比较
+
+| 方面 | 对角化 | SVD |
+|---|---|---|
+| 应用于 | 可对角化的方阵 | 任意矩阵 |
+| 存在性 | 可能失败 | 总是存在 |
+| 基 | <Eq>{`P, P^{-1}`}</Eq>（非正交） | <Eq>{`U, V`}</Eq> 正交 |
+| 值 | 特征值（通常在 <Eq>{`\\mathbb{C}`}</Eq> 中） | 奇异值（<Eq>{`\\geq 0`}</Eq> 实数） |
+
+### 直接应用：图像压缩
+
+灰度图像是矩阵 <Eq>{`M \\in \\mathbb{R}^{m \\times n}`}</Eq>。在 <Eq>{`k`}</Eq> 项处截断 SVD：
+
+- 存储 <Eq>{`A_k`}</Eq> 需要 <Eq>{`k(m + n + 1)`}</Eq> 个数而不是 <Eq>{`mn`}</Eq> 个。
+- Frobenius 相对误差：<Eq>{`\\|A - A_k\\|_F / \\|A\\|_F = \\sqrt{\\sum_{i>k} \\sigma_i^2} / \\sqrt{\\sum_i \\sigma_i^2}`}</Eq>。
+
+### Netflix Prize 案例 (2009)
+
+Netflix 有评分矩阵：约 <Eq>{`10^7`}</Eq> 用户 <Eq>{`\\times 10^5`}</Eq> 部电影，稀疏。低秩逼近（SVD 变体）预测缺失评分。获胜队伍 BellKor's Pragmatic Chaos 提高了精度 10%，赢得了 100 万美元。
+
+</Porta>
+
+<Porta nivel="25" titulo="对工程学生">
+
+SVD 是计算线性代数的瑞士军刀。它解决病态系统，发现隐藏结构，以最优保证压缩数据。
+
+### 计算算法
+
+**对于小的 <Eq>{`A`}</Eq>：**
+1. 计算 <Eq>{`A^T A`}</Eq>（对称 PSD）。
+2. 分解 <Eq>{`A^T A = V \\Lambda V^T`}</Eq>（特征向量）。
+3. <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq>；<Eq>{`u_i = A v_i / \\sigma_i`}</Eq> 当 <Eq>{`\\sigma_i > 0`}</Eq>。
+
+**对于大的 <Eq>{`A`}</Eq>：** Golub-Reinsch 算法，<Eq>{`O(\\min(mn^2, m^2n))`}</Eq>。对于顶-<Eq>{`k`}</Eq>：随机 SVD (Halko-Martinsson-Tropp)，<Eq>{`O(mnk)`}</Eq> 期望。
+
+### 按领域的应用
+
+**计算机视觉**：Eigenfaces (Turk-Pentland 1991) — 中心化脸部矩阵的 SVD → 人脸识别基。
+
+**机器学习**：GloVe 词嵌入 — 词共现矩阵的 SVD；白化 — <Eq>{`W = V \\Sigma^{-1}`}</Eq> 去相关特征。
+
+**金融**：收益率曲线的 PCA — 3 个主因子（水平、斜率、曲率）捕捉约 99% 的方差 (Litterman-Scheinkman 1991)。
+
+**数值**：数值秩 <Eq>{`r_\\epsilon = \\#\\{\\sigma_i > \\epsilon \\cdot \\sigma_1\\}`}</Eq>；通过伪逆进行稳健的最小二乘求解。
+
+### Python 代码
+
+```python
+import numpy as np
+
+A = np.random.randn(200, 50)
+U, s, Vt = np.linalg.svd(A, full_matrices=False)
+
+# 秩-k 逼近
+k = 10
+A_k = U[:, :k] @ np.diag(s[:k]) @ Vt[:k, :]
+print("Frobenius 相对误差:", np.linalg.norm(A - A_k, 'fro') / np.linalg.norm(A, 'fro'))
+
+# 伪逆和最小二乘
+b = np.random.randn(200)
+x_pinv = np.linalg.lstsq(A, b, rcond=None)[0]  # 内部使用 SVD
+```
+
+### 通过 SVD 的 Tikhonov 正则化
+
+不是直接反演 <Eq>{`\\sigma_i`}</Eq>（当 <Eq>{`\\sigma_i`}</Eq> 很小时不稳定），而是使用：
+
+<Equation explicacao="Tikhonov：收缩小奇异值，避免放大噪声。" latex="x_\lambda = \sum_{i=1}^r \frac{\sigma_i}{\sigma_i^2 + \lambda}\, (u_i^T b)\, v_i" />
+
+对于 <Eq>{`\\lambda \\to 0`}</Eq> 恢复伪逆；对于大 <Eq>{`\\lambda`}</Eq> 收缩解。
+
+</Porta>
+
+<Porta nivel="40" titulo="对资深专业人士">
+
+SVD 不仅仅是一个算法——它是线性变换的通用规范形式。每个矩阵都有 SVD；不是每个矩阵都有实特征分解。
+
+### 历史背景
+
+Eugenio Beltrami (1873) 和 Camille Jordan (1874) 独立地证明了方阵的 SVD。Erhard Schmidt (1907) 将其推广到积分算子（Hilbert-Schmidt 核）。对于非方矩阵的现代形式来自 Carl Eckart 和 Gale Young (1936)，他们也证明了最优逼近定理。
+
+### 与泛函分析的联系
+
+对于紧算子 <Eq>{`T: H_1 \\to H_2`}</Eq> 在 Hilbert 空间中，Schmidt 分解为：
+
+<Equation explicacao="无穷维推广：紧算子分解成可数和的秩-1 算子。" latex="T = \sum_{i=1}^\infty \sigma_i\, \langle \cdot, v_i \rangle\, u_i" />
+
+<Eq>{`T`}</Eq> 的**奇异值**形成 <Eq>{`\\ell^2`}</Eq> 中的序列。这是信号压缩、主成分分析和核谱方法背后的结构。
+
+### 随机 SVD (Halko-Martinsson-Tropp 2011)
+
+对于数值低秩矩阵，精确 SVD 不必要。算法：
+
+1. 随机采样列：<Eq>{`Y = A \\Omega`}</Eq>，<Eq>{`\\Omega \\in \\mathbb{R}^{n \\times (k+p)}`}</Eq> 高斯。
+2. 正交化：<Eq>{`Q, R = \\text{QR}(Y)`}</Eq>。
+3. 分解投影：<Eq>{`Q^T A`}</Eq> 的 SVD（小 — <Eq>{`(k+p) \\times n`}</Eq>）。
+
+过采样 <Eq>{`p \\approx 10`}</Eq> 时，期望误差接近 Eckart-Young 最优。可以在受限内存中实现 <Eq>{`10^6 \\times 10^6`}</Eq> 矩阵的 SVD。
+
+### SVD 与现代机器学习
+
+Transformers (Vaswani et al. 2017) 将注意力分解为三矩阵的乘积：<Eq>{`Q, K, V`}</Eq>。多头注意力的几何本质上是通过梯度下降学习的 SVD——"头"学习训练数据的主子空间。
+
+低秩适应 (LoRA, 2021) — LLM 微调 — 用低秩的 <Eq>{`\\Delta W = BA`}</Eq> 扰动预训练权重 <Eq>{`W`}</Eq>，正是 SVD 将其正当化为噪声背景中的信号结构。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用">
+
+### 逐步图像压缩
+
+给定灰度图像，矩阵 <Eq>{`A \\in \\mathbb{R}^{512 \\times 512}`}</Eq>：
+
+1. 计算完整 SVD：<Eq>{`A = U \\Sigma V^T`}</Eq>，<Eq>{`\\sigma_1 \\geq \\cdots \\geq \\sigma_{512} \\geq 0`}</Eq>。
+2. 选择 <Eq>{`k`}</Eq>：绘制 <Eq>{`\\sigma_i`}</Eq> vs <Eq>{`i`}</Eq>（碎石图）；在"肘部"或累计解释方差 <Eq>{`\\geq 95\\%`}</Eq> 处切割。
+3. 存储：<Eq>{`U_{[:, :k]}`}</Eq>、<Eq>{`\\sigma_{1:k}`}</Eq>、<Eq>{`V_{[:, :k]}`}</Eq> — 共 <Eq>{`k(512 + 1 + 512)`}</Eq> 个浮点数。
+4. 重建：<Eq>{`A_k = U_k \\, \\text{diag}(\\sigma_{1:k}) \\, V_k^T`}</Eq>。
+
+以 <Eq>{`k = 50`}</Eq>：压缩比 <Eq>{`512^2 / (50 \\times 1025) \\approx 5.1\\times`}</Eq>。在视觉上与原始图像无法区分。
+
+### 病态回归诊断
+
+在线性回归 <Eq>{`y = X \\beta + \\varepsilon`}</Eq> 中当 <Eq>{`X`}</Eq> 病态时：
+
+1. <Eq>{`X`}</Eq> 的 SVD：<Eq>{`X = U \\Sigma V^T`}</Eq>。
+2. <Eq>{`\\kappa_2(X) = \\sigma_1 / \\sigma_r`}</Eq>。若 <Eq>{`> 30`}</Eq>，存在多重共线性。
+3. 应用岭回归：<Eq>{`\\hat\\beta_\\lambda = V (\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T U^T y`}</Eq>。
+4. 通过交叉验证选择 <Eq>{`\\lambda`}</Eq>。
+
+### 实际练习：按州的 ENEM
+
+ENEM 微数据约有 200 个每位考生的变量。州 × 变量矩阵的 SVD（26 个州 × 200 项）识别了 3-5 个"不平等轴"来结构化区域表现——由国家教育研究所 (INEP) 研究人员在每个版本发表的分析。
+
+</Porta>
+
+</DuasPortas>
+
+## 解题示例
+
+<Exemplo titulo="简单 2×2 矩阵的 SVD" numero="1">
+
+**问题。** 计算 <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix}`}</Eq> 的 SVD。
+
+**策略。** 计算 <Eq>{`A^T A`}</Eq>，分解特征向量/特征值，获得 <Eq>{`V`}</Eq> 和 <Eq>{`\\Sigma`}</Eq>，然后 <Eq>{`U`}</Eq>。
+
+**求解。**
+
+<Eq>{`A^T A = \\begin{pmatrix} 3 & 4 \\\\ 0 & 5 \\end{pmatrix}\\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix} = \\begin{pmatrix} 25 & 20 \\\\ 20 & 25 \\end{pmatrix}`}</Eq>
+
+特征值：<Eq>{`\\det(A^T A - \\lambda I) = (25 - \\lambda)^2 - 400 = 0`}</Eq>，所以 <Eq>{`\\lambda_1 = 45`}</Eq> 和 <Eq>{`\\lambda_2 = 5`}</Eq>。
+
+奇异值：<Eq>{`\\sigma_1 = \\sqrt{45} = 3\\sqrt{5}`}</Eq>、<Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>。
+
+<Eq>{`A^T A`}</Eq> 的特征向量：对于 <Eq>{`\\lambda_1 = 45`}</Eq>，解 <Eq>{`(A^T A - 45I)v = 0`}</Eq>：<Eq>{`v_1 = (1/\\sqrt{2})(1, 1)^T`}</Eq>；对于 <Eq>{`\\lambda_2 = 5`}</Eq>：<Eq>{`v_2 = (1/\\sqrt{2})(1, -1)^T`}</Eq>。
+
+左向量：<Eq>{`u_i = Av_i / \\sigma_i`}</Eq>。
+
+<Eq>{`u_1 = A v_1 / (3\\sqrt{5}) = (1/(3\\sqrt{5})) \\begin{pmatrix} 3/\\sqrt{2} \\\\ 9/\\sqrt{2} \\end{pmatrix} = (1/\\sqrt{10})\\begin{pmatrix}1\\\\3\\end{pmatrix}`}</Eq>
+
+**验证。** <Eq>{`U \\Sigma V^T`}</Eq> 应在数值上重现 <Eq>{`A`}</Eq>（用计算器验证）。
+
+**来源。** [Understanding Linear Algebra, §6.3](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo titulo="通过 SVD 计算矩阵的秩与子空间" numero="2">
+
+**问题。** 通过 SVD 确定 <Eq>{`A = \\begin{pmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\end{pmatrix}`}</Eq> 的秩和 4 个子空间的基。
+
+**策略。** <Eq>{`A`}</Eq> 是 <Eq>{`2 \\times 3`}</Eq>。因为第 2 行是第 1 行的倍数，秩为 1。
+
+**求解。**
+
+<Eq>{`A^T A = \\begin{pmatrix} 1 & 2 \\\\ 2 & 4 \\\\ 3 & 6 \\end{pmatrix}\\begin{pmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\end{pmatrix} = \\begin{pmatrix} 5 & 10 & 15 \\\\ 10 & 20 & 30 \\\\ 15 & 30 & 45 \\end{pmatrix}`}</Eq>
+
+非零特征值：<Eq>{`\\lambda_1 = \\text{tr}(A^T A) = 70`}</Eq>（所有项平方之和，因为秩为 1）。奇异值：<Eq>{`\\sigma_1 = \\sqrt{70}`}</Eq>。
+
+<Eq>{`v_1 = (1/\\sqrt{14})(1, 2, 3)^T`}</Eq>（<Eq>{`A`}</Eq> 行的方向）。<Eq>{`u_1 = Av_1/\\sigma_1 = (1/\\sqrt{2})(1, 2)^T`}</Eq>。
+
+**4 个子空间：**
+- <Eq>{`\\text{Row}(A) = \\text{span}\\{(1,2,3)\\}`}</Eq> — <Eq>{`V`}</Eq> 的第 1 列。
+- <Eq>{`\\ker(A) = \\text{span}\\{(-2,1,0), (-3,0,1)\\}`}</Eq> — <Eq>{`V`}</Eq> 的第 2-3 列。
+- <Eq>{`\\text{Col}(A) = \\text{span}\\{(1,2)\\}`}</Eq> — <Eq>{`U`}</Eq> 的第 1 列。
+- <Eq>{`\\ker(A^T) = \\text{span}\\{(-2,1)\\}`}</Eq> — <Eq>{`U`}</Eq> 的第 2 列。
+
+**验证。** 秩 = 正奇异值个数 = 1。确认：dim Row + dim ker = 1 + 2 = 3 = n。✓
+
+**来源。** [A First Course in Linear Algebra, §SVD 和 §FS](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · GNU FDL。
+
+</Exemplo>
+
+<Exemplo titulo="通过 Eckart-Young 定理的最优秩-1 逼近" numero="3">
+
+**问题。** 给定 <Eq>{`A = \\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\\\ 1 & 1 \\end{pmatrix}`}</Eq>，求最优秩-1 逼近并计算 Frobenius 误差。
+
+**策略。** 计算 SVD 并仅保留第一项。
+
+**求解。**
+
+<Eq>{`A^T A = \\begin{pmatrix} 6 & 5 \\\\ 5 & 6 \\end{pmatrix}`}</Eq>。特征值：11 和 1。奇异值：<Eq>{`\\sigma_1 = \\sqrt{11}`}</Eq>、<Eq>{`\\sigma_2 = 1`}</Eq>。
+
+<Eq>{`v_1 = (1/\\sqrt{2})(1,1)^T`}</Eq>、<Eq>{`v_2 = (1/\\sqrt{2})(1,-1)^T`}</Eq>。
+
+<Eq>{`u_1 = Av_1/\\sqrt{11} = (1/\\sqrt{22})(3, 3, 2)^T`}</Eq>（规范化）。
+
+最优秩-1 逼近：
+
+<Eq>{`A_1 = \\sigma_1 u_1 v_1^T = \\sqrt{11} \\cdot \\frac{1}{\\sqrt{22}}\\begin{pmatrix}3\\\\3\\\\2\\end{pmatrix} \\cdot \\frac{1}{\\sqrt{2}}\\begin{pmatrix}1&1\\end{pmatrix} = \\frac{1}{2}\\begin{pmatrix}3&3\\\\3&3\\\\2&2\\end{pmatrix}`}</Eq>
+
+误差：<Eq>{`\\|A - A_1\\|_F = \\sigma_2 = 1`}</Eq>。
+
+**验证。** <Eq>{`\\|A\\|_F^2 = 4+1+1+4+1+1 = 12 = \\sigma_1^2 + \\sigma_2^2 = 11 + 1`}</Eq>。✓
+
+**来源。** [Understanding Linear Algebra, §6.4 Exercise 6.4.3](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo titulo="非方矩阵的伪逆" numero="4">
+
+**问题。** 计算 <Eq>{`A = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq> 的 <Eq>{`A^+`}</Eq>，并用 <Eq>{`b = (2, 3, 1)^T`}</Eq> 解最小二乘系统 <Eq>{`\\min \\|Ax - b\\|`}</Eq>。
+
+**策略。** <Eq>{`A`}</Eq> 有标准正交列，所以 SVD 平凡：<Eq>{`U = I_{3\\times 3}`}</Eq>（列按顺序）、<Eq>{`\\Sigma = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq>、<Eq>{`V = I_{2\\times 2}`}</Eq>。
+
+**求解。**
+
+<Eq>{`\\Sigma^+ = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\end{pmatrix}`}</Eq>，所以 <Eq>{`A^+ = V \\Sigma^+ U^T = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\end{pmatrix}`}</Eq>。
+
+解：<Eq>{`x^* = A^+ b = (2, 3)^T`}</Eq>。
+
+残差：<Eq>{`b - Ax^* = (2,3,1)^T - (2,3,0)^T = (0,0,1)^T`}</Eq>。最小误差：<Eq>{`\\|b - Ax^*\\| = 1`}</Eq>（<Eq>{`b`}</Eq> 的第三行是不可约的）。
+
+**验证。** <Eq>{`A`}</Eq> 有秩 2。解 <Eq>{`x^* = (2,3)^T`}</Eq> 是最小范数的。<Eq>{`\\|A^+ A\\| = I_2`}</Eq>。✓
+
+**来源。** [A First Course in Linear Algebra, §SVD Exercise SVD.C15](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · GNU FDL。
+
+</Exemplo>
+
+<Exemplo titulo="图像压缩：压缩比和误差" numero="5">
+
+**问题。** 灰度图像为 <Eq>{`512 \\times 512`}</Eq> 像素。奇异值衰减如 <Eq>{`\\sigma_i = 10^4 / i`}</Eq>。计算：(a) 前 <Eq>{`k = 20`}</Eq> 个成分的累积解释方差；(b) <Eq>{`k = 20`}</Eq> 时的压缩比；(c) Frobenius 相对误差。
+
+**策略。** 使用 Eckart-Young 定理和压缩定义的公式。
+
+**求解。**
+
+(a) <Eq>{`\\|A\\|_F^2 = \\sum_{i=1}^{512} \\sigma_i^2 = 10^8 \\sum_{i=1}^{512} 1/i^2 \\approx 10^8 \\cdot 1.6449 = 1.645 \\times 10^8`}</Eq>。
+
+<Eq>{`\\sum_{i=1}^{20} \\sigma_i^2 = 10^8 \\sum_{i=1}^{20} 1/i^2 \\approx 10^8 \\cdot 1.5962`}</Eq>。
+
+解释方差：<Eq>{`1.5962 / 1.6449 \\approx 97.0\\%`}</Eq>。
+
+(b) <Eq>{`A_k`}</Eq> 的存储：<Eq>{`k(m + n + 1) = 20(512 + 512 + 1) = 20505`}</Eq> vs <Eq>{`512^2 = 262144`}</Eq>。比率：<Eq>{`262144 / 20505 \\approx 12.8\\times`}</Eq>。
+
+(c) 相对误差：<Eq>{`\\sqrt{1 - 0.970} = \\sqrt{0.030} \\approx 17.3\\%`}</Eq>（在 Frobenius 中）。
+
+**验证。** 以 <Eq>{`k = 50`}</Eq> 时解释方差会更高，误差更小。选择 <Eq>{`k = 20`}</Eq> 已捕捉 97% 并有 12.8x 压缩——对可视化来说非常好。
+
+**来源。** [Understanding Linear Algebra, §6.4](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA。<Eq>{`\\sigma_i`}</Eq> 衰减模型类似于 Exercise 6.4.5。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-117-svd">
+
+<Exercicio
+  numero="117.1"
+  dificuldade="compreensao"
+  solucao={<>奇异值是 <Eq>{`A^T A`}</Eq> 特征值的平方根。它们总是实数和非负的，与 <Eq>{`A`}</Eq> 的特征值不同，后者可能是复数。对于对称正半定矩阵，特征值和奇异值一致。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "311", exercicio: "6.3.1", licenca: "CC-BY-SA" }}
+>
+解释矩阵 <Eq>{`A`}</Eq> 的特征值和奇异值的区别。哪种矩阵的它们相同？
+</Exercicio>
+
+<Exercicio
+  numero="117.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix} 9 & 0 \\\\ 0 & 16 \\end{pmatrix}`}</Eq>。特征值：9 和 16。奇异值：<Eq>{`\\sigma_1 = 4`}</Eq>、<Eq>{`\\sigma_2 = 3`}</Eq>。<Eq>{`V = I_2`}</Eq>（因为 <Eq>{`A^T A`}</Eq> 已对角）。<Eq>{`U`}</Eq>：列 <Eq>{`u_i = Av_i/\\sigma_i`}</Eq> — 如 <Eq>{`A`}</Eq> 有缩放的标准正交列，<Eq>{`u_1 = (0,1)^T`}</Eq>、<Eq>{`u_2 = (1,0)^T`}</Eq>。</>}
+  passos={<><ol><li>计算 <Eq>{`A^T A`}</Eq>：转置乘以原矩阵。</li><li>求 <Eq>{`A^T A`}</Eq> 的特征值（对角，是条目的平方，重新排序）。</li><li>奇异值：<Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq> 按递减排序。</li><li>向量 <Eq>{`v_i`}</Eq>：<Eq>{`A^T A`}</Eq> 的特征向量。</li><li>向量 <Eq>{`u_i = Av_i/\\sigma_i`}</Eq>。</li><li><em>技巧：</em>对于对角 <Eq>{`A`}</Eq>，SVD 平凡——仅按 <Eq>{`\\sigma`}</Eq> 递减重新排列。</li></ol></>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "498", exercicio: "SVD.C10", licenca: "GNU FDL" }}
+>
+计算 <Eq>{`A = \\begin{pmatrix} 0 & 3 \\\\ 4 & 0 \\end{pmatrix}`}</Eq> 的 SVD。
+</Exercicio>
+
+<Exercicio
+  numero="117.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix} 2 & 2 \\\\ 2 & 2 \\end{pmatrix}`}</Eq>。特征值：4 和 0。奇异值：<Eq>{`\\sigma_1 = 2`}</Eq>。<Eq>{`v_1 = (1/\\sqrt{2})(1,1)^T`}</Eq>。<Eq>{`u_1 = Av_1/2 = (1/\\sqrt{2})(1,1)^T`}</Eq>。秩 = 1。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "313", exercicio: "6.3.3", licenca: "CC-BY-SA" }}
+>
+计算 <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 1 & 1 \\end{pmatrix}`}</Eq> 的紧凑 SVD。<Eq>{`A`}</Eq> 的秩是多少？
+</Exercicio>
+
+<Exercicio
+  numero="117.4"
+  dificuldade="aplicacao"
+  solucao={<>秩 = 严格正奇异值的个数。对于给定 SVD 的 <Eq>{`A`}</Eq>，秩为 2，因为 <Eq>{`\\sigma_1 = 5`}</Eq> 和 <Eq>{`\\sigma_2 = 3`}</Eq> 都是正的。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "500", exercicio: "SVD.M20", licenca: "GNU FDL" }}
+>
+如果 <Eq>{`A \\in \\mathbb{R}^{4 \\times 3}`}</Eq> 的 SVD 有奇异值 <Eq>{`\\sigma_1 = 5, \\sigma_2 = 3, \\sigma_3 = 0`}</Eq>，<Eq>{`A`}</Eq> 的秩是多少？<Eq>{`\\ker(A)`}</Eq> 的维数是多少？
+</Exercicio>
+
+<Exercicio
+  numero="117.5"
+  dificuldade="aplicacao"
+  solucao={<>最优秩-1 逼近：<Eq>{`A_1 = \\sigma_1 u_1 v_1^T`}</Eq>。Frobenius 误差：<Eq>{`\\|A - A_1\\|_F = \\sqrt{\\sigma_2^2 + \\sigma_3^2} = \\sqrt{4 + 1} = \\sqrt{5}`}</Eq>。谱误差：<Eq>{`\\|A - A_1\\|_2 = \\sigma_2 = 2`}</Eq>。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "325", exercicio: "6.4.1", licenca: "CC-BY-SA" }}
+>
+<Eq>{`A`}</Eq> 的 SVD 有奇异值 <Eq>{`\\sigma_1 = 8, \\sigma_2 = 2, \\sigma_3 = 1`}</Eq>。计算最优秩-1 逼近的 Frobenius 误差和谱误差。
+</Exercicio>
+
+<Exercicio
+  numero="117.6"
+  dificuldade="aplicacao"
+  solucao={<>使用 SVD <Eq>{`A = U \\Sigma V^T`}</Eq>：<Eq>{`\\Sigma^+ = \\begin{pmatrix} 1/5 & 0 & 0 \\\\ 0 & 1/3 & 0 \\end{pmatrix}`}</Eq>。<Eq>{`A^+ = V \\Sigma^+ U^T \\in \\mathbb{R}^{3 \\times 2}`}</Eq>。最小二乘解：<Eq>{`x^* = A^+ b`}</Eq>。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "502", exercicio: "SVD.C20", licenca: "GNU FDL" }}
+>
+描述如何计算 <Eq>{`A \\in \\mathbb{R}^{2 \\times 3}`}</Eq> 的伪逆 <Eq>{`A^+`}</Eq>，其奇异值为 <Eq>{`\\sigma_1 = 5, \\sigma_2 = 3`}</Eq> 且秩为 2。<Eq>{`A^+`}</Eq> 的维数是多少？
+</Exercicio>
+
+<Exercicio
+  numero="117.7"
+  dificuldade="compreensao"
+  solucao={<>条件数 <Eq>{`\\kappa_2(A) = \\sigma_1 / \\sigma_r = 100 / 0.01 = 10^4`}</Eq>。一个病态很严重的系统：<Eq>{`b`}</Eq> 的相对误差可被放大多达 <Eq>{`10^4`}</Eq> 到 <Eq>{`x`}</Eq>。有 4 位有效数字的数据可能失去全部精度。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "318", exercicio: "6.3.7", licenca: "CC-BY-SA" }}
+>
+矩阵 <Eq>{`A \\in \\mathbb{R}^{10 \\times 10}`}</Eq> 有奇异值 <Eq>{`\\sigma_1 = 100`}</Eq> 和 <Eq>{`\\sigma_{10} = 0.01`}</Eq>。计算 <Eq>{`\\kappa_2(A)`}</Eq> 并解释这对数值求解 <Eq>{`Ax = b`}</Eq> 意味着什么。
+</Exercicio>
+
+<Exercicio
+  numero="117.8"
+  dificuldade="aplicacao"
+  solucao={<>累积解释方差：<Eq>{`\\sum_{i=1}^k \\sigma_i^2 / \\sum_{j=1}^r \\sigma_j^2`}</Eq>。以 <Eq>{`\\sigma = (10, 5, 2, 1)`}</Eq>：<Eq>{`\\sum \\sigma_i^2 = 100 + 25 + 4 + 1 = 130`}</Eq>。Top-1：<Eq>{`100/130 \\approx 76.9\\%`}</Eq>。Top-2：<Eq>{`125/130 \\approx 96.2\\%`}</Eq>。选 <Eq>{`k = 2`}</Eq> 达到 95%。</>}
+  passos={<><ol><li>计算 <Eq>{`\\|A\\|_F^2 = \\sum_i \\sigma_i^2`}</Eq>。</li><li>计算到每个 <Eq>{`k`}</Eq> 的累积解释方差。</li><li>找最小 <Eq>{`k`}</Eq> 使得累积比例 <Eq>{`\\geq 0.95`}</Eq>。</li><li><em>技巧：</em>碎石图显示 <Eq>{`\\sigma_i`}</Eq> vs <Eq>{`i`}</Eq>；"肘部"通常对应 ~95%。</li></ol></>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "327", exercicio: "6.4.4", licenca: "CC-BY-SA" }}
+>
+矩阵有奇异值 <Eq>{`\\sigma_1 = 10, \\sigma_2 = 5, \\sigma_3 = 2, \\sigma_4 = 1`}</Eq>。求最小 <Eq>{`k`}</Eq> 使秩-<Eq>{`k`}</Eq> 逼近解释至少 95% 的 Frobenius 方差。
+</Exercicio>
+
+<Exercicio
+  numero="117.9"
+  dificuldade="aplicacao"
+  solucao={<>对对称正半定矩阵 <Eq>{`A = Q \\Lambda Q^T`}</Eq>（谱分解）已是 SVD，具 <Eq>{`U = V = Q`}</Eq> 和 <Eq>{`\\Sigma = \\Lambda`}</Eq>。奇异值就是特征值（由于 PSD 非负）。SVD 与对角化一致。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "497", exercicio: "SVD.T10", licenca: "GNU FDL" }}
+>
+证明对对称正半定矩阵 <Eq>{`A = Q \\Lambda Q^T`}</Eq>，SVD 有 <Eq>{`U = V = Q`}</Eq> 和 <Eq>{`\\Sigma = \\Lambda`}</Eq>。在这种情况下，奇异值是什么？
+</Exercicio>
+
+<Exercicio
+  numero="117.10"
+  dificuldade="modelagem"
+  solucao={<>SVD 截断的存储成本：<Eq>{`k(m + n + 1)`}</Eq> 实数。原始：<Eq>{`mn`}</Eq>。压缩比：<Eq>{`mn / [k(m+n+1)]`}</Eq>。对 <Eq>{`m = n = 1000`}</Eq>、<Eq>{`k = 50`}</Eq>：<Eq>{`10^6 / [50 \\times 2001] \\approx 10`}</Eq>。压缩因子 10x。Frobenius 相对误差：<Eq>{`\\sqrt{\\sum_{i > 50} \\sigma_i^2} / \\|A\\|_F`}</Eq>。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "328", exercicio: "6.4.5", licenca: "CC-BY-SA" }}
+>
+灰度图像是 <Eq>{`1000 \\times 1000`}</Eq> 矩阵。如果存储截断 SVD 的 <Eq>{`k = 50`}</Eq> 个成分，与原始图像相比存储多少个浮点数？压缩因子是多少？
+</Exercicio>
+
+<Exercicio
+  numero="117.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "U 的列构成 A 的列空间基，V 的列构成 A 的行空间基", correta: true },
+    { texto: "U 的列是 A 的特征向量，V 的列是 A^T 的特征向量" },
+    { texto: "当 A 是方阵时 U 和 V 是同一矩阵" },
+    { texto: "U 的后列构成 A 的行空间基" }
+  ]}
+  solucao={<>前 <Eq>{`r`}</Eq> 列 <Eq>{`U`}</Eq> 构成 <Eq>{`\\text{Col}(A)`}</Eq> 的标准正交基；后 <Eq>{`m - r`}</Eq> 列构成 <Eq>{`\\ker(A^T)`}</Eq> 的基。前 <Eq>{`r`}</Eq> 列 <Eq>{`V`}</Eq> 构成 <Eq>{`\\text{Row}(A)`}</Eq> 的基；后 <Eq>{`n - r`}</Eq> 列构成 <Eq>{`\\ker(A)`}</Eq> 的基。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "315", exercicio: "6.3.4", licenca: "CC-BY-SA" }}
+>
+关于 SVD 中 <Eq>{`U`}</Eq> 和 <Eq>{`V`}</Eq> 的解释，下列哪个论述正确？
+</Exercicio>
+
+<Exercicio
+  numero="117.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\|A\\|_2 = \\sigma_1`}</Eq>（谱范数 = 最大奇异值）。<Eq>{`\\|A\\|_F = \\sqrt{\\sigma_1^2 + \\cdots + \\sigma_r^2}`}</Eq>（Frobenius 范数）。对 <Eq>{`A`}</Eq> 有 <Eq>{`\\sigma = (6, 3, 2, 1)`}</Eq>：<Eq>{`\\|A\\|_2 = 6`}</Eq>、<Eq>{`\\|A\\|_F = \\sqrt{50} = 5\\sqrt{2}`}</Eq>。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "501", exercicio: "SVD.M30", licenca: "GNU FDL" }}
+>
+<Eq>{`A`}</Eq> 的 SVD 有奇异值 <Eq>{`6, 3, 2, 1`}</Eq>。计算谱范数 <Eq>{`\\|A\\|_2`}</Eq> 和 Frobenius 范数 <Eq>{`\\|A\\|_F`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="117.13"
+  dificuldade="aplicacao"
+  solucao={<>存储所有 <Eq>{`r`}</Eq> 个成分的成本：<Eq>{`r(m + n + 1) = 100(512 + 512 + 1) = 102500`}</Eq> vs <Eq>{`512^2 = 262144`}</Eq>。仍有压缩即便存储全部。前 10 个解释的方差百分比取决于 <Eq>{`\\sigma_i`}</Eq> 分布。</>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "148", exercicio: "SVD-3", licenca: "CC-BY-SA" }}
+>
+图像 <Eq>{`512 \\times 512`}</Eq>，数值秩 <Eq>{`r = 100`}</Eq>。存储秩为 <Eq>{`r`}</Eq> 的完整 SVD 相比原矩阵的压缩比是多少？
+</Exercicio>
+
+<Exercicio
+  numero="117.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\|Ax\\| \\leq \\sigma_1 \\|x\\|`}</Eq> 且 <Eq>{`\\min_{\\|x\\|=1} \\|Ax\\| = \\sigma_r`}</Eq>。矩阵最大拉伸因子 <Eq>{`\\sigma_1`}</Eq>（方向 <Eq>{`v_1`}</Eq>）并最小拉伸 <Eq>{`\\sigma_r`}</Eq>（方向 <Eq>{`v_r`}</Eq>）。单位球面映射到半轴为 <Eq>{`\\sigma_1 \\geq \\cdots \\geq \\sigma_r`}</Eq> 的椭球体。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "319", exercicio: "6.3.9", licenca: "CC-BY-SA" }}
+>
+从几何角度解释 SVD 说明矩阵 <Eq>{`A`}</Eq> 如何变换 <Eq>{`\\mathbb{R}^n`}</Eq> 的单位球面。生成的椭球体的半轴是什么？
+</Exercicio>
+
+<Exercicio
+  numero="117.15"
+  dificuldade="aplicacao"
+  solucao={<>由 SVD 展开：对 <Eq>{`1 \\leq i \\leq r`}</Eq> 有 <Eq>{`Av_i = \\sigma_i u_i`}</Eq>，对 <Eq>{`j > r`}</Eq> 有 <Eq>{`Av_j = 0`}</Eq>。因此 <Eq>{`v_1, \\ldots, v_r`}</Eq> 是行空间的基且 <Eq>{`Av_i`}</Eq> 的范数为 <Eq>{`\\sigma_i`}</Eq>。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "499", exercicio: "SVD.T15", licenca: "GNU FDL" }}
+>
+证明在 SVD 中对所有 <Eq>{`i`}</Eq> 有 <Eq>{`Av_i = \\sigma_i u_i`}</Eq>。用此验证 <Eq>{`\\|Av_i\\| = \\sigma_i`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="117.16"
+  dificuldade="modelagem"
+  solucao={<>LSA：将文档表示为向量 TF-IDF 在术语空间。术语-文档矩阵 <Eq>{`A`}</Eq> 有 SVD。前 <Eq>{`k`}</Eq> 个右奇异向量表示 <Eq>{`k`}</Eq> 个"隐藏主题"。新文档投影：<Eq>{`q_{\\text{new}} = A_{\\text{new}} V_k \\Sigma_k^{-1}`}</Eq>。相似文档在此空间中靠近。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "330", exercicio: "6.4.8", licenca: "CC-BY-SA" }}
+>
+在潜在语义分析 (LSA) 中，术语-文档矩阵的 SVD 在前 <Eq>{`k`}</Eq> 个最大奇异值处截断。从概念上解释为什么这捕捉文档中的"隐藏主题"。
+</Exercicio>
+
+<Exercicio
+  numero="117.17"
+  dificuldade="demonstracao"
+  solucao={<>由 Eckart-Young，<Eq>{`A_k`}</Eq> 在所有秩 <Eq>{`\\leq k`}</Eq> 的矩阵 <Eq>{`B`}</Eq> 中最小化 <Eq>{`\\|A - B\\|_F`}</Eq>。证明：任何秩-<Eq>{`k`}</Eq> 矩阵 <Eq>{`B`}</Eq> 有零空间维度 <Eq>{`\\geq n - k`}</Eq>，所以存在单位 <Eq>{`x`}</Eq> 在 <Eq>{`B`}</Eq> 的零空间和 <Eq>{`v_1, \\ldots, v_{k+1}`}</Eq> 的张成中。然后 <Eq>{`\\|A - B\\|_F \\geq \\|(A - B)x\\| = \\|Ax\\| \\geq \\sigma_{k+1}`}</Eq>。最小值在 <Eq>{`A_k`}</Eq> 达到。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "505", exercicio: "SVD.T30", licenca: "GNU FDL" }}
+>
+阐述 Eckart-Young 定理并草拟 <Eq>{`A_k`}</Eq> 确实是谱范数中最优秩-<Eq>{`k`}</Eq> 逼近的证明思路。
+</Exercicio>
+
+<Exercicio
+  numero="117.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\|A^T A\\|_2 = \\sigma_1(A^T A) = \\sigma_1(A)^2`}</Eq>（因为 <Eq>{`A^T A`}</Eq> 的特征值为 <Eq>{`\\sigma_i(A)^2`}</Eq>）。<Eq>{`\\|A^T A\\|_F = \\sqrt{\\sum \\sigma_i^4}`}</Eq>。对 <Eq>{`A`}</Eq> 有 <Eq>{`\\sigma = (5, 3, 1)`}</Eq>：<Eq>{`\\|A^T A\\|_2 = 25`}</Eq>、<Eq>{`\\|A^T A\\|_F = \\sqrt{625 + 81 + 1} = \\sqrt{707}`}</Eq>。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "316", exercicio: "6.3.5", licenca: "CC-BY-SA" }}
+>
+如果 <Eq>{`A`}</Eq> 有奇异值 <Eq>{`5, 3, 1`}</Eq>，<Eq>{`A^T A`}</Eq> 的奇异值是什么？计算 <Eq>{`\\|A^T A\\|_2`}</Eq> 和 <Eq>{`\\|A^T A\\|_F`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="117.19"
+  dificuldade="aplicacao"
+  solucao={<>数值秩：奇异值个数超过 <Eq>{`\\epsilon \\cdot \\sigma_1`}</Eq>，其中 <Eq>{`\\epsilon`}</Eq> 为机器精度（~<Eq>{`10^{-15}`}</Eq> 对 float64）。对 <Eq>{`\\sigma = (100, 10, 1, 0.001, 0.00001)`}</Eq> 和 <Eq>{`\\epsilon = 10^{-12}`}</Eq>：阈值 = <Eq>{`10^{-10}`}</Eq>，所以数值秩 = 4（前 4 个在上方）。</>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "150", exercicio: "SVD-5", licenca: "CC-BY-SA" }}
+>
+矩阵有奇异值 <Eq>{`100, 10, 1, 0.001, 0.00001`}</Eq>。使用相对于最大奇异值的阈值 <Eq>{`\\epsilon = 10^{-12}`}</Eq>，数值秩是多少？
+</Exercicio>
+
+<Exercicio
+  numero="117.20"
+  dificuldade="aplicacao"
+  solucao={<>对正交矩阵 <Eq>{`A`}</Eq>：<Eq>{`A^T A = I`}</Eq>，所以 <Eq>{`A^T A`}</Eq> 所有特征值为 1，因此 <Eq>{`A`}</Eq> 所有奇异值为 1。SVD：<Eq>{`A = U I V^T`}</Eq> 和 <Eq>{`\\Sigma = I`}</Eq>。条件数：<Eq>{`\\kappa_2(A) = 1`}</Eq> — 完全条件数好。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "498", exercicio: "SVD.T20", licenca: "GNU FDL" }}
+>
+证明正交矩阵的所有奇异值都等于 1。正交矩阵的条件数是多少？
+</Exercicio>
+
+<Exercicio
+  numero="117.21"
+  dificuldade="modelagem"
+  solucao={<>线性因子模型：<Eq>{`n`}</Eq> 只股票在 <Eq>{`T`}</Eq> 天的收益形成矩阵 <Eq>{`R \\in \\mathbb{R}^{T \\times n}`}</Eq>。中心化 <Eq>{`\\tilde R`}</Eq> 的 SVD：前 <Eq>{`k`}</Eq> 列 <Eq>{`V`}</Eq> 是因子投资组合。奇异值平方除以 <Eq>{`T - 1`}</Eq> 为协方差特征值——因子方差。系统性风险被前几个因子捕捉。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "331", exercicio: "6.4.9", licenca: "CC-BY-SA" }}
+>
+解释 SVD 如何从股票收益矩阵识别投资组合中的"风险因子"。前 <Eq>{`v_1, v_2, v_3`}</Eq> 奇异向量在经济上表示什么？
+</Exercicio>
+
+<Exercicio
+  numero="117.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`A^T`}</Eq> 的奇异值与 <Eq>{`A`}</Eq> 的相同。因为 <Eq>{`(A^T)^T A^T = A A^T`}</Eq>，其有与 <Eq>{`A^T A`}</Eq> 相同的非零特征值（由圆形矩阵迹定理）。所以 <Eq>{`\\sigma_i(A^T) = \\sigma_i(A)`}</Eq>。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "499", exercicio: "SVD.T12", licenca: "GNU FDL" }}
+>
+证明 <Eq>{`A`}</Eq> 和 <Eq>{`A^T`}</Eq> 有相同的非零奇异值。
+</Exercicio>
+
+<Exercicio
+  numero="117.23"
+  dificuldade="aplicacao"
+  solucao={<>有Tikhonov正则化的最小二乘解：<Eq>{`x_\\lambda = (A^T A + \\lambda I)^{-1} A^T b = V (\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T U^T b = \\sum_i \\frac{\\sigma_i}{\\sigma_i^2 + \\lambda} (u_i^T b) v_i`}</Eq>。对 <Eq>{`\\lambda \\to 0`}</Eq> 恢复伪逆。对大 <Eq>{`\\lambda`}</Eq> 收缩至零。</>}
+  passos={<><ol><li>在岭公式中代入 <Eq>{`A = U \\Sigma V^T`}</Eq>。</li><li>简化 <Eq>{`(A^T A + \\lambda I)^{-1} = V(\\Sigma^T \\Sigma + \\lambda I)^{-1}V^T`}</Eq>。</li><li><Eq>{`(\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T`}</Eq> 的对角线为 <Eq>{`\\sigma_i / (\\sigma_i^2 + \\lambda)`}</Eq>。</li><li><em>技巧：</em>岭 = 平滑伪逆 — 收缩 <Eq>{`\\sigma_i^2 \\ll \\lambda`}</Eq> 的成分。</li></ol></>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "152", exercicio: "SVD-7", licenca: "CC-BY-SA" }}
+>
+根据 <Eq>{`A`}</Eq> 的 SVD 推导岭回归解 <Eq>{`x_\\lambda = (A^T A + \\lambda I)^{-1} A^T b`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="117.24"
+  dificuldade="aplicacao"
+  solucao={<>三个变形轴：水平（所有收益一起上升）、斜率（短期对长期到期）、曲率（中间对极端）。Litterman-Scheinkman (1991) 证明这 3 个 PC 解释美国财政部收益率曲线约 99% 的方差。收益每日矩阵的 SVD（时间 × 到期）自动提取这些因子。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "332", exercicio: "6.4.10", licenca: "CC-BY-SA" }}
+>
+巴西收益率曲线有 10 个不同到期的每日收益数据。此矩阵的 SVD 识别 3 个主要因子。经济上，这些因子是什么？
+</Exercicio>
+
+<Exercicio
+  numero="117.25"
+  dificuldade="aplicacao"
+  solucao={<>图像压缩比对于 <Eq>{`m \\times n`}</Eq> 图像和 <Eq>{`k`}</Eq> 奇异值：<Eq>{`mn / [k(m + n + 1)]`}</Eq>。有优势当：<Eq>{`k(m+n+1) < mn`}</Eq>，即 <Eq>{`k < mn/(m+n+1)`}</Eq>。对 <Eq>{`m = n = 1000`}</Eq>：<Eq>{`k < 10^6/2001 \\approx 499`}</Eq>。对任何 <Eq>{`k < n/2`}</Eq> 有压缩。对 <Eq>{`k = 100`}</Eq>：约 5x 比率。</>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "149", exercicio: "SVD-4", licenca: "CC-BY-SA" }}
+>
+对于哪些 <Eq>{`k`}</Eq> 值，<Eq>{`n \\times n`}</Eq> 图像的截断 SVD 占用少于原始图像的内存？推导通用条件。
+</Exercicio>
+
+<Exercicio
+  numero="117.26"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A 的所有奇异值平方的总和", correta: true },
+    { texto: "A 的所有奇异值的总和" },
+    { texto: "A 的最大奇异值的平方" },
+    { texto: "A 的所有奇异值的乘积" }
+  ]}
+  solucao={<><Eq>{`\\|A\\|_F^2 = \\text{tr}(A^T A) = \\sum_i \\sigma_i^2`}</Eq>。这是连接 Frobenius 范数与 SVD 的核心恒等式，证明 Eckart-Young 误差公式。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "501", exercicio: "SVD.M25", licenca: "GNU FDL" }}
+>
+Frobenius 范数 <Eq>{`\\|A\\|_F^2`}</Eq> 等于：
+</Exercicio>
+
+<Exercicio
+  numero="117.27"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`cA`}</Eq> 的奇异值：<Eq>{`|c| \\sigma_i(A)`}</Eq>。因为 <Eq>{`cA = U (c\\Sigma) V^T`}</Eq> 的 SVD；奇异值为 <Eq>{`|c|\\Sigma`}</Eq> 的项。<Eq>{`AB`}</Eq> 的奇异值通常没有简单公式，但 <Eq>{`\\sigma_1(AB) \\leq \\sigma_1(A) \\sigma_1(B)`}</Eq>。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "317", exercicio: "6.3.6", licenca: "CC-BY-SA" }}
+>
+如果 <Eq>{`A`}</Eq> 有奇异值 <Eq>{`\\sigma_1, \\sigma_2, \\sigma_3`}</Eq>，<Eq>{`-3A`}</Eq> 的奇异值是什么？
+</Exercicio>
+
+<Exercicio
+  numero="117.28"
+  dificuldade="demonstracao"
+  solucao={<>四个子空间由 SVD：(1) <Eq>{`\\text{Col}(A) = \\text{span}\\{u_1, \\ldots, u_r\\}`}</Eq>（维度 <Eq>{`r`}</Eq>）；(2) <Eq>{`\\ker(A^T) = \\text{span}\\{u_{r+1}, \\ldots, u_m\\}`}</Eq>（维度 <Eq>{`m - r`}</Eq>）；(3) <Eq>{`\\text{Row}(A) = \\text{span}\\{v_1, \\ldots, v_r\\}`}</Eq>（维度 <Eq>{`r`}</Eq>）；(4) <Eq>{`\\ker(A) = \\text{span}\\{v_{r+1}, \\ldots, v_n\\}`}</Eq>（维度 <Eq>{`n - r`}</Eq>）。证明：对 <Eq>{`j \\leq r`}</Eq> 有 <Eq>{`Av_j = \\sigma_j u_j`</Eq>，对 <Eq>{`j > r`}</Eq> 有 <Eq>{`Av_j = 0`}</Eq>。</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "503", exercicio: "SVD.T25", licenca: "GNU FDL" }}
+>
+证明 <Eq>{`A`}</Eq> 的 SVD 中 <Eq>{`U`}</Eq> 和 <Eq>{`V`}</Eq> 的列构成 <Eq>{`A`}</Eq> 的 4 个基本子空间的标准正交基。明确阐述每个子空间及其基。
+</Exercicio>
+
+<Exercicio
+  numero="117.29"
+  dificuldade="modelagem"
+  solucao={<>步骤：(1) 建构评分矩阵 <Eq>{`R`}</Eq>（用户 × 项目，稀疏）；(2) 用均值填补缺失；(3) 按用户中心化；(4) 秩-<Eq>{`k`}</Eq> 截断 SVD；(5) 近似 <Eq>{`R_k = U_k \\Sigma_k V_k^T`}</Eq> 填补缺失评分；(6) 推荐最高预测值的项目。思想是"潜在品味"被前 <Eq>{`k`}</Eq> 个因子捕捉。</>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "154", exercicio: "SVD-9", licenca: "CC-BY-SA" }}
+>
+描述协同过滤 SVD 推荐算法：给定稀疏用户-项目矩阵，截断 SVD 如何预测缺失评分并推荐项目？
+</Exercicio>
+
+<Exercicio
+  numero="117.30"
+  dificuldade="desafio"
+  solucao={<>随机 SVD (Halko-Martinsson-Tropp 2011)：(1) 生成 <Eq>{`\\Omega \\in \\mathbb{R}^{n \\times (k+p)}`}</Eq> 随机；(2) <Eq>{`Y = A \\Omega`}</Eq>（草图成像）；(3) <Eq>{`Q, R = \\text{QR}(Y)`}</Eq>；(4) <Eq>{`B = Q^T A`}</Eq>（小）；(5) <Eq>{`B`}</Eq> 的 SVD = <Eq>{`\\hat U \\Sigma V^T`}</Eq>；(6) <Eq>{`U = Q \\hat U`}</Eq>。复杂度：<Eq>{`O(mn(k+p))`}</Eq> vs <Eq>{`O(mn^2)`}</Eq> 精确 SVD。过采样 <Eq>{`p = 10`}</Eq> 时，期望误差接近 Eckart-Young 最优。</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "334", exercicio: "6.4.12", licenca: "CC-BY-SA" }}
+>
+用 5 步描述 Halko-Martinsson-Tropp (2011) 随机 SVD 算法。为什么它对大低秩数值矩阵有利？与精确 SVD 的复杂度比较如何？
+</Exercicio>
+
+</ListaExercicios>
+
+## 参考文献
+
+- [Understanding Linear Algebra](https://understandinglinearalgebra.org/) — David Austin · Grand Valley State University · CC-BY-SA · SVD 几何、示例和练习的主要参考（§6.3–6.4）。
+- [A First Course in Linear Algebra](http://linear.ups.edu/) — Rob Beezer · University of Puget Sound · GNU FDL · SVD 存在性、伪逆和子空间的严谨证明（§SVD）。
+- [Álgebra Linear (REAMAT UFRGS)](https://www.ufrgs.br/reamat/AlgebraLinear/index.html) — Reamat Colaborativo · UFRGS · CC-BY-SA · 压缩、数值秩和正则化的 PT-BR 练习。
+- [Introduction to Applied Linear Algebra (VMLS)](https://web.stanford.edu/~boyd/vmls/) — Boyd, Vandenberghe · Stanford · CC-BY-NC-ND · ML 和工程应用的背景。

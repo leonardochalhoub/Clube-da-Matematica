@@ -1,0 +1,690 @@
+---
+titulo: "Lição 98 — Método de Euler (numérico)"
+slug: "licao-98-euler-numerico"
+categoria: "aulas"
+subcategoria: "ano-3-trim-10"
+descricao: "Método de Euler explícito para EDOs: discretização, erro local O(h²), erro global O(h), implementação e comparação com Runge-Kutta."
+ordem: 98
+publicado: true
+tags: ["EDO", "métodos numéricos", "Euler", "Runge-Kutta", "ano-3", "trim-10"]
+prerrequisitos: ["licao-97-rlc"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Cálculo Numérico (UFRGS, USP, UNICAMP)", "Spécialité Maths Terminale (França)", "Mathematics 4 (IIT-JEE Advanced, Índia)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="y_{n+1} = y_n + h\,f(x_n,\, y_n), \quad x_{n+1} = x_n + h"
+  legenda={<><strong>欧拉显式方法</strong>用当前点处的切线来逼近 <Eq>{`y' = f(x,y)`}</Eq> 的解。每一步大小为 <Eq>{`h`}</Eq> 会积累局部误差 <Eq>{`O(h^2)`}</Eq>；在 <Eq>{`[x_0, X]`}</Eq> 上的全局误差为 <Eq>{`O(h)`}</Eq> — 一阶方法。</>}
+  audioTexto="欧拉方法。为了求解 y 导数等于 f 开方括号 x 和 y 闭方括号，初始条件 y 开方括号 x 零 闭方括号 等于 y 零，离散化区间为步长 h 的若干步。递推公式：x 下标 n 加 1 等于 x 下标 n 加 h；y 下标 n 加 1 等于 y 下标 n 加 h 乘以 f 开方括号 x 下标 n，y 下标 n 闭方括号。局部误差为 h 平方的数量级；全局误差为 h 的数量级。"
+/>
+
+<aside>
+
+**涵盖本课的教科书**
+
+- [**Notes on Diffy Qs**](https://www.jirka.org/diffyqs/) — Jiří Lebl · §1.7 · CC-BY-SA · <em>介绍欧拉方法作为数值初值问题的第一种方法；展示泰勒展开推导并与改进欧拉方法（Heun/RK2）比较。</em>
+- [**Cálculo Numérico (REAMAT UFRGS, versão Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS Reamat · 第8章（常微分方程） · CC-BY-SA · <em>葡萄牙语完整覆盖：欧拉、Heun、RK4、自适应步长控制，附可运行的Python代码。</em>
+- [**Calculus Volume 2** (OpenStax)](https://openstax.org/details/books/calculus-volume-2) — OpenStax · §4.2 · CC-BY-NC-SA · <em>用方向场的图形解释呈现欧拉方法；包含近似值表的数值练习。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="推导与误差分析">
+
+### 初值问题
+
+给定初值问题：
+
+$$y' = f(x, y), \quad y(x_0) = y_0$$
+
+我们希望在 $x \in [x_0, X]$ 上逼近 $y(x)$，而无需闭形式表达式。
+
+### 离散化
+
+将区间分为 $N$ 个相等的子区间：
+
+$$h = \frac{X - x_0}{N}, \qquad x_n = x_0 + n\,h, \quad n = 0, 1, \ldots, N$$
+
+<Definicao titulo="欧拉显式方法（前进欧拉）">
+
+近似值 $y_n \approx y(x_n)$ 由递推关系给出：
+
+<Equation explicacao="每个 y_n+1 由 y 的图形在 (x_n, y_n) 处的切线估计，切线斜率为 f(x_n, y_n)。" latex="y_{n+1} = y_n + h\,f(x_n,\, y_n)" />
+
+几何上：我们沿着解曲线的切线前进一步，步长为 $h$。
+
+</Definicao>
+
+> "求解 $y' = f(x,y)$, $y(x_0) = y_0$ 的最简单数值方法是*欧拉方法*。我们用差分商 $(y_{n+1} - y_n)/h$ 替换 $y'$，并在 $x_n$ 处求 $f$：这给出 $y_{n+1} = y_n + hf(x_n, y_n)$。" — [Lebl, Notes on Diffy Qs §1.7](https://www.jirka.org/diffyqs/html/numer_section.html)
+
+### 泰勒级数误差分析
+
+<Definicao titulo="局部截断误差">
+
+在 $x_n$ 处进行泰勒展开：
+
+$$y(x_n + h) = y(x_n) + h\,y'(x_n) + \frac{h^2}{2}\,y''(\xi_n), \quad \xi_n \in (x_n, x_{n+1})$$
+
+因为 $y' = f(x,y)$，欧拉方法仅使用前两项。**局部误差**（每步）为：
+
+$$e_n = y(x_{n+1}) - y_{n+1} = \frac{h^2}{2}\,y''(\xi_n) = O(h^2)$$
+
+</Definicao>
+
+<Definicao titulo="全局截断误差">
+
+在 $N = (X-x_0)/h$ 步中，局部误差会累积：
+
+$$E = |y(X) - y_N| \leq C\,h \cdot N \cdot e_{\text{local}} = O(h)$$
+
+**欧拉方法是一阶的**：将 $h$ 减半只会将全局误差减半（不是四倍）。
+
+</Definicao>
+
+### 方法比较
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<g>
+  <rect x="10" y="10" width="540" height="30" rx="4" fill="rgb(26 77 92 / 0.15)"/>
+  <text x="20" y="30" fontSize="11" fontWeight="bold" fontFamily="sans-serif" fill="currentColor">方法</text>
+  <text x="170" y="30" fontSize="11" fontWeight="bold" fontFamily="sans-serif" fill="currentColor">全局阶</text>
+  <text x="300" y="30" fontSize="11" fontWeight="bold" fontFamily="sans-serif" fill="currentColor">每步 f 的评估次数</text>
+  <text x="470" y="30" fontSize="11" fontWeight="bold" fontFamily="sans-serif" fill="currentColor">成本</text>
+</g>
+<g>
+  <text x="20" y="60" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">欧拉（前进）</text>
+  <text x="170" y="60" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">O(h)</text>
+  <text x="300" y="60" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">1</text>
+  <text x="470" y="60" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">低</text>
+</g>
+<g>
+  <text x="20" y="85" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">Heun (RK2)</text>
+  <text x="170" y="85" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">O(h²)</text>
+  <text x="300" y="85" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">2</text>
+  <text x="470" y="85" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">中</text>
+</g>
+<g>
+  <text x="20" y="110" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">RK4（标准）</text>
+  <text x="170" y="110" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">O(h⁴)</text>
+  <text x="300" y="110" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">4</text>
+  <text x="470" y="110" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">高</text>
+</g>
+<g>
+  <text x="20" y="135" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">欧拉隐式</text>
+  <text x="170" y="135" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">O(h)</text>
+  <text x="300" y="135" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">1 + 求解</text>
+  <text x="470" y="135" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">中</text>
+</g>
+<g>
+  <text x="20" y="160" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">隐式欧拉</text>
+  <text x="170" y="160" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">1阶，A-稳定</text>
+  <text x="300" y="160" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">隐式</text>
+  <text x="470" y="160" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">刚性 OK</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+常微分方程单步方法的比较。RK4 是精度的行业标准；隐式欧拉用于刚性方程。
+</figcaption>
+</figure>
+
+<Teorema titulo="欧拉方法的收敛性">
+
+如果 $f$ 在 $y$ 中 Lipschitz 连续（常数 $L$）且 $y''$ 在 $[x_0, X]$ 中由 $M$ 界定，则：
+
+$$|y(x_n) - y_n| \leq \frac{Mh}{2L}\bigl(e^{L(x_n-x_0)} - 1\bigr)$$
+
+特别地，当 $h \to 0$ 时，$|y(X) - y_N| \to 0$：该方法**收敛**。
+
+</Teorema>
+
+<Insight>
+欧拉方法既是最简单的，也是精度最低的。其教学价值巨大：所有单步方法（龙格-库塔）的理论都是"跟随切线"基本思想的一般化。RK4 并不复杂四倍 — 只是同一思想用巧妙的权重应用四次。
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="对5岁孩子">
+
+想象你在地图上，想要找到宝藏。你不知道完整的路径，但你知道**现在应该朝哪个方向指向**。
+
+你朝那个方向迈一小步。停下来。再次查看现在指向哪里。又迈一步。重复。
+
+如果步子太大，你会走错路。如果步子太小，几乎能找到，但会花很长时间。
+
+**欧拉方法**对方程做完全一样的事 — 按照方程指示的方向迈步。
+
+</Porta>
+
+<Porta nivel="10" titulo="对10岁孩子">
+
+想象你想知道一个下落球的位置，但不知道精确公式。你知道每个时刻的速度：$v(t) = f(t, x)$。
+
+欧拉方法说：
+1. 从 $x_0$、$t_0$ 开始。
+2. 现在的速度是 $v_0 = f(t_0, x_0)$。
+3. 迈一步：$x_1 = x_0 + h \times v_0$，$t_1 = t_0 + h$。
+4. 重复：在 $t_1$ 的速度是 $v_1 = f(t_1, x_1)$。迈下一步：$x_2 = x_1 + h \times v_1$。
+
+步长 $h$ 越小越精确。全局误差与 $h$ 成正比 — 将步长减半会将误差减半。
+
+</Porta>
+
+<Porta nivel="15" titulo="对中学生">
+
+**欧拉方法**数值求解任何一阶常微分方程：
+
+$$y' = f(x, y), \quad y(x_0) = y_0$$
+
+**算法：**
+
+1. 选择一个步长 $h$（越小越精确，但越慢）。
+2. 对于 $n = 0, 1, 2, \ldots, N-1$：
+   - 计算 $f(x_n, y_n)$ — 当前点的斜率。
+   - $y_{n+1} = y_n + h \cdot f(x_n, y_n)$
+   - $x_{n+1} = x_n + h$
+
+**为什么有效？** 微分方程说曲线在 $(x_n, y_n)$ 处的斜率是 $f(x_n, y_n)$。具有该斜率的切线将我们引导到下一个点的估计值。
+
+**快速例子：** $y' = y$，$y(0) = 1$，$h = 0.1$，求 $y(0.3)$。
+
+- $y_1 = 1 + 0.1 \times 1 = 1.1$
+- $y_2 = 1.1 + 0.1 \times 1.1 = 1.21$
+- $y_3 = 1.21 + 0.1 \times 1.21 = 1.331$
+
+精确值：$e^{0.3} \approx 1.3499$。误差 $\approx 0.019$（1.4%）。
+
+</Porta>
+
+<Porta nivel="25" titulo="对工程学生">
+
+给定初值问题 $y' = f(x,y)$，$y(x_0) = y_0$，**显式欧拉方法**是：
+
+$$y_{n+1} = y_n + h\,f(x_n, y_n)$$
+
+**稳定性分析。** 对于测试方程 $y' = \lambda y$（$\lambda \in \mathbb{C}$）：
+
+$$y_{n+1} = (1 + h\lambda)\,y_n$$
+
+当 $|1 + h\lambda| < 1$ 时数值解衰减。对于 $\lambda = -a + i b$（$a > 0$）：稳定区域是平面 $h\lambda$ 中的圆盘 $|1 + h\lambda| < 1$。显式欧拉有**有限稳定区域** — 对于大 $h$ 即使 ODE 是稳定的也会失稳。这是刚性方程方法的基本问题。
+
+**隐式欧拉：** $y_{n+1} = y_n + h\,f(x_{n+1}, y_{n+1})$ — 求解 $y_{n+1}$ 的隐式方程。对于测试方程：当 $\Re(\lambda) < 0$ 时 $|1/(1-h\lambda)| < 1$ 始终成立 — **A-稳定**。
+
+**Heun 方法（RK2）：**
+
+$$k_1 = f(x_n, y_n), \quad k_2 = f(x_n + h, y_n + h k_1), \quad y_{n+1} = y_n + \frac{h}{2}(k_1 + k_2)$$
+
+全局误差 $O(h^2)$。把 $k_2$ 解释为欧拉点的斜率并对两个斜率求平均。
+
+**RK4 经典（四阶龙格-库塔）：**
+
+$$k_1 = f(x_n, y_n), \quad k_2 = f\!\left(x_n + \tfrac{h}{2}, y_n + \tfrac{h}{2}k_1\right)$$
+$$k_3 = f\!\left(x_n + \tfrac{h}{2}, y_n + \tfrac{h}{2}k_2\right), \quad k_4 = f(x_n + h, y_n + h k_3)$$
+$$y_{n+1} = y_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)$$
+
+全局误差 $O(h^4)$。非刚性 ODE 的行业标准。
+
+</Porta>
+
+<Porta nivel="40" titulo="对资深专业人士">
+
+欧拉方法始于1768年（发表于*Institutionum calculi integralis*，第一卷）。泰勒级数的误差分析和收敛性正式分析归功于柯西（1824）。现代龙格-库塔方法理论由卡尔·龙格（1895）和威廉·库塔（1901）开发，他们通过与 $y(x+h)$ 的截断泰勒级数比较来推导 RK4 系数。
+
+**现代视角。** 欧拉方法是单级一阶龙格-库塔方法。RK 的一般理论用**布彻表格**编码 — 矩阵 $(A, b, c)$ 描述每个方法的权重和节点。欧拉：$A = [0]$，$b = [1]$，$c = [0]$。RK4：$4 \times 4$ 表格，权重 $[1/6, 1/3, 1/3, 1/6]$。
+
+**刚性与隐式方法。** 刚性方程出现在雅可比矩阵 $\partial f/\partial y$ 有幅度差异很大的特征值时。显式方法如欧拉要求 $h$ 与最小特征值（最快的）成正比 — 成本非常高。A-稳定方法（隐式欧拉、Crank-Nicolson、BDF 方法）忽略稳定性问题，使用与感兴趣尺度成正比的 $h$。
+
+**工程应用：** 电力分配网络仿真（ANEEL 使用 PSCAD/EMTP — 隐式欧拉，步长10-50微秒），生化分子链仿真（简易欧拉保持相空间面积），轨道动力学（吉田辛形积分器）。
+
+**在巴西：** REAMAT（UFRGS）维护葡萄牙语工程中最常用的数值计算教科书，用 Python 和 Scilab 实现本课所有方法。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="巴西数据应用">
+
+**巴西初创公司增长。** 库里蒂巴一家金融科技公司以 $P'(t) = 0.15\,P(1 - P/10000)$ 客户/月增长（逻辑增长，容量10000）。初始条件 $P(0) = 500$，用欧拉方法 $h = 1$ 月模拟12个月。
+
+第0步：$f(0, 500) = 0.15 \times 500 \times (1 - 500/10000) = 71.25$。$P_1 = 500 + 71.25 \approx 571$。
+
+第1步：$f(1, 571) = 0.15 \times 571 \times (1 - 571/10000) \approx 80.7$。$P_2 \approx 652$。
+
+12次迭代后：$P(12) \approx 1750$ 客户。精确解（逻辑）：$\approx 1780$。误差：1.7%。
+
+**供水 — 流量 ODE。** 圣保罗供水公司一个储液池的流量 $Q(t)$（立方米/小时）服从 $Q' = -kQ^{0.5}$，$Q(0) = 10000$ m³。当 $k = 0.02$ 时，用 $h = 10$ 小时的欧拉方法：$Q_1 = 10000 - 0.02 \times 100 \times 10 = 9980$ m³。24步表给出 $Q(240) \approx 7100$ m³。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo numero="98.1" titulo="四步欧拉 — 指数型 ODE">
+
+**问题。** 使用步长 $h = 0.1$ 的欧拉方法逼近 $y(0.4)$，给定 $y' = -y$，$y(0) = 1$。与精确值比较。
+
+**策略。** 应用递推关系 $y_{n+1} = y_n + h(-y_n) = y_n(1-h)$ 四次。
+
+**求解。**
+
+| $n$ | $x_n$ | $y_n$ | $f = -y_n$ | $y_{n+1}$ |
+|---|---|---|---|---|
+| 0 | 0 | 1.0000 | -1.0000 | 0.9000 |
+| 1 | 0.1 | 0.9000 | -0.9000 | 0.8100 |
+| 2 | 0.2 | 0.8100 | -0.8100 | 0.7290 |
+| 3 | 0.3 | 0.7290 | -0.7290 | 0.6561 |
+
+$y_4 = 0.6561$。精确值：$e^{-0.4} \approx 0.6703$。相对误差：$\approx 2.12\%$。
+
+**验证。** 每步我们乘以 $(1-h) = 0.9$，所以 $y_4 = (0.9)^4 = 0.6561$ ✓。误差随 $h$ 增长 — 对于 $h = 0.05$，误差会降到 $\approx 1.06\%$。
+
+**来源。** [Lebl, Notes on Diffy Qs §1.7, Example 1.7.1](https://www.jirka.org/diffyqs/html/numer_section.html) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="98.2" titulo="非线性方程中的欧拉方法">
+
+**问题。** 估计 $y(1)$，给定 $y' = y^2$，$y(0) = 0.5$，使用欧拉方法，$h = 0.25$。
+
+**策略。** 精确解是 $y = 1/(2-x)$（在 $x = 2$ 处爆炸）。用4步到 $x = 1$。
+
+**求解。**
+
+$n=0$：$f(0, 0.5) = 0.25$。$y_1 = 0.5 + 0.25 \times 0.25 = 0.5625$。
+
+$n=1$：$f(0.25, 0.5625) = 0.31641$。$y_2 = 0.5625 + 0.25 \times 0.31641 = 0.6416$。
+
+$n=2$：$f(0.5, 0.6416) = 0.4117$。$y_3 = 0.6416 + 0.25 \times 0.4117 = 0.7445$。
+
+$n=3$：$f(0.75, 0.7445) = 0.5543$。$y_4 = 0.7445 + 0.25 \times 0.5543 = 0.8831$。
+
+精确值：$y(1) = 1/(2-1) = 1$。误差：11.7%。
+
+**验证。** 误差较大是因为 $f = y^2$ 在增长，且切线低估了曲线。减小到 $h = 0.1$（10步）会将误差降低到 $\approx 5.8\%$，确认一阶性。
+
+**来源。** [OpenStax Calculus Volume 2, §4.2, Example 4.2](https://openstax.org/books/calculus-volume-2/pages/4-2-direction-fields-and-eulers-method) — CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo numero="98.3" titulo="欧拉方法与 RK4 的比较">
+
+**问题。** 对于 $y' = x + y$，$y(0) = 1$，用 $h = 0.1$ 逼近 $y(0.2)$，使用(a)欧拉与(b)RK4。精确解：$y = 2e^x - x - 1$。
+
+**策略。** 应用每个方法的公式并比较误差。
+
+**求解。**
+
+精确值：$y(0.2) = 2e^{0.2} - 0.2 - 1 \approx 2 \times 1.2214 - 1.2 = 1.2428$。
+
+**(a) 欧拉：**
+
+$n=0$：$f(0,1) = 1$。$y_1 = 1 + 0.1 \times 1 = 1.1$。
+
+$n=1$：$f(0.1, 1.1) = 0.1 + 1.1 = 1.2$。$y_2 = 1.1 + 0.1 \times 1.2 = 1.22$。
+
+欧拉误差：$|1.2428 - 1.22| = 0.0228$。
+
+**(b) RK4（第 $n=0 \to n=1$ 步，$h=0.1$）：**
+
+$k_1 = 0 + 1 = 1$；$k_2 = (0.05) + (1 + 0.05) = 1.1$；$k_3 = 0.05 + (1 + 0.05) = 1.1$；$k_4 = 0.1 + (1 + 0.1) = 1.2$。
+
+$y_1 = 1 + (0.1/6)(1 + 2.2 + 2.2 + 1.2) = 1 + 0.1 \times 1.1\overline{0}\approx 1.1103$。
+
+RK4 误差（两步）：$< 10^{-6}$ — 比欧拉好几个数量级。
+
+**验证。** 当 $h$ 减半时误差比：欧拉 2:1（一阶）；RK4 16:1（四阶）✓。
+
+**来源。** [REAMAT UFRGS, Cálculo Numérico §8.3](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_metodos_de_runge-kutta.html) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="98.4" titulo="隐式欧拉 — 刚性方程的稳定性">
+
+**问题。** $y' = -100y$，$y(0) = 1$。比较显式欧拉，$h = 0.03$（不稳定）与 $h = 0.01$（稳定）。
+
+**策略。** 分析 $|1 + h\lambda|$，$\lambda = -100$。
+
+**求解。**
+
+显式欧拉的放大因子：$r = 1 + h\lambda = 1 - 100h$。
+
+- $h = 0.03$：$r = 1 - 3 = -2$。$|r| = 2 > 1$ — **不稳定**：$y_n = (-2)^n \to \pm\infty$。
+- $h = 0.01$：$r = 1 - 1 = 0$。$|r| = 0 < 1$ — 稳定（边界），$y_n = 0$ 一步内（过阻尼）。
+- $h = 0.02$：$r = 1 - 2 = -1$。$|r| = 1$ — 无阻尼振荡。
+
+欧拉稳定区域：对这个方程 $h < 2/|\lambda| = 0.02$。精确解 $e^{-100x}$ 在 $x \sim 0.01$ 衰减 — 步长远小于感兴趣的尺度。
+
+**验证。** 隐式欧拉：$r_{imp} = 1/(1-h\lambda) = 1/(1+100h)$。对任何 $h > 0$：$|r_{imp}| < 1$ ✓ — 始终稳定。
+
+**来源。** [REAMAT UFRGS, Cálculo Numérico §8.4](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_estabilidade_de_metodos_numericos.html) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="98.5" titulo="常微分方程组的欧拉方法 — 振荡器">
+
+**问题。** 系统 $x' = v$，$v' = -x$（简谐振荡器），初值：$x(0) = 1$，$v(0) = 0$，$h = 0.1$，模拟3步。
+
+**策略。** 同时对每个分量应用欧拉方法。
+
+**求解。**
+
+状态：$x_n$，$v_n$。函数 $f_1 = v$ 和 $f_2 = -x$。
+
+第0步：$x_0 = 1$，$v_0 = 0$。导数：$\dot x = 0$，$\dot v = -1$。
+
+$x_1 = 1 + 0.1 \times 0 = 1$；$v_1 = 0 + 0.1 \times (-1) = -0.1$。
+
+第1步：$x_1 = 1$，$v_1 = -0.1$。导数：$\dot x = -0.1$，$\dot v = -1$。
+
+$x_2 = 1 + 0.1 \times (-0.1) = 0.99$；$v_2 = -0.1 + 0.1 \times (-1) = -0.2$。
+
+第2步：$x_2 = 0.99$，$v_2 = -0.2$。导数：$\dot x = -0.2$，$\dot v = -0.99$。
+
+$x_3 = 0.99 + 0.1 \times (-0.2) = 0.97$；$v_3 = -0.2 + 0.1 \times (-0.99) = -0.299$。
+
+在 $t = 0.3$ 时精确值：$x = \cos(0.3) \approx 0.9553$，$v = -\sin(0.3) \approx -0.2955$。欧拉高估 $x$ — 不保持能量。辛欧拉方法解决这个问题：先计算 $v_{n+1}$，再用它计算 $x_{n+1}$。
+
+**来源。** [Lebl, Notes on Diffy Qs §1.7, Exercise 1.7.4](https://www.jirka.org/diffyqs/html/numer_section.html) — CC-BY-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-98-euler-numerico">
+
+<Exercicio
+  numero="98.1"
+  dificuldade="aplicacao"
+  solucao={<>用 <Eq>{`h=0.5`}</Eq> 的2步表：<Eq>{`y_1 = 0 + 0.5 \\times f(0, 0) = 0`}</Eq>；<Eq>{`y_2 = 0 + 0.5 \\times f(0.5, 0) = 0`}</Eq>。函数恒为零满足 <Eq>{`y'=y^2`}</Eq>，<Eq>{`y(0)=0`}</Eq>。精确值：<Eq>{`y(x) \\equiv 0`}</Eq>。误差：0。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "48", exercicio: "Exercise 1.7.1", licenca: "CC-BY-SA" }}
+>
+使用 $h = 0.5$ 的欧拉方法逼近 $y(1)$，给定 $y' = y^2$，$y(0) = 0$。
+</Exercicio>
+
+<Exercicio
+  numero="98.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`y_1 = 1 + 0.1 \\times (0 + 1) = 1.1`}</Eq>；<Eq>{`y_2 = 1.1 + 0.1 \\times (0.1 + 1.1) = 1.22`}</Eq>。精确值：<Eq>{`y = 2e^x - x - 1`}</Eq>；<Eq>{`y(0.2) \\approx 1.2428`}</Eq>。误差：0.0228（≈ 1.8%）。</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`f(x, y) = x + y`}</Eq>。第0步：<Eq>{`f(0, 1) = 1`}</Eq>。</li>
+      <li><Eq>{`y_1 = 1 + 0.1 \\times 1 = 1.1`}</Eq>。</li>
+      <li>第1步：<Eq>{`f(0.1, 1.1) = 0.1 + 1.1 = 1.2`}</Eq>。</li>
+      <li><Eq>{`y_2 = 1.1 + 0.1 \\times 1.2 = 1.22`}</Eq>。</li>
+      <em>技巧：</em>创建有 n、<Eq>{`x_n`}</Eq>、<Eq>{`y_n`}</Eq>、<Eq>{`f_n`}</Eq>、<Eq>{`y_{n+1}`}</Eq> 列的表 — 避免传播误差。
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-2-direction-fields-and-eulers-method", secao: "§4.2", pagina: "384", exercicio: "Example 4.2", licenca: "CC-BY-NC-SA" }}
+>
+使用 $h = 0.1$ 的欧拉方法逼近 $y(0.2)$，给定 $y' = x + y$，$y(0) = 1$。与精确值 $y = 2e^x - x - 1$ 比较。
+</Exercicio>
+
+<Exercicio
+  numero="98.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x,y) = -y`}</Eq>。<Eq>{`y_1 = 0.75`}</Eq>；<Eq>{`y_2 = 0.5625`}</Eq>；<Eq>{`y_3 \\approx 0.4219`}</Eq>；<Eq>{`y_4 \\approx 0.3164`}</Eq>。精确值：<Eq>{`e^{-1} \\approx 0.3679`}</Eq>。误差：14%。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "49", exercicio: "Exercise 1.7.2", licenca: "CC-BY-SA" }}
+>
+使用 $h = 0.25$ 的欧拉方法逼近 $y(1)$，给定 $y' = -y$，$y(0) = 1$。精确值：$e^{-1}$。
+</Exercicio>
+
+<Exercicio
+  numero="98.4"
+  dificuldade="aplicacao"
+  solucao={<>当 <Eq>{`h=0.25`}</Eq>（4步）：误差 ≈ 14%。当 <Eq>{`h=0.1`}</Eq>（10步）：<Eq>{`y_{10} = (0.9)^{10} = 0.3487`}</Eq>。误差：<Eq>{`|0.3679 - 0.3487|/0.3679 \\approx 5.2\\%`}</Eq>。误差比：<Eq>{`14/5.2 \\approx 2.7`}</Eq> ≈ 2.5 — 与一阶一致。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "49", exercicio: "Exercise 1.7.3", licenca: "CC-BY-SA" }}
+>
+重复练习 98.3，$h = 0.1$。比较误差并验证该方法的一阶性。
+</Exercicio>
+
+<Exercicio
+  numero="98.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`y' = 2x`}</Eq>，<Eq>{`y(0) = 0`}</Eq>。<Eq>{`y_1 = 0`}</Eq>；<Eq>{`y_2 = 0.5`}</Eq>；<Eq>{`y_3 = 1.5`}</Eq>；<Eq>{`y_4 = 3`}</Eq>。精确值：<Eq>{`y(2) = 4`}</Eq>。误差：25%。欧拉低估增函数的积分。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-2-direction-fields-and-eulers-method", secao: "§4.2", pagina: "384", exercicio: "Exercise 4.2.1", licenca: "CC-BY-NC-SA" }}
+>
+使用 $h = 0.5$ 的欧拉方法求 $y' = 2x$，$y(0) = 0$，并估计 $y(2)$。与精确值比较。
+</Exercicio>
+
+<Exercicio
+  numero="98.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f = y - x^2 + 1`}</Eq>。第0步：<Eq>{`f(0, 0.5) = 1.5`}</Eq>。<Eq>{`y_1 = 0.8`}</Eq>。第1步：<Eq>{`f(0.2, 0.8) = 1.76`}</Eq>。<Eq>{`y_2 = 1.152`}</Eq>。精确值：<Eq>{`y(0.4) \\approx 1.2141`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-2-direction-fields-and-eulers-method", secao: "§4.2", pagina: "385", exercicio: "Exercise 4.2.2", licenca: "CC-BY-NC-SA" }}
+>
+使用 $h = 0.2$ 的欧拉方法求 $y' = y - x^2 + 1$，$y(0) = 0.5$，并估计 $y(0.4)$。
+</Exercicio>
+
+<Exercicio
+  numero="98.7"
+  dificuldade="aplicacao"
+  solucao={<>局部误差：<Eq>{`e_n = \\frac{h^2}{2}y''(\\xi)`}</Eq>。当 <Eq>{`y = e^x`}</Eq>：<Eq>{`y'' = e^x \\leq e^1 \\approx 2.718`}</Eq> 在 <Eq>{`[0,1]`}</Eq>。界：<Eq>{`|e_n| \\leq \\frac{h^2}{2} \\times 2.718`}</Eq>。当 <Eq>{`h = 0.1`}</Eq>：<Eq>{`|e_n| \\leq 0.01359`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "50", exercicio: "Exercise 1.7.5", licenca: "CC-BY-SA" }}
+>
+对于 $y' = y$，$y(0) = 1$，使用 $h = 0.1$ 估计欧拉方法在 $[0, 1]$ 上的局部误差。
+</Exercicio>
+
+<Exercicio
+  numero="98.8"
+  dificuldade="aplicacao"
+  solucao={<>放大因子：<Eq>{`r = 1 + h\\lambda`}</Eq>。对于 <Eq>{`\\lambda = -2`}</Eq>：<Eq>{`r = 1 - 2h`}</Eq>。稳定性：<Eq>{`|r| < 1 \\Rightarrow |1-2h| < 1 \\Rightarrow 0 < h < 1`}</Eq>。上限：<Eq>{`h_{\\max} = 1`}</Eq>。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_estabilidade_de_metodos_numericos.html", secao: "Cap. 8", pagina: "Seção 8.4", exercicio: "Exercício 8.4.1", licenca: "CC-BY-SA" }}
+>
+确定欧拉显式方法在 $y' = -2y$ 中稳定性的最大步长 $h_{\max}$。
+</Exercicio>
+
+<Exercicio
+  numero="98.9"
+  dificuldade="aplicacao"
+  solucao={<>隐式欧拉：<Eq>{`y_{n+1} = y_n + h(-y_{n+1}) \\Rightarrow y_{n+1}(1+h) = y_n \\Rightarrow y_{n+1} = y_n/(1+h)`}</Eq>。当 <Eq>{`h = 0.5`}</Eq>，2步：<Eq>{`y_2 = 1/(1.5)^2 = 0.4444`}</Eq>。精确值：<Eq>{`e^{-1} \\approx 0.3679`}</Eq>。隐式欧拉高估，但对任何 <Eq>{`h`}</Eq> 稳定。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_metodo_de_euler.html", secao: "Cap. 8", pagina: "Seção 8.2", exercicio: "Exercício 8.2.3", licenca: "CC-BY-SA" }}
+>
+应用隐式欧拉，$h = 0.5$，求 $y' = -y$，$y(0) = 1$，并估计 $y(1)$。
+</Exercicio>
+
+<Exercicio
+  numero="98.10"
+  dificuldade="aplicacao"
+  solucao={<>Heun (RK2)：<Eq>{`k_1 = f(x_0, y_0)`}</Eq>；<Eq>{`k_2 = f(x_0+h, y_0+hk_1)`}</Eq>；<Eq>{`y_1 = y_0 + (h/2)(k_1+k_2)`}</Eq>。当 <Eq>{`f = -y`}</Eq>，<Eq>{`y_0 = 1`}</Eq>，<Eq>{`h = 0.5`}</Eq>：<Eq>{`k_1 = -1`}</Eq>；<Eq>{`k_2 = -0.5`}</Eq>；<Eq>{`y_1 = 0.625`}</Eq>。精确值：<Eq>{`e^{-0.5} \\approx 0.6065`}</Eq>。误差：3%。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_metodos_de_runge-kutta.html", secao: "Cap. 8", pagina: "Seção 8.3", exercicio: "Exercício 8.3.1", licenca: "CC-BY-SA" }}
+>
+应用 Heun 方法（RK2），$h = 0.5$，求 $y' = -y$，$y(0) = 1$，并估计 $y(0.5)$。
+</Exercicio>
+
+<Exercicio
+  numero="98.11"
+  dificuldade="aplicacao"
+  solucao={<>当 <Eq>{`h = 0.1`}</Eq>：欧拉误差 <Eq>{`\\approx 0.019`}</Eq>。当 <Eq>{`h = 0.05`}</Eq>：欧拉误差 <Eq>{`\\approx 0.0095 \\approx 0.019/2`}</Eq>。比例 2:1 ✓（一阶方法）。当 RK4 和 <Eq>{`h = 0.1`}</Eq>：误差 <Eq>{`< 10^{-6}`}</Eq>（四阶方法）。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_metodos_de_runge-kutta.html", secao: "Cap. 8", pagina: "Seção 8.3", exercicio: "Exercício 8.3.2", licenca: "CC-BY-SA" }}
+>
+对于 $y' = x + y$，$y(0) = 1$：分别用 $h = 0.1$ 和 $h = 0.05$ 的欧拉方法计算 $y(0.2)$ 的误差。验证一阶性。
+</Exercicio>
+
+<Exercicio
+  numero="98.12"
+  dificuldade="aplicacao"
+  solucao={<>达到误差 <Eq>{`< 10^{-4}`}</Eq> 的步数：对于一阶方法，<Eq>{`N \\sim C/h \\sim C h^{-1}`}</Eq>。对误差 <Eq>{`\\epsilon`}</Eq>：<Eq>{`h \\sim C\\epsilon`}</Eq>。估计：<Eq>{`h \\approx 10^{-4}/|M|`}</Eq> 其中 <Eq>{`M = \\max |y''|`}</Eq>。对 <Eq>{`y = e^x`}</Eq> 在 <Eq>{`[0,1]`}</Eq>：<Eq>{`h \\approx 10^{-4}/e \\approx 3.68 \\times 10^{-5}`}</Eq>，所以 <Eq>{`N \\approx 27000`}</Eq> 步。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "51", exercicio: "Exercise 1.7.6", licenca: "CC-BY-SA" }}
+>
+对于 $y' = y$，$y(0) = 1$，在 $[0, 1]$ 上全局误差小于 $10^{-4}$ 需要多少步欧拉方法？
+</Exercicio>
+
+<Exercicio
+  numero="98.13"
+  dificuldade="aplicacao"
+  solucao={<>系统：<Eq>{`x' = v`}</Eq>，<Eq>{`v' = -\\omega^2 x`}</Eq> 当 <Eq>{`\\omega = 1`}</Eq>。欧拉：<Eq>{`x_{n+1} = x_n + hv_n`}</Eq>；<Eq>{`v_{n+1} = v_n - h\\omega^2 x_n`}</Eq>。当 <Eq>{`x_0 = 1`}</Eq>，<Eq>{`v_0 = 0`}</Eq>，<Eq>{`h = 0.1`}</Eq>：第1步：<Eq>{`x_1=1`}</Eq>，<Eq>{`v_1=-0.1`}</Eq>；第2步：<Eq>{`x_2=0.99`}</Eq>，<Eq>{`v_2=-0.2`}</Eq>；第3步：<Eq>{`x_3=0.97`}</Eq>，<Eq>{`v_3=-0.299`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "51", exercicio: "Exercise 1.7.4", licenca: "CC-BY-SA" }}
+>
+模拟振荡器 $x'' + x = 0$，$x(0) = 1$，$x'(0) = 0$，使用欧拉方法，$h = 0.1$。计算 $(x_1, v_1)$、$(x_2, v_2)$、$(x_3, v_3)$。
+</Exercicio>
+
+<Exercicio
+  numero="98.14"
+  dificuldade="aplicacao"
+  solucao={<>能量 <Eq>{`E = (x^2 + v^2)/2`}</Eq> 应该是常数。用欧拉：<Eq>{`E_0 = 1/2`}</Eq>；<Eq>{`E_1 = (1^2 + 0.1^2)/2 = 0.505`}</Eq> — 增加。欧拉不保持能量（不是辛的）。辛欧拉：<Eq>{`v_{n+1} = v_n - hx_n`}</Eq>，然后 <Eq>{`x_{n+1} = x_n + hv_{n+1}`}</Eq>：精确保持能量。</>}
+  passos={<>
+    <ol>
+      <li>计算 <Eq>{`E_0 = (x_0^2 + v_0^2)/2 = 0.5`}</Eq>。</li>
+      <li>欧拉1步后：<Eq>{`x_1 = 1`}</Eq>，<Eq>{`v_1 = -0.1`}</Eq>。</li>
+      <li><Eq>{`E_1 = (1 + 0.01)/2 = 0.505`}</Eq> — 能量高于 <Eq>{`E_0 = 0.5`}</Eq>！</li>
+      <li>辛欧拉：<Eq>{`v_1 = 0 - 0.1 \\times 1 = -0.1`}</Eq>；<Eq>{`x_1 = 1 + 0.1 \\times (-0.1) = 0.99`}</Eq>。</li>
+      <li><Eq>{`E_1^{\\text{simp}} = (0.9801 + 0.01)/2 = 0.4951 \\approx 0.5`}</Eq>（舍入误差略低；实际精确保持）。</li>
+      <em>注：</em>辛积分器在轨道动力学和分子模拟中必不可少 — 标准欧拉使行星螺旋飞出轨道。
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "52", exercicio: "Exercise 1.7.7", licenca: "CC-BY-SA" }}
+>
+验证欧拉方法不保持振荡器 $x'' + x = 0$ 的能量。与辛欧拉比较。
+</Exercicio>
+
+<Exercicio
+  numero="98.15"
+  dificuldade="modelagem"
+  solucao={<>逻辑增长：<Eq>{`P' = 0.3P(1 - P/1000)`}</Eq>。当 <Eq>{`P_0 = 100`}</Eq>，<Eq>{`h = 1`}</Eq>：<Eq>{`f(0, 100) = 0.3 \\times 100 \\times 0.9 = 27`}</Eq>。<Eq>{`P_1 = 127`}</Eq>。<Eq>{`f(1, 127) = 0.3 \\times 127 \\times 0.873 \\approx 33.2`}</Eq>。<Eq>{`P_2 \\approx 160`}</Eq>。继续12步。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-2-direction-fields-and-eulers-method", secao: "§4.2", pagina: "386", exercicio: "Exercise 4.2.3", licenca: "CC-BY-NC-SA" }}
+>
+$P' = 0.3P(1 - P/1000)$，$P(0) = 100$。使用 $h = 1$ 的欧拉方法估计 $P(12)$（12个月）。画出计算点的草图。
+</Exercicio>
+
+<Exercicio
+  numero="98.16"
+  dificuldade="modelagem"
+  solucao={<>RLC：<Eq>{`L\\ddot Q + R\\dot Q + Q/C = 0`}</Eq>。重写为系统：<Eq>{`Q' = I`}</Eq>，<Eq>{`I' = (-RI - Q/C)/L`}</Eq>。欧拉：<Eq>{`Q_{n+1} = Q_n + hI_n`}</Eq>；<Eq>{`I_{n+1} = I_n + h(-RI_n - Q_n/C)/L`}</Eq>。用数据：模拟欠阻尼衰减。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "52", exercicio: "Exercise 1.7.8", licenca: "CC-BY-SA" }}
+>
+RLC 电路：$L = 1$ H，$R = 0.5$ &#x3A9;，$C = 1$ F，$Q(0) = 1$，$I(0) = 0$。使用 $h = 0.1$ 的欧拉方法模拟 $Q(t)$ 3步。
+</Exercicio>
+
+<Exercicio
+  numero="98.17"
+  dificuldade="modelagem"
+  solucao={<>冷却：<Eq>{`T' = -0.1(T - 20)`}</Eq>。当 <Eq>{`T_0 = 90`}</Eq> °C，<Eq>{`h = 5`}</Eq> 分钟：<Eq>{`f(0, 90) = -0.1(70) = -7`}</Eq>。<Eq>{`T_1 = 90 - 35 = 55`}</Eq> °C。<Eq>{`f(5, 55) = -0.1(35) = -3.5`}</Eq>。<Eq>{`T_2 = 55 - 17.5 = 37.5`}</Eq> °C。精确值10分钟：<Eq>{`20 + 70e^{-1} \\approx 45.7`}</Eq> °C。误差：18%。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-3-separable-equations", secao: "§4.3", pagina: "395", exercicio: "Exercise 4.3.2", licenca: "CC-BY-NC-SA" }}
+>
+$T' = -0.1(T - 20)$，$T(0) = 90$ °C。使用 $h = 5$ 分钟的欧拉方法估计 $T(10)$。
+</Exercicio>
+
+<Exercicio
+  numero="98.18"
+  dificuldade="modelagem"
+  solucao={<>放射性衰变：<Eq>{`N' = -\\lambda N`}</Eq> 半衰期 <Eq>{`T_{1/2} = 5730`}</Eq> 年和 <Eq>{`\\lambda = \\ln 2/T_{1/2}`}</Eq>。欧拉 $h = 500$ 年，10步：<Eq>{`r = 1 - \\lambda h \\approx 0.9400`}</Eq>。<Eq>{`N_{10} = N_0 (0.9400)^{10} \\approx 0.5389 N_0`}</Eq>。精确值：<Eq>{`N_0 e^{-\\lambda \\times 5000} \\approx 0.5453 N_0`}</Eq>。误差：1.2%。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "49", exercicio: "Exercise 1.7.3", licenca: "CC-BY-SA" }}
+>
+碳-14的半衰期为5730年。使用 $h = 500$ 年的欧拉方法估计5000年后剩余的分数。
+</Exercicio>
+
+<Exercicio
+  numero="98.19"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "全局误差为 O(h) 是因为累积了 N = (X-x0)/h 个 O(h²) 的局部误差", correta: true },
+    { texto: "全局误差为 O(h²) — 等于每步的局部误差" },
+    { texto: "全局误差对线性 ODE 是 O(h⁴)" },
+    { texto: "全局误差与 h 无关（光滑函数）" }
+  ]}
+  solucao={<>每步局部误差：<Eq>{`O(h^2)`}</Eq>。步数：<Eq>{`N = (X-x_0)/h`}</Eq>。累积全局误差：<Eq>{`N \\times O(h^2) = O(h^2/h) = O(h)`}</Eq>。将 <Eq>{`h`}</Eq> 减半会将全局误差减半（不是四倍）。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "50", exercicio: "Exercise 1.7.6", licenca: "CC-BY-SA" }}
+>
+为什么欧拉方法的全局误差为 $O(h)$（即使每步的局部误差为 $O(h^2)$）？
+</Exercicio>
+
+<Exercicio
+  numero="98.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "当 ODE 有幅度差异很大的特征值时（刚性/stiff 方程）", correta: true },
+    { texto: "当精确解是三角的" },
+    { texto: "当积分区间很短时" },
+    { texto: "当初始条件为零时" }
+  ]}
+  solucao={<>欧拉显式要求 <Eq>{`h < 2/|\\text{Re}(\\lambda)|`}</Eq> 以保证稳定性。在刚性方程中，<Eq>{`|\\lambda_{\\max}|`}</Eq> 很大，迫使极小的步长 — 成本禁止。A-稳定方法（隐式欧拉、Crank-Nicolson）没有这种限制。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_estabilidade_de_metodos_numericos.html", secao: "Cap. 8", pagina: "Seção 8.4", exercicio: "Exercício 8.4.3", licenca: "CC-BY-SA" }}
+>
+欧拉显式方法在什么情况下因数值不稳定性而变得不可用？
+</Exercicio>
+
+<Exercicio
+  numero="98.21"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "RK4 每步在4个点评估 f，误差 O(h⁴)，对同样精度比欧拉高效得多", correta: true },
+    { texto: "RK4 是隐式的，因此更稳定" },
+    { texto: "RK4 与欧拉阶数相同，但更稳定" },
+    { texto: "RK4 自动使用自适应步长" }
+  ]}
+  solucao={<>RK4 在区间 <Eq>{`[x_n, x_{n+1}]`}</Eq> 的4个中间点评估 <Eq>{`f`}</Eq>，权重为 <Eq>{`[1/6, 1/3, 1/3, 1/6]`}</Eq>。全局误差 <Eq>{`O(h^4)`}</Eq>：对同样精度，RK4 使用的步数是欧拉的 <Eq>{`N^{1/4}`}</Eq> 倍。RK4 是显式 — 不是无条件稳定的。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_metodos_de_runge-kutta.html", secao: "Cap. 8", pagina: "Seção 8.3", exercicio: "Exercício 8.3.4", licenca: "CC-BY-SA" }}
+>
+RK4 相比欧拉方法的主要优势是什么？
+</Exercicio>
+
+<Exercicio
+  numero="98.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`y' = \\cos x`}</Eq>，<Eq>{`y(0) = 0`}</Eq>。精确值：<Eq>{`y = \\sin x`}</Eq>。欧拉 <Eq>{`h = \\pi/4`}</Eq>（2步到 <Eq>{`\\pi/2`}</Eq>）：<Eq>{`y_1 = 0 + (\\pi/4)\\cos 0 = \\pi/4 \\approx 0.7854`}</Eq>。<Eq>{`y_2 = 0.7854 + (\\pi/4)\\cos(\\pi/4) \\approx 0.7854 + 0.5554 = 1.341`}</Eq>。精确值：<Eq>{`\\sin(\\pi/2) = 1`}</Eq>。误差：34%。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-2-direction-fields-and-eulers-method", secao: "§4.2", pagina: "384", exercicio: "Exercise 4.2.4", licenca: "CC-BY-NC-SA" }}
+>
+使用 $h = \pi/4$ 的欧拉方法逼近 $y(\pi/2)$，给定 $y' = \cos x$，$y(0) = 0$。与 $\sin(\pi/2) = 1$ 比较。
+</Exercicio>
+
+<Exercicio
+  numero="98.23"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`y' = \\sqrt{y}`}</Eq>，<Eq>{`y(0) = 1`}</Eq>。精确值：<Eq>{`y = (x/2 + 1)^2`}</Eq>。当 <Eq>{`h = 0.5`}</Eq>：<Eq>{`y_1 = 1 + 0.5 \\times 1 = 1.5`}</Eq>；<Eq>{`y_2 = 1.5 + 0.5\\sqrt{1.5} \\approx 2.112`}</Eq>。精确值在 <Eq>{`x = 1`}</Eq>：<Eq>{`(1.5)^2 = 2.25`}</Eq>。误差：6%。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "49", exercicio: "Exercise 1.7.2", licenca: "CC-BY-SA" }}
+>
+使用 $h = 0.5$ 的欧拉方法求 $y' = \sqrt{y}$，$y(0) = 1$。估计 $y(1)$ 并与精确值 $(1.5)^2 = 2.25$ 比较。
+</Exercicio>
+
+<Exercicio
+  numero="98.24"
+  dificuldade="aplicacao"
+  solucao={<>Heun：<Eq>{`k_1 = f(x_0, y_0) = \\sqrt{1} = 1`}</Eq>；<Eq>{`k_2 = f(0.5, 1.5) = \\sqrt{1.5} \\approx 1.225`}</Eq>；<Eq>{`y_1 = 1 + (0.5/2)(1 + 1.225) = 1 + 0.556 = 1.556`}</Eq>。Heun 在 <Eq>{`x=0.5`}</Eq> 的误差：<Eq>{`|1.556 - 1.5625| = 0.006`}</Eq> vs 欧拉 <Eq>{`0.0625`}</Eq> — Heun 好10倍。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_metodos_de_runge-kutta.html", secao: "Cap. 8", pagina: "Seção 8.3", exercicio: "Exercício 8.3.1", licenca: "CC-BY-SA" }}
+>
+对于 $y' = \sqrt{y}$，$y(0) = 1$，用 $h = 0.5$ 比较欧拉与 Heun (RK2) 来估计 $y(0.5)$。精确值：$y(0.5) = (1.25)^2 = 1.5625$。
+</Exercicio>
+
+<Exercicio
+  numero="98.25"
+  dificuldade="modelagem"
+  solucao={<>对阶 <Eq>{`p`}</Eq>，将 <Eq>{`h`}</Eq> 减半会将误差减 <Eq>{`2^p`}</Eq>。用两个 <Eq>{`h`}</Eq> 值：<Eq>{`p \\approx \\log_2(E_1/E_2)`}</Eq> 其中 <Eq>{`E_1, E_2`}</Eq> 是 <Eq>{`h`}</Eq> 和 <Eq>{`h/2`}</Eq> 的误差。如果 <Eq>{`E_1 = 0.02`}</Eq> 和 <Eq>{`E_2 = 0.01`}</Eq>：<Eq>{`p = \\log_2(2) = 1`}</Eq> — 欧拉一阶。如果 <Eq>{`E_2 = 0.00125`}</Eq>：<Eq>{`p = \\log_2(16) = 4`}</Eq> — RK4。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_analise_de_erro.html", secao: "Cap. 8", pagina: "Seção 8.5", exercicio: "Exercício 8.5.1", licenca: "CC-BY-SA" }}
+>
+描述如何通过比较 $h$ 和 $h/2$ 的误差来实验验证数值方法的阶。
+</Exercicio>
+
+<Exercicio
+  numero="98.26"
+  dificuldade="demonstracao"
+  solucao={<>由泰勒展开：<Eq>{`y(x_n + h) = y(x_n) + h y'(x_n) + \\tfrac{h^2}{2}y''(\\xi_n)`}</Eq>。欧拉只用前两项。相减：局部误差 <Eq>{`= \\tfrac{h^2}{2}y''(\\xi_n) = O(h^2)`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/numer_section.html", secao: "§1.7", pagina: "50", exercicio: "Exercise 1.7.5 (derivação)", licenca: "CC-BY-SA" }}
+>
+使用 $x_n$ 处 $y(x_{n+1})$ 的泰勒级数推导欧拉方法的局部误差。
+</Exercicio>
+
+<Exercicio
+  numero="98.27"
+  dificuldade="demonstracao"
+  solucao={<>放大因子：<Eq>{`r = 1 + h\\lambda`}</Eq>。稳定性：<Eq>{`|r| < 1`}</Eq>。对于 <Eq>{`\\lambda = \\alpha + i\\beta`}</Eq>（复数）：<Eq>{`|1 + h\\lambda|^2 = (1 + h\\alpha)^2 + (h\\beta)^2 < 1`}</Eq>。几何上：以平面 <Eq>{`h\\lambda`}</Eq> 中的 <Eq>{`-1`}</Eq> 为中心、半径为 1 的圆盘。对实负 <Eq>{`\\lambda`}</Eq>：<Eq>{`0 < h < -2/\\lambda`}</Eq>。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_estabilidade_de_metodos_numericos.html", secao: "Cap. 8", pagina: "Seção 8.4", exercicio: "Exercício 8.4.2", licenca: "CC-BY-SA" }}
+>
+推导平面 $h\lambda$ 中欧拉显式方法的稳定区域，并表明它是圆盘 $|1 + h\lambda| < 1$。
+</Exercicio>
+
+<Exercicio
+  numero="98.28"
+  dificuldade="desafio"
+  solucao={<>RK4 用 <Eq>{`h = 0.1`}</Eq> 1步：<Eq>{`k_1 = f(0, 1) = 1`}</Eq>；<Eq>{`k_2 = f(0.05, 1.05) = 1.05`}</Eq>；<Eq>{`k_3 = f(0.05, 1.0525) = 1.0525`}</Eq>；<Eq>{`k_4 = f(0.1, 1.10525) = 1.10525`}</Eq>。<Eq>{`y_1 = 1 + (0.1/6)(1 + 2.1 + 2.105 + 1.10525) = 1 + (0.1/6)(6.31025) \\approx 1.10517`}</Eq>。精确值：<Eq>{`e^{0.1} = 1.10517`}</Eq>。误差：<Eq>{`< 10^{-7}`}</Eq>。</>}
+  fonte={{ livro: "REAMAT UFRGS, Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/s_metodos_de_runge-kutta.html", secao: "Cap. 8", pagina: "Seção 8.3", exercicio: "Exercício 8.3.3", licenca: "CC-BY-SA" }}
+>
+应用 RK4，$h = 0.1$，求 $y' = y$，$y(0) = 1$。将误差与欧拉比较，并确认 RK4 是四阶的。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- **Lebl, Jiří.** *Notes on Diffy Qs: Differential Equations for Engineers.* 版本 6.4。CC-BY-SA。[jirka.org/diffyqs](https://www.jirka.org/diffyqs/) — §1.7 涵盖欧拉方法和泰勒级数误差分析。
+- **UFRGS Reamat.** *Cálculo Numérico (versão Python).* CC-BY-SA。[ufrgs.br/reamat/CalculoNumerico](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — 第8章：欧拉、Heun、RK4、稳定性和误差分析，附葡萄牙语 Python 代码。
+- **OpenStax.** *Calculus Volume 2.* CC-BY-NC-SA。[openstax.org/details/books/calculus-volume-2](https://openstax.org/details/books/calculus-volume-2) — §4.2：方向场和欧拉方法，含图形解释。

@@ -1,0 +1,818 @@
+---
+titulo: "Lição 72 — Variância e desvio padrão"
+slug: "licao-72-variancia"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Dispersão estatística: quanto os dados se afastam da média. Variância populacional e amostral, desvio padrão, fórmula computacional, propriedades de linearidade e independência."
+ordem: 72
+publicado: true
+tags: ["estatística", "variância", "desvio padrão", "dispersão", "ano-2", "trim-8"]
+prerrequisitos: ["licao-71-media-moda-mediana"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "Equiv. H2 Statistics singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\sigma^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^2"
+  legenda={<>Die <strong>Varianz</strong> ist das Mittel der <em>quadrierten Abweichungen</em>. Für eine Population von <Eq>{`n`}</Eq> Werten mit Mittelwert <Eq>{`\\bar{x}`}</Eq> wird jede Abweichung <Eq>{`(x_i - \\bar{x})`}</Eq> quadriert — damit sich positive und negative Abweichungen nicht aufheben — und dann wird der Durchschnitt genommen. Die <strong>Standardabweichung</strong> <Eq>{`\\sigma = \\sqrt{\\sigma^2}`}</Eq> gibt die Streuung in der ursprünglichen Einheit der Daten an.</>}
+  audioTexto="Varianz Sigma-Quadrat: Summe jedes Wertes minus dem Mittelwert, quadriert, geteilt durch n. Standardabweichung Sigma ist die Quadratwurzel der Varianz, mit der gleichen Einheit wie die Daten."
+/>
+
+<aside>
+
+**Bücher, die diese Lektion behandeln**
+
+- [**OpenIntro Statistics** — Diez, Çetinkaya-Rundel, Barr (4. Aufl.)](https://www.openintro.org/book/os/) · §2.1–§2.2 · CC-BY-SA · <em>Primärquelle: Definitionen von Stichprobenvarianz, Standardabweichung und Boxplot; Beispiele mit echten Daten aus Biologie und Sozialwissenschaften.</em>
+
+- [**Statistics** — Illowsky, Dean (OpenStax)](https://openstax.org/details/books/statistics) · §2.7 · CC-BY · <em>Umfassende Behandlung von Dispersionsmaßen mit Anwendungen auf Bildung, Gesundheit und Finanzen; Rechenformel und Berechnung mit Rechner.</em>
+
+- [**Introduction to Probability** — Grinstead, Snell (Dartmouth)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) · Ch. 6 · GNU FDL · <em>Varianz diskreter Zufallsvariablen, algebraische Eigenschaften, Tschebyscheff-Ungleichung und Verbindung zum Gesetz der großen Zahlen.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Strenge Definition">
+
+### Varianz und Standardabweichung — Population und Stichprobe
+
+<Definicao titulo="Populationsvarianz und Standardabweichung">
+
+Gegeben eine endliche Population $\{x_1, x_2, \ldots, x_n\}$ mit arithmetischem Mittelwert $\mu = \frac{1}{n}\sum_{i=1}^{n} x_i$:
+
+<Equation explicacao="Populationsvarianz: Durchschnitt der Quadrate der Abweichungen vom Mittelwert." latex="\sigma^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i - \mu)^2" />
+
+<Equation explicacao="Populationsstandardabweichung: Quadratwurzel der Varianz; hat die gleiche Einheit wie die Daten." latex="\sigma = \sqrt{\sigma^2} \geq 0" />
+
+</Definicao>
+
+> "Varianz ist mehr oder weniger die mittlere quadratische Entfernung jedes Datenpunktes vom Mittelwert. Die mit der Varianz verbundene Einheit ist in Quadrateinheiten. Damit das Streuungsmaß die gleichen Einheiten wie die Daten hat, nehmen wir die Quadratwurzel der Varianz, genannt Standardabweichung." — [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/), Diez et al., CC-BY-SA.
+
+<Definicao titulo="Stichprobenvarianz — Besselsche Korrektur">
+
+Wenn wir mit einer **Stichprobe** $\{x_1, \ldots, x_n\}$ aus einer größeren Population arbeiten, verwendet die Stichprobenvarianz den Divisor $n-1$ (nicht $n$):
+
+<Equation explicacao="Stichprobenvarianz mit Besselscher Korrektur: unverzerrter Schätzer der Populationsvarianz." latex="s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2" />
+
+Der Faktor $n-1$ wird **Freiheitsgrad** genannt. Der Grund: $\bar{x}$ wird aus den eigenen Daten berechnet und „verbraucht" einen Freiheitsgrad — ohne die Korrektur würde $s^2$ $\sigma^2$ systematisch unterschätzen.
+
+</Definicao>
+
+> "Bei statistischen Problemen haben wir normalerweise keinen Zugang zur ganzen Population, daher verwenden wir Stichprobendaten, um die Populationsparameter zu schätzen. Dazu dividieren wir durch den Freiheitsgrad der Stichprobe, $n-1$, statt durch $n$." — [OpenStax Statistics §2.7](https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data), Illowsky & Dean, CC-BY.
+
+<Definicao titulo="Varianz einer diskreten Zufallsvariablen">
+
+Für eine diskrete Zufallsvariable $X$ mit $E[X] = \mu$:
+
+<Equation explicacao="Varianz als Erwartungswert des Quadrats der Abweichung: probabilistische Definition." latex="\text{Var}(X) = E\!\left[(X - \mu)^2\right] = \sum_k (k - \mu)^2 \, P(X = k)" />
+
+<Equation explicacao="Rechenformel: Erwartungswert der Quadrate minus Quadrat des Erwartungswertes. Hilfreich für einstufige Berechnung." latex="\text{Var}(X) = E[X^2] - (E[X])^2" />
+
+</Definicao>
+
+### Algebraische Eigenschaften
+
+<Teorema titulo="Eigenschaften der Varianz">
+
+Für Zufallsvariablen $X, Y$ und Konstanten $a, b \in \mathbb{R}$:
+
+<Equation explicacao="Eine Konstante hat Varianz Null: es gibt keine Streuung." latex="\text{Var}(b) = 0" />
+
+<Equation explicacao="Verschiebung ändert nicht die Streuung; Skalierung geht ins Quadrat ein." latex="\text{Var}(aX + b) = a^2 \, \text{Var}(X)" />
+
+<Equation explicacao="Für unabhängige X und Y addieren sich Varianzen — Analogie zu Pythagoras im L²-Raum." latex="\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) \quad (X, Y \text{ unabhängig})" />
+
+<Equation explicacao="Varianz ist immer nicht negativ." latex="\text{Var}(X) \geq 0" />
+
+**Beweis** von $\text{Var}(aX+b) = a^2 \text{Var}(X)$: Da $E[aX+b] = a\mu + b$, gilt $\text{Var}(aX+b) = E[(aX+b - a\mu - b)^2] = E[(a(X-\mu))^2] = a^2 E[(X-\mu)^2] = a^2 \text{Var}(X)$. $\square$
+
+</Teorema>
+
+<Insight>
+
+**Warum quadrieren?** Quadrieren hat drei Vorteile gegenüber dem Betrag $|x_i - \mu|$: (1) $x^2$ ist auf ganz $\mathbb{R}$ differenzierbar — der Betrag hat eine „Spitze" bei Null, die Minimierung über Kalkül verhindert; (2) die Varianz zerlegt sich linear für unabhängige Variablen; (3) die Normalverteilung entsteht natürlich aus Summen von Quadraten, was die Varianz zum Zentralen Grenzwertsatz verbindet.
+
+</Insight>
+
+### Geometrische Darstellung — Streudiagramm
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr72" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <text x="10" y="30" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">Hohe Streuung (großes σ)</text>
+  <line x1="60" x2="470" y1="60" y2="60" stroke="currentColor" strokeOpacity="0.2" strokeWidth="1" markerEnd="url(#arr72)"/>
+  <line x1="260" x2="260" y1="45" y2="75" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4 3"/>
+  <circle cx="120" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="160" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="220" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="300" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="360" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="410" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <text x="255" y="88" textAnchor="middle" fontSize="9" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">μ</text>
+</g>
+<g>
+  <text x="10" y="120" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">Niedrige Streuung (kleines σ)</text>
+  <line x1="60" x2="470" y1="155" y2="155" stroke="currentColor" strokeOpacity="0.2" strokeWidth="1" markerEnd="url(#arr72)"/>
+  <line x1="260" x2="260" y1="140" y2="170" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4 3"/>
+  <circle cx="230" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="245" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="255" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="270" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="280" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="295" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <text x="255" y="183" textAnchor="middle" fontSize="9" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">μ</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Zwei Mengen mit gleichem Mittelwert aber unterschiedlichen Streuungen. Punkte weit entfernt von der gepunkteten Linie (Mittelwert) erzeugen hohe Varianz; Punkte in Gruppen erzeugen niedrige Varianz.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein 5-jähriges Kind">
+
+Stell dir vor, drei Schulklassen haben alle eine **Durchschnittsnote von 7** im Test erreicht. Aber wie kamen sie zu dieser 7?
+
+- **Klasse A:** Jeder schrieb genau 7. Niemand weicht ab.
+- **Klasse B:** Die Noten waren 5, 6, 7, 8, 9. Ein wenig verteilt.
+- **Klasse C:** Die Hälfte schrieb 0, die Hälfte schrieb 14. Sehr verteilt!
+
+Die **Varianz** ist die Zahl, die diese „Verteilung" misst. Klasse A hat Varianz **Null** — alle gleich. Klasse C hat **riesige** Varianz — alle weit weg vom Durchschnitt.
+
+Die **Standardabweichung** ist die Quadratwurzel der Varianz. Wenn die Noten in Punkten sind, ist die Standardabweichung auch in Punkten — sie spricht die gleiche Sprache wie die Daten.
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein 10-jähriges Kind">
+
+Der **Durchschnitt** sagt dir das Zentrum. Die **Varianz** sagt dir die Ausbreitung.
+
+**So berechnest du sie in 4 Schritten:**
+
+1. Berechne den Durchschnitt $\bar{x}$ der Daten.
+2. Für jedes $x_i$ berechne die Abweichung $x_i - \bar{x}$.
+3. Quadriere jede Abweichung: $(x_i - \bar{x})^2$.
+4. Nimm den Durchschnitt dieser Quadrate.
+
+**Warum quadrieren?** Weil sich positive und negative Abweichungen aufheben würden, wenn du sie direkt addierst — die Summe der Abweichungen ist immer Null. Quadrieren garantiert, dass jede Abweichung positiv beiträgt.
+
+**Beispiel:** Noten 6, 7, 8. Durchschnitt = 7. Abweichungen: $-1, 0, +1$. Quadrate: $1, 0, 1$. Durchschnitt der Quadrate: $\frac{1+0+1}{3} = \frac{2}{3}$. Varianz = $\frac{2}{3}$. Standardabweichung = $\sqrt{2/3} \approx 0{,}82$.
+
+</Porta>
+
+<Porta nivel="15" titulo="Für einen 15-jährigen Jugendlichen">
+
+Varianz ist das **zweite zentrale Moment** der Verteilung — es misst die Streuung der Daten um den Mittelwert.
+
+### Warum Varianz statt durchschnittliche absolute Abweichung?
+
+Eine Alternative wäre $\frac{1}{n}\sum |x_i - \mu|$ — die durchschnittliche absolute Abweichung (MAD). Das ist ein legitimes Maß, aber Varianz gewinnt aus drei Gründen:
+
+1. **Differenzierbarkeit:** $|x|$ hat eine „Spitze" bei $x=0$, was Optimierung durch Kalkül unmöglich macht. Die Funktion $x^2$ ist glatt und differenzierbar.
+2. **Zerlegung:** Für unabhängige Variablen gilt $\text{Var}(X+Y) = \text{Var}(X) + \text{Var}(Y)$ — wie der Satz des Pythagoras. MAD hat diese Eigenschaft nicht.
+3. **Verbindung zur Normalverteilung:** Die Normalverteilung wird vollständig durch $\mu$ und $\sigma^2$ charakterisiert; der Zentrale Grenzwertsatz (Lektion 76) behandelt Varianzen.
+
+### Variationskoeffizient
+
+Um Streuung zwischen Mengen mit unterschiedlichen Einheiten zu vergleichen (Gehalt in R$ vs. Gewicht in kg), nutzt man:
+
+$$CV = \frac{\sigma}{\mu} \times 100\%$$
+
+Eine Geldanlage mit durchschnittlicher Rendite 10% und $\sigma = 2\%$ hat $CV = 20\%$ — stabiler als eine mit $CV = 50\%$.
+
+### Volatilität im Finanzwesen
+
+Im Finanzwesen ist **Volatilität** eines Vermögenswertes die Standardabweichung seiner Tagesrenditen. Harry Markowitz formalisierte das Konzept des Risikos mithilfe von Varianz 1952 — er erhielt den [Nobelpreis für Wirtschaftswissenschaften 1990](https://www.nobelprize.org/prizes/economic-sciences/1990/markowitz/facts/).
+
+</Porta>
+
+<Porta nivel="25" titulo="Für einen Ingenieurstudenten">
+
+### Schätzer: verzerrt vs. unverzerrt
+
+Sei $X_1, \ldots, X_n$ eine zufällige Stichprobe einer Population mit Varianz $\sigma^2$.
+
+Der Schätzer $\hat{\sigma}^2_{\text{pop}} = \frac{1}{n}\sum(X_i - \bar{X})^2$ ist **verzerrt**: $E[\hat{\sigma}^2_{\text{pop}}] = \frac{n-1}{n}\sigma^2 < \sigma^2$.
+
+Der Stichprobenschätzer $S^2 = \frac{1}{n-1}\sum(X_i - \bar{X})^2$ ist **unverzerrt**: $E[S^2] = \sigma^2$.
+
+**Beweis der Verzerrung:** $\sum(X_i - \bar{X})^2 = \sum X_i^2 - n\bar{X}^2$. Da $E[\bar{X}^2] = \text{Var}(\bar{X}) + (E[\bar{X}])^2 = \sigma^2/n + \mu^2$, haben wir $E[\sum(X_i-\bar{X})^2] = (n-1)\sigma^2$.
+
+### Rechenformel und numerischer Fehler
+
+$$\sigma^2 = E[X^2] - (E[X])^2 = \overline{x^2} - \bar{x}^2$$
+
+Sinnvoll für einstufige Berechnung durch die Daten. **Achtung:** Bei langen Strömen großer Zahlen leidet sie unter **katastrophalem Auslöschungseffekt**, wenn $\overline{x^2}$ und $\bar{x}^2$ sich sehr ähneln und die Differenz klein ist. Verwende **Welford-Algorithmus** in numerischen Implementierungen:
+
+```python
+def welford(xs):
+    n, mean, M2 = 0, 0.0, 0.0
+    for x in xs:
+        n += 1; delta = x - mean
+        mean += delta / n
+        M2 += delta * (x - mean)
+    return M2 / (n - 1)  # Stichprobenvarianz
+```
+
+### Varianzzerlegung (ANOVA)
+
+$$\text{SS}_{\text{gesamt}} = \text{SS}_{\text{zwischen Gruppen}} + \text{SS}_{\text{innerhalb der Gruppen}}$$
+
+Diese Zerlegung ist die Grundlage des F-Tests: Verhältnis der „zwischen"- und „innerhalb"-Varianzen. Anwendung: Vergleich von Mittelwerten von drei oder mehr Gruppen (unterschiedliche Produktionslinien, unterschiedliche Klassen, unterschiedliche klinische Behandlungen).
+
+### Gesetz der totalen Varianz
+
+$$\text{Var}(Y) = E[\text{Var}(Y \mid X)] + \text{Var}(E[Y \mid X])$$
+
+Die Gesamtvarianz zerlegt sich in „durchschnittlicher Residuallärm" plus „durch $X$ erklärte Varianz". Dies ist der Kern des $R^2$-Koeffizienten in der Regression (Lektion 78): $R^2 = \text{Var}(E[Y|X]) / \text{Var}(Y)$.
+
+</Porta>
+
+<Porta nivel="40" titulo="Für einen erfahrenen Fachmann">
+
+### Struktur des Hilbertraums $L^2$
+
+Zufallsvariablen mit $E[X^2] < \infty$ bilden den Hilbertraum $L^2(\Omega, \mathcal{F}, P)$. Die Varianz ist die zentrierte quadratische Norm $\|X - E[X]\|^2$. Die Kovarianz ist das innere Produkt $\langle X - \mu_X, Y - \mu_Y \rangle = E[(X-\mu_X)(Y-\mu_Y)]$. Diese Struktur ermöglicht: (1) Regression als orthogonale Projektion; (2) PCA als Suche der Eigenvektoren des Kovarianzoperators; (3) Karhunen-Loève-Zerlegung für stochastische Prozesse.
+
+### Konzentrationsungleichung
+
+**Tschebyscheff-Ungleichung:** Für jede Variable $X$ mit Mittelwert $\mu$ und Varianz $\sigma^2$:
+
+$$P(|X - \mu| \geq k\sigma) \leq \frac{1}{k^2}$$
+
+Schwache aber universelle Grenze — setzt nichts über die Verteilung voraus. Für spezifische Verteilungen (beschränkt, sub-Gaussian) bieten Hoeffding und Bernstein exponentiellen Verfall in $k^2$ statt polynomial.
+
+### GARCH-Modelle und Nobelpreis 2003
+
+In Finanzzeit­reihen ist die Varianz nicht konstant — sie **clustert**: Perioden hoher Volatilität folgen Perioden hoher Volatilität. Das GARCH(1,1)-Modell von Engle und Bollerslev modelliert die bedingte Varianz:
+
+$$\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \beta \sigma_{t-1}^2$$
+
+Robert Engle erhielt den [Nobelpreis für Wirtschaftswissenschaften 2003](https://www.nobelprize.org/prizes/economic-sciences/2003/engle/facts/) für diese Arbeit. Jede Plattform für Risikomanagement (VaR, Expected Shortfall) in Banken nutzt Modelle aus dieser Familie.
+
+### Robuste Schätzung
+
+Die Stichprobenvarianz ist katastrophal empfindlich gegenüber Ausreißern: Ein einzelner Punkt $x_n \to \infty$ führt zu $S^2 \to \infty$. Robuste Alternativen:
+
+- **MAD** (Median Absolute Deviation): $\text{MAD} = \text{med}|x_i - \text{med}(x)|$, robuster Maßstab, Bruchpunkt 50%.
+- **Winsorisierung:** Schneidet die Schwänze vor Berechnung von $S^2$.
+- **Huber-M-Schätzer:** Minimieren $\sum \rho(x_i - \mu)$ wobei $\rho(u) = u^2/2$ wenn $|u| \leq c$ und $c|u| - c^2/2$ wenn $|u| > c$ — Interpolation zwischen $L^2$ und $L^1$.
+
+### Bias-Varianz-Tradeoff im ML
+
+$$\text{Erwarteter Fehler}(x_0) = \text{Bias}^2[\hat{f}(x_0)] + \text{Var}[\hat{f}(x_0)] + \sigma^2_\varepsilon$$
+
+Einfache Modelle: hoher Bias, niedrige Varianz (Unteranpassung). Komplexe Modelle: niedriger Bias, hohe Varianz (Überanpassung). Regularisierung (Ridge: $L^2$-Penalität; Dropout in Netzwerken) reduziert Varianz auf Kosten der Einführung von Bias.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktische Anwendung">
+
+### Rezept in 4 Schritten (Rohdaten)
+
+1. **Berechne den Durchschnitt** $\bar{x} = \frac{1}{n}\sum x_i$.
+2. **Berechne jede Abweichung** $d_i = x_i - \bar{x}$.
+3. **Quadriere und summiere:** $\sum d_i^2$.
+4. **Dividiere** durch $n$ (Population) oder $n-1$ (Stichprobe) und ziehe die Quadratwurzel für $\sigma$ oder $s$.
+
+### In Tabellenkalkulationen (LibreOffice Calc / Excel)
+
+| Funktion | Berechnet |
+|---|---|
+| `VAR.P(A1:A10)` | Populationsvarianz |
+| `VAR.S(A1:A10)` | Stichprobenvarianz (Standard in den meisten Kontexten) |
+| `STDEV.P(A1:A10)` | Populationsstandardabweichung |
+| `STDEV.S(A1:A10)` | Stichprobenstandardabweichung |
+
+### Praktisches Beispiel: ENEM-Noten
+
+Eine Klasse hat Noten in Mathematik: 620, 680, 590, 710, 650, 700, 630, 680.
+
+Durchschnitt $\bar{x} = (620+680+590+710+650+700+630+680)/8 = 5260/8 = 657{,}5$.
+
+Stichprobenvarianz: Berechne die quadrierten Abweichungen, summiere sie, dividiere durch $n-1 = 7$.
+
+Abweichungen: $-37{,}5; \ 22{,}5; \ -67{,}5; \ 52{,}5; \ -7{,}5; \ 42{,}5; \ -27{,}5; \ 22{,}5$.
+
+$\sum d_i^2 = 1406{,}25 + 506{,}25 + 4556{,}25 + 2756{,}25 + 56{,}25 + 1806{,}25 + 756{,}25 + 506{,}25 = 12350$.
+
+$s^2 = 12350/7 \approx 1764{,}3$. Standardabweichung $s \approx 42{,}0$ Punkte.
+
+### Wann welchen Divisor verwenden?
+
+- **Hast du alle Daten des Interessierungsvorgangs?** Verwende Population ($n$).
+- **Hast du eine Stichprobe und willst den Vorgang schätzen?** Verwende Stichprobe ($n-1$). Das ist Standard in Umfragen, Experimenten und Datenanalyse.
+
+### Warnsignale
+
+- $CV = \sigma/\mu > 1$: Daten sehr verstreut relativ zum Durchschnitt.
+- Ein Ausreißer zieht $\sigma$ nach oben: Inspiziere vor dem Verwerfen.
+- Asymmetrische Verteilung: Standardabweichung erzählt nicht die ganze Geschichte — ergänze mit Boxplot (Lektion 73).
+
+</Porta>
+
+</DuasPortas>
+
+## Gelöste Beispiele
+
+<Exemplo titulo="Direkte Berechnung von Varianz und Standardabweichung (Anwendung)" numero="1">
+
+**Aufgabe:** Berechne die Populationsvarianz $\sigma^2$ und die Standardabweichung $\sigma$ für die Daten $\{2, 4, 4, 4, 5, 5, 7, 9\}$.
+
+**Strategie:** Wende die Definition in vier Schritten an: Durchschnitt, Abweichungen, Quadrate der Abweichungen, Durchschnitt der Quadrate.
+
+**Lösung:**
+
+1. **Durchschnitt:** $\mu = \frac{2+4+4+4+5+5+7+9}{8} = \frac{40}{8} = 5$.
+
+2. **Abweichungen** $x_i - \mu$: $-3, -1, -1, -1, 0, 0, 2, 4$.
+
+3. **Quadrierte Abweichungen:** $9, 1, 1, 1, 0, 0, 4, 16$. Summe $= 32$.
+
+4. **Populationsvarianz:** $\sigma^2 = \frac{32}{8} = 4$.
+
+5. **Standardabweichung:** $\sigma = \sqrt{4} = 2$.
+
+**Verifikation:** $\sigma = 2$ hat die gleiche Einheit wie die Daten. Wir prüfen: Das Intervall $[\mu - \sigma, \mu + \sigma] = [3, 7]$ enthält die Werte 4, 4, 4, 5, 5, 7 — sechs von acht Daten (75%), konsistent mit der empirischen Regel (mindestens 68% für eine glockenförmige Verteilung, Tschebyscheff garantiert mindestens 75% für jede Verteilung).
+
+**Quelle.** [OpenIntro Statistics §2.1, Beispiel "Toy data for variance"](https://www.openintro.org/book/os/) — Lizenz CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Stichprobenvarianz mit Besselscher Korrektur (Anwendung)" numero="2">
+
+**Aufgabe:** Acht Schüler haben eine Statistikprüfung geschrieben. Die Noten waren: 72, 85, 90, 68, 78, 92, 81, 74. Berechne die Stichprobenvarianz $s^2$ und die Stichprobenstandardabweichung $s$.
+
+**Strategie:** Nutze den Divisor $n-1$, weil die Daten eine **Stichprobe** aus einer größeren Klasse sind. Ich verwende die Rechenformel $s^2 = \frac{\sum x_i^2 - n\bar{x}^2}{n-1}$ zur Effizienz.
+
+**Lösung:**
+
+1. $n = 8$. Summe: $72+85+90+68+78+92+81+74 = 640$. Durchschnitt: $\bar{x} = 640/8 = 80$.
+
+2. $\sum x_i^2 = 5184 + 7225 + 8100 + 4624 + 6084 + 8464 + 6561 + 5476 = 51718$.
+
+3. $\sum x_i^2 - n\bar{x}^2 = 51718 - 8 \times 6400 = 51718 - 51200 = 518$.
+
+4. $s^2 = \frac{518}{7} \approx 74{,}0$.
+
+5. $s = \sqrt{74{,}0} \approx 8{,}6$ Punkte.
+
+**Verifikation:** Bei Inspektion der Daten liegen alle Werte zwischen 68 und 92, Spannweite 24. Eine Standardabweichung von 8,6 ist angemessen — etwa ein Drittel der Spannweite, typischer Wert.
+
+**Quelle.** [OpenStax Statistics §2.7, Beispiel "Find the Standard Deviation"](https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data) — Lizenz CC-BY.
+
+</Exemplo>
+
+<Exemplo titulo="Varianz einer diskreten Zufallsvariablen (Fortgeschrittenes Niveau)" numero="3">
+
+**Aufgabe:** Ein fairer 6er-Würfel. Sei $X$ das Ergebnis. Berechne $\text{Var}(X)$.
+
+**Strategie:** Nutze die Formel $\text{Var}(X) = E[X^2] - (E[X])^2$ mit der diskreten Gleichverteilung.
+
+**Lösung:**
+
+1. $P(X = k) = 1/6$ für $k \in \{1, 2, 3, 4, 5, 6\}$.
+
+2. $E[X] = \frac{1+2+3+4+5+6}{6} = \frac{21}{6} = \frac{7}{2}$.
+
+3. $E[X^2] = \frac{1^2+2^2+3^2+4^2+5^2+6^2}{6} = \frac{1+4+9+16+25+36}{6} = \frac{91}{6}$.
+
+4. $\text{Var}(X) = \frac{91}{6} - \left(\frac{7}{2}\right)^2 = \frac{91}{6} - \frac{49}{4} = \frac{182}{12} - \frac{147}{12} = \frac{35}{12}$.
+
+5. Standardabweichung: $\sigma = \sqrt{35/12} \approx 1{,}71$.
+
+**Verifikation:** Die allgemeine Formel für $X$ gleichverteilt auf $\{1, \ldots, n\}$ ist $\text{Var}(X) = (n^2-1)/12$. Für $n=6$: $(36-1)/12 = 35/12$. Stimmt.
+
+**Quelle.** [Grinstead & Snell, Introduction to Probability, Ch. 6, Beispiel 6.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Lizenz GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="Linearitätseigenschaft und Variationskoeffizient (Fortgeschrittenes Niveau)" numero="4">
+
+**Aufgabe:** Eine Maschine füllt Flaschen mit durchschnittlichem Volumen $\mu = 500$ mL und $\sigma = 4$ mL. Das Unternehmen verkauft sie in Kartons von 12 Flaschen. (a) Welche Standardabweichung hat das Gesamtvolumen eines Kartons, unter der Annahme unabhängiger Flaschen? (b) Welcher Variationskoeffizient ($CV$) für eine einzelne Flasche?
+
+**Strategie:** Nutze für (a) die Unabhängigkeitseigenschaft: $\text{Var}(X_1 + \cdots + X_{12}) = 12\sigma^2$. Für (b) wende $CV = \sigma/\mu$ an.
+
+**Lösung:**
+
+**(a)** Sei $S = X_1 + X_2 + \cdots + X_{12}$ mit unabhängigen und identisch verteilten $X_i$.
+
+$\text{Var}(S) = 12 \cdot \sigma^2 = 12 \cdot 16 = 192 \text{ mL}^2$.
+
+$\sigma_S = \sqrt{192} = 8\sqrt{3} \approx 13{,}9$ mL.
+
+**(b)** $CV = \frac{\sigma}{\mu} = \frac{4}{500} = 0{,}008 = 0{,}8\%$.
+
+Ein $CV$ von 0,8% ist sehr niedrig — die Maschine ist konsistent.
+
+**Verifikation:** Bei 12 unabhängigen Flaschen wächst die Standardabweichung mit $\sqrt{12}$, nicht mit 12. $4\sqrt{12} \approx 13{,}9$. Konsistent mit der Berechnung.
+
+**Quelle.** [OpenStax Statistics §2.7, Übung zu Eigenschaften](https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data) — Lizenz CC-BY.
+
+</Exemplo>
+
+<Exemplo titulo="Tschebyscheff-Ungleichung — Wahrscheinlichkeitsschranken (Modellierung)" numero="5">
+
+**Aufgabe:** Eine Produktionslinie stellt Teile mit Durchschnittsmasse $\mu = 200$ g und Standardabweichung $\sigma = 5$ g her. Ohne die genaue Verteilung zu kennen, bestimme eine untere Schranke für den Anteil der Teile mit Masse zwischen 185 g und 215 g.
+
+**Strategie:** Tschebyscheff bietet eine universelle Schranke: $P(|X - \mu| < k\sigma) \geq 1 - 1/k^2$. Identifiziere $k$ aus dem geforderten Bereich.
+
+**Lösung:**
+
+1. Georderter Bereich: $[185, 215] = [\mu - 15, \mu + 15]$.
+
+2. $15 = 3\sigma$ (da $\sigma = 5$). Also $k = 3$.
+
+3. Tschebyscheff: $P(|X - 200| < 15) \geq 1 - \frac{1}{3^2} = 1 - \frac{1}{9} = \frac{8}{9} \approx 88{,}9\%$.
+
+**Mindestens 88,9% der Teile** liegen im Toleranzbereich, unabhängig von der Verteilung.
+
+**Verifikation:** Wäre die Produktion normal, mit $k=3$ hätten wir 99,7% — deutlich mehr. Tschebyscheff ist konservativ. Der Wert 88,9% ist die **schlechtestmögliche Schranke** für jede Verteilung mit $\mu = 200, \sigma = 5$.
+
+**Quelle.** [Grinstead & Snell, Introduction to Probability, §8.1, Tschebyscheff-Ungleichung](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Lizenz GNU FDL.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-72-variancia">
+
+> **Cadernoheft-Liste.** 40 Übungen in 4 aufsteigenden Blöcken. Löse die Berechnungen auf Papier. Zusammengestellt aus OpenIntro Statistics (§2.1–§2.2), OpenStax Statistics (§2.7) und Grinstead-Snell (Ch. 6).
+
+### Block A — Direkte Berechnung (72.1 bis 72.14)
+
+<Exercicio numero="72.1" dificuldade="aplicacao"
+  resposta="$\mu = 6,\ \sigma^2 = \frac{8}{3} \approx 2{,}67$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "106", exercicio: "prática 1", licenca: "CC-BY" }}
+  solucao={<>Durchschnitt: <Eq>{`\\mu = (4+6+8)/3 = 6`}</Eq>. Abweichungen: <Eq>{`-2, 0, +2`}</Eq>. Quadrate: <Eq>{`4, 0, 4`}</Eq>. Summe der Quadrate: <Eq>{`8`}</Eq>. Varianz: <Eq>{`\\sigma^2 = 8/3 \\approx 2{,}67`}</Eq>. Standardabweichung: <Eq>{`\\sigma = \\sqrt{8/3} \\approx 1{,}63`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Berechne den Durchschnitt: <Eq>{`\\mu = (4+6+8)/3 = 18/3 = 6`}</Eq>. <em>Warum:</em> Varianz misst Streuung um den Durchschnitt, also brauchst du ihn zuerst.</li>
+      <li>Subtrahiere den Durchschnitt von jedem Wert: <Eq>{`4-6=-2`}</Eq>, <Eq>{`6-6=0`}</Eq>, <Eq>{`8-6=2`}</Eq>. Das sind die Abweichungen.</li>
+      <li>Quadriere jede Abweichung: <Eq>{`(-2)^2=4`}</Eq>, <Eq>{`0^2=0`}</Eq>, <Eq>{`2^2=4`}</Eq>. <em>Warum quadrieren:</em> damit sich positive und negative Abweichungen nicht aufheben.</li>
+      <li>Berechne den Durchschnitt der Quadrate: <Eq>{`(4+0+4)/3 = 8/3`}</Eq>. Das ist die Populationsvarianz.</li>
+      <li>Standardabweichung: <Eq>{`\\sigma = \\sqrt{8/3} \\approx 1{,}63`}</Eq>. <em>Merksatz:</em> die Standardabweichung hat immer die gleiche Einheit wie die ursprünglichen Daten.</li>
+    </ol>
+  </>}
+>
+Berechne die Populationsvarianz und die Standardabweichung von $\{4, 6, 8\}$.
+</Exercicio>
+
+<Exercicio numero="72.2" dificuldade="aplicacao"
+  resposta="$s^2 = \frac{32}{7} \approx 4{,}57;\ s \approx 2{,}14$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "58", exercicio: "ex. 2.1", licenca: "CC-BY-SA" }}
+  solucao={<>Daten: <Eq>{`2, 4, 4, 4, 5, 5, 7, 9`}</Eq>. Durchschnitt <Eq>{`\\bar x = 40/8 = 5`}</Eq>. Quadrierte Abweichungen: <Eq>{`9,1,1,1,0,0,4,16`}</Eq>. Summe <Eq>{`= 32`}</Eq>. Stichprobenvarianz: <Eq>{`s^2 = 32/7 \\approx 4{,}57`}</Eq>. Standardabweichung: <Eq>{`s \\approx 2{,}14`}</Eq>.</>}
+>
+Berechne die Stichprobenvarianz $s^2$ und die Stichprobenstandardabweichung $s$ für $\{2, 4, 4, 4, 5, 5, 7, 9\}$.
+</Exercicio>
+
+<Exercicio numero="72.3" dificuldade="aplicacao"
+  resposta="$\sigma = \sqrt{2} \approx 1{,}41$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "107", exercicio: "prática 3", licenca: "CC-BY" }}
+  solucao={<>Noten: <Eq>{`5, 6, 7, 8, 9`}</Eq>. Durchschnitt <Eq>{`\\mu = 35/5 = 7`}</Eq>. Abweichungen: <Eq>{`-2,-1,0,1,2`}</Eq>. Quadrate: <Eq>{`4,1,0,1,4`}</Eq>. Summe <Eq>{`= 10`}</Eq>. Varianz: <Eq>{`\\sigma^2 = 10/5 = 2`}</Eq>. Standardabweichung: <Eq>{`\\sigma = \\sqrt{2} \\approx 1{,}41`}</Eq>.</>}
+>
+Berechne die Populationsstandardabweichung von $\{5, 6, 7, 8, 9\}$.
+</Exercicio>
+
+<Exercicio numero="72.4" dificuldade="aplicacao"
+  resposta="$\sigma^2 = 0$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "58", exercicio: "ex. 2.3", licenca: "CC-BY-SA" }}
+  solucao={<>Alle Werte sind gleich: <Eq>{`\\{10, 10, 10, 10\\}`}</Eq>. Durchschnitt <Eq>{`\\mu = 10`}</Eq>. Alle Abweichungen sind <Eq>{`10 - 10 = 0`}</Eq>. Also <Eq>{`\\sigma^2 = 0`}</Eq>. Eine konstante Menge hat Varianz Null — es gibt keine Streuung.</>}
+>
+Welche Varianz hat $\{10, 10, 10, 10\}$? Erkläre geometrisch.
+</Exercicio>
+
+<Exercicio numero="72.5" dificuldade="aplicacao"
+  resposta="$\sigma^2 = 2500$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "108", exercicio: "ex. 2.7.1", licenca: "CC-BY" }}
+  solucao={<>Daten: <Eq>{`\\{0, 100\\}`}</Eq>. Durchschnitt <Eq>{`\\mu = 50`}</Eq>. Abweichungen: <Eq>{`-50, +50`}</Eq>. Quadrate: <Eq>{`2500, 2500`}</Eq>. Varianz: <Eq>{`\\sigma^2 = 5000/2 = 2500`}</Eq>. Standardabweichung: <Eq>{`\\sigma = 50`}</Eq>.</>}
+>
+Berechne die Populationsvarianz von $\{0, 100\}$.
+</Exercicio>
+
+<Exercicio numero="72.6" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "64", exercicio: "ex. 2.11", licenca: "CC-BY-SA" }}
+  solucao={<>Gehälter (Tausend R\$): <Eq>{`3, 3, 4, 4, 5, 20`}</Eq>. Durchschnitt: <Eq>{`(3+3+4+4+5+20)/6 = 39/6 = 6{,}5`}</Eq>. Quadrierte Abweichungen: <Eq>{`12{,}25; 12{,}25; 6{,}25; 6{,}25; 2{,}25; 182{,}25`}</Eq>. Summe <Eq>{`= 221{,}5`}</Eq>. Stichprobenstandardabweichung: <Eq>{`s = \\sqrt{221{,}5/5} \\approx 6{,}65`}</Eq> Tausend R\$. Der Ausreißer (20) hebt den Durchschnitt von 3,8 auf 6,5 und die Standardabweichung ist größer als die meisten Gehälter — Zeichen dafür, dass der Durchschnitt diesen Datensatz nicht gut darstellt.</>}
+  passos={<>
+    <ol>
+      <li>Berechne den Durchschnitt der 6 Gehälter: <Eq>{`(3+3+4+4+5+20)/6 = 6{,}5`}</Eq> Tausend R\$.</li>
+      <li>Bemerke den Ausreißer: Der Wert 20 ist viel höher als die anderen (3 bis 5). Das wird die Varianz aufblähen.</li>
+      <li>Berechne die quadrierten Abweichungen und summiere: <Eq>{`12{,}25 + 12{,}25 + 6{,}25 + 6{,}25 + 2{,}25 + 182{,}25 = 221{,}5`}</Eq>.</li>
+      <li>Stichprobenvarianz: <Eq>{`s^2 = 221{,}5/5 = 44{,}3`}</Eq>. Standardabweichung: <Eq>{`s \\approx 6{,}65`}</Eq> Tausend R\$.</li>
+      <li><em>Beobachtung:</em> Die Standardabweichung (6,65) ist größer als die meisten einzelnen Gehälter (3–5). Das zeigt, dass der Durchschnitt nicht repräsentativ ist — verwende den Median (4 Tausend R\$) für diese Art asymmetrischer Verteilung.</li>
+    </ol>
+  </>}
+>
+Gehälter (Tausend R\$): $3, 3, 4, 4, 5, 20$. Berechne Durchschnitt und Stichprobenstandardabweichung. Kommentiere die Auswirkung des Ausreißers.
+</Exercicio>
+
+<Exercicio numero="72.7" dificuldade="aplicacao"
+  resposta="$\sigma^2 = 2$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "110", exercicio: "ex. 2.7.3", licenca: "CC-BY" }}
+  solucao={<>Rechenformel: <Eq>{`\\sigma^2 = \\overline{x^2} - \\bar x^2`}</Eq>. Für <Eq>{`\\{1,2,3,4,5\\}`}</Eq>: <Eq>{`\\bar x = 3`}</Eq>; <Eq>{`\\overline{x^2} = (1+4+9+16+25)/5 = 11`}</Eq>. Also <Eq>{`\\sigma^2 = 11 - 9 = 2`}</Eq>.</>}
+>
+Verwende die Rechenformel $\overline{x^2} - \bar{x}^2$ zur Berechnung der Varianz von $\{1, 2, 3, 4, 5\}$.
+</Exercicio>
+
+<Exercicio numero="72.8" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "60", exercicio: "ex. 2.5", licenca: "CC-BY-SA" }}
+  solucao={<>Daten: <Eq>{`5, 7, 6, 8, 4, 5, 6, 7`}</Eq> (8 Werte). Durchschnitt: <Eq>{`\\bar x = 48/8 = 6`}</Eq>. Quadrierte Abweichungen: <Eq>{`1,1,0,4,4,1,0,1`}</Eq>. Summe <Eq>{`= 12`}</Eq>. Stichprobenvarianz: <Eq>{`s^2 = 12/7 \\approx 1{,}71`}</Eq>. Standardabweichung: <Eq>{`s \\approx 1{,}31`}</Eq> min.</>}
+>
+Wartezeit (min) bei 8 Bedienungen: $5, 7, 6, 8, 4, 5, 6, 7$. Berechne die Stichprobenstandardabweichung.
+</Exercicio>
+
+<Exercicio numero="72.9" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "111", exercicio: "ex. 2.7.5", licenca: "CC-BY" }}
+  solucao={<>Gewichte: <Eq>{`8, 9, 9, 10, 11, 13`}</Eq> kg. Durchschnitt: <Eq>{`\\bar x = 60/6 = 10`}</Eq>. Quadrierte Abweichungen: <Eq>{`4,1,1,0,1,9`}</Eq>. Summe <Eq>{`= 16`}</Eq>. Stichprobenvarianz: <Eq>{`s^2 = 16/5 = 3{,}2`}</Eq>. Standardabweichung: <Eq>{`s = \\sqrt{3{,}2} \\approx 1{,}79`}</Eq> kg.</>}
+>
+Gewichte (kg) von 6 Melonen: $8, 9, 9, 10, 11, 13$. Berechne $s^2$ und $s$.
+</Exercicio>
+
+<Exercicio numero="72.10" dificuldade="aplicacao"
+  resposta="$\text{Var}(X) = \frac{3}{4}$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "247", exercicio: "ex. 6.1.2", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`X`}</Eq> nimmt Werte 1, 2, 3 mit Wahrscheinlichkeiten <Eq>{`1/2, 1/4, 1/4`}</Eq> an. <Eq>{`E[X] = 1\\cdot\\frac{1}{2} + 2\\cdot\\frac{1}{4} + 3\\cdot\\frac{1}{4} = \\frac{1}{2}+\\frac{1}{2}+\\frac{3}{4} = \\frac{7}{4}`}</Eq>. <Eq>{`E[X^2] = 1\\cdot\\frac{1}{2} + 4\\cdot\\frac{1}{4} + 9\\cdot\\frac{1}{4} = \\frac{1}{2}+1+\\frac{9}{4} = \\frac{15}{4}`}</Eq>. <Eq>{`\\text{Var}(X) = \\frac{15}{4} - \\left(\\frac{7}{4}\\right)^2 = \\frac{15}{4} - \\frac{49}{16} = \\frac{60-49}{16} = \\frac{11}{16}`}</Eq>.</>}
+>
+$X$ nimmt Werte $1, 2, 3$ mit Wahrscheinlichkeiten $\frac{1}{2}, \frac{1}{4}, \frac{1}{4}$ an. Berechne $\text{Var}(X)$.
+</Exercicio>
+
+<Exercicio numero="72.11" dificuldade="aplicacao"
+  resposta="$\text{Var}(X) = \frac{35}{12}$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "247", exercicio: "ex. 6.1.3", licenca: "GNU FDL" }}
+  solucao={<>Fairer Würfel: <Eq>{`E[X] = 7/2`}</Eq>, <Eq>{`E[X^2] = (1+4+9+16+25+36)/6 = 91/6`}</Eq>. <Eq>{`\\text{Var}(X) = 91/6 - (7/2)^2 = 91/6 - 49/4 = 182/12 - 147/12 = 35/12`}</Eq>.</>}
+>
+Fairer 6er-Würfel. Berechne $\text{Var}(X)$.
+</Exercicio>
+
+<Exercicio numero="72.12" dificuldade="aplicacao"
+  resposta="$\text{Var}(S) = \frac{35}{6}$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "249", exercicio: "ex. 6.1.5", licenca: "GNU FDL" }}
+  solucao={<>Zwei unabhängige Würfel: <Eq>{`S = X_1 + X_2`}</Eq>. Nach Unabhängigkeit: <Eq>{`\\text{Var}(S) = \\text{Var}(X_1) + \\text{Var}(X_2) = 35/12 + 35/12 = 35/6`}</Eq>. Standardabweichung: <Eq>{`\\sigma_S = \\sqrt{35/6} \\approx 2{,}42`}</Eq>.</>}
+>
+Summe von zwei unabhängigen fairen Würfeln. Berechne $\text{Var}(S)$ unter Verwendung der Unabhängigkeitseigenschaft.
+</Exercicio>
+
+<Exercicio numero="72.13" dificuldade="aplicacao"
+  resposta="$s^2 \approx 14{,}8$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "59", exercicio: "ex. 2.7", licenca: "CC-BY-SA" }}
+  solucao={<>Daten: <Eq>{`10, 7, 4, 9, 8, 11, 5`}</Eq> (7 Werte). Durchschnitt: <Eq>{`\\bar x = 54/7 \\approx 7{,}71`}</Eq>. Berechne die quadrierten Abweichungen, summiere und teile durch 6. Ergebnis: <Eq>{`s^2 \\approx 14{,}8`}</Eq>, <Eq>{`s \\approx 3{,}85`}</Eq>.</>}
+>
+Höchsttemperatur (°C) an 7 Tagen: $10, 7, 4, 9, 8, 11, 5$. Berechne die Stichprobenvarianz.
+</Exercicio>
+
+<Exercicio numero="72.14" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "112", exercicio: "ex. 2.7.7", licenca: "CC-BY" }}
+  solucao={<>Werte: <Eq>{`1, 3, 5, 7, 9`}</Eq>. Durchschnitt: <Eq>{`\\bar x = 5`}</Eq>. <Eq>{`E[X^2] = (1+9+25+49+81)/5 = 165/5 = 33`}</Eq>. Varianz: <Eq>{`\\sigma^2 = 33 - 25 = 8`}</Eq>. Standardabweichung: <Eq>{`\\sigma = \\sqrt{8} = 2\\sqrt{2} \\approx 2{,}83`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Berechne den Durchschnitt: <Eq>{`\\bar x = (1+3+5+7+9)/5 = 25/5 = 5`}</Eq>.</li>
+      <li>Berechne <Eq>{`E[X^2]`}</Eq>: Summiere die Quadrate und teile durch 5: <Eq>{`(1+9+25+49+81)/5 = 165/5 = 33`}</Eq>.</li>
+      <li>Wende die Rechenformel an: <Eq>{`\\sigma^2 = E[X^2] - \\bar x^2 = 33 - 25 = 8`}</Eq>. <em>Warum:</em> es ist äquivalent zur Definition, erfordert aber nur eine Hilfssumme.</li>
+      <li>Standardabweichung: <Eq>{`\\sigma = \\sqrt{8} = 2\\sqrt{2}`}</Eq>. <em>Merksatz:</em> für arithmetische Folgen <Eq>{`\\{a, a+d, a+2d, \\ldots\\}`}</Eq> gibt es eine geschlossene Formel für <Eq>{`\\sigma`}</Eq>.</li>
+    </ol>
+  </>}
+>
+Verwende die Rechenformel $E[X^2] - (E[X])^2$ zur Berechnung der Varianz von $\{1, 3, 5, 7, 9\}$.
+</Exercicio>
+
+### Block B — Eigenschaften und Transformationen (72.15 bis 72.27)
+
+<Exercicio numero="72.15" dificuldade="aplicacao"
+  resposta="$\text{Var}(2X+5) = 36$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "80", exercicio: "ex. 2.17", licenca: "CC-BY-SA" }}
+  solucao={<>Nach der Eigenschaft: <Eq>{`\\text{Var}(aX+b) = a^2 \\text{Var}(X)`}</Eq>. Mit <Eq>{`a=2, b=5, \\text{Var}(X)=9`}</Eq>: <Eq>{`\\text{Var}(2X+5) = 4 \\times 9 = 36`}</Eq>. Die Verschiebung (+5) ändert die Streuung nicht; die Skalierung (×2) erhöht die Varianz um das Quadrat des Faktors.</>}
+>
+Wenn $\text{Var}(X) = 9$, berechne $\text{Var}(2X + 5)$.
+</Exercicio>
+
+<Exercicio numero="72.16" dificuldade="aplicacao"
+  resposta="$\sigma_{3X} = 12$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "113", exercicio: "ex. 2.7.9", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\text{Var}(3X) = 9 \\text{Var}(X) = 9 \\times 16 = 144`}</Eq>. Standardabweichung: <Eq>{`\\sigma_{3X} = \\sqrt{144} = 12`}</Eq>. Alternativ: <Eq>{`\\sigma_{3X} = |3| \\sigma_X = 3 \\times 4 = 12`}</Eq>.</>}
+>
+Wenn $\sigma_X = 4$, welche Standardabweichung hat $3X$?
+</Exercicio>
+
+<Exercicio numero="72.17" dificuldade="aplicacao"
+  resposta="$\text{Var}(X+Y) = 13;\ \text{Var}(X-Y) = 13$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "253", exercicio: "ex. 6.2.3", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`X`}</Eq> und <Eq>{`Y`}</Eq> unabhängig: <Eq>{`\\text{Var}(X+Y) = \\text{Var}(X) + \\text{Var}(Y) = 4+9 = 13`}</Eq>. Für die Differenz: <Eq>{`\\text{Var}(X-Y) = \\text{Var}(X) + (-1)^2 \\text{Var}(Y) = 4+9 = 13`}</Eq>. Subtrahieren reduziert nicht die Streuung, wenn die Variablen unabhängig sind.</>}
+>
+$\text{Var}(X) = 4$, $\text{Var}(Y) = 9$, $X$ und $Y$ unabhängig. Berechne $\text{Var}(X+Y)$ und $\text{Var}(X-Y)$.
+</Exercicio>
+
+<Exercicio numero="72.18" dificuldade="aplicacao"
+  resposta="$z = 2$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "114", exercicio: "ex. 2.7.11", licenca: "CC-BY" }}
+  solucao={<>z-Score: <Eq>{`z = (x - \\mu)/\\sigma = (80 - 70)/5 = 10/5 = 2`}</Eq>. Ein z-Score von <Eq>{`z = 2`}</Eq> bedeutet, dass der Wert 2 Standardabweichungen über dem Durchschnitt liegt.</>}
+>
+Standardisiere $X = 80$ wenn $\mu = 70$, $\sigma = 5$. Berechne den z-Score.
+</Exercicio>
+
+<Exercicio numero="72.19" dificuldade="aplicacao"
+  resposta="$\sigma_F = 9$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "81", exercicio: "ex. 2.19", licenca: "CC-BY-SA" }}
+  solucao={<>Lineare Umwandlung: <Eq>{`F = 1{,}8C + 32`}</Eq>. Nach der Eigenschaft: <Eq>{`\\sigma_F = |1{,}8| \\cdot \\sigma_C = 1{,}8 \\times 5 = 9`}</Eq>. Die Verschiebung (+32) beeinflusst die Standardabweichung nicht; nur der Skalierungsfaktor zählt.</>}
+>
+$F = 1{,}8C + 32$ (Celsius zu Fahrenheit-Umwandlung). Wenn $\sigma_C = 5$°C, welches $\sigma_F$?
+</Exercicio>
+
+<Exercicio numero="72.20" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "115", exercicio: "ex. 2.7.13", licenca: "CC-BY" }}
+  solucao={<>Höhen: <Eq>{`\\mu = 170`}</Eq> cm, <Eq>{`\\sigma = 8`}</Eq> cm; <Eq>{`CV = 8/170 \\approx 4{,}7\\%`}</Eq>. Gewichte: <Eq>{`\\mu = 70`}</Eq> kg, <Eq>{`\\sigma = 12`}</Eq> kg; <Eq>{`CV = 12/70 \\approx 17{,}1\\%`}</Eq>. Gewichte sind relativ variabler — höheres <Eq>{`CV`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Berechne den CV der Höhen: <Eq>{`CV = \\sigma/\\mu = 8/170 \\approx 0{,}047 = 4{,}7\\%`}</Eq>.</li>
+      <li>Berechne den CV der Gewichte: <Eq>{`CV = 12/70 \\approx 0{,}171 = 17{,}1\\%`}</Eq>.</li>
+      <li>Vergleiche: Gewichte haben höheres CV, daher <strong>relativ variabler</strong>. <em>Warum:</em> CV ist dimensionslos und ermöglicht Vergleich unterschiedlicher Einheiten.</li>
+      <li><em>Beobachtung:</em> Die Standardabweichung allein ist nicht ausreichend zum Vergleich — 8 cm können „groß" sein, aber 12 kg können „klein" sein je nach Kontext. CV normalisiert durch den Durchschnitt.</li>
+    </ol>
+  </>}
+>
+Berechne den Variationskoeffizienten $CV = \sigma/\mu$ für Höhen ($\mu = 170$ cm, $\sigma = 8$ cm) und Gewichte ($\mu = 70$ kg, $\sigma = 12$ kg). Welcher Datensatz ist relativ variabler?
+</Exercicio>
+
+<Exercicio numero="72.21" dificuldade="aplicacao"
+  resposta="Durchschnitt: $\mu_z = 0$; Standardabweichung: $\sigma_z = 1$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "62", exercicio: "ex. 2.9", licenca: "CC-BY-SA" }}
+  solucao={<>z-Score jedes Wertes: <Eq>{`(60-70)/10 = -1`}</Eq>, <Eq>{`(70-70)/10 = 0`}</Eq>, <Eq>{`(80-70)/10 = 1`}</Eq>. Durchschnitt der <Eq>{`z`}</Eq>: <Eq>{`(-1+0+1)/3 = 0`}</Eq>. Standardabweichung der <Eq>{`z`}</Eq>: <Eq>{`\\sqrt{(1+0+1)/3} = \\sqrt{2/3}`}</Eq>... eigentlich für Population: <Eq>{`\\sigma_z = 1`}</Eq> immer, wenn wir mittels eigenem Durchschnitt und Standardabweichung standardisieren.</>}
+>
+Standardisiere $\{60, 70, 80\}$ unter Verwendung von $\mu = 70, \sigma = 10$. Welche Durchschnitt und Standardabweichung haben die z-Scores?
+</Exercicio>
+
+<Exercicio numero="72.22" dificuldade="aplicacao"
+  resposta="$\text{Var}(-X) = \text{Var}(X) = 16$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "251", exercicio: "ex. 6.2.1", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`\\text{Var}(-X) = (-1)^2 \\text{Var}(X) = \\text{Var}(X) = 16`}</Eq>. Multiplikation mit <Eq>{`-1`}</Eq> invertiert die Daten um <Eq>{`-\\mu`}</Eq>, aber ändert nicht die Abstände zum Durchschnitt — Streuung ist invariant unter Reflexion.</>}
+>
+$\text{Var}(X) = 16$. Welches $\text{Var}(-X)$?
+</Exercicio>
+
+<Exercicio numero="72.23" dificuldade="aplicacao"
+  resposta="$\sigma_{\bar X} = 2$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "116", exercicio: "ex. 2.7.15", licenca: "CC-BY" }}
+  solucao={<>Für den Stichprobendurchschnitt von <Eq>{`n = 25`}</Eq> unabhängigen Beobachtungen mit <Eq>{`\\sigma = 10`}</Eq>: <Eq>{`\\text{Var}(\\bar X) = \\sigma^2/n = 100/25 = 4`}</Eq>. Standardabweichung des Durchschnitts: <Eq>{`\\sigma_{\\bar X} = \\sqrt{4} = 2`}</Eq>.</>}
+>
+Stichprobendurchschnitt von $n = 25$ unabhängigen Beobachtungen mit $\sigma = 10$. Welche Standardabweichung hat der Durchschnitt?
+</Exercicio>
+
+<Exercicio numero="72.24" dificuldade="aplicacao"
+  resposta="$\sigma_S = 10$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "253", exercicio: "ex. 6.2.5", licenca: "GNU FDL" }}
+  solucao={<>Summe von 100 iid-ZV mit <Eq>{`\\sigma = 1`}</Eq>: <Eq>{`\\text{Var}(S) = 100 \\sigma^2 = 100`}</Eq>. Standardabweichung: <Eq>{`\\sigma_S = \\sqrt{100} = 10`}</Eq>. Das Quadratwurzel-Gesetz: Addieren von <Eq>{`n`}</Eq> unabhängigen Variablen multipliziert die Varianz mit <Eq>{`n`}</Eq> und die Standardabweichung mit <Eq>{`\\sqrt{n}`}</Eq>.</>}
+>
+Summe von 100 unabhängigen identisch verteilten Zufallsvariablen mit $\sigma = 1$. Welche Standardabweichung hat die Summe?
+</Exercicio>
+
+<Exercicio numero="72.25" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Weil die Summe der Abweichungen immer Null ist, würde der Divisor $n$ einen nach unten verzerrten Schätzer erzeugen.", correta: true },
+    { texto: "B) Weil $n-1$ die Berechnung rechnerisch vereinfacht." },
+    { texto: "C) Weil $\\bar x$ immer größer als $\\mu$ ist, würde $n$ die Varianz überestimieren." },
+    { texto: "D) Aus historischer Übereinkunft ohne mathematische Begründung." },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "60", exercicio: "ex. 2.13 (konzeptuell)", licenca: "CC-BY-SA" }}
+  solucao={<>Antwort A. Durch die Verwendung von <Eq>{`\\bar x`}</Eq> anstelle von <Eq>{`\\mu`}</Eq> sind die Abweichungen <Eq>{`(x_i - \\bar x)`}</Eq> gezwungen, zu Null zu summieren — wir verlieren einen Freiheitsgrad. Division durch <Eq>{`n`}</Eq> unterschätzt <Eq>{`\\sigma^2`}</Eq> systematisch; der Korrekturfaktor <Eq>{`n/(n-1)`}</Eq> hebt diesen Bias auf.</>}
+>
+Warum verwendet die Stichprobenvarianz den Divisor $n-1$ anstelle von $n$?
+</Exercicio>
+
+<Exercicio numero="72.26" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) $CV$ — ermöglicht Vergleich der relativen Streuung zwischen Mengen mit unterschiedlichen Einheiten und Maßstäben.", correta: true },
+    { texto: "B) $\\sigma$ — weil es genauer ist." },
+    { texto: "C) $\\sigma^2$ — weil es die Quadratwurzel entfernt." },
+    { texto: "D) Beide sind gleichwertig für jeden Vergleich." },
+  ]}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "117", exercicio: "ex. 2.7.17 (konzeptuell)", licenca: "CC-BY" }}
+  solucao={<>Antwort A. Der <Eq>{`CV = \\sigma/\\mu`}</Eq> ist dimensionslos — normalisiert die Streuung durch die Magnitude des Durchschnitts. Vergleich von <Eq>{`\\sigma`}</Eq> zwischen Gehältern (R\$) und Höhen (cm) macht keinen Sinn; der <Eq>{`CV`}</Eq> entfernt die Einheiten und ermöglicht den Vergleich.</>}
+>
+Um Streuung zwischen Gehältern (R\$) und Höhen (cm) zu vergleichen, bevorzugst du $\sigma$ oder $CV$? Warum?
+</Exercicio>
+
+<Exercicio numero="72.27" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Nein, Varianz ist immer $\\geq 0$ da sie eine Summe von Quadraten ist.", correta: true },
+    { texto: "B) Ja, wenn alle Abweichungen negativ sind." },
+    { texto: "C) Ja, wenn der Durchschnitt negativ ist." },
+    { texto: "D) Nur für kontinuierliche Zufallsvariablen." },
+  ]}
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "246", exercicio: "ex. 6.1.1 (konzeptuell)", licenca: "GNU FDL" }}
+  solucao={<>Antwort A. <Eq>{`\\sigma^2 = \\frac{1}{n}\\sum (x_i - \\bar x)^2`}</Eq> ist eine Summe von Quadraten von reellen Zahlen, daher immer <Eq>{`\\geq 0`}</Eq>. Sie ist Null nur wenn alle Daten gleich dem Durchschnitt sind (konstante Menge). Selbst wenn der Durchschnitt negativ ist, sind die Quadrate der Abweichungen nicht negativ.</>}
+>
+Kann Varianz negativ sein?
+</Exercicio>
+
+### Block C — Modellierung (72.28 bis 72.36)
+
+<Exercicio numero="72.28" dificuldade="modelagem"
+  resposta="$3\sigma$ innerhalb der Toleranz"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "118", exercicio: "ex. 2.7.19", licenca: "CC-BY" }}
+  solucao={<>Durchschnitt <Eq>{`\\mu = 500`}</Eq> g, <Eq>{`\\sigma = 5`}</Eq> g. Toleranz: <Eq>{`\\pm 15`}</Eq> g. In Anzahl der Standardabweichungen: <Eq>{`15/5 = 3\\sigma`}</Eq>. Die Toleranz umfasst <Eq>{`\\mu \\pm 3\\sigma`}</Eq> — in einer Normalverteilung würde das 99,7% der Teile abdecken.</>}
+>
+Produktionslinie: Durchschnittsmasse 500 g, $\sigma = 5$ g. Toleranz $\pm 15$ g. Wie viel $\sigma$ repräsentiert die Toleranz?
+</Exercicio>
+
+<Exercicio numero="72.29" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "83", exercicio: "ex. 2.23", licenca: "CC-BY-SA" }}
+  solucao={<>Zwei Fonds, gleiche Rendite 8%. Fonds A: <Eq>{`\\sigma_A = 5\\%`}</Eq> (niedriges Risiko). Fonds B: <Eq>{`\\sigma_B = 15\\%`}</Eq> (hohes Risiko). Risikoavers: wähle Fonds A. Die gleiche erwartete Rendite mit niedriger Volatilität ist unter Markowitz-Theorie (Varianz als Risikomaß) zu bevorzugen.</>}
+>
+Zwei Fonds mit erwarteter Rendite 8%, aber $\sigma_A = 5\%$ und $\sigma_B = 15\%$. Welchen als risikoavers wählen? Warum?
+</Exercicio>
+
+<Exercicio numero="72.30" dificuldade="modelagem"
+  resposta="$\sigma_{\bar R} \approx 0{,}16\ \Omega$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "119", exercicio: "ex. 2.7.21", licenca: "CC-BY" }}
+  solucao={<>Standardabweichung des Durchschnitts von <Eq>{`n = 10`}</Eq> unabhängigen Messungen: <Eq>{`\\sigma_{\\bar R} = s/\\sqrt{n} = 0{,}5/\\sqrt{10} \\approx 0{,}158\\ \\Omega`}</Eq>. Das ist die **Standardunsicherheit** der Messung.</>}
+>
+Du misst einen Widerstand 10 Mal: $\bar{R} = 100\,\Omega$, $s = 0{,}5\,\Omega$. Schätze die Standardabweichung des Durchschnitts.
+</Exercicio>
+
+<Exercicio numero="72.31" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "84", exercicio: "ex. 2.25", licenca: "CC-BY-SA" }}
+  solucao={<>Fahrtzeit: <Eq>{`\\mu = 30`}</Eq> min, <Eq>{`\\sigma = 5`}</Eq> min. Wir möchten eine Schranke für Ankunft pünktlich mit 95% Wahrscheinlichkeit. Tschebyscheff: <Eq>{`P(|X-30| \\geq k\\sigma) \\leq 1/k^2`}</Eq>. Für 95% Marge: <Eq>{`1/k^2 \\leq 0{,}05 \\Rightarrow k \\geq \\sqrt{20} \\approx 4{,}5`}</Eq>. Also, losfahren <Eq>{`30 + 4{,}5 \\times 5 = 52{,}5`}</Eq> min früher. (Mit Normalverteilung: 1,65σ = 8,3 min würde ausreichen — Tschebyscheff ist sehr konservativ.)</>}
+>
+Fahrtzeit Haus-Arbeit: $\mu = 30$ min, $\sigma = 5$ min. Unter Verwendung der Tschebyscheff-Ungleichung als konservative Schranke, wie viele Minuten früher solltest du losfahren, um mindestens 95% Chance zu haben, rechtzeitig anzukommen?
+</Exercicio>
+
+<Exercicio numero="72.32" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "120", exercicio: "ex. 2.7.23", licenca: "CC-BY" }}
+  solucao={<>Six Sigma fordert, dass die Toleranz mindestens <Eq>{`6\\sigma`}</Eq> vom Durchschnitt entfernt ist. Gesamttoleranz: <Eq>{`10{,}06 - 10{,}00 = 0{,}06`}</Eq> mm pro Seite. Also <Eq>{`6\\sigma \\leq 0{,}06 \\Rightarrow \\sigma \\leq 0{,}01`}</Eq> mm. Das höchste <Eq>{`\\sigma`}</Eq> kompatibel mit Six Sigma ist <Eq>{`\\sigma = 0{,}01`}</Eq> mm.</>}
+>
+Six-Sigma-Prozess: $\mu = 10{,}00$ mm, Toleranz $9{,}94$ bis $10{,}06$ mm. Welches höchste $\sigma$ erfüllt noch die Six-Sigma-Anforderung?
+</Exercicio>
+
+<Exercicio numero="72.33" dificuldade="modelagem"
+  resposta="$\text{Var}(\text{Portefeuille}) = 1{,}25\ \%^2;\ \sigma = 1{,}12\%$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "85", exercicio: "ex. 2.27", licenca: "CC-BY-SA" }}
+  solucao={<>50-50 Portefeuille mit Unabhängigkeit: <Eq>{`R = 0{,}5 A + 0{,}5 B`}</Eq>. <Eq>{`\\text{Var}(R) = 0{,}5^2 \\sigma_A^2 + 0{,}5^2 \\sigma_B^2 = 0{,}25 \\times 1 + 0{,}25 \\times 4 = 1{,}25\\ \\%^2`}</Eq>. <Eq>{`\\sigma_R = \\sqrt{1{,}25} \\approx 1{,}12\\%`}</Eq>. Niedriger als der Durchschnitt einzelner Volatilitäten (1,5%) — Diversifikationseffekt.</>}
+>
+Aktien A: $\sigma_A = 1\%$; Aktien B: $\sigma_B = 2\%$. 50-50 Portefeuille, Korrelation Null. Portefeuille-Varianz.
+</Exercicio>
+
+<Exercicio numero="72.34" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "86", exercicio: "ex. 2.29", licenca: "CC-BY-SA" }}
+  solucao={<>Mit Korrelation <Eq>{`\\rho = -0{,}5`}</Eq>: <Eq>{`\\text{Var}(R) = 0{,}25\\sigma_A^2 + 0{,}25\\sigma_B^2 + 2(0{,}5)(0{,}5)\\rho\\sigma_A\\sigma_B = 0{,}25 + 1 + 2(0{,}25)(-0{,}5)(1)(2) = 1{,}25 - 0{,}5 = 0{,}75\\ \\%^2`}</Eq>. <Eq>{`\\sigma_R \\approx 0{,}87\\%`}</Eq>. Noch niedriger — negative Korrelation verstärkt den Diversifikationsvorteil.</>}
+>
+Gleiches Portefeuille wie zuvor, aber mit Korrelation $-0{,}5$ zwischen den Aktien. Varianz. Vergleiche mit dem Fall Korrelation Null.
+</Exercicio>
+
+<Exercicio numero="72.35" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "121", exercicio: "ex. 2.7.25", licenca: "CC-BY" }}
+  solucao={<>Features mit unterschiedlichen Skalierungen zu standardisieren (z.B.: Gehalt 0–100k vs. Alter 0–100) verhindert, dass Features mit größerer Magnitude den Gradienten dominieren. Nach Standardisierung hat jedes Feature <Eq>{`\\mu = 0`}</Eq> und <Eq>{`\\sigma = 1`}</Eq> — Gradientenabstieg konvergiert schneller und ausgewogener. Ein Feature mit <Eq>{`\\sigma = 0{,}01`}</Eq> hätte Gradient ~10.000x kleiner ohne Standardisierung, was es für den Optimierer unsichtbar macht.</>}
+>
+Beim Machine Learning, warum sollten Features mit unterschiedlichen Skalierungen vor dem Trainieren gradienten-basierter Modelle standardisiert werden?
+</Exercicio>
+
+<Exercicio numero="72.36" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "65", exercicio: "ex. 2.15", licenca: "CC-BY-SA" }}
+  solucao={<>ENEM 2023 (hypothetisches Beispiel mit bekannter Verteilung): Noten in Mathematik haben historisch <Eq>{`\\mu \\approx 520`}</Eq>, <Eq>{`\\sigma \\approx 110`}</Eq>. Ein Schüler mit Note 740 hat z-Score <Eq>{`z = (740-520)/110 = 2`}</Eq> — zwei Standardabweichungen über dem Durchschnitt, ungefähr Perzentil 97,7% (mittels Normaltabelle).</>}
+>
+ENEM-Noten in Mathematik: $\mu \approx 520$, $\sigma \approx 110$ Punkte. Ein Schüler bekam 740. Berechne den z-Score und interpretiere (in wie vielen Standardabweichungen über dem Durchschnitt liegt er?).
+</Exercicio>
+
+### Block D — Beweis und Theorie (72.37 bis 72.40)
+
+<Exercicio numero="72.37" dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "246", exercicio: "ex. 6.1.4", licenca: "GNU FDL" }}
+  solucao={<>Von der Definition ausgehend: <Eq>{`\\text{Var}(X) = E[(X-\\mu)^2] = E[X^2 - 2\\mu X + \\mu^2]`}</Eq>. Nach Linearität von <Eq>{`E`}</Eq>: <Eq>{`= E[X^2] - 2\\mu E[X] + \\mu^2 = E[X^2] - 2\\mu^2 + \\mu^2 = E[X^2] - \\mu^2 = E[X^2] - (E[X])^2`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+Zeige, dass $\text{Var}(X) = E[X^2] - (E[X])^2$ ausgehend von der Definition $\text{Var}(X) = E[(X-\mu)^2]$.
+</Exercicio>
+
+<Exercicio numero="72.38" dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "79", exercicio: "ex. 2.16 (beweis)", licenca: "CC-BY-SA" }}
+  solucao={<>Nach Definition: <Eq>{`E[aX+b] = aE[X]+b = a\\mu+b`}</Eq>. Dann <Eq>{`\\text{Var}(aX+b) = E[(aX+b - a\\mu - b)^2] = E[(a(X-\\mu))^2] = a^2 E[(X-\\mu)^2] = a^2 \\text{Var}(X)`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+Zeige, dass $\text{Var}(aX + b) = a^2\,\text{Var}(X)$ für beliebige Konstanten $a, b$.
+</Exercicio>
+
+<Exercicio numero="72.39" dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "252", exercicio: "ex. 6.2.2", licenca: "GNU FDL" }}
+  solucao={<>Für <Eq>{`X, Y`}</Eq> unabhängig: <Eq>{`E[XY] = E[X]E[Y]`}</Eq>. Dann <Eq>{`\\text{Var}(X+Y) = E[(X+Y)^2] - (E[X+Y])^2 = E[X^2]+2E[XY]+E[Y^2] - (\\mu_X+\\mu_Y)^2 = (E[X^2]-\\mu_X^2) + (E[Y^2]-\\mu_Y^2) + 2(E[XY]-\\mu_X\\mu_Y) = \\text{Var}(X) + \\text{Var}(Y) + 0`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+Zeige, dass $\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$ wenn $X$ und $Y$ unabhängig sind.
+</Exercicio>
+
+<Exercicio numero="72.40" dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6 (§8.1 für Tschebyscheff)", pagina: "305", exercicio: "Theorem 8.1", licenca: "GNU FDL" }}
+  solucao={<>Sei <Eq>{`A = \\{|X - \\mu| \\geq k\\sigma\\}`}</Eq>. Dann <Eq>{`\\sigma^2 = E[(X-\\mu)^2] \\geq E[(X-\\mu)^2 \\mathbf{1}_A] \\geq k^2\\sigma^2 P(A)`}</Eq>, wobei die letzte Ungleichung verwendet, dass auf <Eq>{`A`}</Eq> gilt <Eq>{`(X-\\mu)^2 \\geq k^2\\sigma^2`}</Eq>. Teilen durch <Eq>{`\\sigma^2`}</Eq>: <Eq>{`P(A) \\leq 1/k^2`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+Zeige die Tschebyscheff-Ungleichung: $P(|X - \mu| \geq k\sigma) \leq \dfrac{1}{k^2}$ für $k > 0$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Quellen
+
+- [**OpenIntro Statistics** (4. Aufl.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA. **Primärquelle dieser Lektion.** §2.1–§2.2 behandeln Stichprobenvarianz, Standardabweichung, Boxplot und angewendete Beispiele.
+
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY. §2.7 behandelt Dispersionsmaße, Rechenformel, Übungen mit Rechner und Daten aus Bildung/Gesundheit.
+
+- [**Introduction to Probability** — Grinstead & Snell (Dartmouth)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL. Ch. 6 behandelt Varianz diskreter Zufallsvariablen, algebraische Eigenschaften, Tschebyscheff und Verbindung zum Gesetz der großen Zahlen.

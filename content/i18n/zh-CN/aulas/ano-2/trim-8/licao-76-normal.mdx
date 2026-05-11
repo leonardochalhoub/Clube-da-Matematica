@@ -1,0 +1,910 @@
+---
+titulo: "Lição 76 — Distribuição normal"
+slug: "licao-76-normal"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Curva de sino: densidade, padronização Z, regra 68-95-99,7, intervalos de confiança e testes Z. A distribuição central da estatística e das ciências aplicadas."
+ordem: 76
+publicado: true
+tags: ["estatística", "probabilidade", "normal", "gaussiana", "ano-2", "trim-8"]
+prerrequisitos: ["licao-75"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math — Singapura", "AP Statistics — EUA", "Math B — Japão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="f(x) = \frac{1}{\sigma\sqrt{2\pi}}\,e^{-\frac{(x-\mu)^2}{2\sigma^2}}, \quad Z = \frac{X-\mu}{\sigma}"
+  legenda={<>分布<strong>正态分布</strong> <Eq>{`\\mathcal N(\\mu, \\sigma^2)`}</Eq>是统计学中最重要的分布。它的密度函数关于 <Eq>{`\\mu`}</Eq> 对称，宽度由 <Eq>{`\\sigma`}</Eq> 控制。<strong>标准化</strong> <Eq>{`Z = (X-\\mu)/\\sigma`}</Eq> 将任意正态分布转化为标准正态分布，使得我们可以用单一的表来计算所有概率。</>}
+  audioTexto="正态分布。密度等于一除以 sigma 乘以 root 2 pi，乘以 e 的负 x 减 mu 平方除以 2 sigma 平方的幂。标准化 Z 等于 x 减 mu 除以 sigma。"
+/>
+
+<aside>
+
+**涵盖本课的教科书**
+
+- [**OpenIntro Statistics**（第4版）](https://www.openintro.org/book/os/) — Diez，Çetinkaya-Rundel，Barr · §3.5 · CC-BY-SA · <em>Z 标准化，正态表，68-95-99.7 法则，正态性验证（Q-Q 图）；AP 水平的实数据练习。</em>
+- [**Statistics**（OpenStax）](https://openstax.org/details/books/statistics) — Illowsky，Dean · §6.1–6.4 · CC-BY · <em>密度，累积分布函数，均值的置信区间，中心极限定理；TI 计算器和 Python；AP 水平练习。</em>
+- [**Introduction to Probability**（Grinstead-Snell）](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead，Snell · §5.2 · GNU FDL · <em>正态分布作为二项分布的极限的推导（De Moivre-Laplace）；矩生成函数；最大熵；演示性练习。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 密度和参数
+
+<Definicao titulo="正态分布 N(mu, sigma^2)">
+
+$X \sim \mathcal N(\mu, \sigma^2)$ 当且仅当 $X$ 的密度为：
+
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}}\,\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right), \quad x \in \mathbb{R}$$
+
+- $\mu \in \mathbb{R}$：**位置**参数（均值 = 中位数 = 众数）。
+- $\sigma > 0$：**尺度**参数（标准差）。
+- $\sigma^2$：方差。
+
+正规化性质 $\int_{-\infty}^{+\infty} f(x)\,dx = 1$ 遵循经典高斯结果：$\int_{-\infty}^{+\infty} e^{-x^2/2}\,dx = \sqrt{2\pi}$（使用极坐标证明）。
+
+</Definicao>
+
+> "如果 $X$ 是一个随机变量，$X$ 服从均值 $\mu$ 和标准差 $\sigma$ 的正态分布，我们记为 $X \sim N(\mu, \sigma)$。均值 $\mu$ 是对称曲线的中心，标准差 $\sigma$ 给出了分布的宽度。" — [OpenStax Statistics §6.1](https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution)
+
+<Definicao titulo="标准正态分布和标准化">
+
+$Z \sim \mathcal N(0, 1)$。累积分布函数：
+
+$$\Phi(z) = P(Z \leq z) = \int_{-\infty}^z \frac{1}{\sqrt{2\pi}} e^{-t^2/2}\,dt$$
+
+没有初等闭形式——通过表格或数值计算。
+
+**标准化**：如果 $X \sim \mathcal N(\mu, \sigma^2)$，则 $Z = (X - \mu)/\sigma \sim \mathcal N(0,1)$。
+
+**对称性**：$\Phi(-z) = 1 - \Phi(z)$。
+
+**重要分位数**：
+- $z_{0{,}975} = 1{,}96$（双侧 95% 置信区间）。
+- $z_{0{,}95} = 1{,}645$（单侧 95% 置信区间）。
+- $z_{0{,}995} = 2{,}576$（双侧 99% 置信区间）。
+
+</Definicao>
+
+> "正态分布围绕其均值对称...正态分布曲线下，距离均值一个标准差内的面积约为 68%，两个标准差内约为 95%，三个标准差内约为 99.7%。" — [OpenIntro Statistics §3.5](https://www.openintro.org/book/os/)
+
+<Teorema titulo="68-95-99.7 法则（Sigma 法则）">
+
+对于 $X \sim \mathcal N(\mu, \sigma^2)$：
+
+$$P(\mu - \sigma \leq X \leq \mu + \sigma) \approx 0{,}6827$$
+
+$$P(\mu - 2\sigma \leq X \leq \mu + 2\sigma) \approx 0{,}9545$$
+
+$$P(\mu - 3\sigma \leq X \leq \mu + 3\sigma) \approx 0{,}9973$$
+
+</Teorema>
+
+<Teorema titulo="闭包性质">
+
+1. **线性组合**：$aX + b \sim \mathcal N(a\mu + b,\; a^2\sigma^2)$。
+2. **独立和**：如果 $X \sim \mathcal N(\mu_1, \sigma_1^2)$ 和 $Y \sim \mathcal N(\mu_2, \sigma_2^2)$ 独立，则 $X + Y \sim \mathcal N(\mu_1+\mu_2,\; \sigma_1^2+\sigma_2^2)$。
+3. **样本均值**：$\bar X = (1/n)\sum X_i$ 其中 $X_i$ 来自 $\mathcal N(\mu, \sigma^2)$ 的 iid 样本，满足 $\bar X \sim \mathcal N(\mu, \sigma^2/n)$。
+
+</Teorema>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 540 180" className="w-full">
+<defs>
+  <marker id="arr76" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+</defs>
+<g>
+  <line x1="30" x2="510" y1="140" y2="140" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr76)"/>
+  <path d="M 50,138 C 80,138 100,135 120,120 C 150,95 170,55 200,38 C 220,28 230,25 270,25 C 310,25 320,28 340,38 C 370,55 390,95 420,120 C 440,135 460,138 490,138" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+  <path d="M 200,38 C 220,28 230,25 270,25 C 310,25 320,28 340,38 L 340,138 L 200,138 Z" fill="rgb(26 77 92 / 0.15)"/>
+  <path d="M 120,120 C 150,95 170,55 200,38 L 200,138 L 120,138 Z" fill="rgb(232 199 122 / 0.15)"/>
+  <path d="M 340,38 C 370,55 390,95 420,120 L 420,138 L 340,138 Z" fill="rgb(232 199 122 / 0.15)"/>
+  <line x1="270" x2="270" y1="25" y2="140" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4,3"/>
+  <line x1="200" x2="200" y1="38" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" strokeDasharray="3,3"/>
+  <line x1="340" x2="340" y1="38" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" strokeDasharray="3,3"/>
+  <line x1="120" x2="120" y1="120" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" strokeDasharray="3,3"/>
+  <line x1="420" x2="420" y1="120" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" strokeDasharray="3,3"/>
+  <text x="270" y="158" textAnchor="middle" fontSize="11" fontFamily="serif" fill="currentColor">μ</text>
+  <text x="200" y="158" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">μ−σ</text>
+  <text x="340" y="158" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">μ+σ</text>
+  <text x="120" y="158" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.5">μ−2σ</text>
+  <text x="420" y="158" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.5">μ+2σ</text>
+  <text x="270" y="72" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">68%</text>
+  <text x="160" y="115" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.6">13,6%</text>
+  <text x="380" y="115" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.6">13,6%</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+正态曲线：68% 的数据位于 μ ± σ（中心深色区域），27.2% 位于 μ ± 2σ（侧面区域），0.3% 位于 μ ± 3σ 之外的尾部。
+</figcaption>
+</figure>
+
+<Insight>
+
+正态分布在所有具有固定均值 $\mu$ 和方差 $\sigma^2$ 的分布中最大化**微分熵**。这提供了一个贝叶斯理由：假设正态性意味着在给定均值和方差约束的情况下假设最少的额外信息——与已知条件兼容的"最不可知"的分布。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="5 岁儿童">
+
+想象测量你年龄的**一千个孩子**的身高。大多数接近平均身高。很少有人非常矮，很少有人非常高。
+
+如果你做一个图表，就会出现一个**对称的山**——著名的**钟形曲线**。这个山就是正态分布。
+
+越接近中心，孩子越多。在边缘，几乎没有人。
+
+</Porta>
+
+<Porta nivel="10" titulo="10 岁儿童">
+
+正态分布是自然界中最常见的分布：
+
+- 人的身高
+- 实验室测量中的误差
+- 设计良好的考试的分数
+- 树上叶子的大小
+
+两个数字完全描述曲线：
+
+- $\mu$（**均值**）：峰值的位置。
+- $\sigma$（**标准差**）：曲线有多宽。
+
+**魔法 68-95-99.7 法则**：
+- 68% 的数据位于 $\mu - \sigma$ 和 $\mu + \sigma$ 之间。
+- 95% 位于 $\mu - 2\sigma$ 和 $\mu + 2\sigma$ 之间。
+- 99.7% 位于 $\mu - 3\sigma$ 和 $\mu + 3\sigma$ 之间。
+
+例子：巴西成年人身高：$\mu = 170$ cm，$\sigma = 8$ cm。则 95% 的人身高在 154 到 186 cm 之间。
+
+</Porta>
+
+<Porta nivel="15" titulo="15 岁青少年">
+
+正态分布之所以重要有三个原因：
+
+1. **自然出现**：当许多小的独立因素加起来时，结果趋向于正态（中心极限定理——下一课）。
+2. **简单的代数**：独立正态分布的和和均值也是正态分布。
+3. **支撑统计推断**：置信区间、假设检验、回归分析。
+
+### 如何使用 Z 表
+
+计算任何 $\mathcal N(\mu, \sigma^2)$ 中的 $P(X \leq c)$：
+
+1. 标准化：$z = (c - \mu)/\sigma$。
+2. 查询表 $\Phi(z)$（或使用 `DIST.NORMP.N(z; TRUE)`）。
+3. 对于 $P(X \geq c)$：使用对称性 $\Phi(-z) = 1 - \Phi(z)$。
+
+**例子**：均值为 70，标准差为 10 的考试。$P(X \geq 85)$？
+$z = (85-70)/10 = 1{,}5$。$P(Z \geq 1{,}5) = 1 - \Phi(1{,}5) \approx 1 - 0{,}933 = 0{,}067$（6.7%）。
+
+### 历史
+
+卡尔·弗里德里希·高斯（1809）使用正态分布来模拟天文观察中的误差（"正常误差"）。亚伯拉罕·德·莫弗尔（1733）已经将曲线推导为二项分布的极限。因此"高斯分布"和"正态分布"是同义词。
+
+### 正态分布不适用的情况
+
+- 收入和房地产价格（长尾分布）。
+- 稀有计数（泊松分布）。
+- 等待时间（指数分布）。
+- 金融收益（尾部比正态分布更重——"黑天鹅"）。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程学生">
+
+### 均值的置信区间
+
+对于来自 $\mathcal N(\mu, \sigma^2)（\sigma$ 已知）的 iid $X_1, \ldots, X_n$：
+
+$$\bar X \sim \mathcal N\!\left(\mu, \frac{\sigma^2}{n}\right) \implies \bar X \pm 1{,}96\,\frac{\sigma}{\sqrt n} \text{ 是 } \mu \text{ 的 95% 置信区间}$$
+
+$\sigma$ 未知时：用 $s$ 替换并使用 **t 学生分布**（第 79+ 课）。
+
+### 均值的 z 检验
+
+$H_0: \mu = \mu_0$。检验统计量：
+
+$$z = \frac{\bar X - \mu_0}{\sigma/\sqrt n}$$
+
+在 $H_0$ 下拒绝（双侧，$\alpha = 5\%$）如果 $|z| > 1{,}96$。
+
+### 公差工程（六西格玛）
+
+产品直径 $\mathcal N(10{,}00;\; 0{,}02^2)$ mm。公差 $10{,}00 \pm 0{,}05$ mm。
+
+$z = 0{,}05/0{,}02 = 2{,}5$。$P(|Z| > 2{,}5) = 2\Phi(-2{,}5) \approx 1{,}24\%$。
+
+每 1000 件产品：约 12 件不合格。对于六西格玛（3.4 ppm）：$z \approx 4{,}5$。
+
+### 正态混合（GMM）
+
+$$f(x) = \sum_k \pi_k\,\mathcal N(x;\, \mu_k, \sigma_k^2)$$
+
+模拟异质化种群（例：混合种群的身高、聚类分数）。通过 EM 算法调整。是机器学习中高斯混合模型的基础。
+
+### Q-Q 图（正态性诊断）
+
+绘制样本分位数与 $\mathcal N(0,1)$ 的理论分位数。直线 $y = x$ 表示正态性。曲线表示偏态（偏度）或重尾（峰度）。由 Shapiro-Wilk 检验（$n < 50$）或 Anderson-Darling 补充。
+
+### Python 实现
+
+```python
+from scipy.stats import norm
+norm.cdf(1.96)                       # 0.975
+norm.ppf(0.975)                      # 1.96
+norm.pdf(0)                          # 0.3989 (N(0,1) 的峰值)
+norm.cdf(85, loc=70, scale=10)       # P(X <= 85) with mu=70, sigma=10
+norm.rvs(loc=0, scale=1, size=1000)  # 样本
+```
+
+</Porta>
+
+<Porta nivel="40" titulo="资深专业人士">
+
+### 特征函数刻画
+
+$\mathcal N(\mu, \sigma^2)$ 的特征函数为：
+
+$$\varphi(t) = E[e^{itX}] = \exp\!\left(i\mu t - \frac{\sigma^2 t^2}{2}\right)$$
+
+在有限方差分布中，唯一具有二次对数特征函数的分布。允许通过 Lévy 连续性定理证明 CLT：如果 $\varphi_{X_n}(t) \to e^{-t^2/2}$ 逐点收敛，则 $X_n$ 按分布收敛到 $Z \sim \mathcal N(0,1)$。
+
+### 多元正态分布
+
+$\mathbf X \sim \mathcal N(\boldsymbol\mu, \Sigma)$ 具有均值向量 $\boldsymbol\mu$ 和半正定协方差矩阵 $\Sigma$。密度：
+
+$$f(\mathbf x) = \frac{1}{(2\pi)^{p/2}|\Sigma|^{1/2}} \exp\!\left(-\frac{1}{2}(\mathbf x - \boldsymbol\mu)^\top \Sigma^{-1} (\mathbf x - \boldsymbol\mu)\right)$$
+
+边际分布和条件分布仍为正态。是 PCA、多元线性回归、卡尔曼滤波器、高斯过程和贝叶斯神经网络的基础。
+
+### 细尾 vs. 重尾
+
+正态分布的尾部衰减为 $e^{-x^2/2}$ ——超指数快速衰减。距离平均值 5σ 的事件应该每百万次观察中出现 < 10^{-6} 次。在金融中：LTCM（1998）和 2008 年危机涉及"10σ"事件。教训：**重尾**分布（t 学生、帕累托、Lévy 稳定）更好地模拟极端风险。
+
+### 最大熵
+
+在 $\mathbb{R}$ 上所有具有固定 $E[X] = \mu$ 和 $E[X^2] = \sigma^2 + \mu^2$ 的分布中，正态分布最大化微分熵 $h(X) = -\int f \log f\,dx$。这是统计贝叶斯建模中最大熵原理的理由。
+
+### 布朗运动和 Black-Scholes
+
+Wiener 过程 $W_t$ 有增量 $W_{t+\Delta} - W_t \sim \mathcal N(0, \Delta)$，独立。它是 CLT 的连续基础：iid 跳跃和的极限。Black-Scholes 公式（第 119 课）明确使用 $W_t$ 和标准正态 $\Phi$ 来定价期权。参见[经济学诺贝尔奖 1997](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/)。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用">
+
+### 4 步配方
+
+1. **确定总体的 $\mu$ 和 $\sigma$**。
+2. **标准化**：$z = (x - \mu)/\sigma$。
+3. **查询表** $\Phi(z)$ 或使用电子表格/Python。
+4. **使用对称性**：$P(X \geq c) = 1 - P(X \leq c) = \Phi(-z)$。
+
+### 在电子表格中（Excel / LibreOffice）
+
+| 函数 | 结果 |
+|---|---|
+| `DIST.NORMP.N(z; TRUE)` | $\Phi(z)$ |
+| `DIST.NORM.N(x; mu; sigma; TRUE)` | $P(X \leq x)$ |
+| `INV.NORMP.N(prob)` | 分位数 $z$ |
+| `INV.NORM.N(prob; mu; sigma)` | $\mathcal N(\mu,\sigma^2)$ 的分位数 |
+
+### 何时不用正态分布
+
+- 严格正向且长尾的数据：**对数正态**（工资、价格）。
+- 稀有计数：**泊松分布**。
+- 等待事件的时间：**指数**或 **Weibull**。
+- 日收益：**t 学生**（尾部更重）。
+- 比例：**二项**或 **beta**。
+
+### 正态性快速验证
+
+1. 直方图关于钟形对称？
+2. 68% 的数据在 $[\bar x - s;\; \bar x + s]$ 内？
+3. Q-Q 图是直线？
+4. Shapiro-Wilk 检验（$n < 50$）$p$ 值 > 0.05？
+
+</Porta>
+
+</DuasPortas>
+
+## 解决的例题
+
+<Exemplo numero="76.1" titulo="标准化和 Z 表" dificuldade="basico">
+
+**问题。** $X \sim \mathcal N(70, 10^2)$。计算 $P(X \leq 85)$。
+
+**策略。** 标准化并查询表 $\Phi$。
+
+**解。**
+
+$$z = \frac{85 - 70}{10} = 1{,}5$$
+
+$$P(X \leq 85) = P(Z \leq 1{,}5) = \Phi(1{,}5) \approx 0{,}9332$$
+
+**验证。** 85 在均值上方 $1{,}5\sigma$。根据 68-95-99.7 法则，约 84% 在 $\mu + \sigma = 80$ 下方，更多在 $\mu + 1{,}5\sigma = 85$ 下方。结果约 93% 是合理的。
+
+**来源。** [OpenIntro Statistics §3.5](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="76.2" titulo="应用 68-95-99.7 法则" dificuldade="basico">
+
+**问题。** 智商遵循 $\mathcal N(100, 15^2)$。人口中智商在 85 到 115 之间的比例是多少？超过 130 的比例呢？
+
+**策略。** 确定 σ 倍数位置并应用法则。
+
+**解。**
+
+- 85 = $\mu - \sigma$ 和 115 = $\mu + \sigma$（间隔 $\pm 1\sigma$）：$P(85 \leq X \leq 115) \approx 68\%$。
+- 130 = $\mu + 2\sigma$：$P(X > 130) = (1 - 0{,}9545)/2 \approx 2{,}28\%$。
+
+**验证。** 68% 在 $\pm 1\sigma$ 之间，2.28% 在 $+2\sigma$ 上方是标准正态表的制表结果。智商量表被刻意校准为 $\sigma = 15$ 并使这些百分位有意义。
+
+**来源。** [OpenStax Statistics §6.1](https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="76.3" titulo="工程公差" dificuldade="intermediario">
+
+**问题。** 产品直径 $\mathcal N(10{,}00;\; 0{,}02^2)$ mm。规范 $10{,}00 \pm 0{,}05$ mm。不合格的比例是多少？
+
+**策略。** 通过标准化计算 $P(|X - 10| > 0{,}05)$。
+
+**解。**
+
+$$z = \frac{0{,}05}{0{,}02} = 2{,}5$$
+
+$$P(|X - 10| > 0{,}05) = P(|Z| > 2{,}5) = 2\Phi(-2{,}5) = 2 \times 0{,}0062 = 0{,}0124$$
+
+约 $1{,}24\%$ 的产品被拒绝——每 1000 件约 **12 件**。
+
+**验证。** $z = 2{,}5$ 在 $2\sigma$（2.28% 外）和 $3\sigma$（0.27% 外）之间。结果 1.24% 与此区间一致。对于六西格玛（3.4 ppm），需要 $z \approx 4{,}5$。
+
+**来源。** [OpenStax Statistics §6.3](https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="76.4" titulo="均值的置信区间" dificuldade="intermediario">
+
+**问题。** 25 件产品样本，$\bar X = 105$ mm，$\sigma = 10$ mm（已知）。构造 $\mu$ 的 95% 置信区间。
+
+**策略。** 使用 $\bar X \sim \mathcal N(\mu, \sigma^2/n)$ 和 $z_{0{,}975} = 1{,}96$。
+
+**解。**
+
+$$SE = \frac{\sigma}{\sqrt n} = \frac{10}{\sqrt{25}} = 2$$
+
+$$IC_{95\%} = \left[\bar X - 1{,}96 \cdot SE;\; \bar X + 1{,}96 \cdot SE\right] = [105 - 3{,}92;\; 105 + 3{,}92] = [101{,}08;\; 108{,}92]$$
+
+**验证。** 置信区间的总宽度为 $2 \times 3{,}92 = 7{,}84$ mm。因为 $\sigma = 10$ 和 $n = 25$，标准误为 2——种群标准差的一半，由 $\sqrt{25}$ 减小。该间隔在 95% 的样本中覆盖真实均值。
+
+**来源。** [OpenIntro Statistics §4.2](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="76.5" titulo="推导：高斯积分" dificuldade="avancado">
+
+**问题。** 证明 $\int_{-\infty}^{+\infty} e^{-x^2/2}\,dx = \sqrt{2\pi}$ 使用极坐标技巧。
+
+**策略。** 计算 $I^2$，其中 $I = \int e^{-x^2/2}\,dx$，并转换为极坐标。
+
+**解。** 设 $I = \int_{-\infty}^{+\infty} e^{-x^2/2}\,dx$。
+
+$$I^2 = \left(\int_{-\infty}^{+\infty} e^{-x^2/2}\,dx\right)\!\left(\int_{-\infty}^{+\infty} e^{-y^2/2}\,dy\right) = \int_{-\infty}^{+\infty}\!\int_{-\infty}^{+\infty} e^{-(x^2+y^2)/2}\,dx\,dy$$
+
+极坐标：$x = r\cos\theta$，$y = r\sin\theta$，雅可比行列式 $r$：
+
+$$I^2 = \int_0^{2\pi}\!\int_0^{+\infty} e^{-r^2/2}\,r\,dr\,d\theta = 2\pi \int_0^{+\infty} r\,e^{-r^2/2}\,dr$$
+
+替换 $u = r^2/2$：$\int_0^\infty r e^{-r^2/2}\,dr = [-e^{-r^2/2}]_0^\infty = 1$。
+
+因此 $I^2 = 2\pi$，所以 $I = \sqrt{2\pi}$。
+
+**验证。** 密度 $f(x) = e^{-x^2/2}/\sqrt{2\pi}$ 在 $\mathbb R$ 上积分为 1——与 $Z$ 的正态性一致。
+
+**来源。** [Introduction to Probability — Grinstead, Snell §5.2](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-76-normal">
+
+### 块 A — 标准化和 Z 表（76.1 到 76.14）
+
+<Exercicio
+  numero="76.1"
+  dificuldade="aplicacao"
+  resposta="1,5"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "150", exercicio: "3.62", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`z = (X - \\mu)/\\sigma = (85 - 70)/10 = 15/10 = 1{,}5`}</Eq>。</>}
+>
+
+$X \sim \mathcal N(70, 10^2)$。计算 $X = 85$ 的 z 分数。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (80 - 100)/15 = -20/15 = -1{,}33`}</Eq>。低于平均值的值；z 分数为负。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "151", exercicio: "3.64", licenca: "CC-BY-SA" }}
+>
+
+$X \sim \mathcal N(100, 15^2)$。计算 $X = 80$ 的 z 分数。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.3"
+  dificuldade="aplicacao"
+  resposta="0,975"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "319", exercicio: "6.1.1", licenca: "CC-BY" }}
+  solucao={<><Eq>{`P(Z \\leq 1{,}96) = \\Phi(1{,}96) = 0{,}975`}</Eq>。这是标准正态的 97.5% 分位数——95% 置信区间的基础。</>}
+>
+
+计算 $P(Z \leq 1{,}96)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.4"
+  dificuldade="aplicacao"
+  resposta="0,025"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "320", exercicio: "6.1.3", licenca: "CC-BY" }}
+  solucao={<>根据对称性：<Eq>{`P(Z \\geq 1{,}96) = 1 - \\Phi(1{,}96) = 1 - 0{,}975 = 0{,}025`}</Eq>。</>}
+>
+
+计算 $P(Z \geq 1{,}96)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.5"
+  dificuldade="aplicacao"
+  solucao={<>根据对称性：<Eq>{`P(-1{,}96 \\leq Z \\leq 1{,}96) = \\Phi(1{,}96) - \\Phi(-1{,}96) = 0{,}975 - 0{,}025 = 0{,}950`}</Eq>。这是双侧 95% 区间。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "152", exercicio: "3.66", licenca: "CC-BY-SA" }}
+  passos={<><ol><li><Eq>{`P(-1{,}96 \\leq Z \\leq 1{,}96) = P(Z \\leq 1{,}96) - P(Z \\leq -1{,}96)`}</Eq>。</li><li><Eq>{`P(Z \\leq -1{,}96) = \\Phi(-1{,}96) = 1 - \\Phi(1{,}96) = 0{,}025`}</Eq>（对称）。</li><li>结果：<Eq>{`0{,}975 - 0{,}025 = 0{,}950`}</Eq>。</li></ol><em>技巧：</em>区间 <Eq>{`[-1{,}96;\\; 1{,}96]`}</Eq> 恰好捕获标准正态面积的 95% ——95% 置信区间的基础。</>}
+>
+
+计算 $P(-1{,}96 \leq Z \leq 1{,}96)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.6"
+  dificuldade="aplicacao"
+  resposta="0,0668"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "321", exercicio: "6.1.5", licenca: "CC-BY" }}
+  solucao={<><Eq>{`P(Z \\leq -1{,}5) = \\Phi(-1{,}5) = 1 - \\Phi(1{,}5) = 1 - 0{,}9332 = 0{,}0668`}</Eq>。</>}
+>
+
+计算 $P(Z \leq -1{,}5)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(0 \\leq Z \\leq 2) = \\Phi(2) - \\Phi(0) = 0{,}9772 - 0{,}5000 = 0{,}4772`}</Eq>。分布中约 48% 位于平均值和上方 2 个标准差之间。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "153", exercicio: "3.68", licenca: "CC-BY-SA" }}
+>
+
+计算 $P(0 \leq Z \leq 2)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (65 - 50)/10 = 1{,}5`}</Eq>。<Eq>{`P(X > 65) = P(Z > 1{,}5) = 1 - 0{,}9332 = 0{,}0668`}</Eq>。约 6.7% 在 65 上方。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "322", exercicio: "6.1.7", licenca: "CC-BY" }}
+>
+
+$X \sim \mathcal N(50, 10^2)$。计算 $P(X > 65)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.9"
+  dificuldade="aplicacao"
+  resposta="0,68"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "154", exercicio: "3.70", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`P(40 < X < 60) = P(-1 < Z < 1) \\approx 0{,}6827`}</Eq>。这是 <Eq>{`\\mu \\pm \\sigma`}</Eq> 区间——68% 法则。</>}
+>
+
+$X \sim \mathcal N(50, 10^2)$。计算 $P(40 < X < 60)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\mathcal N(0, 4)`}</Eq>：这里 <Eq>{`\\sigma^2 = 4`}</Eq>，所以 <Eq>{`\\sigma = 2`}</Eq>。<Eq>{`z = (3-0)/2 = 1{,}5`}</Eq>。<Eq>{`P(X > 3) = P(Z > 1{,}5) \\approx 0{,}0668`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "323", exercicio: "6.1.9", licenca: "CC-BY" }}
+>
+
+$X \sim \mathcal N(0, 4)$（方差 = 4）。计算 $P(X > 3)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.11"
+  dificuldade="aplicacao"
+  solucao={<>90% 分位数：<Eq>{`z_{0{,}90} = \\Phi^{-1}(0{,}90) \\approx 1{,}282`}</Eq>。<Eq>{`x = \\mu + z \\sigma = 100 + 1{,}282 \\times 15 \\approx 119{,}2`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "155", exercicio: "3.72", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>标准正态中的 90% 分位数：<Eq>{`z = \\Phi^{-1}(0{,}90) \\approx 1{,}282`}</Eq>。</li><li>反标准化：<Eq>{`x = \\mu + z\\sigma = 100 + 1{,}282 \\times 15 \\approx 119{,}2`}</Eq>。</li></ol><em>技巧：</em>"反标准化"= 反转标准化。如果 <Eq>{`z = (x-\\mu)/\\sigma`}</Eq>，则 <Eq>{`x = \\mu + z\\sigma`}</Eq>。</>}
+>
+
+计算 $\mathcal N(100, 15^2)$ 的 90% 分位数。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.12"
+  dificuldade="aplicacao"
+  solucao={<>25% 分位数（第一四分位数）：<Eq>{`z_{0{,}25} = \\Phi^{-1}(0{,}25) \\approx -0{,}674`}</Eq>。<Eq>{`x = 100 + (-0{,}674) \\times 15 \\approx 89{,}9`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "324", exercicio: "6.1.11", licenca: "CC-BY" }}
+>
+
+计算 $\mathcal N(100, 15^2)$ 的 $Q_1$（25% 分位数）。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.13"
+  dificuldade="aplicacao"
+  resposta="68%"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "156", exercicio: "3.74", licenca: "CC-BY-SA" }}
+  solucao={<>智商 <Eq>{`\\sim \\mathcal N(100, 15^2)`}</Eq>。区间 [85, 115] = <Eq>{`[\\mu - \\sigma;\\; \\mu + \\sigma]`}</Eq>。根据 68-95-99.7 法则：<Eq>{`P(85 \\leq X \\leq 115) \\approx 68\\%`}</Eq>。</>}
+>
+
+智商 $\sim \mathcal N(100, 15^2)$。人口中智商在 85 到 115 之间的比例是多少？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.14"
+  dificuldade="aplicacao"
+  resposta="2,5%"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "157", exercicio: "3.76", licenca: "CC-BY-SA" }}
+  solucao={<>130 = <Eq>{`\\mu + 2\\sigma`}</Eq>。通过 <Eq>{`\\pm 2\\sigma`}</Eq> 区间覆盖 95%：尾部有 5%，每条尾部 2.5%。<Eq>{`P(X > 130) \\approx 2{,}5\\%`}</Eq>。</>}
+>
+
+智商 $\sim \mathcal N(100, 15^2)$。哪个比例的人智商超过 130？
+
+</Exercicio>
+
+### 块 B — 应用 68-95-99.7 和分位数（76.15 到 76.24）
+
+<Exercicio
+  numero="76.15"
+  dificuldade="aplicacao"
+  solucao={<>145 = <Eq>{`\\mu + 3\\sigma`}</Eq>。区间 <Eq>{`\\pm 3\\sigma`}</Eq> 覆盖 99.7%。尾部有 0.3%，每条尾部 0.15%。<Eq>{`P(X > 145) \\approx 0{,}15\\%`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "325", exercicio: "6.1.13", licenca: "CC-BY" }}
+>
+
+智商 $\sim \mathcal N(100, 15^2)$。哪个比例的人智商超过 145？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.16"
+  dificuldade="aplicacao"
+  solucao={<>186 = 170 + 16 = <Eq>{`\\mu + 2\\sigma`}</Eq>（使用 <Eq>{`\\sigma = 8`}</Eq>）。<Eq>{`P(X > 186) \\approx 2{,}5\\%`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "158", exercicio: "3.78", licenca: "CC-BY-SA" }}
+>
+
+身高 $\sim \mathcal N(170, 8^2)$ cm。哪个比例的人身高超过 186 cm？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.17"
+  dificuldade="aplicacao"
+  solucao={<>前 5% 相当于 95% 分位数：<Eq>{`z_{0{,}95} \\approx 1{,}645`}</Eq>。<Eq>{`x = 70 + 1{,}645 \\times 10 \\approx 86{,}5`}</Eq>。超过 86.5 分的分数属于前 5%。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "326", exercicio: "6.1.15", licenca: "CC-BY" }}
+  passos={<><ol><li>前 5% → 分布的 95% 分位数。</li><li>标准正态：<Eq>{`z_{0{,}95} \\approx 1{,}645`}</Eq>。</li><li>反标准化：<Eq>{`x = 70 + 1{,}645 \\times 10 = 86{,}45`}</Eq>。</li></ol><em>技巧：</em>"前 k%"= 分布的第 (100-k) 百分位。前 5% = 95 百分位。</>}
+>
+
+分数 $\sim \mathcal N(70, 10^2)$。从哪个分数开始是前 5%？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.18"
+  dificuldade="aplicacao"
+  resposta="0,0027"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "159", exercicio: "3.80", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`P(|Z| > 3) = 2(1 - \\Phi(3)) = 2(1 - 0{,}9987) = 2 \\times 0{,}0013 = 0{,}0027`}</Eq>。3σ 法则：尾部有 0.27%。</>}
+>
+
+$X \sim \mathcal N(0, 1)$。计算 $P(|X| > 3)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.19"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "中位数 = 众数 = mu（由分布的对称轴）", correta: true}, {texto: "中位数 = mu + sigma"}, {texto: "中位数 = mu^2"}, {texto: "连续分布的众数是未定义的"}]}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "327", exercicio: "6.1.17", licenca: "CC-BY" }}
+  solucao={<>正态分布关于 <Eq>{`\\mu`}</Eq> 对称。根据对称性：<Eq>{`P(X \\leq \\mu) = 0{,}5`}</Eq> → <Eq>{`\\mu`}</Eq> 是中位数。密度的峰值在 <Eq>{`\\mu`}</Eq> → <Eq>{`\\mu`}</Eq> 是众数。三者重合。</>}
+>
+
+对于 $X \sim \mathcal N(\mu, \sigma^2)$，中位数、众数和 $\mu$ 之间的关系是什么？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.20"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\mathcal N(20, 16)`}</Eq>（<Eq>{`\\sigma = 4`}</Eq>）和 <Eq>{`Y \\sim \\mathcal N(10, 9)`}</Eq>（<Eq>{`\\sigma = 3`}</Eq>）独立。<Eq>{`X + Y \\sim \\mathcal N(30, 25)`}</Eq>，所以 <Eq>{`\\mu_{X+Y} = 30`}</Eq> 和 <Eq>{`\\sigma_{X+Y} = 5`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "160", exercicio: "3.82", licenca: "CC-BY-SA" }}
+>
+
+$X \sim \mathcal N(20, 4^2)$ 和 $Y \sim \mathcal N(10, 3^2)$ 独立。$X + Y$ 的分布是什么？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.21"
+  dificuldade="aplicacao"
+  solucao={<>工资 <Eq>{`\\sim \\mathcal N(5000, 1500^2)`}</Eq>。90% 分位数：<Eq>{`z = 1{,}282`}</Eq>。<Eq>{`x = 5000 + 1{,}282 \\times 1500 \\approx 6923`}</Eq>。前 10% 赚取超过 6923 雷亚尔。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "328", exercicio: "6.1.19", licenca: "CC-BY" }}
+>
+
+月薪 $\sim \mathcal N(5000, 1500^2)$ 雷亚尔。前 10% 的工资下限是多少？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.22"
+  dificuldade="aplicacao"
+  solucao={<>航班：<Eq>{`X \\sim \\mathcal N(120, 10^2)`}</Eq> 分钟。99% 分位数：<Eq>{`z_{0{,}99} \\approx 2{,}326`}</Eq>。<Eq>{`x = 120 + 2{,}326 \\times 10 \\approx 143{,}3`}</Eq> 分钟。预留 144 分钟（向上取整）以获得 99% 的信心。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "161", exercicio: "3.84", licenca: "CC-BY-SA" }}
+>
+
+航班时长 $\sim \mathcal N(120, 10^2)$ 分钟。为了有 99% 的把握按时到达，应该预留多少时间？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.23"
+  dificuldade="aplicacao"
+  solucao={<>日收益：<Eq>{`X \\sim \\mathcal N(0{,}001, 0{,}01^2)`}</Eq>。损失超过 2% = <Eq>{`P(X < -0{,}02)`}</Eq>。<Eq>{`z = (-0{,}02 - 0{,}001)/0{,}01 = -2{,}1`}</Eq>。<Eq>{`P(Z < -2{,}1) \\approx 0{,}0179`}</Eq> 或 1.79%。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "329", exercicio: "6.1.21", licenca: "CC-BY" }}
+>
+
+股票日收益 $\sim \mathcal N(0{,}001,\; 0{,}01^2)$。计算 $P(\text{损失} > 2\%)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.24"
+  dificuldade="aplicacao"
+  solucao={<>电压 <Eq>{`\\sim \\mathcal N(220, 5^2)`}</Eq>。<Eq>{`P(V > 235) = P(Z > (235-220)/5) = P(Z > 3) \\approx 0{,}0013`}</Eq>。约 0.13% 的测量会失败。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "162", exercicio: "3.86", licenca: "CC-BY-SA" }}
+>
+
+电压 $\sim \mathcal N(220, 5^2)$。如果 $V > 235$ V，设备会失败。计算失败的概率。
+
+</Exercicio>
+
+### 块 C — 建模和推断（76.25 到 76.36）
+
+<Exercicio
+  numero="76.25"
+  dificuldade="modelagem"
+  solucao={<>公差：<Eq>{`z = 0{,}05/0{,}02 = 2{,}5`}</Eq>。<Eq>{`P(|X-10| > 0{,}05) = 2\\Phi(-2{,}5) = 2 \\times 0{,}0062 = 0{,}0124`}</Eq>。被拒绝的比例：1.24% ——每 1000 件约 12 件。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "345", exercicio: "6.3.1", licenca: "CC-BY" }}
+  passos={<><ol><li>标准化公差限制：<Eq>{`z = 0{,}05/0{,}02 = 2{,}5`}</Eq>。</li><li><Eq>{`P(\\text{拒绝}) = P(|Z| > 2{,}5) = 2(1 - \\Phi(2{,}5))`}</Eq>。</li><li><Eq>{`\\Phi(2{,}5) \\approx 0{,}9938`}</Eq>。因此 <Eq>{`P = 2 \\times 0{,}0062 = 0{,}0124`}</Eq>。</li></ol><em>有趣的事实：</em>六西格玛要求 <Eq>{`z \\geq 4{,}5`}</Eq>，将缺陷减少到 3.4 ppm——比这个过程少 365 倍。</>}
+>
+
+产品直径 $\mathcal N(10{,}00;\; 0{,}02^2)$ mm。公差 $10{,}00 \pm 0{,}05$ mm。不合格的比例是多少？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.26"
+  dificuldade="modelagem"
+  solucao={<>调查：<Eq>{`\\hat p \\sim \\mathcal N(0{,}5, 0{,}5 \\times 0{,}5/1000)`}</Eq>。95% 置信区间：<Eq>{`0{,}5 \\pm 1{,}96 \\times \\sqrt{0{,}25/1000} = 0{,}5 \\pm 0{,}031`}</Eq>。区间：[0.469; 0.531]。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "172", exercicio: "4.20", licenca: "CC-BY-SA" }}
+>
+
+对 1000 名受访者的调查估计了实际比例 $p = 0{,}50$。构造 $p$ 的 95% 置信区间。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.27"
+  dificuldade="modelagem"
+  solucao={<>均值的 95% 置信区间：<Eq>{`\\bar X \\pm z_{0{,}975} \\sigma/\\sqrt{n} = 105 \\pm 1{,}96 \\times 10/5 = 105 \\pm 3{,}92 = [101{,}08;\\; 108{,}92]`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "173", exercicio: "4.22", licenca: "CC-BY-SA" }}
+>
+
+$\bar X = 105$，$n = 25$，$\sigma = 10$（已知）。构造 $\mu$ 的 95% 置信区间。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.28"
+  dificuldade="modelagem"
+  solucao={<>双侧 z 检验：<Eq>{`z = (\\bar X - \\mu_0)/(\\sigma/\\sqrt n) = (105 - 100)/(10/5) = 5/2 = 2{,}5`}</Eq>。<Eq>{`p\\text{-值} = 2 \\times P(Z > 2{,}5) = 2 \\times 0{,}0062 = 0{,}0124`}</Eq>。由于 0.0124 &lt; 0.05，拒绝 <Eq>{`H_0`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "346", exercicio: "6.3.3", licenca: "CC-BY" }}
+  passos={<><ol><li>检验统计量：<Eq>{`z = (105-100)/(10/5) = 2{,}5`}</Eq>。</li><li>双侧 p 值：<Eq>{`2 \\times P(Z > 2{,}5) = 2 \\times 0{,}0062 = 0{,}0124`}</Eq>。</li><li>决定：0.0124 &lt; 0.05 → 在 5% 水平上拒绝 <Eq>{`H_0`}</Eq>。</li></ol><em>技巧：</em>双侧 p 值 = 2 × （更极端尾部的面积）。与 <Eq>{`\\alpha`}</Eq> 比较，而非 <Eq>{`\\alpha/2`}</Eq>。</>}
+>
+
+检验 $H_0: \mu = 100$ vs. $H_1: \mu \neq 100$。$\bar X = 105$，$n = 25$，$\sigma = 10$。计算 p 值并做出决定。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.29"
+  dificuldade="modelagem"
+  solucao={<>执行时间：<Eq>{`X \\sim \\mathcal N(50, 5^2)`}</Eq> 毫秒。95% SLA：<Eq>{`x = 50 + 1{,}645 \\times 5 \\approx 58{,}2`}</Eq> 毫秒。将 SLA 限制定义为 59 毫秒（向上取整）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "163", exercicio: "3.88", licenca: "CC-BY-SA" }}
+>
+
+执行时间 $\sim \mathcal N(50, 5^2)$ 毫秒。为了保证 95% 的请求低于限制的 SLA，应该定义什么阈值？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.30"
+  dificuldade="modelagem"
+  solucao={<>六西格玛标准：<Eq>{`\\pm 6\\sigma`}</Eq> 覆盖 <Eq>{`2 \\times (1 - \\Phi(6)) \\approx 2 \\times 10^{-9}`}</Eq> ——缺陷基本为零。通过调整 1.5σ 的过程偏移：相当于 <Eq>{`\\pm 4{,}5\\sigma`}</Eq> 有效。<Eq>{`2(1-\\Phi(4{,}5)) \\approx 3{,}4 \\times 10^{-6}`}</Eq> = 3.4 ppm。因此"六西格玛 = 每百万 3.4 个缺陷"。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "347", exercicio: "6.3.5", licenca: "CC-BY" }}
+>
+
+六西格玛：规范 $\mu \pm 6\sigma$。通过调整 1.5σ 的过程偏移，计算每百万的缺陷。为什么结果是 3.4 ppm 而不是基本为零？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.31"
+  dificuldade="modelagem"
+  solucao={<>X-bar 图：<Eq>{`n = 5`}</Eq>，<Eq>{`\\sigma`}</Eq> 已知。控制限 <Eq>{`\\pm 3\\sigma/\\sqrt n`}</Eq>：<Eq>{`UCL = \\bar{\\bar X} + 3\\sigma/\\sqrt 5`}</Eq>，<Eq>{`LCL = \\bar{\\bar X} - 3\\sigma/\\sqrt 5`}</Eq>。对于 <Eq>{`\\sigma = 2`}</Eq> 和 <Eq>{`\\bar{\\bar X} = 100`}</Eq>：<Eq>{`UCL = 100 + 6/\\sqrt 5 \\approx 102{,}68`}</Eq>，<Eq>{`LCL \\approx 97{,}32`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "164", exercicio: "3.90", licenca: "CC-BY-SA" }}
+>
+
+X-bar 图 $n = 5$，$\sigma = 2$（已知），$\bar{\bar{X}} = 100$。计算 UCL 和 LCL 在 $\pm 3\sigma$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.32"
+  dificuldade="modelagem"
+  solucao={<>ML 模型：分数 <Eq>{`\\sim \\mathcal N(0{,}80, 0{,}05^2)`}</Eq>。前 20% 的阈值 = 80% 分位数：<Eq>{`z_{0{,}80} \\approx 0{,}842`}</Eq>。<Eq>{`x = 0{,}80 + 0{,}842 \\times 0{,}05 \\approx 0{,}842`}</Eq>。分数 > 0.842 的模型位于前 20%。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "330", exercicio: "6.1.23", licenca: "CC-BY" }}
+>
+
+ML 模型的分数 $\sim \mathcal N(0{,}80,\; 0{,}05^2)$。选择前 20% 模型的阈值是多少？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.33"
+  dificuldade="modelagem"
+  solucao={<>100Ω 电阻 ± 5%：公差 = [95, 105]Ω。如果 <Eq>{`\\sigma = 5/3 \\approx 1{,}67`}</Eq>（因为 3σ = 5）：<Eq>{`z = 5/1{,}67 = 3`}</Eq>。<Eq>{`P(95 \\leq X \\leq 105) = P(|Z| \\leq 3) \\approx 0{,}9973`}</Eq>。99.73% 在公差范围内。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "165", exercicio: "3.92", licenca: "CC-BY-SA" }}
+>
+
+100Ω 电阻，公差 $\pm 5\%$。假设 $\sigma = 5/3$ 欧（3$\sigma$ = 公差），计算在规范范围内的比例。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.34"
+  dificuldade="modelagem"
+  solucao={<>股票：日收益 <Eq>{`\\sim \\mathcal N(0{,}05\\%/252; \\; 20\\%^2/252)`}</Eq>。年度参数：预期收益 5%，<Eq>{`\\sigma = 20\\%`}</Eq>。年收益为负的概率：<Eq>{`P(X < 0) = \\Phi(-0{,}05/0{,}20) = \\Phi(-0{,}25) \\approx 40\\%`}</Eq>。单个年份的损失概率很高！</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "348", exercicio: "6.3.7", licenca: "CC-BY" }}
+>
+
+投资组合年度收益 $\sim \mathcal N(5\%, 20\%^2)$。计算一年内收益为负的概率。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.35"
+  dificuldade="modelagem"
+  solucao={<>ENEM：分数 <Eq>{`\\sim \\mathcal N(520, 110^2)`}</Eq>。<Eq>{`P(\\text{分数} > 700) = P(Z > 1{,}636) \\approx 0{,}051`}</Eq>。约 5% 的考生获得超过 700 分——与考试难度一致。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "166", exercicio: "3.94", licenca: "CC-BY-SA" }}
+>
+
+ENEM（数学）分数 $\sim \mathcal N(520, 110^2)$。计算 $P(\text{分数} > 700)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.36"
+  dificuldade="modelagem"
+  solucao={<>IPCA 年度累积：<Eq>{`X \\sim \\mathcal N(4{,}5\\%, 1{,}5\\%^2)`}</Eq>。目标上限 = 6.5%。<Eq>{`P(X > 6{,}5) = P(Z > (6{,}5-4{,}5)/1{,}5) = P(Z > 1{,}33) \\approx 0{,}092`}</Eq>。约 9.2% 的机会会超过通胀目标。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "349", exercicio: "6.3.9", licenca: "CC-BY" }}
+>
+
+IPCA 年度被建模为 $\mathcal N(4{,}5\%,\; 1{,}5\%^2)$。通胀目标：最高 6.5%。超过目标的概率是多少？
+
+</Exercicio>
+
+### 块 D — 理解和演示（76.37 到 76.42）
+
+<Exercicio
+  numero="76.37"
+  dificuldade="compreensao"
+  solucao={<>我们标准化是为了使用单一表（标准正态 <Eq>{`\\mathcal N(0,1)`}</Eq> 的表）来计算任何正态 <Eq>{`\\mathcal N(\\mu, \\sigma^2)`}</Eq> 的概率。没有标准化，我们需要为每对 <Eq>{`(\\mu, \\sigma)`}</Eq> 准备不同的表——不可能。变换 <Eq>{`Z = (X-\\mu)/\\sigma`}</Eq> 是一个缩放和原点移动，将任何正态分布映射到标准分布。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "167", exercicio: "3.96", licenca: "CC-BY-SA" }}
+>
+
+我们为什么要标准化成标准正态？单一表 $\Phi(z)$ 的存在说明了什么？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.38"
+  dificuldade="compreensao"
+  opcoes={[{texto: "正态尾部很细（衰减为 e^{-x^2/2}）；t 学生有更重的尾部，在金融中更好地模拟极端风险", correta: true}, {texto: "正态尾部很重；t 学生尾部更细"}, {texto: "对于大 n，正态和 t 学生尾部相同"}, {texto: "正态比任何其他连续分布的尾部都更重"}]}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "210", exercicio: "5.2.11", licenca: "GNU FDL" }}
+  solucao={<>正态尾部"细"：衰减为 <Eq>{`e^{-x^2/2}`}</Eq>，超指数级。距平均值 <Eq>{`5\\sigma`}</Eq> 的事件有 <Eq>{`\\approx 3 \\times 10^{-7}`}</Eq> 的概率——几乎不可能。t 学生在很少自由度时衰减为多项式：尾部更重得多，在金融中更好地模拟"黑天鹅"。</>}
+>
+
+正态尾部是"细"还是"重"？为什么这在金融风险建模中重要？
+
+</Exercicio>
+
+<Exercicio
+  numero="76.39"
+  dificuldade="desafio"
+  solucao={<>如果 <Eq>{`X \\sim \\mathcal N(0,1)`}</Eq>，则 <Eq>{`Y = X^2`}</Eq> 的 CDF 为 <Eq>{`P(Y \\leq y) = P(-\\sqrt y \\leq X \\leq \\sqrt y) = \\Phi(\\sqrt y) - \\Phi(-\\sqrt y) = 2\\Phi(\\sqrt y) - 1`}</Eq>。求导：<Eq>{`f_Y(y) = \\frac{1}{\\sqrt y} \\phi(\\sqrt y)`}</Eq> 对于 <Eq>{`y > 0`}</Eq>，其中 <Eq>{`\\phi`}</Eq> 是标准正态密度。这是 1 个自由度的卡方分布的密度：<Eq>{`f_Y(y) = y^{1/2-1} e^{-y/2} / (2^{1/2}\\Gamma(1/2))`}</Eq>。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "211", exercicio: "5.2.13", licenca: "GNU FDL" }}
+>
+
+证明如果 $X \sim \mathcal N(0, 1)$，则 $Y = X^2$ 有 1 个自由度的卡方分布。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.40"
+  dificuldade="demonstracao"
+  solucao={<>设 <Eq>{`X \\sim \\mathcal N(\\mu, \\sigma^2)`}</Eq>，<Eq>{`Y = aX + b`}</Eq>。<Eq>{`Y`}</Eq> 的 CDF：<Eq>{`P(Y \\leq y) = P(aX + b \\leq y) = P(X \\leq (y-b)/a) = \\Phi((y-b-a\\mu)/(a\\sigma))`}</Eq>。求导：<Eq>{`Y`}</Eq> 的密度为 <Eq>{`(1/(a\\sigma)) \\phi((y - (a\\mu+b))/(a\\sigma))`}</Eq>，这是 <Eq>{`\\mathcal N(a\\mu+b, a^2\\sigma^2)`}</Eq> 的密度。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "212", exercicio: "5.2.15", licenca: "GNU FDL" }}
+>
+
+证明如果 $X \sim \mathcal N(\mu, \sigma^2)$ 且 $Y = aX + b$（$a > 0$），则 $Y \sim \mathcal N(a\mu + b,\; a^2\sigma^2)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.41"
+  dificuldade="demonstracao"
+  solucao={<>高斯积分：<Eq>{`I = \\int_{-\\infty}^{+\\infty} e^{-x^2/2}\\,dx`}</Eq>。<Eq>{`I^2 = \\int\\int e^{-(x^2+y^2)/2}\\,dx\\,dy`}</Eq>。极坐标：<Eq>{`I^2 = \\int_0^{2\\pi} d\\theta \\int_0^\\infty r e^{-r^2/2}\\,dr = 2\\pi \\times [-e^{-r^2/2}]_0^\\infty = 2\\pi \\times 1 = 2\\pi`}</Eq>。因此 <Eq>{`I = \\sqrt{2\\pi}`}</Eq>。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "213", exercicio: "5.2.17", licenca: "GNU FDL" }}
+>
+
+证明 $\int_{-\infty}^{+\infty} e^{-x^2/2}\,dx = \sqrt{2\pi}$ 使用极坐标技巧。
+
+</Exercicio>
+
+<Exercicio
+  numero="76.42"
+  dificuldade="demonstracao"
+  solucao={<>正态分布在均值 <Eq>{`\\mu`}</Eq> 和方差 <Eq>{`\\sigma^2`}</Eq> 固定的分布中最大化微分熵。通过拉格朗日乘数法证明：最大化 <Eq>{`h(f) = -\\int f \\ln f`}</Eq> 约束为 <Eq>{`\\int f = 1`}</Eq>，<Eq>{`\\int xf = \\mu`}</Eq>，<Eq>{`\\int x^2 f = \\sigma^2 + \\mu^2`}</Eq>。拉格朗日函数导致解 <Eq>{`f(x) = e^{\\lambda_0 + \\lambda_1 x + \\lambda_2 x^2}`}</Eq>。为了可积且方差有限，<Eq>{`\\lambda_2 < 0`}</Eq>，解是高斯正态。最大熵值为 <Eq>{`h = \\frac{1}{2}\\ln(2\\pi e \\sigma^2)`}</Eq>。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "214", exercicio: "5.2.19", licenca: "GNU FDL" }}
+>
+
+证明（草图）正态分布在所有具有固定均值 $\mu$ 和方差 $\sigma^2$ 的连续分布中最大化微分熵。
+
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenIntro Statistics**（第4版）](https://www.openintro.org/book/os/) — Diez，Çetinkaya-Rundel，Barr · 2019 · EN · CC-BY-SA。**主要来源——§3.5（标准化、68-95-99.7 法则、Q-Q 图、应用）。**
+- [**Statistics**（OpenStax）](https://openstax.org/details/books/statistics) — Illowsky，Dean · 2022 · EN · CC-BY。**§6.1–6.4——密度、CDF、置信区间、中心极限定理、AP 水平练习。**
+- [**Introduction to Probability**（Grinstead-Snell）](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead，Snell · 1997 · EN · GNU FDL。**§5.2——高斯积分、矩生成函数、最大熵、De Moivre-Laplace 极限；演示性练习。**

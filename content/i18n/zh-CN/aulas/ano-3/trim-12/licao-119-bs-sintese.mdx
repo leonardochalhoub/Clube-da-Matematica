@@ -1,0 +1,806 @@
+---
+titulo: "Lição 119 — Síntese: Black-Scholes revisited"
+slug: "licao-119-bs-sintese"
+categoria: "aulas"
+subcategoria: "ano-3-trim-12"
+descricao: "A culminação de 3 anos: toda a matemática do Ensino Médio converge na fórmula de Black-Scholes. Funções, exp/log, derivadas, integrais, EDPs, distribuição normal, álgebra linear — todos visíveis na fórmula. Nobel de Economia 1997."
+ordem: 119
+publicado: true
+tags: ["Black-Scholes", "síntese", "opções", "finanças quantitativas", "Nobel", "ano-3", "trim-12"]
+prerrequisitos: ["licao-118-pca", "licao-83-tfc"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Math III japonês cap. final", "Equiv. Klasse 12 LK alemã — Finanças Aplicadas", "Equiv. H2 Further Math singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="C(S,t) = S\,N(d_1) - K\,e^{-r(T-t)}\,N(d_2)"
+  legenda={<><strong>Black-Scholes 定价公式</strong>用于给欧式看涨期权定价。<Eq>{`S`}</Eq>是当前资产价格，<Eq>{`K`}</Eq>是执行价格，<Eq>{`r`}</Eq>是无风险利率，<Eq>{`\\sigma`}</Eq>是波动率，<Eq>{`T-t`}</Eq>是到期时间。<Eq>{`N(d)`}</Eq>是标准正态分布的累积分布函数——一个积分。120堂课的全部数学都汇聚在这里。<a href="https://www.nobelprize.org/prizes/economic-sciences/1997/summary/" target="_blank" rel="noopener noreferrer"><strong>1997年诺贝尔经济学奖</strong></a>。</>}
+  audioTexto="Black-Scholes。C等于S乘以N的d一，减去K乘以e的负r乘以T减t次方，乘以N的d二。N是标准正态分布的累积分布函数。所有中等教育的数学都汇聚在这个方程中。1997年诺贝尔经济学奖。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+
+**涵盖本课程的书籍**
+
+- <a href="https://openstax.org/details/books/introductory-business-statistics" target="_blank" rel="noopener noreferrer">**OpenStax — Introductory Business Statistics**</a> <span> · 第6章（正态分布）和第11章（资产定价） · CC-BY 4.0 · </span><em>为N(d₁)和N(d₂)提供概率基础和正态分布。</em>
+
+- <a href="https://www.openintro.org/book/os/" target="_blank" rel="noopener noreferrer">**OpenIntro Statistics（第4版）**</a> <span> · §3.3–3.4（正态）、§3.5（近似） · CC-BY-SA · </span><em>带表格和金融定价例的标准正态分布。</em>
+
+- <a href="https://www.jirka.org/diffyqs/" target="_blank" rel="noopener noreferrer">**Notes on Diffy Qs — Jiří Lebl**</a> <span> · §4.1–4.3（抛物型偏微分方程、热方程） · CC-BY-SA · </span><em>Black-Scholes偏微分方程类似于热方程——Lebl涵盖了变换和求解。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 模型和经典方程
+
+<Definicao titulo="几何布朗运动（GBM）">
+
+Black-Scholes假设资产价格 $S_t$ 按照随机过程演变：
+
+$$dS = \mu S\,dt + \sigma S\,dW_t$$
+
+其中 $\mu$ 是预期回报率，$\sigma > 0$ 是波动率，$W_t$ 是标准布朗运动（维纳过程）。根据伊藤引理，对数收益率服从正态分布：
+
+$$\ln\frac{S_T}{S_0} \sim N\!\left(\left(\mu - \frac{\sigma^2}{2}\right)T,\; \sigma^2 T\right)$$
+
+</Definicao>
+
+> "Black和Scholes（1973）推导了欧式看涨期权的价格，假设基础资产价格遵循恒定漂移和波动率的几何布朗运动，无股息且市场无摩擦。" — [OpenStax Business Statistics，第11章](https://openstax.org/details/books/introductory-business-statistics)
+
+<Definicao titulo="Black-Scholes偏微分方程">
+
+无套利和连续对冲复制投资组合意味着任何衍生品 $V(S,t)$ 满足抛物型偏微分方程：
+
+$$\frac{\partial V}{\partial t} + \frac{1}{2}\sigma^2 S^2 \frac{\partial^2 V}{\partial S^2} + rS\frac{\partial V}{\partial S} - rV = 0$$
+
+变量替换 $x = \ln S$、$\tau = T - t$、$u = e^{r\tau}V$ 将这个偏微分方程化为**热方程**：
+
+$$\frac{\partial u}{\partial \tau} = \frac{\sigma^2}{2}\frac{\partial^2 u}{\partial x^2}$$
+
+</Definicao>
+
+> "热方程 $u_t = k\,u_{xx}$ 是抛物型偏微分方程的原型。其通过与高斯核卷积的解正是当对期权收益边界条件施加约束时产生Black-Scholes公式的结果。" — [Lebl，Notes on Diffy Qs §4.3](https://www.jirka.org/diffyqs/)
+
+<Definicao titulo="解析解——欧式看涨期权">
+
+在边界条件 $V(S,T) = \max(S - K, 0)$ 下，偏微分方程的解为：
+
+$$C(S,t) = S\,N(d_1) - K\,e^{-r(T-t)}\,N(d_2)$$
+
+$$d_1 = \frac{\ln(S/K) + (r + \sigma^2/2)(T-t)}{\sigma\sqrt{T-t}}, \quad d_2 = d_1 - \sigma\sqrt{T-t}$$
+
+其中 $N(d) = \dfrac{1}{\sqrt{2\pi}}\displaystyle\int_{-\infty}^{d} e^{-u^2/2}\,du$ 是标准正态分布的累积分布函数（CDF）。
+
+**解释**：$N(d_2)$ 是风险中性测度下期权行使至到期时价内的概率；$S\,N(d_1)$ 是在行使条件下接收资产的期望值，折现至 $t=0$。
+
+</Definicao>
+
+<Teorema titulo="看涨-看跌平价">
+
+对于无股息资产的欧式期权，在无套利市场中：
+
+$$C - P = S - K\,e^{-r(T-t)}$$
+
+**证明**：构造两个投资组合，在时刻T有相同的收益。投资组合A：买入看涨期权并卖出看跌期权。投资组合B：买入资产并借款 $Ke^{-r(T-t)}$。两者都在时刻T支付 $S_T - K$。根据无套利，它们今天的价值相同。
+
+</Teorema>
+
+### 希腊字母——C的偏导数
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<defs><marker id="arr119" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+<g>
+  <text x="10" y="28" fontSize="12" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.9" fontWeight="bold">希腊字母</text>
+  <text x="90" y="28" fontSize="12" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.9" fontWeight="bold">导数</text>
+  <text x="260" y="28" fontSize="12" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.9" fontWeight="bold">数值（看涨）</text>
+  <text x="390" y="28" fontSize="12" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.9" fontWeight="bold">解释</text>
+</g>
+<g>
+  <text x="10" y="55" fontSize="11" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">Delta</text>
+  <text x="90" y="55" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">∂C/∂S</text>
+  <text x="260" y="55" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">N(d₁)</text>
+  <text x="390" y="55" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">对冲比率</text>
+</g>
+<g>
+  <text x="10" y="82" fontSize="11" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">Gamma</text>
+  <text x="90" y="82" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">∂²C/∂S²</text>
+  <text x="260" y="82" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">φ(d₁)/(Sσ√T)</text>
+  <text x="390" y="82" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">凸性</text>
+</g>
+<g>
+  <text x="10" y="109" fontSize="11" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">Vega</text>
+  <text x="90" y="109" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">∂C/∂σ</text>
+  <text x="260" y="109" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">S·φ(d₁)·√T</text>
+  <text x="390" y="109" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">对波动率敏感</text>
+</g>
+<g>
+  <text x="10" y="136" fontSize="11" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">Theta</text>
+  <text x="90" y="136" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">∂C/∂t</text>
+  <text x="260" y="136" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">（负值）</text>
+  <text x="390" y="136" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">时间衰减</text>
+</g>
+<g>
+  <text x="10" y="163" fontSize="11" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">Rho</text>
+  <text x="90" y="163" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">∂C/∂r</text>
+  <text x="260" y="163" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">KT·e^(−rT)·N(d₂)</text>
+  <text x="390" y="163" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">对利率敏感</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+五个主要希腊字母——C对各参数的偏导数。衍生品交易柜台持续计算所有数值。
+</figcaption>
+</figure>
+
+<Insight>
+
+**为什么BS的偏微分方程类似于热方程？** 热扩散（热量从一个热点散开）和对资产未来价格不确定性的扩散遵循相同的数学。通过替换坐标，BS在字面上变成了Fourier（1822年）的热方程——通过高斯积分的解随之而来。19世纪的物理学为20世纪的衍生品定价服务。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="给5岁孩子的解释">
+
+想象你想买一张**票券，享有在1个月后以今天的价格购买玩具的权利**。但你没有义务——如果玩具变便宜了，你就扔掉票券。
+
+这张票券值多少钱？取决于三件事：
+- 玩具今天的价格。
+- 票券让你购买的价格。
+- 价格的"神经质"程度——如果上下波动很大，票券就更值钱。
+
+Black-Scholes是**神奇的计算**，告诉你票券值多少。两位数学家50多年前发明了这个计算，并在[**1997年赢得诺贝尔经济学奖**](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/)——经济学中最重要的奖项。
+
+</Porta>
+
+<Porta nivel="10" titulo="给10岁孩子的解释">
+
+想象Petrobras股票今天价值30美元（巴西雷亚尔）。你买了一个"权利"，可以在1个月内以32美元（巴西雷亚尔）的价格购买这只股票。如果股票升到40美元（巴西雷亚尔），你行使权利：以32美元（巴西雷亚尔）买入，以40美元（巴西雷亚尔）卖出——赚钱！如果跌到25美元（巴西雷亚尔），你干脆不行使。
+
+这个"权利"叫做**看涨期权**（call）。但你今天应该为它支付多少？
+
+**Black-Scholes**是回答这个问题的公式，考虑到：
+- 股票的当前价格（$S = 30$）
+- 执行价格（$K = 32$）
+- 到期时间（$T$）
+- 波动率——价格的"神经质"程度（$\sigma$）
+- 利率（$r$）
+
+该公式使用**你在中等教育中学到的一切**：函数、指数、对数、积分、概率。全部在一个方程中。
+
+发现这一点的人在[**1997年赢得诺贝尔经济学奖**](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/)。今天，世界上每个股票交易所每天使用这个公式数千次。
+
+</Porta>
+
+<Porta nivel="15" titulo="给15岁青少年的解释">
+
+你刚完成3年的数学。如果所有这些都汇聚成一个公式呢？
+
+$$C = S\cdot N(d_1) - K\cdot e^{-rT}\cdot N(d_2)$$
+
+看看这里有什么：
+- **函数** — $C(S,t)$ 是两个变量的函数（第2课）。
+- **指数** — $e^{-rT}$ 是连续折现（第7课）。
+- **对数** — $\ln(S/K)$ 出现在 $d_1$ 中（第7课）。
+- **平方根** — $\sigma\sqrt{T}$（第3课）。
+- **概率** — $N(d)$ 是累积钟形曲线（第39、76课）。
+- **导数** — 希腊字母是 $\partial C/\partial S$ 等（第51课）。
+- **积分** — $N(d)$ 是反常积分（第83课）。
+
+**世界上每个衍生品交易柜台**都持续计算这个。全球数量：估计超过600万亿美元的衍生品在全球市场。
+
+[**1997年诺贝尔经济学奖**](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/)：Robert Merton和Myron Scholes。Fischer Black在1995年去世——Nobel不追颂已故者，但委员会在引文中明确认可了他的核心贡献。
+
+**祝贺你走到了这里。**
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程学学生的解释">
+
+Black-Scholes是现代应用数学的典范：现实经济问题 → 随机模型 → 偏微分方程 → 解析解 → 实证验证 → [**Nobel**](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/)。
+
+### 通过复制投资组合的推导
+
+**假设：**
+1. $S_t$ 遵循GBM：$dS = \mu S\,dt + \sigma S\,dW_t$。
+2. 无摩擦市场、自由卖空。
+3. $r$ 和 $\sigma$ 恒定。
+4. 无股息。
+
+**复制投资组合：** 多头 $\Delta = \partial C/\partial S$ 股份 + 空头1张看涨期权。价值：$\Pi = \Delta S - C$。
+
+根据伊藤引理：
+
+$$dC = \frac{\partial C}{\partial t}dt + \frac{\partial C}{\partial S}dS + \frac{1}{2}\sigma^2 S^2 \frac{\partial^2 C}{\partial S^2}dt$$
+
+投资组合 $d\Pi = \Delta\,dS - dC$ 当 $\Delta = \partial C/\partial S$ 时消除 $dW_t$ 项：
+
+$$d\Pi = -\left(\frac{\partial C}{\partial t} + \frac{1}{2}\sigma^2 S^2 \frac{\partial^2 C}{\partial S^2}\right)dt$$
+
+根据无套利：$d\Pi = r\Pi\,dt$。代入 $\Pi = \Delta S - C$：
+
+$$\frac{\partial C}{\partial t} + \frac{1}{2}\sigma^2 S^2 \frac{\partial^2 C}{\partial S^2} + rS\frac{\partial C}{\partial S} - rC = 0$$
+
+### 通过热方程求解
+
+变量替换 $x = \ln S + (r - \sigma^2/2)(T-t)$、$\tau = \sigma^2(T-t)/2$ 将BS化为 $u_\tau = u_{xx}$。初始条件：$u(x,0) = \max(e^x - K, 0)$。通过与高斯核卷积求解：
+
+$$u(x,\tau) = \frac{1}{\sqrt{4\pi\tau}}\int_{-\infty}^{\infty} u(y,0)\,e^{-(x-y)^2/(4\tau)}\,dy$$
+
+反演变量替换后，得到公式 $C = SN(d_1) - Ke^{-rT}N(d_2)$。
+
+### 数值实现（Python）
+
+```python
+import numpy as np
+from scipy.stats import norm
+
+def bs_call(S, K, r, sigma, T):
+    d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+    d2 = d1 - sigma*np.sqrt(T)
+    return S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
+
+def greeks(S, K, r, sigma, T):
+    d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+    d2 = d1 - sigma*np.sqrt(T)
+    phi = norm.pdf(d1)
+    return {
+        'delta': norm.cdf(d1),
+        'gamma': phi / (S*sigma*np.sqrt(T)),
+        'vega':  S*phi*np.sqrt(T),
+        'theta': -(S*phi*sigma)/(2*np.sqrt(T)) - r*K*np.exp(-r*T)*norm.cdf(d2),
+        'rho':   K*T*np.exp(-r*T)*norm.cdf(d2),
+    }
+
+# PETR4: S=46.60, K=47, r=14.65%, sigma=35%, T=30/365
+print(bs_call(46.60, 47, 0.1465, 0.35, 30/365))  # 约 1.94美元（巴西雷亚尔）
+```
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士的解释">
+
+Black-Scholes不仅是一个公式——是一个**范式**。动态复制论证（多头 $\Delta$ 股份 + 空头1张看涨期券 = 每一时刻无风险投资组合）是现代定量金融的基础。
+
+### Nobel和历史
+
+[**1997年诺贝尔经济学奖**](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/)：Robert C. Merton和Myron S. Scholes，"因确定衍生品价值的新方法"。Scholes的官方讲座：[*Derivatives in a Dynamic Environment*](https://www.nobelprize.org/uploads/2018/06/scholes-lecture.pdf)。Fischer Black于1995年8月去世；Nobel委员会在引文中明确提及他。
+
+原始论文：Black & Scholes (1973)，*The Pricing of Options and Corporate Liabilities*，J. Political Economy 81(3):637–654——被两份杂志拒绝后才发表。
+
+### 已知的局限和后继模型
+
+| BS假设 | 现实 | 扩展 |
+|---|---|---|
+| 对数正态性 | 尾部肥厚、峰度 | 跳跃（Merton 1976、Kou 2002） |
+| $\sigma$ 恒定 | 波动率微笑、期限结构 | Heston (1993)、SABR (Hagan 2002) |
+| 完全市场 | 摩擦、资本 | FVA、KVA、MVA (XVA框架) |
+| 连续对冲 | 离散、成本 | 复制误差分析（Taleb） |
+
+### 交易柜台实际操作什么
+
+没人"操作Black-Scholes"——操作的是**隐含波动率**。隐含波动率曲面 $\sigma_\text{impl}(K, T)$ 是中心对象：BS被数值反演（Newton-Raphson，初值来自Brenner-Subrahmanyam $\sigma_0 \approx \sqrt{2\pi/T}\cdot C_\text{ATM}/S$），给定观察到的市场价格。
+
+### 与第12学期（PCA和线性代数）的联系
+
+在含$n$个资产的投资组合中，波动率是协方差矩阵 $\Sigma$。Cholesky分解 $\Sigma = LL^T$ 为蒙特卡洛生成相关布朗运动。PCA（第118课）提取主风险因子——前3-5个成分捕获>95%的方差在固定收益中。这是**风险归因**的机构基础。
+
+### 最新进展（2025-2026）
+
+- **粗糙波动率**（Gatheral、El Euch、Rosenbaum 2018）：$\sigma_t$ 是分数过程，$H < 1/2$ ——以更少参数重现微笑。
+- **神经随机微分方程**：网络从市场数据学习波动率动态。
+- **深度校准**：通过离线训练的神经网络在毫秒内校准曲面。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实践——使用B3数据定价">
+
+### 配方：给欧式看涨期权定价
+
+1. 收集：$S$（报价）、$K$（执行价）、$r$（年化Selic）、$\sigma$（估计的隐含波动率）、$T$（天数/365）。
+2. 计算 $d_1 = \dfrac{\ln(S/K)+(r+\sigma^2/2)T}{\sigma\sqrt{T}}$ 和 $d_2 = d_1 - \sigma\sqrt{T}$。
+3. 从标准正态表或使用 `scipy.stats.norm.cdf` 读取 $N(d_1)$ 和 $N(d_2)$。
+4. 应用：$C = SN(d_1) - Ke^{-rT}N(d_2)$。
+5. 对于看跌期权：$P = C - S + Ke^{-rT}$（看涨-看跌平价）。
+
+### B3场景——PETR4
+
+2026年4月30日：PETR4价格46.60美元（巴西雷亚尔）。看涨期权执行价47美元（巴西雷亚尔），到期30天，估计隐含波动率35%，Selic 14.65% 年率。
+
+$$d_1 = \frac{\ln(46{.}60/47)+(0{.}1465+0{.}0613)\cdot 0{.}0822}{0{.}35\cdot 0{.}2868} \approx 0{.}085$$
+
+$$d_2 = 0{.}085 - 0{.}35\cdot\sqrt{0{.}0822} \approx -0{.}015$$
+
+$$N(0{.}085)\approx 0{.}534, \quad N(-0{.}015)\approx 0{.}494$$
+
+$$C \approx 46{.}60\cdot 0{.}534 - 47\cdot e^{-0{.}1465\cdot 0{.}0822}\cdot 0{.}494 \approx \text{1.94美元（巴西雷亚尔）}$$
+
+与市场价格比较。如果市场收费2.50美元（巴西雷亚尔），市场隐含波动率大于35%——市场比模型定价了更多的不确定性。
+
+### BS在实践中何时失效
+
+- **盈利前**：隐含波动率飙升——BS假设$\sigma$恒定，但市场定价跳跃。
+- **危机（2008、2020）**：真实尾部肥厚远重于对数正态。
+- **流动性**：深度虚值期权有宽的买卖价差——理论价格无关。
+- **美式期权**：可能提前行使——BS无解析解。使用二叉树（Cox-Ross-Rubinstein）或Crank-Nicolson。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例题
+
+<Exemplo titulo="计算d1和d2（应用）" numero="1">
+
+**问题：** 对于看涨期权，$S = 100$，$K = 100$，$r = 0.05$，$\sigma = 0.20$，$T = 1$年，计算$d_1$和$d_2$。
+
+**策略：** 直接应用公式。因为$S = K$，项$\ln(S/K) = \ln(1) = 0$。
+
+**解决方案：**
+
+$$d_1 = \frac{\ln(100/100)+(0.05+0.02)\cdot 1}{0.20\cdot\sqrt{1}} = \frac{0 + 0.07}{0.20} = 0.35$$
+
+$$d_2 = 0.35 - 0.20\cdot 1 = 0.15$$
+
+**验证：** $d_2 = d_1 - \sigma\sqrt{T} = 0.35 - 0.20 = 0.15$。正确。因为$S = K$（平价期权），对于$r > 0$预期$d_1 > 0$。
+
+**来源。** 改编自[OpenStax — Introductory Business Statistics，第6章](https://openstax.org/details/books/introductory-business-statistics) — CC-BY 4.0。
+
+</Exemplo>
+
+<Exemplo titulo="通过标准正态表计算看涨期权价格（应用）" numero="2">
+
+**问题：** 使用$d_1 = 0.35$和$d_2 = 0.15$（例题1），已知$N(0.35) \approx 0.6368$和$N(0.15) \approx 0.5596$，计算看涨期权的价格。
+
+**策略：** 应用$C = SN(d_1) - Ke^{-rT}N(d_2)$，使用表中读取的值。
+
+**解决方案：**
+
+$$K e^{-rT} = 100\cdot e^{-0.05} \approx 100\cdot 0.9512 = 95.12$$
+
+$$C = 100\cdot 0.6368 - 95.12\cdot 0.5596$$
+
+$$C = 63.68 - 53.23 \approx 10.45$$
+
+**验证：** 看涨期权价值10.45美元（巴西雷亚尔）对于100美元（巴西雷亚尔）的股票。直觉：平价期权波动率20%且1年期应该价值7-13%——10.45%在预期范围内。
+
+**来源。** 改编自[OpenIntro Statistics §3.3](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo titulo="看涨-看跌平价——计算看跌期权（中等）" numero="3">
+
+**问题：** 使用例题2的数据（$C \approx 10.45$、$S = 100$、$K = 100$、$r = 0.05$、$T = 1$），计算相应欧式看跌期权的价格。
+
+**策略：** 应用看涨-看跌平价$P = C - S + Ke^{-rT}$。
+
+**解决方案：**
+
+$$P = 10.45 - 100 + 95.12 = 5.57$$
+
+**验证：** 根据对称性，相同参数的平价看跌期权应小于看涨期权，当$r > 0$时（持有股票的机会成本为$r$）。实际上，$P = 5.57 < C = 10.45$。一致。
+
+额外测试：$C - P = 10.45 - 5.57 = 4.88 \approx S - Ke^{-rT} = 100 - 95.12 = 4.88$。平价得到确认。
+
+**来源。** [OpenIntro Statistics §3.4 — 通过无套利论证推导平价](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo titulo="Delta和对冲比率（中等/高等）" numero="4">
+
+**问题：** 一个交易柜台持有1000张看涨期权多头，$\Delta = N(d_1) = 0.6368$（例题1）。应该卖空多少股票来创建Delta中性投资组合？
+
+**策略：** Delta中性意味着总投资组合有$\Delta_\text{total} = 0$。每张看涨期权的Delta = 0.6368；每股的Delta = 1。
+
+**解决方案：**
+
+投资组合：多头1000张看涨期权 + 空头$n$股。
+
+$$\Delta_\text{portfólio} = 1000\cdot 0.6368 - n\cdot 1 = 0$$
+
+$$n = 636.8 \approx 637 \text{ 股}$$
+
+**验证：** 如果$S$升1美元（巴西雷亚尔），1000张看涨期权赚$1000 \times 0.6368 \times 1 = $ 636.80美元（巴西雷亚尔）。卖出的637股失去637美元（巴西雷亚尔）。净值：约-20美分——接近零（四舍五入误差）。对冲在瞬间有效；当Delta改变时必须重新平衡。
+
+**来源。** [OpenStax — Introductory Business Statistics，第11章](https://openstax.org/details/books/introductory-business-statistics) — CC-BY 4.0。
+
+</Exemplo>
+
+<Exemplo titulo="120堂课的收敛——每个概念在BS中的出现（真实建模）" numero="5">
+
+**问题：** 在公式$C = SN(d_1) - Ke^{-r(T-t)}N(d_2)$及其分量中，识别在以下地方出现的内容：(a)两个变量的函数，(b)自然对数，(c)数字$e$，(d)导数，(e)积分，(f)正态分布，(g)偏微分方程，(h)线性代数。
+
+**策略：** 系统地将每个数学概念映射到公式中出现的分量。
+
+**解决方案：**
+
+(a) **两个变量的函数**（第2、51课）：$C(S,t)$ ——定义域$S > 0$、$t \in [0,T]$。
+
+(b) **自然对数**（第7课）：$\ln(S/K)$在$d_1$中——衡量期权变为价内所需的对数收益。
+
+(c) **数字$e$**（第7课）：$e^{-r(T-t)}$——连续折现因子；$e = \lim_{n\to\infty}(1+r/n)^n$。
+
+(d) **导数**（第51-67课）：$\Delta = \partial C/\partial S = N(d_1)$、$\Gamma = \partial^2 C/\partial S^2$等。希腊字母是所有偏导数。
+
+(e) **积分**（第82-87课）：$N(d) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{d} e^{-u^2/2}\,du$ ——反常积分数值计算。
+
+(f) **正态分布**（第76-77课）：$N(d)$是标准正态$\mathcal{N}(0,1)$的CDF；通过中央极限定理的对数收益正态。
+
+(g) **偏微分方程**（第92-95课）：公式是BS抛物型偏微分方程的解——可还原为热方程。
+
+(h) **线性代数**（第31-35、114-118课）：在多资产投资组合中，波动率变成协方差矩阵$\Sigma$；PCA提取风险因子。
+
+**验证：** 识别了12个学期的8个概念。其余4个（三角学、数列、解析几何、组合学）出现在派生模型中：三角在周期性隐含波动率中、生成函数在二叉树中、极坐标在风险矢量场中。
+
+**来源。** 基于[OpenStax — Introductory Business Statistics](https://openstax.org/details/books/introductory-business-statistics)和[Notes on Diffy Qs §4.1–4.3](https://www.jirka.org/diffyqs/) — CC-BY 4.0 / CC-BY-SA的课程综合练习。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-119-bs-sintese">
+
+<Exercicio numero="119.1" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 基础资产的当前价格", correta: true },
+    { texto: "B) 执行价格（执行价）" },
+    { texto: "C) 无风险利率" },
+    { texto: "D) 资产的波动率" },
+  ]}
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "conceitual BS", licenca: "CC-BY 4.0" }}
+  solucao={<>在公式<Eq>{`C = SN(d_1) - Ke^{-rT}N(d_2)`}</Eq>中，<Eq>{`S`}</Eq>是基础资产的当前价格——股票今天的市场价格。答案：A。</>}
+>
+在Black-Scholes公式$C = SN(d_1) - Ke^{-rT}N(d_2)$中，变量$S$代表什么？
+</Exercicio>
+
+<Exercicio numero="119.2" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 期权以价内结束的概率" },
+    { texto: "B) 标准正态分布在d处的累积分布函数", correta: true },
+    { texto: "C) 高斯密度函数的导数" },
+    { texto: "D) 期权的隐含波动率" },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.3", pagina: "115", exercicio: "conceitual CDF", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`N(d)`}</Eq>是标准正态分布<Eq>{`\\mathcal{N}(0,1)`}</Eq>在<Eq>{`d`}</Eq>处的累积分布函数（CDF）。数值上是从<Eq>{`-\\infty`}</Eq>到<Eq>{`d`}</Eq>的高斯密度积分。答案：B。</>}
+  passos={<>
+    <ol>
+      <li>回顾CDF的定义：<Eq>{`F(x) = P(X \\leq x)`}</Eq>。<em>为什么：</em>N(d)正是X为标准正态时的这个。</li>
+      <li>写出积分：<Eq>{`N(d) = \\frac{1}{\\sqrt{2\\pi}}\\int_{-\\infty}^{d} e^{-u^2/2}\\,du`}</Eq>。<em>为什么：</em>高斯密度的积分。</li>
+      <li>消除错误选项：A是N(d₂)的特定含义——不是N(d)的一般含义。C是PDF（导数），不是CDF。D是隐含波动率。</li>
+    </ol>
+    <p><em>技巧：</em>N代表"Normal CDF"——记住CDF总是从左到点的PDF积分。</p>
+  </>}
+>
+在Black-Scholes公式中，$N(d)$代表什么？
+</Exercicio>
+
+<Exercicio numero="119.3" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "cálculo d1", licenca: "CC-BY 4.0" }}
+  solucao={<>因为<Eq>{`S=K`}</Eq>，<Eq>{`\\ln(S/K)=0`}</Eq>。那么<Eq>{`d_1 = \\frac{0+(0.06+0.02)\\cdot 1}{0.20} = \\frac{0.08}{0.20} = 0.40`}</Eq>和<Eq>{`d_2 = 0.40 - 0.20 = 0.20`}</Eq>。</>}
+>
+对于$S = K = 50$、$r = 0.06$、$\sigma = 0.20$、$T = 1$，计算$d_1$和$d_2$。
+</Exercicio>
+
+<Exercicio numero="119.4" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.3", pagina: "118", exercicio: "tabela normal", licenca: "CC-BY-SA" }}
+  solucao={<>用<Eq>{`d_1=0.40`}</Eq>和<Eq>{`d_2=0.20`}</Eq>：<Eq>{`N(0.40)\\approx 0.6554`}</Eq>和<Eq>{`N(0.20)\\approx 0.5793`}</Eq>。那么<Eq>{`C = 50\\cdot 0.6554 - 50\\cdot e^{-0.06}\\cdot 0.5793 \\approx 32.77 - 50\\cdot 0.9418\\cdot 0.5793 \\approx 32.77 - 27.27 = 5.50`}</Eq>。</>}
+>
+使用来自练习119.3的$d_1 = 0.40$和$d_2 = 0.20$，已知$N(0.40) \approx 0.6554$、$N(0.20) \approx 0.5793$，计算看涨期权的价格（$S = K = 50$、$r = 0.06$、$T = 1$）。
+</Exercicio>
+
+<Exercicio numero="119.5" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "122", exercicio: "paridade put-call", licenca: "CC-BY-SA" }}
+  solucao={<>根据平价：<Eq>{`P = C - S + Ke^{-rT} = 5.50 - 50 + 50\\cdot e^{-0.06} \\approx 5.50 - 50 + 47.09 = 2.59`}</Eq>。</>}
+>
+使用练习119.4的数据（$C = 5.50$、$S = K = 50$、$r = 0.06$、$T = 1$），使用看涨-看跌平价计算欧式看跌期权的价格。
+</Exercicio>
+
+<Exercicio numero="119.6" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "delta call", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`\\Delta = N(d_1) = N(0.40) \\approx 0.6554`}</Eq>。要对冲500张看涨期权：卖空<Eq>{`500 \\times 0.6554 = 327.7 \\approx 328`}</Eq>股。</>}
+>
+用$\Delta = N(d_1) = 0.6554$（练习119.3），为了Delta对冲500张看涨期权的多头头寸，应该卖空多少股？
+</Exercicio>
+
+<Exercicio numero="119.7" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) Theta (∂C/∂t)" },
+    { texto: "B) Delta (∂C/∂S)" },
+    { texto: "C) Vega (∂C/∂σ)", correta: true },
+    { texto: "D) Rho (∂C/∂r)" },
+  ]}
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "greeks conceitual", licenca: "CC-BY 4.0" }}
+  solucao={<>Vega<Eq>{`= \\partial C/\\partial \\sigma`}</Eq>衡量期权价格对波动率的敏感性。这是交易柜台在操作隐含波动率时监控的希腊字母。答案：C。</>}
+>
+哪个希腊字母衡量期权价格对波动率$\sigma$的敏感性？
+</Exercicio>
+
+<Exercicio numero="119.8" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.3", pagina: "115", exercicio: "d1 d2 geral", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`\\ln(46.60/47) = \\ln(0.9915) \\approx -0.00854`}</Eq>。<Eq>{`d_1 = \\frac{-0.00854 + (0.1465+0.0613)\\cdot 0.0822}{0.35\\cdot 0.2868} \\approx \\frac{0.00855}{0.1004} \\approx 0.085`}</Eq>。<Eq>{`d_2 = 0.085 - 0.100 \\approx -0.015`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>转换T：<Eq>{`T = 30/365 \\approx 0.0822`}</Eq>年。<em>为什么：</em>BS用T的单位为年。</li>
+      <li>计算<Eq>{`\\ln(S/K) = \\ln(46.60/47)`}</Eq>。使用<Eq>{`\\ln(1+x)\\approx x`}</Eq>对x很小时：<Eq>{`x = -0.40/47 \\approx -0.0085`}</Eq>。</li>
+      <li>计算d₁的分子：<Eq>{`-0.0085 + (0.1465 + 0.0613)\\cdot 0.0822`}</Eq>。</li>
+      <li>计算分母：<Eq>{`0.35\\cdot\\sqrt{0.0822} = 0.35\\cdot 0.2867 \\approx 0.100`}</Eq>。</li>
+    </ol>
+    <p><em>观察：</em><Eq>{`\\sigma^2/2 = 0.35^2/2 = 0.0613`}</Eq>。</p>
+  </>}
+>
+计算PETR4的$d_1$和$d_2$：$S = 46.60$、$K = 47$、$r = 14.65\%$年率、$\sigma = 35\%$、$T = 30$天。
+</Exercicio>
+
+<Exercicio numero="119.9" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "C PETR4", licenca: "CC-BY 4.0" }}
+  solucao={<>用<Eq>{`N(0.085)\\approx 0.534`}</Eq>和<Eq>{`N(-0.015)\\approx 0.494`}</Eq>：<Eq>{`C = 46.60\\cdot 0.534 - 47\\cdot e^{-0.1465\\cdot 0.0822}\\cdot 0.494 \\approx 24.88 - 47\\cdot 0.9879\\cdot 0.494 \\approx 24.88 - 22.96 \\approx 1.92`}</Eq>。理论价格：约1.92美元（巴西雷亚尔）。</>}
+>
+用$d_1 \approx 0.085$和$d_2 \approx -0.015$（练习119.8）、$N(0.085) \approx 0.534$、$N(-0.015) \approx 0.494$，计算PETR4看涨期权的理论价格。
+</Exercicio>
+
+<Exercicio numero="119.10" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "122", exercicio: "paridade PETR4", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`P = C - S + Ke^{-rT} = 1.92 - 46.60 + 47\\cdot 0.9879 \\approx 1.92 - 46.60 + 46.43 = 1.75`}</Eq>。看跌期权价值约1.75美元（巴西雷亚尔）。</>}
+>
+用$C \approx 1.92$、$S = 46.60$、$K = 47$、$Ke^{-rT} \approx 46.43$，通过看涨-看跌平价计算PETR4看跌期权的价格。
+</Exercicio>
+
+<Exercicio numero="119.11" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 波动方程" },
+    { texto: "B) Laplace方程" },
+    { texto: "C) 热方程", correta: true },
+    { texto: "D) Schrödinger方程" },
+  ]}
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.1", pagina: "195", exercicio: "classificação EDP", licenca: "CC-BY-SA" }}
+  solucao={<>BS偏微分方程是抛物型，通过变量替换<Eq>{`x=\\ln S, \\tau=T-t`}</Eq>化为热方程<Eq>{`u_\\tau = \\frac{\\sigma^2}{2}u_{xx}`}</Eq>。答案：C。</>}
+>
+Black-Scholes偏微分方程在数学上类似于物理学中的哪个其他经典方程？
+</Exercicio>
+
+<Exercicio numero="119.12" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "efeito sigma", licenca: "CC-BY 4.0" }}
+  solucao={<>对于<Eq>{`\\sigma=0.30`}</Eq>：<Eq>{`d_1 = \\frac{0+(0.05+0.045)}{0.30} = \\frac{0.095}{0.30} \\approx 0.317`}</Eq>；<Eq>{`d_2 = 0.317 - 0.30 = 0.017`}</Eq>。<Eq>{`N(0.317)\\approx 0.624`}</Eq>，<Eq>{`N(0.017)\\approx 0.507`}</Eq>。<Eq>{`C \\approx 100\\cdot 0.624 - 95.12\\cdot 0.507 \\approx 62.4 - 48.2 = 14.2`}</Eq>。比<Eq>{`\\sigma=0.20`}</Eq>时的10.45美元（巴西雷亚尔）更贵——更高波动率，更高期权。</>}
+>
+重复例题2的计算（$S = K = 100$、$r = 0.05$、$T = 1$）但用$\sigma = 0.30$（更高波动率）。与结果$C \approx 10.45$（$\sigma = 0.20$时）比较。看涨期权价格发生了什么？
+</Exercicio>
+
+<Exercicio numero="119.13" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.3", pagina: "115", exercicio: "efeito T", licenca: "CC-BY-SA" }}
+  solucao={<>对于<Eq>{`T=0.25`}</Eq>：分母<Eq>{`= 0.20\\cdot 0.50 = 0.10`}</Eq>；分子<Eq>{`= 0 + 0.07\\cdot 0.25 = 0.0175`}</Eq>。<Eq>{`d_1 = 0.175`}</Eq>，<Eq>{`d_2 = 0.075`}</Eq>。<Eq>{`N(0.175)\\approx 0.569`}</Eq>，<Eq>{`N(0.075)\\approx 0.530`}</Eq>。<Eq>{`C \\approx 100\\cdot 0.569 - 98.77\\cdot 0.530 \\approx 56.9 - 52.3 = 4.6`}</Eq>。时间减半→期权价值更低（Theta为负）。</>}
+>
+用$S = K = 100$、$r = 0.05$、$\sigma = 0.20$，计算$T = 0.25$（3个月）的$C$。与$T = 1$时的$C \approx 10.45$比较。解释时间效应（Theta）。
+</Exercicio>
+
+<Exercicio numero="119.14" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "N(d) tabela", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`N(0.00)=0.5000`}</Eq>，<Eq>{`N(0.50)=0.6915`}</Eq>，<Eq>{`N(1.00)=0.8413`}</Eq>，<Eq>{`N(1.96)=0.9750`}</Eq>，<Eq>{`N(2.00)=0.9772`}</Eq>。根据对称性：<Eq>{`N(-d)=1-N(d)`}</Eq>。</>}
+>
+从标准正态表读取$d \in \{0; 0.50; 1.00; 1.96; 2.00\}$时$N(d)$的值。使用对称性$N(-d) = 1 - N(d)$计算$N(-1)$和$N(-1.96)$。
+</Exercicio>
+
+<Exercicio numero="119.15" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.3", pagina: "118", exercicio: "interpretação d2", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`N(d_2)`}</Eq>是风险中性测度下期权行使至到期时价内（<Eq>{`S_T > K`}</Eq>）的概率。<Eq>{`N(d_1)`}</Eq>是"delta"——如果行使，按基础资产价值加权的概率。</>}
+>
+用一句话解释Black-Scholes公式中$N(d_2)$的概率解释。
+</Exercicio>
+
+<Exercicio numero="119.16" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "K > S", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`\\ln(100/110) = \\ln(0.909) \\approx -0.0953`}</Eq>。<Eq>{`d_1 = \\frac{-0.0953 + 0.07}{0.20} = \\frac{-0.0253}{0.20} = -0.127`}</Eq>；<Eq>{`d_2 = -0.327`}</Eq>。<Eq>{`N(-0.127)\\approx 0.449`}</Eq>；<Eq>{`N(-0.327)\\approx 0.372`}</Eq>。<Eq>{`C \\approx 100\\cdot 0.449 - 110\\cdot 0.9512\\cdot 0.372 \\approx 44.9 - 38.9 = 6.0`}</Eq>。</>}
+>
+对于$S = 100$、$K = 110$（价外）、$r = 0.05$、$\sigma = 0.20$、$T = 1$，计算$d_1$、$d_2$和$C$。与例题2的平价期权比较。
+</Exercicio>
+
+<Exercicio numero="119.17" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "122", exercicio: "paridade OTM", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`P = C - S + Ke^{-rT} = 6.0 - 100 + 110\\cdot 0.9512 = 6.0 - 100 + 104.6 = 10.6`}</Eq>。价外看跌期权比价外看涨期权值钱更多——有意义：看跌期权因下跌超过10%而价内，这比上涨超过10%的可能性更大...但等等，在GBM下它们概率相等。差异来自持仓成本：<Eq>{`S > Ke^{-rT}`}</Eq>。</>}
+>
+用练习119.16的$C = 6.0$（$S = 100$、$K = 110$、$r = 0.05$、$T = 1$）计算看跌期权价格。比较看跌和看涨期权。
+</Exercicio>
+
+<Exercicio numero="119.18" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "vol implícita conceito", licenca: "CC-BY 4.0" }}
+  solucao={<>隐含波动率是<Eq>{`\\sigma`}</Eq>的值，代入BS后，使理论价格等于观察到的市场价格。因为BS对<Eq>{`\\sigma`}</Eq>没有给定<Eq>{`C`}</Eq>的闭形解，数值反演通过Newton-Raphson：<Eq>{`\\sigma_{n+1} = \\sigma_n - (C_{BS}(\\sigma_n) - C_{\\text{mkt}})/\\text{vega}(\\sigma_n)`}</Eq>。</>}
+>
+市场对PETR4看涨期权（练习119.9）的报价为2.50美元（巴西雷亚尔），而模型用$\sigma = 35\%$给出1.92美元（巴西雷亚尔）。解释隐含波动率的概念及其计算方式。
+</Exercicio>
+
+<Exercicio numero="119.19" dificuldade="modelagem"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.3", pagina: "205", exercicio: "equação calor analogia", licenca: "CC-BY-SA" }}
+  solucao={<>BS偏微分方程<Eq>{`V_t + \\frac{1}{2}\\sigma^2 S^2 V_{SS} + rSV_S - rV = 0`}</Eq>用<Eq>{`x=\\ln S`}</Eq>、<Eq>{`\\tau=T-t`}</Eq>、<Eq>{`u=e^{r\\tau}V`}</Eq>变为热方程<Eq>{`u_\\tau = \\frac{\\sigma^2}{2}u_{xx}`}</Eq>。解是收益与高斯核卷积——正是Lebl §4.3学习的热方程解的形式。</>}
+>
+描述将Black-Scholes偏微分方程变换为热方程的3个变量替换。为什么这很有用？
+</Exercicio>
+
+<Exercicio numero="119.20" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "hedge dinâmico", licenca: "CC-BY 4.0" }}
+  solucao={<>第0天：<Eq>{`\\Delta_0 = 0.534`}</Eq>→为1000张看涨期权买入534股。第1天：S升至47.50美元（巴西雷亚尔），重新计算<Eq>{`d_1`}</Eq>和<Eq>{`\\Delta_1`}</Eq>——假设<Eq>{`\\Delta_1 = 0.58`}</Eq>→再买46股。每次重新平衡时的交易成本+买卖价差是BS忽视的"对冲成本"。</>}
+>
+描述1000张PETR4看涨期权（$\Delta = 0.534$）在2天内的Delta中性动态对冲。为什么这个对冲是"动态的"，BS忽视的真实成本是什么？
+</Exercicio>
+
+<Exercicio numero="119.21" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "130", exercicio: "TCL e log-normal", licenca: "CC-BY-SA" }}
+  solucao={<>中央极限定理声称许多独立收益的和收敛到正态。对数收益<Eq>{`\\ln(S_T/S_0) = \\sum \\ln(S_{t+1}/S_t)`}</Eq>是<Eq>{`T`}</Eq>个增量的和——根据中央极限定理，分布正态。因此<Eq>{`S_T`}</Eq>是对数正态，BS的核心假设。</>}
+>
+解释中央极限定理（第77课）如何为Black-Scholes模型中$S_T$的对数正态性假设辩护。
+</Exercicio>
+
+<Exercicio numero="119.22" dificuldade="compreensao"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.1", pagina: "195", exercicio: "EDP tipo", licenca: "CC-BY-SA" }}
+  solucao={<>BS偏微分方程在<Eq>{`S`}</Eq>的二阶导数上具有第一阶在<Eq>{`t`}</Eq>，在<Eq>{`V_{SS}`}</Eq>项上有正系数——因此是**抛物型**。如同热方程<Eq>{`u_t = ku_{xx}`}</Eq>。抛物型偏微分方程模拟扩散——<Eq>{`S_T`}</Eq>上的不确定性沿时间"扩散"。</>}
+>
+为什么Black-Scholes偏微分方程被归类为抛物型？这在物理上意味着什么？
+</Exercicio>
+
+<Exercicio numero="119.23" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 6", pagina: "variável", exercicio: "simetria normal", licenca: "CC-BY 4.0" }}
+  solucao={<>当<Eq>{`S=K`}</Eq>且<Eq>{`r=0`}</Eq>时：<Eq>{`d_1 = \\sigma\\sqrt{T}/2`}</Eq>和<Eq>{`d_2 = -\\sigma\\sqrt{T}/2`}</Eq>。根据正态对称：<Eq>{`N(d_1)+N(-d_1)=1`}</Eq>。看涨期权价值<Eq>{`C = S[N(d_1)-N(-d_1)] = S[2N(d_1)-1]`}</Eq>。对于<Eq>{`\\sigma\\sqrt{T}\\to 0`}</Eq>，<Eq>{`C\\to 0`}</Eq>；对于<Eq>{`\\sigma\\sqrt{T}\\to\\infty`}</Eq>，<Eq>{`C\\to S`}</Eq>。</>}
+>
+在特殊情况$S = K$和$r = 0$下，证明$C = S[2N(\sigma\sqrt{T}/2) - 1]$。使用标准正态分布的对称性。
+</Exercicio>
+
+<Exercicio numero="119.24" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.3", pagina: "118", exercicio: "N aproximação", licenca: "CC-BY-SA" }}
+  solucao={<>Abramowitz-Stegun近似（公式26.2.17）：对于<Eq>{`d>0`}</Eq>，<Eq>{`N(d)\\approx 1 - \\phi(d)(a_1 t + a_2 t^2 + a_3 t^3)`}</Eq>其中<Eq>{`t=1/(1+0.33267\\,d)`}</Eq>，<Eq>{`a_1=0.4361836`}</Eq>，<Eq>{`a_2=-0.1201676`}</Eq>，<Eq>{`a_3=0.9372980`}</Eq>。对于<Eq>{`d=0.35`}</Eq>：<Eq>{`t\\approx 0.896`}</Eq>，结果<Eq>{`\\approx 0.6368`}</Eq>——与精确值相符。</>}
+>
+函数$N(d)$没有闭形。描述多项式近似（Abramowitz-Stegun）用于没有统计库的实现中。用近似计算$N(0.35)$并与表值（$\approx 0.6368$）比较。
+</Exercicio>
+
+<Exercicio numero="119.25" dificuldade="desafio"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.2", pagina: "200", exercicio: "derivação EDP BS", licenca: "CC-BY-SA" }}
+  solucao={<>投资组合<Eq>{`\\Pi = \\Delta S - C`}</Eq>。根据伊藤引理：<Eq>{`dC = C_t dt + C_S dS + \\frac{1}{2}\\sigma^2 S^2 C_{SS}dt`}</Eq>。选择<Eq>{`\\Delta = C_S`}</Eq>，在<Eq>{`d\\Pi = \\Delta dS - dC`}</Eq>中<Eq>{`dS`}</Eq>项取消：<Eq>{`d\\Pi = -(C_t + \\frac{1}{2}\\sigma^2 S^2 C_{SS})dt`}</Eq>。根据无套利<Eq>{`d\\Pi = r\\Pi dt = r(C_S S - C)dt`}</Eq>。相等：<Eq>{`C_t + \\frac{1}{2}\\sigma^2 S^2 C_{SS} + rS C_S - rC = 0`}</Eq>。</>}
+>
+概述Black-Scholes偏微分方程的推导：构造复制投资组合$\Pi = \Delta S - C$，对$dC$应用伊藤引理，通过适当选择$\Delta$消除风险，使用无套利获得偏微分方程。
+</Exercicio>
+
+<Exercicio numero="119.26" dificuldade="desafio"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "limitações BS", licenca: "CC-BY 4.0" }}
+  solucao={<>(a)**对数正态性**：2008危机中，股票在几天内跌50%+——按正态分布这是"不可能的"事件。(b)**恒定波动率**：隐含波动率微笑和偏斜与BS矛盾。(c)**无限流动性**：在恐慌中，买卖价差爆炸——连续对冲不可能。替代模型：Heston（随机波动率）、Merton（跳跃）、Local Vol（Dupire）。</>}
+>
+列出在2008年金融危机期间清楚失效的3个Black-Scholes假设。对于每一个，引用一个放松该假设的替代模型。
+</Exercicio>
+
+<Exercicio numero="119.27" dificuldade="desafio"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.3", pagina: "205", exercicio: "verificação BS EDP", licenca: "CC-BY-SA" }}
+  solucao={<>计算<Eq>{`C_t, C_S, C_{SS}`}</Eq>并代入偏微分方程。<Eq>{`C_S = N(d_1)`}</Eq>（Delta）。<Eq>{`C_{SS} = \\phi(d_1)/(S\\sigma\\sqrt{T-t})`}</Eq>（Gamma）。<Eq>{`C_t`}</Eq>是Theta（负值）。代入：<Eq>{`\\Theta + \\frac{1}{2}\\sigma^2 S^2 \\Gamma + rS\\Delta - rC = 0`}</Eq>——这是希腊字母间的基本关系：Theta-Gamma-Delta。数值验证：代入例题2的值并检查两边相等。</>}
+>
+使用例题2的值（$S = K = 100$、$r = 0.05$、$\sigma = 0.20$、$T = 1$），数值验证Black-Scholes公式满足BS偏微分方程。计算偏微分方程的每一项。
+</Exercicio>
+
+<Exercicio numero="119.28" dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "122", exercicio: "prova paridade", licenca: "CC-BY-SA" }}
+  solucao={<>两个投资组合在时刻T有相同收益：(A)多头看涨期权+空头看跌期权；(B)多头股票+借款<Eq>{`Ke^{-rT}`}</Eq>。在T时：(A)支付<Eq>{`\\max(S_T-K,0)-\\max(K-S_T,0)=S_T-K`}</Eq>。(B)支付<Eq>{`S_T - K`}</Eq>。根据无套利：<Eq>{`C - P = S - Ke^{-rT}`}</Eq>。<Eq>{`\\blacksquare`}</Eq></>}
+>
+通过两个等收益投资组合的无套利论证证明看涨-看跌平价$C - P = S - Ke^{-r(T-t)}$。
+</Exercicio>
+
+<Exercicio numero="119.29" dificuldade="demonstracao"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.3", pagina: "205", exercicio: "limite sigma a 0", licenca: "CC-BY-SA" }}
+  solucao={<>当<Eq>{`\\sigma\\to 0^+`}</Eq>时，若<Eq>{`S>Ke^{-rT}`}</Eq>则<Eq>{`d_1\\to +\\infty`}</Eq>（若<Eq>{`S<Ke^{-rT}`}</Eq>则<Eq>{`d_1\\to -\\infty`}</Eq>）。因此<Eq>{`N(d_1)\\to 1`}</Eq>和<Eq>{`N(d_2)\\to 1`}</Eq>，故<Eq>{`C\\to S-Ke^{-rT} = \\max(S-Ke^{-rT},0)`}</Eq>（折现内在价值）。对于<Eq>{`S<Ke^{-rT}`}</Eq>：<Eq>{`C\\to 0`}</Eq>。结果：在零波动率极限，看涨期权值其折现时间价值——无不确定性，没有期权性价值。</>}
+>
+用Black-Scholes公式计算极限$\lim_{\sigma\to 0^+} C(S, t)$。使用性质$N(-\infty) = 0$和$N(+\infty) = 1$。财务解释。
+</Exercicio>
+
+<Exercicio numero="119.30" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "Selic efeito r", licenca: "CC-BY 4.0" }}
+  solucao={<>更高<Eq>{`r`}</Eq>→K的更大折现→更低<Eq>{`Ke^{-rT}`}</Eq>减少→看涨期权更贵。形式上，<Eq>{`\\rho = \\partial C/\\partial r = KTe^{-rT}N(d_2) > 0`}</Eq>。对于PETR4：Selic升100个基点（~1%）使C增加<Eq>{`0.01\\times \\rho`}</Eq>。用<Eq>{`r=0.1465`}</Eq>：<Eq>{`\\rho \\approx 47\\times 0.0822\\times 0.9879\\times 0.494 \\approx 1.88`}</Eq>。升1%→看涨期权升约0.019美元（巴西雷亚尔）。</>}
+>
+根据BS，Selic利率如何影响欧式看涨期权价格？计算PETR4数据（练习119.9）的希腊字母Rho（$\rho = \partial C / \partial r$）并解释。
+</Exercicio>
+
+<Exercicio numero="119.31" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.3", pagina: "118", exercicio: "vega numérico", licenca: "CC-BY-SA" }}
+  solucao={<>Vega<Eq>{`= S\\phi(d_1)\\sqrt{T}`}</Eq>。对于例题1：<Eq>{`\\phi(0.35) = \\frac{1}{\\sqrt{2\\pi}}e^{-0.35^2/2} \\approx \\frac{e^{-0.061}}{2.507} \\approx \\frac{0.941}{2.507} \\approx 0.375`}</Eq>。Vega<Eq>{`= 100\\times 0.375\\times 1 = 37.5`}</Eq>。含义：<Eq>{`\\sigma`}</Eq>增加1个百分点→看涨期权升0.375美元（巴西雷亚尔）（Vega以1%波动率单位计）。</>}
+>
+计算例题1的看涨期权的Vega（$S = K = 100$、$d_1 = 0.35$、$T = 1$、$\sigma = 0.20$）。使用$\phi(0.35) \approx 0.375$。解释：如果$\sigma$从20%升到21%，看涨期权改变多少？
+</Exercicio>
+
+<Exercicio numero="119.32" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "gamma numérico", licenca: "CC-BY 4.0" }}
+  solucao={<>Gamma<Eq>{`= \\phi(d_1)/(S\\sigma\\sqrt{T}) = 0.375/(100\\times 0.20\\times 1) = 0.375/20 = 0.01875`}</Eq>。含义：如果S升1美元（巴西雷亚尔），Delta从0.6368升至<Eq>{`0.6368 + 0.01875 \\approx 0.6556`}</Eq>。Gamma是看涨期权的凸性——高Gamma期权需要更频繁的对冲重新平衡。</>}
+>
+计算例题1的看涨期权的Gamma（$S = K = 100$、$d_1 = 0.35$、$\sigma = 0.20$、$T = 1$）。解释：如果$S$升1美元（巴西雷亚尔），Delta改变多少？
+</Exercicio>
+
+<Exercicio numero="119.33" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "122", exercicio: "portfólio multi-ativo", licenca: "CC-BY-SA" }}
+  solucao={<>投资组合风险：<Eq>{`\\sigma_P^2 = w_1^2\\sigma_1^2 + w_2^2\\sigma_2^2 + 2w_1 w_2\\sigma_1\\sigma_2\\rho_{12}`}</Eq>其中<Eq>{`w_i`}</Eq>是权重。若<Eq>{`\\rho_{12}=0.5`}</Eq>、<Eq>{`\\sigma_1=\\sigma_2=0.25`}</Eq>、<Eq>{`w_1=w_2=0.5`}</Eq>：<Eq>{`\\sigma_P^2 = 2\\times(0.5)^2\\times(0.25)^2\\times(1+0.5) = 2\\times 0.25\\times 0.0625\\times 1.5 = 0.046875`}</Eq>。<Eq>{`\\sigma_P \\approx 21.6\\%`}</Eq>小于25%个别——多样化收益。</>}
+>
+在权重相等的2资产投资组合中，波动率$\sigma_1 = \sigma_2 = 25\%$且相关性$\rho = 0.5$，计算投资组合波动率。这如何与BS多资产中使用的协方差矩阵相关？
+</Exercicio>
+
+<Exercicio numero="119.34" dificuldade="modelagem"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.1", pagina: "195", exercicio: "payoff diagram", licenca: "CC-BY-SA" }}
+  solucao={<>到期时的看涨期权收益：<Eq>{`P(S_T) = \\max(S_T - K, 0)`}</Eq>。对于<Eq>{`S_T < K=100`}</Eq>：收益 = 0（期权变成灰尘）。对于<Eq>{`S_T > K`}</Eq>：收益 = <Eq>{`S_T - 100`}</Eq>（斜率为1的线）。包括已付溢价的损益两平：<Eq>{`S_T^* = K + C = 100 + 10.45 = 110.45`}</Eq>。图表是一只"云雀"——右边有无限收益尾，左边最大损失=已付溢价。</>}
+>
+在到期时为看涨期权（$K = 100$、已付溢价$C = 10.45$）绘制收益图。识别损益两平点和盈利/亏损区域。
+</Exercicio>
+
+<Exercicio numero="119.35" dificuldade="compreensao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 6", pagina: "variável", exercicio: "N(d) integral", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`N(d) = \\int_{-\\infty}^{d} \\frac{1}{\\sqrt{2\\pi}}e^{-u^2/2}\\,du`}</Eq>——标准正态PDF从<Eq>{`-\\infty`}</Eq>到<Eq>{`d`}</Eq>的反常积分。没有初等函数的原始：<Eq>{`e^{-u^2/2}`}</Eq>根据Liouville不可积。因此使用表或数值算法（Simpson、Gauss-Hermite）。与BS的链接（第83课）：<Eq>{`N(d)`}</Eq>用第83课学到的相同积分类型计算。</>}
+>
+将$N(d)$写成积分并解释为什么这个积分在初等函数中没有闭形解。这如何与微积分基本定理（第83课）相关？
+</Exercicio>
+
+<Exercicio numero="119.36" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "130", exercicio: "GBM x random walk", licenca: "CC-BY-SA" }}
+  solucao={<>随机游走（离散）：<Eq>{`S_{t+1} = S_t + \\epsilon`}</Eq>，绝对增量。GBM（连续）：<Eq>{`dS = \\mu S\\,dt + \\sigma S\\,dW`}</Eq>，**相对**增量（收益）。因此在GBM中<Eq>{`S_t > 0`}</Eq>总是成立（股票不能有负价格），但随机游走可以。对数收益<Eq>{`\\ln(S_{t+1}/S_t)`}</Eq>在GBM中总是良定义的。</>}
+>
+比较几何布朗运动（GBM）与简单（离散）随机游走。为什么GBM对于股票价格建模更合适？
+</Exercicio>
+
+<Exercicio numero="119.37" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "bs dividendo", licenca: "CC-BY 4.0" }}
+  solucao={<>连续股息调整：在公式中用<Eq>{`Se^{-qT}`}</Eq>替换<Eq>{`S`}</Eq>。对于PETR4，<Eq>{`q=5\\%`}</Eq>年率和<Eq>{`T=30/365`}</Eq>：<Eq>{`Se^{-qT} = 46.60\\cdot e^{-0.05\\times 0.0822} \\approx 46.60\\times 0.9959 \\approx 46.41`}</Eq>。用<Eq>{`S^* = 46.41`}</Eq>重新计算→<Eq>{`d_1`}</Eq>略低→看涨期权略便宜（股息向股东"泄露"价值，而非看涨期权持有者）。</>}
+>
+PETR4以年率$q = 5\%$支付连续股息。如何调整BS公式？计算练习119.8数据的新$S_{\text{adj}} = Se^{-qT}$并描述对看涨期权价格的影响。
+</Exercicio>
+
+<Exercicio numero="119.38" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§3.3", pagina: "118", exercicio: "vol smirk B3", licenca: "CC-BY-SA" }}
+  solucao={<>如果BS精确，隐含波动率对所有执行价将恒定。在B3中，深度价外看跌期权的隐含波动率系统性大于价外看涨期权——"斜面"（或"负斜度"）。原因：对保护的需求（价外看跌期权）更大，抬高其价格，故其隐含波动率。这与BS对称对数正态假设矛盾。替代模型：Heston，带负波动率-价格相关性（<Eq>{`\\rho < 0`}</Eq>）捕捉斜度。</>}
+>
+在巴西实践中，PETR4的隐含波动率曲线不平——它是一个"斜面"（不对称微笑）。解释这意味着什么，以及为什么它与Black-Scholes假设矛盾。
+</Exercicio>
+
+<Exercicio numero="119.39" dificuldade="desafio"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.2", pagina: "200", exercicio: "Newton-Raphson vol implícita", licenca: "CC-BY-SA" }}
+  solucao={<>目标：找<Eq>{`\\sigma^*`}</Eq>使<Eq>{`BS(\\sigma^*) = C_{\\text{mkt}}`}</Eq>。定义<Eq>{`f(\\sigma) = BS(\\sigma) - C_{\\text{mkt}}`}</Eq>。Newton-Raphson：<Eq>{`\\sigma_{n+1} = \\sigma_n - f(\\sigma_n)/f'(\\sigma_n) = \\sigma_n - (BS(\\sigma_n) - C_{\\text{mkt}})/\\text{Vega}(\\sigma_n)`}</Eq>。Brenner-Subrahmanyam初值：<Eq>{`\\sigma_0 \\approx \\sqrt{2\\pi/T}\\cdot C_{\\text{ATM}}/S`}</Eq>。对PETR4：<Eq>{`\\sigma_0 = \\sqrt{2\\pi/0.0822}\\cdot 2.50/46.60 \\approx 8.74\\times 0.0537 \\approx 0.469 = 46.9\\%`}</Eq>。几次迭代收敛。</>}
+  passos={<>
+    <ol>
+      <li>定义目标函数：<Eq>{`f(\\sigma) = C_{\\text{BS}}(\\sigma) - C_{\\text{mkt}}`}</Eq>。<em>为什么：</em>我们要找这个函数的零点。</li>
+      <li>解析导数：<Eq>{`f'(\\sigma) = \\text{Vega} = S\\phi(d_1)\\sqrt{T}`}</Eq>。<em>为什么：</em>Vega是定义上的<Eq>{`\\partial C/\\partial\\sigma`}</Eq>。</li>
+      <li>Brenner-Subrahmanyam初值：<Eq>{`\\sigma_0 \\approx \\sqrt{2\\pi/T}\\cdot C/S`}</Eq>。<em>为什么：</em>近似对平价有效。</li>
+      <li>迭代至<Eq>{`|f(\\sigma_n)| < 0.001`}</Eq>（1美分精度（巴西雷亚尔））。</li>
+    </ol>
+    <p><em>技巧：</em>Vega总是正→Newton-Raphson从合理初值单调收敛。</p>
+  </>}
+>
+描述计算隐含波动率的Newton-Raphson算法，给定看涨期权PETR4以2.50美元（巴西雷亚尔）报价（vs. 1.92美元（巴西雷亚尔）理论，$\sigma = 35\%$）。使用Vega作为导数。计算第一次迭代。
+</Exercicio>
+
+<Exercicio numero="119.40" dificuldade="desafio"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.3", pagina: "205", exercicio: "binomial CRR", licenca: "CC-BY-SA" }}
+  solucao={<>CRR（Cox-Ross-Rubinstein）：用<Eq>{`u=e^{\\sigma\\sqrt{\\Delta t}}`}</Eq>、<Eq>{`d=1/u`}</Eq>、风险中性概率<Eq>{`p=(e^{r\\Delta t}-d)/(u-d)`}</Eq>将S离散化为二叉树。对美式期权，在每个节点比较等待价值与行使——取最大值。在极限<Eq>{`\\Delta t\\to 0`}</Eq>，二叉树收敛到BS。用<Eq>{`n=3`}</Eq>步，<Eq>{`\\Delta t = 1/3`</Eq>年，<Eq>{`u = e^{0.20/\\sqrt{3}} \\approx 1.122`}</Eq>，<Eq>{`d\\approx 0.891`</Eq>。4个终端节点的树。计算收益并进行后向归纳。</>}
+>
+描述Cox-Ross-Rubinstein (CRR)二叉树模型作为BS的替代品来给美式看涨期权定价（$S = K = 100$、$r = 0.05$、$\sigma = 0.20$、$T = 1$年、$n = 3$步）。为什么BS对美式期权不起作用？
+</Exercicio>
+
+<Exercicio numero="119.41" dificuldade="desafio"
+  fonte={{ livro: "OpenStax — Introductory Business Statistics", url: "https://openstax.org/details/books/introductory-business-statistics", secao: "Cap. 11", pagina: "variável", exercicio: "opção real", licenca: "CC-BY 4.0" }}
+  solucao={<>实期权：权利，非义务，进行未来投资。类比：公司拥有在1年后以5000万美元（巴西雷亚尔）（K=5000万）扩建工厂的期权。项目现值 = S。价值不确定 = sigma。无风险率 = r。BS给扩建期权的价值。应用：石油公司拥有勘探许可——无钻探义务。许可价值 = BS调用油田价值。</>}
+>
+解释"实期权"（real option）的概念以及BS公式如何可被用来评估扩建工厂的权利。在该背景中识别$S$、$K$、$\sigma$。
+</Exercicio>
+
+<Exercicio numero="119.42" dificuldade="demonstracao"
+  fonte={{ livro: "Notes on Diffy Qs — Jiří Lebl", url: "https://www.jirka.org/diffyqs/", secao: "§4.3", pagina: "205", exercicio: "theta gamma delta relação", licenca: "CC-BY-SA" }}
+  solucao={<>从BS偏微分方程和<Eq>{`V = C`}</Eq>：<Eq>{`\\Theta + \\frac{1}{2}\\sigma^2 S^2 \\Gamma + rS\\Delta - rC = 0`}</Eq>。重新排列：<Eq>{`\\Theta = rC - rS\\Delta - \\frac{1}{2}\\sigma^2 S^2 \\Gamma`}</Eq>。对delta对冲（<Eq>{`\\Delta S`}</Eq>中性），头寸每时间单位失Theta，但通过凸性赚<Eq>{`\\frac{1}{2}\\sigma^2 S^2 \\Gamma`}</Eq>（"多long gamma = 购买波动率"）。保持delta中性对冲的成本正好被凸性收益补偿，当实现波动率 = 隐含波动率时。</>}
+>
+从Black-Scholes偏微分方程证明希腊字母间的关系$\Theta + \frac{1}{2}\sigma^2 S^2 \Gamma + rS\Delta = rC$。财务解释：为什么delta对冲的多头看涨期权头寸随时间失钱但通过资产的急剧波动赚钱？
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenStax — Introductory Business Statistics**](https://openstax.org/details/books/introductory-business-statistics) — Holmes、Illowsky、Dean · CC-BY 4.0 · 第6章（正态）和第11章（衍生品定价）。**本课程的主要练习来源。**
+
+- [**OpenIntro Statistics（第4版）**](https://www.openintro.org/book/os/) — Diez、Çetinkaya-Rundel、Barr · CC-BY-SA · §3.3–3.5（正态分布、CDF、近似）。**概率练习的来源。**
+
+- [**Notes on Diffy Qs — Jiří Lebl**](https://www.jirka.org/diffyqs/) — CC-BY-SA · §4.1–4.3（抛物型偏微分方程、热方程、BS→热变换）。**偏微分方程练习的来源。**
+
+- **Black, F.; Scholes, M.** (1973). [*The Pricing of Options and Corporate Liabilities*](https://www.cs.princeton.edu/courses/archive/fall09/cos323/papers/black_scholes73.pdf). *Journal of Political Economy* 81(3): 637–654. 原始论文——完整的偏微分方程推导和闭形公式。
+
+- **Merton, R. C.** (1973). *Theory of Rational Option Pricing*. *Bell Journal of Economics* 4(1): 141–183. 连续性扩展和平价证明。
+
+- [**Nobel de Economia 1997**](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/) — Robert C. Merton和Myron S. Scholes · Scholes的官方讲座：[*Derivatives in a Dynamic Environment*](https://www.nobelprize.org/uploads/2018/06/scholes-lecture.pdf)。
+
+- [**Foundations of Financial Engineering**](https://www.columbia.edu/~mh2078/FoundationsFE/BlackScholes.pdf) — Martin Haugh、Columbia University · 2016 · 免费 · 通过伊藤引理和测度变换的谨慎推导。

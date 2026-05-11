@@ -1,0 +1,907 @@
+---
+titulo: "Lição 55 — Derivadas de ordem superior"
+slug: "licao-55-derivadas-superiores"
+categoria: "aulas"
+subcategoria: "ano-2-trim-6"
+descricao: "Segunda derivada (concavidade, aceleração), terceira derivada (jerk), fórmulas de ordem n, pontos de inflexão e prévia de série de Taylor."
+ordem: 55
+publicado: true
+tags: ["derivada superior", "concavidade", "inflexão", "taylor", "ano-2", "trim-6"]
+prerrequisitos: ["licao-54-derivadas-implicitas"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["Cálculo I (Brasil)", "Equiv. Math III japonês (cap. 4)", "Equiv. Analysis LK alemão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="f''(x) = \frac{d}{dx}\!\left[\frac{dy}{dx}\right] = \frac{d^2y}{dx^2}"
+  legenda={<>第 <strong>二阶导数</strong>是导数的导数。物理上：若 <Eq>{`f`}</Eq> 是位置，则 <Eq>{`f'`}</Eq> 是速度，<Eq>{`f''`}</Eq> 是 <strong>加速度</strong>。几何上：<Eq>{`f'' > 0`}</Eq> 表示曲线向上凹（笑脸）；<Eq>{`f'' < 0`}</Eq> 表示曲线向下凹（帽子）。<Eq>{`f''`}</Eq> 改变符号的地方有一个 <strong>拐点</strong>。</>}
+  audioTexto="第二阶导数是函数f线的导数，记作f两线x，或d平方y比d x平方。如果f表示位置，f线表示速度，f两线表示加速度。当f两线为正时，图像向上凹。当为负时，向下凹。改变符号的地方有一个拐点。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    本节课涵盖的教科书
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-1-6-second-d.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §1.6 The Second Derivative · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">关于凹凸性、拐点以及f''作为加速度的物理解释的主要来源。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §3.2 e §4.5 · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">n阶导数公式、记号表、极值的二阶导数检验。</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman et al. — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §2.2 e §3.4 · CC-BY-NC · </span>
+      <em className="text-clube-mist">高阶导数的乘积和商法则；凹凸性分析的完整协议。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 高阶导数
+
+<Definicao titulo="n阶导数">
+
+设 $f$ 是一个可微函数。递归定义为：
+
+$$f^{(0)} = f, \quad f^{(1)} = f', \quad f^{(n)} = \bigl(f^{(n-1)}\bigr)', \quad n \geq 1.$$
+
+如果 $0, 1, \ldots, n$ 的每个阶数的导数都在该点存在，则 n 阶导数存在。若 $f^{(n)}$ 连续，我们称 $f$ 为 **$C^n$ 类** 函数（记法：$f \in C^n$）。
+
+</Definicao>
+
+> "若 $y = f(x)$，则 $f$ 的二阶导数是 $f'$ 的导数，记为 $f''(x)$ 或 $d^2 y/dx^2$。计算连续导数的过程称为重复微分。" — [OpenStax Calculus Vol. 1, §3.2](https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function)
+
+### 等价的记号
+
+| 记号 | 读法 | 备注 |
+|---|---|---|
+| $f''(x)$ | "f二撇x" | Newton; $n = 2$ |
+| $\dfrac{d^2y}{dx^2}$ | "d平方y比d x平方" | Leibniz |
+| $D^2 f$ | "D平方f" | 算子 |
+| $\ddot{y}$ | "y两点" | 物理；独立变量是 $t$ |
+| $f^{(n)}(x)$ | "f的n阶导数" | 一般阶数 |
+| $\dfrac{d^n y}{dx^n}$ | "d的n次方y" | Leibniz 一般形式 |
+
+### 表：n阶闭形式公式
+
+| $f(x)$ | $f^{(n)}(x)$ | 有效性 |
+|---|---|---|
+| $e^{ax}$ | $a^n e^{ax}$ | $a \in \mathbb{R}$, $n \geq 0$ |
+| $\sin x$ | $\sin\!\bigl(x + \tfrac{n\pi}{2}\bigr)$ | $n \geq 0$ |
+| $\cos x$ | $\cos\!\bigl(x + \tfrac{n\pi}{2}\bigr)$ | $n \geq 0$ |
+| $x^k$ | $\dfrac{k!}{(k-n)!} x^{k-n}$ | $k \geq n$；$k < n$ 时为零 |
+| $\ln x$ | $(-1)^{n-1}\dfrac{(n-1)!}{x^n}$ | $x > 0$, $n \geq 1$ |
+| $\dfrac{1}{x}$ | $(-1)^n \dfrac{n!}{x^{n+1}}$ | $x \neq 0$, $n \geq 0$ |
+
+### 几何意义 — 凹凸性
+
+<Definicao titulo="凹凸性和拐点">
+
+设 $f$ 在 $(a, b)$ 上二阶可微。
+
+- 若对所有 $x \in (a, b)$ 有 $f''(x) > 0$：$f$ 在 $(a, b)$ 上向 **上凹**。
+- 若对所有 $x \in (a, b)$ 有 $f''(x) < 0$：$f$ 在 $(a, b)$ 上向 **下凹**。
+- 若点 $c$ 满足 $f''$ 在 $c$ 处改变符号，则 $c$ 是 **拐点**。
+
+**注意：** $f''(c) = 0$ 是拐点的必要条件，但不充分。反例：$f(x) = x^4$ 有 $f''(0) = 0$ 但不改变符号 — 没有拐点。
+
+</Definicao>
+
+> "若对所有 $x \in (a, b)$ 有 $f''(x) > 0$，则 $f$ 在 $(a, b)$ 上向上凹。若对所有 $x \in (a, b)$ 有 $f''(x) < 0$，则 $f$ 在 $(a, b)$ 上向下凹。" — [Active Calculus, §1.6](https://activecalculus.org/single/sec-1-6-second-d.html)
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr55" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <text x="10" y="30" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">f'' &gt; 0: 向上凹（笑脸）</text>
+  <path d="M 60,160 Q 170,60 280,160" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+  <text x="155" y="175" textAnchor="middle" fontSize="10" fill="currentColor" fillOpacity="0.6">切线向上转</text>
+</g>
+<g>
+  <text x="290" y="30" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">f'' &lt; 0: 向下凹（帽子）</text>
+  <path d="M 310,60 Q 415,160 520,60" fill="none" stroke="rgb(199 107 63)" strokeWidth="2.5"/>
+  <text x="415" y="175" textAnchor="middle" fontSize="10" fill="currentColor" fillOpacity="0.6">切线向下转</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+凹凸性由 <em>f''</em> 的符号决定。蓝色曲线上，<em>f'' &gt; 0</em> — 函数"向上开"。橙色曲线上，<em>f'' &lt; 0</em> — 函数"向下开"。
+</figcaption>
+</figure>
+
+### Leibniz 乘积法则
+
+$$(fg)^{(n)} = \sum_{k=0}^{n} \binom{n}{k} f^{(k)}\, g^{(n-k)}$$
+
+完美类似于二项式定理：用对应阶数的导数替换幂次。
+
+### n次 Taylor 多项式
+
+<Equation explicacao="以a为中心的n次Taylor多项式。每个系数由f在a处的k阶导数除以k的阶乘决定。这是f在a邻域内最好的n次多项式近似。" latex="T_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x - a)^k" />
+
+<Insight>
+
+**为什么高阶导数对图形的形状很重要？** 一阶导数告诉我们函数上升还是下降。二阶导数告诉我们它是在 *加速* 上升还是 *减速* 上升 — 斜率是在增加还是减少。这就是凹凸性。物理上讲：如果你以恒定速度驾驶，你不会感觉到任何东西；如果你加速，你会感觉到座位。二阶导数就是座椅感受到的东西。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="五岁小孩">
+
+想象你在一辆车里。
+
+- **位置**：汽车现在在哪里 — A街还是B街。
+- **速度**：汽车每秒行进多远。看仪表盘。
+- **加速度**：速度变化有多快。当司机踩加速踏板时，你会感觉向前 — 这就是加速度。
+- **抖动** （大人称为"jerk"）：当司机突然踩刹车时，你的头向前冲。抖动是加速度突然变化。
+
+每个"导数"就是这些东西之一 — 但在数学中，不是用汽车，而是任何随时间变化的东西。
+
+</Porta>
+
+<Porta nivel="10" titulo="十岁小孩">
+
+我们已经知道 $f'$ 是函数的 **速度** — 它增长或下降有多快。现在我们再导一次：$f''$ 是速度的速度，即 **加速度**。
+
+**路上的汽车：** $s(t)$ = 位置，$s'(t)$ = 速度，$s''(t)$ = 加速度。当你在急刹中感觉到安全带收紧时，那是三阶导数 $s'''(t)$ — 物理学家称之为 **jerk**（抖动）。
+
+**凹凸性** — $f''$ 告诉我们关于图形的什么：
+
+- $f'' > 0$：图形看起来像一个碗（笑脸）。曲线向右走时"变得越来越陡"。
+- $f'' < 0$：图形看起来像一个倒过来的帽子。曲线"变得越来越平"。
+- 从笑脸变成帽子的地方：**拐点** — $f'' = 0$ 且改变符号的地方。
+
+**快速例子**
+
+$f(x) = x^3$：$f'(x) = 3x^2$，$f''(x) = 6x$。
+
+- 对于 $x > 0$：$f'' = 6x > 0$ — 向上凹。
+- 对于 $x < 0$：$f'' = 6x < 0$ — 向下凹。
+- 在 $x = 0$：$f'' = 0$ 且改变符号 — **原点处拐点**。
+
+</Porta>
+
+<Porta nivel="15" titulo="十五岁青少年">
+
+高阶导数 **揭示图形的形状** 而一阶导数单独做不到。
+
+### 凹凸性 — 完整协议
+
+1. 计算 $f''(x)$。
+2. 求解 $f''(x) = 0$ 以找到拐点候选。
+3. 在所得区间上制作 $f''$ 的符号表。
+4. 其中 $f'' > 0$：向上凹。其中 $f'' < 0$：向下凹。
+5. 其中 $f''$ 改变符号：拐点确认。
+
+### 极值的二阶导数检验
+
+若 $f'(c) = 0$（临界点）：
+- $f''(c) > 0 \Rightarrow c$ 是 **局部最小值**。
+- $f''(c) < 0 \Rightarrow c$ 是 **局部最大值**。
+- $f''(c) = 0 \Rightarrow$ 检验无效 — 用 $f'$ 的符号分析。
+
+### n阶导数的模式
+
+**正弦** — 周期为4的循环：
+
+$$(\sin x)' = \cos x, \quad (\sin x)'' = -\sin x, \quad (\sin x)''' = -\cos x, \quad (\sin x)^{(4)} = \sin x$$
+
+**指数** — 永远等于自身：
+
+$$(e^x)^{(n)} = e^x \text{ 对所有 } n$$
+
+**n次多项式** — 在第(n+1)阶导数处消失：
+
+$$(x^n)^{(n)} = n!, \quad (x^n)^{(n+1)} = 0$$
+
+### 例子：$f(x) = x^4 - 4x^3 + 6$ 的完整分析
+
+$$f'(x) = 4x^3 - 12x^2 = 4x^2(x - 3)$$
+$$f''(x) = 12x^2 - 24x = 12x(x - 2)$$
+
+$f'' = 0$ 在 $x = 0$ 和 $x = 2$。符号：$(0, 2)$ 中 $f'' < 0$，$(-\infty, 0)$ 和 $(2, +\infty)$ 中 $f'' > 0$。拐点在 $x = 0$ 和 $x = 2$。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程学学生">
+
+高阶导数是 **Taylor级数、ODEs、控制和优化的基础设施**。
+
+### Taylor级数
+
+$$f(x) = \sum_{k=0}^{\infty} \frac{f^{(k)}(a)}{k!}(x - a)^k, \quad |x - a| < R$$
+
+截断的n次多项式在 $a$ 周围是最好的n次多项式近似，意义在于前n个误差系数为零。Taylor级数 **将所有导数编码** 到一个单一对象中。
+
+### 常系数线性ODEs
+
+$$f^{(n)} + a_{n-1}f^{(n-1)} + \cdots + a_1 f' + a_0 f = g(t)$$
+
+每个经典ODE都使用高阶导数：谐振子 ($f'' + \omega^2 f = 0$)、RLC电路 ($LQ'' + RQ' + Q/C = E(t)$)、热方程、波动方程。
+
+### 应用：机械系统中的抖动和舒适性
+
+在机器人、电梯、高速列车和飞行模拟器中，**最小化jerk** $s'''(t)$ — 不仅仅是加速度 — 以避免不适。最优速度轮廓是一条光滑曲线，其jerk有限。"最小抖动"轨迹是5次多项式。
+
+### 凸性和优化
+
+$f$ 在 $(a, b)$ 上是凸的当且仅当 $f''(x) \geq 0$ 在 $(a, b)$ 上。凸函数有唯一的局部最小值，是凸规划的中心对象（Boyd–Vandenberghe）。在优化问题中，验证 $f'' \geq 0$ 是认证的最后步骤。
+
+### 中心差分
+
+$f''$ 的数值近似（二阶格式）：
+
+$$f''(x) \approx \frac{f(x+h) - 2f(x) + f(x-h)}{h^2} + O(h^2)$$
+
+有限元方法和Crank–Nicolson格式的基础。
+
+### 跨域
+
+- **物理**：波动方程 $\partial^2 u/\partial t^2 = c^2\,\partial^2 u/\partial x^2$。
+- **ML**：Hessian矩阵 $\nabla^2 L(\theta)$ 决定损失函数的曲率。Newton方法使用Hessian：二次收敛但成本 $O(n^2)$。
+- **金融（Gamma）**：$\Gamma = \partial^2 V/\partial S^2$ 衡量期权在 $S$ 中的凸性。
+
+</Porta>
+
+<Porta nivel="40" titulo="资深专业人士">
+
+### 泛函分析和微分算子
+
+算子 $D = d/dx$ 是 $C^\infty(\mathbb{R})$ 上的线性算子。$D$ 的"代数"允许将线性ODEs写成 $D$ 的多项式：$(D^2 + \omega^2)f = 0$ 的解在核中。$D^2$ 在 $[0, \pi]$ 上有Dirichlet条件的谱：$\{-n^2 : n \in \mathbb{N}\}$ — Fourier正弦的基。
+
+### Laplacian和调和函数
+
+算子 $\Delta = \partial^2/\partial x^2 + \partial^2/\partial y^2$（2D Laplacian）是空间中的二阶导数。调和函数 ($\Delta f = 0$) 是解析的，满足平均值性质，在静电、势流、全纯函数的实部和虚部中是中心的。
+
+### 多元优化中的Hessian
+
+对于 $f : \mathbb{R}^n \to \mathbb{R}$，Hessian $\nabla^2 f$ 是二阶偏导数矩阵。临界点是：
+- **局部最小值**：Hessian正定（所有特征值 > 0）。
+- **局部最大值**：Hessian负定。
+- **鞍点**：Hessian不定。在深度神经网络中，高维的几乎所有临界点都是鞍点（Pascanu et al., 2014）。
+
+### Black–Scholes中的Gamma和凸结构
+
+在Black–Scholes方程中，$\Gamma = \partial^2 V/\partial S^2$ 表示期权在 $S$ 中的凸性。方程可以写成 $\Theta + \frac{1}{2}\sigma^2 S^2 \Gamma + rS\Delta_{BS} = rV$。最大Gamma出现在到期日期附近的ATM — 套期保护风险的雷区。
+
+### 分数导数（Riemann–Liouville）
+
+对于非整数 $\alpha \in \mathbb{R}_{>0}$，定义
+
+$$D^\alpha f(x) = \frac{1}{\Gamma(n - \alpha)} \frac{d^n}{dx^n} \int_0^x (x - t)^{n - \alpha - 1} f(t)\, dt, \quad n = \lceil \alpha \rceil.$$
+
+应用：粘弹性、异常扩散、EEG信号中的记忆建模。分数微积分已成为软物质物理中的标准工具。
+
+### 矩论和矩生成函数
+
+矩生成函数 $M_X(t) = E[e^{tX}]$ 有 $M_X^{(n)}(0) = E[X^n]$ — 所有矩来自零处的n阶导数。这直接将高阶微积分连接到概率。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实践 — 工作协议">
+
+### 何时使用每个导数阶
+
+| 工程问题 | 工具 |
+|---|---|
+| 图形上升还是下降？ | $f'$ |
+| 图形是向上凹还是向下凹？ | $f''$ |
+| 拐点在哪里？ | $f'' = 0$ + 符号变化 |
+| 对极值分类？ | $f''$ 检验 |
+| 按多项式近似？ | Taylor级数（用 $f^{(n)}$） |
+| 位置、速度、加速度？ | $s$、$s'$、$s''$ |
+| 机械系统中的舒适度？ | $s'''$ (jerk) |
+
+### 标准工作流 — 凹凸性分析
+
+1. 符号计算 $f''(x)$。
+2. 求解 $f''(x) = 0$ — 获得拐点候选 $c_1, c_2, \ldots$
+3. 在由 $c_i$ 分隔的每个区间上制作 $f''$ 的符号表。
+4. 识别向上凹的区间 ($f'' > 0$) 和向下凹的区间 ($f'' < 0$)。
+5. 确认 $f''$ 改变符号的地方的拐点。
+
+### 边际成本和二阶导数 — ENEM/微观经济学例子
+
+设 $C(q) = q^3 - 6q^2 + 15q$ 是生产 $q$ 单位的成本（单位R$千）。边际成本是 $C'(q) = 3q^2 - 12q + 15$。二阶导数 $C''(q) = 6q - 12$ 告诉我们边际成本是增加还是减少：
+
+- $q < 2$：$C'' < 0$ — 边际成本仍在下降（有利的规模）。
+- $q > 2$：$C'' > 0$ — 边际成本增加（成本压力）。
+- $q = 2$：拐点 — 边际效率最大的点，其中每增加一个单位的成本最小。
+
+### 常见错误
+
+- 混淆 $f^{(n)}$（n阶导数）和 $[f(x)]^n$（幂）。它们是完全不同的对象。
+- 仅因为 $f''(c) = 0$ 就得出拐点。反例：$f(x) = x^4$ 有 $f''(0) = 0$ 但不改变符号 — 不是拐点。
+- 当 $f''(c) = 0$ 时应用二阶导数检验 — 在这种情况下检验无效；使用 $f'$ 的符号分析。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo titulo="多项式的二阶和三阶导数（应用）" numero="1">
+
+**问题。** 设 $f(x) = x^4 - 6x^3 + 5x + 1$。计算 $f'(x)$、$f''(x)$ 和 $f'''(x)$。
+
+**策略。** 连续导数，每个步骤使用幂法则 $(x^n)' = nx^{n-1}$。
+
+**解。**
+
+步骤1 — 一阶导数：
+
+$$f'(x) = 4x^3 - 18x^2 + 5$$
+
+步骤2 — 二阶导数（导数 $f'$）：
+
+$$f''(x) = 12x^2 - 36x$$
+
+步骤3 — 三阶导数（导数 $f''$）：
+
+$$f'''(x) = 24x - 36$$
+
+**通过次数计数验证。** $f$ 的次数为4；$f'$ 的次数为3；$f''$ 的次数为2；$f'''$ 的次数为1；$f^{(4)} = 24$；$f^{(5)} = 0$。一致。
+
+**来源。** [Active Calculus — Boelkins, §1.6](https://activecalculus.org/single/sec-1-6-second-d.html) — CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="从位置的加速度（物理建模）" numero="2">
+
+**问题。** 粒子的位置（米）由 $s(t) = 3t^3 - 12t^2 + 9t$、$t \geq 0$（秒）给出。求速度 $v(t)$、加速度 $a(t)$ 和jerk $j(t)$。加速度何时为零？
+
+**策略。** $v = s'$、$a = s'' = v'$、$j = s''' = a'$。求解 $a(t) = 0$。
+
+**解。**
+
+$$v(t) = s'(t) = 9t^2 - 24t + 9$$
+
+$$a(t) = s''(t) = 18t - 24$$
+
+$$j(t) = s'''(t) = 18 \text{ 米/秒}^3 \text{ （常数）}$$
+
+**加速度为零：** $18t - 24 = 0 \Rightarrow t = 4/3$ 秒。
+
+对于 $t < 4/3$：$a < 0$（粒子减速）。对于 $t > 4/3$：$a > 0$（粒子加速）。常数jerk表示加速度流均匀。
+
+**来源。** [APEX Calculus — Hartman, §2.2](https://www.apexcalculus.com/) — CC-BY-NC。
+</Exemplo>
+
+<Exemplo titulo="正弦x的n阶导数模式（演示）" numero="3">
+
+**问题。** 确定 $(\sin x)^{(n)}$ 对所有 $n \geq 0$。
+
+**策略。** 计算前几个导数并识别周期为4的循环模式。
+
+**解。**
+
+$$(\sin x)^{(0)} = \sin x$$
+$$(\sin x)^{(1)} = \cos x = \sin\!\bigl(x + \tfrac{\pi}{2}\bigr)$$
+$$(\sin x)^{(2)} = -\sin x = \sin\!\bigl(x + \pi\bigr)$$
+$$(\sin x)^{(3)} = -\cos x = \sin\!\bigl(x + \tfrac{3\pi}{2}\bigr)$$
+$$(\sin x)^{(4)} = \sin x = \sin\!\bigl(x + 2\pi\bigr)$$
+
+循环重复。一般公式是：
+
+$$(\sin x)^{(n)} = \sin\!\left(x + \frac{n\pi}{2}\right)$$
+
+**验证：** $(\sin x)^{(100)} = \sin(x + 50\pi) = \sin x$，因为 $\sin$ 的周期是 $2\pi$ 且 $50\pi = 25 \cdot 2\pi$。
+
+**来源。** [OpenStax Calculus Vol. 1, §3.2](https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function) — CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="凹凸性和拐点的完整分析（中级）" numero="4">
+
+**问题。** 对于 $f(x) = x^4 - 4x^3$，确定凹凸区间和拐点。
+
+**策略。** 计算 $f''$，找零，制作符号表，识别符号变化。
+
+**解。**
+
+$$f'(x) = 4x^3 - 12x^2 = 4x^2(x - 3)$$
+$$f''(x) = 12x^2 - 24x = 12x(x - 2)$$
+
+**$f''$ 的零：** $x = 0$ 和 $x = 2$。
+
+**符号表：**
+
+| 区间 | $12x$ 的符号 | $(x-2)$ 的符号 | $f''$ 的符号 | 凹凸性 |
+|---|---|---|---|---|
+| $(-\infty, 0)$ | $-$ | $-$ | $+$ | 向上 |
+| $(0, 2)$ | $+$ | $-$ | $-$ | 向下 |
+| $(2, +\infty)$ | $+$ | $+$ | $+$ | 向上 |
+
+**拐点：** $x = 0$ 和 $x = 2$（两者都改变 $f''$ 的符号）。
+
+$f(0) = 0$ 和 $f(2) = 16 - 32 = -16$。
+
+拐点：$(0, 0)$ 和 $(2, -16)$。
+
+**来源。** [Active Calculus — Boelkins, §1.6](https://activecalculus.org/single/sec-1-6-second-d.html) — CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="在a = 0周围的二次Taylor多项式（预览）" numero="5">
+
+**问题。** 找到 $f(x) = e^x$ 在 $a = 0$ 周围的二次Taylor多项式。
+
+**策略。** 应用公式 $T_2(x) = f(0) + f'(0)x + \frac{f''(0)}{2}x^2$。
+
+**解。**
+
+$(e^x)^{(n)} = e^x$ 对所有 $n$。所以：
+
+$$f(0) = e^0 = 1, \quad f'(0) = 1, \quad f''(0) = 1$$
+
+$$T_2(x) = 1 + x + \frac{x^2}{2}$$
+
+**数值验证。** 对于 $x = 0.1$：$e^{0.1} \approx 1.10517$；$T_2(0.1) = 1 + 0.1 + 0.005 = 1.105$。误差 $\approx 0.00017$。对 $x$ 很小的情况很好。
+
+**解释。** 二阶导数 $f''(0) = 1 > 0$ 保证 $e^x$ 在 $x = 0$ 处向上凹，这是二次抛物线 $T_2$ 正确捕捉的。
+
+**来源。** [Active Calculus — Boelkins, §8.3](https://activecalculus.org/single/sec-8-3-taylor.html) — CC-BY-NC-SA。
+</Exemplo>
+
+<ListaExercicios seed="licao-55-derivadas-superiores">
+
+> **笔记列表。** 有40个练习，分4个难度递增的块。在纸上解决。列表编译自Active Calculus（Boelkins）、OpenStax Calculus Vol. 1和APEX Calculus — 所有来源都在本课程末尾的**来源**部分。
+
+### 块A — 二阶和三阶导数的计算（55.1到55.15）
+
+<Exercicio
+  numero="55.1"
+  dificuldade="aplicacao"
+  solucao={<>一阶导数：<Eq>{`f'(x) = 3x^2 - 4x + 1`}</Eq>。二阶导数：<Eq>{`f''(x) = 6x - 4`}</Eq>。每次导数时常数项消失。</>}
+  passos={<>
+    <ol>
+      <li><strong>识别函数。</strong> <Eq>{`f(x) = x^3 - 2x^2 + x - 5`}</Eq>。目标：导数两次。</li>
+      <li><strong>一阶导数。</strong> 对每一项应用幂法则：<Eq>{`f'(x) = 3x^2 - 4x + 1`}</Eq>。常数项 <Eq>{`-5`}</Eq> 消失。</li>
+      <li><strong>二阶导数。</strong> 导数 <Eq>{`f'`}</Eq>：<Eq>{`f''(x) = 6x - 4`}</Eq>。常数项 <Eq>{`1`}</Eq> 消失。</li>
+      <li><em>技巧：</em>每次导数使次数减少1，乘以该次数。快速检查：<Eq>{`f`}</Eq> 的次数是3，<Eq>{`f''`}</Eq> 的次数是1。正确。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", pagina: "ex. 1.6.1", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = x^3 - 2x^2 + x - 5$。计算 $f'(x)$ 和 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.2"
+  dificuldade="aplicacao"
+  solucao={<>一阶导数：<Eq>{`f'(x) = 5x^4 - 6x + 1`}</Eq>。二阶导数：<Eq>{`f''(x) = 20x^3 - 6`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", pagina: "ex. 3.2.107", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = x^5 - 3x^2 + x + 2$。计算 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.3"
+  dificuldade="aplicacao"
+  solucao={<>一阶导数：<Eq>{`f'(x) = \\cos x`}</Eq>。二阶导数：<Eq>{`f''(x) = -\\sin x`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = \sin x$。计算 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.4"
+  dificuldade="aplicacao"
+  solucao={<>用链式法则：<Eq>{`f'(x) = -2\\sin(2x)`}</Eq>。二阶导数：<Eq>{`f''(x) = -4\\cos(2x)`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = \cos(2x)$。计算 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq> 有 <Eq>{`f'(x) = x^{-1}`}</Eq>。二阶导数：<Eq>{`f''(x) = -x^{-2} = -1/x^2`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>一阶导数。</strong> <Eq>{`(\\ln x)' = 1/x = x^{-1}`}</Eq>。</li>
+      <li><strong>二阶导数。</strong> 用幂法则导数 <Eq>{`x^{-1}`}</Eq>：<Eq>{`(-1) \\cdot x^{-2} = -1/x^2`}</Eq>。</li>
+      <li><em>观察：</em> <Eq>{`f''(x) < 0`}</Eq> 对所有 <Eq>{`x > 0`}</Eq> — 对数在整个域上向下凹。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = \ln x$。计算 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.6"
+  dificuldade="aplicacao"
+  solucao={<>用乘积法则：<Eq>{`f'(x) = e^x + xe^x = (1+x)e^x`}</Eq>。再次导数：<Eq>{`f''(x) = e^x + (1+x)e^x = (2+x)e^x`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", licenca: "CC-BY-NC" }}
+>
+设 $f(x) = xe^x$。计算 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.7"
+  dificuldade="aplicacao"
+  solucao={<>用乘积法则：<Eq>{`f'(x) = 2x\\ln x + x^2 \\cdot (1/x) = 2x\\ln x + x`}</Eq>。再次导数：<Eq>{`f''(x) = 2\\ln x + 2x \\cdot (1/x) + 1 = 2\\ln x + 3`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = x^2 \ln x$。计算 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 4x^3 - 12x^2`}</Eq>, <Eq>{`f''(x) = 12x^2 - 24x`}</Eq>, <Eq>{`f'''(x) = 24x - 24`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = x^4 - 4x^3 + 1$。计算 $f'''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.9"
+  dificuldade="aplicacao"
+  resposta="f''(0) = -2"
+  solucao={<>用商法则：<Eq>{`f(x) = (1+x^2)^{-1}`}</Eq>。<Eq>{`f'(x) = -2x(1+x^2)^{-2}`}</Eq>。用链式法则和乘积法则：<Eq>{`f''(x) = -2(1+x^2)^{-2} + 8x^2(1+x^2)^{-3}`}</Eq>。在 <Eq>{`x = 0`}</Eq>：<Eq>{`f''(0) = -2 \\cdot 1 + 0 = -2`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.4", licenca: "CC-BY-NC" }}
+>
+设 $f(x) = \dfrac{1}{1 + x^2}$。计算 $f''(0)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = x^{1/2}`}</Eq>。<Eq>{`f'(x) = \\frac{1}{2}x^{-1/2}`}</Eq>。<Eq>{`f''(x) = -\\frac{1}{4}x^{-3/2} = -\\frac{1}{4x^{3/2}}`}</Eq>。注意 <Eq>{`f'' < 0`}</Eq> 对所有 <Eq>{`x > 0`}</Eq> — 平方根向下凹。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = \sqrt{x}$。计算 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f^{(1)} = -2\\sin(2x)`}</Eq>, <Eq>{`f^{(2)} = -4\\cos(2x)`}</Eq>, <Eq>{`f^{(3)} = 8\\sin(2x)`}</Eq>, <Eq>{`f^{(4)} = 16\\cos(2x)`}</Eq>。每次导数乘以2并推进正弦→余弦循环。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = \cos(2x)$。计算 $f^{(4)}(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.12"
+  dificuldade="aplicacao"
+  resposta="f^{(5)}(x) = 0"
+  solucao={<><Eq>{`f(x) = x^4`}</Eq> 是4次多项式。任何4次多项式的五阶导数为零，因为 <Eq>{`(x^4)^{(4)} = 4! = 24`}</Eq> 是常数，常数的导数为零。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = x^4$。计算 $f^{(5)}(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.13"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`e^{2x}`}</Eq> 的每次导数用链式法则乘以2：<Eq>{`f^{(1)} = 2e^{2x}`}</Eq>, <Eq>{`f^{(2)} = 4e^{2x}`}</Eq>。一般来说 <Eq>{`f^{(n)} = 2^n e^{2x}`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = e^{2x}$。确定 $f^{(n)}(x)$ 对所有 $n \geq 1$。
+</Exercicio>
+
+<Exercicio
+  numero="55.14"
+  dificuldade="aplicacao"
+  resposta="(\sin x)^{(100)} = \sin x"
+  solucao={<>正弦在导数中有周期4的循环。<Eq>{`100 = 4 \\times 25`}</Eq>，余数0。所以 <Eq>{`(\\sin x)^{(100)} = (\\sin x)^{(0)} = \\sin x`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", licenca: "CC-BY-NC-SA" }}
+>
+确定 $(\sin x)^{(100)}$。
+</Exercicio>
+
+<Exercicio
+  numero="55.15"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = x^{-1}`}</Eq>。<Eq>{`f^{(1)} = -x^{-2}`}</Eq>, <Eq>{`f^{(2)} = 2x^{-3}`}</Eq>, <Eq>{`f^{(3)} = -6x^{-4}`}</Eq>。模式：<Eq>{`f^{(n)} = (-1)^n n! x^{-(n+1)}`}</Eq>。符号的交替来自连续负因子的乘积。</>}
+  passos={<>
+    <ol>
+      <li><strong>计算前几个导数。</strong> <Eq>{`f = x^{-1}`}</Eq>：<Eq>{`f' = -1 \\cdot x^{-2}`}</Eq>, <Eq>{`f'' = (-1)(-2)x^{-3} = 2x^{-3}`}</Eq>, <Eq>{`f''' = (-1)(-2)(-3)x^{-4} = -6x^{-4}`}</Eq>。</li>
+      <li><strong>识别模式。</strong> <Eq>{`f^{(n)}`}</Eq> 的系数：<Eq>{`(-1)^n \\cdot n!`}</Eq>。指数：<Eq>{`-(n+1)`}</Eq>。</li>
+      <li><strong>写一般公式。</strong> <Eq>{`f^{(n)}(x) = (-1)^n n! x^{-(n+1)}`}</Eq>。</li>
+      <li><em>有趣的事实：</em>此公式是 <Eq>{`x^k`}</Eq> 导数的特例：<Eq>{`(x^k)^{(n)} = k(k-1)\\cdots(k-n+1)x^{k-n}`}</Eq>，其中 <Eq>{`k = -1`}</Eq>。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", licenca: "CC-BY-NC" }}
+>
+设 $f(x) = \dfrac{1}{x}$。确定一般公式 $f^{(n)}(x)$。
+</Exercicio>
+
+### 块B — 凹凸性和拐点（55.16到55.27）
+
+<Exercicio
+  numero="55.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f''(x) = 12x^2 - 24x = 12x(x-2)`}</Eq>。零在 <Eq>{`x = 0`}</Eq> 和 <Eq>{`x = 2`}</Eq>。<Eq>{`f'' > 0`}</Eq> 在 <Eq>{`(-\\infty, 0)`}</Eq>, <Eq>{`f'' < 0`}</Eq> 在 <Eq>{`(0, 2)`}</Eq>, <Eq>{`f'' > 0`}</Eq> 在 <Eq>{`(2, +\\infty)`}</Eq>。两个零都是拐点（每个都改变符号）。</>}
+  passos={<>
+    <ol>
+      <li><strong>计算 <Eq>{`f''`}</Eq>。</strong> <Eq>{`f(x) = x^4 - 4x^3 + 1`}</Eq>。<Eq>{`f' = 4x^3 - 12x^2`}</Eq>。<Eq>{`f'' = 12x^2 - 24x = 12x(x-2)`}</Eq>。</li>
+      <li><strong><Eq>{`f''`}</Eq> 的零。</strong> <Eq>{`12x(x-2) = 0 \\Rightarrow x = 0`}</Eq> 或 <Eq>{`x = 2`}</Eq>。</li>
+      <li><strong>符号表。</strong> 在 <Eq>{`x = -1`}</Eq>：<Eq>{`f'' = 36 > 0`}</Eq>。在 <Eq>{`x = 1`}</Eq>：<Eq>{`f'' = -12 < 0`}</Eq>。在 <Eq>{`x = 3`}</Eq>：<Eq>{`f'' = 36 > 0`}</Eq>。</li>
+      <li><strong>结论。</strong> <Eq>{`f''`}</Eq> 在两个点都改变符号 — 拐点在 <Eq>{`x = 0`}</Eq> 和 <Eq>{`x = 2`}</Eq>。</li>
+      <li><em>心理技巧：</em>当 <Eq>{`f''`}</Eq> 分解为两个不同的线性因子的乘积时，每个零自动是拐点（符号在每个简单零处交替）。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", pagina: "ex. 1.6.5", licenca: "CC-BY-NC-SA" }}
+>
+对于 $f(x) = x^4 - 4x^3 + 1$，确定拐点和凹凸区间。
+</Exercicio>
+
+<Exercicio
+  numero="55.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = x^3 - 3x^2 + 2`}</Eq>。<Eq>{`f'' = 6x - 6 = 6(x - 1)`}</Eq>。对于 <Eq>{`x < 1`}</Eq>：<Eq>{`f'' < 0`}</Eq>（向下凹）。对于 <Eq>{`x > 1`}</Eq>：<Eq>{`f'' > 0`}</Eq>（向上凹）。拐点在 <Eq>{`x = 1`}</Eq>，<Eq>{`f(1) = 0`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "§4.5", licenca: "CC-BY-NC-SA" }}
+>
+对于 $f(x) = x^3 - 3x^2 + 2$，确定凹凸区间和拐点。
+</Exercicio>
+
+<Exercicio
+  numero="55.18"
+  dificuldade="aplicacao"
+  resposta="f''(0) = -2"
+  solucao={<><Eq>{`f(x) = e^{-x^2}`}</Eq>。用链式法则：<Eq>{`f'(x) = -2x e^{-x^2}`}</Eq>。用乘积法则：<Eq>{`f''(x) = -2e^{-x^2} + (-2x)(-2x)e^{-x^2} = (-2 + 4x^2)e^{-x^2}`}</Eq>。在 <Eq>{`x = 0`}</Eq>：<Eq>{`f''(0) = -2 \\cdot 1 = -2`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+对于 $f(x) = e^{-x^2}$，计算 $f''(0)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = x^5 - 5x^4`}</Eq>。<Eq>{`f' = 5x^4 - 20x^3`}</Eq>。<Eq>{`f'' = 20x^3 - 60x^2 = 20x^2(x - 3)`}</Eq>。零：<Eq>{`x = 0`}</Eq>（重）和 <Eq>{`x = 3`}</Eq>。在 <Eq>{`x = -1`}</Eq>, <Eq>{`f'' = 80 > 0`}</Eq>；在 <Eq>{`x = 1`}</Eq>, <Eq>{`f'' = -40 < 0`}</Eq>；在 <Eq>{`x = 4`}</Eq>, <Eq>{`f'' > 0`}</Eq>。符号变化在 <Eq>{`x = 0`}</Eq> 和 <Eq>{`x = 3`}</Eq> — 都是拐点。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "§4.5", pagina: "ex. 4.5.1", licenca: "CC-BY-NC-SA" }}
+>
+对于 $f(x) = x^5 - 5x^4$，确定拐点。
+</Exercicio>
+
+<Exercicio
+  numero="55.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "不一定 — $f''(c) = 0$ 是拐点的必要条件但不充分", correta: true },
+    { texto: "$f''$ 的每个零都是拐点" },
+    { texto: "如果 $f$ 是多项式则是" },
+    { texto: "不 — 拐点需要 $f'(c) = 0$ 也成立" },
+  ]}
+  solucao={<>反例：<Eq>{`f(x) = x^4`}</Eq>。<Eq>{`f''(x) = 12x^2`}</Eq> 和 <Eq>{`f''(0) = 0`}</Eq>。但 <Eq>{`f'' \\geq 0`}</Eq> 在整个 <Eq>{`\\mathbb{R}`}</Eq> — 不改变符号。拐点的充分条件：<Eq>{`f''`}</Eq> 在 <Eq>{`c`}</Eq> 处改变符号。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+如果 $f''(c) = 0$，我们能得出 $c$ 是 $f$ 的拐点吗？
+</Exercicio>
+
+<Exercicio
+  numero="55.21"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$c$ 是局部最小值", correta: true },
+    { texto: "$c$ 是局部最大值" },
+    { texto: "$c$ 是拐点" },
+    { texto: "检验无效 — 无法得出结论" },
+  ]}
+  solucao={<>如果 <Eq>{`f'(c) = 0`}</Eq> 且 <Eq>{`f''(c) > 0`}</Eq>，由二阶Taylor展开：<Eq>{`f(c+h) \\approx f(c) + \\frac{f''(c)}{2}h^2 > f(c)`}</Eq> 对于 <Eq>{`h \\neq 0`}</Eq> 很小。所以 <Eq>{`c`}</Eq> 是局部最小值。正曲率保证函数在 <Eq>{`c`}</Eq> 周围"向上开"。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "§4.5", licenca: "CC-BY-NC-SA" }}
+>
+如果 $f'(c) = 0$ 和 $f''(c) > 0$，关于 $c$ 我们得出什么？
+</Exercicio>
+
+<Exercicio
+  numero="55.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = e^x`}</Eq> 有 <Eq>{`f''(x) = e^x > 0`}</Eq> 对所有 <Eq>{`x \\in \\mathbb{R}`}</Eq>。所以 <Eq>{`e^x`}</Eq> 在整个域中向上凹。这意味着 <Eq>{`e^x`}</Eq> 是严格凸函数。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+确定 $f(x) = e^x$ 在整个域中的凹凸性。
+</Exercicio>
+
+<Exercicio
+  numero="55.23"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = x^3`}</Eq>。<Eq>{`f''(x) = 6x`}</Eq>。对于 <Eq>{`x < 0`}</Eq>：<Eq>{`f'' < 0`}</Eq>（向下凹）。对于 <Eq>{`x > 0`}</Eq>：<Eq>{`f'' > 0`}</Eq>（向上凹）。拐点在 <Eq>{`x = 0`}</Eq> — 点 <Eq>{`(0, 0)`}</Eq> 是曲线从"帽子"变为"笑脸"的地方。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "§4.5", licenca: "CC-BY-NC-SA" }}
+>
+分析 $f(x) = x^3$ 的凹凸性并识别拐点。
+</Exercicio>
+
+<Exercicio
+  numero="55.24"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = x^4 - 6x^2`}</Eq>。<Eq>{`f'' = 12x^2 - 12 = 12(x-1)(x+1)`}</Eq>。零：<Eq>{`x = \\pm 1`}</Eq>。<Eq>{`f'' > 0`}</Eq> 在 <Eq>{`(-\\infty, -1)`}</Eq> 和 <Eq>{`(1, +\\infty)`}</Eq>；<Eq>{`f'' < 0`}</Eq> 在 <Eq>{`(-1, 1)`}</Eq>。拐点在 <Eq>{`x = -1`}</Eq> 和 <Eq>{`x = 1`}</Eq>，<Eq>{`f(-1) = f(1) = -5`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.4", licenca: "CC-BY-NC" }}
+>
+对于 $f(x) = x^4 - 6x^2$，确定凹凸区间和拐点。
+</Exercicio>
+
+<Exercicio
+  numero="55.25"
+  dificuldade="compreensao"
+  solucao={<>对于正弦：导数四次走过循环 <Eq>{`\\sin \\to \\cos \\to -\\sin \\to -\\cos \\to \\sin`}</Eq>，回到起点 — 周期4。对于指数：<Eq>{`(e^x)' = e^x`}</Eq> — 它是导数算子的唯一不动点（除了乘法常数），因此 <Eq>{`(e^x)^{(n)} = e^x`}</Eq> 对所有 $n$。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+解释为什么 $(\sin x)^{(4)} = \sin x$ 和为什么 $(e^x)^{(n)} = e^x$ 对所有 $n \geq 0$。
+</Exercicio>
+
+<Exercicio
+  numero="55.26"
+  dificuldade="aplicacao"
+  solucao={<>用乘积法则：<Eq>{`(fg)' = f'g + fg'`}</Eq>。再次导数：<Eq>{`(fg)'' = f''g + f'g' + f'g' + fg'' = f''g + 2f'g' + fg''`}</Eq>。混合项中的系数2类似于二项式 <Eq>{`(a+b)^2 = a^2 + 2ab + b^2`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", licenca: "CC-BY-NC" }}
+>
+从乘积法则导出 $(fg)''$ 的公式，并识别与二项式定理的类比。
+</Exercicio>
+
+<Exercicio
+  numero="55.27"
+  dificuldade="aplicacao"
+  resposta="f^{(10)}(0) = 10! = 3628800"
+  solucao={<><Eq>{`f(x) = (1+x)^{10}`}</Eq>。二项展开中 <Eq>{`x^{10}`}</Eq> 的系数是 <Eq>{`\\binom{10}{10} = 1`}</Eq>。所以 <Eq>{`f^{(10)}(x) = 10! \\cdot 1 = 10!`}</Eq>（常数）。在 <Eq>{`x = 0`}</Eq> 评估：<Eq>{`f^{(10)}(0) = 10! = 3628800`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-taylor.html", secao: "§8.3", licenca: "CC-BY-NC-SA" }}
+>
+设 $f(x) = (1 + x)^{10}$。计算 $f^{(10)}(0)$。
+</Exercicio>
+
+### 块C — 建模：位置、速度、加速度和抖动（55.28到55.35）
+
+<Exercicio
+  numero="55.28"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`s(t) = 4t^3 - t^4`}</Eq>。速度：<Eq>{`v(t) = 12t^2 - 4t^3`}</Eq>；<Eq>{`v(1) = 12 - 4 = 8`}</Eq> m/s。加速度：<Eq>{`a(t) = 24t - 12t^2`}</Eq>；<Eq>{`a(1) = 24 - 12 = 12`}</Eq> m/s²。抖动：<Eq>{`j(t) = 24 - 24t`}</Eq>；<Eq>{`j(1) = 0`}</Eq> m/s³。在 <Eq>{`t = 1`}</Eq> 处零抖动表示加速度处于最大值（加速度曲线的拐点）。</>}
+  passos={<>
+    <ol>
+      <li><strong>速度。</strong> <Eq>{`v(t) = s'(t) = 12t^2 - 4t^3`}</Eq>。<Eq>{`v(1) = 12 - 4 = 8`}</Eq> m/s。</li>
+      <li><strong>加速度。</strong> <Eq>{`a(t) = v'(t) = 24t - 12t^2`}</Eq>。<Eq>{`a(1) = 24 - 12 = 12`}</Eq> m/s²。</li>
+      <li><strong>抖动。</strong> <Eq>{`j(t) = a'(t) = 24 - 24t`}</Eq>。<Eq>{`j(1) = 0`}</Eq> m/s³。</li>
+      <li><em>解释：</em>在 <Eq>{`t = 1`}</Eq> 处抖动 = 0 意味着加速度在那个瞬间不变化 — 它达到了其极值。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", pagina: "ex. 2.2.7", licenca: "CC-BY-NC" }}
+>
+粒子的位置：$s(t) = 4t^3 - t^4$（米，$t$ 秒）。计算 $v(1)$、$a(1)$ 和 $j(1)$，并解释 $j(1) = 0$。
+</Exercicio>
+
+<Exercicio
+  numero="55.29"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\theta(t) = A\\cos(\\omega t)`}</Eq>。<Eq>{`\\dot\\theta = -A\\omega\\sin(\\omega t)`}</Eq>。<Eq>{`\\ddot\\theta = -A\\omega^2\\cos(\\omega t) = -\\omega^2 \\theta(t)`}</Eq>。所以 <Eq>{`\\ddot\\theta + \\omega^2\\theta = 0`}</Eq> — 简单摆的方程（小振幅）。角位置的二阶导数与位置成比例，符号为负 — 恢复原理。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", licenca: "CC-BY-NC" }}
+>
+摆：$\theta(t) = A\cos(\omega t)$。计算 $\ddot{\theta}$ 并验证 $\ddot{\theta} + \omega^2\theta = 0$。
+</Exercicio>
+
+<Exercicio
+  numero="55.30"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`C(q) = q^3 - 6q^2 + 15q`}</Eq>。<Eq>{`C'(q) = 3q^2 - 12q + 15`}</Eq>（边际成本）。<Eq>{`C''(q) = 6q - 12 = 6(q - 2)`}</Eq>。零在 <Eq>{`q = 2`}</Eq>。对于 <Eq>{`q < 2`}</Eq>：<Eq>{`C'' < 0`}</Eq>（边际成本下降）。对于 <Eq>{`q > 2`}</Eq>：<Eq>{`C'' > 0`}</Eq>（边际成本增加）。<Eq>{`q = 2`}</Eq> 处的拐点是边际成本最小的点 — 最大规模效率。</>}
+  passos={<>
+    <ol>
+      <li><strong>计算 <Eq>{`C''`}</Eq>。</strong> <Eq>{`C'(q) = 3q^2 - 12q + 15`}</Eq>。<Eq>{`C''(q) = 6q - 12`}</Eq>。</li>
+      <li><strong><Eq>{`C''`}</Eq> 的零。</strong> <Eq>{`6q - 12 = 0 \\Rightarrow q = 2`}</Eq>。</li>
+      <li><strong>符号。</strong> <Eq>{`C'' < 0`}</Eq> 对 <Eq>{`q < 2`}</Eq>；<Eq>{`C'' > 0`}</Eq> 对 <Eq>{`q > 2`}</Eq>。符号变化：拐点确认。</li>
+      <li><em>经济解释：</em>边际成本 <Eq>{`C'`}</Eq> 在 <Eq>{`q = 2`}</Eq> 处达到最小值。生产少于2单位：仍有规模收益。超过2：边际成本开始上升。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+生产成本：$C(q) = q^3 - 6q^2 + 15q$（R$千）。计算 $C''(q)$ 并将拐点解释为"边际成本最小值"。
+</Exercicio>
+
+<Exercicio
+  numero="55.31"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`s(t) = 10t^3 - 30t^2 + 5`}</Eq>。速度：<Eq>{`v(t) = 30t^2 - 60t`}</Eq>。加速度：<Eq>{`a(t) = 60t - 60 = 60(t-1)`}</Eq>。抖动：<Eq>{`j(t) = 60`}</Eq> m/s³（常数）。加速度零在 <Eq>{`t = 1`}</Eq> 秒。对于 <Eq>{`t < 1`}</Eq>：<Eq>{`a < 0`}</Eq>；对于 <Eq>{`t > 1`}</Eq>：<Eq>{`a > 0`}</Eq>。常数抖动表示加速度的线性变化。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", licenca: "CC-BY-NC" }}
+>
+车辆位置：$s(t) = 10t^3 - 30t^2 + 5$（米）。计算 $v(t)$、$a(t)$、$j(t)$ 并确定何时加速度为零。
+</Exercicio>
+
+<Exercicio
+  numero="55.32"
+  dificuldade="modelagem"
+  resposta="h''(t) = -9.8 m/s² (重力加速度，常数)"
+  solucao={<><Eq>{`h(t) = -4.9t^2 + v_0 t + h_0`}</Eq>。<Eq>{`h'(t) = -9.8t + v_0`}</Eq>（速度）。<Eq>{`h''(t) = -9.8`}</Eq> m/s² — 重力加速度，常数且为负（向下指向）。在重力作用下的位置的二阶导数总是 <Eq>{`-g`}</Eq>，不依赖 <Eq>{`v_0`}</Eq> 和 <Eq>{`h_0`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", licenca: "CC-BY-NC-SA" }}
+>
+投射体高度：$h(t) = -4.9t^2 + v_0 t + h_0$。计算 $h''(t)$ 并识别其物理意义。
+</Exercicio>
+
+<Exercicio
+  numero="55.33"
+  dificuldade="modelagem"
+  solucao={<>在有势能 <Eq>{`U(\\theta)`}</Eq> 的系统中，平衡出现在 <Eq>{`U'(\\theta_0) = 0`}</Eq>。二阶导数检验分类：<Eq>{`U''(\\theta_0) > 0`}</Eq> — <Eq>{`U`}</Eq> 有局部最小值，稳定平衡（系统在受扰时返回）。<Eq>{`U''(\\theta_0) < 0`}</Eq> — <Eq>{`U`}</Eq> 有局部最大值，不稳定平衡（系统在受扰时逃逸）。二阶导数量化势能的曲率，即系统的有效刚度。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.4", licenca: "CC-BY-NC" }}
+>
+在机械系统中，势能 $U(\theta)$ 在 $\theta_0$ 有临界点。$U''(\theta_0) > 0$ 相对于 $U''(\theta_0) < 0$ 意味着什么关于平衡的稳定性？
+</Exercicio>
+
+<Exercicio
+  numero="55.34"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`f(x) = e^x`}</Eq>。<Eq>{`f(0) = 1`}</Eq>, <Eq>{`f'(0) = 1`}</Eq>, <Eq>{`f''(0) = 1`}</Eq>。<Eq>{`T_2(x) = 1 + x + \\frac{1}{2}x^2`}</Eq>。对于 <Eq>{`x = 0.1`}</Eq>：<Eq>{`T_2 = 1 + 0.1 + 0.005 = 1.105`}</Eq>；<Eq>{`e^{0.1} \\approx 1.10517`}</Eq>；误差 <Eq>{`\\approx 0.00017`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-taylor.html", secao: "§8.3", licenca: "CC-BY-NC-SA" }}
+>
+使用 $f(x) = e^x$ 在 $a = 0$ 的前三个导数，写出Taylor多项式 $T_2(x)$ 并估计 $x = 0.1$ 的误差。
+</Exercicio>
+
+<Exercicio
+  numero="55.35"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`f(x) = \\cos x`}</Eq>。<Eq>{`f(0) = 1`}</Eq>, <Eq>{`f'(0) = -\\sin(0) = 0`}</Eq>, <Eq>{`f''(0) = -\\cos(0) = -1`}</Eq>。<Eq>{`T_2(x) = 1 + 0 \\cdot x + \\frac{-1}{2}x^2 = 1 - \\frac{x^2}{2}`}</Eq>。对于 <Eq>{`x = 0.1`}</Eq>：<Eq>{`T_2 = 0.995`}</Eq>；<Eq>{`\\cos(0.1) \\approx 0.99500`}</Eq>。近似非常好 — 误差项是 <Eq>{`x^4/24`}</Eq> 阶。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-taylor.html", secao: "§8.3", licenca: "CC-BY-NC-SA" }}
+>
+写出 $f(x) = \cos x$ 在 $a = 0$ 周围的二次Taylor多项式并对 $x = 0.1$ 验证。
+</Exercicio>
+
+### 块D — 挑战和演示（55.36到55.40）
+
+<Exercicio
+  numero="55.36"
+  dificuldade="desafio"
+  solucao={<>对于 <Eq>{`f(x) = \\ln(1+x)`}</Eq>：<Eq>{`f'(x) = (1+x)^{-1}`}</Eq>, <Eq>{`f''(x) = -(1+x)^{-2}`}</Eq>, <Eq>{`f'''(x) = 2(1+x)^{-3}`}</Eq>。模式：<Eq>{`f^{(n)}(x) = (-1)^{n-1}(n-1)!(1+x)^{-n}`}</Eq>。在 <Eq>{`x = 0`}</Eq>：<Eq>{`f^{(n)}(0) = (-1)^{n-1}(n-1)!`}</Eq>。所以 <Eq>{`\\frac{f^{(n)}(0)}{n!} = \\frac{(-1)^{n-1}}{n}`}</Eq>, 且 <Eq>{`T_n(x) = \\sum_{k=1}^n \\frac{(-1)^{k+1}}{k}x^k`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-taylor.html", secao: "§8.3", licenca: "CC-BY-NC-SA" }}
+>
+计算 $f(x) = \ln(1+x)$ 的 $f^{(n)}(x)$ 并写出在 $a = 0$ 周围的Taylor多项式 $T_n(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.37"
+  dificuldade="desafio"
+  solucao={<>取对数：<Eq>{`\\ln f = x\\ln x`}</Eq>。导数：<Eq>{`f'/f = \\ln x + 1`}</Eq>, 所以 <Eq>{`f' = x^x(1 + \\ln x)`}</Eq>。再次用乘积法则导数：<Eq>{`f'' = x^x(1 + \\ln x)^2 + x^x \\cdot \\frac{1}{x} = x^x(1 + \\ln x)^2 + x^{x-1}`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/3-2-the-derivative-as-a-function", secao: "§3.2", licenca: "CC-BY-NC-SA" }}
+>
+对于 $f(x) = x^x$（$x > 0$），用对数导数计算 $f''(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="55.38"
+  dificuldade="desafio"
+  solucao={<>对于 <Eq>{`n = 1`}</Eq>：<Eq>{`(fg)' = f'g + fg'`}</Eq> — 乘积法则。假设对 <Eq>{`n = m`}</Eq> 成立。对两边导数并用Pascal恒等式 <Eq>{`\\binom{m}{k} + \\binom{m}{k-1} = \\binom{m+1}{k}`}</Eq> 组合项。获得对 <Eq>{`n = m+1`}</Eq> 的公式。由归纳法，对所有 <Eq>{`n \\geq 1`}</Eq> 成立。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", licenca: "CC-BY-NC" }}
+>
+陈述Leibniz公式 $(fg)^{(n)} = \sum_{k=0}^n \binom{n}{k} f^{(k)} g^{(n-k)}$ 并描述证明它的归纳法论证的结构。
+</Exercicio>
+
+<Exercicio
+  numero="55.39"
+  dificuldade="demonstracao"
+  solucao={<>给定 <Eq>{`f(0) = f(1) = 0`}</Eq> 且 <Eq>{`f`}</Eq> 可微，由Rolle定理存在 <Eq>{`c_1 \\in (0, 1)`}</Eq> 有 <Eq>{`f'(c_1) = 0`}</Eq>。由于 <Eq>{`f' \\not\\equiv 0`}</Eq>，存在某个点其中 <Eq>{`f' \\neq 0`}</Eq>。特别地，<Eq>{`f'`}</Eq> 有零（至少 <Eq>{`c_1`}</Eq>）。对 <Eq>{`f'`}</Eq> 在 <Eq>{`f'`}</Eq> 在两点假设相同值的区间应用Rolle，或在 <Eq>{`f'`}</Eq> 的零和 <Eq>{`f' \\neq 0`}</Eq> 的点之间使用平均值定理，获得 <Eq>{`c \\in (0, 1)`}</Eq> 有 <Eq>{`f''(c) = 0`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+**演示。** 设 $f$ 在 $[0, 1]$ 上二阶可微，有 $f(0) = f(1) = 0$ 和 $f' \not\equiv 0$。存在 $c \in (0, 1)$ 有 $f''(c) = 0$ 吗？证明。
+</Exercicio>
+
+<Exercicio
+  numero="55.40"
+  dificuldade="demonstracao"
+  solucao={<>若 <Eq>{`f'' \\geq 0`}</Eq> 在 <Eq>{`(a,b)`}</Eq>, 则 <Eq>{`f'`}</Eq> 非递减。给定 <Eq>{`x_1 < x < x_2`}</Eq> 在 <Eq>{`(a,b)`}</Eq>, 写 <Eq>{`x = \\lambda x_1 + (1-\\lambda)x_2`}</Eq> 其中 <Eq>{`\\lambda \\in (0,1)`}</Eq>。由平均值定理：<Eq>{`f(x_2) - f(x) \\geq f'(x)(x_2 - x)`}</Eq> 和 <Eq>{`f(x) - f(x_1) \\leq f'(x)(x - x_1)`}</Eq>（<Eq>{`f'`}</Eq> 的单调性）。乘以 <Eq>{`\\lambda`}</Eq> 和 <Eq>{`1-\\lambda`}</Eq> 分别并组合，获得 <Eq>{`f(\\lambda x_1 + (1-\\lambda)x_2) \\leq \\lambda f(x_1) + (1-\\lambda)f(x_2)`}</Eq> — 凸性的定义。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-6-second-d.html", secao: "§1.6", licenca: "CC-BY-NC-SA" }}
+>
+**演示。** 证明若 $f$ 二阶可微且 $f''(x) \geq 0$ 在 $(a, b)$，则 $f$ 在 $(a, b)$ 中凸。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**Active Calculus 2.0**](https://activecalculus.org/single/) — Boelkins · 2024 · §1.6 (The Second Derivative), §8.3 (Taylor Polynomials). **主要来源。** CC-BY-NC-SA。
+- [**Calculus, Volume 1**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · 2016 · §3.2 (The Derivative as a Function), §4.5 (Derivatives and the Shape of a Graph). CC-BY-NC-SA。
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman et al. · 2024 · v5 · §2.2 (Interpretations of the Derivative), §3.4 (Concavity and the Second Derivative). CC-BY-NC。

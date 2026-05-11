@@ -1,0 +1,803 @@
+---
+titulo: "Lição 101 — Amostragem: tipos, vieses e distribuição amostral"
+slug: "licao-101-amostragem"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Amostragem aleatória simples, estratificada e por conglomerados. Vieses de seleção. Distribuição amostral da média e o Teorema Central do Limite."
+ordem: 101
+publicado: true
+tags: ["estatística inferencial", "amostragem", "TCL", "ano-3", "trim-11"]
+prerrequisitos: ["licao-100-variavel-aleatoria"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "H2 Statistics singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\bar X = \frac{1}{n}\sum_{i=1}^{n} X_i, \quad \mathrm{E}[\bar X] = \mu, \quad \mathrm{Var}(\bar X) = \frac{\sigma^2}{n}"
+  legenda={<><strong>样本均值</strong> <Eq>{`\\bar X`}</Eq> 是 <Eq>{`\\mu`}</Eq> 的无偏估计量，其方差随 <Eq>{`n`}</Eq> 递减。根据中心极限定理，对于足够大的 <Eq>{`n`}</Eq>，无论总体分布如何，<Eq>{`\\bar X`}</Eq> 近似服从正态分布。</>}
+  audioTexto="样本均值X上面一条横线等于n分之一乘以X i求和。E左方括号X上面一条横线右方括号等于mu：无偏估计量。Var左方括号X上面一条横线右方括号等于sigma平方除以n：随着n增加而减小。根据中心极限定理，X上面一条横线对大的n服从正态分布。"
+/>
+
+<aside>
+
+**覆盖本课的教科书**
+
+- [**OpenIntro Statistics**（第4版）— Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · §1.3–1.4 和 §4.1 · CC-BY-SA · <em>涵盖抽样类型、常见偏差和样本均值分布，包含应用示例和开放式习题。</em>
+- [**Statistics**（OpenStax，Illowsky, Dean）](https://openstax.org/details/books/statistics) · §1.1–1.3 和 §7.1–7.3 · CC-BY · <em>介绍简单随机抽样、分层抽样、系统抽样和整群抽样，采用美国日常数据；可适应巴西背景。</em>
+- [**Statistical Thinking for the 21st Century** — Russell Poldrack](https://statsthinking21.org/) · 第3–4章 · CC-BY-NC · <em>通过R模拟讨论抽样偏差和样本分布；为25岁群体门户提供良好桥梁。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 结构：总体、样本和参数
+
+<Definicao titulo="总体、样本和估计量">
+
+- **总体** $\mathcal{P}$：感兴趣的完整元素集合。其参数（$\mu$、$\sigma^2$、$p$ 等）是**固定但未知**的。
+- **样本** $X_1, X_2, \ldots, X_n$：观测到的子集。在收集前是**随机变量**；收集后是**实现值**。
+- **估计量** $\hat\theta = T(X_1, \ldots, X_n)$：从样本计算得出的统计量，用于近似 $\theta$。
+
+</Definicao>
+
+> "样本是总体的子集。统计量是从样本计算得到的数字。参数是汇总整个总体数据的数字。" — [OpenStax Statistics, §1.1](https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms)
+
+### 抽样类型
+
+<Definicao titulo="简单随机抽样 (SRS)">
+
+总体的每个大小为 $n$ 的子集被选中的概率相同。形式上，如果总体有 $N$ 个元素，大小为 $n$ 的每个样本被选中的概率为 $\binom{N}{n}^{-1}$。
+
+<Equation explicacao="在SRS中被纳入的概率：每个元素有相同的机会。" latex="\pi_i = \frac{n}{N} \quad \text{对所有 } i \in \mathcal{P}" />
+
+</Definicao>
+
+<Definicao titulo="分层抽样">
+
+总体被分为 $K$ 个同质层。在每层内进行SRS，样本量为 $n_k$。
+
+<Equation explicacao="分层均值估计量：各层均值的加权平均。" latex="\bar X_{\text{est}} = \sum_{k=1}^K \frac{N_k}{N} \bar X_k" />
+
+优势：当层内比总体更同质时，可减少方差。
+
+</Definicao>
+
+<Definicao titulo="整群抽样">
+
+总体被分组为整群（例：街区、班级）。随机选择某些完整的群。当无法获得完整总体列表或移动成本高时很有用。
+
+</Definicao>
+
+> "在分层抽样中，总体被分成称为层的组。然后从每个层中选择随机样本。" — [OpenStax Statistics, §1.3](https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement)
+
+### 估计量的理想性质
+
+<Definicao titulo="无偏性、一致性和有效性">
+
+设 $\hat\theta$ 是 $\theta$ 的估计量。
+
+- **无偏性**：$\mathrm{E}[\hat\theta] = \theta$。估计量既不系统地高估也不低估。
+- **一致性**：$\hat\theta \xrightarrow{P} \theta$ 当 $n \to \infty$ 时。有更多数据时，收敛到真值。
+- **有效性**：在无偏估计量的类中，$\hat\theta$ 具有尽可能最小的方差（达到Cramér-Rao界）。
+
+</Definicao>
+
+### 样本均值的分布
+
+<Teorema titulo="中心极限定理 (CLT)">
+
+设 $X_1, X_2, \ldots, X_n$ 独立同分布，$\mathrm{E}[X_i] = \mu$ 且 $\mathrm{Var}(X_i) = \sigma^2 < \infty$。则：
+
+<Equation explicacao="标准化样本均值按分布收敛到标准正态分布。" latex="\frac{\bar X - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1) \quad \text{当 } n \to \infty" />
+
+等价地，对于大的 $n$：$\bar X \overset{\text{approx}}{\sim} \mathcal{N}\!\left(\mu,\, \sigma^2/n\right)$。
+
+**经验法则**：对于近似对称的总体，$n \geq 30$ 足以；高度偏斜的总体（如收入或资产价格）可能需要更大的 $n$。
+
+</Teorema>
+
+<Insight>
+
+CLT是统计学的中心奇迹：总体分布的形式（均匀、指数、双峰……）无关紧要。对于足够大的 $n$，样本均值总是近似正态分布。这就是为什么有2000人的选举民调能以2%的误差估计2亿人的意愿。
+
+</Insight>
+
+### 常见偏差
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 160" className="w-full">
+<defs>
+  <marker id="arr101" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="rgb(26 77 92)"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="10" width="110" height="40" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="65" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">选择</text>
+</g>
+<g>
+  <rect x="145" y="10" width="110" height="40" rx="6" fill="rgb(232 199 122 / 0.2)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="200" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">无应答</text>
+</g>
+<g>
+  <rect x="280" y="10" width="110" height="40" rx="6" fill="rgb(199 107 63 / 0.2)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="335" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">自选择</text>
+</g>
+<g>
+  <rect x="415" y="10" width="100" height="40" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="465" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">幸存者偏差</text>
+</g>
+<g>
+  <text x="65" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">在线调查：</text>
+  <text x="65" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">排除无互联网者</text>
+</g>
+<g>
+  <text x="200" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">回应者</text>
+  <text x="200" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">异于非回应者</text>
+</g>
+<g>
+  <text x="335" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">志愿者不同于</text>
+  <text x="335" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">总体</text>
+</g>
+<g>
+  <text x="465" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">仅分析</text>
+  <text x="465" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">幸存者</text>
+</g>
+<g>
+  <line x1="260" y1="140" x2="260" y2="108" stroke="rgb(26 77 92)" strokeWidth="1" strokeDasharray="4,3"/>
+  <text x="260" y="155" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.6">所有情况都产生系统偏差的估计</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+四个经典抽样偏差来源。每一个都使样本不能代表目标总体。
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="5岁儿童的解释">
+
+你想知道学校里所有孩子最喜欢的冰淇淋口味。但学校有**500个孩子**，你无法问每一个。
+
+所以你**随机抽取40个孩子**并只问他们。如果你抽样得当——没有排除任何群体——他们的答案会与所有孩子的答案**相似**。
+
+你问的孩子越多，答案就越准确。这就是**抽样**：通过一小部分来理解整体。
+
+</Porta>
+
+<Porta nivel="10" titulo="10岁儿童的解释">
+
+当你想了解**很多人**（所有巴西人、城市中的所有儿童）的情况时，你无法问每个人。所以你使用一个**样本**——一个精心选择的小群体。
+
+**秘诀是：如何选择？**
+
+- **简单随机**：随机选择任何人，如抽彩票。每个人机会相同。
+- **分层**：分成组（比如男孩/女孩），分别从每组抽样。确保没有群体被遗漏。
+- **整群**：随机选择整个街区，并采访该街区的每个人。
+
+**当你计算样本均值时会发生什么？**
+
+样本均值 $\bar X$ 不会**完全**等于所有人的均值，但会很**接近**。如果你用不同的样本重复，均值会聚集在真实均值 $\mu$ 周围。这就是**中心极限定理**——数学中最强大的思想之一。
+
+</Porta>
+
+<Porta nivel="15" titulo="15岁青少年的解释">
+
+### 为什么要抽样？
+
+人口普查（测量整个总体）成本高、耗时且有时不可能。精心设计的抽样以**十分之一的努力**给你精确的估计。
+
+实际例子：
+- IBGE：PNAD用约20万家庭估计2.1亿巴西人的收入、就业和教育。
+- Datafolha：2000次采访估计投票意愿，误差为 $\pm$ 2%。
+- 工业质量控制：100件产品估计10万件批次的缺陷。
+
+### 抽样类型
+
+| 类型 | 思想 | 何时使用 |
+|---|---|---|
+| SRS | 随机抽取 $n$ 个个体，机会相等 | 标准理论基础 |
+| 分层 | 在同质组内随机抽样 | 保证子群体的代表性 |
+| 系统 | 从列表中每 $k$ 个元素中抽一个 | 有序列表可用 |
+| 整群 | 随机抽取整个群 | 个人列表不可用或成本高 |
+
+### $\bar X$ 的样本分布
+
+$\bar X$ 是一个**随机变量**：它的值在样本间变化。但是：
+
+- $\mathrm{E}[\bar X] = \mu$（无偏：平均正确）
+- $\mathrm{Var}(\bar X) = \sigma^2/n$（观察越多，越稳定）
+- 标准误：$\mathrm{SE}(\bar X) = \sigma/\sqrt{n}$
+
+标准误随 $\sqrt{n}$ 递减：要把误差减半，你需要**四倍** $n$。
+
+### 误差边界
+
+95%置信度下：$\mathrm{ME} = 1{,}96 \cdot \sigma/\sqrt{n}$。
+
+有 $n = 2000$ 和 $\hat p = 0{,}45$ 的调查：$\mathrm{ME} = 1{,}96\sqrt{0{,}45 \cdot 0{,}55/2000} \approx 0{,}022$。结果：45% $\pm$ 2.2%。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程学生的解释">
+
+### 简单随机抽样：形式模型
+
+$X_1, \ldots, X_n \overset{\text{iid}}{\sim} F$，其中 $F$ 是未知的总体分布，$\mathrm{E}[X] = \mu$ 且 $\mathrm{Var}(X) = \sigma^2$。
+
+### 大数定律
+
+**弱（Khinchin）**：对于任何有 $\mathrm{E}[|X|] < \infty$ 的 $F$，$\bar X_n \xrightarrow{P} \mu$。
+
+**强（Kolmogorov）**：$\bar X_n \xrightarrow{\text{a.s.}} \mu$ ——几乎肯定收敛（逐条轨迹，除了概率为零的集合）。
+
+### 中心极限定理
+
+$$\sqrt{n}\,\frac{\bar X_n - \mu}{\sigma} \xrightarrow{d} \mathcal{N}(0,1)$$
+
+实际适用性：对于对称总体，$n \geq 30$；有高峰度或偏度的总体（如收入或资产价格）可能需要更大的 $n$。
+
+### 估计量及其性质
+
+| 性质 | 形式定义 |
+|---|---|
+| 无偏性 | $\mathrm{E}[\hat\theta] = \theta$ |
+| 一致性 | $\hat\theta \xrightarrow{P} \theta$ |
+| 有效性 (UMVUE) | $\mathrm{Var}(\hat\theta) = [nI(\theta)]^{-1}$ |
+| 充分性 | $f(\mathbf{x} \mid \theta) = g(T(\mathbf{x}), \theta)\,h(\mathbf{x})$ |
+
+### Cramér-Rao界
+
+$$\mathrm{Var}(\hat\theta) \geq \frac{1}{nI(\theta)}, \quad I(\theta) = \mathrm{E}\!\left[\left(\frac{\partial}{\partial\theta}\log f(X;\theta)\right)^2\right]$$
+
+最大似然估计量 (MLE) 渐近达到此界。
+
+### 精度 $E$ 的样本量
+
+$$n = \left\lceil\frac{z_{\alpha/2}^2\,\sigma^2}{E^2}\right\rceil$$
+
+对于比例（最不利情况 $p = 0{,}5$）：$n = z_{\alpha/2}^2/(4E^2)$。95%和 $E = 3\%$：$n \approx 1067$。
+
+### 分层抽样：效率增益
+
+分层估计量对SRS的方差：
+
+$$\mathrm{Var}(\bar X_{\text{est}}) = \sum_{k=1}^K \left(\frac{N_k}{N}\right)^2 \frac{\sigma_k^2}{n_k} \leq \mathrm{Var}(\bar X_{\text{SRS}})$$
+
+当层在内部同质（低层内方差）时，增益最大。
+
+</Porta>
+
+<Porta nivel="40" titulo="资深专业人士的解释">
+
+### 基于设计的推论对基于模型的推论
+
+现代抽样理论的基本二分法：
+
+- **基于设计**（Neyman, 1934）：随机性来自选择机制。Horvitz-Thompson估计量 $\hat T_{HT} = \sum_{i \in S} Y_i/\pi_i$ 对任何 $Y$ 值都是无偏的。
+- **基于模型**（超总体框架）：把 $Y_i$ 视为随机模型的实现；样本随机性是次要的。
+
+### Horvitz-Thompson估计量
+
+$$\hat T_{HT} = \sum_{i \in S} \frac{Y_i}{\pi_i}, \quad \widehat{\mathrm{Var}}(\hat T_{HT}) = \sum_{i \in S}\sum_{j \in S} \frac{\pi_{ij} - \pi_i\pi_j}{\pi_{ij}} \frac{Y_i}{\pi_i}\frac{Y_j}{\pi_j}$$
+
+允许复杂抽样（嵌套层、不等概率）同时保持精确无偏性。
+
+### 无应答和校准
+
+事后分层和*raking*使用总体中已知的辅助变量（人口普查）调整样本权重，减少无应答偏差而无需显式建模缺失机制。
+
+### 测度集中
+
+Hoeffding对 $X_i \in [a, b]$ 的非渐近界：
+
+$$P(\lvert\bar X - \mu\rvert > t) \leq 2\exp\!\left(-\frac{2n\,t^2}{(b-a)^2}\right)$$
+
+在机器学习（PAC学习）和小样本A/B测试分析中有用。
+
+### 因果推论和抽样
+
+随机对照试验 (RCTs) 是随机分配到处理的抽样。Joshua Angrist和Guido Imbens因开发准实验方法（工具变量、RDD、差分法）获得[2021年诺贝尔经济学奖](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/)，以在RCT不可行时提取因果推论。
+
+### Bootstrap及变体
+
+- **非参数**：从 $\{X_1, \ldots, X_n\}$ 有放回重新抽样，在每个副本中计算 $\hat\theta^*$，估计方差和区间。
+- **块Bootstrap**：在时间序列中保留依赖结构（重叠块、平稳Bootstrap）。
+- **贝叶斯Bootstrap**：用Dirichlet权重代替重新抽样，产生函数的后验分布。
+
+### 序列统计
+
+Wald的SPRT（序列概率比检验）在证据充分时停止收集，最小化期望的 $n$。在现代A/B测试中，*always-valid p-values*（e-values、随时有效推论）解决了窥视问题而不增加Type I错误。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="巴西实际应用">
+
+### PNAD连续：两阶段分层整群抽样
+
+IBGE在PNAD连续调查中使用**两阶段分层整群抽样**：
+
+1. **层**：每个州（26个州 + 联邦区）是一个主层。
+2. **第一阶段**：随机抽取初级抽样单位 (PSUs = 人口普查区)。
+3. **第二阶段**：在每个抽取的PSU内，列出住户并抽取固定比例。
+
+结果：每季度约21.1万住户，代表2.1亿巴西人，失业率估计变异系数小于5%。
+
+### 质量控制：ABNT NBR 5426
+
+工业产品批次通过**属性抽样**进行检验。对于 $N = 10,000$ 单位的批次和NQA（可接受质量水平）为1%，表格指示 $n = 200$ 件；如果发现超过5件缺陷，批次被拒绝。
+
+估计比例的标准误为：
+
+$$\mathrm{SE}(\hat p) = \sqrt{\frac{\hat p(1-\hat p)}{n}} = \sqrt{\frac{0{,}025 \cdot 0{,}975}{200}} \approx 0{,}011$$
+
+95%置信下的误差边界为 $\pm$ 1.1%。
+
+### 选举民调
+
+Datafolha、Ipec等使用配额（按地区、性别、年龄分层）加上每个配额内的随机选择。用 $n = 2000$，比例的误差边界为：
+
+$$\mathrm{ME} = 1{,}96\sqrt{\frac{0{,}5 \cdot 0{,}5}{2000}} \approx 2{,}2\%$$
+
+</Porta>
+
+</DuasPortas>
+
+## 已解答的例子
+
+<Exemplo numero="101.1" titulo="样本均值的标准误（基础）">
+
+**问题**。一项关于月收入的调查收集了 $n = 64$ 名工人。总体标准差已知：$\sigma = R\$\,800$。计算样本均值的标准误。
+
+**策略**。直接应用公式 $\mathrm{SE}(\bar X) = \sigma/\sqrt{n}$。
+
+**解决**。
+
+$$\mathrm{SE}(\bar X) = \frac{\sigma}{\sqrt{n}} = \frac{800}{\sqrt{64}} = \frac{800}{8} = 100$$
+
+标准误为R$ 100。
+
+**验证**。对于 $n = 256$（四倍大）：$\mathrm{SE} = 800/16 = 50$。四倍 $n$ 使标准误减半。与 $\mathrm{SE} \propto 1/\sqrt{n}$ 的关系一致。
+
+**来源**。[OpenStax Statistics, §7.1, Example 7.1](https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="101.2" titulo="误差边界的样本量（中等）">
+
+**问题**。一名研究者想估计从事工作的中学生的比例，最大误差边界为3%，95%置信度。最小样本量是多少？
+
+**策略**。使用保守公式 $n = z_{\alpha/2}^2/(4E^2)$，当 $p = 0{,}5$（最不利情况）时。
+
+**解决**。
+
+$$n = \frac{z_{\alpha/2}^2}{4E^2} = \frac{(1{,}960)^2}{4 \cdot (0{,}03)^2} = \frac{3{,}8416}{0{,}0036} \approx 1068$$
+
+向上舍入：$n = 1068$。
+
+**验证**。用 $n = 1068$ 和 $p = 0{,}5$：$\mathrm{ME} = 1{,}96\sqrt{0{,}25/1068} = 1{,}96 \cdot 0{,}01531 \approx 0{,}030$。在3%限制内。
+
+**来源**。[OpenIntro Statistics, §5.2, Example 5.10](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="101.3" titulo="CLT应用——样本均值的概率（中等）">
+
+**问题**。卫生中心门诊的等待时间平均 $\mu = 18$ 分钟，标准差 $\sigma = 6$ 分钟。收集 $n = 36$ 次就诊的样本。样本均值大于20分钟的概率是多少？
+
+**策略**。根据CLT，$\bar X \approx \mathcal{N}(18,\, 36/36) = \mathcal{N}(18, 1)$。标准化并使用Z表。
+
+**解决**。
+
+$$Z = \frac{\bar X - \mu}{\sigma/\sqrt{n}} = \frac{20 - 18}{6/\sqrt{36}} = \frac{2}{1} = 2{,}00$$
+
+$$P(\bar X > 20) = P(Z > 2{,}00) = 1 - \Phi(2{,}00) = 1 - 0{,}9772 = 0{,}0228$$
+
+概率约为2.3%。
+
+**验证**。值 $\bar X = 20$ 高于均值2个标准差：根据68-95-99.7规则，仅约2.5%的样本均值应落在 $\mu + 2\,\mathrm{SE}$ 以上。结果2.28%是一致的。
+
+**来源**。[OpenStax Statistics, §7.2, Example 7.3](https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sums) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="101.4" titulo="识别抽样偏差（概念）">
+
+**问题**。一家商业杂志进行在线调查，询问巴西税收制度的满意度，得到80%的负面回应。编辑声称："10名企业主中有8人对税收不满意"。识别存在的偏差。
+
+**策略**。检查抽样过程的每一步：谁有权限，谁回应，谁被代表。
+
+**解决**。
+
+三个偏差累积：
+
+1. **选择偏差**：在线调查排除了无数字接入的企业主（农村小企业、非正式微创业）。
+2. **无应答偏差**：税收问题更能激发不满的人（满意者没有紧迫感回应）。
+3. **取样框架偏差**：杂志读者是较大的企业或对管理特别感兴趣的——不代表所有"巴西企业主"。
+
+**结论**：80%的估计系统地高估了普通人群中的不满意度。
+
+**验证**。由访问员进行的有概率样本的IBGE/IBPT调查会产生不同的结果——方法上是防守的。
+
+**来源**。[OpenIntro Statistics, §1.4, Section "Sampling Bias"](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="101.5" titulo="分层抽样：效率计算（高等）">
+
+**问题**。一家公司有3个部门：A（200名员工，$\sigma_A = 4$ k R$）、B（500名员工，$\sigma_B = 2$ k R$）、C（300名员工，$\sigma_C = 6$ k R$）。预算为 $n = 100$ 次采访。比较SRS和比例分层在估计平均薪资时的方差。
+
+**策略**。计算SRS的方差和分层抽样的方差（比例分配）。
+
+**解决**。
+
+总体方差：$\sigma^2 = \sum (N_k/N)\sigma_k^2$（近似——为简化忽略层均值方差）：
+
+比例分配：$n_A = 20$、$n_B = 50$、$n_C = 30$。
+
+$$\mathrm{Var}(\bar X_{\text{est}}) = \sum_{k} \left(\frac{N_k}{N}\right)^2 \frac{\sigma_k^2}{n_k}$$
+
+$$= \left(\frac{200}{1000}\right)^2\frac{16}{20} + \left(\frac{500}{1000}\right)^2\frac{4}{50} + \left(\frac{300}{1000}\right)^2\frac{36}{30}$$
+
+$$= 0{,}04 \cdot 0{,}8 + 0{,}25 \cdot 0{,}08 + 0{,}09 \cdot 1{,}2 = 0{,}032 + 0{,}020 + 0{,}108 = 0{,}160$$
+
+分层标准误：$\sqrt{0{,}160} \approx 0{,}40$ k R$。
+
+相比之下，简单SRS有 $n = 100$ 和总体方差约 $\sigma^2 \approx (200 \cdot 16 + 500 \cdot 4 + 300 \cdot 36)/1000 = (3200 + 2000 + 10800)/1000 = 16$ 会给出 $\mathrm{Var}(\bar X_{\text{SRS}}) = 16/100 = 0{,}160$。在这个案例中，比例分配数值上与SRS一致——效率增益来自层均值相差很大时。
+
+**验证**。结果确认了理论：用比例分配和不同层方差，分层至少与SRS一样有效。
+
+**来源**。[OpenIntro Statistics, §1.4, Exercise 1.35](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-101-amostragem">
+
+<Exercicio
+  numero="101.1"
+  dificuldade="aplicacao"
+  solucao={<>标准误为 <Eq>{`\\mathrm{SE} = \\sigma/\\sqrt{n} = 50/\\sqrt{100} = 5`}</Eq> 克。由于估计量是无偏的，样本均值以 <Eq>{`\\mu`}</Eq> 为中心，围绕它波动5克。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "396", exercicio: "7.1", licenca: "CC-BY" }}
+>
+一家工厂生产螺栓，平均重量 $\mu$ 和标准差 $\sigma = 50$ 克。收集 $n = 100$ 个螺栓的样本。计算样本均值的标准误。
+</Exercicio>
+
+<Exercicio
+  numero="101.2"
+  dificuldade="aplicacao"
+  solucao={<>四倍 <Eq>{`n`}</Eq> 使标准误减半，因为 <Eq>{`\\mathrm{SE} \\propto 1/\\sqrt{n}`}</Eq>。从 <Eq>{`n = 25`}</Eq> 到 <Eq>{`n = 100`}</Eq>：<Eq>{`\\mathrm{SE}`}</Eq> 从 <Eq>{`\\sigma/5`}</Eq> 变为 <Eq>{`\\sigma/10`}</Eq>。减少50%。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "174", exercicio: "4.3", licenca: "CC-BY-SA" }}
+>
+一项调查开始时 $n = 25$。你需要增加 $n$ 多少倍才能使标准误减半？使用公式解释。
+</Exercicio>
+
+<Exercicio
+  numero="101.3"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>识别参数：<Eq>{`\\mu = 120`}</Eq>, <Eq>{`\\sigma = 15`}</Eq>, <Eq>{`n = 9`}</Eq>。</li>
+<li>计算标准误：<Eq>{`\\mathrm{SE} = 15/\\sqrt{9} = 5`}</Eq>。</li>
+<li>标准化：<Eq>{`Z = (\\bar X - \\mu)/\\mathrm{SE}`}</Eq>。对于 <Eq>{`\\bar X = 125`}</Eq>：<Eq>{`Z = (125-120)/5 = 1{,}00`}</Eq>。</li>
+<li>查表Z：<Eq>{`P(Z > 1{,}00) = 1 - 0{,}8413 = 0{,}1587`}</Eq>。</li>
+<li><em>技巧：</em>如果总体分布是正态的，结果对任何 <Eq>{`n`}</Eq> 成立——不需要CLT。</li>
+</ol>
+  </>}
+  solucao={<>根据CLT（或总体正态性），<Eq>{`\\bar X \\sim \\mathcal{N}(120, 25)`}</Eq>。<Eq>{`\\bar X > 125`}</Eq> 的概率是 <Eq>{`P(Z > 1{,}00) \\approx 15{,}87\\%`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "398", exercicio: "7.3", licenca: "CC-BY" }}
+>
+银行分行的等待时间服从正态分布，$\mu = 120$ 秒，$\sigma = 15$ 秒。收集 $n = 9$ 位客户的样本。 $\bar X > 125$ 秒的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="101.4"
+  dificuldade="aplicacao"
+  solucao={<>分层抽样，按性别和年龄段分层。确保可能在小样本SRS中被代表不足的子群体有恰当的代表。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.17", licenca: "CC-BY-SA" }}
+>
+一家医院想估计患者对医疗服务的满意度。院长知道性别和年龄段对感知有很大影响。哪种抽样类型最合适？证明理由。
+</Exercicio>
+
+<Exercicio
+  numero="101.5"
+  dificuldade="aplicacao"
+  solucao={<>自选择偏差。自愿回应购买后满意度调查的人倾向于意见更极端（非常满意或非常不满意）比普通客户群体。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "31", exercicio: "1.19", licenca: "CC-BY-SA" }}
+>
+网店在每次购买后发送电子邮件请求评价。仅有12%的客户回应。识别最可能的偏差类型并解释其对估计的影响。
+</Exercicio>
+
+<Exercicio
+  numero="101.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n = z_{\\alpha/2}^2/(4E^2) = (1{,}960)^2/(4 \\cdot 0{,}04^2) = 3{,}8416/0{,}0064 \\approx 601`}</Eq>。需要：601个住户。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "454", exercicio: "8.31", licenca: "CC-BY" }}
+>
+一项调查想估计农村地区有互联网接入的住户比例，误差边界为4%，95%置信度。最小样本量是多少？
+</Exercicio>
+
+<Exercicio
+  numero="101.7"
+  dificuldade="aplicacao"
+  solucao={<>幸存者偏差。分析仅考虑仍然存在的公司，忽略那些失败的。幸存者的平均表现高估了新公司的预期表现。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "32", exercicio: "1.21", licenca: "CC-BY-SA" }}
+>
+一位顾问分析了50家5年前成立且仍在运营的初创公司的增长，得出结论"初创公司平均每年增长120%"。存在什么偏差？
+</Exercicio>
+
+<Exercicio
+  numero="101.8"
+  dificuldade="aplicacao"
+  solucao={<>无偏：是，因为 <Eq>{`\\mathrm{E}[\\bar X] = \\mu`}</Eq> 对任何 <Eq>{`n`}</Eq> 成立。一致：是，因为 <Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n \\to 0`}</Eq>。有效：在 <Eq>{`\\mu`}</Eq> 的线性无偏估计量类中，<Eq>{`\\bar X`}</Eq> 有最小方差（Gauss-Markov）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.1", licenca: "CC-BY-SA" }}
+>
+证明样本均值 $\bar X$ 是（a）无偏、（b）一致和（c）有效的 $\mu$ 估计量，在线性估计量的类中。
+</Exercicio>
+
+<Exercicio
+  numero="101.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sigma/\\sqrt{n} = 40/\\sqrt{400} = 2`}</Eq> 雷亚尔。2个标准误的区间：样本均值约在 $\mu - 4$ 和 $\mu + 4$ 之间在约95%的样本中。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "399", exercicio: "7.5", licenca: "CC-BY" }}
+>
+关于公共交通支出的研究收集 $n = 400$ 条记录。历史标准差为 $\sigma = R\$\,40$。计算标准误并解释其意义。
+</Exercicio>
+
+<Exercicio
+  numero="101.10"
+  dificuldade="aplicacao"
+  solucao={<>SRS给予每个公司相等的机会。按部门分层确保每个部门（工业、商业、服务）按比例代表。按整群将抽取市镇并采访该市镇的所有公司。当平均收入在部门间差异很大时，分层更有效。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement", secao: "§1.3", pagina: "18", exercicio: "1.5", licenca: "CC-BY" }}
+>
+IBGE想估计巴西公司的平均收入。描述SRS、按部门分层和按整群的抽样如何进行。哪个会更有效？为什么？
+</Exercicio>
+
+<Exercicio
+  numero="101.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "偏差为零；方差为正且随n递减", correta: true },
+    { texto: "偏差为正；方差为零" },
+    { texto: "偏差为负；方差随n递增" },
+    { texto: "偏差和方差对大的n都为零" }
+  ]}
+  solucao={<><Eq>{`\\mathrm{E}[\\bar X] = \\mu`}</Eq> 意味着偏差为零。<Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n > 0`}</Eq> 且随 <Eq>{`n`}</Eq> 递减。方差为零需要 <Eq>{`n \\to \\infty`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.2", licenca: "CC-BY-SA" }}
+>
+对于固定 $n$ 和iid总体的样本均值 $\bar X$，哪个陈述是正确的？
+</Exercicio>
+
+<Exercicio
+  numero="101.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "因为样本量大到足以应用CLT" },
+    { texto: "因为总体必然是正态的", correta: false },
+    { texto: "因为样本是分层的" },
+    { texto: "因为标准差很小" }
+  ]}
+  solucao={<>CLT保证对于大的 <Eq>{`n`}</Eq>，<Eq>{`\\bar X`}</Eq> 无论总体分布如何都近似正态。总体分布不需要是正态的。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "394", exercicio: "7.1c", licenca: "CC-BY" }}
+>
+为什么，在许多实际调查中，样本均值有近似正态分布，即使不知道总体的确切分布？
+</Exercicio>
+
+<Exercicio
+  numero="101.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "否：大小为n的每个可能样本有相等的被选中概率", correta: true },
+    { texto: "是：每个个体有相等的概率被入选，但集合可能有不同的概率" },
+    { texto: "是：SRS保证所有子群体的成比例代表" },
+    { texto: "否：仅系统抽样保证等概率性" }
+  ]}
+  solucao={<>在SRS中，个体的等概率（所有人有机会 <Eq>{`n/N`}</Eq>）和子集的等概率是等价的——每个 <Eq>{`n`}</Eq> 个个体的集合有相同的机会。这不保证所有子群体的代表（可能偶然有一个群体没有代表）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "28", exercicio: "1.15", licanca: "CC-BY-SA" }}
+>
+声明："在简单随机抽样中，每个个体有相同的被选中概率。这等价于说每个 $n$ 个个体的集合有相同的概率成为样本。"这个声明正确吗？
+</Exercicio>
+
+<Exercicio
+  numero="101.14"
+  dificuldade="aplicacao"
+  solucao={<>根据CLT，<Eq>{`\\bar X \\sim \\mathcal{N}(3{,}5,\\, 1{,}5^2/36) = \\mathcal{N}(3{,}5,\\, 0{,}0625)`}</Eq>。<Eq>{`P(\\bar X < 3{,}2) = P(Z < (3{,}2 - 3{,}5)/0{,}25) = P(Z < -1{,}20) = 0{,}1151`}</Eq>。概率约为11.5%。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "400", exercicio: "7.7", licenca: "CC-BY" }}
+>
+考试的历史平均分为 $\mu = 3{,}5$，标准差 $\sigma = 1{,}5$。对于 $n = 36$ 的班级，班级平均分小于3.2的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="101.15"
+  dificuldade="aplicacao"
+  solucao={<>两阶段整群抽样：随机抽取城市（第一阶段），然后在被选中的城市内随机抽取街道。从操作效率角度有效，因为采访集中在几个市镇，减少了差旅成本。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.18", licenca: "CC-BY-SA" }}
+>
+IBGE需要估计巴西所有市镇的基本卫生设施接入情况，预算有限。虽然没有住户清单，但有市镇和街道清单。提议一个抽样计划。
+</Exercicio>
+
+<Exercicio
+  numero="101.16"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>比例标准误的公式是 <Eq>{`\\mathrm{SE} = \\sqrt{p(1-p)/n}`}</Eq>。</li>
+<li>代入：<Eq>{`\\mathrm{SE} = \\sqrt{0{,}6 \\cdot 0{,}4 / 400} = \\sqrt{0{,}24/400} = \\sqrt{0{,}0006} \\approx 0{,}0245`}</Eq>。</li>
+<li>95%的误差边界：<Eq>{`1{,}96 \\times 0{,}0245 \\approx 0{,}048`}</Eq>，即 <Eq>{`\\pm 4{,}8\\%`}</Eq>。</li>
+<li><em>观察：</em>比例的误差边界在 <Eq>{`p = 0{,}5`}</Eq> 时最大。对于 <Eq>{`p = 0{,}6`}</Eq>，误差稍小于 <Eq>{`p = 0{,}5`}</Eq> 时。</li>
+</ol>
+  </>}
+  solucao={<><Eq>{`\\mathrm{SE}(\\hat p) = \\sqrt{0{,}6 \\cdot 0{,}4/400} \\approx 0{,}0245`}</Eq>。误差边界：<Eq>{`\\pm 4{,}8\\%`}</Eq>。结果：60% <Eq>{`\\pm`}</Eq> 4.8%。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "450", exercicio: "8.27", licenca: "CC-BY" }}
+>
+一项有 $n = 400$ 名选民的调查发现 $\hat p = 60\%$ 的市政府批准率。计算标准误和95%置信度的误差边界。
+</Exercicio>
+
+<Exercicio
+  numero="101.17"
+  dificuldade="aplicacao"
+  solucao={<>从 <Eq>{`n = z^2/(4E^2)`}</Eq>：对于 <Eq>{`E = 0{,}05`}</Eq> 和95%：<Eq>{`n = 3{,}8416/(4 \\cdot 0{,}0025) = 384{,}16 \\approx 385`}</Eq>。对于 <Eq>{`E = 0{,}025`}</Eq>：<Eq>{`n = 3{,}8416/0{,}0025 = 1537`}</Eq>。误差边界减半四倍所需的样本量。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "214", exercicio: "5.11", licenca: "CC-BY-SA" }}
+>
+计算估计比例的最小样本量，误差边界为(a) 5%和(b) 2.5%，均为95%置信度。解释结果之间的关系。
+</Exercicio>
+
+<Exercicio
+  numero="101.18"
+  dificuldade="aplicacao"
+  solucao={<>系统抽样：列出所有3000个客户；在前10个中随机抽取一个客户（例：4）；选择第4、14、24、……、3000个，直到300个客户。当列表没有按与感兴趣结果相关的变量排序时，等价于SRS。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement", secao: "§1.3", pagina: "20", exercicio: "1.7", licenca: "CC-BY" }}
+>
+一家公司有3000个按合同号码排序的客户。想为调查选择300个。描述系统抽样的程序并讨论何时可能引入偏差。
+</Exercicio>
+
+<Exercicio
+  numero="101.19"
+  dificuldade="aplicacao"
+  solucao={<>根据CLT：<Eq>{`\\bar X \\sim \\mathcal{N}(70, 100/64) = \\mathcal{N}(70, 1{,}5625)`}</Eq>。<Eq>{`P(68 \\leq \\bar X \\leq 72) = P(-1{,}6 \\leq Z \\leq 1{,}6)`}</Eq>。<Eq>{`= \\Phi(1{,}6) - \\Phi(-1{,}6) = 0{,}9452 - 0{,}0548 = 0{,}8904`}</Eq>。概率约为89%。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "401", exercicio: "7.9", licenca: "CC-BY" }}
+>
+大米袋的重量有 $\mu = 70$ 公斤和 $\sigma = 10$ 公斤。对于 $n = 64$ 的样本，计算 $P(68 \leq \bar X \leq 72)$。
+</Exercicio>
+
+<Exercicio
+  numero="101.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "无应答偏差：回应问卷的人系统不同于不回应的人" },
+    { texto: "幸存者偏差：仅目前在读的学生参与", correta: true },
+    { texto: "互联网接入选择偏差" },
+    { texto: "志愿者自选择偏差" }
+  ]}
+  solucao={<>已退课的学生（可能是最不满意的）不在当前学生名单上，因此无法被采访。调查衡量的是项目"幸存者"中的满意度，高估了平均满意度。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "32", exercicio: "1.22", licenca: "CC-BY-SA" }}
+>
+一所大学对**目前在读学生**进行满意度调查。在这种方法中最相关的偏差是什么？
+</Exercicio>
+
+<Exercicio
+  numero="101.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sqrt{p(1-p)/n}`}</Eq>。在 <Eq>{`p = 0{,}5`}</Eq> 时最大：<Eq>{`\\mathrm{SE}_{\\max} = 0{,}5/\\sqrt{n}`}</Eq>。对于95%：<Eq>{`n = (1{,}96 \\cdot 0{,}5/0{,}02)^2 = 2401`}</Eq>。四舍五入到2401。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "455", exercicio: "8.33", licenca: "CC-BY" }}
+>
+不了解 $p$ 的先验知识，估计95%置信、误差边界为2%的比例的最小样本量是多少？
+</Exercicio>
+
+<Exercicio
+  numero="101.22"
+  dificuldade="aplicacao"
+  solucao={<>选择偏差：逐户采访仅接触在工作日白天在家的人——通常是失业者、退休者和家务工作者。全职工作者被系统排除在样本外。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "31", exercicio: "1.20", licenca: "CC-BY-SA" }}
+>
+一名研究者在工作日9时至17时敲门采访市民居民，想估计平均家庭收入。识别偏差并描述其方向（是低估还是高估平均收入？）。
+</Exercicio>
+
+<Exercicio
+  numero="101.23"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>公式：<Eq>{`\\mathrm{SE}(\\bar X) = \\sigma/\\sqrt{n}`}</Eq>。</li>
+<li>对于 <Eq>{`n = 25`}</Eq>：<Eq>{`\\mathrm{SE} = 12/\\sqrt{25} = 12/5 = 2{,}4`}</Eq> 分钟。</li>
+<li>对于 <Eq>{`n = 100`}</Eq>：<Eq>{`\\mathrm{SE} = 12/\\sqrt{100} = 12/10 = 1{,}2`}</Eq> 分钟。</li>
+<li>比率：<Eq>{`2{,}4/1{,}2 = 2`}</Eq>。将 <Eq>{`\\sqrt{n}`}</Eq> 翻倍（四倍 <Eq>{`n`}</Eq>）使SE减半。</li>
+<li><em>技巧：</em>要使SE减小因子 <Eq>{`k`}</Eq>，将 <Eq>{`n`}</Eq> 乘以 <Eq>{`k^2`}</Eq>。</li>
+</ol>
+  </>}
+  solucao={<>对于 <Eq>{`n = 25`}</Eq>：<Eq>{`\\mathrm{SE} = 2{,}4`}</Eq> 分钟。对于 <Eq>{`n = 100`}</Eq>：<Eq>{`\\mathrm{SE} = 1{,}2`}</Eq> 分钟。四倍 <Eq>{`n`}</Eq> 使SE减半。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "397", exercicio: "7.2", licenca: "CC-BY" }}
+>
+医生咨询的时间有 $\sigma = 12$ 分钟。计算 $n = 25$ 和 $n = 100$ 时均值的标准误，并比较。
+</Exercicio>
+
+<Exercicio
+  numero="101.24"
+  dificuldade="aplicacao"
+  solucao={<>根据CLT，<Eq>{`\\bar X \\sim \\mathcal{N}(500, 80^2/100) = \\mathcal{N}(500, 64)`}</Eq>。<Eq>{`P(\\bar X > 510) = P(Z > (510-500)/8) = P(Z > 1{,}25) = 1 - 0{,}8944 = 0{,}1056`}</Eq>。概率为10.6%。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "402", exercicio: "7.11", licenca: "CC-BY" }}
+>
+一个城市的月用电量有 $\mu = 500$ 度电和 $\sigma = 80$ 度电。对于 $n = 100$ 个随机抽取的住户，计算 $P(\bar X > 510)$。
+</Exercicio>
+
+<Exercicio
+  numero="101.25"
+  dificuldade="modelagem"
+  passos={<>
+<ol>
+<li>PNAD使用按州分层和两阶段整群抽样。</li>
+<li>要以95%置信度、误差边界为 <Eq>{`\\pm 0{,}5\\%`}</Eq> 估计全国失业率，使用 <Eq>{`n \\geq z^2/(4E^2) = 3{,}8416/(4 \\cdot 0{,}0025) \\approx 384`}</Eq> 失业观察。但失业率稀有（<Eq>{`p \\approx 0{,}12`}</Eq>），所以公式调整为 <Eq>{`n \\geq z^2 p(1-p)/E^2 \\approx 1628`}</Eq>。</li>
+<li>在实践中，IBGE使用21.1万住户以支持同时的州级估计并校正设计效应（DEFF大于1，因为整群）。</li>
+<li><em>有趣的是：</em>"设计效应"（design effect）是复杂估计量的实际方差与理论SRS方差的比率。在PNAD连续调查中，全国失业率的DEFF约为1.5——整群引入的簇内相关增加了估计方差。</li>
+</ol>
+  </>}
+  solucao={<>对于 <Eq>{`\\pm 0{,}5\\%`}</Eq> 误差边界和 <Eq>{`p \\approx 0{,}12`}</Eq> 的全国估计：<Eq>{`n \\geq 1{,}96^2 \\cdot 0{,}12 \\cdot 0{,}88/0{,}005^2 \\approx 16{.}295`}</Eq>。IBGE使用21.1万以支持更小误差边界的州级估计。整群抽样的设计效应(DEFF)增加了有效方差，需要比纯SRS更大的样本。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "213", exercicio: "5.9", licenca: "CC-BY-SA" }}
+>
+IBGE在PNAD连续调查中使用约21.1万住户。全国失业率约为12%。(a) 以 $\pm 0{,}5\%$ 误差边界、95%置信度估计失业率的理论最小 $n$ 是多少？(b) 为什么IBGE使用大得多的 $n$？
+</Exercicio>
+
+<Exercicio
+  numero="101.26"
+  dificuldade="modelagem"
+  solucao={<>分层抽样，按邮编范围分层（收入的代理）和Neyman最优分配：<Eq>{`n_k \\propto N_k \\sigma_k`}</Eq>。高不履约方差的层获得更多采访，即使它们较小。这在同样成本下最小化估计量的总方差。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.18", licenca: "CC-BY-SA" }}
+>
+一家银行想估计其50万客户信用组合中的平均逾期率。不履约变异在收入水平间差异很大。提议一个高效的抽样计划并证明按层分配。
+</Exercicio>
+
+<Exercicio
+  numero="101.27"
+  dificuldade="modelagem"
+  solucao={<>幸存者偏差。停止运营的基金（表现差）从数据库中消失。仅分析活跃基金系统地高估了历史平均收益。正确的比较要求包括该期间存在的所有基金，包括已关闭的。</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 3", pagina: "47", exercicio: "3.2", licenca: "CC-BY-NC" }}
+>
+一位财务分析师比较历史平均收益率的活跃投资基金，得出主动经理人跑赢指数的结论。数据仅包括至今仍存在的基金。识别偏差并解释它如何影响结论。
+</Exercicio>
+
+<Exercicio
+  numero="101.28"
+  dificuldade="modelagem"
+  passos={<>
+<ol>
+<li>总体方差的无偏估计量为 <Eq>{`S^2 = \\frac{1}{n-1}\\sum_{i=1}^n (X_i - \\bar X)^2`}</Eq>。</li>
+<li>展开：<Eq>{`\\mathrm{E}[S^2] = \\frac{1}{n-1}\\mathrm{E}\\left[\\sum (X_i - \\bar X)^2\\right]`}</Eq>。</li>
+<li>使用 <Eq>{`\\sum (X_i - \\bar X)^2 = \\sum X_i^2 - n\\bar X^2`}</Eq> 和 <Eq>{`\\mathrm{E}[\\sum X_i^2] = n(\\sigma^2 + \\mu^2)`}</Eq>，<Eq>{`\\mathrm{E}[n\\bar X^2] = n(\\sigma^2/n + \\mu^2)`}</Eq>。</li>
+<li>结果：<Eq>{`\\mathrm{E}[S^2] = \\sigma^2`}</Eq>。分母 <Eq>{`n-1`}</Eq>（不是 <Eq>{`n`}</Eq>）是保证无偏性的原因。</li>
+<li><em>技巧：</em>分母 <Eq>{`n-1`}</Eq> "校正"了 <Eq>{`\\bar X`}</Eq> 略比 <Eq>{`\\mu`}</Eq> 更接近数据的事实——一个自由度被用于估计均值。</li>
+</ol>
+  </>}
+  solucao={<>证明用分母 <Eq>{`n-1`}</Eq> 时 <Eq>{`\\mathrm{E}[S^2] = \\sigma^2`}</Eq>。中心论证：<Eq>{`\\sum(X_i - \\bar X)^2 = \\sum X_i^2 - n\\bar X^2`}</Eq> 和 <Eq>{`\\mathrm{E}[\\bar X^2] = \\sigma^2/n + \\mu^2`}</Eq>。分母 <Eq>{`n-1`}</Eq> 校正用 <Eq>{`n`}</Eq> 会出现的偏差。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "175", exercicio: "4.5", licenca: "CC-BY-SA" }}
+>
+代数证明 $S^2 = \frac{1}{n-1}\sum(X_i - \bar X)^2$ 是 $\sigma^2$ 的无偏估计量。为什么分母是 $n-1$ 而不是 $n$？
+</Exercicio>
+
+<Exercicio
+  numero="101.29"
+  dificuldade="desafio"
+  solucao={<>对于 <Eq>{`X_i \\in [0, 1]`}</Eq> 和 <Eq>{`t = 0{,}05`}</Eq>，<Eq>{`n = 100`}</Eq>：<Eq>{`P(|\\bar X - \\mu| > 0{,}05) \\leq 2\\exp(-2 \\cdot 100 \\cdot 0{,}0025/1) = 2e^{-0{,}5} \\approx 2 \\cdot 0{,}6065 = 1{,}213`}</Eq>。界大于1，在这种情况下无信息。对于 <Eq>{`n = 1000`}</Eq>：<Eq>{`2e^{-5} \\approx 0{,}0135`}</Eq> ——现在保证不到1.4%的错误超过5%机会。</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 4", pagina: "65", exercicio: "4.3", licenca: "CC-BY-NC" }}
+>
+对 $X_i \in [0, 1]$ 应用Hoeffding不等式：$P(|\bar X - \mu| > t) \leq 2\exp(-2nt^2)$。对于 $t = 0{,}05$，计算 $n = 100$ 和 $n = 1000$ 的界。解释结果。
+</Exercicio>
+
+<Exercicio
+  numero="101.30"
+  dificuldade="demonstracao"
+  solucao={<>样本均值无偏性的证明：<Eq>{`\\mathrm{E}[\\bar X] = \\mathrm{E}\\left[\\frac{1}{n}\\sum_{i=1}^n X_i\\right] = \\frac{1}{n}\\sum_{i=1}^n \\mathrm{E}[X_i] = \\frac{1}{n} \\cdot n\\mu = \\mu`}</Eq>。一致性：<Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n \\to 0`}</Eq>；根据Chebyshev不等式：<Eq>{`P(|\\bar X - \\mu| > \\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2) \\to 0`}</Eq> 对所有 <Eq>{`\\varepsilon > 0`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.1", licenca: "CC-BY-SA" }}
+>
+形式化证明样本均值 $\bar X = \frac{1}{n}\sum X_i$ 是 $\mu$ 的（a）无偏和（b）一致估计量，对部分(b)使用Chebyshev不等式。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenIntro Statistics**（第4版）](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA。章节 §1.3–1.4（抽样类型和偏差）和 §4.1–4.2（样本分布）。
+- [**Statistics**（OpenStax）](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY。第1章（抽样介绍）和第7章（样本分布和CLT）。
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC。第3–4章（抽样偏差和样本分布及模拟）。

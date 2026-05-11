@@ -1,0 +1,674 @@
+---
+titulo: "Lição 104 — Teste z e teste t de Student"
+slug: "licao-104-teste-z-t"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Teste z para média com sigma conhecido. Teste t de Student: uma amostra, duas amostras independentes (Welch e pooled), e pareado. Condições de aplicação e escolha do teste adequado."
+ordem: 104
+publicado: true
+tags: ["estatística inferencial", "teste t", "teste z", "Welch", "pareado", "ano-3", "trim-11"]
+prerrequisitos: ["licao-103-teste-hipotese"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "H2 Statistics singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="T = \frac{\bar X - \mu_0}{s/\sqrt{n}} \sim t_{n-1} \quad \text{（单样本, } \sigma \text{ 未知)}"
+  legenda={<>学生<strong>t 检验</strong>用未知总体标准差的样本估计值 <Eq>{`s`}</Eq> 代替，代价是尾部更厚（分布为 <Eq>{`t_{n-1}`}</Eq>）。对于两个独立样本，分别使用 Welch 检验（方差不等）或合并方差检验（方差相等）。对于配对样本，在差值上进行操作。</>}
+  audioTexto="学生 tê 检验。统计量 tê 等于样本均值减去假设均值，除以样本标准差除以 ene 的平方根。当 sigma 未知且总体近似服从正态分布时，服从 ene 减 1 个自由度的 tê 分布。"
+/>
+
+<aside>
+
+**涵盖本课的教科书**
+
+- [**OpenIntro Statistics**（第 4 版）— Diez、Çetinkaya-Rundel、Barr](https://www.openintro.org/book/os/) · §5.3–5.4 · CC-BY-SA · <em>涵盖单样本 t 检验、两个独立样本 Welch 检验和配对检验，含应用示例；讨论应用条件。</em>
+- [**Statistics** — OpenStax（Illowsky、Dean）](https://openstax.org/details/books/statistics) · §9.5–9.6 和 §10.1–10.4 · CC-BY · <em>发展了检验 z、一样本和两样本 t 检验，包含表格、详细数值示例和组比较练习。</em>
+- [**Statistical Thinking for the 21st Century** — Russell Poldrack](https://statsthinking21.org/) · 第 12 章 · CC-BY-NC · <em>以现代视角介绍组比较检验，包括模拟和与贝叶斯方法的比较。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 检验 z — sigma 已知
+
+<Definicao titulo="一个均值的 z 检验">
+
+假设：$X_1, \ldots, X_n$ 独立同分布，$\sigma$ 已知，总体正态分布或 $n \geq 30$（中心极限定理）。
+
+在 $H_0: \mu = \mu_0$ 下：
+
+<Equation explicacao="z 统计量：当 sigma 已知时在 H0 下服从标准正态分布。" latex="Z = \frac{\bar X - \mu_0}{\sigma / \sqrt{n}} \overset{H_0}{\sim} \mathcal{N}(0, 1)" />
+
+实际应用：罕见，因为 $\sigma$ 通常未知。适用于 $\sigma$ 来自长期历史校准的情况。
+
+</Definicao>
+
+### 检验 t — 单样本
+
+<Definicao titulo="学生 t 检验（单样本）">
+
+假设：$\sigma$ 未知；总体正态分布或 $n \geq 15$（中等稳健）。
+
+<Equation explicacao="单样本 t 统计量：在 H0 和正态性下服从 n-1 个自由度的 t 分布。" latex="T = \frac{\bar X - \mu_0}{s / \sqrt{n}} \overset{H_0}{\sim} t_{n-1}" />
+
+当 $n$ 很大时，$t_{n-1} \to \mathcal{N}(0,1)$。
+
+</Definicao>
+
+> "当使用样本标准差 $s$ 代替 $\sigma$ 时，学生 t 分布是合适的。尾部更厚反映了估计 $\sigma$ 的额外不确定性。" — [OpenIntro Statistics, §5.3](https://www.openintro.org/book/os/)
+
+### 检验 t — 两个独立样本
+
+<Definicao titulo="Welch t（方差不相等）">
+
+对于 $X_{1,i} \overset{\text{iid}}{\sim} F_1(\mu_1, \sigma_1^2)$ 和 $X_{2,j} \overset{\text{iid}}{\sim} F_2(\mu_2, \sigma_2^2)$ 独立，检验 $H_0: \mu_1 = \mu_2$：
+
+<Equation explicacao="Welch 统计量：分别使用每个组的标准差，不假设方差相等。" latex="T_W = \frac{\bar X_1 - \bar X_2}{\sqrt{s_1^2/n_1 + s_2^2/n_2}} \overset{H_0}{\approx} t_\nu" />
+
+自由度 $\nu$ 由 Welch-Satterthwaite 公式近似：
+
+<Equation explicacao="Welch-Satterthwaite 有效自由度。总在 min(n1-1, n2-1) 和 n1+n2-2 之间。" latex="\nu = \frac{(s_1^2/n_1 + s_2^2/n_2)^2}{\frac{(s_1^2/n_1)^2}{n_1-1} + \frac{(s_2^2/n_2)^2}{n_2-1}}" />
+
+</Definicao>
+
+<Definicao titulo="合并方差 t（方差相等）">
+
+当 $\sigma_1^2 = \sigma_2^2 = \sigma^2$（假设方差相等）：
+
+<Equation explicacao="合并方差：使用两个组的组合估计共同方差。" latex="s_p^2 = \frac{(n_1 - 1)s_1^2 + (n_2 - 1)s_2^2}{n_1 + n_2 - 2}" />
+
+<Equation explicacao="合并 t 统计量：精确自由度为 n1+n2-2。" latex="T_P = \frac{\bar X_1 - \bar X_2}{s_p\sqrt{1/n_1 + 1/n_2}} \overset{H_0}{\sim} t_{n_1 + n_2 - 2}" />
+
+**建议**：默认使用 Welch t，因为即使 $\sigma_1 = \sigma_2$ 也是稳健的。合并 t 仅在方差相等合理时有效。
+
+</Definicao>
+
+### 检验 t — 配对
+
+<Definicao titulo="配对 t 检验">
+
+配对 $(X_{1,i}, X_{2,i})$ 来自同一个体（或试验单位）在两个时间点或条件下的测量。定义 $D_i = X_{1,i} - X_{2,i}$。
+
+<Equation explicacao="将问题简化为差值 D_i 的单样本 t 检验。" latex="T = \frac{\bar D - \delta_0}{s_D / \sqrt{n}} \overset{H_0: \delta = \delta_0}{\sim} t_{n-1}" />
+
+其中 $\bar D = \frac{1}{n}\sum D_i$ 和 $s_D^2 = \frac{1}{n-1}\sum(D_i - \bar D)^2$。
+
+**优势**：消除个体间的变异性，增加了检测真实效应的能力。
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 540 200" className="w-full">
+<defs>
+  <marker id="arr104" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="rgb(26 77 92)"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="10" width="100" height="40" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="60" y="28" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor">sigma</text>
+  <text x="60" y="42" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor">已知？</text>
+</g>
+<g>
+  <line x1="110" y1="30" x2="160" y2="30" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="135" y="24" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">是</text>
+  <rect x="160" y="10" width="80" height="40" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="200" y="35" textAnchor="middle" fontSize="11" fontFamily="sans-serif" fill="currentColor" fontWeight="bold">z 检验</text>
+</g>
+<g>
+  <line x1="60" y1="50" x2="60" y2="90" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="70" y="75" fontSize="9" fontFamily="sans-serif" fill="currentColor">否</text>
+  <rect x="10" y="90" width="100" height="40" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="60" y="108" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor">一个</text>
+  <text x="60" y="122" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor">还是两个样本？</text>
+</g>
+<g>
+  <line x1="110" y1="110" x2="160" y2="110" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="135" y="103" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">一个</text>
+  <rect x="160" y="90" width="90" height="40" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="205" y="108" textAnchor="middle" fontSize="11" fontFamily="sans-serif" fill="currentColor" fontWeight="bold">t (n-1 df)</text>
+  <text x="205" y="122" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">单样本</text>
+</g>
+<g>
+  <line x1="60" y1="130" x2="60" y2="165" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="70" y="152" fontSize="9" fontFamily="sans-serif" fill="currentColor">两个</text>
+  <rect x="10" y="165" width="100" height="30" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="60" y="178" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">配对</text>
+  <text x="60" y="190" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">依赖？</text>
+</g>
+<g>
+  <line x1="110" y1="180" x2="160" y2="150" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="137" y="162" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">是</text>
+  <rect x="160" y="140" width="90" height="30" rx="6" fill="rgb(232 199 122 / 0.3)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="205" y="162" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor" fontWeight="bold">配对 t</text>
+</g>
+<g>
+  <line x1="110" y1="186" x2="280" y2="186" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="200" y="196" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">否（独立）</text>
+  <rect x="280" y="170" width="110" height="30" rx="6" fill="rgb(199 107 63 / 0.2)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="335" y="188" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor" fontWeight="bold">Welch t</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+检验选择决策树。两个独立样本时默认使用 Welch t。
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="5 岁孩子的理解">
+
+你想知道你的班级和邻居班级的身高是否不同。你测量了每个班的一些孩子，计算了平均值。
+
+但是身高在每个班级内并不完全相同——总有一些变化。**t 检验**是一种计算均值差异是否**足够大**以至于不仅仅是偶然发生的方法。
+
+如果你在穿矫形垫垫前后**测量同一个孩子**，你使用**配对检验**——因为是同一个人在两个时间点。
+
+</Porta>
+
+<Porta nivel="10" titulo="10 岁孩子的理解">
+
+### 什么时候使用 z 或 t？
+
+- **z 检验**：你确切知道总体的标准差（非常罕见！）。使用标准正态曲线。
+- **t 检验**：你只有从样本计算的标准差（常见情况）。t 曲线比正态曲线稍微"胖"一些——承认有更多的不确定性。
+
+### 单样本与两样本
+
+- **单样本**："我的班级平均分与全国平均 500 分不同吗？"
+- **两个独立样本**："A 校的平均分与 B 校不同吗？"
+- **配对**："同样 30 个学生在强化后有改善吗？"（之前与之后）
+
+配对检验更"公平"，因为它消除了人与人之间的自然变化——每个人都是自己的对照。
+
+</Porta>
+
+<Porta nivel="15" titulo="15 岁青少年的理解">
+
+### z 检验与 t 检验——实际差异
+
+| | z 检验 | t 检验 |
+|---|---|---|
+| $\sigma$ | 已知 | 由 $s$ 估计 |
+| 分布 | $\mathcal{N}(0,1)$ | $t_{n-1}$（尾部更厚） |
+| 何时使用 | 罕见（已校准设备） | 几乎总是 |
+| 对于 $n$ 很大 | 无关紧要 — $t \to z$ | — |
+
+### 两样本的黄金法则
+
+- **样本独立且方差可能不同**：Welch t。
+- **同一个体的之前-之后测量**：配对检验。
+- **方差已知相等（如：同一生产过程）**：合并 t。
+
+### 完整示例：Welch t
+
+两个数学班级：
+- A 班：$n_1 = 15$，$\bar X_1 = 72$，$s_1 = 10$。
+- B 班：$n_2 = 18$，$\bar X_2 = 68$，$s_2 = 15$。
+
+$H_0: \mu_1 = \mu_2$，$H_1: \mu_1 \neq \mu_2$，$\alpha = 0.05$。
+
+$$T_W = \frac{72 - 68}{\sqrt{100/15 + 225/18}} = \frac{4}{\sqrt{6.667 + 12.5}} = \frac{4}{\sqrt{19.167}} = \frac{4}{4.378} \approx 0.914$$
+
+Welch 自由度：$\nu \approx 28$（由公式计算）。双侧临界值：$t_{0.025,\,28} \approx 2.048$。因为 $0.914 < 2.048$，我们不拒绝 $H_0$。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程学生的理解">
+
+### 为什么默认用 Welch 而不是合并？
+
+合并 t 假设 $\sigma_1 = \sigma_2$。当这个假设错误时，合并 t 的实际第一类错误概率会畸变——可能远大于或小于 $\alpha$。Welch t 是稳健的：当方差相等时，力量损失很小；当方差不等时，是正确的。因此 R、Python（scipy）、SPSS 和 OpenIntro 本身都推荐 Welch 作为默认。
+
+### 精确分布与 Welch-Satterthwaite 近似
+
+当 $\sigma_1 \neq \sigma_2$ 时，Welch 检验在 $H_0$ 下没有精确 t 分布（Behrens-Fisher 问题）。Welch-Satterthwaite 近似提供自由度 $\nu$，在 $\min(n_1-1, n_2-1)$ 和 $n_1+n_2-2$ 之间插值，在实践中有很好的覆盖。
+
+### 应用条件
+
+| 条件 | z 检验 | 单样本 t | Welch t | 配对 |
+|---|---|---|---|---|
+| 中心极限定理最小 $n$ | 30 | 30（或正态） | 每组 30（或正态） | 30（或差值正态） |
+| 严重离群值 | 敏感 | 敏感 | 敏感 | 敏感 |
+| 非正态数据且 $n$ 小 | 差 | 差 | 差 | 替代：Wilcoxon |
+
+### 配对 t 与独立 t 的能力
+
+配对的标准误为 $s_D/\sqrt{n}$，其中 $s_D^2 = s_1^2 + s_2^2 - 2\rho\,s_1\,s_2$。对于配对之间的正相关 $\rho > 0$，$s_D < \sqrt{s_1^2 + s_2^2}$——配对检验更有能力。当 $\rho \to 1$（配对高度相关）时，收益最大。
+
+### 非参数替代方法
+
+当正态性被违反且 $n$ 很小时：
+
+- **Wilcoxon 符号秩**：单样本 t 和配对检验的替代。
+- **Mann-Whitney U**：两个独立样本 Welch t 的替代。
+- 对离群值稳健；当满足正态性时力量损失较小。
+
+</Porta>
+
+<Porta nivel="40" titulo="资深职业人士的理解">
+
+### Behrens-Fisher 问题及其解决方案
+
+Behrens-Fisher 问题（1935/1939）：当 $\sigma_1, \sigma_2$ 都未知且可能不相等时，检验 $H_0: \mu_1 = \mu_2$。没有精确的频率论解决方案（与 $\sigma_1 = \sigma_2$ 的情况不同）。主要方法：
+
+1. **Welch-Satterthwaite**（1949）：通过分数自由度近似。在实践中效果很好；是软件标准。
+2. **Scheffé 解决方案**（1943）：通过分布混合构造。精确但保守。
+3. **贝叶斯方法**：非信息先验下，产生精确覆盖的可信区间，不依赖于近似。
+
+### 方差分析作为扩展
+
+两样本独立 t 检验是两组 ANOVA 的特例。对于 $k$ 组，ANOVA 的 F 检验比较组间方差与组内方差：
+
+$$F = \frac{\mathrm{SQTrat}/(k-1)}{\mathrm{SQRes}/(N-k)} \overset{H_0}{\sim} F_{k-1,\,N-k}$$
+
+对于 $k = 2$：$F = T^2$（合并）——ANOVA 和合并 t 等价。
+
+### 方差等性检验
+
+在选择合并 vs Welch 之前，可以用以下方法检验 $H_0: \sigma_1 = \sigma_2$：
+- **F 检验**：$F = s_1^2/s_2^2 \sim F_{n_1-1, n_2-1}$。对非正态性很敏感。
+- **Levene**：基于绝对偏差，更稳健。
+- **Bartlett**：更有能力但对非正态性敏感。
+
+在实践中，不推荐这种预检验，因为它本身有变异性，造成全局错误控制问题。总是选择 Welch。
+
+### 荟萃分析和效应合并
+
+当多项研究估计 $\mu_1 - \mu_2$ 时，用荟萃分析结合（所有研究相同 $\delta$ 的固定效应）或随机效应（每项研究 $\delta_i \sim \mathcal{N}(\delta, \tau^2)$）。DerSimonian-Laird 估计器是随机效应的标准。$I^2$ 指标衡量由研究间异质性导致的总方差比例。
+
+### 金融应用：异常收益的 t 检验
+
+在 Fama、Fisher、Jensen 和 Roll（1969）的事件研究方法中，检验某一事件周围股票的收益是否显著不同于零。配对检验检验 $D_i = R_{i,\text{event}} - R_{i,\text{expected}}$ 对每个事件中的公司。收益分布通常非正态（厚尾），但大 $n$ 时中心极限定理保证渐近有效性。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="巴西实际应用">
+
+### 前后对比：学生辍学防控项目
+
+一个教育部门实施了强化出勤监测。测量了 40 名风险学生在强化监测 60 天**前**和**后**的出勤率。
+
+$H_0: \mu_D = 0$（无变化），$H_1: \mu_D > 0$（出勤提高）。
+
+差值结果（$D_i = \text{after}_i - \text{before}_i$）：$\bar D = +8.5$ pp，$s_D = 12$ pp。
+
+$$T = \frac{8.5}{12/\sqrt{40}} = \frac{8.5}{1.897} = 4.48 \quad (df = 39)$$
+
+$t_{0.05,\,39} = 1.685$（单侧）。因为 $4.48 > 1.685$，我们拒绝 $H_0$：出勤有改善的证据。
+
+### 地区间成绩比较：ENEM
+
+INEP 想验证来自东北和南方地区公立学校的考生在数学上的平均分是否不同。
+
+- 东北地区：$n_1 = 500$，$\bar X_1 = 512$，$s_1 = 95$。
+- 南方地区：$n_2 = 400$，$\bar X_2 = 541$，$s_2 = 88$。
+
+Welch t：
+$$T_W = \frac{512 - 541}{\sqrt{95^2/500 + 88^2/400}} = \frac{-29}{\sqrt{18.05 + 19.36}} = \frac{-29}{6.116} = -4.74$$
+
+$\nu \approx 858$。p 值 $\approx 0.000003$。差异高度显著。然而，29 分的差异对应于 Cohen 的 $d \approx 0.32$ 的效应大小——小到中等。
+
+### 质量控制：两个供应商比较
+
+一家制药公司比较两个供应商的赋形剂纯度变异性：
+
+- 供应商 A：$n_1 = 20$，$s_1 = 0.8$ mg/g。
+- 供应商 B：$n_2 = 15$，$s_2 = 1.5$ mg/g。
+
+方差等性的 F 检验：$F = 1.5^2/0.8^2 = 2.25/0.64 = 3.52$，$df = (14, 19)$。临界值 $F_{0.025,\,14,\,19} \approx 2.86$。拒绝 $H_0$：方差不相等。因此，用 Welch t 比较均值。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的示例
+
+<Exemplo numero="104.1" titulo="单样本 t 检验（基础）">
+
+**问题**。急诊室等待时间历史上为 $\mu_0 = 45$ 分钟。实施数字分诊后，$n = 25$ 次就诊的样本给出 $\bar X = 40$ 分钟和 $s = 10$ 分钟。在 5% 水平上，平均时间减少了吗？
+
+**策略**。$H_0: \mu \geq 45$，$H_1: \mu < 45$（左单侧）。$df = 24$ 的 t 统计量。
+
+**求解**。
+
+$$T = \frac{\bar X - \mu_0}{s/\sqrt{n}} = \frac{40 - 45}{10/\sqrt{25}} = \frac{-5}{2} = -2.50$$
+
+单侧临界值：$t_{0.05,\,24} = -1.711$。因为 $-2.50 < -1.711$，**我们拒绝 $H_0$**。
+
+p 值：$P(t_{24} \leq -2.50) \approx 0.010 < 0.05$。已确认。
+
+**验证**。单侧 95% CI：$\mu > 40 - 1.711 \times 2 = 36.58$ 分钟。因为 45 在下限之上（但关于 45 相对于新系统的优越性的检验被拒绝了），一致。
+
+**来源**。[OpenStax Statistics, §9.5, Example 9.9](https://openstax.org/books/statistics/pages/9-5-additional-information-and-full-hypothesis-test-examples) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="104.2" titulo="Welch t — 两个独立样本（中等难度）">
+
+**问题**。比较两组患者的收缩压：
+- 饮食组：$n_1 = 12$，$\bar X_1 = 132$ mmHg，$s_1 = 18$ mmHg。
+- 药物组：$n_2 = 15$，$\bar X_2 = 125$ mmHg，$s_2 = 10$ mmHg。
+
+在 5% 水平上，均值不同吗？
+
+**策略**。$H_0: \mu_1 = \mu_2$，$H_1: \mu_1 \neq \mu_2$（双侧）。使用 Welch，因为方差明显不同（$18^2 = 324$ vs $10^2 = 100$，比率 3.24）。
+
+**求解**。
+
+$$\mathrm{SE} = \sqrt{\frac{18^2}{12} + \frac{10^2}{15}} = \sqrt{27 + 6.667} = \sqrt{33.667} = 5.803$$
+
+$$T_W = \frac{132 - 125}{5.803} = \frac{7}{5.803} = 1.206$$
+
+Welch 自由度（近似）：$\nu \approx 17$（用完整公式计算）。双侧临界值：$t_{0.025,\,17} = 2.110$。因为 $1.206 < 2.110$，**我们不拒绝 $H_0$**。
+
+**验证**。p 值 $\approx 0.244 > 0.05$。$n_1 = 12$ 和 $n_2 = 15$ 时，检测 7 mmHg 差异的能力有限。推荐更大规模的研究。
+
+**来源**。[OpenIntro Statistics, §5.4, Example 5.12](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="104.3" titulo="配对 t 检验 — 前后对比（中等难度）">
+
+**问题**。10 名跑步者在 8 周间隔训练前后测量了 VO2max。差值（$D_i = \text{after} - \text{before}$）单位为 mL/kg/min 为：3, 1, 4, 2, 5, 0, 3, 2, 4, 2。在 5% 水平上，训练改善了 VO2max 吗？
+
+**策略**。$H_0: \mu_D = 0$，$H_1: \mu_D > 0$（单侧）。计算差值的 $\bar D$ 和 $s_D$。
+
+**求解**。
+
+$\sum D_i = 3+1+4+2+5+0+3+2+4+2 = 26$。$\bar D = 26/10 = 2.6$ mL/kg/min。
+
+$\sum D_i^2 = 9+1+16+4+25+0+9+4+16+4 = 88$。$s_D^2 = (88 - 10 \times 2.6^2)/(10-1) = (88 - 67.6)/9 = 20.4/9 = 2.267$。$s_D = 1.506$。
+
+$$T = \frac{\bar D}{s_D/\sqrt{n}} = \frac{2.6}{1.506/\sqrt{10}} = \frac{2.6}{0.4763} = 5.46$$
+
+临界值 $t_{0.05,\,9} = 1.833$。因为 $5.46 > 1.833$，**我们拒绝 $H_0$**。p 值 $< 0.001$。
+
+**验证**。$\mu_D$ 的 95% CI：$2.6 \pm 2.262 \times 0.476 = 2.6 \pm 1.077$，即 $[1.52;\; 3.68]$ mL/kg/min。因为 CI 不包括 0，与 $H_0$ 的拒绝一致。
+
+**来源**。[OpenIntro Statistics, §5.4, Example 5.14](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="104.4" titulo="合并 t 与 Welch — 何时使用各自（高级）">
+
+**问题**。两个机械加工工艺生产金属零件。工艺 A：$n_1 = 20$，$\bar X_1 = 50.2$ mm，$s_1 = 0.8$ mm。工艺 B：$n_2 = 25$，$\bar X_2 = 50.0$ mm，$s_2 = 0.9$ mm。计算合并 t 和 Welch t。比较。
+
+**策略**。两者都检验 $H_0: \mu_1 = \mu_2$，$H_1: \mu_1 \neq \mu_2$ 在 $\alpha = 0.05$。
+
+**求解**。
+
+**合并**：
+$s_p^2 = (19 \times 0.64 + 24 \times 0.81)/(20+25-2) = (12.16 + 19.44)/43 = 31.60/43 = 0.735$。$s_p = 0.857$。
+
+$T_P = (50.2 - 50.0)/(0.857\sqrt{1/20+1/25}) = 0.2/(0.857 \times 0.3) = 0.2/0.257 = 0.778$。$df = 43$。
+
+**Welch**：
+$\mathrm{SE} = \sqrt{0.64/20 + 0.81/25} = \sqrt{0.032 + 0.0324} = \sqrt{0.0644} = 0.254$。
+$T_W = 0.2/0.254 = 0.787$。$\nu \approx 43$（方差类似）。
+
+两者：$T \approx 0.78$，$p \approx 0.44$。我们不拒绝 $H_0$。当方差类似时，两个检验一致。
+
+**验证**。方差的比率是 $0.81/0.64 = 1.27$ — 接近 1。当 $s_1 \approx s_2$ 时，合并和 Welch 产生几乎相同的结果。
+
+**来源**。[OpenStax Statistics, §10.1, Example 10.1](https://openstax.org/books/statistics/pages/10-1-two-population-means-with-unknown-standard-deviations) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="104.5" titulo="选择正确的检验 — 完整案例（高级）">
+
+**问题**。一位研究者想比较全日制学校与常规学校青少年的睡眠时间。她从每种学校类型独立收集了 15 名青少年。数据汇总：全日制：$\bar X_1 = 7.2$ h，$s_1 = 1.4$ h；常规：$\bar X_2 = 8.1$ h，$s_2 = 0.8$ h。在 5% 水平上，睡眠不同吗？使用合适的检验。
+
+**策略**。独立组，方差明显不同（$s_1/s_2 = 1.75$）。使用 Welch t。
+
+**求解**。
+
+$H_0: \mu_1 = \mu_2$，$H_1: \mu_1 \neq \mu_2$（双侧）。
+
+$\mathrm{SE} = \sqrt{1.4^2/15 + 0.8^2/15} = \sqrt{1.96/15 + 0.64/15} = \sqrt{0.1307 + 0.04267} = \sqrt{0.1733} = 0.4163$。
+
+$T_W = (7.2 - 8.1)/0.4163 = -0.9/0.4163 = -2.162$。
+
+Welch 自由度（近似）：$\nu \approx 22$。临界值：$t_{0.025,\,22} = 2.074$。
+
+因为 $\lvert -2.162 \rvert = 2.162 > 2.074$，在 5% 水平上，**我们拒绝 $H_0$**。p 值 $\approx 0.042$。
+
+Cohen 效应大小：$d = 0.9/\sqrt{(1.4^2 + 0.8^2)/2} = 0.9/\sqrt{1.3} = 0.9/1.14 = 0.79$ — 大效应。
+
+**验证**。$\mu_1 - \mu_2$ 的 95% CI：$-0.9 \pm 2.074 \times 0.4163 = -0.9 \pm 0.863$，即 $[-1.763;\; -0.037]$。因为不包括 0，与 $H_0$ 的拒绝一致。
+
+**来源**。[OpenIntro Statistics, §5.4, Exercise 5.17](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-104-teste-z-t">
+
+<Exercicio
+  numero="104.1"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`T = (22 - 20)/(5/\\sqrt{16}) = 2/1.25 = 1.60`}</Eq>。双侧临界值：<Eq>{`t_{0.025,\\,15} = 2.131`}</Eq>。因为 <Eq>{`1.60 < 2.131`}</Eq>，我们不拒绝 <Eq>{`H_0`}</Eq>。p 值 <Eq>{`\\approx 0.130`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-5-additional-information-and-full-hypothesis-test-examples", secao: "§9.5", pagina: "510", exercicio: "9.17", licenca: "CC-BY" }}
+>
+$H_0: \mu = 20$，$H_1: \mu \neq 20$。数据：$n = 16$，$\bar X = 22$，$s = 5$。$\alpha = 0.05$ 时的 t 统计量和结论。
+</Exercicio>
+
+<Exercicio
+  numero="104.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`T = (48 - 50)/(8/\\sqrt{36}) = -2/1.333 = -1.50`}</Eq>。左单侧：<Eq>{`p = P(t_{35} < -1.50) \\approx 0.071`}</Eq>。因为 <Eq>{`p > 0.05`}</Eq>，我们不拒绝 <Eq>{`H_0`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "221", exercicio: "5.17", licenca: "CC-BY-SA" }}
+>
+$H_0: \mu = 50$，$H_1: \mu < 50$。数据：$n = 36$，$\bar X = 48$，$s = 8$。计算 $T$ 和 p 值。$\alpha = 0.05$ 时的结论。
+</Exercicio>
+
+<Exercicio
+  numero="104.3"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>差值 <Eq>{`D_i = \\text{post} - \\text{pre}`}</Eq>：2, 3, 1, 4, 2, 3, 1, 2, 3, 1。</li>
+<li><Eq>{`\\bar D = (2+3+1+4+2+3+1+2+3+1)/10 = 22/10 = 2.2`}</Eq>。</li>
+<li><Eq>{`\\sum D_i^2 = 4+9+1+16+4+9+1+4+9+1 = 58`}</Eq>。<Eq>{`s_D^2 = (58 - 10 \\times 4.84)/9 = (58-48.4)/9 = 1.067`}</Eq>。<Eq>{`s_D = 1.033`}</Eq>。</li>
+<li><Eq>{`T = 2.2/(1.033/\\sqrt{10}) = 2.2/0.327 = 6.73`}</Eq>。</li>
+<li>临界值：<Eq>{`t_{0.05,\\,9} = 1.833`}</Eq>。因为 <Eq>{`6.73 > 1.833`}</Eq>，我们拒绝 <Eq>{`H_0`}</Eq>。</li>
+<li><em>技巧：</em>10 对配对检验有 <Eq>{`df = 9`}</Eq>，就像 <Eq>{`n = 10`}</Eq> 的单样本检验——差值被视为单一数据。</li>
+</ol>
+  </>}
+  solucao={<><Eq>{`\\bar D = 2.2`}</Eq>，<Eq>{`s_D = 1.033`}</Eq>。<Eq>{`T = 6.73 > 1.833`}</Eq>。我们拒绝 <Eq>{`H_0`}</Eq>：干预后有显著改善。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "229", exercicio: "5.21", licenca: "CC-BY-SA" }}
+>
+10 个患者的血压测量，饮食前后。差值：2, 3, 1, 4, 2, 3, 1, 2, 3, 1 mmHg。$H_0: \mu_D = 0$，$H_1: \mu_D > 0$。在 5% 水平上，饮食降低了血压吗？
+</Exercicio>
+
+<Exercicio
+  numero="104.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sqrt{16/30 + 9/25} = \\sqrt{0.533 + 0.360} = \\sqrt{0.893} = 0.945`}</Eq>。<Eq>{`T_W = (85 - 80)/0.945 = 5.291`}</Eq>。<Eq>{`\\nu \\approx 49`}</Eq>。双侧临界值：<Eq>{`t_{0.025,\\,49} \\approx 2.010`}</Eq>。因为 <Eq>{`5.291 > 2.010`}</Eq>，我们拒绝 <Eq>{`H_0`}</Eq>。成绩显著不同。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "225", exercicio: "5.18", licenca: "CC-BY-SA" }}
+>
+A 组：$n_1 = 30$，$\bar X_1 = 85$，$s_1 = 4$。B 组：$n_2 = 25$，$\bar X_2 = 80$，$s_2 = 3$。5% 水平的 Welch t 双侧检验。
+</Exercicio>
+
+<Exercicio
+  numero="104.5"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "使用合并 t，因为它有更多自由度" },
+    { texto: "使用 Welch t，因为它对不相等的方差稳健", correta: true },
+    { texto: "先进行方差等性的 F 检验" },
+    { texto: "当 n 很大时使用 z 检验" }
+  ]}
+  solucao={<>Welch t 被推荐为默认，因为：(1) 当方差不同时稳健；(2) 当方差相等时力量损失很小。不推荐方差等性的 F 预检验，因为它在全局水平控制中引入了额外错误。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "224", exercicio: "5.16", licenca: "CC-BY-SA" }}
+>
+你想比较公司两个部门之间的平均工资，且方差可能不相等。最好的策略是什么？
+</Exercicio>
+
+<Exercicio
+  numero="104.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`Z = (\\bar X - \\mu_0)/(\\sigma/\\sqrt{n}) = (102 - 100)/(15/\\sqrt{64}) = 2/1.875 = 1.067`}</Eq>。双侧 p 值：<Eq>{`2 \\times P(Z > 1.067) = 2 \\times 0.143 = 0.286`}</Eq>。我们不拒绝 <Eq>{`H_0`}</Eq>：没有证据表明该班不同于总体。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-2-outcomes-and-the-type-i-and-type-ii-errors", secao: "§9.2", pagina: "484", exercicio: "9.3", licenca: "CC-BY" }}
+>
+总体平均智商：$\mu_0 = 100$，$\sigma = 15$（已知）。$n = 64$ 的班级有 $\bar X = 102$。在 5% 水平上，该班的平均智商与总体不同吗？
+</Exercicio>
+
+<Exercicio
+  numero="104.7"
+  dificuldade="aplicacao"
+  solucao={<>差值：2, -1, 3, 1, 2, 0, 1, 2, -1, 2。<Eq>{`\\bar D = 11/10 = 1.1`}</Eq>。<Eq>{`s_D^2 = (\\sum D_i^2 - 10 \\times 1.21)/9 = (28 - 12.1)/9 = 1.767`}</Eq>。<Eq>{`s_D = 1.329`}</Eq>。<Eq>{`T = 1.1/(1.329/\\sqrt{10}) = 1.1/0.420 = 2.618`}</Eq>。<Eq>{`t_{0.025,\\,9} = 2.262`}</Eq>。因为 <Eq>{`2.618 > 2.262`}</Eq>，我们拒绝 <Eq>{`H_0`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "230", exercicio: "5.23", licenca: "CC-BY-SA" }}
+>
+10 个驾驶员喝咖啡前后的反应时间（毫秒）。差值：2, -1, 3, 1, 2, 0, 1, 2, -1, 2。在 5% 水平上，咖啡改变了反应时间吗？
+</Exercicio>
+
+<Exercicio
+  numero="104.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`s_p^2 = (14 \\times 100 + 19 \\times 81)/(15+20-2) = (1400+1539)/33 = 2939/33 = 89.06`}</Eq>。<Eq>{`s_p = 9.437`}</Eq>。<Eq>{`T_P = (75-70)/(9.437 \\times \\sqrt{1/15+1/20}) = 5/(9.437 \\times 0.2582) = 5/2.437 = 2.052`}</Eq>。<Eq>{`df = 33`}</Eq>。临界值：<Eq>{`t_{0.025,\\,33} \\approx 2.035`}</Eq>。勉强拒绝 <Eq>{`H_0`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/10-1-two-population-means-with-unknown-standard-deviations", secao: "§10.1", pagina: "540", exercicio: "10.3", licenca: "CC-BY" }}
+>
+组 1：$n_1 = 15$，$\bar X_1 = 75$，$s_1 = 10$。组 2：$n_2 = 20$，$\bar X_2 = 70$，$s_2 = 9$。假设方差相等，在 5% 水平进行双侧合并 t 检验。
+</Exercicio>
+
+<Exercicio
+  numero="104.9"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "两个独立样本的 Welch t" },
+    { texto: "配对 t 检验", correta: true },
+    { texto: "双侧 z 检验" },
+    { texto: "合并方差的合并 t" }
+  ]}
+  solucao={<>相同的患者在两个时间点测量——观察值依赖（高血压患者之前倾向于之后也高血压）。配对检验更强大，因为它消除了患者间的变异性，集中于差值的变异性。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "228", exercicio: "5.19", licenca: "CC-BY-SA" }}
+>
+医生测量了 20 个患者在治疗前后的血压。最合适的检验是什么？
+</Exercicio>
+
+<Exercicio
+  numero="104.10"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>假设：<Eq>{`H_0: \\mu = 5`}</Eq> h，<Eq>{`H_1: \\mu \\neq 5`}</Eq> h。<Eq>{`\\alpha = 0.05`}</Eq>。</li>
+<li>统计量：<Eq>{`T = (4.5 - 5)/(1.2/\\sqrt{20}) = -0.5/0.268 = -1.863`}</Eq>。</li>
+<li>临界值：<Eq>{`t_{0.025,\\,19} = 2.093`}</Eq>。因为 <Eq>{`|-1.863| = 1.863 < 2.093`}</Eq>，我们不拒绝 <Eq>{`H_0`}</Eq>。</li>
+<li>p 值：<Eq>{`2 \\times P(t_{19} < -1.863) \\approx 2 \\times 0.039 = 0.078`}</Eq>。一致。</li>
+<li><em>注：</em>结果接近边界。$n = 40$ 时，相同的效应给出 <Eq>{`T = -2.635`}</Eq> 和 <Eq>{`p \\approx 0.012`}</Eq> — 在"不显著"和"显著"之间的差异通常是样本大小。</li>
+</ol>
+  </>}
+  solucao={<><Eq>{`T = -1.863`}</Eq>。p 值 <Eq>{`\\approx 0.078 > 0.05`}</Eq>。我们不拒绝 <Eq>{`H_0`}</Eq>：证据不足表明睡眠与 5 小时不同。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-5-additional-information-and-full-hypothesis-test-examples", secao: "§9.5", pagina: "512", exercicio: "9.19", licenca: "CC-BY" }}
+>
+$n = 20$ 名大学生的每日学习时间：$\bar X = 4.5$ h/天，$s = 1.2$ h。$H_0: \mu = 5$。5% 水平双侧。
+</Exercicio>
+
+<Exercicio
+  numero="104.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`Z = (0.52 - 0.50)/\\sqrt{0.50 \\times 0.50/100} = 0.02/0.05 = 0.40`}</Eq>。双侧 p 值：<Eq>{`2 \\times P(Z > 0.40) = 2 \\times 0.345 = 0.689`}</Eq>。我们不拒绝 <Eq>{`H_0`}</Eq>。数据与公平硬币一致。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-3-distribution-needed-for-hypothesis-testing", secao: "§9.3", pagina: "492", exercicio: "9.6", licenca: "CC-BY" }}
+>
+硬币投掷 100 次：52 次正面。在 5% 水平上，硬币是公平的吗？（使用比例 z 检验，$\sigma_{\hat p} = \sqrt{p_0(1-p_0)/n}$。）
+</Exercicio>
+
+<Exercicio
+  numero="104.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sqrt{49/20 + 100/30} = \\sqrt{2.45 + 3.333} = \\sqrt{5.783} = 2.405`}</Eq>。<Eq>{`T_W = (45-40)/2.405 = 5/2.405 = 2.079`}</Eq>。<Eq>{`\\nu \\approx 44`}</Eq>。<Eq>{`t_{0.025,\\,44} \\approx 2.015`}</Eq>。我们拒绝 <Eq>{`H_0`}</Eq>：均值不同。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "226", exercicio: "5.20", licenca: "CC-BY-SA" }}
+>
+A 和 B 班级：$n_1 = 20$，$\bar X_1 = 45$，$s_1 = 7$；$n_2 = 30$，$\bar X_2 = 40$，$s_2 = 10$。5% 水平的 Welch t。
+</Exercicio>
+
+<Exercicio
+  numero="104.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "z 检验比同样 n 的 t 检验更保守" },
+    { texto: "对于 n 很大，z 和 t 产生几乎相同的结果", correta: true },
+    { texto: "无论 sigma 是否已知，t 检验总是优于 z 检验" },
+    { texto: "z 检验要求总体正态性，而 t 不要求" }
+  ]}
+  solucao={<>对于大 $n$，<Eq>{`t_{n-1} \\to \\mathcal{N}(0,1)`}</Eq>。分位数收敛：<Eq>{`t_{0.025,\\,\\infty} = z_{0.025} = 1.960`}</Eq>。对于 $n = 120$，<Eq>{`t_{0.025,\\,119} = 1.980`}</Eq> — 差异为 1%。两个检验都要求数据近似正态或通过中心极限定理实现大 $n$。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "220", exercicio: "5.16", licenca: "CC-BY-SA" }}
+>
+z 检验和 t 检验对于大样本的关系是什么？
+</Exercicio>
+
+<Exercicio
+  numero="104.14"
+  dificuldade="aplicacao"
+  solucao={<>差值（测后-测前）：5, 3, 7, 2, 4, 6, 1, 3, 5, 4。<Eq>{`\\bar D = 40/10 = 4.0`}</Eq>。<Eq>{`s_D^2 = (\\sum D_i^2 - 10 \\times 16)/9`}</Eq>。<Eq>{`\\sum D_i^2 = 25+9+49+4+16+36+1+9+25+16 = 190`}</Eq>。<Eq>{`s_D^2 = (190-160)/9 = 3.333`}</Eq>。<Eq>{`s_D = 1.826`}</Eq>。<Eq>{`T = 4.0/(1.826/\\sqrt{10}) = 4.0/0.577 = 6.93`}</Eq>。<Eq>{`t_{0.05,\\,9} = 1.833`}</Eq>。我们拒绝 <Eq>{`H_0`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "231", exercicio: "5.25", licenca: "CC-BY-SA" }}
+>
+10 名学生的打字速度（wpm），课程前和后：前 [40, 35, 50, 45, 38, 42, 47, 36, 44, 41]，后 [45, 38, 57, 47, 42, 48, 48, 39, 49, 45]。在 5% 水平上，课程改善了速度吗？
+</Exercicio>
+
+<Exercicio
+  numero="104.15"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`T = (198 - 200)/(12/\\sqrt{25}) = -2/2.4 = -0.833`}</Eq>。双侧，$df = 24$：p 值 <Eq>{`= 2 \\times P(t_{24} < -0.833) \\approx 0.413`}</Eq>。我们不拒绝 <Eq>{`H_0`}</Eq>。过程受控。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-5-additional-information-and-full-hypothesis-test-examples", secao: "§9.5", pagina: "514", exercicio: "9.21", licenca: "CC-BY" }}
+>
+生产线应填充 200 mL 的瓶子。$n = 25$ 样本：$\bar X = 198$ mL，$s = 12$ mL。在 5% 水平上，过程失控了吗？
+</Exercicio>
+
+<Exercicio
+  numero="104.16"
+  dificuldade="modelagem"
+  solucao={<>配对：学生相同，测量前后。差值：15, 8, 12, 20, 5, 10, 18, 7, 12, 13。<Eq>{`\\bar D = 120/10 = 12.0`}</Eq>。<Eq>{`s_D^2 = (\\sum D_i^2 - 10 \\times 144)/9`}</Eq>。<Eq>{`\\sum D_i^2 = 225+64+144+400+25+100+324+49+144+169 = 1644`}</Eq>。<Eq>{`s_D^2 = (1644-1440)/9 = 22.67`}</Eq>。<Eq>{`s_D = 4.76`}</Eq>。<Eq>{`T = 12/(4.76/\\sqrt{10}) = 12/1.506 = 7.97`}</Eq>。我们拒绝 <Eq>{`H_0`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "232", exercicio: "5.27", licenca: "CC-BY-SA" }}
+>
+一个学校实施了数学强化计划。10 名学生在 SAEB 的分数，前后：之前 [60, 55, 70, 65, 58, 62, 67, 56, 64, 61]。之后 [75, 63, 82, 85, 63, 72, 85, 63, 76, 74]。在 5% 水平使用合适的检验。
+</Exercicio>
+
+<Exercicio
+  numero="104.17"
+  dificuldade="modelagem"
+  solucao={<>两个独立组的比较。Welch t：<Eq>{`\\mathrm{SE} = \\sqrt{400/50 + 625/60} = \\sqrt{8 + 10.417} = \\sqrt{18.417} = 4.291`}</Eq>。<Eq>{`T_W = (520 - 505)/4.291 = 15/4.291 = 3.496`}</Eq>。<Eq>{`\\nu \\approx 104`}</Eq>。p 值 <Eq>{`\\approx 0.0007`}</Eq>。我们拒绝 <Eq>{`H_0`}</Eq>：新方法似乎改善了成绩。效应大小 <Eq>{`d = 15/\\sqrt{(400+625)/2} = 15/22.6 = 0.66`}</Eq> — 中等效应。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "227", exercicio: "5.22", licenca: "CC-BY-SA" }}
+>
+一个学校网络测试了新的教学方法。控制学校（$n_1 = 50$）：$\bar X_1 = 505$ 分，$s_1 = 20$。试点学校（$n_2 = 60$）：$\bar X_2 = 520$，$s_2 = 25$。在 1% 水平上，方法改善了成绩吗？计算效应大小。
+</Exercicio>
+
+<Exercicio
+  numero="104.18"
+  dificuldade="modelagem"
+  solucao={<>双侧 z 检验：<Eq>{`Z = (31 - 30)/(8/\\sqrt{100}) = 1/0.8 = 1.25`}</Eq>。p 值 <Eq>{`= 0.211`}</Eq>。我们不拒绝 <Eq>{`H_0`}</Eq>。但 $n = 10000$ 时：<Eq>{`Z = (31 - 30)/(8/\\sqrt{10000}) = 1/0.08 = 12.5`}</Eq>。p 值 <Eq>{`\\approx 0`}</Eq>。确定拒绝。相同 1°C 的差异变为"高度显著" — 但实际相关性取决于 1°C 对过程是否重要。</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 12", pagina: "183", exercicio: "12.3", licenca: "CC-BY-NC" }}
+>
+工业过程的温度：$\mu_0 = 30$°C，$\sigma = 8$°C。对 $\bar X = 31$°C，$n = 100$ 和 $n = 10000$ 计算双侧 z 检验。比较 p 值，讨论统计显著性和实际显著性之间的差异。
+</Exercicio>
+
+<Exercicio
+  numero="104.19"
+  dificuldade="desafio"
+  solucao={<>对于配对：<Eq>{`\\mathrm{SE}_D = s_D/\\sqrt{n}`}</Eq>，其中 <Eq>{`s_D^2 = s_1^2 + s_2^2 - 2\\rho s_1 s_2`}</Eq>。对于独立 Welch：<Eq>{`\\mathrm{SE}_W = \\sqrt{s_1^2/n + s_2^2/n} = \\sqrt{(s_1^2 + s_2^2)/n}`}</Eq>。比率：<Eq>{`\\mathrm{SE}_D/\\mathrm{SE}_W = \\sqrt{1 - 2\\rho s_1 s_2/(s_1^2 + s_2^2)}`}</Eq>。对于 $\rho > 0$，比率小于 1：配对的标准误更小，因此能力更强。$s_1 = s_2 = s$ 时：<Eq>{`\\mathrm{SE}_D/\\mathrm{SE}_W = \\sqrt{1 - \\rho}`}</Eq>。对于 $\rho = 0.7$：标准误降低 45%。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "233", exercicio: "5.29", licenca: "CC-BY-SA" }}
+>
+代数上证明，当配对之间的相关 $\rho$ 为正时，配对 t 检验的标准误比 Welch t（相同每组 $n$）更小。对于 $\rho = 0.7$ 和 $s_1 = s_2$，标准误小多少？
+</Exercicio>
+
+<Exercicio
+  numero="104.20"
+  dificuldade="demonstracao"
+  solucao={<>Welch-Satterthwaite 公式的推导：设 <Eq>{`W = s_1^2/n_1 + s_2^2/n_2`}</Eq>。每个分量 <Eq>{`(n_k-1)s_k^2/\\sigma_k^2 \\sim \\chi^2_{n_k-1}`}</Eq>。当 <Eq>{`\\sigma_1 \\neq \\sigma_2`}</Eq> 时 <Eq>{`W`}</Eq> 的分布不是精确卡方。Satterthwaite 近似将 <Eq>{`W`}</Eq> 的前两个矩等于缩放的卡方分布：<Eq>{`\\nu = W^2/[(s_1^2/n_1)^2/(n_1-1) + (s_2^2/n_2)^2/(n_2-1)]`}</Eq>。对于 $n_1 = n_2 = n$ 和 $s_1 = s_2$：<Eq>{`\\nu = (2s^2/n)^2/(2(s^2/n)^2/(n-1)) = 2(n-1)`}</Eq>，恢复合并 t 结果。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "234", exercicio: "5.31", licenca: "CC-BY-SA" }}
+>
+推导 Welch t 检验的有效自由度 $\nu$ 的 Welch-Satterthwaite 公式。验证对于 $n_1 = n_2$ 和 $s_1 = s_2$，公式简化为 $\nu = 2(n-1)$，与合并 t 一致。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenIntro Statistics**（第 4 版）](https://www.openintro.org/book/os/) — Diez、Çetinkaya-Rundel、Barr · CC-BY-SA。§5.3–5.4 节（单样本 t 检验、Welch、配对；应用条件）。
+- [**Statistics**（OpenStax）](https://openstax.org/details/books/statistics) — Illowsky、Dean · CC-BY。§9.5–9.6 和 §10.1–10.4 节（z 和 t 检验、两个独立样本和配对）。
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC。第 12 章（组比较检验、模拟、现代视角）。

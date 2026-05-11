@@ -1,0 +1,1019 @@
+---
+titulo: "Lição 70 — Consolidação Trim 7: máximos, L'Hôpital, Taylor, Newton"
+slug: "licao-70-consolidacao-trim-7"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Workshop integrado de Cálculo Diferencial aplicado: otimização, esboço de gráficos, L'Hôpital, Taylor, concavidade, análise marginal, cinemática e Newton-Raphson. Todas as técnicas derivam da linearização local."
+ordem: 70
+publicado: true
+tags: ["consolidação", "otimização", "L'Hôpital", "Taylor", "Newton-Raphson", "cinemática", "análise marginal", "concavidade", "ano-2", "trim-7"]
+prerrequisitos: ["licao-69-newton-raphson"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["2.º ano EM", "Equiv. Math II/III japonês cap. 6–7", "Equiv. Leistungskurs Differentialrechnung alemão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="f(x) \approx \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k"
+  legenda={<>Die <strong>Taylor-Reihe</strong> ist das Rückgrat des Trimesters 7: Sie vereinigt Optimierung (<Eq>{`f'(a)=0`}</Eq>), L'Hôpital (Verhältnis linearer Approximationen), Skizzierung (Vorzeichen von <Eq>{`f''`}</Eq>), Newton-Raphson (Tangenten-Iteration) und Marginalanalyse (Ableitung als augenblickliche Änderungsrate). Jedes Werkzeug dieses Trimesters ist ein Spezialfall dieser Formel.</>}
+  audioTexto="Taylor-Reihe von f um a. Summe von k gleich null bis n von: f-Ableitung k-te Ordnung von a, geteilt durch Fakultät von k, mal x minus a hoch k. Jede Lektion des Trimesters 7 ist ein Spezialfall dieser polynomialen Approximation."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Bücher, die diese Lektion abdecken
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §3.3–3.4 (Optimierung), §2.6 (L'Hôpital), §8.4–8.5 (Taylor) · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Primärquelle für angewandte Optimierung und Taylor-Reihen; aktive Übungen mit forschendem Ansatz.</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §3.1–3.3 (Extrema und Skizzierung), §6.7 (L'Hôpital), §8.8 (Newton-Raphson) · CC-BY-NC · </span>
+      <em className="text-clube-mist">Umfangreiche Referenz für Pipeline der Funktionsanalyse, mit Beispielen zu Kinematik und Marginalanalyse.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/calculus-volume-1" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.3 (Max-Min), §4.7 (angewandte Optimierung), §4.8 (L'Hôpital) · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Klassische Optimierungsprobleme (Dose, Kasten, Zaun) mit ausführlicher Schritt-für-Schritt-Lösung.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Einheitliche Theorie: Linearisierung und ihre Anwendungen">
+
+### Das Kernkonzept: Taylor-Approximation
+
+<Definicao titulo="Taylor-Polynom n-ter Ordnung">
+
+Sei $f$ eine Funktion, die n-mal differenzierbar in $a$ ist. Das **Taylor-Polynom n-ter Ordnung** von $f$ um $a$ ist:
+
+$$P_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k$$
+
+Spezialfälle:
+- **Ordnung 0:** $P_0(x) = f(a)$ (konstante Approximation).
+- **Ordnung 1:** $P_1(x) = f(a) + f'(a)(x-a)$ (Linearisierung — die Tangente).
+- **Ordnung 2:** $P_2(x) = f(a) + f'(a)(x-a) + \dfrac{f''(a)}{2}(x-a)^2$ (Parabolisierung).
+
+Wenn $a = 0$, heißt es **Maclaurin-Polynom**.
+
+</Definicao>
+
+> "The Taylor polynomial of degree $n$ centered at $x=a$ is the unique polynomial of degree $n$ that agrees with $f$ in value and in all its first $n$ derivatives at $x=a$." — [Active Calculus §8.4](https://activecalculus.org/single/sec-8-4-taylor.html)
+
+### Optimierung: kritische Punkte und Test der zweiten Ableitung
+
+<Definicao titulo="Kriterium der Ableitung für Extrema">
+
+Sei $f$ stetig auf $[a,b]$ und differenzierbar auf $(a,b)$.
+
+- **Kritische Punkte:** $c \in (a,b)$ so dass $f'(c) = 0$ oder $f'(c)$ nicht existiert.
+- **Test der zweiten Ableitung:** Wenn $f'(c) = 0$ und $f''(c)$ existiert:
+  - $f''(c) > 0 \Rightarrow f$ hat **lokales Minimum** in $c$.
+  - $f''(c) < 0 \Rightarrow f$ hat **lokales Maximum** in $c$.
+  - $f''(c) = 0 \Rightarrow$ Test nicht aussagekräftig.
+- **Absolutes Extremum:** vergleiche $f$ in inneren kritischen Punkten und an den Grenzen $f(a)$, $f(b)$.
+
+</Definicao>
+
+> "Finding the maximum and minimum values of a function also has practical significance because we can use this method to solve optimization problems, such as increasing profit, minimizing cost, and maximizing area." — [OpenStax Calculus Vol. 1 §4.3](https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima)
+
+<Teorema titulo="Fermats Theorem (notwendige Bedingung)">
+Wenn $f$ ein lokales Extremum in $c$ hat und $f'(c)$ existiert, dann $f'(c) = 0$.
+
+**Beweis (Skizze).** Angenommen lokales Maximum in $c$. Für $h > 0$ klein: $f(c+h) - f(c) \leq 0$, also $[f(c+h)-f(c)]/h \leq 0$; mit $h \to 0^+$ erhalten wir $f'(c) \leq 0$. Für $h < 0$: $[f(c+h)-f(c)]/h \geq 0$; mit $h \to 0^-$ erhalten wir $f'(c) \geq 0$. Daher $f'(c) = 0$. $\square$
+</Teorema>
+
+### Konkavität und Wendepunkte
+
+<Definicao titulo="Konkavität und Wendepunkte">
+
+- $f$ ist **konvex** (konkav nach oben) auf $I$ wenn $f'' > 0$ auf $I$. Geometrisch: die Tangente liegt unterhalb des Graphen; $f(x) \geq P_1(x)$.
+- $f$ ist **konkav** (konkav nach unten) auf $I$ wenn $f'' < 0$ auf $I$.
+- **Wendepunkt:** $c$ wobei $f''$ das Vorzeichen wechselt.
+
+</Definicao>
+
+<Insight>
+
+**Konvexität und Taylor 2. Ordnung.** Wenn $f'' > 0$ in $a$, dann $P_2(x) - f(a) = f'(a)(x-a) + \frac{f''(a)}{2}(x-a)^2$. Für $x$ nahe $a$ dominiert der quadratische Term wenn $f'(a) = 0$, was bestätigt, dass kritische Punkte mit $f'' > 0$ lokale Minima sind. Der Test der zweiten Ableitung ist daher ein direktes Korollar von Taylor 2. Ordnung.
+
+</Insight>
+
+### L'Hôpital: Verhältnis von Linearisierungen
+
+<Definicao titulo="L'Hôpitals Regel">
+
+Wenn $\lim_{x \to a} f(x) = 0$ und $\lim_{x \to a} g(x) = 0$ (oder beide $\pm\infty$), und wenn $\lim_{x \to a} f'(x)/g'(x)$ existiert, dann:
+
+$$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
+
+</Definicao>
+
+> "L'Hôpital's Rule applies whenever both $f(x) \to 0$ and $g(x) \to 0$ as $x \to a$, or whenever $f(x) \to \pm\infty$ and $g(x) \to \pm\infty$." — [OpenStax Calculus Vol. 1 §4.8](https://openstax.org/books/calculus-volume-1/pages/4-8-l-hopital-s-rule)
+
+**Idee via Taylor 1. Ordnung.** Für $a = 0$: $f(x) \approx f'(0) x$ und $g(x) \approx g'(0) x$, also $f(x)/g(x) \approx f'(0)/g'(0)$. L'Hôpital formalisiert exakt diese Idee des Verhältnisses von Linearisierungen.
+
+### Newton-Raphson: Tangenten-Iteration
+
+<Definicao titulo="Newton-Raphson-Methode">
+
+Um eine Wurzel von $f(x) = 0$ zu finden, gegeben eine Startvermutung $x_0$:
+
+$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$
+
+Jedes $x_{n+1}$ ist die Nullstelle der Tangente an $f$ im Punkt $(x_n, f(x_n))$.
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 400 200" className="w-full max-w-[500px] mx-auto block">
+<defs>
+  <marker id="arrtrim7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="20" y1="160" x2="380" y2="160" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrtrim7)"/>
+  <line x1="60" y1="180" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1"/>
+  <text x="375" y="155" fontSize="9" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">x</text>
+  <text x="65" y="25" fontSize="9" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">y</text>
+</g>
+<g>
+  <path d="M 80,40 C 120,20 160,60 200,110 C 240,160 280,175 340,165" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+  <text x="345" y="163" fontSize="9" fontFamily="serif" fontStyle="italic" fill="rgb(26 77 92)">f</text>
+</g>
+<g>
+  <line x1="220" y1="30" x2="260" y2="160" stroke="rgb(232 199 122)" strokeWidth="1.5" strokeDasharray="5,3"/>
+  <circle cx="240" cy="118" r="4" fill="rgb(232 199 122)"/>
+  <line x1="240" y1="118" x2="240" y2="160" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" strokeDasharray="3,2"/>
+  <text x="242" y="170" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">x₀</text>
+  <text x="258" y="155" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">x₁</text>
+  <circle cx="255" cy="160" r="3" fill="currentColor" fillOpacity="0.5"/>
+</g>
+<g>
+  <text x="80" y="195" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.6">Tangente in x₀ kreuzt die x-Achse in x₁, bessere Annäherung der Wurzel</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Newton-Raphson: Die Tangente zur Kurve im Punkt <em>x₀</em> kreuzt die x-Achse in <em>x₁</em>, konvergiert zur echten Wurzel.
+</figcaption>
+</figure>
+
+### Vereinigte Pipeline der Funktionsanalyse
+
+<Definicao titulo="Verfahren für vollständige Skizzierung">
+
+Gegeben $f$, folgen Sie der Reihe nach:
+
+1. **Definitionsbereich:** wo $f$ definiert ist.
+2. **Abschnitte und Symmetrien:** $f(0)$, Nullstellen von $f$, Parität.
+3. **Asymptotisches Verhalten:** $\lim_{x\to\pm\infty} f(x)$; vertikale Asymptoten in Singularitäten.
+4. **$f'$:** kritische Punkte, Monotonie mit Vorzeichentabelle.
+5. **$f''$:** Konkavität, Wendepunkte.
+6. **Absolute Extrema** (auf abgeschlossenem Bereich): vergleiche $f$ bei kritischen Punkten + Grenzen.
+7. **Skizze** mit gesammelten Informationen.
+
+</Definicao>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein 5-jähriges Kind">
+
+Dieses ganze Trimester handelte davon, **Funktionen** mit speziellen Werkzeugen zu erforschen.
+
+- Ein Werkzeug zeigt, **wo der Berg seinen Gipfel hat** (Optimierung).
+- Ein anderes zeigt, **ob die Kurve wie eine Schüssel oder ein Hut aussieht** (Konkavität).
+- Ein drittes **errät das Ergebnis, wenn der Taschenrechner null geteilt durch null zeigt** (L'Hôpital).
+- Ein weiteres **macht ein Foto einer Funktion mit einem Polynom** — je mehr Begriffe, desto besser das Foto (Taylor).
+- Das letzte **findet Antworten, die niemand kennt, durch Raten und Korrigieren** (Newton).
+
+Alle diese Werkzeuge machen im Grunde das gleiche: **auf die Tangentenlinie schauen**, die an dem interessierenden Punkt anliegt. Es ist wie eine Linie an die Kurve zu halten, um die ganze Kurve zu verstehen.
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein 10-jähriges Kind">
+
+Dieses Trimester handelte davon, **Ableitungen zu verwenden, um nützliche Dinge zu tun**:
+
+- **Optimierung:** wenn du den größtmöglichen Kasten aus einem Blatt Papier bauen willst, findet die Ableitung das richtige Maß.
+- **Skizzierung:** willst du eine Funktion zeichnen, ohne 1000 Punkte zu plotten? Schau dir $f'$ und $f''$ an.
+- **L'Hôpital:** manchmal gibt eine Grenzwert $0/0$ und sieht unmöglich aus. Die Regel verwendet Ableitungen um es zu lösen.
+- **Taylor:** jede Funktion kann **durch ein Polynom in der Nähe eines Punktes nachgeahmt werden**. Je mehr Begriffe, desto besser die Nachahmung. So berechnen Taschenrechner $\sin(0,3)$.
+- **Newton-Raphson:** willst du wissen, wo $f(x) = 0$ ist, wenn man es nicht von Hand lösen kann? Starten Sie mit einer Vermutung und korrigieren Sie mit der Tangente. In 5 Schritten hast du 15 Dezimalstellen.
+
+Der zentrale Punkt: **die Tangentenlinie ist das mächtigste Werkzeug der Infinitesimalrechnung**.
+
+</Porta>
+
+<Porta nivel="15" titulo="Für einen 15-jährigen Jugendlichen">
+
+### Die einigende Idee: Linearisierung
+
+Das ganze Trimester 7 dreht sich um:
+
+$$f(x) \approx f(a) + f'(a)(x - a)$$
+
+Jede Lektion benutzte dies auf unterschiedliche Weise:
+
+| Lektion | Kernidee | Schlüsselformel |
+|---|---|---|
+| 62 — Optimierung | Horizontale Tangente | $f'(c) = 0$ |
+| 63 — Skizzierung | Vorzeichen von $f'$ und $f''$ | Pipeline |
+| 64 — L'Hôpital | Verhältnis von Tangenten | $\lim f/g = \lim f'/g'$ |
+| 65 — Taylor | Tangente + Krümmungen | $\sum f^{(k)}/k! \cdot (x-a)^k$ |
+| 66 — Konkavität | Krümmung der Tangente | $f'' > 0$ konvex |
+| 67 — Marginal | Tangente im wirtschaftlichen Kontext | $MC = C'(q)$ |
+| 68 — Kinematik | Tangente in der Zeit | $v = s'$, $a = s''$ |
+| 69 — Newton | Iteration von Tangenten | $x_{n+1} = x_n - f/f'$ |
+
+### Was vor der Prüfung studieren
+
+1. Beherrsche die **Skizzierungs-Pipeline** (7 Schritte in der formalen Tür).
+2. Merke die **Unbestimmtheitshformen, die L'Hôpital löst**: $0/0$, $\infty/\infty$, und die Formen $0 \cdot \infty$, $\infty - \infty$, $0^0$, $1^\infty$, $\infty^0$ (die sich auf die ersten beiden reduzieren).
+3. Kenne **Maclaurin-Expansionen** der 5 elementaren Funktionen: $e^x$, $\sin x$, $\cos x$, $\ln(1+x)$, $(1+x)^\alpha$.
+4. Für Newton: überprüfe immer die **Konvergenz**, indem du $f$ und $f'$ in der Nähe der Wurzel plottest.
+
+</Porta>
+
+<Porta nivel="25" titulo="Für einen Ingenieurstudierenden">
+
+### Approximations-Hierarchie und wann jede Ordnung verwendet wird
+
+| Ordnung | Polynom $P_n$ | Kosten | Wann verwenden |
+|---|---|---|---|
+| 0 | $f(a)$ | trivial | Vor-Check der Skala |
+| 1 | $f(a)+f'(a)(x-a)$ | 1 Ableitung | Linearisierung der Kontrolle, Newton, L'Hôpital |
+| 2 | $+f''(a)/2 \cdot (x-a)^2$ | 2 Ableitungen | Krümmung, Test des Extremums, Fehleranalyse |
+| $n$ | $+\ldots+f^{(n)}/n! \cdot (x-a)^n$ | $n$ Ableitungen | numerische Präzision, empfindliche Grenzwerte |
+
+### Newton-Raphson: quadratische Konvergenz
+
+Wenn $f$ $C^2$ nahe der Wurzel $r$ mit $f'(r) \neq 0$ ist, dann erfüllt der Fehler $e_n = x_n - r$:
+
+$$e_{n+1} \approx -\frac{f''(r)}{2f'(r)} e_n^2$$
+
+**Quadratische Konvergenz**: die Anzahl der korrekten Dezimalstellen verdoppelt sich mit jeder Iteration. In der Praxis geben 6–10 Iterationen 15 Ziffern Genauigkeit (Genauigkeit von `float64`).
+
+**Konvergenzfehler:** Newton divergiert wenn
+- $f'(x_n) \approx 0$ (Tangente fast horizontal nahe $x_n$),
+- die Wurzel eine Multiplizität größer als 1 hat (lineare Konvergenz, nicht quadratisch),
+- die Startvermutung weit von der Wurzel entfernt ist und die Funktion Minima/Maxima zwischen $x_0$ und $r$ hat.
+
+### Marginalanalyse und wirtschaftliche Optimierung
+
+Für konkurrenzielles Unternehmen mit Umsatz $R(q) = p \cdot q$ und Kosten $C(q)$:
+
+- **Gewinn:** $\pi(q) = p \cdot q - C(q)$.
+- **Bedingung erster Ordnung:** $\pi'(q^*) = p - C'(q^*) = 0 \Rightarrow p = MC$.
+- **Bedingung zweiter Ordnung:** $\pi''(q^*) = -C''(q^*) < 0 \Rightarrow C'' > 0$ (steigende Grenzkosten).
+- **Monopolist:** $R(q) = p(q) \cdot q$; Bedingung $MR = MC$ statt $p = MC$.
+
+### Cross-Domain-Verbindungen
+
+| Werkzeug | Anwendung in der Ingenieurstechnik |
+|---|---|
+| Optimierung | Produktdesign, LP/QP, Hyperparameter-Tuning ML |
+| L'Hôpital | Asymptotische Algorithmus-Analyse (Big-O), Filtergewinn-Berechnung |
+| Taylor | Linearisierung am Betriebspunkt (lineare Kontrolle, kleine Signale) |
+| Newton | numerische Solver, modifizierter Gradient Descent, Jacobi-Inverse |
+| Kinematik | Robotik (Geschwindigkeits-Jacobian), Bahnverfolgung-Kontrolle |
+
+</Porta>
+
+<Porta nivel="40" titulo="Für einen älteren Fachmann">
+
+### Historische Perspektive: 350 Jahre Linearisierung
+
+Die Taylor-Formel (Brook Taylor, 1715) vereinheitlichte verstreute Ergebnisse von Newton, Gregory und Leibniz. Was Taylor erkannte ist, dass **jede analytische Funktion lokal ein Polynom ist** — und Polynome sind das, was Menschen (und Computer) perfekt berechnen können.
+
+Guillaume de l'Hôpital (1696) zahlte Johann Bernoulli, um seine Entdeckungen als seine eigenen zu veröffentlichen — einschließlich der Regel, die heute seinen Namen trägt. Bernoulli war der echte Autor. Die Geschichte der Infinitesimalrechnung ist voll von Prioritätsdisputen (Newton vs. Leibniz ist der größte), aber die Mathematik überstand intakt.
+
+Newton (1669, *De analysi*) verwendete Potenzreihen um Wurzeln mit beispielloses Genauigkeit zu berechnen — der gleiche Algorithmus, den `scipy.optimize.newton` heute implementiert. Die quadratische Konvergenz, die Newton intuitiv ausnutzte, wurde von Kantorovich 1948 formalisiert und brachte ihm 1975 den Nobelpreis in Wirtschaftswissenschaften ein (für Anwendungen in linearer Programmierung und Funktionalanalyse, aber das mathematische Gerüstzeug ist das gleiche).
+
+### Wo Linearisierung heute lebt
+
+- **ML:** Gradient Descent ist Newton 1. Ordnung (Gradient ohne Hessian). Adam, Adagrad, RMSProp sind Varianten, die Krümmung ohne explizite Berechnung von $f''$ approximieren. BFGS und L-BFGS sind Quasi-Newton, die Krümmungsinformation iterativ sammeln.
+- **Quantenphysik:** Störungstheorie ist Taylor 1. Ordnung (erste Begriffe) und 2. Ordnung (Korrektionen). Rayleigh-Schrödinger Störungstheorie — direkte Anwendung der Taylor-Hierarchie.
+- **Finanzen:** Black-Scholes (Lektion 119) verwendet stochastisches Taylor (Itô-Lemma) — die 2. Ordnung Version für Brownsche Prozesse. Die Griechen (Delta, Gamma) sind Taylor-Koeffizienten des Optionspreises bezüglich des zugrunde liegenden Vermögenswertes.
+- **Regelungstechnik:** Linearisierung am Betriebspunkt ist Taylor $P_1$, angewendet auf das nichtlineare Modell. Das klassische PID-Regler-Design operiert in dieser lokalen Linearisierung.
+
+### Was dieses Trimester wirklich lehrte
+
+Nicht separate Techniken. Eine einzige Idee — Funktionen mit Polynomen wachsender Ordnung approximieren — in acht verschiedenen Kontexten. Wer das internalisiert hat, versteht, warum JAX, PyTorch und TensorFlow Autodiff implementieren: Sie sind Maschinen um Taylor-Koeffizienten 1. Ordnung (Gradienten) zu berechnen. Der nächste Schritt (Hessian, Krümmung, Methoden 2. Ordnung) ist Taylor 2. Ordnung.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praxis — Beispiele mit echten brasilianischen Daten">
+
+### Fall 1: Produktpreisfestlegung im brasilianischen Markt
+
+Ein Schuhunternehmen in Franca (SP) hat Kosten $C(q) = 0{,}5q^2 + 20q + 800$ (reais) um $q$ Paare pro Tag zu produzieren. Der Verkaufspreis ist R\$ 60 pro Paar. Maximaler Gewinn:
+
+$\pi(q) = 60q - C(q) = -0{,}5q^2 + 40q - 800$
+
+$\pi'(q) = -q + 40 = 0 \Rightarrow q^* = 40$ Paare/Tag.
+
+$\pi(40) = -0{,}5 \cdot 1600 + 40 \cdot 40 - 800 = -800 + 1600 - 800 = 0$ reais.
+
+Gewinn null — das Unternehmen ist am Break-Even-Punkt. Um Gewinn zu erzielen, muss es entweder Festkosten senken (R\$ 800) oder den Preis erhöhen.
+
+### Fall 2: Fahrzeugkinematik auf Bundesstraße
+
+Ein Lastwagen auf der BR-381 hat Position $s(t) = 20t - 0{,}5t^2$ (Meter) für $0 \leq t \leq 20$ s (Notbremsen-Phase). Geschwindigkeit null: $v(t) = 20 - t = 0 \Rightarrow t = 20$ s. Bremsweg: $s(20) = 400 - 200 = 200$ Meter. Verzögerung: $a = s'' = -1$ m/s². Kompatibel mit beladener Lastwagen-Bremsung auf trockener Asphalt.
+
+### Fall 3: Approximation des SELIC-Satzes mittels Taylor
+
+Wenn der SELIC-Satz $r(t)$ durch $r(t) \approx r(0) + r'(0) t$ für $t$ in Monaten approximiert werden kann, und im vorherigen Quartal $r(0) = 10{,}5\%$ und $r'(0) = 0{,}25\%$/Monat, ist der erwartete Satz in 3 Monaten $r(3) \approx 10{,}5 + 0{,}75 = 11{,}25\%$. Das ist Taylor-Linearisierung 1. Ordnung, angewendet auf makroökonomische Prognosen.
+
+### Schluss-Checkliste des Trimesters
+
+Bevor du Trimester 7 für beherrscht hältst, solltest du das alles ohne Nachschlag können:
+
+- [ ] Finde kritische Punkte und Extrema jeder polynomialen oder rationalen Funktion $f$.
+- [ ] Skizziere $f(x) = xe^{-x}$ mit vollständiger Pipeline.
+- [ ] Berechne $\lim_{x\to 0}(\sin x - x)/x^3$ via L'Hôpital oder Taylor.
+- [ ] Expandiere $\cos x$ in Maclaurin bis Ordnung 6.
+- [ ] Führe 3 Newton-Iterationen für $f(x) = x^3 - 2$ aus.
+- [ ] Gegeben $C(q) = q^2 + 10q$ und $p = 30$, finde $q^*$ und $\pi^*$.
+- [ ] Gegeben $s(t) = t^3 - 6t^2 + 9t$, finde wann $v = 0$ und Gesamtstrecke auf $[0,4]$.
+
+</Porta>
+
+</DuasPortas>
+
+## Gelöste Beispiele
+
+<Exemplo titulo="Optimierung einer Kiste ohne Deckel (Anwendung)" numero="1">
+
+**Problem:** Aus einem Kartonblatt von $24 \times 24$ cm werden Quadrate der Seitenlänge $x$ an vier Ecken ausgeschnitten und die Laschen hochgeklappt um eine Kiste ohne Deckel zu bilden. Bestimmen Sie $x$, das das Volumen maximiert.
+
+**Strategie:** Das Volumen als Funktion von $x$ ausdrücken, kritischen Punkt via $V'(x) = 0$ finden, Maximum durch Test der zweiten Ableitung bestätigen, und verifizieren dass $x$ im physikalischen Bereich $0 < x < 12$ liegt.
+
+**Lösung:**
+
+1. **Volumen:** $V(x) = x(24 - 2x)^2$, Bereich: $x \in (0, 12)$.
+2. **Expandieren:** $V(x) = x(576 - 96x + 4x^2) = 4x^3 - 96x^2 + 576x$.
+3. **Ableiten:** $V'(x) = 12x^2 - 192x + 576 = 12(x^2 - 16x + 48) = 12(x-4)(x-12)$.
+4. **Kritische Punkte in $(0,12)$:** $x = 4$ (das $x = 12$ liegt an der Grenze, gibt Volumen null).
+5. **Test:** $V''(x) = 24x - 192$; $V''(4) = 96 - 192 = -96 < 0 \Rightarrow$ lokales Maximum.
+6. **Maximales Volumen:** $V(4) = 4(24 - 8)^2 = 4 \cdot 256 = 1024\ \text{cm}^3$.
+
+**Verifizierung:** $V(0) = 0$, $V(12) = 0$, $V(4) = 1024 > 0$. Das Maximum liegt im Inneren des Bereiches. Überprüfung: $V(4) = 4 \cdot 16^2 = 4 \cdot 256 = 1024$.
+
+**Quelle.** [OpenStax Calculus Vol. 1 §4.7, ex. 4.41](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems) — Lizenz CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Unbestimmter Grenzwert via L'Hôpital (Anwendung)" numero="2">
+
+**Problem:** Berechne $\displaystyle\lim_{x \to 0} \frac{e^x - 1 - x}{x^2}$.
+
+**Strategie:** Die Form ist $0/0$ in $x = 0$. L'Hôpital einmal anwenden und überprüfen, ob die neue Form noch $0/0$ ist; wenn ja, nochmal anwenden. Alternativ Maclaurin von $e^x$ verwenden um das Ergebnis schneller zu leiten.
+
+**Lösung:**
+
+1. **Form überprüfen:** $e^0 - 1 - 0 = 0$ und $0^2 = 0$ — Unbestimmtheit $0/0$.
+2. **1. Anwendung von L'Hôpital:**
+$$\lim_{x \to 0} \frac{e^x - 1}{2x}$$
+Noch $0/0$ (Zähler $\to 0$, Nenner $\to 0$).
+3. **2. Anwendung:**
+$$\lim_{x \to 0} \frac{e^x}{2} = \frac{e^0}{2} = \frac{1}{2}.$$
+4. **Verifizierung via Taylor:** $e^x = 1 + x + x^2/2 + O(x^3)$, also $e^x - 1 - x = x^2/2 + O(x^3)$. Dann $\frac{e^x - 1 - x}{x^2} \to \frac{x^2/2}{x^2} = \frac{1}{2}$. Konsistent.
+
+**Verifizierung:** Für $x = 0{,}1$: Zähler $= e^{0,1} - 1{,}1 \approx 1{,}10517 - 1{,}1 = 0{,}00517$; Nenner $= 0{,}01$; Verhältnis $\approx 0{,}517 \approx 1/2$.
+
+**Quelle.** [Active Calculus §2.6, Übung zu Unbestimmtheitsformen](https://activecalculus.org/single/sec-2-8-lhopital.html) — Lizenz CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Maclaurin-Expansion und Grenzwert (Mittelstufe)" numero="3">
+
+**Problem:** Verwende die Maclaurin-Reihe von $\sin x$ um $\displaystyle\lim_{x \to 0} \frac{\sin x - x + x^3/6}{x^5}$ zu berechnen.
+
+**Strategie:** Expandiere $\sin x$ in Maclaurin bis Ordnung 5, setze in Zähler ein und vereinfache — Taylor-Technik ist eleganter als L'Hôpital fünfmal anwenden.
+
+**Lösung:**
+
+1. **Maclaurin von $\sin x$:**
+$$\sin x = x - \frac{x^3}{6} + \frac{x^5}{120} - \frac{x^7}{5040} + \cdots$$
+2. **Zähler:**
+$$\sin x - x + \frac{x^3}{6} = \left(x - \frac{x^3}{6} + \frac{x^5}{120} - \cdots\right) - x + \frac{x^3}{6} = \frac{x^5}{120} + O(x^7).$$
+3. **Grenzwert:**
+$$\lim_{x \to 0} \frac{x^5/120 + O(x^7)}{x^5} = \frac{1}{120}.$$
+
+**Verifizierung:** Für $x = 0{,}1$: $\sin(0{,}1) \approx 0{,}099833417$; $\sin x - x + x^3/6 = 0{,}099833417 - 0{,}1 + 0{,}000166667 = 0{,}000000083$; $x^5 = 10^{-5}$; Verhältnis $\approx 0{,}0083 \approx 1/120 = 0{,}00833$.
+
+**Quelle.** [Active Calculus §8.4](https://activecalculus.org/single/sec-8-4-taylor.html) — Lizenz CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Vollständige Skizzierung rationaler Funktion (Mittelstufe)" numero="4">
+
+**Problem:** Skizziere $f(x) = \dfrac{x^2}{x^2 - 1}$, identifiziere Bereich, Asymptoten, Extrema und Konkavität.
+
+**Strategie:** Folge der 7-Schritte Funktionsanalyse-Pipeline. Die Funktion ist rational mit leicht identifizierbaren Nennernullstellen.
+
+**Lösung:**
+
+1. **Bereich:** $x^2 - 1 \neq 0 \Rightarrow x \neq \pm 1$. Bereich: $\mathbb{R} \setminus \{-1, 1\}$.
+2. **Abschnitte/Symmetrie:** $f(0) = 0$ (Abschnitt). Nullstellen: $x^2 = 0 \Rightarrow x = 0$. $f(-x) = f(x)$: gerade Funktion (symmetrisch zur y-Achse).
+3. **Asymptoten:** vertikal in $x = \pm 1$; horizontal: $\lim_{x\to\pm\infty} f(x) = 1$ (Asymptote $y = 1$).
+4. **$f'$:** $f'(x) = \dfrac{-2x}{(x^2-1)^2}$. Kritisch: $x = 0$. Vorzeichen: $f' > 0$ für $x < 0$; $f' < 0$ für $x > 0$ — lokales Maximum in $x = 0$.
+5. **$f''$:** $f''(x) = \dfrac{2(3x^2+1)}{(x^2-1)^3}$. Für $x \in (-1,1)$: Nenner $< 0$, Zähler $> 0$, also $f'' < 0$ (konkav). Für $|x| > 1$: $f'' > 0$ (konvex). Keine Wendepunkte im Bereich (Vorzeichenwechsel von $f''$ tritt außerhalb des Bereiches auf $x = \pm 1$).
+6. **Extremum:** $f(0) = 0$ — lokales Maximum (und absolutes Maximum auf $(-1,1)$).
+
+**Verifizierung:** $f(0) = 0 < 1 = \lim_{x\to\infty} f(x)$ macht Sinn: auf $(-1,1)$ variiert die Funktion von $0$ zu $-\infty$ an den Grenzen und zurück; Maximum ist $f(0)=0$ in diesem Intervall.
+
+**Quelle.** [APEX Calculus §3.5, ex. 42](https://www.apexcalculus.com/) — Lizenz CC-BY-NC.
+</Exemplo>
+
+<Exemplo titulo="Newton-Raphson für transzendente Gleichung (echte Modellierung)" numero="5">
+
+**Problem:** Eine Investition von R\$ 10.000 wächst mit monatlichem Satz $r$, der zu bestimmen ist. Nach 12 Monaten ist die Endsumme R\$ 11.268. Löse $f(r) = (1+r)^{12} - 1{,}1268 = 0$ mit Newton-Raphson, mit $x_0 = 0{,}01$ (1% pro Monat).
+
+**Strategie:** $f'(r) = 12(1+r)^{11}$. Iteriere $x_{n+1} = x_n - f(x_n)/f'(x_n)$ bis Konvergenz.
+
+**Lösung:**
+
+Iteration 1: $f(0{,}01) = (1{,}01)^{12} - 1{,}1268 = 1{,}12683 - 1{,}1268 = 0{,}00003$.
+$f'(0{,}01) = 12 \cdot (1{,}01)^{11} = 12 \cdot 1{,}11567 = 13{,}388$.
+$x_1 = 0{,}01 - 0{,}00003/13{,}388 \approx 0{,}009998$.
+
+Nach 2 Iterationen, $r^* \approx 1{,}00\%$ monatlich (Nominaljahreszins $\approx 12{,}68\%$ p.a.).
+
+**Verifizierung:** $(1{,}01)^{12} = 1{,}12683 \approx 1{,}1268$. Konsistent mit der Aussage.
+
+**Quelle.** [APEX Calculus §6.1, Newton-Raphson-Anwendung](https://www.apexcalculus.com/) — Lizenz CC-BY-NC.
+</Exemplo>
+
+<ListaExercicios seed="licao-70-consolidacao-trim-7">
+
+> **Konsolidierungsliste.** 40 Übungen in 4 Blöcken, die 8 Themen von Trimester 7 abdecken. Lösen Sie auf Papier — die Website zeigt nur Antwort und Lösung. Quellen: Active Calculus §3.3–3.4, §2.6, §8.4; APEX Calculus §3.1–3.5, §6.7; OpenStax Calculus Vol. 1 §4.3, §4.7, §4.8.
+
+### Blöcke A — Optimierung und Funktionsskizzierung (70.1 bis 70.13)
+
+<Exercicio
+  numero="70.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "§3.1", pagina: "185", exercicio: "ex. 3.1.3", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`f'(x) = 3x^2 - 12x + 9 = 3(x-1)(x-3)`}</Eq>. Kritisch: <Eq>{`x=1, x=3`}</Eq>. <Eq>{`f''(x)=6x-12`}</Eq>: <Eq>{`f''(1)=-6<0`}</Eq> (lokales Maximum), <Eq>{`f''(3)=6>0`}</Eq> (lokales Minimum). Wendepunkt in <Eq>{`x=2`}</Eq> (<Eq>{`f''=0`}</Eq> ändert Vorzeichen).
+  </>}
+  passos={<>
+    <ol>
+      <li>Berechne <Eq>{`f'`}</Eq> und faktorisiere. <em>Warum:</em> kritische Punkte sind dort wo <Eq>{`f'=0`}</Eq>.</li>
+      <li>Erstelle Vorzeichentabelle von <Eq>{`f'`}</Eq>: positiv auf <Eq>{`(-\\infty,1)`}</Eq>, negativ auf <Eq>{`(1,3)`}</Eq>, positiv auf <Eq>{`(3,+\\infty)`}</Eq>.</li>
+      <li>Berechne <Eq>{`f''`}</Eq> und evaluiere an kritischen Punkten. <em>Warum:</em> Test der zweiten Ableitung bestätigt Art des Extremums.</li>
+      <li>Finde Wendepunkt: <Eq>{`f''(2)=0`}</Eq> und <Eq>{`f''`}</Eq> ändert Vorzeichen in <Eq>{`x=2`}</Eq>.</li>
+    </ol>
+    <p><em>Trick:</em> kubische Funktion mit positivem Koeffizient hat immer lokales Maximum links und lokales Minimum rechts.</p>
+  </>}
+>
+Finde die kritischen Punkte, lokalen Extrema und Wendepunkt von $f(x) = x^3 - 6x^2 + 9x + 1$.
+</Exercicio>
+
+<Exercicio
+  numero="70.2"
+  dificuldade="aplicacao"
+  resposta="Maximum in $x=1$, Wert $1/e$"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "§3.1", pagina: "186", exercicio: "ex. 3.1.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`f'(x)=e^{-x} - xe^{-x} = e^{-x}(1-x)`}</Eq>. Kritisch: <Eq>{`x=1`}</Eq>. <Eq>{`f''(1) = e^{-1}(1-1) + e^{-1}(-1) = -e^{-1} < 0`}</Eq>: Maximum. <Eq>{`f(1)=1/e`}</Eq>. Bei <Eq>{`x=0`}</Eq>: <Eq>{`f(0)=0`}</Eq>. Globales Maximum in <Eq>{`x=1`}</Eq>.
+  </>}
+  passos={<>
+    <ol>
+      <li>Leite mit Produktregel ab: <Eq>{`f'(x) = 1\\cdot e^{-x} + x\\cdot(-e^{-x}) = e^{-x}(1-x)`}</Eq>.</li>
+      <li>Da <Eq>{`e^{-x}>0`}</Eq> immer, ist das Vorzeichen von <Eq>{`f'`}</Eq> das Vorzeichen von <Eq>{`(1-x)`}</Eq>. Kritisch: <Eq>{`x=1`}</Eq>.</li>
+      <li>Vorzeichentabelle: <Eq>{`f'>0`}</Eq> auf <Eq>{`(0,1)`}</Eq>, <Eq>{`f'<0`}</Eq> auf <Eq>{`(1,\\infty)`}</Eq> — Maximum in <Eq>{`x=1`}</Eq>.</li>
+      <li>Vergleiche mit Grenze: <Eq>{`f(0)=0 < f(1)=1/e \\approx 0{,}368`}</Eq> und <Eq>{`f(x)\\to 0`}</Eq> wenn <Eq>{`x\\to\\infty`}</Eq>. Also <Eq>{`x=1`}</Eq> ist globales Maximum.</li>
+    </ol>
+    <p><em>Nebeninfo:</em> Die Funktion <Eq>{`xe^{-x}`}</Eq> modelliert Wahrscheinlichkeitsverteilung Gamma mit Parameter 2 — der Modus der Verteilung ist genau <Eq>{`x=1`}</Eq>.</p>
+  </>}
+>
+Maximiere $f(x) = xe^{-x}$ auf $[0, +\infty)$. Was ist das globale Maximum?
+</Exercicio>
+
+<Exercicio
+  numero="70.3"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.5", pagina: "178", exercicio: "ex. 14", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=(x^2-4)/x = x - 4/x`}</Eq>. Vertikale Asymptote: <Eq>{`x=0`}</Eq>. Schiefe Asymptote: <Eq>{`y=x`}</Eq>. <Eq>{`f'(x)=1+4/x^2>0`}</Eq> immer (keine Extrema). <Eq>{`f''(x)=-8/x^3`}</Eq>: konkav nach oben für <Eq>{`x<0`}</Eq>, nach unten für <Eq>{`x>0`}</Eq>. Kein Funktionsnullstelle im Bereich.
+  </>}
+>
+Skizziere $f(x) = (x^2 - 4)/x$. Identifiziere Asymptoten, Monotonie und Konkavität.
+</Exercicio>
+
+<Exercicio
+  numero="70.4"
+  dificuldade="aplicacao"
+  resposta="Minimum in $x=2$, Wert $4$"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "§4.7", pagina: "454", exercicio: "ex. 4.7.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`f'(x)=1-4/x^2=0 \\Rightarrow x=2`}</Eq> (im Bereich <Eq>{`(0,\\infty)`}</Eq>). <Eq>{`f''(x)=8/x^3>0`}</Eq>: Minimum. <Eq>{`f(2)=2+4/2=4`}</Eq>.
+  </>}
+>
+Finde das globale Minimum von $f(x) = x + 4/x$ auf $(0, +\infty)$.
+</Exercicio>
+
+<Exercicio
+  numero="70.5"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "§4.7", pagina: "456", exercicio: "ex. 4.7.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Zylindrische Dose: Radius <Eq>{`r`}</Eq>, Höhe <Eq>{`h`}</Eq>, <Eq>{`V = \\pi r^2 h = 1000`}</Eq> cm³. Material <Eq>{`S = 2\\pi r^2 + 2\\pi r h = 2\\pi r^2 + 2000/r`}</Eq>. <Eq>{`S'(r)=4\\pi r - 2000/r^2=0 \\Rightarrow r^3=500/\\pi \\Rightarrow r\\approx 5{,}42`}</Eq> cm; <Eq>{`h=2r\\approx 10{,}84`}</Eq> cm (Höhe = Durchmesser ist das klassische Ergebnis).
+  </>}
+  passos={<>
+    <ol>
+      <li>Variablen: <Eq>{`r`}</Eq> (Radius) und <Eq>{`h`}</Eq> (Höhe). Ziel: minimiere Gesamtfläche <Eq>{`S`}</Eq>.</li>
+      <li>Beschränkung: <Eq>{`\\pi r^2 h = 1000`}</Eq>, also <Eq>{`h = 1000/(\\pi r^2)`}</Eq>.</li>
+      <li>Setze in <Eq>{`S`}</Eq> ein: <Eq>{`S(r) = 2\\pi r^2 + 2\\pi r \\cdot 1000/(\\pi r^2) = 2\\pi r^2 + 2000/r`}</Eq>.</li>
+      <li>Leite ab und setze gleich null: <Eq>{`S'(r)=4\\pi r - 2000/r^2=0 \\Rightarrow 4\\pi r^3=2000`}</Eq>.</li>
+      <li>Bestätige Minimum: <Eq>{`S''(r)=4\\pi + 4000/r^3 > 0`}</Eq> immer.</li>
+    </ol>
+    <p><em>Bemerkung:</em> universelles Ergebnis — Dose mit festem Volumen und minimalem Material hat immer <Eq>{`h = 2r`}</Eq> (Höhe gleich Durchmesser). Echte Getränkedosen weichen ab wegen Fertigungseinschränkungen.</p>
+  </>}
+>
+Eine zylindrische Dose mit $V = 1000\ \text{cm}^3$ soll mit minimalem Material gebaut werden. Bestimmen Sie optimalen Radius und Höhe.
+</Exercicio>
+
+<Exercicio
+  numero="70.6"
+  dificuldade="modelagem"
+  resposta="$x = 5/3$ cm (ungefähr), $V \approx 1185\ \text{cm}^3$"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "§4.7", pagina: "457", exercicio: "ex. 4.7.6", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`V(x) = x(20-2x)(30-2x)`}</Eq>, <Eq>{`x \\in (0,10)`}</Eq>. <Eq>{`V'(x) = 12x^2 - 200x + 600 = 4(3x^2-50x+150)=4(3x-20)(x-...) `}</Eq>. Nullstellen: <Eq>{`x=(50\\pm\\sqrt{2500-1800})/6 = (50\\pm \\sqrt{700})/6`}</Eq>. <Eq>{`\\sqrt{700}\\approx 26{,}46`}</Eq>. Nullstellen: <Eq>{`x\\approx 12{,}74`}</Eq> (außerhalb Bereich) und <Eq>{`x\\approx 3{,}92`}</Eq>. <Eq>{`V(3{,}92) = 3{,}92 \\cdot 12{,}16 \\cdot 22{,}16 \\approx 1056`}</Eq> cm³.
+  </>}
+>
+Aus Karton $20 \times 30\ \text{cm}$ werden Quadrate $x \times x$ an den Ecken ausgeschnitten und die Laschen hochgeklappt. Welches $x$ maximiert das Boxenvolumen?
+</Exercicio>
+
+<Exercicio
+  numero="70.7"
+  dificuldade="modelagem"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-4-applied-opt.html", secao: "§3.4", pagina: "208", exercicio: "ex. 3.4.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Quadrat der Entfernung: <Eq>{`D(x) = (x-3)^2 + (x^2-0)^2 = (x-3)^2 + x^4`}</Eq>. <Eq>{`D'(x)=2(x-3)+4x^3=0`}</Eq>. Nach Inspektion/Newton: <Eq>{`x\\approx 0{,}926`}</Eq>. Minimale Entfernung: <Eq>{`d = \\sqrt{D(0{,}926)}`}</Eq>.
+  </>}
+>
+Finde den Punkt auf der Parabel $y = x^2$, der dem Punkt $(3, 0)$ am nächsten ist.
+</Exercicio>
+
+<Exercicio
+  numero="70.8"
+  dificuldade="modelagem"
+  resposta="$l = 100$ m, $w = 50$ m, Fläche $= 5000\ \text{m}^2$"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "§4.7", pagina: "455", exercicio: "ex. 4.7.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Länge parallel zur Mauer: <Eq>{`l`}</Eq>; Breite senkrecht: <Eq>{`w`}</Eq>. Zaun: <Eq>{`l + 2w = 200`}</Eq>. Fläche: <Eq>{`A = lw = (200-2w)w`}</Eq>. <Eq>{`A'(w)=200-4w=0 \\Rightarrow w=50, l=100`}</Eq>. <Eq>{`A=5000`}</Eq> m².
+  </>}
+>
+Ein Zaun von $200\ \text{m}$ begrenzt ein Rechteck, das an einer Mauer liegt (die Mauer bildet eine Seite). Maximiere die Fläche.
+</Exercicio>
+
+<Exercicio
+  numero="70.9"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.4", pagina: "162", exercicio: "ex. 16", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f'(x)=-2xe^{-x^2}`}</Eq>. <Eq>{`f''(x)=-2e^{-x^2}+4x^2e^{-x^2}=2e^{-x^2}(2x^2-1)`}</Eq>. <Eq>{`f''=0 \\Rightarrow x=\\pm 1/\\sqrt{2}`}</Eq>. Wendepunkte in <Eq>{`x=\\pm 1/\\sqrt{2}\\approx \\pm 0{,}707`}</Eq>. Konvex für <Eq>{`|x|>1/\\sqrt{2}`}</Eq>, konkav für <Eq>{`|x|<1/\\sqrt{2}`}</Eq>.
+  </>}
+>
+Bestimme die Wendepunkte und Konkavität von $f(x) = e^{-x^2}$.
+</Exercicio>
+
+<Exercicio
+  numero="70.10"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.5", pagina: "179", exercicio: "ex. 22", licenca: "CC-BY-NC" }}
+  solucao={<>
+    Bereich: <Eq>{`\\mathbb{R}`}</Eq>. Gerade. <Eq>{`f(0)=0`}</Eq>. <Eq>{`\\lim_{|x|\\to\\infty}f=+\\infty`}</Eq>. <Eq>{`f'(x)=2x/(1+x^2)`}</Eq>: negativ für <Eq>{`x<0`}</Eq>, null für <Eq>{`x=0`}</Eq> (Minimum, <Eq>{`f(0)=0`}</Eq>), positiv für <Eq>{`x>0`}</Eq>. <Eq>{`f''(x)=(2-2x^2)/(1+x^2)^2`}</Eq>: Wendepunkte in <Eq>{`x=\\pm 1`}</Eq> (<Eq>{`f(\\pm 1)=\\ln 2`}</Eq>).
+  </>}
+>
+Mache die vollständige Skizzierung von $f(x) = \ln(1 + x^2)$: Bereich, Symmetrie, Extrema, Wendepunkte, asymptotisches Verhalten.
+</Exercicio>
+
+<Exercicio
+  numero="70.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Nicht anwendbar — die Unbestimmtheit ist nicht $0/0$ noch $\\infty/\\infty$", correta: true },
+    { texto: "Anwendbar, da $\\tan x \\to \\infty$ wenn $x \\to \\pi/2$" },
+    { texto: "Anwendbar, da beide Grenzwerte $0$ sind" },
+    { texto: "Anwendbar, man muss nur den Zähler ableiten" },
+  ]}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-8-l-hopital-s-rule", secao: "§4.8", pagina: "465", exercicio: "ex. 4.8.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\lim_{x\\to 0} \\sin x / x`}</Eq> ist in der Tat <Eq>{`0/0`}</Eq> und L'Hôpital gilt. Aber L'Hôpital auf <Eq>{`\\lim_{x\\to 0} x/\\sin x`}</Eq> liefert <Eq>{`1/\\cos x \\to 1`}</Eq> — gleiche Antwort. Die Option "nicht anwendbar" bezog sich auf Fall <Eq>{`\\lim_{x\\to\\pi/2}\\tan x / x = \\infty/c`}</Eq>, das ist keine Unbestimmtheit — Option A ist am genauesten für diese Aussage.
+  </>}
+>
+L'Hôpital gilt direkt für $\lim_{x \to 0} \sin x / x$ (Form $0/0$). Welche Alternative beschreibt einen Fall, in dem die Regel **nicht direkt gilt**?
+</Exercicio>
+
+<Exercicio
+  numero="70.12"
+  dificuldade="aplicacao"
+  resposta="$1/2$"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-8-l-hopital-s-rule", secao: "§4.8", pagina: "463", exercicio: "ex. 4.8.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Form <Eq>{`0/0`}</Eq>. L'Hôpital: <Eq>{`\\lim_{x\\to 0}\\sin x / (2x) = \\lim \\cos x / 2 = 1/2`}</Eq>.
+  </>}
+  passos={<>
+    <ol>
+      <li>Überprüfe Form: <Eq>{`1-\\cos(0)=0`}</Eq> und <Eq>{`0^2=0`}</Eq> — ist <Eq>{`0/0`}</Eq>. <em>Warum:</em> L'Hôpital gilt nur für <Eq>{`0/0`}</Eq> oder <Eq>{`\\infty/\\infty`}</Eq>.</li>
+      <li>1. Anwendung: leite Zähler und Nenner einzeln ab. <Eq>{`(1-\\cos x)' = \\sin x`}</Eq>, <Eq>{`(x^2)' = 2x`}</Eq>.</li>
+      <li>Neuer Grenzwert: <Eq>{`\\lim_{x\\to 0}\\sin x/(2x)`}</Eq> — noch <Eq>{`0/0`}</Eq>. Wende nochmal an: <Eq>{`\\cos x / 2 \\to 1/2`}</Eq>.</li>
+    </ol>
+    <p><em>Trick:</em> <Eq>{`(1-\\cos x)/x^2 \\to 1/2`}</Eq> ist ein fundamentaler Grenzwert — erscheint jedes Mal wenn wir <Eq>{`\\cos`}</Eq> durch Taylor 2. Ordnung approximieren.</p>
+  </>}
+>
+Berechne $\lim_{x \to 0} \dfrac{1 - \cos x}{x^2}$.
+</Exercicio>
+
+<Exercicio
+  numero="70.13"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-2-8-lhopital.html", secao: "§2.6", pagina: "152", exercicio: "ex. 2.6.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Form <Eq>{`\\infty/\\infty`}</Eq>. L'Hôpital zweimal: <Eq>{`\\lim x^2/e^x = \\lim 2x/e^x = \\lim 2/e^x = 0`}</Eq>. Exponentialfunktion übertrifft jede Potenz.
+  </>}
+>
+Berechne $\lim_{x \to +\infty} \dfrac{x^2}{e^x}$.
+</Exercicio>
+
+### Blöcke B — L'Hôpital und Taylor (70.14 bis 70.24)
+
+<Exercicio
+  numero="70.14"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-2-8-lhopital.html", secao: "§2.6", pagina: "153", exercicio: "ex. 2.6.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Form <Eq>{`0^0`}</Eq>. Schreibe um: <Eq>{`x^{\\sin x} = e^{\\sin x \\ln x}`}</Eq>. Berechne <Eq>{`\\lim_{x\\to 0^+}\\sin x \\ln x = \\lim_{x\\to 0^+}\\ln x / (1/\\sin x)`}</Eq> — Form <Eq>{`-\\infty/\\infty`}</Eq>. L'Hôpital: <Eq>{`(1/x)/(-\\cos x/\\sin^2 x) = -\\sin^2 x/(x\\cos x) \\to 0`}</Eq>. Daher <Eq>{`x^{\\sin x} \\to e^0 = 1`}</Eq>.
+  </>}
+>
+Berechne $\lim_{x \to 0^+} x^{\sin x}$ (Unbestimmtheit $0^0$).
+</Exercicio>
+
+<Exercicio
+  numero="70.15"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "511", exercicio: "ex. 8.4.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\sin x = x - x^3/6 + x^5/120 - x^7/5040 + \\cdots`}</Eq>. Bis Ordnung 5: <Eq>{`P_5(x) = x - x^3/3! + x^5/5! = x - x^3/6 + x^5/120`}</Eq>.
+  </>}
+  passos={<>
+    <ol>
+      <li>Berechne Ableitungen von <Eq>{`\\sin x`}</Eq> in <Eq>{`a=0`}</Eq>: <Eq>{`f(0)=0, f'(0)=1, f''(0)=0, f'''(0)=-1, f^{(4)}(0)=0, f^{(5)}(0)=1`}</Eq>.</li>
+      <li>Stelle das Polynom zusammen: <Eq>{`P_5(x) = 0 + x - 0 - x^3/6 + 0 + x^5/120`}</Eq>.</li>
+      <li>Vereinfache: <Eq>{`P_5(x) = x - x^3/6 + x^5/120`}</Eq>.</li>
+    </ol>
+    <p><em>Trick:</em> Ableitungen von <Eq>{`\\sin`}</Eq> zyklen mit Periode 4: <Eq>{`\\sin, \\cos, -\\sin, -\\cos, \\sin, \\ldots`}</Eq>. Nur ungerade Terme überleben für <Eq>{`\\sin`}</Eq>, da <Eq>{`\\cos(0)=1`}</Eq> und <Eq>{`\\sin(0)=0`}</Eq>.</p>
+  </>}
+>
+Schreibe das Maclaurin-Polynom von $\sin x$ der Ordnung 5 ($P_5$).
+</Exercicio>
+
+<Exercicio
+  numero="70.16"
+  dificuldade="aplicacao"
+  resposta="$1/2$"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "512", exercicio: "ex. 8.4.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\tan x = x + x^3/3 + O(x^5)`}</Eq> und <Eq>{`\\sin x = x - x^3/6 + O(x^5)`}</Eq>. Zähler: <Eq>{`\\tan x - \\sin x = x^3/3 + x^3/6 + O(x^5) = x^3/2 + O(x^5)`}</Eq>. Grenzwert: <Eq>{`x^3/(2x^3) = 1/2`}</Eq>.
+  </>}
+>
+Benutze Taylor-Expansion um $\lim_{x \to 0} \dfrac{\tan x - \sin x}{x^3}$ zu berechnen.
+</Exercicio>
+
+<Exercicio
+  numero="70.17"
+  dificuldade="modelagem"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "513", exercicio: "ex. 8.4.6", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`(1+x)^{1/2} = 1 + x/2 - x^2/8 + x^3/16 - \\cdots`}</Eq> (Binomialreihe). Für <Eq>{`x=0{,}1`}</Eq>: <Eq>{`P_3(0{,}1) = 1 + 0{,}05 - 0{,}00125 + 0{,}0000625 = 1{,}0488`}</Eq>. Exakter Wert: <Eq>{`\\sqrt{1{,}1} \\approx 1{,}04881`}</Eq>. Fehler: <Eq>{`< 10^{-5}`}</Eq>.
+  </>}
+>
+Approximiere $\sqrt{1{,}1}$ mittels Maclaurin-Reihe von $(1+x)^{1/2}$ bis Ordnung 3.
+</Exercicio>
+
+<Exercicio
+  numero="70.18"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§8.8", pagina: "480", exercicio: "ex. 5", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`e^x = 1 + x + x^2/2 + x^3/6 + O(x^4)`}</Eq> für <Eq>{`x=-0{,}1`}</Eq>: <Eq>{`P_3(-0{,}1) = 1 - 0{,}1 + 0{,}005 - 0{,}000167 = 0{,}904833`}</Eq>. Exakter Wert: <Eq>{`e^{-0{,}1}\\approx 0{,}904837`}</Eq>. Fehler: <Eq>{`4\\times 10^{-6}`}</Eq>.
+  </>}
+>
+Approximiere $e^{-0{,}1}$ mit Maclaurin-Polynom von $e^x$ der Ordnung 3. Berechne den Fehler.
+</Exercicio>
+
+<Exercicio
+  numero="70.19"
+  dificuldade="aplicacao"
+  resposta="$1/6$"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "511", exercicio: "ex. 8.4.5", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\sin x = x - x^3/6 + x^5/120 - \\cdots`}</Eq>, also <Eq>{`\\sin x - x = -x^3/6 + O(x^5)`}</Eq>. <Eq>{`(\\sin x - x)/x^3 \\to -1/6`}</Eq>. Aber die Aufgabe fragt nach <Eq>{`(x - \\sin x)/x^3 \\to 1/6`}</Eq>.
+  </>}
+>
+Berechne $\lim_{x \to 0} \dfrac{x - \sin x}{x^3}$ mit Taylor.
+</Exercicio>
+
+<Exercicio
+  numero="70.20"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "513", exercicio: "ex. 8.4.8", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\ln(1+x) = x - x^2/2 + x^3/3 - x^4/4 + x^5/5 - \\cdots`}</Eq>. Reihe gültig für <Eq>{`|x| \\leq 1, x \\neq -1`}</Eq>.
+  </>}
+>
+Schreibe die Maclaurin-Reihe von $\ln(1+x)$ bis zum Term in $x^5$.
+</Exercicio>
+
+<Exercicio
+  numero="70.21"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "514", exercicio: "ex. 8.4.9", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`e^x = 1 + x + x^2/2 + \\cdots`}</Eq> und <Eq>{`\\cos x = 1 - x^2/2 + x^4/24 + \\cdots`}</Eq>. Zähler: <Eq>{`e^x - \\cos x - x = x^2/2 + x^2/2 + O(x^3) = x^2 + O(x^3)`}</Eq>. Grenzwert: <Eq>{`x^2/x^2 = 1`}</Eq>.
+  </>}
+>
+Berechne $\lim_{x \to 0} \dfrac{e^x - \cos x - x}{x^2}$ mittels Taylor.
+</Exercicio>
+
+<Exercicio
+  numero="70.22"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Die Reihe konvergiert zu $f(x)$ auf ganz $\\mathbb{R}$" },
+    { texto: "Die Reihe ist ein Polynom und konvergiert auf ganz $\\mathbb{R}$" },
+    { texto: "Die Reihe konvergiert nur für $|x| < 1$" },
+    { texto: "Die Reihe konvergiert auf $(-1, 1]$ und divergiert außerhalb", correta: true },
+  ]}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "518", exercicio: "ex. 8.5.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Die Maclaurin-Reihe von <Eq>{`\\ln(1+x)`}</Eq> hat Konvergenzradius <Eq>{`R=1`}</Eq>. Bei <Eq>{`x=1`}</Eq> konvergiert sie (alternierende harmonische Reihe) und bei <Eq>{`x=-1`}</Eq> divergiert sie (harmonische Reihe). Also konvergiert sie auf <Eq>{`(-1,1]`}</Eq>.
+  </>}
+>
+Was ist das Konvergenzintervall der Maclaurin-Reihe von $\ln(1 + x)$?
+</Exercicio>
+
+<Exercicio
+  numero="70.23"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "514", exercicio: "ex. 8.4.12", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\cos x = 1 - x^2/2 + x^4/24 - x^6/720 + \\cdots`}</Eq>. Bis Ordnung 6: <Eq>{`P_6(x) = 1 - x^2/2 + x^4/24 - x^6/720`}</Eq>.
+  </>}
+>
+Schreibe $P_6(x)$ Maclaurin für $\cos x$.
+</Exercicio>
+
+<Exercicio
+  numero="70.24"
+  dificuldade="aplicacao"
+  resposta="$e^2$"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "510", exercicio: "ex. 8.4.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Form <Eq>{`1^\\infty`}</Eq>. Schreibe <Eq>{`L = \\lim (1+2/x)^x`}</Eq>. <Eq>{`\\ln L = \\lim x \\ln(1+2/x)`}</Eq>. Setze <Eq>{`t=1/x\\to 0^+`}</Eq>: <Eq>{`= \\lim \\ln(1+2t)/t`}</Eq> (Form <Eq>{`0/0`}</Eq>). L'Hôpital: <Eq>{`= \\lim 2/(1+2t) = 2`}</Eq>. Daher <Eq>{`L=e^2`}</Eq>.
+  </>}
+>
+Berechne $\lim_{x \to +\infty} \left(1 + \dfrac{2}{x}\right)^x$ (Form $1^\infty$).
+</Exercicio>
+
+### Blöcke C — Marginalanalyse, Kinematik und Newton-Raphson (70.25 bis 70.35)
+
+<Exercicio
+  numero="70.25"
+  dificuldade="modelagem"
+  resposta="$q^* = 90$, $\pi^* = \text{R\$ } 1325$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "220", exercicio: "ex. 4.4.3", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`\\pi(q) = 50q - (q^2/4 + 5q + 100) = -q^2/4 + 45q - 100`}</Eq>. <Eq>{`\\pi'(q) = -q/2 + 45 = 0 \\Rightarrow q^*=90`}</Eq>. <Eq>{`\\pi(90) = -2025 + 4050 - 100 = 1925`}</Eq> reais.
+  </>}
+  passos={<>
+    <ol>
+      <li>Schreibe Gewinn: <Eq>{`\\pi(q) = Rq - C(q)`}</Eq> mit <Eq>{`R = 50`}</Eq> (Verkaufspreis). <em>Warum:</em> Gewinn = Umsatz minus Kosten.</li>
+      <li>Vereinfache: <Eq>{`\\pi(q) = -q^2/4 + 45q - 100`}</Eq>.</li>
+      <li>Bedingung erster Ordnung: <Eq>{`\\pi'(q^*)=0`}</Eq>. <em>Warum:</em> Extremum erfordert Ableitung null.</li>
+      <li>Bestätige Maximum: <Eq>{`\\pi''(q)=-1/2 < 0`}</Eq>.</li>
+      <li>Berechne <Eq>{`\\pi(q^*)`}</Eq>.</li>
+    </ol>
+    <p><em>Trick:</em> konkurrenzielles Unternehmen maximiert Gewinn wenn <Eq>{`p = MC`}</Eq>: hier <Eq>{`50 = q/2 + 5 \\Rightarrow q=90`}</Eq>.</p>
+  </>}
+>
+Kosten $C(q) = q^2/4 + 5q + 100$ (reais), Preis $p = 50$ reais/Einheit. Finde Menge $q^*$ und Maximalgewinn $\pi^*$.
+</Exercicio>
+
+<Exercicio
+  numero="70.26"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "221", exercicio: "ex. 4.4.5", licenca: "CC-BY-NC" }}
+  solucao={<>
+    Inverse Nachfrage: <Eq>{`p = (100-q)/2`}</Eq>. Umsatz: <Eq>{`R(q) = pq = q(100-q)/2`}</Eq>. Gewinn: <Eq>{`\\pi(q) = q(100-q)/2 - 10q = -q^2/2 + 40q`}</Eq>. <Eq>{`\\pi'(q)=-q+40=0 \\Rightarrow q^*=40`}</Eq>, <Eq>{`p^*=30`}</Eq>, <Eq>{`\\pi^*=800`}</Eq>.
+  </>}
+  passos={<>
+    <ol>
+      <li>Invertiere Nachfrage: <Eq>{`q=100-2p \\Rightarrow p=(100-q)/2`}</Eq>. <em>Warum:</em> um Umsatz als Funktion von <Eq>{`q`}</Eq> zu schreiben.</li>
+      <li>Umsatz: <Eq>{`R(q)=pq=q(100-q)/2=-q^2/2+50q`}</Eq>.</li>
+      <li>Gewinn: <Eq>{`\\pi(q)=R-C=-q^2/2+50q-10q=-q^2/2+40q`}</Eq>.</li>
+      <li>Bedingung für Maximum: <Eq>{`\\pi'=-q+40=0 \\Rightarrow q^*=40`}</Eq>. Bestätige: <Eq>{`\\pi''=-1<0`}</Eq>.</li>
+      <li>Optimaler Preis: <Eq>{`p^*=(100-40)/2=30`}</Eq>. Gewinn: <Eq>{`\\pi(40)=-800+1600=800`}</Eq>.</li>
+    </ol>
+    <p><em>Trick:</em> Monopolbedingung ist <Eq>{`MR=MC`}</Eq>: <Eq>{`MR=R'(q)=-q+50`}</Eq> und <Eq>{`MC=C'(q)=10`}</Eq>, also <Eq>{`-q+50=10 \\Rightarrow q=40`}</Eq>.</p>
+  </>}
+>
+Monopolist hat Nachfrage $q = 100 - 2p$ und Kosten $C(q) = 10q$. Finde $q^*$, $p^*$ und Maximalgewinn.
+</Exercicio>
+
+<Exercicio
+  numero="70.27"
+  dificuldade="modelagem"
+  resposta="Max. Höhe $20$ m bei $t=2$ s; kommt zum Boden bei $t=4$ s"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", pagina: "78", exercicio: "ex. 2.2.12", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`s(t)=20t-5t^2`}</Eq> (mit <Eq>{`g=10`}</Eq> m/s²). <Eq>{`v(t)=20-10t=0 \\Rightarrow t=2`}</Eq> s. Max. Höhe: <Eq>{`s(2)=40-20=20`}</Eq> m. Boden: <Eq>{`s(t)=0 \\Rightarrow t(20-5t)=0 \\Rightarrow t=4`}</Eq> s.
+  </>}
+>
+Ein Ball wird vertikal mit Anfangsgeschwindigkeit $v_0 = 20\ \text{m/s}$ geworfen ($g = 10\ \text{m/s}^2$). Berechne maximale Höhe und Flugzeit.
+</Exercicio>
+
+<Exercicio
+  numero="70.28"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", pagina: "79", exercicio: "ex. 2.2.14", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`v(t) = 3t^2 - 18t + 24 = 3(t-2)(t-4)`}</Eq>. <Eq>{`v=0`}</Eq> bei <Eq>{`t=2`}</Eq> und <Eq>{`t=4`}</Eq>. Gesamtstrecke: <Eq>{`|s(2)-s(0)|+|s(4)-s(2)|+|s(5)-s(4)|`}</Eq>. <Eq>{`s(0)=0, s(2)=8-36+48=20, s(4)=64-144+96=16, s(5)=125-225+120=20`}</Eq>. Strecke: <Eq>{`20+4+4=28`}</Eq> m.
+  </>}
+  passos={<>
+    <ol>
+      <li>Berechne <Eq>{`v(t)=s'(t)=3t^2-18t+24`}</Eq> und finde Nullstellen.</li>
+      <li>Evaluiere <Eq>{`s`}</Eq> an kritischen Instanten und Grenzen: <Eq>{`t=0,2,4,5`}</Eq>.</li>
+      <li>Addiere Teilstrecken (immer positiv!). <em>Warum:</em> Gesamtstrecke ist Integral von <Eq>{`|v|`}</Eq>, nicht <Eq>{`s(5)-s(0)`}</Eq>.</li>
+    </ol>
+    <p><em>Achtung:</em> nicht Verschiebung verwechseln (<Eq>{`s(5)-s(0)=20`}</Eq> m) mit zurückgelegter Strecke (<Eq>{`28`}</Eq> m).</p>
+  </>}
+>
+$s(t) = t^3 - 9t^2 + 24t$. Wann ist $v(t) = 0$? Berechne die Gesamtstrecke in $0 \leq t \leq 5$.
+</Exercicio>
+
+<Exercicio
+  numero="70.29"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", pagina: "80", exercicio: "ex. 2.2.16", licenca: "CC-BY-NC" }}
+  solucao={<>
+    Periode: <Eq>{`T = 2\\pi\\sqrt{m/k} = 2\\pi\\sqrt{0{,}5/50} = 2\\pi \\cdot 0{,}1 = 0{,}628`}</Eq> s. Max. Geschwindigkeit: <Eq>{`v_{\\max} = A\\omega = A\\sqrt{k/m} = 0{,}1\\sqrt{100} = 1`}</Eq> m/s.
+  </>}
+>
+Masse-Feder-System: $m = 0{,}5\ \text{kg}$, $k = 50\ \text{N/m}$, Amplitude $A = 0{,}1\ \text{m}$. Berechne Periode und maximale Geschwindigkeit.
+</Exercicio>
+
+<Exercicio
+  numero="70.30"
+  dificuldade="modelagem"
+  resposta="$\sqrt{7} \approx 2{,}64575$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§6.1", pagina: "330", exercicio: "ex. 6.1.5", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=x^2-7`}</Eq>, <Eq>{`f'(x)=2x`}</Eq>, <Eq>{`x_0=3`}</Eq>. <Eq>{`x_1=3-2/6=2{,}667`}</Eq>. <Eq>{`x_2=2{,}667-(2{,}667^2-7)/(2\\cdot 2{,}667)=2{,}646`}</Eq>. <Eq>{`x_3\\approx 2{,}64575`}</Eq>.
+  </>}
+>
+Benutze Newton-Raphson für $f(x) = x^2 - 7$ mit $x_0 = 3$ um $\sqrt{7}$ mit 5 Dezimalstellen zu berechnen.
+</Exercicio>
+
+<Exercicio
+  numero="70.31"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§6.1", pagina: "331", exercicio: "ex. 6.1.7", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=x^3-2`}</Eq>, <Eq>{`f'(x)=3x^2`}</Eq>, <Eq>{`x_0=1`}</Eq>. <Eq>{`x_1=1-(1-2)/3=1+1/3=1{,}333`}</Eq>. <Eq>{`x_2=1{,}333-(1{,}333^3-2)/(3\\cdot 1{,}333^2)\\approx 1{,}264`}</Eq>. <Eq>{`x_3\\approx 1{,}25993`}</Eq>. Exakter Wert: <Eq>{`2^{1/3}\\approx 1{,}25992`}</Eq>.
+  </>}
+  passos={<>
+    <ol>
+      <li>Identifiziere <Eq>{`f(x)=x^3-2`}</Eq> und <Eq>{`f'(x)=3x^2`}</Eq>.</li>
+      <li>Iteration: <Eq>{`x_{n+1}=x_n-f(x_n)/f'(x_n)=x_n-(x_n^3-2)/(3x_n^2)`}</Eq>.</li>
+      <li>Tabelliere: <Eq>{`x_0=1, x_1=4/3, x_2\\approx 1{,}264, x_3\\approx 1{,}25993`}</Eq>.</li>
+    </ol>
+    <p><em>Wissenswertes:</em> Newton verwendete genau diesen Algorithmus um Kubikwurzeln 1669 zu berechnen. Quadratische Konvergenz bedeutet, dass der Fehler in Iteration 3 bereits kleiner als <Eq>{`10^{-5}`}</Eq> ist.</p>
+  </>}
+>
+Benutze Newton-Raphson für $f(x) = x^3 - 2$ mit $x_0 = 1$ um $\sqrt[3]{2}$ zu approximieren. Mache 3 Iterationen.
+</Exercicio>
+
+<Exercicio
+  numero="70.32"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§6.1", pagina: "332", exercicio: "ex. 6.1.9", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=e^x-3x`}</Eq>, <Eq>{`f'(x)=e^x-3`}</Eq>. Nullstellen bei <Eq>{`e^x=3x`}</Eq>: eine in <Eq>{`(0,1)`}</Eq> (ca. <Eq>{`x_1\\approx 0{,}619`}</Eq>) und eine in <Eq>{`(1,2)`}</Eq> (ca. <Eq>{`x_2\\approx 1{,}512`}</Eq>). Für jede Nullstelle, verwende <Eq>{`x_0`}</Eq> in der Nähe und iteriere.
+  </>}
+>
+Wende Newton-Raphson auf $f(x) = e^x - 3x$ an um beide echten Nullstellen zu finden. Verwende $x_0 = 0$ für eine und $x_0 = 1{,}5$ für die andere.
+</Exercicio>
+
+<Exercicio
+  numero="70.33"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "474", exercicio: "ex. 4.9.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Keplers Gleichung: <Eq>{`E - 0{,}3\\sin E = 1`}</Eq>. Schreibe um: <Eq>{`f(E)=E-0{,}3\\sin E - 1 = 0`}</Eq>. <Eq>{`f'(E)=1-0{,}3\\cos E`}</Eq>. <Eq>{`E_0=1`}</Eq>: <Eq>{`E_1=1-(1-0{,}3\\sin 1-1)/(1-0{,}3\\cos 1)=1-(-0{,}252)/(0{,}838)\\approx 1{,}301`}</Eq>. <Eq>{`E_2\\approx 1{,}351`}</Eq>. <Eq>{`E_3\\approx 1{,}352`}</Eq>. <Eq>{`E_4\\approx 1{,}352`}</Eq> (konvergiert).
+  </>}
+>
+Keplers Gleichung: $E - 0{,}3\sin E = 1$. Benutze Newton-Raphson mit $E_0 = 1$ und mache 4 Iterationen.
+</Exercicio>
+
+<Exercicio
+  numero="70.34"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "§3.3", pagina: "200", exercicio: "ex. 3.3.10", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`f''\\geq 0`}</Eq> überall auf <Eq>{`\\mathbb{R}`}</Eq> impliziert <Eq>{`f`}</Eq> konvex. Wenn <Eq>{`f`}</Eq> zwei lokale Minima <Eq>{`a`}</Eq> und <Eq>{`b`}</Eq> hätte, würde der Mittelwertsatz ein <Eq>{`c \\in (a,b)`}</Eq> mit <Eq>{`f(c) < f(a)`}</Eq> und <Eq>{`f(c) < f(b)`}</Eq> geben. Aber Konvexität erfordert <Eq>{`f(c) \\leq f(a) + (f(b)-f(a))/(b-a)\\cdot(c-a)`}</Eq>. Für streng konvexe Funktion (<Eq>{`f''>0`}</Eq>) existiert nur ein globales Minimum.
+  </>}
+>
+Zeige, dass eine Funktion $C^2$ streng konvex ($f'' > 0$) auf $\mathbb{R}$ höchstens einen Minimumpunkt hat.
+</Exercicio>
+
+### Blöcke D — Synthese: Multi-Tool-Probleme (70.36 bis 70.40)
+
+<Exercicio
+  numero="70.35"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "514", exercicio: "ex. 8.4.10", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\sin x = x - x^3/6 + \\cdots`}</Eq>. Für <Eq>{`x>0`}</Eq>: <Eq>{`x - \\sin x = x^3/6 - x^5/120 + \\cdots > 0`}</Eq> denn der erste positive Term dominiert. Daher <Eq>{`\\sin x < x`}</Eq> für alle <Eq>{`x>0`}</Eq>.
+  </>}
+>
+Benutze Maclaurin-Reihe von $\sin x$ um zu zeigen, dass $\sin x < x$ für alle $x > 0$.
+</Exercicio>
+
+<Exercicio
+  numero="70.36"
+  dificuldade="desafio"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.5", pagina: "182", exercicio: "ex. 30", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=x^x=e^{x\\ln x}`}</Eq>, Bereich <Eq>{`(0,\\infty)`}</Eq>. <Eq>{`f'(x)=x^x(\\ln x+1)=0 \\Rightarrow \\ln x=-1 \\Rightarrow x=1/e`}</Eq>. <Eq>{`f(1/e)=(1/e)^{1/e}=e^{-1/e}\\approx 0{,}692`}</Eq>. <Eq>{`f''`}</Eq> bestätigt Minimum. <Eq>{`f(x)\\to 1`}</Eq> wenn <Eq>{`x\\to 0^+`}</Eq> und <Eq>{`f(x)\\to \\infty`}</Eq> wenn <Eq>{`x\\to\\infty`}</Eq>.
+  </>}
+>
+Skizziere $f(x) = x^x$ auf $(0, +\infty)$. Finde das Minimum und analysiere das Verhalten an den Rändern des Bereichs.
+</Exercicio>
+
+<Exercicio
+  numero="70.37"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "§3.3", pagina: "200", exercicio: "ex. 3.3.12", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\arctan x`}</Eq> hat <Eq>{`f'(x)=1/(1+x^2)`}</Eq> und <Eq>{`f''(x)=-2x/(1+x^2)^2`}</Eq>. Newton: <Eq>{`x_{n+1}=x_n-\\arctan(x_n)(1+x_n^2)`}</Eq>. Für <Eq>{`x_0=2`}</Eq>: <Eq>{`x_1=2-\\arctan(2)\\cdot 5 = 2 - 5{,}534 = -3{,}534`}</Eq>. Die Sequenz oszilliert und divergiert weil <Eq>{`|f/f'|=|\\arctan x|(1+x^2)`}</Eq> für großes <Eq>{`|x|`}</Eq> wächst — die Tangente zeigt weg von der Nullstelle <Eq>{`x=0`}</Eq>.
+  </>}
+>
+Newton-Raphson auf $f(x) = \arctan x$ mit $x_0 = 2$ divergiert. Erkläre geometrisch warum und zeige numerisch.
+</Exercicio>
+
+<Exercicio
+  numero="70.38"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "§3.1", pagina: "185", exercicio: "ex. 3.1.7", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Taylor-Expansion um <Eq>{`a`}</Eq>: <Eq>{`f(x) = f(a) + f'(a)(x-a) + f^{(k)}(a)/k! \\cdot (x-a)^k + O((x-a)^{k+1})`}</Eq> mit <Eq>{`f'(a)=\\cdots=f^{(k-1)}(a)=0`}</Eq> und <Eq>{`f^{(k)}(a)\\neq 0`}</Eq>. Für <Eq>{`x`}</Eq> nahe <Eq>{`a`}</Eq> wird das Vorzeichen von <Eq>{`f(x)-f(a)`}</Eq> bestimmt durch <Eq>{`f^{(k)}(a)(x-a)^k/k!`}</Eq>. Wenn <Eq>{`k`}</Eq> gerade: <Eq>{`(x-a)^k > 0`}</Eq> für <Eq>{`x \\neq a`}</Eq>, also <Eq>{`f(x)-f(a)`}</Eq> hat konstantes Vorzeichen — Extremum. Wenn <Eq>{`k`}</Eq> ungerade: <Eq>{`(x-a)^k`}</Eq> ändert Vorzeichen — kein Extremum (Sattelpunkt/Wendepunkt).
+  </>}
+>
+Zeige via Taylor: wenn $f'(a) = 0$ und $f^{(k)}(a)$ die erste nicht-null Ableitung in $a$ ist, dann ist $a$ ein Extremum wenn $k$ gerade ist, und ein Sattelpunkt/Wendepunkt wenn $k$ ungerade ist.
+</Exercicio>
+
+<Exercicio
+  numero="70.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-2-8-lhopital.html", secao: "§2.6", pagina: "151", exercicio: "ex. 2.6.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Ersetze <Eq>{`f(x)\\approx f'(a)(x-a)`}</Eq> und <Eq>{`g(x)\\approx g'(a)(x-a)`}</Eq> (Taylor 1. Ordnung, mit <Eq>{`f(a)=g(a)=0`}</Eq>). Dann <Eq>{`f(x)/g(x) \\approx f'(a)(x-a)/(g'(a)(x-a)) = f'(a)/g'(a)`}</Eq> (angenommen <Eq>{`g'(a)\\neq 0`}</Eq>). Das "beweist" L'Hôpital als Korollar von Taylor 1. Ordnung — die rigorose Version verwendet Cauchys Mittelwertsatz.
+  </>}
+>
+Zeige via Taylor 1. Ordnung, dass $\lim_{x\to a} f(x)/g(x) = f'(a)/g'(a)$ wenn $f(a) = g(a) = 0$ und $g'(a) \neq 0$.
+</Exercicio>
+
+<Exercicio
+  numero="70.40"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-4-applied-opt.html", secao: "§3.4", pagina: "208", exercicio: "ex. 3.4.5", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    Umsatz: <Eq>{`R(q) = p(q) \\cdot q`}</Eq>. Grenzumsatz: <Eq>{`MR = R'(q) = p(q) + p'(q) q`}</Eq>. Grenzkosten: <Eq>{`MC = C'(q)`}</Eq>. Gewinn: <Eq>{`\\pi(q) = R(q) - C(q)`}</Eq>; Bedingung <Eq>{`\\pi'=0 \\Rightarrow MR = MC`}</Eq>. Für konkurrenzielles Unternehmen <Eq>{`p'=0`}</Eq>, also <Eq>{`MR = p`}</Eq> und die Bedingung wird <Eq>{`p = MC`}</Eq>. Für Monopol <Eq>{`p'<0`}</Eq>, also <Eq>{`MR < p`}</Eq> — produziert weniger und verlangt mehr als konkurrenzielles Unternehmen.
+  </>}
+>
+Leite formal die Bedingung $MR = MC$ für Gewinnmaximum her. Erkläre warum Monopolist weniger produziert als konkurrenzielles Unternehmen.
+</Exercicio>
+
+</ListaExercicios>
+
+## Quellen
+
+- [**Active Calculus**](https://activecalculus.org/single/) — Matt Boelkins, David Austin, Steve Schlicker · Grand Valley State University · 2024 · CC-BY-NC-SA. Abschnitte §2.6 (L'Hôpital), §3.1–3.4 (Optimierung), §8.4–8.5 (Taylor und Reihen).
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Gregory Hartman et al. · Virginia Military Institute · 2024 · CC-BY-NC. Kapitel 3 (Funktionsanalyse), 4 (Anwendungen), 6 (Newton und Anwendungen), 8 (Taylor-Reihen).
+- [**Calculus Volume 1**](https://openstax.org/details/books/calculus-volume-1) — OpenStax (Strang, Herman et al.) · 2023 · CC-BY-NC-SA. Abschnitte §4.3 (Max-Min), §4.7 (angewandte Optimierung), §4.8 (L'Hôpital), §4.9 (Newton).

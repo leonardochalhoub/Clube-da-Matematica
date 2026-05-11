@@ -1,0 +1,818 @@
+---
+titulo: "Lição 72 — Variância e desvio padrão"
+slug: "licao-72-variancia"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Dispersão estatística: quanto os dados se afastam da média. Variância populacional e amostral, desvio padrão, fórmula computacional, propriedades de linearidade e independência."
+ordem: 72
+publicado: true
+tags: ["estatística", "variância", "desvio padrão", "dispersão", "ano-2", "trim-8"]
+prerrequisitos: ["licao-71-media-moda-mediana"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "Equiv. H2 Statistics singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\sigma^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^2"
+  legenda={<><strong>方差</strong>是<em>偏离的平方</em>的平均值。对于包含<Eq>{`n`}</Eq>个值且均值为<Eq>{`\\bar{x}`}</Eq>的总体，每个偏差<Eq>{`(x_i - \\bar{x})`}</Eq>被平方——这样正偏差和负偏差不会相互抵消——然后求平均。<strong>标准差</strong><Eq>{`\\sigma = \\sqrt{\\sigma^2}`}</Eq>将分散度还原为原始数据的单位。</>}
+  audioTexto="方差 sigma 平方：每个值减去均值，平方，求和，除以 n。标准差 sigma 是方差的平方根，单位与数据相同。"
+/>
+
+<aside>
+
+**本课涵盖的书籍**
+
+- [**OpenIntro Statistics** — Diez, Çetinkaya-Rundel, Barr (第4版)](https://www.openintro.org/book/os/) · §2.1–§2.2 · CC-BY-SA · <em>主要来源：样本方差、标准差和箱线图的定义；生物学和社会科学实际数据的例子。</em>
+
+- [**Statistics** — Illowsky, Dean (OpenStax)](https://openstax.org/details/books/statistics) · §2.7 · CC-BY · <em>分散度量的完整处理，包括教育、卫生和财务应用的练习；计算公式和计算器计算。</em>
+
+- [**Introduction to Probability** — Grinstead, Snell (达特茅斯学院)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) · 第6章 · GNU FDL · <em>离散随机变量的方差、代数性质、切比雪夫不等式及与大数定律的联系。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 方差和标准差——总体与样本
+
+<Definicao titulo="总体方差和标准差">
+
+给定有限总体$\{x_1, x_2, \ldots, x_n\}$，算术均值为$\mu = \frac{1}{n}\sum_{i=1}^{n} x_i$：
+
+<Equation explicacao="总体方差：相对于均值的偏差平方的平均值。" latex="\sigma^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i - \mu)^2" />
+
+<Equation explicacao="总体标准差：方差的平方根；与数据具有相同的单位。" latex="\sigma = \sqrt{\sigma^2} \geq 0" />
+
+</Definicao>
+
+> "方差或多或少是每个数据点到均值的平均平方距离。与方差关联的单位是平方单位。为了使分散度量具有与数据相同的单位，我们取方差的平方根，称为标准差。" — [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/)，Diez et al.，CC-BY-SA。
+
+<Definicao titulo="样本方差——贝塞尔修正">
+
+当我们使用从更大总体中提取的**样本**$\{x_1, \ldots, x_n\}$时，样本方差使用除数$n-1$（而非$n$）：
+
+<Equation explicacao="具有贝塞尔修正的样本方差：总体方差的无偏估计量。" latex="s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2" />
+
+因子$n-1$称为**自由度**。原因是：$\bar{x}$是从数据本身计算的，"消耗"了一个自由度——不进行修正的话，$s^2$会系统地低估$\sigma^2$。
+
+</Definicao>
+
+> "在统计问题中，我们通常无法获得整个总体，因此使用样本数据来估计总体参数。为此，我们除以样本的自由度$n-1$而不是$n$。" — [OpenStax Statistics §2.7](https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data)，Illowsky & Dean，CC-BY。
+
+<Definicao titulo="离散随机变量的方差">
+
+对于均值$E[X] = \mu$的离散随机变量$X$：
+
+<Equation explicacao="方差为偏差平方的期望值：概率论定义。" latex="\text{Var}(X) = E\!\left[(X - \mu)^2\right] = \sum_k (k - \mu)^2 \, P(X = k)" />
+
+<Equation explicacao="计算公式：平方的期望减去期望的平方。对于单次遍历计算有用。" latex="\text{Var}(X) = E[X^2] - (E[X])^2" />
+
+</Definicao>
+
+### 代数性质
+
+<Teorema titulo="方差的性质">
+
+对于随机变量$X, Y$和常数$a, b \in \mathbb{R}$：
+
+<Equation explicacao="常数方差为零：没有分散。" latex="\text{Var}(b) = 0" />
+
+<Equation explicacao="平移不影响分散；缩放以平方形式进入。" latex="\text{Var}(aX + b) = a^2 \, \text{Var}(X)" />
+
+<Equation explicacao="对于独立的X和Y，方差相加——类似勾股定理在L²中的类比。" latex="\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) \quad (X, Y \text{ 独立})" />
+
+<Equation explicacao="方差总是非负的。" latex="\text{Var}(X) \geq 0" />
+
+**$\text{Var}(aX+b) = a^2 \text{Var}(X)$的证明**：因为$E[aX+b] = a\mu + b$，我们有$\text{Var}(aX+b) = E[(aX+b - a\mu - b)^2] = E[(a(X-\mu))^2] = a^2 E[(X-\mu)^2] = a^2 \text{Var}(X)$。$\square$
+
+</Teorema>
+
+<Insight>
+
+**为什么平方？** 相对于模$|x_i - \mu|$，平方有三个优势：(1) $x^2$在整个$\mathbb{R}$上可微——模在零处有"拐角"，阻止通过微积分最小化；(2) 方差对独立变量线性分解；(3) 正态分布自然地从平方和中出现，将方差与中心极限定理联系起来。
+
+</Insight>
+
+### 几何表示——散点图
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr72" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <text x="10" y="30" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">高分散（大σ）</text>
+  <line x1="60" x2="470" y1="60" y2="60" stroke="currentColor" strokeOpacity="0.2" strokeWidth="1" markerEnd="url(#arr72)"/>
+  <line x1="260" x2="260" y1="45" y2="75" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4 3"/>
+  <circle cx="120" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="160" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="220" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="300" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="360" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <circle cx="410" cy="60" r="6" fill="rgb(26 77 92 / 0.7)"/>
+  <text x="255" y="88" textAnchor="middle" fontSize="9" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">μ</text>
+</g>
+<g>
+  <text x="10" y="120" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">低分散（小σ）</text>
+  <line x1="60" x2="470" y1="155" y2="155" stroke="currentColor" strokeOpacity="0.2" strokeWidth="1" markerEnd="url(#arr72)"/>
+  <line x1="260" x2="260" y1="140" y2="170" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4 3"/>
+  <circle cx="230" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="245" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="255" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="270" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="280" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <circle cx="295" cy="155" r="6" fill="rgb(61 122 95 / 0.8)"/>
+  <text x="255" y="183" textAnchor="middle" fontSize="9" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">μ</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+两个均值相同但分散不同的集合。远离虚线（均值）的点产生高方差；聚集的点产生低方差。
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="对于5岁儿童">
+
+想象三个班级在测验中都得到了**平均成绩7分**。但他们如何达到这个平均值7分的呢？
+
+- **A班：** 每个人都得了7分。没有学生偏离。
+- **B班：** 成绩是5、6、7、8、9。有点分散。
+- **C班：** 一半得0分，一半得14分。非常分散！
+
+**方差**是衡量这个"分散程度"的数字。A班的方差是**零**——每个人都相同。C班的方差**巨大**——每个人都远离均值。
+
+**标准差**是方差的平方根。如果成绩以分数计，标准差也以分数计——它使用与数据相同的语言。
+
+</Porta>
+
+<Porta nivel="10" titulo="对于10岁儿童">
+
+**均值**告诉你中心。**方差**告诉你分散。
+
+**如何用4个步骤计算：**
+
+1. 计算数据的均值$\bar{x}$。
+2. 对于每个$x_i$，计算偏差$x_i - \bar{x}$。
+3. 将每个偏差平方：$(x_i - \bar{x})^2$。
+4. 取这些平方的平均值。
+
+**为什么平方？** 因为正偏差和负偏差如果直接相加会相互抵消——偏差之和总是零。平方确保每个偏差都正向贡献。
+
+**例子：** 成绩6、7、8。均值 = 7。偏差：$-1, 0, +1$。平方：$1, 0, 1$。平方的平均值：$\frac{1+0+1}{3} = \frac{2}{3}$。方差 = $\frac{2}{3}$。标准差 = $\sqrt{2/3} \approx 0.82$。
+
+</Porta>
+
+<Porta nivel="15" titulo="对于15岁青少年">
+
+方差是分布的**第二中心矩**——衡量数据围绕均值的分散。
+
+### 为什么是方差而不是平均绝对偏差？
+
+另一个选择是$\frac{1}{n}\sum |x_i - \mu|$——平均绝对偏差(MAD)。这是一个合法的度量，但方差因三个原因而更优：
+
+1. **可微性：** $|x|$在$x=0$处有"拐角"，无法通过微分进行优化。函数$x^2$光滑且可微。
+2. **分解：** 对于独立变量，$\text{Var}(X+Y) = \text{Var}(X) + \text{Var}(Y)$——如勾股定理。MAD没有这个性质。
+3. **与正态分布的联系：** 正态分布完全由$\mu$和$\sigma^2$表征；中心极限定理(第76课)涉及方差。
+
+### 变异系数
+
+为了比较不同单位集合间的分散(如以卢比(R\$)计的薪资与以公斤计的重量)，使用：
+
+$$CV = \frac{\sigma}{\mu} \times 100\%$$
+
+平均收益为10%且$\sigma = 2\%$的投资有$CV = 20\%$——比$CV = 50\%$的更稳定。
+
+### 金融中的波动率
+
+在金融中，资产的**波动率**是其日回报率的标准差。Harry Markowitz在1952年使用方差来正式化风险概念——他获得了[1990年经济学诺贝尔奖](https://www.nobelprize.org/prizes/economic-sciences/1990/markowitz/facts/)。
+
+</Porta>
+
+<Porta nivel="25" titulo="对于工程学生">
+
+### 估计量：有偏与无偏
+
+设$X_1, \ldots, X_n$是来自具有方差$\sigma^2$的总体的随机样本。
+
+估计量$\hat{\sigma}^2_{\text{pop}} = \frac{1}{n}\sum(X_i - \bar{X})^2$是**有偏的**：$E[\hat{\sigma}^2_{\text{pop}}] = \frac{n-1}{n}\sigma^2 < \sigma^2$。
+
+样本估计量$S^2 = \frac{1}{n-1}\sum(X_i - \bar{X})^2$是**无偏的**：$E[S^2] = \sigma^2$。
+
+**偏差证明：** $\sum(X_i - \bar{X})^2 = \sum X_i^2 - n\bar{X}^2$。由于$E[\bar{X}^2] = \text{Var}(\bar{X}) + (E[\bar{X}])^2 = \sigma^2/n + \mu^2$，我们有$E[\sum(X_i-\bar{X})^2] = (n-1)\sigma^2$。
+
+### 计算公式和数值误差
+
+$$\sigma^2 = E[X^2] - (E[X])^2 = \overline{x^2} - \bar{x}^2$$
+
+对于单次遍历数据很有用。**注意：** 对于长的大数字流，当$\overline{x^2}$和$\bar{x}^2$几乎相等且差异很小时，会遭遇**灾难性抵消**。在数值实现中使用**Welford算法**：
+
+```python
+def welford(xs):
+    n, mean, M2 = 0, 0.0, 0.0
+    for x in xs:
+        n += 1; delta = x - mean
+        mean += delta / n
+        M2 += delta * (x - mean)
+    return M2 / (n - 1)  # 样本方差
+```
+
+### 方差分解(ANOVA)
+
+$$\text{SS}_{\text{total}} = \text{SS}_{\text{between groups}} + \text{SS}_{\text{within groups}}$$
+
+这个分解是F检验的基础：组间和组内方差的比率。应用：比较三个或更多组的均值(不同的生产线、不同的班级、不同的临床治疗)。
+
+### 全方差法则
+
+$$\text{Var}(Y) = E[\text{Var}(Y \mid X)] + \text{Var}(E[Y \mid X])$$
+
+总方差分解为"平均残差噪声"加"由$X$解释的方差"。这是回归中$R^2$系数的核心(第78课)：$R^2 = \text{Var}(E[Y|X]) / \text{Var}(Y)$。
+
+</Porta>
+
+<Porta nivel="40" titulo="对于高级专业人员">
+
+### Hilbert空间$L^2$的结构
+
+具有$E[X^2] < \infty$的随机变量形成Hilbert空间$L^2(\Omega, \mathcal{F}, P)$。方差是以中心化为标准的范数平方$\|X - E[X]\|^2$。协方差是内积$\langle X - \mu_X, Y - \mu_Y \rangle = E[(X-\mu_X)(Y-\mu_Y)]$。这个结构使得：(1) 回归作为正交投影；(2) PCA作为协方差算子的特征向量搜索；(3) 对随机过程的Karhunen-Loève分解。
+
+### 测度集中
+
+**切比雪夫不等式：** 对于任何均值为$\mu$、方差为$\sigma^2$的随机变量$X$：
+
+$$P(|X - \mu| \geq k\sigma) \leq \frac{1}{k^2}$$
+
+弱但普遍的界——不对分布做任何假设。对于特定分布(有界的、亚高斯的)，Hoeffding和Bernstein提供$k^2$中的指数衰减而不是多项式。
+
+### GARCH模型与2003年诺奖
+
+在金融时间序列中，方差不是常数——它**聚集**：高波动期跟随高波动期。Engle和Bollerslev的GARCH(1,1)模型对条件方差建模：
+
+$$\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \beta \sigma_{t-1}^2$$
+
+Robert Engle因此工作获得了[2003年经济学诺贝尔奖](https://www.nobelprize.org/prizes/economic-sciences/2003/engle/facts/)。每个银行风险管理平台(VaR、Expected Shortfall)都使用这个系列的模型。
+
+### 稳健估计
+
+样本方差对异常值极其敏感：单个点$x_n \to \infty$会导致$S^2 \to \infty$。稳健替代：
+
+- **MAD**(中位绝对偏差)：$\text{MAD} = \text{med}|x_i - \text{med}(x)|$，稳健规模，断点50%。
+- **Winsorization：** 计算$S^2$前修剪尾部。
+- **Huber的M-估计量：** 最小化$\sum \rho(x_i - \mu)$，其中$\rho(u) = u^2/2$如果$|u| \leq c$，$c|u| - c^2/2$如果$|u| > c$——$L^2$和$L^1$之间的插值。
+
+### 机器学习中的偏差-方差权衡
+
+$$\text{Error}_{\text{expected}}(x_0) = \text{Bias}^2[\hat{f}(x_0)] + \text{Var}[\hat{f}(x_0)] + \sigma^2_\varepsilon$$
+
+简单模型：高偏差、低方差(欠拟合)。复杂模型：低偏差、高方差(过拟合)。正则化(岭回归：$L^2$惩罚；神经网络中的dropout)通过引入偏差来降低方差。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用">
+
+### 4步方案(原始数据)
+
+1. **计算均值**$\bar{x} = \frac{1}{n}\sum x_i$。
+2. **计算每个偏差**$d_i = x_i - \bar{x}$。
+3. **平方并求和：** $\sum d_i^2$。
+4. **除以**$n$(总体)或$n-1$(样本)，然后开方得到$\sigma$或$s$。
+
+### 在电子表格中(LibreOffice Calc / Excel)
+
+| 函数 | 计算 |
+|---|---|
+| `VAR.P(A1:A10)` | 总体方差 |
+| `VAR.S(A1:A10)` | 样本方差(大多数情况下的标准) |
+| `DESVPAD.P(A1:A10)` | 总体标准差 |
+| `DESVPAD.A(A1:A10)` | 样本标准差 |
+
+### 实际例子：ENEM数学成绩
+
+一个班级的数学成绩：620、680、590、710、650、700、630、680。
+
+均值$\bar{x} = (620+680+590+710+650+700+630+680)/8 = 5260/8 = 657.5$。
+
+样本方差：计算平方偏差，求和，除以$n-1 = 7$。
+
+偏差：$-37.5; \ 22.5; \ -67.5; \ 52.5; \ -7.5; \ 42.5; \ -27.5; \ 22.5$。
+
+$\sum d_i^2 = 1406.25 + 506.25 + 4556.25 + 2756.25 + 56.25 + 1806.25 + 756.25 + 506.25 = 12350$。
+
+$s^2 = 12350/7 \approx 1764.3$。标准差$s \approx 42.0$分。
+
+### 何时使用哪个除数？
+
+- **你有感兴趣宇宙的所有数据？** 使用总体($n$)。
+- **你有样本并想估计宇宙？** 使用样本($n-1$)。这是调查、实验和数据分析中的标准。
+
+### 警告信号
+
+- $CV = \sigma/\mu > 1$：数据相对于均值分散程度很高。
+- 单个异常值拉高$\sigma$：在舍弃之前检查。
+- 非对称分布：标准差不能讲述全部故事——用箱线图补充(第73课)。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo titulo="方差和标准差的直接计算(应用)" numero="1">
+
+**问题：** 计算数据$\{2, 4, 4, 4, 5, 5, 7, 9\}$的总体方差$\sigma^2$和标准差$\sigma$。
+
+**策略：** 用四个步骤应用定义：均值、偏差、偏差的平方、平方的均值。
+
+**解：**
+
+1. **均值：** $\mu = \frac{2+4+4+4+5+5+7+9}{8} = \frac{40}{8} = 5$。
+
+2. **偏差**$x_i - \mu$：$-3, -1, -1, -1, 0, 0, 2, 4$。
+
+3. **偏差的平方：** $9, 1, 1, 1, 0, 0, 4, 16$。和$= 32$。
+
+4. **总体方差：** $\sigma^2 = \frac{32}{8} = 4$。
+
+5. **标准差：** $\sigma = \sqrt{4} = 2$。
+
+**验证：** $\sigma = 2$与数据具有相同的单位。我们检查：区间$[\mu - \sigma, \mu + \sigma] = [3, 7]$包含值4、4、4、5、5、7——8个数据中的6个(75%)，与经验规则一致(对于钟形分布至少68%，切比雪夫保证任何分布至少75%)。
+
+**来源。** [OpenIntro Statistics §2.1，例"Toy data for variance"](https://www.openintro.org/book/os/) — CC-BY-SA许可。
+
+</Exemplo>
+
+<Exemplo titulo="具有贝塞尔修正的样本方差(应用)" numero="2">
+
+**问题：** 8个学生参加了统计测验。成绩为：72、85、90、68、78、92、81、74。计算样本方差$s^2$和样本标准差$s$。
+
+**策略：** 因为数据是更大班级的**样本**，使用除数$n-1$。我将使用计算公式$s^2 = \frac{\sum x_i^2 - n\bar{x}^2}{n-1}$以提高效率。
+
+**解：**
+
+1. $n = 8$。和：$72+85+90+68+78+92+81+74 = 640$。均值：$\bar{x} = 640/8 = 80$。
+
+2. $\sum x_i^2 = 5184 + 7225 + 8100 + 4624 + 6084 + 8464 + 6561 + 5476 = 51718$。
+
+3. $\sum x_i^2 - n\bar{x}^2 = 51718 - 8 \times 6400 = 51718 - 51200 = 518$。
+
+4. $s^2 = \frac{518}{7} \approx 74.0$。
+
+5. $s = \sqrt{74.0} \approx 8.6$分。
+
+**验证：** 检查数据，所有值在68到92之间，幅度24。8.6的标准差是合理的——大约是幅度的1/3，这是典型的。
+
+**来源。** [OpenStax Statistics §2.7，例"Find the Standard Deviation"](https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data) — CC-BY许可。
+
+</Exemplo>
+
+<Exemplo titulo="离散随机变量的方差(中等)" numero="3">
+
+**问题：** 一个公平的6面骰子。设$X$为结果。计算$\text{Var}(X)$。
+
+**策略：** 使用公式$\text{Var}(X) = E[X^2] - (E[X])^2$与离散均匀分布。
+
+**解：**
+
+1. $P(X = k) = 1/6$对于$k \in \{1, 2, 3, 4, 5, 6\}$。
+
+2. $E[X] = \frac{1+2+3+4+5+6}{6} = \frac{21}{6} = \frac{7}{2}$。
+
+3. $E[X^2] = \frac{1^2+2^2+3^2+4^2+5^2+6^2}{6} = \frac{1+4+9+16+25+36}{6} = \frac{91}{6}$。
+
+4. $\text{Var}(X) = \frac{91}{6} - \left(\frac{7}{2}\right)^2 = \frac{91}{6} - \frac{49}{4} = \frac{182}{12} - \frac{147}{12} = \frac{35}{12}$。
+
+5. 标准差：$\sigma = \sqrt{35/12} \approx 1.71$。
+
+**验证：** $X$在$\{1, \ldots, n\}$上均匀分布的一般公式是$\text{Var}(X) = (n^2-1)/12$。对于$n=6$：$(36-1)/12 = 35/12$。确认。
+
+**来源。** [Grinstead & Snell，Introduction to Probability，第6章，例6.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL许可。
+
+</Exemplo>
+
+<Exemplo titulo="线性性质和变异系数(中等)" numero="4">
+
+**问题：** 一台机器装填瓶子，平均体积$\mu = 500$ mL，$\sigma = 4$ mL。公司以12瓶为一箱销售。(a) 假设瓶子独立，一箱总体积的标准差是多少？(b) 单个瓶子的变异系数($CV$)是多少？
+
+**策略：** 对于(a)，使用独立性性质：$\text{Var}(X_1 + \cdots + X_{12}) = 12\sigma^2$。对于(b)，应用$CV = \sigma/\mu$。
+
+**解：**
+
+**(a)** 设$S = X_1 + X_2 + \cdots + X_{12}$，其中$X_i$独立同分布。
+
+$\text{Var}(S) = 12 \cdot \sigma^2 = 12 \cdot 16 = 192 \text{ mL}^2$。
+
+$\sigma_S = \sqrt{192} = 8\sqrt{3} \approx 13.9$ mL。
+
+**(b)** $CV = \frac{\sigma}{\mu} = \frac{4}{500} = 0.008 = 0.8\%$。
+
+0.8%的$CV$非常低——机器是一致的。
+
+**验证：** 对于12个独立瓶子，标准差以$\sqrt{12}$增长，不是12。$4\sqrt{12} \approx 13.9$。与计算一致。
+
+**来源。** [OpenStax Statistics §2.7，性质练习](https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data) — CC-BY许可。
+
+</Exemplo>
+
+<Exemplo titulo="切比雪夫不等式——概率界(建模)" numero="5">
+
+**问题：** 一条生产线制造零件，平均质量$\mu = 200$ g，标准差$\sigma = 5$ g。不知道确切的分布，为质量在185 g到215 g之间的零件比例确定一个下界。
+
+**策略：** 切比雪夫提供了一个普遍的界：$P(|X - \mu| < k\sigma) \geq 1 - 1/k^2$。从要求的范围识别$k$。
+
+**解：**
+
+1. 要求的范围：$[185, 215] = [\mu - 15, \mu + 15]$。
+
+2. $15 = 3\sigma$(因为$\sigma = 5$)。因此$k = 3$。
+
+3. 切比雪夫：$P(|X - 200| < 15) \geq 1 - \frac{1}{3^2} = 1 - \frac{1}{9} = \frac{8}{9} \approx 88.9\%$。
+
+**至少88.9%的零件**在容限范围内，独立于分布。
+
+**验证：** 如果生产是正态的，使用$k=3$我们将有99.7%——更好得多。切比雪夫是保守的。值88.9%是对任何具有$\mu = 200, \sigma = 5$的分布的**最坏界**。
+
+**来源。** [Grinstead & Snell，Introduction to Probability，§8.1，切比雪夫不等式](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL许可。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-72-variancia">
+
+> **笔记本列表。** 有40个练习分为4个递增的块。在纸上解决计算。汇总自OpenIntro Statistics(§2.1–§2.2)、OpenStax Statistics(§2.7)和Grinstead-Snell(第6章)。
+
+### 块A——直接计算(72.1到72.14)
+
+<Exercicio numero="72.1" dificuldade="aplicacao"
+  resposta="$\mu = 6,\ \sigma^2 = \frac{8}{3} \approx 2.67$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "106", exercicio: "prática 1", licenca: "CC-BY" }}
+  solucao={<>均值：<Eq>{`\\mu = (4+6+8)/3 = 6`}</Eq>。偏差：<Eq>{`-2, 0, +2`}</Eq>。平方：<Eq>{`4, 0, 4`}</Eq>。平方和：<Eq>{`8`}</Eq>。方差：<Eq>{`\\sigma^2 = 8/3 \\approx 2.67`}</Eq>。标准差：<Eq>{`\\sigma = \\sqrt{8/3} \\approx 1.63`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>计算均值：<Eq>{`\\mu = (4+6+8)/3 = 18/3 = 6`}</Eq>。<em>为何：</em>方差衡量围绕均值的分散，所以我们首先需要它。</li>
+      <li>从每个值减去均值：<Eq>{`4-6=-2`}</Eq>、<Eq>{`6-6=0`}</Eq>、<Eq>{`8-6=2`}</Eq>。这些是偏差。</li>
+      <li>将每个偏差平方：<Eq>{`(-2)^2=4`}</Eq>、<Eq>{`0^2=0`}</Eq>、<Eq>{`2^2=4`}</Eq>。<em>为何平方：</em>使正偏差和负偏差不相互抵消。</li>
+      <li>计算平方的均值：<Eq>{`(4+0+4)/3 = 8/3`}</Eq>。这是总体方差。</li>
+      <li>标准差：<Eq>{`\\sigma = \\sqrt{8/3} \\approx 1.63`}</Eq>。<em>技巧：</em>标准差总是与原始数据具有相同的单位。</li>
+    </ol>
+  </>}
+>
+计算$\{4, 6, 8\}$的总体方差和标准差。
+</Exercicio>
+
+<Exercicio numero="72.2" dificuldade="aplicacao"
+  resposta="$s^2 = \frac{32}{7} \approx 4.57;\ s \approx 2.14$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "58", exercicio: "ex. 2.1", licenca: "CC-BY-SA" }}
+  solucao={<>数据：<Eq>{`2, 4, 4, 4, 5, 5, 7, 9`}</Eq>。均值<Eq>{`\\bar x = 40/8 = 5`}</Eq>。平方偏差：<Eq>{`9,1,1,1,0,0,4,16`}</Eq>。和<Eq>{`= 32`}</Eq>。样本方差：<Eq>{`s^2 = 32/7 \\approx 4.57`}</Eq>。标准差：<Eq>{`s \\approx 2.14`}</Eq>。</>}
+>
+计算$\{2, 4, 4, 4, 5, 5, 7, 9\}$的样本方差$s^2$和样本标准差$s$。
+</Exercicio>
+
+<Exercicio numero="72.3" dificuldade="aplicacao"
+  resposta="$\sigma = \sqrt{2} \approx 1.41$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "107", exercicio: "prática 3", licenca: "CC-BY" }}
+  solucao={<>成绩：<Eq>{`5, 6, 7, 8, 9`}</Eq>。均值<Eq>{`\\mu = 35/5 = 7`}</Eq>。偏差：<Eq>{`-2,-1,0,1,2`}</Eq>。平方：<Eq>{`4,1,0,1,4`}</Eq>。和<Eq>{`= 10`}</Eq>。方差：<Eq>{`\\sigma^2 = 10/5 = 2`}</Eq>。标准差：<Eq>{`\\sigma = \\sqrt{2} \\approx 1.41`}</Eq>。</>}
+>
+计算$\{5, 6, 7, 8, 9\}$的总体标准差。
+</Exercicio>
+
+<Exercicio numero="72.4" dificuldade="aplicacao"
+  resposta="$\sigma^2 = 0$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "58", exercicio: "ex. 2.3", licenca: "CC-BY-SA" }}
+  solucao={<>所有值相等：<Eq>{`\\{10, 10, 10, 10\\}`}</Eq>。均值<Eq>{`\\mu = 10`}</Eq>。所有偏差为<Eq>{`10 - 10 = 0`}</Eq>。因此<Eq>{`\\sigma^2 = 0`}</Eq>。常数集合的方差为零——没有分散。</>}
+>
+$\{10, 10, 10, 10\}$的方差是多少？从几何上解释。
+</Exercicio>
+
+<Exercicio numero="72.5" dificuldade="aplicacao"
+  resposta="$\sigma^2 = 2500$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "108", exercicio: "ex. 2.7.1", licenca: "CC-BY" }}
+  solucao={<>数据：<Eq>{`\\{0, 100\\}`}</Eq>。均值<Eq>{`\\mu = 50`}</Eq>。偏差：<Eq>{`-50, +50`}</Eq>。平方：<Eq>{`2500, 2500`}</Eq>。方差：<Eq>{`\\sigma^2 = 5000/2 = 2500`}</Eq>。标准差：<Eq>{`\\sigma = 50`}</Eq>。</>}
+>
+计算$\{0, 100\}$的总体方差。
+</Exercicio>
+
+<Exercicio numero="72.6" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "64", exercicio: "ex. 2.11", licenca: "CC-BY-SA" }}
+  solucao={<>薪资(千R\$)：<Eq>{`3, 3, 4, 4, 5, 20`}</Eq>。均值：<Eq>{`(3+3+4+4+5+20)/6 = 39/6 = 6.5`}</Eq>。平方偏差：<Eq>{`12.25; 12.25; 6.25; 6.25; 2.25; 182.25`}</Eq>。和<Eq>{`= 221.5`}</Eq>。样本标准差：<Eq>{`s = \\sqrt{221.5/5} \\approx 6.65`}</Eq>千R\$。异常值(20)将均值从3.8提升到6.5，标准差大于大多数薪资——表明均值不能很好地代表这个集合。</>}
+  passos={<>
+    <ol>
+      <li>计算6个薪资的均值：<Eq>{`(3+3+4+4+5+20)/6 = 6.5`}</Eq>千R\$。</li>
+      <li>注意异常值：值20远高于其他值(3到5)。这将增加方差。</li>
+      <li>计算平方偏差并求和：<Eq>{`12.25 + 12.25 + 6.25 + 6.25 + 2.25 + 182.25 = 221.5`}</Eq>。</li>
+      <li>样本方差：<Eq>{`s^2 = 221.5/5 = 44.3`}</Eq>。标准差：<Eq>{`s \\approx 6.65`}</Eq>千R\$。</li>
+      <li><em>观察：</em>标准差(6.65)大于大多数个人薪资(3–5)。这表明均值不是代表性度量——对这种非对称分布使用中位数(4千R\$)。</li>
+    </ol>
+  </>}
+>
+薪资(千R\$)：$3, 3, 4, 4, 5, 20$。计算均值和样本标准差。评论异常值的影响。
+</Exercicio>
+
+<Exercicio numero="72.7" dificuldade="aplicacao"
+  resposta="$\sigma^2 = 2$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "110", exercicio: "ex. 2.7.3", licenca: "CC-BY" }}
+  solucao={<>计算公式：<Eq>{`\\sigma^2 = \\overline{x^2} - \\bar x^2`}</Eq>。对于<Eq>{`\\{1,2,3,4,5\\}`}</Eq>：<Eq>{`\\bar x = 3`}</Eq>；<Eq>{`\\overline{x^2} = (1+4+9+16+25)/5 = 11`}</Eq>。因此<Eq>{`\\sigma^2 = 11 - 9 = 2`}</Eq>。</>}
+>
+使用计算公式$\overline{x^2} - \bar{x}^2$计算$\{1, 2, 3, 4, 5\}$的方差。
+</Exercicio>
+
+<Exercicio numero="72.8" dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "60", exercicio: "ex. 2.5", licenca: "CC-BY-SA" }}
+  solucao={<>数据：<Eq>{`5, 7, 6, 8, 4, 5, 6, 7`}</Eq>(8个值)。均值：<Eq>{`\\bar x = 48/8 = 6`}</Eq>。平方偏差：<Eq>{`1,1,0,4,4,1,0,1`}</Eq>。和<Eq>{`= 12`}</Eq>。样本方差：<Eq>{`s^2 = 12/7 \\approx 1.71`}</Eq>。标准差：<Eq>{`s \\approx 1.31`}</Eq>分。</>}
+>
+8次服务的等待时间(分)：$5, 7, 6, 8, 4, 5, 6, 7$。计算样本标准差。
+</Exercicio>
+
+<Exercicio numero="72.9" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "111", exercicio: "ex. 2.7.5", licenca: "CC-BY" }}
+  solucao={<>重量：<Eq>{`8, 9, 9, 10, 11, 13`}</Eq>公斤。均值：<Eq>{`\\bar x = 60/6 = 10`}</Eq>。平方偏差：<Eq>{`4,1,1,0,1,9`}</Eq>。和<Eq>{`= 16`}</Eq>。样本方差：<Eq>{`s^2 = 16/5 = 3.2`}</Eq>。标准差：<Eq>{`s = \\sqrt{3.2} \\approx 1.79`}</Eq>公斤。</>}
+>
+6个西瓜的重量(公斤)：$8, 9, 9, 10, 11, 13$。计算$s^2$和$s$。
+</Exercicio>
+
+<Exercicio numero="72.10" dificuldade="aplicacao"
+  resposta="$\text{Var}(X) = \frac{3}{4}$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "247", exercicio: "ex. 6.1.2", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`X`}</Eq>取值1、2、3，概率为<Eq>{`1/2, 1/4, 1/4`}</Eq>。<Eq>{`E[X] = 1\\cdot\\frac{1}{2} + 2\\cdot\\frac{1}{4} + 3\\cdot\\frac{1}{4} = \\frac{1}{2}+\\frac{1}{2}+\\frac{3}{4} = \\frac{7}{4}`}</Eq>。<Eq>{`E[X^2] = 1\\cdot\\frac{1}{2} + 4\\cdot\\frac{1}{4} + 9\\cdot\\frac{1}{4} = \\frac{1}{2}+1+\\frac{9}{4} = \\frac{15}{4}`}</Eq>。<Eq>{`\\text{Var}(X) = \\frac{15}{4} - \\left(\\frac{7}{4}\\right)^2 = \\frac{15}{4} - \\frac{49}{16} = \\frac{60-49}{16} = \\frac{11}{16}`}</Eq>。</>}
+>
+$X$取值$1, 2, 3$，概率为$\frac{1}{2}, \frac{1}{4}, \frac{1}{4}$。计算$\text{Var}(X)$。
+</Exercicio>
+
+<Exercicio numero="72.11" dificuldade="aplicacao"
+  resposta="$\text{Var}(X) = \frac{35}{12}$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "247", exercicio: "ex. 6.1.3", licenca: "GNU FDL" }}
+  solucao={<>公平骰子：<Eq>{`E[X] = 7/2`}</Eq>、<Eq>{`E[X^2] = (1+4+9+16+25+36)/6 = 91/6`}</Eq>。<Eq>{`\\text{Var}(X) = 91/6 - (7/2)^2 = 91/6 - 49/4 = 182/12 - 147/12 = 35/12`}</Eq>。</>}
+>
+6面公平骰子。计算$\text{Var}(X)$。
+</Exercicio>
+
+<Exercicio numero="72.12" dificuldade="aplicacao"
+  resposta="$\text{Var}(S) = \frac{35}{6}$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "249", exercicio: "ex. 6.1.5", licenca: "GNU FDL" }}
+  solucao={<>两个独立骰子：<Eq>{`S = X_1 + X_2`}</Eq>。由独立性：<Eq>{`\\text{Var}(S) = \\text{Var}(X_1) + \\text{Var}(X_2) = 35/12 + 35/12 = 35/6`}</Eq>。标准差：<Eq>{`\\sigma_S = \\sqrt{35/6} \\approx 2.42`}</Eq>。</>}
+>
+两个独立公平骰子之和。使用独立性性质计算$\text{Var}(S)$。
+</Exercicio>
+
+<Exercicio numero="72.13" dificuldade="aplicacao"
+  resposta="$s^2 \approx 14.8$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "59", exercicio: "ex. 2.7", licenca: "CC-BY-SA" }}
+  solucao={<>数据：<Eq>{`10, 7, 4, 9, 8, 11, 5`}</Eq>(7个值)。均值：<Eq>{`\\bar x = 54/7 \\approx 7.71`}</Eq>。计算平方偏差，求和并除以6。结果：<Eq>{`s^2 \\approx 14.8`}</Eq>、<Eq>{`s \\approx 3.85`}</Eq>。</>}
+>
+7天的最高温度(℃)：$10, 7, 4, 9, 8, 11, 5$。计算样本方差。
+</Exercicio>
+
+<Exercicio numero="72.14" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "112", exercicio: "ex. 2.7.7", licenca: "CC-BY" }}
+  solucao={<>值：<Eq>{`1, 3, 5, 7, 9`}</Eq>。均值：<Eq>{`\\bar x = 5`}</Eq>。<Eq>{`E[X^2] = (1+9+25+49+81)/5 = 165/5 = 33`}</Eq>。方差：<Eq>{`\\sigma^2 = 33 - 25 = 8`}</Eq>。标准差：<Eq>{`\\sigma = \\sqrt{8} = 2\\sqrt{2} \\approx 2.83`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>计算均值：<Eq>{`\\bar x = (1+3+5+7+9)/5 = 25/5 = 5`}</Eq>。</li>
+      <li>计算<Eq>{`E[X^2]`}</Eq>：平方求和除以5：<Eq>{`(1+9+25+49+81)/5 = 165/5 = 33`}</Eq>。</li>
+      <li>应用计算公式：<Eq>{`\\sigma^2 = E[X^2] - \\bar x^2 = 33 - 25 = 8`}</Eq>。<em>为何：</em>与定义等价但仅需辅助和。</li>
+      <li>标准差：<Eq>{`\\sigma = \\sqrt{8} = 2\\sqrt{2}`}</Eq>。<em>技巧：</em>对于算术序列<Eq>{`\\{a, a+d, a+2d, \\ldots\\}`}</Eq>，存在<Eq>{`\\sigma`}</Eq>的闭式公式。</li>
+    </ol>
+  </>}
+>
+使用计算公式$E[X^2] - (E[X])^2$计算$\{1, 3, 5, 7, 9\}$的方差。
+</Exercicio>
+
+### 块B——性质和变换(72.15到72.27)
+
+<Exercicio numero="72.15" dificuldade="aplicacao"
+  resposta="$\text{Var}(2X+5) = 36$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "80", exercicio: "ex. 2.17", licenca: "CC-BY-SA" }}
+  solucao={<>通过性质：<Eq>{`\\text{Var}(aX+b) = a^2 \\text{Var}(X)`}</Eq>。以<Eq>{`a=2, b=5, \\text{Var}(X)=9`}</Eq>：<Eq>{`\\text{Var}(2X+5) = 4 \\times 9 = 36`}</Eq>。平移(+5)不影响分散；缩放(×2)将方差提升到因子的平方。</>}
+>
+如果$\text{Var}(X) = 9$，计算$\text{Var}(2X + 5)$。
+</Exercicio>
+
+<Exercicio numero="72.16" dificuldade="aplicacao"
+  resposta="$\sigma_{3X} = 12$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "113", exercicio: "ex. 2.7.9", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\text{Var}(3X) = 9 \\text{Var}(X) = 9 \\times 16 = 144`}</Eq>。标准差：<Eq>{`\\sigma_{3X} = \\sqrt{144} = 12`}</Eq>。或者：<Eq>{`\\sigma_{3X} = |3| \\sigma_X = 3 \\times 4 = 12`}</Eq>。</>}
+>
+如果$\sigma_X = 4$，$3X$的标准差是多少？
+</Exercicio>
+
+<Exercicio numero="72.17" dificuldade="aplicacao"
+  resposta="$\text{Var}(X+Y) = 13;\ \text{Var}(X-Y) = 13$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "253", exercicio: "ex. 6.2.3", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`X`}</Eq>和<Eq>{`Y`}</Eq>独立：<Eq>{`\\text{Var}(X+Y) = \\text{Var}(X) + \\text{Var}(Y) = 4+9 = 13`}</Eq>。对于差：<Eq>{`\\text{Var}(X-Y) = \\text{Var}(X) + (-1)^2 \\text{Var}(Y) = 4+9 = 13`}</Eq>。当变量独立时，相减不减少分散。</>}
+>
+$\text{Var}(X) = 4$、$\text{Var}(Y) = 9$、$X$和$Y$独立。计算$\text{Var}(X+Y)$和$\text{Var}(X-Y)$。
+</Exercicio>
+
+<Exercicio numero="72.18" dificuldade="aplicacao"
+  resposta="$z = 2$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "114", exercicio: "ex. 2.7.11", licenca: "CC-BY" }}
+  solucao={<>z分数：<Eq>{`z = (x - \\mu)/\\sigma = (80 - 70)/5 = 10/5 = 2`}</Eq>。<Eq>{`z = 2`}</Eq>的分数意味着该值在均值上方2个标准差。</>}
+>
+如果$\mu = 70$、$\sigma = 5$，对$X = 80$进行标准化。计算z分数。
+</Exercicio>
+
+<Exercicio numero="72.19" dificuldade="aplicacao"
+  resposta="$\sigma_F = 9$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "81", exercicio: "ex. 2.19", licenca: "CC-BY-SA" }}
+  solucao={<>线性转换：<Eq>{`F = 1.8C + 32`}</Eq>。通过性质：<Eq>{`\\sigma_F = |1.8| \\cdot \\sigma_C = 1.8 \\times 5 = 9`}</Eq>。平移(+32)不影响标准差；仅缩放因子重要。</>}
+>
+$F = 1.8C + 32$(摄氏度到华氏度转换)。如果$\sigma_C = 5$°C，$\sigma_F$是多少？
+</Exercicio>
+
+<Exercicio numero="72.20" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "115", exercicio: "ex. 2.7.13", licenca: "CC-BY" }}
+  solucao={<>高度：<Eq>{`\\mu = 170`}</Eq>厘米、<Eq>{`\\sigma = 8`}</Eq>厘米；<Eq>{`CV = 8/170 \\approx 4.7\\%`}</Eq>。重量：<Eq>{`\\mu = 70`}</Eq>公斤、<Eq>{`\\sigma = 12`}</Eq>公斤；<Eq>{`CV = 12/70 \\approx 17.1\\%`}</Eq>。重量相对变化更大——<Eq>{`CV`}</Eq>更大。</>}
+  passos={<>
+    <ol>
+      <li>计算高度的CV：<Eq>{`CV = \\sigma/\\mu = 8/170 \\approx 0.047 = 4.7\\%`}</Eq>。</li>
+      <li>计算重量的CV：<Eq>{`CV = 12/70 \\approx 0.171 = 17.1\\%`}</Eq>。</li>
+      <li>比较：重量有更大的CV，因此<strong>相对变异性更高</strong>。<em>为何：</em>CV是无量纲的，允许比较不同单位的分散。</li>
+      <li><em>观察：</em>单独的标准差不足以比较——8厘米看起来"大"但12公斤可能"小"取决于背景。CV按均值标准化。</li>
+    </ol>
+  </>}
+>
+计算高度($\mu = 170$厘米、$\sigma = 8$厘米)和重量($\mu = 70$公斤、$\sigma = 12$公斤)的变异系数$CV = \sigma/\mu$。哪个集合相对变异性更大？
+</Exercicio>
+
+<Exercicio numero="72.21" dificuldade="aplicacao"
+  resposta="均值：$\mu_z = 0$；标准差：$\sigma_z = 1$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "62", exercicio: "ex. 2.9", licenca: "CC-BY-SA" }}
+  solucao={<>每个值的z分数：<Eq>{`(60-70)/10 = -1`}</Eq>、<Eq>{`(70-70)/10 = 0`}</Eq>、<Eq>{`(80-70)/10 = 1`}</Eq>。<Eq>{`z`}</Eq>的均值：<Eq>{`(-1+0+1)/3 = 0`}</Eq>。<Eq>{`z`}</Eq>的标准差：<Eq>{`\\sqrt{(1+0+1)/3} = \\sqrt{2/3}`}</Eq>...实际上对于总体：<Eq>{`\\sigma_z = 1`}</Eq>总是当我们用自己的均值和标准差标准化时。</>}
+>
+使用$\mu = 70, \sigma = 10$对$\{60, 70, 80\}$进行标准化。z分数的均值和标准差是多少？
+</Exercicio>
+
+<Exercicio numero="72.22" dificuldade="aplicacao"
+  resposta="$\text{Var}(-X) = \text{Var}(X) = 16$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "251", exercicio: "ex. 6.2.1", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`\\text{Var}(-X) = (-1)^2 \\text{Var}(X) = \\text{Var}(X) = 16`}</Eq>。乘以<Eq>{`-1`}</Eq>围绕<Eq>{`-\\mu`}</Eq>反射数据但不改变与均值的距离——分散在反射下不变。</>}
+>
+$\text{Var}(X) = 16$。$\text{Var}(-X)$是多少？
+</Exercicio>
+
+<Exercicio numero="72.23" dificuldade="aplicacao"
+  resposta="$\sigma_{\bar X} = 2$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "116", exercicio: "ex. 2.7.15", licenca: "CC-BY" }}
+  solucao={<>对于$n = 25$个独立观测的样本均值，$\sigma = 10$：<Eq>{`\\text{Var}(\\bar X) = \\sigma^2/n = 100/25 = 4`}</Eq>。均值的标准差：<Eq>{`\\sigma_{\\bar X} = \\sqrt{4} = 2`}</Eq>。</>}
+>
+$n = 25$个独立观测的样本均值，$\sigma = 10$。均值的标准差是多少？
+</Exercicio>
+
+<Exercicio numero="72.24" dificuldade="aplicacao"
+  resposta="$\sigma_S = 10$"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "253", exercicio: "ex. 6.2.5", licenca: "GNU FDL" }}
+  solucao={<>100个iid随机变量之和，$\sigma = 1$：<Eq>{`\\text{Var}(S) = 100 \\sigma^2 = 100`}</Eq>。标准差：<Eq>{`\\sigma_S = \\sqrt{100} = 10`}</Eq>。平方根定律：求和<Eq>{`n`}</Eq>个独立变量将方差乘以<Eq>{`n`}</Eq>，标准差乘以<Eq>{`\\sqrt{n}`}</Eq>。</>}
+>
+100个iid随机变量之和，$\sigma = 1$。和的标准差是多少？
+</Exercicio>
+
+<Exercicio numero="72.25" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 因为偏差之和总是零，所以除数$n$会产生对下方的有偏估计量。", correta: true },
+    { texto: "B) 因为$n-1$简化了计算。" },
+    { texto: "C) 因为$\\bar x$总是大于$\mu$，所以除以$n$会高估方差。" },
+    { texto: "D) 纯粹的历史惯例，没有数学证明。" },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "60", exercicio: "ex. 2.13 (conceitual)", licenca: "CC-BY-SA" }}
+  solucao={<>答案A。使用<Eq>{`\\bar x`}</Eq>而不是<Eq>{`\\mu`}</Eq>时，偏差<Eq>{`(x_i - \\bar x)`}</Eq>被迫求和为零——我们失去了一个自由度。除以<Eq>{`n`}</Eq>系统地低估了<Eq>{`\\sigma^2`}</Eq>；修正因子<Eq>{`n/(n-1)`}</Eq>移除这个偏差。</>}
+>
+为什么样本方差使用除数$n-1$而不是$n$？
+</Exercicio>
+
+<Exercicio numero="72.26" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) $CV$ — 允许比较不同单位和尺度集合间的相对分散。", correta: true },
+    { texto: "B) $\\sigma$ — 因为更精确。" },
+    { texto: "C) $\\sigma^2$ — 因为移除了平方根。" },
+    { texto: "D) 两者对任何比较都等价。" },
+  ]}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "117", exercicio: "ex. 2.7.17 (conceitual)", licenca: "CC-BY" }}
+  solucao={<>答案A。<Eq>{`CV = \\sigma/\\mu`}</Eq>是无量纲的——按均值的大小标准化分散。比较<Eq>{`\\sigma`}</Eq>在薪资(R\$)和高度(厘米)之间没有意义；<Eq>{`CV`}</Eq>移除单位并允许比较。</>}
+>
+为了比较薪资(R\$)和高度(厘米)间的分散，更倾向$\sigma$还是$CV$？为什么？
+</Exercicio>
+
+<Exercicio numero="72.27" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 不，方差总是$\\geq 0$因为是平方和。", correta: true },
+    { texto: "B) 是的，当所有偏差是负数。" },
+    { texto: "C) 是的，如果均值是负数。" },
+    { texto: "D) 仅对连续随机变量。" },
+  ]}
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "246", exercicio: "ex. 6.1.1 (conceitual)", licenca: "GNU FDL" }}
+  solucao={<>答案A。<Eq>{`\\sigma^2 = \\frac{1}{n}\\sum (x_i - \\bar x)^2`}</Eq>是实数的平方和，总是$\\geq 0$。仅当所有数据等于均值时才是零(常数集合)。即使均值是负数，偏差的平方也是非负的。</>}
+>
+方差能是负数吗？
+</Exercicio>
+
+### 块C——建模(72.28到72.36)
+
+<Exercicio numero="72.28" dificuldade="modelagem"
+  resposta="$3\sigma$在容限范围内"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "118", exercicio: "ex. 2.7.19", licenca: "CC-BY" }}
+  solucao={<>均值<Eq>{`\\mu = 500`}</Eq>克、<Eq>{`\\sigma = 5`}</Eq>克。容限：<Eq>{`\\pm 15`}</Eq>克。在标准差数目中：<Eq>{`15/5 = 3\\sigma`}</Eq>。容限覆盖<Eq>{`\\mu \\pm 3\\sigma`}</Eq>——在正态分布中，这将覆盖99.7%的零件。</>}
+>
+生产线：平均质量500克、$\sigma = 5$克。容限$\pm 15$克。容限代表多少$\sigma$？
+</Exercicio>
+
+<Exercicio numero="72.29" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "83", exercicio: "ex. 2.23", licenca: "CC-BY-SA" }}
+  solucao={<>两个基金，相同回报8%。基金A：<Eq>{`\\sigma_A = 5\\%`}</Eq>(较低风险)。基金B：<Eq>{`\\sigma_B = 15\\%`}</Eq>(较高风险)。风险厌恶者：选择基金A。相同的期望回报以较低的波动率是根据Markowitz理论(方差作为风险度量)更优选的。</>}
+>
+两个基金期望回报8%，但$\sigma_A = 5\%$和$\sigma_B = 15\%$。作为风险厌恶者，选择哪个？为什么？
+</Exercicio>
+
+<Exercicio numero="72.30" dificuldade="modelagem"
+  resposta="$\sigma_{\bar R} \approx 0.16\ \Omega$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "119", exercicio: "ex. 2.7.21", licenca: "CC-BY" }}
+  solucao={<>n = 10个独立测量的均值标准差：<Eq>{`\\sigma_{\\bar R} = s/\\sqrt{n} = 0.5/\\sqrt{10} \\approx 0.158\\ \\Omega`}</Eq>。这是测量的**标准不确定性**。</>}
+>
+你测量电阻10次：$\bar{R} = 100\,\Omega$、$s = 0.5\,\Omega$。估计均值的标准差。
+</Exercicio>
+
+<Exercicio numero="72.31" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "84", exercicio: "ex. 2.25", licenca: "CC-BY-SA" }}
+  solucao={<>出行时间：<Eq>{`\\mu = 30`}</Eq>分钟、<Eq>{`\\sigma = 5`}</Eq>分钟。我们想要95%概率到达的界。切比雪夫：<Eq>{`P(|X-30| \\geq k\\sigma) \\leq 1/k^2`}</Eq>。对于95%的界：<Eq>{`1/k^2 \\leq 0.05 \\Rightarrow k \\geq \\sqrt{20} \\approx 4.5`}</Eq>。因此，出发<Eq>{`30 + 4.5 \\times 5 = 52.5`}</Eq>分钟前。(使用正态分布：1.65σ = 8.3分钟就足够了——切比雪夫非常保守。)</>}
+>
+家到工作出行时间：$\mu = 30$分钟、$\sigma = 5$分钟。使用切比雪夫不等式作为保守界，提前多少分钟出发来保证至少95%的到达机会？
+</Exercicio>
+
+<Exercicio numero="72.32" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "120", exercicio: "ex. 2.7.23", licenca: "CC-BY" }}
+  solucao={<>Six Sigma要求容限至少为均值后<Eq>{`6\\sigma`}</Eq>。总容限：<Eq>{`10.06 - 10.00 = 0.06`}</Eq>毫米每侧。然后<Eq>{`6\\sigma \\leq 0.06 \\Rightarrow \\sigma \\leq 0.01`}</Eq>毫米。与Six Sigma兼容的最大<Eq>{`\\sigma`}</Eq>是<Eq>{`\\sigma = 0.01`}</Eq>毫米。</>}
+>
+Six Sigma过程：$\mu = 10.00$毫米，容限9.94至10.06毫米。仍满足Six Sigma要求的最大$\sigma$是多少？
+</Exercicio>
+
+<Exercicio numero="72.33" dificuldade="modelagem"
+  resposta="$\text{Var}(\text{carteira}) = 1.25\ \%^2;\ \sigma = 1.12\%$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "85", exercicio: "ex. 2.27", licenca: "CC-BY-SA" }}
+  solucao={<>具有独立性的50-50投资组合：<Eq>{`R = 0.5 A + 0.5 B`}</Eq>。<Eq>{`\\text{Var}(R) = 0.5^2 \\sigma_A^2 + 0.5^2 \\sigma_B^2 = 0.25 \\times 1 + 0.25 \\times 4 = 1.25\\ \\%^2`}</Eq>。<Eq>{`\\sigma_R = \\sqrt{1.25} \\approx 1.12\\%`}</Eq>。低于各个波动率的平均值(1.5%)——多样化的影响。</>}
+>
+股票A：$\sigma_A = 1\%$；股票B：$\sigma_B = 2\%$。50-50投资组合，零相关。投资组合方差。
+</Exercicio>
+
+<Exercicio numero="72.34" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "86", exercicio: "ex. 2.29", licenca: "CC-BY-SA" }}
+  solucao={<>具有<Eq>{`\\rho = -0.5`}</Eq>的相关：<Eq>{`\\text{Var}(R) = 0.25\\sigma_A^2 + 0.25\\sigma_B^2 + 2(0.5)(0.5)\\rho\\sigma_A\\sigma_B = 0.25 + 1 + 2(0.25)(-0.5)(1)(2) = 1.25 - 0.5 = 0.75\\ \\%^2`}</Eq>。<Eq>{`\\sigma_R \\approx 0.87\\%`}</Eq>。更低——负相关放大多样化的好处。</>}
+>
+来自前一个练习的同一投资组合，但股票之间的相关为$-0.5$。方差。与零相关的情况比较。
+</Exercicio>
+
+<Exercicio numero="72.35" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-7-measures-of-the-spread-of-the-data", secao: "§2.7", pagina: "121", exercicio: "ex. 2.7.25", licenca: "CC-BY" }}
+  solucao={<>标准化具有不同尺度的特征(例：薪资0–100k与年龄0–100)防止较大幅度的特征主导梯度。标准化后，每个特征都有<Eq>{`\\mu = 0`}</Eq>和<Eq>{`\\sigma = 1`}</Eq>——梯度下降更快且均衡地收敛。<Eq>{`\\sigma = 0.01`}</Eq>的特征在未标准化时会有~10,000倍较小的梯度，使其对优化器有效不可见。</>}
+>
+在机器学习中，为什么应在训练基于梯度的模型前标准化具有不同尺度的特征？
+</Exercicio>
+
+<Exercicio numero="72.36" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "65", exercicio: "ex. 2.15", licenca: "CC-BY-SA" }}
+  solucao={<>ENEM 2023(具有已知分布的假想例子)：数学中的成绩历史上有<Eq>{`\\mu \\approx 520`}</Eq>、<Eq>{`\\sigma \\approx 110`}</Eq>。有740分的学生有<Eq>{`z = (740-520)/110 = 2`}</Eq> — 均值上方两个标准差，近似百分位数97.7%(使用正态表)。</>}
+>
+ENEM数学成绩：$\mu \approx 520$、$\sigma \approx 110$分。一个学生得了740分。计算z分数并解释(他在均值上方多少个标准差？)。
+</Exercicio>
+
+### 块D——证明和理论(72.37到72.40)
+
+<Exercicio numero="72.37" dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "246", exercicio: "ex. 6.1.4", licenca: "GNU FDL" }}
+  solucao={<>从定义开始：<Eq>{`\\text{Var}(X) = E[(X-\\mu)^2] = E[X^2 - 2\\mu X + \\mu^2]`}</Eq>。由<Eq>{`E`}</Eq>的线性性：<Eq>{`= E[X^2] - 2\\mu E[X] + \\mu^2 = E[X^2] - 2\\mu^2 + \\mu^2 = E[X^2] - \\mu^2 = E[X^2] - (E[X])^2`}</Eq>。<Eq>{`\\square`}</Eq></>}
+>
+从定义$\text{Var}(X) = E[(X-\mu)^2]$证明$\text{Var}(X) = E[X^2] - (E[X])^2$。
+</Exercicio>
+
+<Exercicio numero="72.38" dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.4", pagina: "79", exercicio: "ex. 2.16 (demonstração)", licenca: "CC-BY-SA" }}
+  solucao={<>定义：<Eq>{`E[aX+b] = aE[X]+b = a\\mu+b`}</Eq>。然后<Eq>{`\\text{Var}(aX+b) = E[(aX+b - a\\mu - b)^2] = E[(a(X-\\mu))^2] = a^2 E[(X-\\mu)^2] = a^2 \\text{Var}(X)`}</Eq>。<Eq>{`\\square`}</Eq></>}
+>
+对任意常数$a, b$证明$\text{Var}(aX + b) = a^2\,\text{Var}(X)$。
+</Exercicio>
+
+<Exercicio numero="72.39" dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6", pagina: "252", exercicio: "ex. 6.2.2", licenca: "GNU FDL" }}
+  solucao={<>对<Eq>{`X, Y`}</Eq>独立：<Eq>{`E[XY] = E[X]E[Y]`}</Eq>。然后<Eq>{`\\text{Var}(X+Y) = E[(X+Y)^2] - (E[X+Y])^2 = E[X^2]+2E[XY]+E[Y^2] - (\\mu_X+\\mu_Y)^2 = (E[X^2]-\\mu_X^2) + (E[Y^2]-\\mu_Y^2) + 2(E[XY]-\\mu_X\\mu_Y) = \\text{Var}(X) + \\text{Var}(Y) + 0`}</Eq>。<Eq>{`\\square`}</Eq></>}
+>
+当$X$和$Y$独立时证明$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$。
+</Exercicio>
+
+<Exercicio numero="72.40" dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead-Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "Ch. 6 (§8.1 para Chebyshev)", pagina: "305", exercicio: "Theorem 8.1", licenca: "GNU FDL" }}
+  solucao={<>设<Eq>{`A = \\{|X - \\mu| \\geq k\\sigma\\}`}</Eq>。然后<Eq>{`\\sigma^2 = E[(X-\\mu)^2] \\geq E[(X-\\mu)^2 \\mathbf{1}_A] \\geq k^2\\sigma^2 P(A)`}</Eq>，其中最后不等式使用在<Eq>{`A`}</Eq>上我们有<Eq>{`(X-\\mu)^2 \\geq k^2\\sigma^2`}</Eq>。除以<Eq>{`\\sigma^2`}</Eq>：<Eq>{`P(A) \\leq 1/k^2`}</Eq>。<Eq>{`\\square`}</Eq></>}
+>
+证明切比雪夫不等式：对$k > 0$有$P(|X - \mu| \geq k\sigma) \leq \dfrac{1}{k^2}$。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenIntro Statistics**(第4版)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA。**本课的主要来源。** §2.1–§2.2涵盖样本方差、标准差、箱线图和应用例子。
+
+- [**Statistics**(OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY。§2.7涵盖分散度量、计算公式、计算器练习和教育/卫生数据。
+
+- [**Introduction to Probability** — Grinstead & Snell (达特茅斯学院)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL。第6章涵盖离散随机变量的方差、代数性质、切比雪夫和与大数定律的联系。

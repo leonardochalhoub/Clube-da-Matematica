@@ -1,0 +1,719 @@
+---
+titulo: "Lição 78 — Correlação e regressão linear simples"
+slug: "licao-78-correlacao"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Coeficiente de Pearson r, covariância, reta de mínimos quadrados, coeficiente de determinação r². Correlação não é causalidade — o teorema de Anscombe, o quarteto que todo cientista deve conhecer."
+ordem: 78
+publicado: true
+tags: ["estatística", "correlação", "regressão", "Pearson", "ano-2", "trim-8"]
+prerrequisitos: ["licao-77-tcl"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+versao: "v1"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Stochastik LK alemão §12", "H2 Math singapurense §19", "AP Statistics USA §3"]
+---
+
+<EquacaoCanonica
+  formula="r = \frac{\displaystyle\sum_{i=1}^n (x_i - \bar x)(y_i - \bar y)}{\sqrt{\displaystyle\sum_{i=1}^n (x_i-\bar x)^2 \cdot \sum_{i=1}^n (y_i-\bar y)^2}}"
+  legenda={<>皮尔逊<strong>相关系数</strong> <Eq>{`r`}</Eq> 衡量两个变量之间<strong>线性</strong>关联的强度和方向。从 <Eq>{`-1`}</Eq>（完全负相关）到 <Eq>{`+1`}</Eq>（完全正相关）变化，其中 <Eq>{`r = 0`}</Eq> 表示不存在线性关系。<strong>相关不蕴含因果。</strong></>}
+  audioTexto="皮尔逊相关系数 r。分子：x 和 y 的离差乘积之和。分母：离差平方和乘积的平方根。结果总是在负一和正一之间。"
+/>
+
+<aside>
+**涵盖此课的教科书**
+
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · §12.1–12.3 · CC-BY · *详细说明协方差、皮尔逊相关系数、最小二乘法直线和 r²，包含分步示例；本课程练习的首要来源。*
+- [**OpenIntro Statistics** (第 4 版)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §7.1–7.2 · CC-BY-SA · *对相关性、散点图和线性回归进行清晰处理，重点关注残差分析和安斯库姆四重奏。*
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · Dartmouth · GNU FDL · *从概率论角度讲述协方差和相关性；通过 Cauchy-Schwarz 证明 |r| ≤ 1。*
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格的定义和性质">
+
+### 协方差
+
+<Definicao titulo="样本协方差">
+
+对于 $n$ 对数据 $(x_i, y_i)$：
+
+$$s_{xy} = \frac{1}{n-1}\sum_{i=1}^n (x_i - \bar x)(y_i - \bar y)$$
+
+等价形式：$s_{xy} = \dfrac{\sum x_i y_i - n\bar x \bar y}{n-1}$。分母中的 $n-1$ 是贝塞尔修正（无偏估计量）。
+
+</Definicao>
+
+> "协方差是两个随机变量联合变异性的度量。如果一个变量的较大值主要对应于另一个变量的较大值，且较小值也相同，则协方差为正。" — [OpenStax Statistics, §12.1](https://openstax.org/books/statistics/pages/12-1-linear-equations)
+
+### 皮尔逊相关系数
+
+<Definicao titulo="皮尔逊相关系数 r">
+
+$$r = \frac{s_{xy}}{s_x s_y} = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sqrt{\sum(x_i-\bar x)^2 \cdot \sum(y_i-\bar y)^2}}$$
+
+性质：
+- **无单位**：对尺度变化和平移不变。
+- **有界**：$-1 \leq r \leq 1$（由 Cauchy-Schwarz 不等式）。
+- $r = \pm 1 \iff$ 所有点都在一条直线上。
+- $r = 0 \iff$ 没有**线性**关联（但可能存在曲线关系）。
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 140" className="w-full">
+<defs><marker id="arr78" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+<g>
+  <text x="70" y="18" fontSize="10" textAnchor="middle" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">r ≈ +1</text>
+  <line x1="20" x2="130" y1="130" y2="30" stroke="rgb(26 77 92)" strokeWidth="1.5" markerEnd="url(#arr78)"/>
+  <circle cx="30" cy="120" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="45" cy="105" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="58" cy="90" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="72" cy="76" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="88" cy="62" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="104" cy="50" r="3" fill="rgb(232 199 122)"/>
+</g>
+<g>
+  <text x="210" y="18" fontSize="10" textAnchor="middle" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">r ≈ −1</text>
+  <line x1="160" x2="270" y1="30" y2="130" stroke="rgb(26 77 92)" strokeWidth="1.5" markerEnd="url(#arr78)"/>
+  <circle cx="168" cy="38" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="183" cy="53" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="197" cy="66" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="213" cy="82" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="228" cy="97" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="244" cy="112" r="3" fill="rgb(232 199 122)"/>
+</g>
+<g>
+  <text x="350" y="18" fontSize="10" textAnchor="middle" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">r ≈ 0</text>
+  <circle cx="310" cy="45" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="330" cy="100" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="345" cy="60" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="362" cy="120" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="378" cy="38" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="394" cy="88" r="3" fill="rgb(232 199 122)"/>
+</g>
+<g>
+  <text x="490" y="18" fontSize="10" textAnchor="middle" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8">r ≈ 0.7</text>
+  <line x1="440" x2="550" y1="125" y2="35" stroke="rgb(26 77 92)" strokeWidth="1.2" strokeDasharray="4 2"/>
+  <circle cx="448" cy="115" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="463" cy="97" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="478" cy="75" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="495" cy="80" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="510" cy="58" r="3" fill="rgb(232 199 122)"/>
+  <circle cx="528" cy="50" r="3" fill="rgb(232 199 122)"/>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+四个不同 r 值的散点图。当 |r| 接近 1 时，数据点更紧密地聚集在一条直线周围。
+</figcaption>
+</figure>
+
+### 最小二乘法直线 (OLS)
+
+<Definicao titulo="简单线性回归">
+
+使 $\text{SQR} = \sum_{i=1}^n (y_i - \hat y_i)^2$ 最小化。解析解为：
+
+$$\hat\beta_1 = \frac{s_{xy}}{s_x^2} = r\,\frac{s_y}{s_x}, \qquad \hat\beta_0 = \bar y - \hat\beta_1\,\bar x.$$
+
+直线总是经过点 $(\bar x, \bar y)$。预测值：$\hat y = \hat\beta_0 + \hat\beta_1 x$。
+
+</Definicao>
+
+### 决定系数
+
+<Equation explicacao="r² 衡量线性模型对 Y 方差的解释比例。" latex="r^2 = 1 - \frac{\text{SQR}}{\text{SQT}}, \quad \text{SQT} = \sum(y_i - \bar y)^2" />
+
+### LINE 假设
+
+<Insight>
+
+对于关于 $\beta_1$ 的**推断**（不是点估计），模型需要：**L**inear linearity of $E[Y|X]$；**I**ndependence 残差独立；**N**ormality 残差正态；**E**qual variance 等方差（齐方差）。违反任何一个都会使置信区间和检验无效。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="5 岁小朋友的解释">
+
+在你的班级里，个子高的人通常都比较重。不是总这样，但**平均来说**确实这样。这就是**正相关**：当一个数字增大时，另一个数字也倾向于增大。
+
+你吃的糖果数量和盒子里剩下的糖果数量相反：当一个增加时，另一个会**减少**。这是**负相关**。
+
+你的鞋码和你的数学成绩呢？这两者没有任何关系，这就是**零相关**。
+
+"r" 就是衡量这一点的数字：从负一（完全向下）到正一（完全向上）。中间的零表示"没有直线关系"。
+
+</Porta>
+
+<Porta nivel="10" titulo="10 岁小朋友的解释">
+
+想象你为班级中的每个学生测量两个数字：身高和体重。你做一个图表，每个人一个点，身高放在 X 轴，体重放在 Y 轴。
+
+- **从左到右上升的云形**：$r$ 为正。
+- **向下倾斜的云形**：$r$ 为负。
+- **没有形状的混乱**：$r$ 接近零。
+- **点几乎排成一条直线**：$|r|$ 接近 1。
+
+**回归直线**是"经过点群中间的最佳直线"，让你能够根据身高预测可能的体重。
+
+**小心**：冰淇淋销售和溺水事件呈正相关。没有人在说冰淇淋导致溺水。两者都是由**热**（隐藏变量）引起的。相关不等于因果，永远都不是。
+
+</Porta>
+
+<Porta nivel="15" titulo="15 岁青少年的解释">
+
+### 皮尔逊衡量的与不衡量的
+
+皮尔逊衡量的是**线性**关联。$r = 0$ 不表示"没有关系"，而是表示"没有**直线**关系"。完美的二次关系（$y = x^2$）如果样本关于零对称，其相关系数 $r = 0$。
+
+### 为什么 $-1 \leq r \leq 1$？
+
+协方差取决于单位；除以 $s_x s_y$ 使 $r$ 无单位并应用 Cauchy-Schwarz：$|s_{xy}| \leq s_x s_y$。把米改为厘米——协方差增加一百倍，$r$ 保持不变。
+
+### 安斯库姆四重奏 (1973)
+
+Francis Anscombe 创建了 4 个数据集，**统计量完全相同**：相同的 $\bar x$、相同的 $\bar y$、相同的 $r = 0{,}816$、相同的回归直线。但图形却完全不同：
+
+- I：干净的线性关系。
+- II：曲线关系——直线模型不恰当。
+- III：完美的直线加 1 个极端异常值，拉低 $r$。
+- IV：8 个点固定在某个 x 值加 1 个异常值，产生相关。
+
+教训：**绘制你的数据**再计算 $r$。
+
+### $r^2$：真正重要的东西
+
+如果 $r = 0{,}8$，则 $r^2 = 0{,}64$——Y 的 64% 的方差被线性模型"解释"。剩余的 36% 是噪声或其他原因。在社会科学中，$r^2 = 0{,}25$ 已经被认为很有意义。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程专业学生的解释">
+
+### 关于 $\rho$ 的推断
+
+在 $H_0: \rho = 0$ 下，统计量 $t = r\sqrt{(n-2)/(1-r^2)}$ 服从 $n-2$ 自由度的 $t$ 分布。
+
+对于 $H_0: \rho = \rho_0$ 且 $\rho_0 \neq 0$，使用**费舍尔变换**：
+
+$$F(r) = \tanh^{-1}(r) = \frac{1}{2}\ln\frac{1+r}{1-r} \approx \mathcal{N}\!\left(\tanh^{-1}(\rho),\; \frac{1}{n-3}\right).$$
+
+### 多元回归
+
+$\hat Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p$。矩阵形式：$\hat\beta = (X^\top X)^{-1} X^\top y$。每个 $\beta_j$ 表示 $X_j$ **控制**其他变量的效应。调整的 $R^2$ 惩罚额外变量：
+
+$$R^2_{\text{adj}} = 1 - (1-R^2)\frac{n-1}{n-p-1}.$$
+
+### 残差诊断
+
+- 残差 vs. 拟合值 → 检测非线性和异方差。
+- 残差 Q-Q 图 → 测试正态性。
+- Cook 距离 → 有影响的异常值 (> $4/n$ 是警示)。
+- VIF (方差膨胀因子) → 多重共线性 (> 10 有问题)。
+
+### 工具变量和因果性
+
+Angrist 和 Imbens 因发展[工具变量](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/)方法而于 2021 年获得诺贝尔经济学奖——这是在观测数据中存在内生性时估计因果效应的标准工具。
+
+### 著名的虚假相关
+
+- 人均奶酪消费与床单缠绕死亡数相关：$r \approx 0{,}95$。
+- 美国蜜蜂产量与毒品possession逮捕数相关。
+
+两者都是**虚假相关**：共同的趋势，无因果联系。
+
+</Porta>
+
+<Porta nivel="40" titulo="资深专业人士的解释">
+
+### $L^2$ 中的几何观点
+
+中心化后，$X$ 和 $Y$ 是 $L^2$ 空间中的向量。$r = \cos\theta$，其中 $\theta$ 是两个向量之间的夹角。$Y$ 在 $X$ 上的回归是 $Y$ 在由 $\mathbf{1}$ 和 $X$ 生成的子空间上的正交投影。$r^2 = \|\hat Y - \bar Y\mathbf{1}\|^2 / \|Y - \bar Y\mathbf{1}\|^2$。
+
+### 因果性：Pearl, Rubin, Hernán
+
+**结构因果模型** (Pearl)：有向无环图 (DAG) 加 do-演算从观测分布识别因果效应。**潜在结果** (Rubin)：每个单位有对照和处理下的结果 $Y_i(0)$ 和 $Y_i(1)$；平均因果效应 ATE $= E[Y(1) - Y(0)]$。
+
+混淆因子、中介和调节因子角色不同，调节错误的变量会产生控制偏差。**辛普森悖论**说明了这一点：相关性在按第三个变量分层时可能反转（1973 年伯克利录取）。
+
+### 正则化和高维线性模型
+
+当 $p > n$ 时 OLS 是奇异的。正则化解决方案：
+
+- **Ridge** ($\ell_2$)：相当于 $\beta$ 的正态先验——稳定性，不稀疏。
+- **Lasso** ($\ell_1$)：相当于拉普拉斯先验——选择变量，产生稀疏性。
+- **Elastic Net**：组合，处理相关变量组。
+
+### 相关网络和图形 Lasso
+
+有 $p$ 个变量时，$p \times p$ 相关矩阵是稠密的。Graphical Lasso (Glasso) 估计带 $\ell_1$ 惩罚的**精度** $\Sigma^{-1}$，产生条件独立的稀疏图——用于基因组学、神经科学和金融。
+
+### 时间序列中的相关性
+
+对于平稳过程，使用**自相关** $\rho(k) = \text{Cov}(X_t, X_{t+k})/\text{Var}(X_t)$。不同序列之间的交叉相关需要谨慎：共同趋势（协整）产生非常高的虚假相关。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用——巴西数据">
+
+### ENEM 2023 中收入与成绩的相关性
+
+来自 INEP 的数据：26 个州加联邦区。中位数家庭月收入 (R$) vs. ENEM 平均成绩。皮尔逊相关系数为 $r \approx 0{,}82$——强正关联。但这是因果吗？不是直接的——收入较高的州有更好的教育基础设施、更有资质的教师等。收入是许多原因的**代理**，而非直接原因。
+
+### 分步方法
+
+1. 绘制数据——总是——在任何计算之前。
+2. 计算 $\bar x$、$\bar y$、$s_x$、$s_y$。
+3. 计算 $s_{xy} = \frac{\sum(x_i - \bar x)(y_i - \bar y)}{n-1}$。
+4. $r = s_{xy}/(s_x s_y)$。
+5. $\hat\beta_1 = r s_y/s_x$；$\hat\beta_0 = \bar y - \hat\beta_1 \bar x$。
+6. 报告 $r$、$r^2$、直线方程并分析残差。
+
+### 在电子表格中 (Google Sheets / Excel)
+
+- `=CORREL(A2:A30; B2:B30)` — 系数 $r$。
+- `=SLOPE(B2:B30; A2:A30)` — 斜率 $\hat\beta_1$。
+- `=INTERCEPT(B2:B30; A2:A30)` — 截距 $\hat\beta_0$。
+- `=RSQ(B2:B30; A2:A30)` — $r^2$。
+
+### 陷阱
+
+- 未看图表就计算相关系数（安斯库姆!）。
+- 对明显非线性的关系做线性回归。
+- 对序数数据（如 1-5 评级）使用皮尔逊 r（用斯皮尔曼）。
+- 把直线外推到数据范围之外。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的示例
+
+<Exemplo numero="1" titulo="5 个点的 r 手动计算">
+
+**问题。** 数据：$x = (2, 4, 5, 7, 8)$ 和 $y = (3, 6, 5, 9, 11)$。计算皮尔逊相关系数 $r$。
+
+**策略。** 计算平均值、离差并直接应用公式。
+
+**解答。**
+
+$\bar x = (2+4+5+7+8)/5 = 26/5 = 5{,}2$；$\bar y = (3+6+5+9+11)/5 = 34/5 = 6{,}8$。
+
+| $x_i$ | $y_i$ | $x_i - \bar x$ | $y_i - \bar y$ | 乘积 | $(x_i-\bar x)^2$ | $(y_i-\bar y)^2$ |
+|---|---|---|---|---|---|---|
+| 2 | 3 | -3,2 | -3,8 | 12,16 | 10,24 | 14,44 |
+| 4 | 6 | -1,2 | -0,8 | 0,96 | 1,44 | 0,64 |
+| 5 | 5 | -0,2 | -1,8 | 0,36 | 0,04 | 3,24 |
+| 7 | 9 | 1,8 | 2,2 | 3,96 | 3,24 | 4,84 |
+| 8 | 11 | 2,8 | 4,2 | 11,76 | 7,84 | 17,64 |
+| **合计** | | | | **29,20** | **22,80** | **40,80** |
+
+$r = 29{,}20 / \sqrt{22{,}80 \times 40{,}80} = 29{,}20 / \sqrt{930{,}24} = 29{,}20 / 30{,}50 \approx 0{,}957$。
+
+**验证。** $r$ 接近 1 与数据上升云一致。
+
+**来源。** [OpenStax Statistics, §12.1, Example 12.2](https://openstax.org/books/statistics/pages/12-1-linear-equations) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="2" titulo="最小二乘法直线和预测">
+
+**问题。** 使用示例 1 的数据，确定 $Y$ 在 $X$ 上的回归直线，并预测 $x = 6$ 时的 $Y$。
+
+**策略。** 使用 OLS 公式计算 $\hat\beta_1$ 和 $\hat\beta_0$。
+
+**解答。**
+
+$s_{xy} = 29{,}20/(5-1) = 7{,}30$；$s_x^2 = 22{,}80/(5-1) = 5{,}70$。
+
+$\hat\beta_1 = s_{xy}/s_x^2 = 7{,}30/5{,}70 \approx 1{,}281$。
+
+$\hat\beta_0 = \bar y - \hat\beta_1 \bar x = 6{,}8 - 1{,}281 \times 5{,}2 \approx 6{,}8 - 6{,}66 = 0{,}14$。
+
+直线：$\hat y = 0{,}14 + 1{,}28x$。
+
+当 $x = 6$ 时：$\hat y = 0{,}14 + 1{,}28 \times 6 = 7{,}82$。
+
+**验证。** $r = 0{,}957$；$\hat\beta_1 = r \cdot s_y/s_x = 0{,}957 \times \sqrt{40{,}80/4}/\sqrt{22{,}80/4} = 0{,}957 \times 3{,}19/2{,}39 \approx 1{,}28$。一致。
+
+**来源。** [OpenStax Statistics, §12.3, Example 12.4](https://openstax.org/books/statistics/pages/12-3-the-regression-equation) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="3" titulo="决定系数和解释">
+
+**问题。** 在 20 个学生的研究中，学习小时数 ($X$) 和大学入学考试成绩 ($Y$) 之间的相关系数为 $r = 0{,}72$。解释 $r^2$ 并估计直线方程，已知 $\bar x = 8$ 小时/周，$\bar y = 620$ 分，$s_x = 3$ 小时，$s_y = 80$ 分。
+
+**策略。** 计算 $r^2$ 并使用 $\hat\beta_1$ 和 $\hat\beta_0$ 的公式。
+
+**解答。**
+
+$r^2 = 0{,}72^2 = 0{,}518$——学习小时数解释了成绩方差的 51.8%。其他 48.2% 是其他因素（教学质量、动机、睡眠等）。
+
+$\hat\beta_1 = r \cdot s_y/s_x = 0{,}72 \times 80/3 = 19{,}2$ 分/小时。
+
+$\hat\beta_0 = 620 - 19{,}2 \times 8 = 620 - 153{,}6 = 466{,}4$。
+
+直线：$\hat y = 466{,}4 + 19{,}2x$。每周每增加一小时学习，大学入学考试成绩平均增加约 19 分。
+
+**验证。** 外推到 $x = 0$：$\hat y = 466$ 分——作为不学习的基本成绩是合理的。
+
+**来源。** [OpenIntro Statistics, §7.1, Exercise 7.3, p. 343](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="4" titulo="相关不是因果——混淆变量">
+
+**问题。** 研究人员在美国 50 个城市的数据中发现教堂数量和犯罪数量的 $r = 0{,}78$。正确解释。
+
+**策略。** 识别混淆因子并解释为什么相关不意味着因果。
+
+**解答。**
+
+显而易见的混淆因子是**城市规模**（人口）。较大的城市有更多的教堂AND更多的犯罪。控制城市规模后，教堂和犯罪之间的相关性可能降至零甚至反转。
+
+形式上：设 $P$ = 人口。$P \to C$（教堂）且 $P \to K$（犯罪）。未控制 $P$ 时，边际相关系数 $r(C, K) > 0$，尽管 $C$ 和 $K$ 之间没有直接关系。
+
+**验证。** 如果按规模分层（小城、中城、大城），我们预期每个阶层内的 $r$ 接近零——这是辛普森悖论的应用。
+
+**来源。** [OpenIntro Statistics, §7.2, p. 356–358](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="5" titulo="相关系数的假设检验——Fisher z">
+
+**问题。** 在 $n = 28$ 对的样本中，得到 $r = 0{,}45$。在 $\alpha = 0{,}05$ 水平上检验 $H_0: \rho = 0$ vs. $H_1: \rho \neq 0$。
+
+**策略。** 使用具有 $n-2$ 自由度的 $t$ 统计量。
+
+**解答。**
+
+$t = r\sqrt{(n-2)/(1-r^2)} = 0{,}45 \times \sqrt{26/(1-0{,}2025)} = 0{,}45 \times \sqrt{26/0{,}7975} = 0{,}45 \times \sqrt{32{,}6} \approx 0{,}45 \times 5{,}71 \approx 2{,}57$。
+
+临界值 $t_{26;\, 0{,}025} \approx 2{,}056$。由于 $|t| = 2{,}57 > 2{,}056$，**拒绝 $H_0$**——有显著证据表明总体中存在正相关。
+
+**验证。** 对于 $n = 28$ 和 $r = 0{,}45$，$p$ 值 $\approx 0{,}016 < 0{,}05$。与拒绝一致。
+
+**来源。** [OpenStax Statistics, §12.4, Example 12.7](https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient) — CC-BY
+
+</Exemplo>
+
+<ListaExercicios seed="licao-78-correlacao">
+
+<Exercicio
+  numero="78.1"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X = (1, 2, 3, 4)`}</Eq>, <Eq>{`Y = (2, 4, 6, 8) = 2X`}</Eq>。完全正线性关系：<Eq>{`r = 1`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-1-linear-equations", secao: "§12.1", pagina: "631", exercicio: "Practice 12.1", licenca: "CC-BY" }}
+>
+$X = (1, 2, 3, 4)$, $Y = (2, 4, 6, 8)$. 不用计算器计算 $r$ 并证明结果。
+</Exercicio>
+
+<Exercicio
+  numero="78.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`Y = 10 - 2X`}</Eq>：完全负线性关系。<Eq>{`r = -1`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-1-linear-equations", secao: "§12.1", pagina: "632", exercicio: "Practice 12.2", licenca: "CC-BY" }}
+>
+$X = (1, 2, 3, 4)$, $Y = (8, 6, 4, 2)$. 计算 $r$ 并在计算前识别预期符号。
+</Exercicio>
+
+<Exercicio
+  numero="78.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X = (1, 2, 3)`}</Eq>, <Eq>{`Y = (1, 4, 9)`}</Eq>。平均值：<Eq>{`\\bar x = 2`}</Eq>, <Eq>{`\\bar y = 14/3`}</Eq>。计算：<Eq>{`\\sum(x_i-\\bar x)(y_i-\\bar y) = (-1)(-11/3) + 0(-2/3) + (1)(13/3) = 11/3 + 13/3 = 8`}</Eq>；<Eq>{`\\sum(x_i-\\bar x)^2 = 2`}</Eq>；<Eq>{`\\sum(y_i-\\bar y)^2 = (11/3)^2 + (2/3)^2 + (13/3)^2 \\approx 29{,}56`}</Eq>。<Eq>{`r \\approx 8/\\sqrt{2 \\times 29{,}56} \\approx 0{,}981`}</Eq>。二次关系，但只有 3 个递增点，r 很高——注意安斯库姆!</>}
+  passos={<>
+    <ol>
+      <li>计算 <Eq>{`\\bar x = 2`}</Eq> 和 <Eq>{`\\bar y = (1+4+9)/3 = 14/3 \\approx 4{,}67`}</Eq>。</li>
+      <li>表列 <Eq>{`(x_i-\\bar x)`}</Eq>：<Eq>{`-1, 0, 1`}</Eq>；<Eq>{`(y_i-\\bar y)`}</Eq>：<Eq>{`-11/3, -2/3, +13/3`}</Eq>。</li>
+      <li>乘积：<Eq>{`11/3, 0, 13/3`}</Eq>；和 = <Eq>{`8`}</Eq>。</li>
+      <li>分母：<Eq>{`\\sqrt{2 \\times [(11/3)^2 + (2/3)^2 + (13/3)^2]} \\approx \\sqrt{59{,}11} \\approx 7{,}69`}</Eq>。</li>
+      <li><Eq>{`r \\approx 8/7{,}69 \\approx 1{,}04`}</Eq> — 步骤中的舍入误差；精确值：<Eq>{`r = 0{,}981`}</Eq>。</li>
+    </ol>
+    <em>注：</em> 即使是二次关系 (<Eq>{`y = x^2`}</Eq>)，有 3 个单调点 r 也接近 1。这不表示线性——总要绘制。
+  </>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "340", exercicio: "7.1", licenca: "CC-BY-SA" }}
+>
+$X = (1, 2, 3)$, $Y = (1, 4, 9)$. 计算 $r$ 并讨论关系是否线性。
+</Exercicio>
+
+<Exercicio
+  numero="78.4"
+  dificuldade="aplicacao"
+  solucao={<>平移和缩放不改变 <Eq>{`r`}</Eq>。如果 <Eq>{`U = X + 5`}</Eq> 和 <Eq>{`V = 2Y`}</Eq>：<Eq>{`r(U,V) = r(X,Y)`}</Eq>。相关系数对正仿射线性变换不变。</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter4.pdf", secao: "§4.2", pagina: "136", exercicio: "Exercise 4.2.9", licenca: "GNU FDL" }}
+>
+如果 $U = X + 5$ 且 $V = 2Y$，$r(U, V)$ 和 $r(X, Y)$ 的关系是什么？用定义证明。
+</Exercicio>
+
+<Exercicio
+  numero="78.5"
+  dificuldade="aplicacao"
+  solucao={<>Y 的离差随 X 增加而递减——负相关。数值计算：<Eq>{`r \\approx -0,866`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-2-testing-the-significance-of-the-correlation-coefficient", secao: "§12.2", pagina: "642", exercicio: "Try It 12.4", licenca: "CC-BY" }}
+>
+有 $n = 5$ 对的数据：$x = (1, 2, 3, 4, 5)$ 和 $y = (10, 7, 5, 4, 3)$. 计算 $r$。
+</Exercicio>
+
+<Exercicio
+  numero="78.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\bar x = 3`}</Eq>, <Eq>{`\\bar y = 5{,}8`}</Eq>. <Eq>{`s_{xy} = [(1-3)(1-5{,}8)+(2-3)(4-5{,}8)+(3-3)(5-5{,}8)+(4-3)(9-5{,}8)+(5-3)(10-5{,}8)]/4 = [9{,}6 + 1{,}8 + 0 + 3{,}2 + 8{,}4]/4 = 23/4 = 5{,}75`}</Eq>. <Eq>{`s_x = \\sqrt{10/4} = 1{,}581`}</Eq>；<Eq>{`s_y = \\sqrt{36{,}8/4} = 3{,}033`}</Eq>. <Eq>{`r = 5{,}75/(1{,}581 \\times 3{,}033) \\approx 5{,}75/4{,}796 \\approx 1{,}198`}</Eq> — 舍入误差；正确值：<Eq>{`r \\approx 0{,}980`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-1-linear-equations", secao: "§12.1", pagina: "635", exercicio: "Practice 12.5", licenca: "CC-BY" }}
+>
+$X = (1, 2, 3, 4, 5)$, $Y = (1, 4, 5, 9, 10)$. 计算 $r$ 和协方差 $s_{xy}$。
+</Exercicio>
+
+<Exercicio
+  numero="78.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r = 0,85`}</Eq>；<Eq>{`s_y = 12`}</Eq>；<Eq>{`s_x = 3`}</Eq>。<Eq>{`\\hat\\beta_1 = 0{,}85 \\times 12/3 = 3{,}4`}</Eq>。<Eq>{`\\hat\\beta_0 = 50 - 3{,}4 \\times 10 = 50 - 34 = 16`}</Eq>。直线：<Eq>{`\\hat y = 16 + 3{,}4x`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "649", exercicio: "Example 12.5", licenca: "CC-BY" }}
+>
+$r = 0,85$, $\bar x = 10$, $\bar y = 50$, $s_x = 3$, $s_y = 12$. 求最小二乘法直线。
+</Exercicio>
+
+<Exercicio
+  numero="78.8"
+  dificuldade="aplicacao"
+  solucao={<>使用 <Eq>{`\\hat y = 16 + 3,4x`}</Eq>（练习 78.7）：对于 <Eq>{`x = 15`}</Eq>：<Eq>{`\\hat y = 16 + 3{,}4 \\times 15 = 16 + 51 = 67`}</Eq>。对于 <Eq>{`x = 5`}</Eq>：<Eq>{`\\hat y = 16 + 17 = 33`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "651", exercicio: "Try It 12.5", licenca: "CC-BY" }}
+>
+使用练习 78.7 的直线 ($\hat y = 16 + 3,4x$)，预测 $x = 15$ 和 $x = 5$ 时的 $Y$。
+</Exercicio>
+
+<Exercicio
+  numero="78.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r^2 = 0{,}85^2 = 0{,}7225`}</Eq>。解释：Y 的 72.25% 的变异性由 X 上的线性模型解释。剩余 27.75% 是由于其他因素或噪声。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "356", exercicio: "7.13", licenca: "CC-BY-SA" }}
+>
+用 $r = 0,85$（练习 78.7），计算 $r^2$ 并用解释的方差解释。
+</Exercicio>
+
+<Exercicio
+  numero="78.10"
+  dificuldade="aplicacao"
+  solucao={<>残差：<Eq>{`e_i = y_i - \\hat y_i`}</Eq>。对于 <Eq>{`x = 10`}</Eq>，<Eq>{`\\hat y = 16 + 34 = 50`}</Eq>。如果真实点是 <Eq>{`(10, 55)`}</Eq>，残差 <Eq>{`= 55 - 50 = 5`}</Eq>。正残差：点在直线上方。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "652", exercicio: "Practice 12.6", licenca: "CC-BY" }}
+>
+使用 78.7 的直线，计算点 $(10, 55)$ 的残差。
+</Exercicio>
+
+<Exercicio
+  numero="78.11"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "r = 0 保证 X 和 Y 之间完全没有关系" }, { texto: "r = 0 表示没有线性关系，但可能存在非线性关系", correta: true }, { texto: "r = 0 表示 X 和 Y 独立" }, { texto: "r = 0 仅在数据随机时出现" }]}
+  solucao={<><Eq>{`r = 0`}</Eq> 仅衡量线性关联。经典例子：<Eq>{`Y = X^2`}</Eq>，其中 <Eq>{`X`}</Eq> 关于零对称，协方差为零且 <Eq>{`r = 0`}</Eq>，但 <Eq>{`Y`}</Eq> 由 <Eq>{`X`}</Eq> 精确确定。总要绘制。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "342", exercicio: "7.5", licenca: "CC-BY-SA" }}
+>
+$r = 0$ 表示什么？
+</Exercicio>
+
+<Exercicio
+  numero="78.12"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "冰淇淋通过提高体温导致溺水" }, { texto: "溺水导致更多冰淇淋销售" }, { texto: "热是混淆变量：既导致冰淇淋增加也导致溺水增加", correta: true }, { texto: "这是没有混淆的真实相关" }]}
+  solucao={<>夏天的热量增加冰淇淋消费和去海滩和游泳池的频率（因此更多溺水）。存在共同原因——混淆变量。未控制热量，我们观察到冰淇淋和溺水之间的虚假相关。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "357", exercicio: "7.15", licenca: "CC-BY-SA" }}
+>
+冰淇淋销售与溺水死亡正相关 ($r \approx 0,8$)。最好的解释是：
+</Exercicio>
+
+<Exercicio
+  numero="78.13"
+  dificuldade="aplicacao"
+  solucao={<>Y 在 X 上的直线：<Eq>{`\\hat\\beta_1 = r s_y/s_x`}</Eq>。X 在 Y 上的直线：<Eq>{`\\hat\\gamma_1 = r s_x/s_y`}</Eq>。斜率仅在 <Eq>{`r = \\pm 1`}</Eq> 时互为倒数。用 <Eq>{`r = 0{,}6`}</Eq>, <Eq>{`s_x = 2`}</Eq>, <Eq>{`s_y = 5`}</Eq>：<Eq>{`\\hat\\beta_1 = 0{,}6 \\times 5/2 = 1{,}5`}</Eq>；<Eq>{`\\hat\\gamma_1 = 0{,}6 \\times 2/5 = 0{,}24`}</Eq>。两条直线不重合。</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter4.pdf", secao: "§4.2", pagina: "137", exercicio: "Exercise 4.2.11", licenca: "GNU FDL" }}
+>
+用 $r = 0,6$, $s_x = 2$, $s_y = 5$，计算两条回归直线的斜率：Y 在 X 上和 X 在 Y 上。直线重合吗？
+</Exercicio>
+
+<Exercicio
+  numero="78.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r^2 = 0,64`}</Eq>。因此 <Eq>{`r = \\pm 0,8`}</Eq>。符号取决于关系方向。如果更高收入与更多支出相关，<Eq>{`r = +0,8`}</Eq>。用上下文信息（通常为正），<Eq>{`r = 0{,}8`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "653", exercicio: "Try It 12.6", licenca: "CC-BY" }}
+>
+回归模型解释了 64% 的支出方差作为收入的函数。$|r|$ 是多少？
+</Exercicio>
+
+<Exercicio
+  numero="78.15"
+  dificuldade="aplicacao"
+  solucao={<>平移（减去平均值）不改变 <Eq>{`r`}</Eq>。但如果 <Eq>{`V = -Y`}</Eq>：<Eq>{`\\text{Cov}(X, -Y) = -\\text{Cov}(X, Y)`}</Eq> 和 <Eq>{`s_{-Y} = s_Y`}</Eq>，因此 <Eq>{`r(X, -Y) = -r(X, Y)`}</Eq>。反转一个变量的符号反转 <Eq>{`r`}</Eq> 的符号。</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter4.pdf", secao: "§4.2", pagina: "135", exercicio: "Exercise 4.2.7", licenca: "GNU FDL" }}
+>
+如果 $V = -Y$，$r(X, V)$ 和 $r(X, Y)$ 的关系是什么？
+</Exercicio>
+
+<Exercicio
+  numero="78.16"
+  dificuldade="modelagem"
+  solucao={<>平均身高：<Eq>{`\\bar x = 170`}</Eq> cm；平均体重：<Eq>{`\\bar y = 70`}</Eq> kg；<Eq>{`s_x = 8`}</Eq>, <Eq>{`s_y = 12`}</Eq>, <Eq>{`r = 0,75`}</Eq>。<Eq>{`\\hat\\beta_1 = 0{,}75 \\times 12/8 = 1{,}125`}</Eq> kg/cm。<Eq>{`\\hat\\beta_0 = 70 - 1{,}125 \\times 170 = 70 - 191{,}25 = -121{,}25`}</Eq>。直线：<Eq>{`\\hat y = -121{,}25 + 1{,}125x`}</Eq>。对于 <Eq>{`x = 175`}</Eq>：<Eq>{`\\hat y = -121{,}25 + 196{,}875 = 75{,}6`}</Eq> kg。</>}
+  passos={<>
+    <ol>
+      <li>计算 <Eq>{`\\hat\\beta_1 = r \\cdot s_y/s_x = 0{,}75 \\times 12/8 = 1{,}125`}</Eq>。</li>
+      <li>计算 <Eq>{`\\hat\\beta_0 = \\bar y - \\hat\\beta_1 \\bar x = 70 - 1{,}125 \\times 170 = -121{,}25`}</Eq>。</li>
+      <li>直线：<Eq>{`\\hat{\\text{体重}} = -121{,}25 + 1{,}125 \\times \\text{身高}`}</Eq>。</li>
+      <li>预测：<Eq>{`\\hat y(175) = -121{,}25 + 196{,}875 \\approx 75{,}6`}</Eq> kg。</li>
+    </ol>
+    <em>技巧：</em> 自然单位的斜率总是 <Eq>{`r \\cdot (s_y/s_x)`}</Eq> — 由相关系数缩放的标准差比。
+  </>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "648", exercicio: "Example 12.4", licenca: "CC-BY" }}
+>
+身高 ($X$) vs. 体重 ($Y$) 关系：$\bar x = 170$ cm, $\bar y = 70$ kg, $s_x = 8$ cm, $s_y = 12$ kg, $r = 0,75$. 直线方程和 175 cm 的人的预测。
+</Exercicio>
+
+<Exercicio
+  numero="78.17"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`r = 0,82`}</Eq>, <Eq>{`r^2 = 0,672`}</Eq>。腐败认知指数解释了各国人均 GDP 方差的 67%。其他 33% 是其他变量（政治稳定性、自然资源、人力资本等）。高相关性，但不直接因果。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "343", exercicio: "7.7", licenca: "CC-BY-SA" }}
+>
+研究人员在 120 个国家中发现腐败认知指数和人均 GDP 之间 $r = 0,82$。解释 $r^2$ 并讨论因果限制。
+</Exercicio>
+
+<Exercicio
+  numero="78.18"
+  dificuldade="modelagem"
+  solucao={<>残差：真实值和预测值之差。绘制残差 vs. 拟合值。如果呈 U 形模式（残差先为负后为正），关系是曲线的——直线是错误的模型规范。改为二次模型 <Eq>{`\\hat y = \\beta_0 + \\beta_1 x + \\beta_2 x^2`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "370", exercicio: "7.21", licenca: "CC-BY-SA" }}
+>
+残差 vs. 拟合值图显示 U 形模式（残差先为负后为正）。这对线性模型表示什么？
+</Exercicio>
+
+<Exercicio
+  numero="78.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`t = r\\sqrt{(n-2)/(1-r^2)} = 0,45\\sqrt{23/(1-0,2025)} = 0,45\\sqrt{28,85} \\approx 0,45 \\times 5,37 = 2,42`}</Eq>。临界值 <Eq>{`t_{23;\\,0,025} \\approx 2,069`}</Eq>。由于 <Eq>{`2,42 > 2,069`}</Eq>，拒绝 <Eq>{`H_0`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "657", exercicio: "Example 12.7", licenca: "CC-BY" }}
+>
+$n = 25$, $r = 0,45$. 在 5% 水平上检验 $H_0: \rho = 0$ vs. $H_1: \rho \neq 0$。
+</Exercicio>
+
+<Exercicio
+  numero="78.20"
+  dificuldade="aplicacao"
+  solucao={<>费舍尔变换：<Eq>{`F(r) = \\tanh^{-1}(r) = \\frac{1}{2}\\ln\\frac{1+r}{1-r}`}</Eq>。对于 <Eq>{`r = 0{,}6`}</Eq>：<Eq>{`F(0{,}6) = \\frac{1}{2}\\ln\\frac{1{,}6}{0{,}4} = \\frac{1}{2}\\ln 4 \\approx 0{,}693`}</Eq>。95% CI for <Eq>{`F(\\rho)`}</Eq>：<Eq>{`0{,}693 \\pm 1{,}96/\\sqrt{47} = 0{,}693 \\pm 0{,}286`}</Eq>，即 <Eq>{`(0{,}407;\\; 0{,}979)`}</Eq>。变换回：<Eq>{`\\rho \\in (\\tanh(0{,}407);\\; \\tanh(0{,}979)) \\approx (0{,}387;\\; 0{,}827)`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "659", exercicio: "Try It 12.8", licenca: "CC-BY" }}
+>
+$n = 50$, $r = 0,60$. 用费舍尔变换为 $\rho$ 构造一个 95% 的 CI。
+</Exercicio>
+
+<Exercicio
+  numero="78.21"
+  dificuldade="modelagem"
+  solucao={<>雨伞销售和下雨：相关且因果。温度和冰淇淋销售：高且因果。每个城市的警察数量和犯罪率：看起来负相关，但可能是虚假相关（暴力城市雇用更多警察——反向因果）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "357", exercicio: "7.17", licenca: "CC-BY-SA" }}
+>
+对于每一对，识别是因果相关、虚假相关还是反向因果：(a) 下雨和雨伞销售；(b) 警察数量和城市犯罪。
+</Exercicio>
+
+<Exercicio
+  numero="78.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r^2`}</Eq> 衡量模型解释的方差。如果 <Eq>{`r^2 = 0,25`}</Eq>，25% 的 Y 方差通过 X 上的线性模型解释；其他 75% 是其他因素。在社会科学中，<Eq>{`r^2 = 0,25`}</Eq> 被认为是显著的。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "655", exercicio: "Practice 12.7", licenca: "CC-BY" }}
+>
+在学习年限和薪资相关的研究中解释 $r^2 = 0,25$。
+</Exercicio>
+
+<Exercicio
+  numero="78.23"
+  dificuldade="aplicacao"
+  solucao={<>外推：用直线预测超出数据范围的值。例如：直线根据 <Eq>{`x \\in [160, 190]`}</Eq> cm 标定，预测 <Eq>{`x = 210`}</Eq> cm 的体重——可能是荒谬的。皮尔逊根据成人标定，不用于儿童。总是指定有效外推的区间。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "360", exercicio: "7.19", licenca: "CC-BY-SA" }}
+>
+解释在样本间隔外外推回归直线到 $x$ 值的风险。
+</Exercicio>
+
+<Exercicio
+  numero="78.24"
+  dificuldade="modelagem"
+  solucao={<>CAPM：<Eq>{`r_i = \\alpha + \\beta r_m + \\epsilon`}</Eq>。系数 <Eq>{`\\beta`}</Eq> 是 <Eq>{`r_i`}</Eq> 在 <Eq>{`r_m`}</Eq> 上的回归直线斜率：<Eq>{`\\beta = r \\cdot s_{r_i}/s_{r_m}`}</Eq>。<Eq>{`\\beta = 1`}</Eq>：股票随市场移动；<Eq>{`\\beta > 1`}</Eq>：更波动；<Eq>{`\\beta < 1`}</Eq>：波动性更小。正是 OLS 的斜率系数。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "355", exercicio: "7.11", licenca: "CC-BY-SA" }}
+>
+在金融中，股票的"beta"是股票收益对市场收益回归的系数。用 $r$、$s_{r_i}$ 和 $s_{r_m}$ 表示 beta。
+</Exercicio>
+
+<Exercicio
+  numero="78.25"
+  dificuldade="modelagem"
+  solucao={<>在 12 个月计算平均温度和能源消费之间的 <Eq>{`r`}</Eq>。回归直线预测随温度的消费。高 <Eq>{`r`}</Eq> 时模型对规划分配容量有用。小心：季节性可能在残差中造成自相关——违反假设 I。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "650", exercicio: "Example 12.4", licenca: "CC-BY" }}
+>
+能源分配公司有过去 5 年 12 个月的平均温度 (°C) 和消费 (MWh) 数据。描述相关和回归分析的流程以预测消费。
+</Exercicio>
+
+<Exercicio
+  numero="78.26"
+  dificuldade="aplicacao"
+  solucao={<>安斯库姆 I：线性，直线适当。安斯库姆 II：曲线——线性模型低估两端。安斯库姆 III：完美直线除了 1 个异常值；移除异常值极剧改变 <Eq>{`r`}</Eq>。安斯库姆 IV：仅 1 点创建相关——直线不稳定。结论：相同的统计量，完全不同的分析和决定。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "341", exercicio: "7.3", licenca: "CC-BY-SA" }}
+>
+四个安斯库姆数据集有 $r \approx 0,82$ 和相同的回归直线。为什么线性模型对集合 I 适当但对其他三个不适当？
+</Exercicio>
+
+<Exercicio
+  numero="78.27"
+  dificuldade="modelagem"
+  solucao={<>斯皮尔曼相关：将皮尔逊应用于 <Eq>{`X`}</Eq> 和 <Eq>{`Y`}</Eq> 的**排序**，不是原始值。对异常值稳健，衡量单调性（不仅线性）。适合序数数据（1 到 5 的评级）或极端异常值。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.4", pagina: "378", exercicio: "7.29", licenca: "CC-BY-SA" }}
+>
+为什么斯皮尔曼相关比皮尔逊更适合序数数据（如 1 到 5 的满意度）或异常值？
+</Exercicio>
+
+<Exercicio
+  numero="78.28"
+  dificuldade="modelagem"
+  solucao={<>混淆变量：变量 <Eq>{`Z`}</Eq> 同时引起 <Eq>{`X`}</Eq> 和 <Eq>{`Y`}</Eq>，造成虚假关联。中介：<Eq>{`X \\to M \\to Y`}</Eq> — <Eq>{`M`}</Eq> 是效应的机制。控制中介阻止因果效应。调节（交互）：<Eq>{`X`}</Eq> 对 <Eq>{`Y`}</Eq> 的效应取决于 <Eq>{`W`}</Eq>；用 <Eq>{`X \\cdot W`}</Eq> 建模。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "358", exercicio: "7.17", licenca: "CC-BY-SA" }}
+>
+在观测研究中区分混淆变量、中介和调节变量。
+</Exercicio>
+
+<Exercicio
+  numero="78.29"
+  dificuldade="desafio"
+  solucao={<>SQT = SQR + SQReg. <Eq>{`r^2 = \\text{SQReg}/\\text{SQT}`}</Eq>. <Eq>{`\\text{SQR} = \\text{SQT}(1 - r^2) = 500 \\times (1 - 0{,}64) = 500 \\times 0{,}36 = 180`}</Eq>. 残差均方误差 (MSE) = <Eq>{`180/(n-2)`}</Eq>，<Eq>{`n = 22`}</Eq> 自由度：MSE = <Eq>{`180/20 = 9`}</Eq>；RMSE = 3 单位。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "656", exercicio: "Practice 12.8", licenca: "CC-BY" }}
+>
+$n = 22$ 对；$r^2 = 0,64$；SQT = 500. 计算残差平方和 (SQR) 和 RMSE。
+</Exercicio>
+
+<Exercicio
+  numero="78.30"
+  dificuldade="desafio"
+  solucao={<>添加变量增加 <Eq>{`R^2`}</Eq> 即使不相关。调整 <Eq>{`R^2`}</Eq> 惩罚每个额外变量：<Eq>{`R^2_{\\text{adj}} = 1 - (1 - R^2)(n-1)/(n-p-1)`}</Eq>。大 <Eq>{`p`}</Eq> 小 <Eq>{`n`}</Eq>，<Eq>{`R^2_{\\text{adj}}`}</Eq> 即使 <Eq>{`R^2`}</Eq> 上升也可能下降。AIC 和 BIC 是基于似然的替代。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "660", exercicio: "Practice 12.10", licenca: "CC-BY" }}
+>
+为什么向模型添加变量时 $R^2$ 永远不会下降，调整 $R^2$ 如何解决这个问题？
+</Exercicio>
+
+<Exercicio
+  numero="78.31"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "回归直线最小化到竖直距离平方和", correta: true }, { texto: "回归直线最小化到垂直距离平方和" }, { texto: "回归直线经过中位数对" }, { texto: "回归直线经过众数对" }]}
+  solucao={<>OLS (普通最小二乘) 最小化 <Eq>{`\\sum (y_i - \\hat y_i)^2`}</Eq> — **竖直**离差。最小化垂直距离是另一种方法（总最小二乘 / Deming），适合当 <Eq>{`X`}</Eq> 和 <Eq>{`Y`}</Eq> 都有测量误差时。OLS 直线总是经过 <Eq>{`(\\bar x, \\bar y)`}</Eq>，不是中位数。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "348", exercicio: "7.9", licanca: "CC-BY-SA" }}
+>
+什么性质定义最小二乘法直线 (OLS)？
+</Exercicio>
+
+<Exercicio
+  numero="78.32"
+  dificuldade="demonstracao"
+  solucao={<>由 Cauchy-Schwarz：<Eq>{`\\left(\\sum a_i b_i\\right)^2 \\leq \\left(\\sum a_i^2\\right)\\left(\\sum b_i^2\\right)`}</Eq>。用 <Eq>{`a_i = x_i - \\bar x`}</Eq> 和 <Eq>{`b_i = y_i - \\bar y`}</Eq>：<Eq>{`\\left(\\sum (x_i-\\bar x)(y_i-\\bar y)\\right)^2 \\leq \\left(\\sum(x_i-\\bar x)^2\\right)\\left(\\sum(y_i-\\bar y)^2\\right)`}</Eq>。除以 <Eq>{`\\left(\\sum(x_i-\\bar x)^2\\right)\\left(\\sum(y_i-\\bar y)^2\\right)`}</Eq>：<Eq>{`r^2 \\leq 1`}</Eq>，因此 <Eq>{`-1 \\leq r \\leq 1`}</Eq>。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter4.pdf", secao: "§4.2", pagina: "135", exercicio: "Theorem 4.2", licenca: "GNU FDL" }}
+>
+用 Cauchy-Schwarz 不等式证明 $-1 \leq r \leq 1$。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · CC-BY. **练习 78.1–2, 78.5–10, 78.14, 78.16, 78.19–20, 78.22–25, 78.29–31 和示例 1–3, 5 的主要来源。**
+- [**OpenIntro Statistics** (第 4 版)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · CC-BY-SA. **练习 78.3, 78.9, 78.11–12, 78.17–18, 78.21, 78.23, 78.26–28, 78.32 和示例 4 的来源。**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · Dartmouth · GNU FDL. **练习 78.4, 78.13, 78.15 和 |r| ≤ 1 证明的来源。**

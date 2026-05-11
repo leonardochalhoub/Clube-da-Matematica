@@ -1,0 +1,770 @@
+---
+titulo: "Lição 109 — Estatística bayesiana introdutória"
+slug: "licao-109-bayesiana-intro"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Prior, verossimilhança, posterior. Regra de Bayes. Conjugados Beta-Bernoulli. MAP versus MLE. Intervalo credível. Introdução à inferência pelo paradigma bayesiano."
+ordem: 109
+publicado: true
+tags: ["estatística bayesiana", "prior", "posterior", "verossimilhança", "ano-3", "trim-11"]
+prerrequisitos: ["licao-108-qui-quadrado"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik LK (Alemanha, Klasse 12)", "H2 Math Statistics (Singapura)", "AP Statistics (EUA)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="P(\theta \mid D) = \frac{P(D \mid \theta)\,P(\theta)}{P(D)}"
+  legenda={<><strong>贝叶斯规则</strong>根据观察到的数据 <Eq>{`D`}</Eq> 更新我们对参数 <Eq>{`\\theta`}</Eq> 的信念。<strong>后验分布</strong> <Eq>{`P(\\theta \\mid D)`}</Eq> 正比于<strong>似然函数</strong> <Eq>{`P(D \\mid \\theta)`}</Eq> 与<strong>先验分布</strong> <Eq>{`P(\\theta)`}</Eq> 的乘积，由<strong>证据</strong> <Eq>{`P(D)`}</Eq> 归一化。</>}
+  audioTexto="贝叶斯规则。给定θ的P等于θ的P乘以D的P，除以D的P。后验分布等于似然函数乘以先验分布，进行归一化。所有贝叶斯推断都是这个方程的变体。"
+/>
+
+<aside>
+
+**本讲涵盖的书籍**
+
+- [**Think Bayes** — Allen B. Downey](https://greenteapress.com/wp/think-bayes/) · §1–3 · CC-BY-NC-SA · *用Python进行计算介绍；每个概念（先验、似然、后验）在讲述公式前都通过具体例子构建。*
+- [**Introduction to Probability** — Grinstead & Snell](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) · §4.1 · GNU FDL · *从条件概率出发的经典推导；使用样本空间分割来演示贝叶斯定理的例子。*
+- [**OpenIntro Statistics** — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · §3.6–3.7 · CC-BY-SA · *为不学微积分的学生设计的处理方式；用真实医学案例解释频率派与贝叶斯派的观点。*
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 贝叶斯定理
+
+<Definicao titulo="贝叶斯规则（一般形式）">
+
+设 $\theta$ 是参数（或假说）， $D$ 是观察到的数据。定义：
+
+- $P(\theta)$ — **先验**：观察数据*之前*参数的概率分布。
+- $P(D \mid \theta)$ — **似然函数**（*likelihood*）：给定参数时数据的概率。
+- $P(D)$ — **边际证据**：$P(D) = \int P(D \mid \theta) P(\theta)\, d\theta$（或离散求和）。
+- $P(\theta \mid D)$ — **后验**：观察 $D$ 后的更新分布。
+
+贝叶斯规则：
+
+<Equation explicacao="后验正比于似然乘以先验。分母P(D)仅是归一化常数。" latex="P(\theta \mid D) = \frac{P(D \mid \theta)\, P(\theta)}{P(D)} \propto P(D \mid \theta)\, P(\theta)" />
+
+</Definicao>
+
+> "贝叶斯定理是条件概率的基本结果，但其解释改变了一切：它提供了一个正式的方法，在证据的照亮下更新信念。" — [OpenIntro Statistics §3.6](https://www.openintro.org/book/os/)
+
+### 共轭先验：Beta-Bernoulli情形
+
+<Definicao titulo="共轭族 Beta-Bernoulli">
+
+当 $X_1, \ldots, X_n \stackrel{\text{iid}}{\sim} \text{Bernoulli}(\theta)$ 且先验为 $\theta \sim \text{Beta}(\alpha, \beta)$ 时，后验有闭式解：
+
+<Equation explicacao="在n次试验中有s次成功后，后验是参数更新的另一个Beta分布。" latex="\theta \mid D \;\sim\; \text{Beta}(\alpha + s,\; \beta + n - s)" />
+
+其中 $s = \sum_i X_i$ 是成功次数。Beta分布对Bernoulli分布来说是**共轭的**：先验和后验属于同一族。
+
+Beta分布的密度为：
+
+<Equation explicacao="Beta(a,b)的密度：定义在[0,1]上，由参数a和b控制。" latex="f(\theta; a, b) = \frac{\theta^{a-1}(1-\theta)^{b-1}}{B(a,b)}, \quad \theta \in [0, 1]" />
+
+其中 $B(a, b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$。
+
+</Definicao>
+
+### 点估计量
+
+<Definicao titulo="MAP 和 MLE">
+
+给定后验 $P(\theta \mid D)$：
+
+- **MAP**（*最大后验估计*）：$\hat\theta_{\text{MAP}} = \arg\max_\theta P(\theta \mid D)$。最大化后验——包含先验信息。
+- **MLE**（*最大似然估计*）：$\hat\theta_{\text{MLE}} = \arg\max_\theta P(D \mid \theta)$。最大化似然——忽略先验。
+- **后验平均值**（*二次Bayes估计量*）：$E[\theta \mid D]$。
+
+**关系**：在均匀先验（$P(\theta) = c$）下，MAP = MLE。当 $n \to \infty$ 时，后验集中在 $\hat\theta_{\text{MLE}}$ 处——随着数据增加，先验变得无关。
+
+对于Beta-Bernoulli：
+
+<Equation explicacao="Beta-Bernoulli情形的MAP和后验平均值。与MLE = s/n（经验比例）比较。" latex="\hat\theta_{\text{MAP}} = \frac{\alpha + s - 1}{\alpha + \beta + n - 2}, \quad E[\theta \mid D] = \frac{\alpha + s}{\alpha + \beta + n}" />
+
+</Definicao>
+
+### 可信区间
+
+<Definicao titulo="最高后验密度可信区间（HPD）">
+
+一个**水平为** $1 - \alpha$ 的可信区间是任何满足 $P(\theta \in I \mid D) = 1 - \alpha$ 的区间 $I$。
+
+**HPD**（*最高后验密度*）是所有相同水平的可信区间中最短的。
+
+<Insight>
+贝叶斯可信区间有直接的解释："给定先验和数据，参数位于 $I$ 的概率是 $1-\alpha$"——这是频率派置信区间无法说的。频率派置信区间仅声称该程序在重复样本的 $1-\alpha$ 中覆盖真实参数。
+</Insight>
+
+</Definicao>
+
+### 贝叶斯因子
+
+<Definicao titulo="贝叶斯因子">
+
+为了比较假说 $H_0$ 和 $H_1$：
+
+<Equation explicacao="边际证据的比率。衡量数据对H1相对于H0的支持程度，与先验无关。" latex="BF_{10} = \frac{P(D \mid H_1)}{P(D \mid H_0)}" />
+
+Jeffreys量表：$BF > 10$ — 强证据支持 $H_1$；$BF < 1/10$ — 强证据支持 $H_0$；$1/3 < BF < 3$ — 未能确定。
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 180" className="w-full">
+<defs>
+  <marker id="arr109" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <text x="10" y="22" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">先验 P(θ)</text>
+  <rect x="10" y="30" width="120" height="60" rx="6" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="70" y="65" textAnchor="middle" fontSize="12" fontFamily="serif" fontStyle="italic" fill="currentColor">Beta(α, β)</text>
+</g>
+<g>
+  <text x="180" y="22" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">似然函数</text>
+  <rect x="175" y="30" width="130" height="60" rx="6" fill="rgb(199 107 63 / 0.25)" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+  <text x="240" y="57" textAnchor="middle" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor">P(D | θ)</text>
+  <text x="240" y="75" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">s次成功 / n次试验</text>
+</g>
+<g>
+  <line x1="135" x2="170" y1="60" y2="60" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" markerEnd="url(#arr109)"/>
+  <text x="152" y="52" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.5">×</text>
+</g>
+<g>
+  <line x1="310" x2="345" y1="60" y2="60" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" markerEnd="url(#arr109)"/>
+  <text x="327" y="52" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.5">∝</text>
+</g>
+<g>
+  <text x="355" y="22" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">后验 P(θ|D)</text>
+  <rect x="350" y="30" width="150" height="60" rx="6" fill="rgb(61 122 95 / 0.35)" stroke="rgb(61 122 95)" strokeWidth="1.5"/>
+  <text x="425" y="57" textAnchor="middle" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor">Beta(α+s, β+n−s)</text>
+  <text x="425" y="76" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">更新的信念</text>
+</g>
+<g>
+  <text x="260" y="145" textAnchor="middle" fontSize="11" fontFamily="ui-sans-serif,sans-serif" fill="currentColor" fillOpacity="0.6">贝叶斯更新循环——后验成为下一批数据的先验</text>
+  <line x1="425" x2="425" y1="90" y2="115" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" strokeDasharray="4 3"/>
+  <line x1="425" x2="70" y1="115" y2="115" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" strokeDasharray="4 3" markerEnd="url(#arr109)"/>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+贝叶斯流程：先验 × 似然 → 后验。当新数据到达时，后验成为新的先验。
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="给5岁孩子讲">
+
+你和妈妈在找你**最喜欢的玩具**。你认为它在卧室里——这是你**找之前的想法**（*先验*）。
+
+你去了客厅，发现**玩具的盒子打开**了。现在你更相信它在客厅。你**改变了主意**，因为你看到了线索（*证据*）。
+
+贝叶斯就是这样：
+
+1. 你先有一个想法（先验）。
+2. 你看到一个线索（数据）。
+3. 你更新想法（后验）。
+
+这是学会用数学**从世界中学习**的方式。
+
+</Porta>
+
+<Porta nivel="10" titulo="给10岁孩子讲">
+
+想象你怀疑一枚硬币**有点儿被动过手脚**——但不是很确定。这个怀疑是你的**先验**。
+
+你投掷硬币10次，结果出现**8次正面**。这对于公平的硬币来说很奇怪。你更新你的怀疑——现在认为硬币被动过手脚的概率**高得多**。这个新的估计就是**后验**。
+
+贝叶斯公式精确地进行了这种更新：
+
+$$P(\text{被动过手脚} \mid \text{8次正面}) = \frac{P(\text{8次正面} \mid \text{被动过手脚}) \times P(\text{被动过手脚})}{P(\text{8次正面})}$$
+
+本讲你将学到：如何对任何情况精确地进行这种计算。
+
+</Porta>
+
+<Porta nivel="15" titulo="给15岁青少年讲">
+
+频率派统计学（第10学期和第11学期初）将参数 $\theta$ 视为**固定且未知**——可以估计，但不能说"$\theta$ 的概率"。频率派置信区间不说"总体平均值在 $a$ 到 $b$ 之间的概率是95%"——它说构造置信区间的*程序*在95%的重复样本中捕捉到真实 $\theta$。
+
+**贝叶斯统计学**改变了起点：$\theta$ 被视为**具有概率分布的随机变量**。这允许直接提问，如"$\theta > 0.5$ 的概率是多少？"——答案是后验的积分。
+
+**中心方程：**
+
+$$P(\theta \mid D) \propto \underbrace{P(D \mid \theta)}_{\text{似然}} \times \underbrace{P(\theta)}_{\text{先验}}$$
+
+**如何选择先验？**
+
+- *信息性先验*：你有先验信息（早期试验、专家意见）。例如：$\text{Beta}(3, 3)$ — 稍微倾向公平的硬币。
+- *模糊先验*：你知之甚少。例如：$\text{Beta}(1, 1) = \text{Uniform}[0,1]$。
+- *共轭先验*：选择族使得后验有闭式解。
+
+**Beta-Bernoulli情形：** 对于硬币掷或是/否试验，如果 $\theta \sim \text{Beta}(\alpha, \beta)$ 且观察到 $n$ 次试验中有 $s$ 次成功：
+
+$$\theta \mid D \sim \text{Beta}(\alpha + s, \,\beta + n - s)$$
+
+后验平均值为 $E[\theta \mid D] = \dfrac{\alpha + s}{\alpha + \beta + n}$ — 在先验和样本比例 $s/n$ 之间的加权平均。
+
+</Porta>
+
+<Porta nivel="25" titulo="工科学生">
+
+**参数推断问题：** 给定模型 $X_i \mid \theta \stackrel{\text{iid}}{\sim} p(x \mid \theta)$，我们想从 $x_1, \ldots, x_n$ 学习 $\theta$。
+
+**频率派范式：** $\theta$ 固定——点估计 $\hat\theta$ 和抽样分布。
+
+**贝叶斯范式：** $\theta \sim \pi(\theta)$（先验）。观察数据后，后验为：
+
+$$\pi(\theta \mid \mathbf{x}) = \frac{\prod_{i=1}^n p(x_i \mid \theta) \cdot \pi(\theta)}{\int \prod_{i=1}^n p(x_i \mid \theta) \cdot \pi(\theta)\, d\theta}$$
+
+分母中的积分——边际证据 $p(\mathbf{x})$——在高维中通常难以处理，这激发了计算方法（MCMC、变分推断）。
+
+**渐近性质（Bernstein–von Mises）：** 在规则性条件下，当 $n \to \infty$ 时：
+
+$$\pi(\theta \mid \mathbf{x}) \xrightarrow{d} \mathcal{N}\!\left(\hat\theta_{\text{MLE}},\; \frac{1}{n\,\mathcal{I}(\hat\theta)}\right)$$
+
+其中 $\mathcal{I}(\theta)$ 是Fisher信息。后验收敛到MLE——在足够数据下先验消失。
+
+**常见共轭族：**
+
+| 似然 | 共轭先验 | 后验 |
+|---|---|---|
+| Bernoulli/Binomial | Beta($\alpha$, $\beta$) | Beta($\alpha$+$s$, $\beta$+$n$−$s$) |
+| Poisson | Gamma($\alpha$, $\beta$) | Gamma($\alpha$+$\sum x_i$, $\beta$+$n$) |
+| Normal（已知方差） | Normal($\mu_0$, $\sigma_0^2$) | 加权Normal |
+| Multinomial | Dirichlet | Dirichlet |
+
+**点估计：** 贝叶斯风险（最小化期望损失）由以下最小化：
+- 二次损失 → 后验平均值。
+- 绝对损失 → 后验中位数。
+- 0-1损失 → MAP（后验众数）。
+
+</Porta>
+
+<Porta nivel="40" titulo="资深从业者">
+
+**历史背景：** Thomas Bayes（1701–1761）在1763年身后出版了论文"An Essay towards solving a Problem in the Doctrine of Chances"。Laplace独立地重新发现并在*Théorie analytique des probabilités*（1812）中推广到现代形式。概率的主观解释由Bruno de Finetti（1930年代）和Leonard Jimmie Savage（1954）正式化。
+
+在20世纪，频率派学派（Fisher、Neyman、Pearson）主宰了应用统计——贝叶斯范式被认为是"非科学的"，因为它将参数视为随机。在20世纪下半叶，Harold Jeffreys、I.J. Good，特别是MCMC方法的普及（Gelfand & Smith 1990；Gibbs采样器的Geman & Geman 1984），转变开始了。
+
+**哲学基础：** 主观解释（Savage-de Finetti）将概率视为一致的个人信念程度——理性代理人应该有可由概率测度表示的信念（Savage表示定理）。客观解释（Jeffreys、Bernardo）寻求反映真实无知的"无信息"先验——但无知的概念取决于参数化（Borel-Kolmogorov问题）。
+
+**在现代实践中：** 贝叶斯推断是分层模型（收缩、多水平）、概率机器学习（高斯过程、贝叶斯神经网络）、临床研究（FDA允许自适应试验的贝叶斯方法）和跟踪（Kalman滤波器作为高斯贝叶斯特殊情形）的标准。*Stan*（Carpenter等，2017）和*PyMC*通过NUTS（No-U-Turn Sampler）使任意模型的贝叶斯推断在计算上可行。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="巴西应用">
+
+**情景1 — 医学诊断**
+
+疾病X在巴西人口中的患病率：1000人中有1个（$P(D) = 0.001$）。测试的灵敏度为99%（$P(\text{正} \mid D) = 0.99$），特异度为95%（$P(\text{负} \mid \neg D) = 0.95$）。
+
+$P(D \mid \text{正})$ 是多少？
+
+$$P(D \mid \text{正}) = \frac{0.99 \times 0.001}{0.99 \times 0.001 + 0.05 \times 0.999} \approx 1.94\%$$
+
+反直觉的结果：即使测试呈阳性，患病的概率也不足2%——因为患病率非常低。Bayes形式化解释了为什么在低风险人群中进行筛查会产生许多假阳性。
+
+**情景2 — ENEM：正确率估计**
+
+一道ENEM题有5个选项。未学习时，$P(\text{正确})= 0.2$。学生学得很好时，$P(\text{正确}) = 0.8$。关于"学得好"的先验：60%的考生。在50道题中观察40题正确后，关于"学得好"的后验是什么？
+
+Beta-Binomial模型允许迭代或通过直接Bayes计算来计算这一点，使用两个状态。
+
+**情景3 — 违约率（信贷）**
+
+一家银行的历史数据表明个人信贷违约率为8%。对于新客户，先验：$\text{Beta}(8, 92)$（期望值8%）。在支付了10期分期付款后：后验 $\text{Beta}(8, 102)$，平均值约 $\approx 7.3\%$。风险随着每次付款而更新。
+
+</Porta>
+
+</DuasPortas>
+
+## 解决的例子
+
+<Exemplo numero="1" titulo="离散贝叶斯规则 — 诊断（基础）">
+
+**问题。** 一种疾病影响2%的人口。测试的灵敏度为90%，特异度为85%。患者测试呈阳性。他患有该疾病的概率是多少？
+
+**策略。** 用分割 $\{D, \neg D\}$ 应用贝叶斯公式，计算 $P(D \mid +)$。
+
+**求解。**
+
+$P(D) = 0.02$，$P(\neg D) = 0.98$，$P(+ \mid D) = 0.90$，$P(+ \mid \neg D) = 0.15$。
+
+总证据：
+$$P(+) = P(+ \mid D)\,P(D) + P(+ \mid \neg D)\,P(\neg D)$$
+$$= 0.90 \times 0.02 + 0.15 \times 0.98 = 0.018 + 0.147 = 0.165$$
+
+后验：
+$$P(D \mid +) = \frac{0.90 \times 0.02}{0.165} = \frac{0.018}{0.165} \approx 0.109 = 10.9\%$$
+
+**验证。** 患病率仅为2%，即使测试相当好，也会产生许多假阳性。答案 $\approx 11\%$ 有意义：大多数阳性来自庞大的健康人群。
+
+**来源。** [OpenIntro Statistics §3.6, 医学诊断例子](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="2" titulo="顺序更新 Beta-Bernoulli（中等）">
+
+**问题。** 一个罐子中的红球比例为未知的 $\theta$。先验：$\theta \sim \text{Beta}(2, 2)$。有放回地抽取：第1个样本——5次抽取中3个红球；第2个样本——6次抽取中4个红球。计算每次样本后的后验和最终后验平均值。
+
+**策略。** Beta-Bernoulli：在 $n$ 次试验中有 $s$ 次成功后，$\text{Beta}(\alpha, \beta) \to \text{Beta}(\alpha+s, \beta+n-s)$。按顺序应用。
+
+**求解。**
+
+先验：$\text{Beta}(2, 2)$，平均值 $= 2/4 = 0.50$。
+
+第1次样本后（$s = 3$，$n = 5$）：
+$$\text{Beta}(2+3,\; 2+5-3) = \text{Beta}(5, 4), \quad E[\theta] = \frac{5}{9} \approx 0.556$$
+
+第2次样本后（$s = 4$，$n = 6$）：
+$$\text{Beta}(5+4,\; 4+6-4) = \text{Beta}(9, 6), \quad E[\theta] = \frac{9}{15} = 0.600$$
+
+**验证。** 总数据：11次抽取中7个红球，样本比例 = $7/11 \approx 0.636$。后验平均值0.60在先验（0.50）和样本比例之间——合理。有弱先验时，随着 $n$ 增加，后验收敛到MLE。
+
+**来源。** [Think Bayes §3 — Allen Downey](https://greenteapress.com/wp/think-bayes/) — CC-BY-NC-SA。
+
+</Exemplo>
+
+<Exemplo numero="3" titulo="MAP vs MLE vs 后验平均值（中等）">
+
+**问题。** 对于Beta-Bernoulli模型，$\alpha = 3$，$\beta = 3$，在10次试验中有6次成功后，计算MLE、MAP和后验平均值。解释差异。
+
+**策略。** MLE最大化似然；MAP最大化后验；后验平均值是 $E[\theta \mid D]$。
+
+**求解。**
+
+MLE：$\hat\theta_{\text{MLE}} = s/n = 6/10 = 0.600$。
+
+后验：$\text{Beta}(3+6, 3+4) = \text{Beta}(9, 7)$。
+
+MAP（Beta$(a, b)$的众数，当 $a, b > 1$ 时为 $(a-1)/(a+b-2)$）：
+$$\hat\theta_{\text{MAP}} = \frac{9 - 1}{9 + 7 - 2} = \frac{8}{14} \approx 0.571$$
+
+后验平均值：
+$$E[\theta \mid D] = \frac{9}{9 + 7} = \frac{9}{16} = 0.5625$$
+
+**验证。** 排序：平均值$(0.5625)$在MAP$(0.571)$和Beta(9,7)的众数之间。MLE$(0.60)$最大——先验"拉"向0.5（对称先验环绕0.5）。当 $n$ 很大时，三者都收敛到MLE。
+
+**来源。** [Think Bayes §4, §6 — Allen Downey](https://greenteapress.com/wp/think-bayes/) — CC-BY-NC-SA。
+
+</Exemplo>
+
+<Exemplo numero="4" titulo="95%可信区间 Beta（高级）">
+
+**问题。** 在先验 $\text{Beta}(1, 1)$ 下，10次试验中有12次成功后，计算 $\theta$ 的95%中心可信区间。
+
+**策略。** 后验 $\text{Beta}(13, 9)$。95%中心区间由Beta分布的2.5%和97.5%分位数给出。
+
+**求解。**
+
+后验：$\text{Beta}(1+12, 1+8) = \text{Beta}(13, 9)$。
+
+后验平均值：$13/(13+9) = 13/22 \approx 0.591$。
+
+按表或软件（R：`qbeta(c(0.025, 0.975), 13, 9)`）：
+
+2.5%分位数：$\approx 0.376$。97.5%分位数：$\approx 0.779$。
+
+**95%可信区间：$(0.376;\; 0.779)$。**
+
+**验证。** 直接解释："给定均匀先验和数据，$\theta$ 位于0.376和0.779之间的概率是95%"。注意区间不以0.6为中心——它是非对称的，因为这种情形下Beta是非对称的。
+
+**来源。** [Introduction to Probability §4.1 — Grinstead & Snell](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL。
+
+</Exemplo>
+
+<Exemplo numero="5" titulo="贝叶斯因子 — 假说比较（论证）">
+
+**问题。** 为了测试 $\theta = 0.5$（公平硬币）versus $\theta = 0.7$（歪硬币），先验等概率（$P(H_0) = P(H_1) = 0.5$），在10次掷币中得到8次正面后计算贝叶斯因子和 $H_1$ 的后验概率。
+
+**策略。** 计算每个假说的 $P(D \mid H_i)$，然后应用Bayes。
+
+**求解。**
+
+$$P(D \mid H_0) = \binom{10}{8}(0.5)^{10} = 45 \times \frac{1}{1024} \approx 0.0439$$
+
+$$P(D \mid H_1) = \binom{10}{8}(0.7)^8(0.3)^2 = 45 \times 0.05765 \times 0.09 \approx 0.2335$$
+
+贝叶斯因子：
+$$BF_{10} = \frac{0.2335}{0.0439} \approx 5.32$$
+
+先验 $P(H_0) = P(H_1) = 0.5$：
+$$P(H_1 \mid D) = \frac{BF_{10}}{1 + BF_{10}} = \frac{5.32}{6.32} \approx 0.842$$
+
+**验证。** $BF_{10} \approx 5.32$ — 中等到强证据支持 $H_1$（Jeffreys量表：3到10之间为"中等"）。歪硬币的后验概率从50%上升到84%。与数据一致（10中的8个偏向 $\theta = 0.7$）。
+
+**来源。** [OpenIntro Statistics §3.7 — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-109-bayesiana-intro">
+
+<Exercicio
+  numero="109.1"
+  dificuldade="aplicacao"
+  solucao={<>使用Bayes：<Eq>{`P(\\text{疾病} \\mid +) = \\frac{0.95 \\times 0.01}{0.95 \\times 0.01 + 0.10 \\times 0.99} = \\frac{0.0095}{0.1085} \\approx 8.76\\%`}</Eq>。低先验（1%）即使在合理的测试下也会产生许多假阳性。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.6", pagina: "97", exercicio: "3.38", licenca: "CC-BY-SA" }}
+>
+某疾病的患病率：1%。测试灵敏度：95%。假阳性率：10%。患者测试呈阳性。计算患有该疾病的概率。
+</Exercicio>
+
+<Exercicio
+  numero="109.2"
+  dificuldade="aplicacao"
+  solucao={<>后验：<Eq>{`\\text{Beta}(1+4, 1+6) = \\text{Beta}(5, 7)`}</Eq>。后验平均值：<Eq>{`5/12 \\approx 0.417`}</Eq>。MLE：<Eq>{`4/10 = 0.40`}</Eq>。均匀先验将估计值略微"推动"。</>}
+  passos={<>
+    <ol>
+      <li>均匀先验 = Beta(1,1)。观察前我们一无所知。</li>
+      <li>数据：10次中有4次成功，因此<Eq>{`s=4, n=10`}</Eq>。</li>
+      <li>后验：<Eq>{`\\text{Beta}(1+4, 1+10-4) = \\text{Beta}(5,7)`}</Eq>。</li>
+      <li>后验平均值：<Eq>{`\\alpha/(\\alpha+\\beta) = 5/12 \\approx 0.417`}</Eq>。</li>
+      <li>MLE：样本比例<Eq>{`s/n = 0.40`}</Eq>。因为数据占主导，均匀先验的拉力很小。</li>
+    </ol>
+    <em>技巧：</em> 使用Beta(1,1)先验，后验平均值总是(s+1)/(n+2)——称为Laplace估计。
+  </>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "35", exercicio: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+一枚硬币掷10次，得到4次正面。先验：Beta(1,1)（均匀）。计算后验、后验平均值并与MLE比较。
+</Exercicio>
+
+<Exercicio
+  numero="109.3"
+  dificuldade="aplicacao"
+  solucao={<>后验：<Eq>{`\\text{Beta}(4+7, 6+3) = \\text{Beta}(11, 9)`}</Eq>。平均值：<Eq>{`11/20 = 0.55`}</Eq>。MAP：<Eq>{`(11-1)/(11+9-2) = 10/18 \\approx 0.556`}</Eq>。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "37", exercicio: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+先验：Beta(4, 6)。样本：10次中有7次成功。计算后验、后验平均值和MAP。
+</Exercicio>
+
+<Exercicio
+  numero="109.4"
+  dificuldade="aplicacao"
+  solucao={<>最终后验：<Eq>{`\\text{Beta}(2+5+8, 2+5-5+10-8) = \\text{Beta}(15, 4)`}</Eq>。平均值：<Eq>{`15/19 \\approx 0.789`}</Eq>。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "40", exercicio: "3.5", licenca: "CC-BY-NC-SA" }}
+>
+先验：Beta(2, 2)。批次1：10次中有5次成功。批次2：10次中有8次成功。进行顺序更新，计算最终后验平均值。
+</Exercicio>
+
+<Exercicio
+  numero="109.5"
+  dificuldade="aplicacao"
+  solucao={<>证据：<Eq>{`P(+) = 0.99 \\times 0.005 + 0.02 \\times 0.995 = 0.00495 + 0.01990 = 0.02485`}</Eq>。后验：<Eq>{`0.00495/0.02485 \\approx 19.9\\%`}</Eq>。即使测试非常好，也不足20%。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.6", pagina: "99", exercicio: "3.42", licenca: "CC-BY-SA" }}
+>
+患病率：0.5%。灵敏度：99%。假阳性率：2%。患者测试呈阳性。患有该疾病的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="109.6"
+  dificuldade="aplicacao"
+  solucao={<>MLE：<Eq>{`s/n = 3/10 = 0.30`}</Eq>。先验Beta(1,1)：后验平均值 = 4/12 = 0.333。先验Beta(5,5)：后验平均值 = 8/20 = 0.40。更强的先验对后验的拉力更大。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "38", exercicio: "3.4", licenca: "CC-BY-NC-SA" }}
+>
+10次试验中有3次成功。比较先验Beta(1,1)和Beta(5,5)的后验平均值。哪个先验对后验影响更大？
+</Exercicio>
+
+<Exercicio
+  numero="109.7"
+  dificuldade="aplicacao"
+  solucao={<>Bayes表：<Eq>{`P(E_1 \\mid B) = 0.6 \\times 0.3 / (0.6 \\times 0.3 + 0.3 \\times 0.5 + 0.1 \\times 0.1) = 0.18/0.34 \\approx 52.9\\%`}</Eq>。</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "108", exercicio: "4.1.4", licenca: "GNU FDL" }}
+>
+三家工厂生产螺钉：E1（产量的60%，缺陷率30%）、E2（30%，缺陷率50%）、E3（10%，缺陷率10%）。取出一个缺陷螺钉。它来自E1的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="109.8"
+  dificuldade="aplicacao"
+  solucao={<>0次成功中5次后验：<Eq>{`\\text{Beta}(3+0, 3+5) = \\text{Beta}(3,8)`}</Eq>。平均值：<Eq>{`3/11 \\approx 0.273`}</Eq>。之前：0.50。缺少成功降低了对公平硬币的信念。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "36", exercicio: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+先验：Beta(3, 3)（对公平硬币的轻微信念，平均值0.5）。掷5次，出现0次正面。计算后验和新的平均值。
+</Exercicio>
+
+<Exercicio
+  numero="109.9"
+  dificuldade="aplicacao"
+  solucao={<>Beta(a,b)当a,b大于1时的MAP为<Eq>{`(a-1)/(a+b-2)`}</Eq>。后验：Beta(1+15, 1+5) = Beta(16,6)。MAP：<Eq>{`15/20 = 0.75`}</Eq>。MLE：<Eq>{`15/20 = 0.75`}</Eq>。使用均匀先验，MAP = MLE。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "68", exercicio: "6.1", licenca: "CC-BY-NC-SA" }}
+>
+先验：Beta(1,1)。数据：20次中15次成功。计算MAP和MLE。它们相等吗？为什么？
+</Exercicio>
+
+<Exercicio
+  numero="109.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(H \\mid 2C) = \\frac{P(2C \\mid H)P(H)}{P(2C \\mid H)P(H) + P(2C \\mid J)P(J)} = \\frac{(1)^2 \\times 0.5}{(1)^2 \\times 0.5 + (0.5)^2 \\times 0.5} = \\frac{0.5}{0.625} = 0.8`}</Eq>。有80%的概率是总出现正面的硬币（诚实硬币）。</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "110", exercicio: "4.1.6", licenca: "GNU FDL" }}
+>
+袋子里有两枚硬币：一枚总是出现正面(H)，另一枚公平(J)。随机选一枚。掷两次，都是正面。是硬币H的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="109.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "θ位于区间内的概率是95% — 直接解释。", correta: true },
+    { texto: "该程序在95%的重复样本中捕捉θ。" },
+    { texto: "参数θ以95%的频率派确定性在区间内。" },
+    { texto: "区间包含95%的观察数据。" }
+  ]}
+  solucao={<>贝叶斯可信区间有直接的解释：给定先验和数据，<Eq>{`\\theta`}</Eq>位于区间内的概率恰好是<Eq>{`1-\\alpha`}</Eq>。这是可能的，因为在贝叶斯范式中，<Eq>{`\\theta`}</Eq>是具有分布的随机变量。选项B描述了频率派置信区间。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.7", pagina: "103", exercicio: "3.48", licenca: "CC-BY-SA" }}
+>
+95%贝叶斯可信区间意味着什么？
+</Exercicio>
+
+<Exercicio
+  numero="109.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "当先验均匀时MAP = MLE。", correta: true },
+    { texto: "对于任何先验，MAP总是等于MLE。" },
+    { texto: "MAP和MLE总是不同的。" },
+    { texto: "当n很大时MAP = MLE。" }
+  ]}
+  solucao={<>正确的陈述是A：当先验均匀时MAP = MLE，因为最大化<Eq>{`P(D|\\theta) \\times c`}</Eq>（常数）等价于最大化<Eq>{`P(D|\\theta)`}</Eq>。选项B是错误的——使用非均匀先验，MAP和MLE不同。选项D描述渐近收敛，而非等式。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "70", exercicio: "6.3", licenca: "CC-BY-NC-SA" }}
+>
+关于MAP和MLE哪个陈述是错误的？
+</Exercicio>
+
+<Exercicio
+  numero="109.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "弱先验 → 后验接近MLE；强先验 → 后验被先验拉动。" },
+    { texto: "弱先验 → 后验接近先验；强先验 → 后验被MLE拉动。" },
+    { texto: "当n很小时先验不影响后验。" },
+    { texto: "强先验且n很大 → 后验接近MLE。", correta: true }
+  ]}
+  solucao={<>当<Eq>{`n`}</Eq>很大时，似然主导——后验不管先验如何都收敛到MLE（Bernstein–von Mises结果）。陈述D正确。陈述A对于n很小到中等时的逻辑正确，但当n很大时即使强先验也会消失。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.7", pagina: "104", exercicio: "3.50", licenca: "CC-BY-SA" }}
+>
+样本大小n如何影响先验和后验之间的关系？
+</Exercicio>
+
+<Exercicio
+  numero="109.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(A \\mid B_1) = 0.8, P(B_1) = 0.6, P(A \\mid B_2) = 0.2, P(B_2) = 0.4`}</Eq>。<Eq>{`P(B_1 \\mid A) = (0.8 \\times 0.6)/(0.8 \\times 0.6 + 0.2 \\times 0.4) = 0.48/0.56 \\approx 85.7\\%`}</Eq>。</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "112", exercicio: "4.1.10", licenca: "GNU FDL" }}
+>
+一名学生通过了考试($A$)。已知：$P(A \mid B_1) = 0.8$（学了很多，概率60%），$P(A \mid B_2) = 0.2$（没学，概率40%）。已知他通过了，学了很多的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="109.15"
+  dificuldade="aplicacao"
+  solucao={<>Beta(10, 2)。平均值：10/12 ≈ 0.833。MAP：9/10 = 0.9。信息性先验Beta(4,2)的权重小于数据（6次中6次成功）：后验反映完美序列但记得之前发生过失败。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "41", exercicio: "3.6", licenca: "CC-BY-NC-SA" }}
+>
+机器的成功率未知。先验：Beta(4, 2)（4次成功和2次失败的历史）。新测试：6次连续成功。计算后验、平均值和MAP。
+</Exercicio>
+
+<Exercicio
+  numero="109.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`BF_{10} = P(8C, 2K \\mid \\theta=0.7)/P(8C, 2K \\mid \\theta=0.5)`}</Eq>。分子：<Eq>{`\\binom{10}{8}(0.7)^8(0.3)^2 \\approx 0.2335`}</Eq>。分母：<Eq>{`\\binom{10}{8}(0.5)^{10} \\approx 0.0439`}</Eq>。BF ≈ 5.32。中等证据支持歪硬币。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.7", pagina: "105", exercicio: "3.52", licenca: "CC-BY-SA" }}
+>
+在10次掷币中得到8次正面后，计算$H_1: \theta = 0.7$ vs $H_0: \theta = 0.5$的贝叶斯因子。
+</Exercicio>
+
+<Exercicio
+  numero="109.17"
+  dificuldade="aplicacao"
+  solucao={<>累积后验在30次试验后（20次成功）：Beta(1+20, 1+10) = Beta(21, 11)。平均值：21/32 ≈ 0.656。当n=30时，Beta(1,1)先验权重最小；后验平均值 ≈ MLE = 20/30 = 0.667。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "43", exercicio: "3.8", licenca: "CC-BY-NC-SA" }}
+>
+三批各10次试验：7次成功、6次成功、7次成功。先验：Beta(1,1)。进行顺序更新，计算最终后验平均值。
+</Exercicio>
+
+<Exercicio
+  numero="109.18"
+  dificuldade="aplicacao"
+  solucao={<>证据：P(+) = 0.95 × 0.30 + 0.20 × 0.70 = 0.285 + 0.14 = 0.425。P(疾病 | +) = 0.285/0.425 ≈ 67.1%。高患病率显著改变了正预测值。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.6", pagina: "98", exercicio: "3.40", licenca: "CC-BY-SA" }}
+>
+患病率：30%。灵敏度：95%。假阳性率：20%。患者测试呈阳性。计算患有该疾病的概率，并与练习109.1比较。
+</Exercicio>
+
+<Exercicio
+  numero="109.19"
+  dificuldade="aplicacao"
+  solucao={<>Beta(a,b)的平均值是a/(a+b)。在有s次成功的n次试验后，先验Beta(α,β)：后验平均值 = (α+s)/(α+β+n)。它在先验（α/(α+β)）和样本比例（s/n）之间的加权平均，权重为(α+β)和n。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "66", exercicio: "6.2", licenca: "CC-BY-NC-SA" }}
+>
+证明Beta-Bernoulli模型的后验平均值是先验和样本比例之间的加权平均。识别权重。
+</Exercicio>
+
+<Exercicio
+  numero="109.20"
+  dificuldade="aplicacao"
+  solucao={<>Beta(2+0, 2+3) = Beta(2,5)。平均值：2/7 ≈ 0.286。MAP：(2-1)/(2+5-2) = 1/5 = 0.20。在3次中有0次，后验集中在θ的低值。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "39", exercicio: "3.4b", licenca: "CC-BY-NC-SA" }}
+>
+先验：Beta(2, 2)。数据：3次中0次成功。计算后验、MAP和后验平均值。
+</Exercicio>
+
+<Exercicio
+  numero="109.21"
+  dificuldade="aplicacao"
+  solucao={<>P(下雨 | 乌云) = P(乌云 | 下雨) × P(下雨) / P(乌云)。P(乌云) = 0.85 × 0.4 + 0.3 × 0.6 = 0.34 + 0.18 = 0.52。后验 = 0.34/0.52 ≈ 65.4%。</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "109", exercicio: "4.1.5", licenca: "GNU FDL" }}
+>
+在福塔莱萨某一天下雨的概率：40%。若要下雨，有85%的可能会有浓密乌云。若不下雨，有30%的可能。有浓密乌云。下雨的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="109.22"
+  dificuldade="aplicacao"
+  solucao={<>先验Beta(10, 90)（预期值10%），在20次中有3个缺陷后：Beta(13, 107)。平均值：13/120 ≈ 10.8%。强先验（100次观察的等效值）吸收了小的新样本。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "44", exercicio: "3.9", licenca: "CC-BY-NC-SA" }}
+>
+生产历史：10%缺陷（相当于100件产品中有10个缺陷 = Beta(10,90)）。新检查：20件中有3个缺陷。计算后验和后验平均值。
+</Exercicio>
+
+<Exercicio
+  numero="109.23"
+  dificuldade="aplicacao"
+  solucao={<>P(H) = 1/3，P(J) = 2/3。P(正 | H) = 1，P(正 | J) = 0.5。P(H | 正) = (1 × 1/3) / (1 × 1/3 + 0.5 × 2/3) = (1/3) / (2/3) = 0.5。1次正面后：50%。</>}
+  passos={<>
+    <ol>
+      <li>制作表格：假说、先验、似然、乘积。</li>
+      <li>H（总是正面）：先验1/3，似然1，乘积1/3。</li>
+      <li>J（公平）：先验2/3，似然0.5，乘积1/3。</li>
+      <li>乘积之和 = 2/3。归一化：P(H|正) = (1/3)/(2/3) = 0.5。</li>
+      <li>令人惊讶：1次正面无法区分两枚硬币——J更可能的先验与H的更高似然平衡。</li>
+    </ol>
+    <em>观察：</em> 如果出现5次连续正面，P(H|CCCCC) = (1)⁵×(1/3) / [(1)⁵×(1/3) + (0.5)⁵×(2/3)] ≈ 0.94。
+  </>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "111", exercicio: "4.1.8", licenca: "GNU FDL" }}
+>
+袋子里有3枚硬币：1枚总出现正面(H)，2枚公平(J)。随机取一枚并掷一次：出现正面。是硬币H的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="109.24"
+  dificuldade="aplicacao"
+  solucao={<>使用Beta(1,1)的后验在10次成功中20次：Beta(11,11)。95%中心区间：Beta(11,11)的2.5%和97.5%分位数。由于对称性(a=b)，围绕0.5。约(0.31; 0.69)。</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "115", exercicio: "4.1.12", licenca: "GNU FDL" }}
+>
+先验Beta(1,1)。数据：20次中10次成功。描述后验和95%中心可信区间（使用Beta(11,11)的2.5%分位数≈0.31）。
+</Exercicio>
+
+<Exercicio
+  numero="109.25"
+  dificuldade="modelagem"
+  solucao={<>自然先验：Beta(α, β)，α/(α+β) = 历史通过率（例如：70%）。如果历史表明70%：Beta(7,3)。在20个学生中15个通过后：Beta(22,8)。后验平均值：22/30 ≈ 73.3%。可信区间（使用软件或表）。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "45", exercicio: "3.10", licenca: "CC-BY-NC-SA" }}
+>
+一个培训班历史上在ENEM中通过率为70%。新班级，20名学生：15人通过。提出合适的Beta先验，计算后验和通过率的后验平均值。
+</Exercicio>
+
+<Exercicio
+  numero="109.26"
+  dificuldade="modelagem"
+  solucao={<>医生的贝叶斯反演：P(癌) = 0.002（罕见）。活检呈阳性：灵敏度92%，假阳性3%。P(癌 | 活检+) = (0.92 × 0.002)/(0.92 × 0.002 + 0.03 × 0.998) = 0.00184/0.03178 ≈ 5.8%。即便如此，建议活检，因为不治疗的成本巨大。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.6", pagina: "100", exercicio: "3.44", licenca: "CC-BY-SA" }}
+>
+胰腺癌患病率：0.2%。活检：灵敏度92%，特异度97%。阳性检查。计算P(癌 | 正)并讨论医学决定。
+</Exercicio>
+
+<Exercicio
+  numero="109.27"
+  dificuldade="modelagem"
+  solucao={<>先验Beta(1,1)，50次交付中有20次延迟：Beta(21, 31)。平均值：21/52 ≈ 40.4%。90%可信区间约(0.29; 0.53)。该操作保持接近40%的费率。贝叶斯允许说"有90%的概率费率在29%和53%之间"。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "46", exercicio: "3.11", licenca: "CC-BY-NC-SA" }}
+>
+物流公司报告在监管的50次交付中有20次延迟。使用先验Beta(1,1)，以90%可信区间估计延迟率。
+</Exercicio>
+
+<Exercicio
+  numero="109.28"
+  dificuldade="modelagem"
+  solucao={<>之前：P(欺诈) = 0.01。R$15.000的异常交易。P(大交易 | 欺诈) = 0.85，P(大交易 | 合法) = 0.02。后验：(0.85 × 0.01)/(0.85 × 0.01 + 0.02 × 0.99) = 0.0085/0.0283 ≈ 30.0%。单个可疑信号从1%上升到30%。</>}
+  passos={<>
+    <ol>
+      <li>识别先验：P(欺诈) = 0.01。</li>
+      <li>似然：P(大值 | 欺诈) = 0.85；P(大值 | 合法) = 0.02。</li>
+      <li>计算证据：P(大值) = 0.85 × 0.01 + 0.02 × 0.99 = 0.0085 + 0.0198 = 0.0283。</li>
+      <li>应用Bayes：后验 = 0.0085/0.0283 ≈ 30%。</li>
+      <li>决定：有30%的欺诈概率，值得调查（暂时阻止）。</li>
+    </ol>
+    <em>趣味事实：</em> 真实的反欺诈系统串联多个Bayes：每个信号（位置、时间、金额）顺序更新风险评分。
+  </>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "48", exercicio: "3.12", licenca: "CC-BY-NC-SA" }}
+>
+一家金融科技公司知道1%的交易是欺诈性的。一个算法检测到当前交易的值超出了客户的正常范围。P(异常值 | 欺诈) = 85%，P(异常值 | 合法) = 2%。计算欺诈的概率。
+</Exercicio>
+
+<Exercicio
+  numero="109.29"
+  dificuldade="demonstracao"
+  solucao={<>n次Bernoulli中s次成功的似然：<Eq>{`L(\\theta) = \\binom{n}{s}\\theta^s(1-\\theta)^{n-s}`}</Eq>。Beta(α,β)先验：正比于<Eq>{`\\theta^{\\alpha-1}(1-\\theta)^{\\beta-1}`}</Eq>。后验：正比于<Eq>{`\\theta^{s+\\alpha-1}(1-\\theta)^{n-s+\\beta-1}`}</Eq>，这正好是Beta(α+s, β+n-s)的核。归一化常数是B(α+s, β+n-s)。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "64", exercicio: "6.4", licenca: "CC-BY-NC-SA" }}
+>
+**证明**对于具有Beta先验的Bernoulli模型，后验也是Beta。识别参数。
+</Exercicio>
+
+<Exercicio
+  numero="109.30"
+  dificuldade="demonstracao"
+  solucao={<>均匀先验：Beta(1,1)，在[0,1]上密度常数1。后验有s次成功在n次中：Beta(1+s, 1+n-s)，正比于<Eq>{`\\theta^s(1-\\theta)^{n-s}`}</Eq>。这正好是似然（Bernoulli）。因此最大化后验 = 最大化似然 = MAP = MLE = s/n。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "71", exercicio: "6.5", licensa: "CC-BY-NC-SA" }}
+>
+**论证**对于Bernoulli模型，使用Beta(1,1)先验（均匀）时，MAP估计量与MLE重合。
+</Exercicio>
+
+<Exercicio
+  numero="109.31"
+  dificuldade="aplicacao"
+  solucao={<>P(垃圾邮件 | 3个关键词)应用朴素Bayes：P(垃圾) = 0.2，P(词 | 垃圾) = 0.6^3 = 0.216，P(词 | 合法) = 0.05^3 = 0.000125。后验：(0.216 × 0.2)/(0.216 × 0.2 + 0.000125 × 0.8) = 0.0432/0.04321 ≈ 99.97%。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§4", pagina: "52", exercicio: "4.1", licensa: "CC-BY-NC-SA" }}
+>
+垃圾邮件过滤器：20%的邮件是垃圾。在垃圾邮件中，每个可疑关键词出现的概率为60%；在合法邮件中为5%。一封邮件有3个关键词。是垃圾的概率是多少？
+</Exercicio>
+
+<Exercicio
+  numero="109.32"
+  dificuldade="aplicacao"
+  solucao={<>后验：H1：Beta(1+8, 1+2) = Beta(9,3)；H2：Beta(1+3, 1+7) = Beta(4,8)。平均值：H1 = 9/12 = 0.75；H2 = 4/12 = 0.33。系列1的估计传播概率远大于系列2。H1的95%可信区间约(0.46; 0.94)。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.7", pagina: "106", exercicio: "3.54", licensa: "CC-BY-SA" }}
+>
+两组大鼠：系列1（10个动物，暴露后8个肿瘤）和系列2（10个动物，3个肿瘤）。两个费率的先验Beta(1,1)。计算每个系列的后验和后验平均值。
+</Exercicio>
+
+<Exercicio
+  numero="109.33"
+  dificuldade="aplicacao"
+  solucao={<>在100次中抽取50个橙球后：Beta(1+50, 1+50) = Beta(51,51)。平均值：0.5。MAP：50/100 = 0.5。95%可信区间约(0.40; 0.60)。与n=10的情形相比，当n=100时，可信区间大幅缩窄。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "47", exercicio: "3.13", licensa: "CC-BY-NC-SA" }}
+>
+一个罐子内橙球的比例未知。100次有放回抽取后，50个是橙色。先验Beta(1,1)。计算后验、平均值和95%可信区间。
+</Exercicio>
+
+<Exercicio
+  numero="109.34"
+  dificuldade="desafio"
+  solucao={<>Beta(0.5; 0.5)先验是Bernoulli模型的Jeffreys先验。它对变换是不变的——如果θ → φ = g(θ)，得到的先验也是新参数化的Jeffreys先验。这是"客观上非信息的"意义上不偏向任何参数化。10次中6次成功后：Beta(6.5; 4.5)。平均值≈0.591，与先验均匀的MAP 0.60不同。</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§9", pagina: "110", exercicio: "9.1", licensa: "CC-BY-NC-SA" }}
+>
+Bernoulli的**Jeffreys先验**是Beta(0.5; 0.5)。在10次中6次成功后，计算后验。研究该先验意味着什么"对参数化不变"，并将后验平均值与先验Beta(1,1)比较。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**Think Bayes** — Allen B. Downey](https://greenteapress.com/wp/think-bayes/) · CC-BY-NC-SA · Greenteapress · 第1-9章。
+- [**Introduction to Probability** — Grinstead & Snell](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) · GNU FDL · Dartmouth · §4.1。
+- [**OpenIntro Statistics** — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · CC-BY-SA · OpenIntro · §3.6–3.7。

@@ -1,0 +1,854 @@
+---
+titulo: "Lição 112 — 线性变换"
+slug: "licao-112-transformacoes-lineares"
+categoria: "aulas"
+subcategoria: "ano-3-trim-12"
+descricao: "向量空间之间保持线性组合的函数。在一组基中的矩阵表示。基变换。使机器学习、三维图形和信号处理成为可能的基本运算。"
+ordem: 112
+publicado: true
+tags: ["álgebra linear", "transformação linear", "matriz", "ano-3", "trim-12"]
+prerrequisitos: ["licao-111-espacos-vetoriais"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Leistungskurs alemão (Lineare Algebra)", "Math III japonês", "H2 Math singapurense", "graduação engenharia 1.º semestre"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="T(au + bv) = a\,T(u) + b\,T(v)"
+  legenda={<><strong>线性变换</strong>是向量空间之间保持加法和标量乘法的函数 <Eq>{`T: V \\to W`}</Eq>。在固定基中，它由一个<strong>矩阵</strong>表示：对向量应用 <Eq>{`T`}</Eq> 变成矩阵乘法 <Eq>{`T(v) = Av`}</Eq>。</>}
+  audioTexto="线性变换。T 的 a u 加 b v，等于 a 乘以 T 的 u，加 b 乘以 T 的 v。该函数保持线性组合。在固定基中，应用 T 等同于乘以 T 的矩阵。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    涵盖本课的教材
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="http://linear.ups.edu/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Beezer — A First Course in Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · §LT–§ILT (Linear Transformations) · GNU FDL · </span>
+      <em className="text-clube-mist">公理定义、矩阵表示、核和像——本课的主要参考。</em>
+    </li>
+    <li>
+      <a href="https://hefferon.net/linearalgebra/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hefferon — Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · 第 3 章 (Maps Between Spaces) · CC-BY-SA · </span>
+      <em className="text-clube-mist">平面和空间变换的几何观点；基变换和相似矩阵。</em>
+    </li>
+    <li>
+      <a href="https://linear.axler.net/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Axler — Linear Algebra Done Right (4.ª ed.)
+      </a>
+      <span className="text-clube-mist"> · 第 3 章 (Linear Maps) · CC-BY-NC · </span>
+      <em className="text-clube-mist">不以行列式优先的方法；线性映射作为一流对象及其自有代数。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 线性变换
+
+<Definicao titulo="线性变换（线性映射）">
+
+设 $V$ 和 $W$ 是数域 $K$ 上的向量空间。函数 $T: V \to W$ 称为**线性变换**（或**线性映射**），如果对所有 $u, v \in V$ 和 $a \in K$ 都满足：
+
+<Equation explicacao="加法保持：和的像等于像的和。" latex="T(u + v) = T(u) + T(v)" />
+
+<Equation explicacao="标量保持：倍数的像等于像的倍数。" latex="T(av) = a\,T(v)" />
+
+两个条件可合并为一个：对所有 $u, v \in V$ 和 $a, b \in K$，有 $T(au + bv) = aT(u) + bT(v)$。
+
+</Definicao>
+
+> "线性变换是从一个向量空间映到另一个向量空间的函数，它保持向量空间的加法和标量乘法运算。" — [Beezer — A First Course in Linear Algebra, §LT](http://linear.ups.edu/fcla/section-LT.html)
+
+<Definicao titulo="线性性的直接推论">
+
+每个线性变换都满足：
+
+- **$T(0_V) = 0_W$**：零向量的像是零。（证明：$T(0_V) = T(0 \cdot 0_V) = 0\,T(0_V) = 0_W$。）
+- **$T(-v) = -T(v)$**：相反数的像是像的相反数。
+- **$T\left(\sum_{i=1}^n a_i v_i\right) = \sum_{i=1}^n a_i T(v_i)$**：线性性扩展到任意线性组合。
+
+**注意：** 仿射函数 $x \mapsto Ax + b$（其中 $b \neq 0$）**不是线性的**——违反 $T(0) = 0$。
+
+</Definicao>
+
+> "如果 $T$ 是线性变换，那么 $T(0) = 0$。" — [Beezer — A First Course in Linear Algebra, Teorema LTTZZ, §LT](http://linear.ups.edu/fcla/section-LT.html)
+
+### 矩阵表示
+
+<Definicao titulo="线性变换的矩阵">
+
+固定 $V$ 的基 $\mathcal{B} = \{v_1, \ldots, v_n\}$ 和 $W$ 的基 $\mathcal{C} = \{w_1, \ldots, w_m\}$。**$T$ 在基 $\mathcal{B}$ 和 $\mathcal{C}$ 中的矩阵**，记作 $[T]_{\mathcal{B}}^{\mathcal{C}} \in M_{m \times n}(K)$，是这样的矩阵：其第 $j$ 列是向量 $T(v_j)$ 在基 $\mathcal{C}$ 中的坐标：
+
+<Equation explicacao="[T] 的第 j 列是 T(v_j) 在 C 中的坐标。对于任何向量 v，其在 B 中的坐标为 x，则 T(v) 在 C 中的坐标为 [T]x。" latex="[T]_j = [T(v_j)]_{\mathcal{C}}" />
+
+结果：$T$ 由它在一个基上的值**完全决定**。对任何 $v$ 应用 $T$ 等价于用 $[T]$ 乘以 $v$ 在 $\mathcal{B}$ 中的坐标向量。
+
+</Definicao>
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr112" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="20" y="60" width="120" height="80" rx="10" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="80" y="95" textAnchor="middle" fontSize="13" fontFamily="serif" fontStyle="italic" fill="currentColor">V</text>
+  <text x="80" y="115" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">base B</text>
+</g>
+<g>
+  <rect x="380" y="60" width="120" height="80" rx="10" fill="rgb(199 107 63 / 0.15)" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+  <text x="440" y="95" textAnchor="middle" fontSize="13" fontFamily="serif" fontStyle="italic" fill="currentColor">W</text>
+  <text x="440" y="115" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">base C</text>
+</g>
+<g>
+  <line x1="145" y1="100" x2="375" y2="100" stroke="rgb(232 199 122)" strokeWidth="2.5" markerEnd="url(#arr112)"/>
+  <text x="260" y="90" textAnchor="middle" fontSize="12" fontFamily="serif" fontStyle="italic" fill="rgb(201 163 95)">T</text>
+</g>
+<g>
+  <text x="80" y="170" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">coord. x em B</text>
+  <text x="440" y="170" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">coord. [T]x em C</text>
+</g>
+<g>
+  <text x="260" y="145" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">[T] ∈ M(m×n)</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+图：<em>T</em> 将 <em>V</em>（有基 <em>B</em>）中的向量映到 <em>W</em>（有基 <em>C</em>）。在坐标中，运算就是用矩阵 <em>[T]</em> 相乘。
+</figcaption>
+</figure>
+
+### 基变换与相似矩阵
+
+<Teorema titulo="相似矩阵代表同一变换">
+
+设 $[T]_{\mathcal{B}}$ 和 $[T]_{\mathcal{B}'}$ 是 $T: V \to V$ 在基 $\mathcal{B}$ 和 $\mathcal{B}'$ 中的矩阵，$P$ 是从 $\mathcal{B}'$ 到 $\mathcal{B}$ 的基变换矩阵。则：
+
+<Equation explicacao="相似矩阵：同一变换，不同基。P 可逆——其列是 B' 的向量在 B 中的坐标。" latex="[T]_{\mathcal{B}'} = P^{-1}\,[T]_{\mathcal{B}}\,P" />
+
+两个矩阵 $A$ 和 $B$ 称为**相似**（$A \sim B$），如果存在可逆矩阵 $P$ 使得 $B = P^{-1}AP$。相似矩阵有相同的行列式、相同的迹和相同的特征值。
+
+</Teorema>
+
+> "代表同一线性变换但在不同基中的两个矩阵称为相似矩阵，且 $B = P^{-1}AP$，其中 $P$ 是某个可逆矩阵。" — [Hefferon — Linear Algebra, cap. 3 §III.1](https://hefferon.net/linearalgebra/index.html)
+
+### 复合
+
+<Teorema titulo="线性变换的复合">
+
+如果 $S: U \to V$ 和 $T: V \to W$ 是线性变换，那么 $T \circ S: U \to W$ 是线性的，在固定基中：
+
+<Equation explicacao="复合变成矩阵乘积。顺序：[T][S]（S 先应用，T 后应用——与复合顺序相同）。" latex="[T \circ S] = [T]\,[S]" />
+
+**推论**：矩阵乘积有具体的几何意义——它是变换的复合。
+
+</Teorema>
+
+<Insight>
+
+**为什么用基？** 线性变换 $T$ 是几何对象：独立于坐标而存在。**矩阵**是 $T$ 在特定基中的一张*快照*。改变基就是改变拍照角度——对象本身不变，只是表示方式改变。这激发了对角化（第 115 课）：找到使快照最简单的基。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="给 5 岁小孩">
+
+想象你家门口有一面**魔镜**。
+
+你拿着背包走过去，镜子就照出那个背包。你拿着帽子走过去，它就照出帽子。如果你同时拿着背包和帽子走过去，镜子就照出两个——完全一样你之前分别照出它们的样子。
+
+**线性变换**就是这样诚实的镜子：不编造也不隐藏任何东西。如果你把背包翻倍（变成两个背包），镜子也会把像翻倍。
+
+镜子**不做的**：不会把你推到一边。如果你什么都不带就到达，像也就是什么都没有。（会移动东西的魔镜——那个不是线性的！）
+
+</Porta>
+
+<Porta nivel="10" titulo="给 10 岁小孩">
+
+你知道什么是**旋转**：在平面上旋转一个图形。还有**缩放**：拉伸或缩小。这两个操作都是**线性变换**。
+
+它们的规则很简单：
+
+- 如果你先合并两个向量然后旋转——结果和分别旋转它们再合并是一样的。
+- 如果你先把一个向量翻倍然后旋转——结果和先旋转再翻倍是一样的。
+
+现在来看魔法：**每个线性变换都可以写成矩阵**。
+
+平面上 90° 旋转：
+
+$$R = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$$
+
+把 $R$ 应用到向量 $\begin{pmatrix}1 \\ 0\end{pmatrix}$（指向右）得到 $\begin{pmatrix}0 \\ 1\end{pmatrix}$（指向上）。向量正好旋转了 90°！
+
+</Porta>
+
+<Porta nivel="15" titulo="给 15 岁青少年">
+
+线性变换是**线性代数的中心运算**。你从第 31 课开始学的所有矩阵理论，归根结底都是线性变换的代数。
+
+### 为什么矩阵有效？
+
+在基 $\{e_1, \ldots, e_n\}$ 中，任何向量 $v$ 都可以写成 $v = a_1 e_1 + \cdots + a_n e_n$。由线性性：
+
+$$T(v) = a_1 T(e_1) + \cdots + a_n T(e_n)$$
+
+**结论**：要知道 $T$ 对任何向量做什么，只需知道它对基向量做什么。这些像向量 $T(e_1), \ldots, T(e_n)$ 就是 $T$ 矩阵的**列**。
+
+### 平面上的规范变换
+
+| 变换 | 矩阵 $2 \times 2$ | 作用 |
+|---|---|---|
+| 恒等 | $\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$ | 不改变 |
+| 旋转 $\theta$ | $\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$ | 旋转 $\theta$ 度 |
+| 关于 $x$ 轴反射 | $\begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}$ | 竖直翻转 |
+| 缩放 $k$ | $kI$ | 大小乘以 $k$ |
+| 投影到 $x$ 轴 | $\begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$ | 扔到 $x$ 轴 |
+
+### 复合就是乘积
+
+应用 $S$ 然后 $T$：$(T \circ S)(v) = T(S(v))$。在矩阵中：$[T][S]v$。**注意：顺序很重要。** 一般 $AB \neq BA$。
+
+<Insight>
+
+**基变换**正是这样：从另一个角度看同一变换。当第 115 课讲对角化时，你将找到让矩阵变成对角线（最简形式）的基。一切都从这里开始。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程学生">
+
+在工程学中，线性代数就是：**数据（向量）+ 运算（矩阵）= 系统**。线性变换是矩阵上面的概念层级——掌握这一层将你与"只会计算"的人分开。
+
+### 重要的变换类别
+
+| 类型 | 条件 | 出现在 |
+|---|---|---|
+| 同构 | 双射线性 | 坐标变换 |
+| 正交投影 | $P^2 = P$, $P = P^T$ | 最小二乘法、PCA |
+| 反射 | $R^2 = I$, $R \neq I$ | Householder QR |
+| 旋转 | 正交，$\det = 1$ | 机器人、计算机图形、量子 |
+| 幂零 | $N^k = 0$ 对某个 $k$ | Jordan 标准形、偏微分 |
+| 幂等 | $A^2 = A$ | 投影、条件期望 |
+
+### 计算应用
+
+**计算机图形**：3D 渲染管线使用线性变换复合（模型 → 视图 → 投影）。齐次坐标 $\mathbb{R}^4$ 在更高维度中将平移表示为线性变换。
+
+**信号处理**：离散卷积 = Toeplitz 矩阵乘法。FFT（快速傅立叶变换）是正交线性变换——其高效实现正是使音频压缩成为可能的原因。
+
+**机器学习**：神经网络的每一**密集层**是 $y = W x + b$——线性部分 $Wx$ 是线性变换，$b$ 是仿射部分。层间的所有"信息压缩"都是线性的；非线性来自激活函数（ReLU、sigmoid 等）。
+
+**系统控制**：LTI（线性时不变）系统有动态 $\dot{x} = Ax + Bu$，$y = Cx + Du$。矩阵 $A, B, C, D$ 是常数线性变换。
+
+### 计算成本
+
+矩阵-向量乘法 $A \in \mathbb{R}^{m \times n}$，$v \in \mathbb{R}^n$：$O(mn)$ 操作。矩阵-矩阵乘法：$O(n^3)$（Strassen：$O(n^{2.807})$）。GPU 是专为此设计的硬件——现代所有 AI 通过大规模并行矩阵乘法扩展。
+
+**实际规则**：永远不要显式计算 $A^{-1}$ 来解 $Ax = b$。用 LU 或 Cholesky 分解——相同的 $O(n^3)$ 成本但不累积数值误差。
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士">
+
+### 范畴 $\mathbf{Vect}_K$
+
+线性变换是 $K$ 上向量空间范畴的**态射**。复合是矩阵乘积。恒等元是 $\text{id}_V$。同构是可逆的。这个范畴观点澄清了结构：
+
+- $\text{Hom}(V, W)（所有从 $V$ 到 $W$ 的线性变换的集合）本身是维数为 $(\dim V)(\dim W)$ 的向量空间。
+- 复合是双线性的：$\text{Hom}(V, W) \times \text{Hom}(U, V) \to \text{Hom}(U, W)$。
+
+### 第一同构定理
+
+每个 $T: V \to W$ 承认规范分解：
+
+$$V \twoheadrightarrow V/\ker T \xrightarrow{\bar{T}} \operatorname{Im}(T) \hookrightarrow W$$
+
+其中 $\bar{T}$ 是同构。**秩-零度定理**（rank-nullity）是其推论：$\dim V = \dim \ker T + \dim \operatorname{Im}(T)$。
+
+### 计算分解
+
+对矩阵（变换表示）：
+
+- **LU**：$A = LU$——Gauss 消元，$O(n^3)$，所有直接求解器的基础。
+- **QR**：$A = QR$——Gram-Schmidt 或 Householder。$m \geq n$ 时 $O(mn^2)$。最小二乘和 QR 特征值方法的基础。
+- **Cholesky**：$A = LL^T$ 对 SPD——$O(n^3/3)$，LU 成本的一半。
+- **SVD**：$A = U\Sigma V^T$——第 117 课。最有信息量的分解；总是存在，即使对矩形矩阵也是。
+- **Jordan**：$\mathbb{C}$ 上的规范形式——与 ODE 和控制系统相关。
+
+### 无限维中的算子
+
+在 $L^2(\mathbb{R})$ 中，线性变换包括：
+- **乘法**：$(M_g f)(x) = g(x)f(x)$——若 $g \in L^\infty$ 则有界。
+- **卷积**：$(K_h f)(x) = \int h(x-y)f(y)\,dy$——Young 不等式决定有界性。
+- **微分**：$D = d/dx$——**无界**，但闭的。
+- **傅立叶变换**：在 $L^2$ 中幺正（Plancherel 定理）。
+
+### 谱定理
+
+自伴紧算子在 Hilbert 空间中有离散谱分解——特征值是实的，特征向量正交。**量子力学**就在这里：可观测量是 $L^2$ 中的自伴算子，特征值是可能的测量结果。
+
+**可微编程**：$f: \mathbb{R}^n \to \mathbb{R}^m$ 在一点的导数是线性变换（Jacobian）。所有通过梯度下降的神经网络训练都是对这些无穷小线性性的迭代。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实践——验证线性性">
+
+### 如何验证线性性：实用程序
+
+对任何候选 $T$：
+
+1. 计算 $T(u + v)$ 并与 $T(u) + T(v)$ 比较。它们对所有 $u, v$ 都相等吗？
+2. 计算 $T(\lambda v)$ 并与 $\lambda T(v)$ 比较。它们对所有 $\lambda$ 都相等吗？
+3. 检查 $T(0) = 0$。如果失败，停止——不是线性的。
+
+如果任何条件失败，函数**不是线性的**。
+
+### 如何构造矩阵：列-逐-列算法
+
+1. 选择 $V$ 的基 $\{e_1, \ldots, e_n\}$。
+2. 计算 $T(e_1), T(e_2), \ldots, T(e_n)$（基向量的像）。
+3. 每个 $T(e_j)$，用 $W$ 的基坐标写出，变成矩阵的第 $j$ 列。
+
+**例**：$T: \mathbb{R}^2 \to \mathbb{R}^2$，$T(x, y) = (2x + y,\ x - 3y)$。
+
+规范基：$e_1 = (1, 0)$，$e_2 = (0, 1)$。
+
+$T(e_1) = T(1, 0) = (2, 1) \Rightarrow$ 列 1：$\begin{pmatrix}2\\1\end{pmatrix}$
+
+$T(e_2) = T(0, 1) = (1, -3) \Rightarrow$ 列 2：$\begin{pmatrix}1\\-3\end{pmatrix}$
+
+矩阵：$[T] = \begin{pmatrix}2 & 1 \\ 1 & -3\end{pmatrix}$。
+
+### 金融应用：投资组合回报
+
+有 $n$ 个资产和权重 $w = (w_1, \ldots, w_n)$ 的投资组合有期望回报 $r_p = w^\top \mu$，其中 $\mu$ 是期望回报向量。这是线性变换 $T: \mathbb{R}^n \to \mathbb{R}$，$T(w) = w^\top \mu$。投资组合优化（Markowitz）最小化 $w^\top \Sigma w$ 受约束于 $w^\top \mu = r_\text{target}$——线性约束下的二次问题。
+
+### 对于第 12 学期的其余课程
+
+整个第 12 学期的课程都建立在线性变换基础上：
+
+- **第 113 课**：核和像（$\ker T$ 和 $\operatorname{Im} T$）、秩-零度定理。
+- **第 114 课**：特征值和特征向量（$T$ 只缩放的方向）。
+- **第 115 课**：对角化（$[T]$ 变成对角的基）。
+- **第 117 课**：SVD（最通用的分解，总是存在）。
+
+掌握本课的概念是所有后续课程的先决条件。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo titulo="验证 T(x, y) = (2x, 3y) 的线性性" numero="1">
+
+**问题：** 确定 $T: \mathbb{R}^2 \to \mathbb{R}^2$（定义为 $T(x, y) = (2x,\, 3y)$）是否是线性变换。
+
+**策略：** 验证定义的两个条件：加法保持和标量保持。使用通用向量。
+
+**求解：**
+
+设 $u = (x_1, y_1)$ 和 $v = (x_2, y_2)$ 是 $\mathbb{R}^2$ 中的向量，$a \in \mathbb{R}$ 是标量。
+
+1. **加法保持：**
+$$T(u + v) = T(x_1 + x_2,\; y_1 + y_2) = (2(x_1+x_2),\; 3(y_1+y_2))$$
+$$= (2x_1 + 2x_2,\; 3y_1 + 3y_2) = (2x_1, 3y_1) + (2x_2, 3y_2) = T(u) + T(v). \checkmark$$
+
+2. **标量保持：**
+$$T(a u) = T(ax_1, ay_1) = (2ax_1,\; 3ay_1) = a(2x_1, 3y_1) = a\,T(u). \checkmark$$
+
+**验证：** 由于两个条件都为通用向量验证了，$T$ 是线性的。另外，$T(0, 0) = (0, 0) = 0$——与线性性一致。
+
+**来源。** [Beezer — A First Course in Linear Algebra, §LT 例 LTPM](http://linear.ups.edu/fcla/section-LT.html) — GNU FDL 许可。
+
+</Exemplo>
+
+<Exemplo titulo="构造 60 度旋转矩阵" numero="2">
+
+**问题：** 找到代表 $\mathbb{R}^2$ 中 60° 旋转的 $2 \times 2$ 矩阵。
+
+**策略：** 应用列-逐-列算法：计算 $T$ 如何映射 $e_1 = (1,0)$ 和 $e_2 = (0,1)$。像就是列。
+
+**求解：**
+
+1. **$e_1$ 的像：** 向量 $(1, 0)$ 指向右（角度 $0°$）。旋转 60° 后，指向角度 $60°$：
+$$T(e_1) = (\cos 60°,\; \sin 60°) = \left(\frac{1}{2},\; \frac{\sqrt{3}}{2}\right)$$
+
+2. **$e_2$ 的像：** 向量 $(0, 1)$ 指向上（角度 $90°$）。旋转 60° 后，指向角度 $150°$：
+$$T(e_2) = (\cos 150°,\; \sin 150°) = \left(-\frac{\sqrt{3}}{2},\; \frac{1}{2}\right)$$
+
+3. **组装矩阵**（列 = 像）：
+$$[T] = \begin{pmatrix} \cos 60° & \cos 150° \\ \sin 60° & \sin 150° \end{pmatrix} = \begin{pmatrix} 1/2 & -\sqrt{3}/2 \\ \sqrt{3}/2 & 1/2 \end{pmatrix}$$
+
+**验证：** $\det[T] = (1/2)(1/2) - (-\sqrt{3}/2)(\sqrt{3}/2) = 1/4 + 3/4 = 1$。旋转保持面积——$\det = 1$ 正确。而且 $[T]^\top [T] = I$（正交矩阵），确认范数被保持。
+
+**来源。** [Hefferon — Linear Algebra, cap. 3 §I 例 1.9](https://hefferon.net/linearalgebra/index.html) — CC-BY-SA 许可。
+
+</Exemplo>
+
+<Exemplo titulo="在 P2 中的微分——规范基中的矩阵" numero="3">
+
+**问题：** 定义 $D: \mathcal{P}_2 \to \mathcal{P}_2$ 为 $D(p) = p'$（通常导数）。证明 $D$ 是线性的并在基 $\mathcal{B} = \{1, x, x^2\}$ 中找到它的矩阵。
+
+**策略：** (1) 使用导数性质验证线性性。(2) 计算 $D$ 在每个基向量上的作用并组装列。
+
+**求解：**
+
+1. **线性性：**
+$$D(p + q) = (p + q)' = p' + q' = D(p) + D(q). \checkmark$$
+$$D(\lambda p) = (\lambda p)' = \lambda p' = \lambda D(p). \checkmark$$
+
+2. **基向量的像：**
+
+$$D(1) = 0 = 0 \cdot 1 + 0 \cdot x + 0 \cdot x^2 \Rightarrow \text{列 1: } \begin{pmatrix}0\\0\\0\end{pmatrix}$$
+
+$$D(x) = 1 = 1 \cdot 1 + 0 \cdot x + 0 \cdot x^2 \Rightarrow \text{列 2: } \begin{pmatrix}1\\0\\0\end{pmatrix}$$
+
+$$D(x^2) = 2x = 0 \cdot 1 + 2 \cdot x + 0 \cdot x^2 \Rightarrow \text{列 3: } \begin{pmatrix}0\\2\\0\end{pmatrix}$$
+
+3. **矩阵：**
+$$[D]_{\mathcal{B}} = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 2 \\ 0 & 0 & 0 \end{pmatrix}$$
+
+**验证：** 将 $[D]$ 应用到 $p = 3 + 2x + 5x^2$ 的坐标向量 $(3, 2, 5)^\top$：
+$$[D]\begin{pmatrix}3\\2\\5\end{pmatrix} = \begin{pmatrix}2\\10\\0\end{pmatrix}$$
+这对应多项式 $2 + 10x$。事实上 $p'(x) = 2 + 10x$。正确。
+
+**来源。** [Beezer — A First Course in Linear Algebra, §LT 例 MLTCV](http://linear.ups.edu/fcla/section-LT.html) — GNU FDL 许可。
+
+</Exemplo>
+
+<Exemplo titulo="基变换——同一 T，不同矩阵" numero="4">
+
+**问题：** 设 $T: \mathbb{R}^2 \to \mathbb{R}^2$ 是关于 $x$ 轴的反射：$T(x, y) = (x, -y)$。
+(a) 在规范基 $\mathcal{B} = \{e_1, e_2\}$ 中找到 $[T]$。
+(b) 在基 $\mathcal{B}' = \{(1,1),\, (1,-1)\}$ 中找到 $[T]$。
+(c) 确认 $[T]_{\mathcal{B}'} = P^{-1}[T]_{\mathcal{B}}\,P$。
+
+**策略：** (a) 在每个基中用列-逐-列算法。(c) 使用基变换公式，其中 $P$ = 其列为 $\mathcal{B}'$ 中向量在 $\mathcal{B}$ 坐标中的矩阵。
+
+**求解：**
+
+**(a)** 规范基：
+$$T(e_1) = T(1, 0) = (1, 0) \Rightarrow \text{列 1: } (1, 0)^\top$$
+$$T(e_2) = T(0, 1) = (0, -1) \Rightarrow \text{列 2: } (0, -1)^\top$$
+$$[T]_{\mathcal{B}} = \begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}$$
+
+**(b)** 基 $\mathcal{B}' = \{v_1, v_2\} = \{(1,1),(1,-1)\}$。计算像用 $\mathcal{B}'$ 坐标：
+$$T(v_1) = T(1,1) = (1,-1) = v_2 = 0 \cdot v_1 + 1 \cdot v_2 \Rightarrow \text{列 1: } (0, 1)^\top$$
+$$T(v_2) = T(1,-1) = (1,1) = v_1 = 1 \cdot v_1 + 0 \cdot v_2 \Rightarrow \text{列 2: } (1, 0)^\top$$
+$$[T]_{\mathcal{B}'} = \begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix}$$
+
+**(c)** 矩阵 $P$（列为 $v_1, v_2$ 在规范坐标中）：
+$$P = \begin{pmatrix}1 & 1 \\ 1 & -1\end{pmatrix}, \quad P^{-1} = \frac{1}{-2}\begin{pmatrix}-1 & -1 \\ -1 & 1\end{pmatrix} = \begin{pmatrix}1/2 & 1/2 \\ 1/2 & -1/2\end{pmatrix}$$
+
+$$P^{-1}[T]_{\mathcal{B}}P = \begin{pmatrix}1/2 & 1/2 \\ 1/2 & -1/2\end{pmatrix}\begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}\begin{pmatrix}1 & 1 \\ 1 & -1\end{pmatrix} = \begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix} = [T]_{\mathcal{B}'}. \checkmark$$
+
+**验证：** 在 $\mathcal{B}'$ 中，反射交换 $v_1 \leftrightarrow v_2$，所以矩阵应该恰好是排列 $\begin{pmatrix}0&1\\1&0\end{pmatrix}$——几何上有意义。
+
+**来源。** [Hefferon — Linear Algebra, cap. 3 §V 练习 1.18](https://hefferon.net/linearalgebra/index.html) — CC-BY-SA 许可。
+
+</Exemplo>
+
+<Exemplo titulo="变换复合与矩阵乘积" numero="5">
+
+**问题：** 定义 $S: \mathbb{R}^2 \to \mathbb{R}^2$ 为水平错切 $S(x, y) = (x + 2y,\, y)$ 和 $T: \mathbb{R}^2 \to \mathbb{R}^2$ 为反射 $T(x, y) = (-x,\, y)$。计算 (a) 矩阵 $[S]$ 和 $[T]$；(b) $T \circ S$ 的矩阵；(c) 直接计算 $(T \circ S)(3, 1)$ 并通过矩阵乘积验证。
+
+**策略：** 用列-逐-列算法得到每个变换。复合 = 矩阵乘积 $[T][S]$。
+
+**求解：**
+
+**(a)** 矩阵通过列-逐-列：
+$$[S] = \begin{pmatrix}1 & 2 \\ 0 & 1\end{pmatrix}, \quad [T] = \begin{pmatrix}-1 & 0 \\ 0 & 1\end{pmatrix}$$
+
+**(b)** 复合 $T \circ S$（先应用 $S$ 后应用 $T$）：
+$$[T \circ S] = [T][S] = \begin{pmatrix}-1 & 0 \\ 0 & 1\end{pmatrix}\begin{pmatrix}1 & 2 \\ 0 & 1\end{pmatrix} = \begin{pmatrix}-1 & -2 \\ 0 & 1\end{pmatrix}$$
+
+**(c)** 验证 $(3, 1)$：
+
+**直接：** $S(3, 1) = (3 + 2\cdot1,\; 1) = (5, 1)$。然后 $T(5, 1) = (-5, 1)$。
+
+**通过矩阵：** $[T \circ S]\begin{pmatrix}3\\1\end{pmatrix} = \begin{pmatrix}-1 & -2 \\ 0 & 1\end{pmatrix}\begin{pmatrix}3\\1\end{pmatrix} = \begin{pmatrix}-3-2\\0+1\end{pmatrix} = \begin{pmatrix}-5\\1\end{pmatrix}$。
+
+结果：$(-5, 1)$——相同。矩阵乘积 = 变换复合。
+
+**来源。** [Axler — Linear Algebra Done Right 4.ª ed., §3B 练习 1](https://linear.axler.net/) — CC-BY-NC 许可。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-112-transformacoes-lineares">
+
+### 块 A——线性性验证（112.1 至 112.12）
+
+<Exercicio numero="112.1" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C20", licenca: "GNU FDL" }}
+  solucao={<>我们验证两个条件。设 <Eq>{`u = (x_1,y_1)`}</Eq>，<Eq>{`v = (x_2,y_2)`}</Eq>。加法：<Eq>{`T(u+v) = (2(x_1+x_2), 3(y_1+y_2)) = T(u)+T(v)`}</Eq>。标量：<Eq>{`T(au) = (2ax_1, 3ay_1) = aT(u)`}</Eq>。因此 <Eq>{`T`}</Eq> 是线性的。矩阵：<Eq>{`\\begin{pmatrix}2&0\\\\0&3\\end{pmatrix}`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>写出通用向量 <Eq>{`u = (x_1,y_1)`}</Eq>，<Eq>{`v = (x_2,y_2)`}</Eq> 和标量 <Eq>{`a \\in \\mathbb{R}`}</Eq>。我们用通用的来证明<em>所有</em>对，而不仅仅一个例子。</li>
+      <li>加法条件：计算 <Eq>{`T(u+v)`}</Eq> 并与 <Eq>{`T(u)+T(v)`}</Eq> 比较。它们应该相等。</li>
+      <li>标量条件：计算 <Eq>{`T(au)`}</Eq> 并与 <Eq>{`aT(u)`}</Eq> 比较。</li>
+      <li>对于矩阵：应用列-逐-列算法。<Eq>{`T(e_1) = T(1,0) = (2,0)`}</Eq> → 列 1。<Eq>{`T(e_2) = T(0,1) = (0,3)`}</Eq> → 列 2。</li>
+    </ol>
+    <em>技巧：</em> <Eq>{`T(x,y) = (2x, 3y)`}</Eq> 是非均匀缩放——$x$ 轴拉伸 2 倍，$y$ 轴拉伸 3 倍。缩放变换总是线性的。
+  </>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$，$T(x, y) = (2x,\, 3y)$。验证 $T$ 是线性的并找到它的矩阵。
+</Exercicio>
+
+<Exercicio numero="112.2" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "不是线性的——违反 $T(0) = 0$", correta: true },
+    { texto: "是线性的——满足 $T(u+v)=T(u)+T(v)$" },
+    { texto: "是线性的——是仿射函数" },
+    { texto: "不是线性的——不是单射" },
+  ]}
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C21", licenca: "GNU FDL" }}
+  solucao={<>只需测试零点：<Eq>{`T(0,0) = (0+1, 0) = (1,0) \\neq (0,0)`}</Eq>。由于每个线性变换都满足 <Eq>{`T(0) = 0`}</Eq>，这个函数不是线性的。它是一个平移，即仿射变换。</>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$，$T(x, y) = (x + 1,\, y)$。为什么 $T$ 不是线性变换？
+</Exercicio>
+
+<Exercicio numero="112.3" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.1", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T(x) = x^2`}</Eq> 不是线性的。例：<Eq>{`T(1+1) = T(2) = 4`}</Eq>，但 <Eq>{`T(1)+T(1) = 1+1 = 2 \\neq 4`}</Eq>。加法条件失败。另外，<Eq>{`T(-1) = 1 \\neq -1 = -T(1)`}</Eq>。</>}
+>
+$T: \mathbb{R} \to \mathbb{R}$，$T(x) = x^2$。给出一个具体反例证明 $T$ 不是线性的。
+</Exercicio>
+
+<Exercicio numero="112.4" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C22", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T(x,y) = (y,x)`}</Eq> 是线性的。矩阵：<Eq>{`T(e_1) = T(1,0) = (0,1)`}</Eq> 和 <Eq>{`T(e_2) = T(0,1) = (1,0)`}</Eq>。因此 <Eq>{`[T] = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>。这是排列矩阵——它交换坐标。</>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$，$T(x, y) = (y,\, x)$。证明它是线性的并找到它的 $2 \times 2$ 矩阵。
+</Exercicio>
+
+<Exercicio numero="112.5" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C30", licenca: "GNU FDL" }}
+  solucao={<>是线性的。矩阵 <Eq>{`2 \\times 3`}</Eq>：<Eq>{`T(e_1)=(1,0)`}</Eq>，<Eq>{`T(e_2)=(1,1)`}</Eq>，<Eq>{`T(e_3)=(0,1)`}</Eq>。因此 <Eq>{`[T] = \\begin{pmatrix}1&1&0\\\\0&1&1\\end{pmatrix}`}</Eq>。</>}
+>
+$T: \mathbb{R}^3 \to \mathbb{R}^2$，$T(x, y, z) = (x + y,\, y + z)$。证明它是线性的并找到 $2 \times 3$ 矩阵。
+</Exercicio>
+
+<Exercicio numero="112.6" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.5", licenca: "CC-BY-NC" }}
+  solucao={<>微分 <Eq>{`D: \\mathcal{P}_3 \\to \\mathcal{P}_3`}</Eq>，<Eq>{`D(p) = p'`}</Eq>。基 <Eq>{`\\{1, x, x^2, x^3\\}`}</Eq>：<Eq>{`D(1)=0`}</Eq>，<Eq>{`D(x)=1`}</Eq>，<Eq>{`D(x^2)=2x`}</Eq>，<Eq>{`D(x^3)=3x^2`}</Eq>。矩阵 <Eq>{`4\\times4`}</Eq>：<Eq>{`[D] = \\begin{pmatrix}0&1&0&0\\\\0&0&2&0\\\\0&0&0&3\\\\0&0&0&0\\end{pmatrix}`}</Eq>。它是幂零的：<Eq>{`D^4=0`}</Eq>。</>}
+>
+$D: \mathcal{P}_3 \to \mathcal{P}_3$，$D(p) = p'$。找到基 $\{1, x, x^2, x^3\}$ 中的 $4 \times 4$ 矩阵。这个矩阵有什么特别的？
+</Exercicio>
+
+<Exercicio numero="112.7" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C31", licenca: "GNU FDL" }}
+  solucao={<>积分 <Eq>{`I: \\mathcal{P}_2 \\to \\mathcal{P}_3`}</Eq>，<Eq>{`I(p)(x) = \\int_0^x p(t)\\,dt`}</Eq>。由积分性质是线性的。像：<Eq>{`I(1)=x`}</Eq>，<Eq>{`I(x)=x^2/2`}</Eq>，<Eq>{`I(x^2)=x^3/3`}</Eq>。矩阵 <Eq>{`4\\times3`}</Eq>：列是 <Eq>{`(0,1,0,0)^\\top`}</Eq>，<Eq>{`(0,0,1/2,0)^\\top`}</Eq>，<Eq>{`(0,0,0,1/3)^\\top`}</Eq>。</>}
+>
+$I: \mathcal{P}_2 \to \mathcal{P}_3$，$I(p)(x) = \int_0^x p(t)\,dt$。证明它是线性的并在规范基中找到 $4 \times 3$ 矩阵。
+</Exercicio>
+
+<Exercicio numero="112.8" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.11", licenca: "CC-BY-SA" }}
+  solucao={<>转置 <Eq>{`T(A) = A^T`}</Eq> 在 <Eq>{`\\mathcal{M}_2`}</Eq> 中。规范基：<Eq>{`E_{11}, E_{12}, E_{21}, E_{22}`}</Eq>。<Eq>{`T(E_{11})=E_{11}`}</Eq>，<Eq>{`T(E_{12})=E_{21}`}</Eq>，<Eq>{`T(E_{21})=E_{12}`}</Eq>，<Eq>{`T(E_{22})=E_{22}`}</Eq>。矩阵 <Eq>{`4\\times4`}</Eq>：排列坐标 2 和 3。它是线性的，因为 <Eq>{`(A+B)^T = A^T+B^T`}</Eq> 和 <Eq>{`(aA)^T = aA^T`}</Eq>。</>}
+>
+$T: \mathcal{M}_2 \to \mathcal{M}_2$，$T(A) = A^\top$。证明它是线性的并在 $\mathcal{M}_2$ 的规范基中写出 $4 \times 4$ 矩阵。
+</Exercicio>
+
+<Exercicio numero="112.9" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.10", licenca: "CC-BY-NC" }}
+  solucao={<>是的，它是线性的。固定 <Eq>{`B`}</Eq>，对任何 <Eq>{`A_1, A_2`}</Eq> 和标量 <Eq>{`a`}</Eq>：<Eq>{`(A_1+A_2)B = A_1 B + A_2 B`}</Eq>（分配律）和 <Eq>{`(aA)B = a(AB)`}</Eq>（结合律）。矩阵乘法的两个性质都保证线性性。</>}
+>
+固定 $B \in \mathcal{M}_n$。定义 $T: \mathcal{M}_n \to \mathcal{M}_n$ 为 $T(A) = AB$。证明 $T$ 是线性的。
+</Exercicio>
+
+<Exercicio numero="112.10" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "不——$\\det(2A) = 2^n\\det(A) \\neq 2\\det(A)$ 一般情况", correta: true },
+    { texto: "是——$\\det(A+B) = \\det A + \\det B$" },
+    { texto: "不——行列式在向量空间上未定义" },
+    { texto: "是——$\\det$ 是多重线性的，因此是线性的" },
+  ]}
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.20", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`T(A) = \\det A`}</Eq> 不是线性的。看到这个，取 <Eq>{`A = I_2`}</Eq>：<Eq>{`T(2I) = \\det(2I) = 4`}</Eq>，但 <Eq>{`2T(I) = 2\\cdot1 = 2`}</Eq>。显然 <Eq>{`4 \\neq 2`}</Eq>。行列式是<em>多重线性</em>的（在每列分别线性），但作为矩阵的函数不是线性的。</>}
+>
+$T: \mathcal{M}_2 \to \mathbb{R}$，$T(A) = \det A$。$T$ 是线性变换吗？
+</Exercicio>
+
+<Exercicio numero="112.11" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C40", licenca: "GNU FDL" }}
+  solucao={<>每个多项式 <Eq>{`p(x) = a_0 + a_1 x + a_2 x^2`}</Eq> 满足：<Eq>{`T(p)(x) = p(2x) = a_0 + 2a_1 x + 4a_2 x^2`}</Eq>。在基 <Eq>{`\\{1, x, x^2\\}`}</Eq> 中：<Eq>{`T(1)=1`}</Eq>，<Eq>{`T(x)=2x`}</Eq>，<Eq>{`T(x^2)=4x^2`}</Eq>。对角矩阵：<Eq>{`\\mathrm{diag}(1,2,4)`}</Eq>。</>}
+>
+$T: \mathcal{P}_2 \to \mathcal{P}_2$，$T(p)(x) = p(2x)$。证明它是线性的并在基 $\{1, x, x^2\}$ 中找到对角矩阵。
+</Exercicio>
+
+<Exercicio numero="112.12" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.7", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T(v) = 0`}</Eq> 对所有 <Eq>{`v`}</Eq>。零变换是平凡线性的：<Eq>{`T(u+v) = 0 = 0+0 = T(u)+T(v)`}</Eq>。矩阵是零矩阵 <Eq>{`0_{m\\times n}`}</Eq>。</>}
+>
+$T: V \to W$，对所有 $v \in V$ 有 $T(v) = 0$。证明 $T$ 是线性的。它在任何基中的矩阵是什么？
+</Exercicio>
+
+### 块 B——矩阵计算（112.13 至 112.24）
+
+<Exercicio numero="112.13" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.3", licenca: "CC-BY-SA" }}
+  solucao={<>45° 旋转：<Eq>{`\\cos 45° = \\sin 45° = \\sqrt{2}/2`}</Eq>。矩阵：<Eq>{`R_{45} = \\begin{pmatrix}\\sqrt{2}/2 & -\\sqrt{2}/2 \\\\ \\sqrt{2}/2 & \\sqrt{2}/2\\end{pmatrix}`}</Eq>。验证：<Eq>{`\\det = 1`}</Eq> 和 <Eq>{`R^T R = I`}</Eq>。</>}
+>
+找到平面中 45° 旋转的 $2 \times 2$ 矩阵。验证其行列式为 1。
+</Exercicio>
+
+<Exercicio numero="112.14" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.5", licenca: "CC-BY-SA" }}
+  solucao={<>关于直线 <Eq>{`y=x`}</Eq> 的反射：<Eq>{`T(e_1) = T(1,0) = (0,1)`}</Eq> 和 <Eq>{`T(e_2) = T(0,1) = (1,0)`}</Eq>。因此 <Eq>{`[T] = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>。注意 <Eq>{`[T]^2 = I`}</Eq>——反射两次回到原点。</>}
+>
+找到关于直线 $y = x$ 的反射的 $2 \times 2$ 矩阵。验证 $[T]^2 = I$。
+</Exercicio>
+
+<Exercicio numero="112.15" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C50", licenca: "GNU FDL" }}
+  solucao={<>投影到 $y$ 轴：<Eq>{`T(x,y) = (0,y)`}</Eq>。矩阵：<Eq>{`T(e_1) = (0,0)`}</Eq>，<Eq>{`T(e_2) = (0,1)`}</Eq>。因此 <Eq>{`P = \\begin{pmatrix}0&0\\\\0&1\\end{pmatrix}`}</Eq>。幂等：<Eq>{`P^2 = P`}</Eq>。</>}
+>
+找到投影到 $y$ 轴的 $2 \times 2$ 矩阵。验证 $P^2 = P$（幂等性）。
+</Exercicio>
+
+<Exercicio numero="112.16" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.8", licenca: "CC-BY-SA" }}
+  solucao={<>投影到直线 <Eq>{`y=x`}</Eq>：向 <Eq>{`u = (1,1)/\\sqrt{2}`}</Eq> 方向投影的公式是 <Eq>{`P = uu^T = \\frac{1}{2}\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix}`}</Eq>。验证：<Eq>{`P^2 = \\frac{1}{4}\\begin{pmatrix}2&2\\\\2&2\\end{pmatrix} \\cdot \\frac{1}{1} = \\frac{1}{2}\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix} = P`}</Eq>。</>}
+>
+找到投影到直线 $y = x$ 的 $2 \times 2$ 矩阵。验证幂等性。
+</Exercicio>
+
+<Exercicio numero="112.17" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.14", licenca: "CC-BY-SA" }}
+  solucao={<>非均匀缩放：<Eq>{`T(x,y) = (3x, 2y)`}</Eq>。矩阵：<Eq>{`\\begin{pmatrix}3&0\\\\0&2\\end{pmatrix}`}</Eq>。行列式：<Eq>{`6`}</Eq>——变换将面积乘以 6。</>}
+>
+找到非均匀缩放 $(x,y) \mapsto (3x,\, 2y)$ 的矩阵。行列式的几何意义是什么？
+</Exercicio>
+
+<Exercicio numero="112.18" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.15", licenca: "CC-BY-SA" }}
+  solucao={<>系数为 2 的水平错切：<Eq>{`T(x,y)=(x+2y, y)`}</Eq>。矩阵：<Eq>{`\\begin{pmatrix}1&2\\\\0&1\\end{pmatrix}`}</Eq>。行列式：<Eq>{`1`}</Eq>——保持面积。</>}
+>
+找到系数为 2 的水平错切矩阵：$T(x, y) = (x + 2y,\, y)$。
+</Exercicio>
+
+<Exercicio numero="112.19" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C55", licenca: "GNU FDL" }}
+  solucao={<>复合：30° 旋转然后缩放 2。<Eq>{`R_{30} = \\begin{pmatrix}\\sqrt{3}/2 & -1/2 \\\\ 1/2 & \\sqrt{3}/2\\end{pmatrix}`}</Eq>，<Eq>{`E_2 = 2I`}</Eq>。乘积：<Eq>{`E_2 R_{30} = \\begin{pmatrix}\\sqrt{3} & -1 \\\\ 1 & \\sqrt{3}\\end{pmatrix}`}</Eq>。几何上：缩放 2 倍和 30° 旋转（按此顺序：先旋转后缩放）。</>}
+  passos={<>
+    <ol>
+      <li>使用一般公式 <Eq>{`R_\\theta = \\begin{pmatrix}\\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta\\end{pmatrix}`}</Eq> 写出 30° 旋转矩阵。代入 <Eq>{`\\theta = 30°`}</Eq>：<Eq>{`\\cos30° = \\sqrt{3}/2`}</Eq>，<Eq>{`\\sin30° = 1/2`}</Eq>。</li>
+      <li>缩放 2 有矩阵 <Eq>{`2I = \\begin{pmatrix}2&0\\\\0&2\\end{pmatrix}`}</Eq>。用此矩阵乘以向量将每个坐标翻倍。</li>
+      <li>复合"旋转然后缩放"：先应用的变换在乘积中右边。我们想要缩放 ∘ 旋转 = <Eq>{`(2I)(R_{30})`}</Eq>。</li>
+      <li>执行乘积：逐行相乘。结果 <Eq>{`\\begin{pmatrix}\\sqrt{3}&-1\\\\1&\\sqrt{3}\\end{pmatrix}`}</Eq> 有行列式 <Eq>{`3+1=4=2^2`}</Eq>——有意义，因为缩放 2 倍将面积乘以 <Eq>{`2^2 = 4`}</Eq>。</li>
+    </ol>
+    <em>技巧：</em> 先应用的变换在矩阵乘积中总是右边。"旋转然后缩放" = (缩放) × (旋转)。这个惯例在计算机图形编程中产生经典错误。
+  </>}
+>
+复合：30° 旋转随后缩放 2。计算矩阵乘积 $[E_2][R_{30}]$。
+</Exercicio>
+
+<Exercicio numero="112.20" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §II", pagina: "ex. 2.7", licenca: "CC-BY-SA" }}
+  solucao={<>反射 <Eq>{`y=x`}</Eq> 然后旋转 90°。反射：<Eq>{`F = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>。旋转 90°：<Eq>{`R_{90} = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}`}</Eq>。乘积：<Eq>{`R_{90}F = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix} = \\begin{pmatrix}-1&0\\\\0&1\\end{pmatrix}`}</Eq>。这是关于 $y$ 轴的反射！</>}
+>
+复合：关于直线 $y = x$ 的反射然后 90° 旋转。计算矩阵乘积并识别得到的变换。
+</Exercicio>
+
+<Exercicio numero="112.21" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C60", licenca: "GNU FDL" }}
+  solucao={<>在 <Eq>{`\\mathbb{R}^3`}</Eq> 中绕 $z$ 轴 90° 旋转：$z$ 轴固定，$xy$ 平面旋转。<Eq>{`T(e_1) = (0,1,0)`}</Eq>，<Eq>{`T(e_2) = (-1,0,0)`}</Eq>，<Eq>{`T(e_3) = (0,0,1)`}</Eq>。$3\\times3$ 矩阵：<Eq>{`\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}`}</Eq>。</>}
+>
+在 $\mathbb{R}^3$ 中，找到绕 $z$ 轴 90° 旋转的 $3 \times 3$ 矩阵（$z$ 轴保持固定）。
+</Exercicio>
+
+<Exercicio numero="112.22" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.16", licenca: "CC-BY-SA" }}
+  solucao={<>投影到 $xy$ 平面：<Eq>{`T(x,y,z) = (x,y,0)`}</Eq>。逐列：<Eq>{`T(e_1)=(1,0,0)`}</Eq>，<Eq>{`T(e_2)=(0,1,0)`}</Eq>，<Eq>{`T(e_3)=(0,0,0)`}</Eq>。矩阵：<Eq>{`\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&0\\end{pmatrix}`}</Eq>。幂等：<Eq>{`P^2=P`}</Eq>。</>}
+>
+在 $\mathbb{R}^3$ 中，找到投影到 $xy$ 平面的 $3 \times 3$ 矩阵。
+</Exercicio>
+
+<Exercicio numero="112.23" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C65", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T: \\mathcal{P}_2 \\to \\mathcal{P}_2`}</Eq>，<Eq>{`T(p) = p' + p`}</Eq>。基 <Eq>{`\\{1, x, x^2\\}`}</Eq> 的像：<Eq>{`T(1) = 0+1 = 1`}</Eq>，<Eq>{`T(x) = 1+x`}</Eq>，<Eq>{`T(x^2) = 2x+x^2`}</Eq>。矩阵：<Eq>{`[T] = \\begin{pmatrix}1&1&0\\\\0&1&2\\\\0&0&1\\end{pmatrix}`}</Eq>。上三角——所有特征值是 1。</>}
+>
+$T: \mathcal{P}_2 \to \mathcal{P}_2$，$T(p) = p' + p$。在规范基中找到 $3 \times 3$ 矩阵。
+</Exercicio>
+
+<Exercicio numero="112.24" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.5", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T: \\mathbb{R}^3 \\to \\mathbb{R}^3`}</Eq>，<Eq>{`T(v) = v \\times w`}</Eq> 其中 <Eq>{`w = (1,1,1)`}</Eq>。对于 <Eq>{`v = (x,y,z)`}</Eq>：<Eq>{`T(v) = (y-z,\\ z-x,\\ x-y)`}</Eq>。逐列矩阵：<Eq>{`T(e_1)=(0,-1,1)`}</Eq>，<Eq>{`T(e_2)=(1,0,-1)`}</Eq>，<Eq>{`T(e_3)=(-1,1,0)`}</Eq>。因此 <Eq>{`[T] = \\begin{pmatrix}0&1&-1\\\\-1&0&1\\\\1&-1&0\\end{pmatrix}`}</Eq>。反对称：<Eq>{`[T]^T = -[T]`}</Eq>。</>}
+>
+$T: \mathbb{R}^3 \to \mathbb{R}^3$，$T(v) = v \times (1,1,1)$（与 $(1,1,1)$ 固定的叉积）。找到 $3 \times 3$ 矩阵。
+</Exercicio>
+
+### 块 C——基变换与相似矩阵（112.25 至 112.34）
+
+<Exercicio numero="112.25" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §V", pagina: "ex. 1.10", licenca: "CC-BY-SA" }}
+  solucao={<>反射 <Eq>{`T(x,y) = (x,-y)`}</Eq>。规范基：<Eq>{`[T]_{\\mathcal{B}} = \\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}`}</Eq>。新基 <Eq>{`\\mathcal{B}' = \\{(1,1),(1,-1)\\}`}</Eq>：<Eq>{`T(1,1)=(1,-1)=v_2`}</Eq>，<Eq>{`T(1,-1)=(1,1)=v_1`}</Eq>。因此 <Eq>{`[T]_{\\mathcal{B}'} = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>。相似矩阵，同一变换。</>}
+  passos={<>
+    <ol>
+      <li>在规范基中用列-逐-列方法计算 <Eq>{`[T]_{\\mathcal{B}}`}</Eq>：<Eq>{`T(e_1)=(1,0)`}</Eq> 和 <Eq>{`T(e_2)=(0,-1)`}</Eq>。</li>
+      <li>对于基 <Eq>{`\\mathcal{B}' = \\{v_1,v_2\\} = \\{(1,1),(1,-1)\\}`}</Eq>，计算 <Eq>{`T(v_1)`}</Eq> 和 <Eq>{`T(v_2)`}</Eq>。</li>
+      <li>在 <Eq>{`\\mathcal{B}'`}</Eq> 坐标中表达每个像：写 <Eq>{`T(v_j) = a\\cdot v_1 + b \\cdot v_2`}</Eq> 并求解 <Eq>{`(a,b)`}</Eq>。这些坐标形成第 $j$ 列。</li>
+      <li>比较两个矩阵。它们不同，但代表相同的几何操作。</li>
+    </ol>
+    <em>观察：</em> 在 <Eq>{`\\mathcal{B}'`}</Eq> 中，反射在两个基向量之间交换——因此矩阵变成排列 <Eq>{`\\begin{pmatrix}0&1\\1&0\\end{pmatrix}`}</Eq>，比规范基中的对角形式更简单！
+  </>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$，$T(x,y) = (x, -y)$（关于 $x$ 轴的反射）。在规范基和基 $\mathcal{B}' = \{(1,1),\,(1,-1)\}$ 中找到 $[T]$。确认它们相似。
+</Exercicio>
+
+<Exercicio numero="112.26" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §V", pagina: "ex. 1.14", licenca: "CC-BY-SA" }}
+  solucao={<>如果 <Eq>{`A \\sim B`}</Eq>，存在可逆 <Eq>{`P`}</Eq> 使得 <Eq>{`B = P^{-1}AP`}</Eq>。那么：<Eq>{`\\det B = \\det(P^{-1})\\det(A)\\det(P) = \\frac{\\det A}{\\det P}\\cdot\\det P = \\det A`}</Eq>。而且 <Eq>{`\\text{tr}(B) = \\text{tr}(P^{-1}AP) = \\text{tr}(APP^{-1}) = \\text{tr}(A)`}</Eq>（迹的循环性）。</>}
+>
+证明相似矩阵有相同的行列式和相同的迹。
+</Exercicio>
+
+<Exercicio numero="112.27" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.10", licenca: "CC-BY-NC" }}
+  solucao={<>如果 <Eq>{`A \\sim B`}</Eq>，存在可逆 <Eq>{`P`}</Eq> 使得 <Eq>{`B = P^{-1}AP`}</Eq>。那么 <Eq>{`B^k = (P^{-1}AP)^k = P^{-1}A^kP`}</Eq>，因此 <Eq>{`A^k \\sim B^k`}</Eq>。如果 <Eq>{`A`}</Eq> 是幂零的（<Eq>{`A^k=0`}</Eq>），那么 <Eq>{`B^k = P^{-1}0P = 0`}</Eq>，因此 <Eq>{`B`}</Eq> 也是幂零的。</>}
+>
+证明：如果 $A \sim B$（相似），那么对所有 $k \geq 1$ 有 $A^k \sim B^k$。结论：幂零性在相似下是不变的。
+</Exercicio>
+
+<Exercicio numero="112.28" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.22", licenca: "CC-BY-SA" }}
+  solucao={<>齐次坐标：将点 <Eq>{`(x,y) \\in \\mathbb{R}^2`}</Eq> 表示为 <Eq>{`(x,y,1) \\in \\mathbb{R}^3`}</Eq>。平移 <Eq>{`(a,b)`}</Eq>：<Eq>{`\\begin{pmatrix}1&0&a\\\\0&1&b\\\\0&0&1\\end{pmatrix}\\begin{pmatrix}x\\\\y\\\\1\\end{pmatrix} = \\begin{pmatrix}x+a\\\\y+b\\\\1\\end{pmatrix}`}</Eq>。平移变成矩阵乘法——在 <Eq>{`\\mathbb{R}^3`}</Eq> 中线性，即使在 <Eq>{`\\mathbb{R}^2`}</Eq> 中不是。</>}
+>
+在计算机图形中，平移 $(a, b)$ 在 $\mathbb{R}^2$ 中不是线性变换。齐次坐标如何允许将它表示为 $\mathbb{R}^3$ 中的线性变换？写出 $3 \times 3$ 矩阵。
+</Exercicio>
+
+<Exercicio numero="112.29" dificuldade="modelagem"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. M30", licenca: "GNU FDL" }}
+  solucao={<>投资组合回报：<Eq>{`r_p = w^\\top \\mu`}</Eq>。它是线性变换 <Eq>{`T: \\mathbb{R}^n \\to \\mathbb{R}`}</Eq>，<Eq>{`T(w) = \\mu^\\top w`}</Eq>。在 <Eq>{`w`}</Eq> 中线性：如果你翻倍所有权重，回报翻倍。投资组合方差 <Eq>{`\\sigma_p^2 = w^\\top \\Sigma w`}</Eq> 是<em>双线性</em>形式（不是线性）。</>}
+>
+投资组合有 $n$ 个资产，权重 $w \in \mathbb{R}^n$，期望回报 $\mu \in \mathbb{R}^n$。期望回报 $r_p = w^\top \mu$ 在 $w$ 中是线性变换吗？方差 $\sigma_p^2 = w^\top \Sigma w$ 呢？
+</Exercicio>
+
+<Exercicio numero="112.30" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §III", pagina: "ex. 3.8", licenca: "CC-BY-SA" }}
+  solucao={<>大小为 3 的核的 1D 卷积在大小为 5 的信号上：输出大小为 3。核 <Eq>{`k = (k_0, k_1, k_2)`}</Eq>，输入 <Eq>{`x = (x_0,\\ldots,x_4)`}</Eq>。输出 <Eq>{`y_i = \\sum_{j=0}^{2} k_j x_{i+j}`}</Eq>。Toeplitz 矩阵 <Eq>{`3\\times5`}</Eq>：每一行是核移位一个位置。</>}
+>
+写出执行核为 $k = (1, 2, 1)$ 的 1D 线性卷积的 $3 \times 5$ Toeplitz 矩阵，应用到长度为 5 的信号（有效输出，长度 3）。
+</Exercicio>
+
+<Exercicio numero="112.31" dificuldade="modelagem"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.15", licenca: "CC-BY-NC" }}
+  solucao={<>密集层：<Eq>{`y = Wx + b`}</Eq>。部分 <Eq>{`Wx`}</Eq> 是线性变换 <Eq>{`W: \\mathbb{R}^{n_{\\rm in}} \\to \\mathbb{R}^{n_{\\rm out}}`}</Eq>。<Eq>{`b`</Eq>（偏置）使层<em>仿射</em>，不是线性。网络的非线性来自激活函数（ReLU、sigmoid）在每层后应用。</>}
+>
+在机器学习中，密集层是 $y = Wx + b$。哪一部分是线性变换？为什么加上 $b$ 不让层线性？神经网络的非线性来自哪里？
+</Exercicio>
+
+<Exercicio numero="112.32" dificuldade="modelagem"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. M35", licenca: "GNU FDL" }}
+  solucao={<>LTI 系统：<Eq>{`\\dot{x} = Ax`}</Eq>，解 <Eq>{`x(t) = e^{At}x_0`}</Eq>。应用 <Eq>{`x_0 \\mapsto x(t)`}</Eq> 是线性变换：<Eq>{`e^{At}(x_0 + y_0) = e^{At}x_0 + e^{At}y_0`}</Eq>。转移矩阵是 <Eq>{`\\Phi(t) = e^{At}`}</Eq>。在控制工程中，<Eq>{`A`}</Eq> 的特征值决定系统稳定性。</>}
+>
+LTI 系统：$\dot{x} = Ax$，解 $x(t) = e^{At}x_0$。证明应用 $x_0 \mapsto x(t)$ 是线性变换。矩阵 $e^{At}$ 是什么？
+</Exercicio>
+
+<Exercicio numero="112.33" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §III", pagina: "ex. 3.12", licenca: "CC-BY-SA" }}
+  solucao={<>微分 <Eq>{`D: \\mathcal{P}_n \\to \\mathcal{P}_n`}</Eq>。矩阵幂零：<Eq>{`D^{n+1} = 0`}</Eq> 因为对度数为 $n$ 的任何多项式求导 $n+1$ 次得零。几何上：度数在每次求导时递减，$n+1$ 次应用后，每个多项式都到零。</>}
+>
+微分算子 $D: \mathcal{P}_n \to \mathcal{P}_n$ 有幂零矩阵。解释为什么 $D^{n+1} = 0$，以及这在多项式方面意味着什么。
+</Exercicio>
+
+<Exercicio numero="112.34" dificuldade="modelagem"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.14", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`\\mathcal{L}(V,W) = \\mathrm{Hom}(V,W)`}</Eq> 的维数：每个元素由它在 $V$ 的基上的值决定（$n$ 个向量），每个像在 $W$ 中（维数 $m$）。有 $n \\cdot m$ 个自由标量。因此 <Eq>{`\\dim \\mathcal{L}(V,W) = mn`}</Eq>。对于 <Eq>{`V=W=\\mathbb{R}^n`}</Eq>：$n^2$ 个条目 = <Eq>{`\\mathcal{M}_{n}(\\mathbb{R})`}</Eq> 的维数。</>}
+>
+为什么 $\dim \mathcal{L}(V, W) = (\dim V)(\dim W)$？这对所有 $m \times n$ 矩阵的空间说什么？
+</Exercicio>
+
+### 块 D——理解与证明（112.35 至 112.44）
+
+<Exercicio numero="112.35" dificuldade="compreensao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. T10", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T(0)=0`}</Eq> 是必要但不充分的。例：<Eq>{`T: \\mathbb{R} \\to \\mathbb{R}`}</Eq>，<Eq>{`T(x) = x^2`}</Eq>。我们有 <Eq>{`T(0)=0`}</Eq>，但 <Eq>{`T(1+1)=4 \\neq 1+1=T(1)+T(1)`}</Eq>。因此 <Eq>{`T(0)=0`}</Eq> 条件是必要的（每个线性都满足）但不充分的（存在不是线性的也满足）。</>}
+>
+$T(0) = 0$ 是线性性的必要条件。给出有 $T(0) = 0$ 但不是线性的 $T$ 的例子。为什么 $T(0) = 0$ 不充分？
+</Exercicio>
+
+<Exercicio numero="112.36" dificuldade="compreensao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §V", pagina: "ex. 1.17", licenca: "CC-BY-SA" }}
+  solucao={<>如果 <Eq>{`A`}</Eq> 代表 <Eq>{`\\mathcal{B}`}</Eq> 中的 <Eq>{`T`}</Eq> 且我们想要 <Eq>{`[T]_{\\mathcal{B}'}`}</Eq>：设 <Eq>{`P`}</Eq> 是其列为 <Eq>{`\\mathcal{B}'`}</Eq> 向量在 <Eq>{`\\mathcal{B}`}</Eq> 坐标中的矩阵。那么 <Eq>{`[T]_{\\mathcal{B}'} = P^{-1}AP`}</Eq>。公式读为："通过 <Eq>{`P`}</Eq> 从 <Eq>{`\\mathcal{B}'`}</Eq> 转换到 <Eq>{`\\mathcal{B}`}</Eq>，应用 <Eq>{`A`}</Eq>，通过 <Eq>{`P^{-1}`}</Eq> 转换回"。</>}
+>
+如果 $A = [T]_{\mathcal{B}}$ 代表 $\mathcal{B}$ 中的 $T$，解释公式 $[T]_{\mathcal{B}'} = P^{-1}AP$ 的几何意义。每个因子做什么？
+</Exercicio>
+
+<Exercicio numero="112.37" dificuldade="compreensao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.3", licenca: "CC-BY-NC" }}
+  solucao={<>矩阵乘积 <Eq>{`[T][S]`}</Eq> 实现复合 <Eq>{`T \\circ S`}</Eq>。证明：对任何 <Eq>{`v`}</Eq> 在 <Eq>{`\\mathcal{B}`}</Eq> 中坐标为 <Eq>{`x`}</Eq>，<Eq>{`(T \\circ S)(v)`}</Eq> 有坐标 <Eq>{`[T]([S]x)`}</Eq>。但那恰好是 <Eq>{`([T][S])x`}</Eq> 通过矩阵乘积定义。</>}
+>
+解释，不计算，为什么矩阵乘积 $[T][S]$ 恰好是复合 $T \circ S$。矩阵乘积定义和复合定义之间的关系是什么？
+</Exercicio>
+
+<Exercicio numero="112.38" dificuldade="compreensao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. T20", licenca: "GNU FDL" }}
+  solucao={<>设 <Eq>{`T_1, T_2 \\in \\mathcal{L}(V,W)`}</Eq>。定义 <Eq>{`(T_1+T_2)(v) = T_1(v)+T_2(v)`}</Eq> 和 <Eq>{`(aT)(v) = a\\cdot T(v)`}</Eq>。验证：<Eq>{`(T_1+T_2)(u+v) = T_1(u+v)+T_2(u+v) = T_1(u)+T_1(v)+T_2(u)+T_2(v) = (T_1+T_2)(u)+(T_1+T_2)(v)`}</Eq>。因此 <Eq>{`\\mathcal{L}(V,W)`}</Eq> 在加法和标量下闭合——是向量空间。</>}
+>
+证明 $\mathcal{L}(V, W)$（所有从 $V$ 到 $W$ 的线性变换的集合）本身是向量空间，操作为 $(T_1 + T_2)(v) = T_1(v) + T_2(v)$ 和 $(aT)(v) = a\,T(v)$。
+</Exercicio>
+
+<Exercicio numero="112.39" dificuldade="desafio"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "cap. 3 §I", pagina: "ex. 1.28", licenca: "CC-BY-SA" }}
+  solucao={<>我们想要 <Eq>{`T: \\mathbb{R}^2 \\to \\mathbb{R}^2`}</Eq> 使得 <Eq>{`T^2 = -I`}</Eq>。90° 旋转有效：<Eq>{`R_{90} = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}`}</Eq>。那么 <Eq>{`R_{90}^2 = \\begin{pmatrix}-1&0\\\\0&-1\\end{pmatrix} = -I`}</Eq>。这个属性类似于复数中的 <Eq>{`i^2 = -1`}</Eq>——90° 旋转就像虚数单位 <Eq>{`i`}</Eq>！</>}
+>
+找到 $T: \mathbb{R}^2 \to \mathbb{R}^2$ 使得 $T^2 = -I$（恒等元的负）。建议用 90° 旋转。与复数的连接是什么？
+</Exercicio>
+
+<Exercicio numero="112.40" dificuldade="desafio"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.17", licenca: "CC-BY-NC" }}
+  solucao={<>每个 <Eq>{`T: \\mathbb{R} \\to \\mathbb{R}`}</Eq> 线性有形式 <Eq>{`T(x) = T(1)\\cdot x`}</Eq>。证明：给定任何 <Eq>{`x \\in \\mathbb{R}`}</Eq>，<Eq>{`T(x) = T(x \\cdot 1) = x\\,T(1)`}</Eq> 由线性性（标量保持）。因此 <Eq>{`a = T(1) \\in \\mathbb{R}`}</Eq> 完全决定 <Eq>{`T`}</Eq>，且 <Eq>{`T(x) = ax`}</Eq>。</>}
+>
+证明：每个线性变换 $T: \mathbb{R} \to \mathbb{R}$ 有形式 $T(x) = ax$ 对某个 $a \in \mathbb{R}$。
+</Exercicio>
+
+<Exercicio numero="112.41" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT Teorema LTLC", pagina: "p. 320", licenca: "GNU FDL" }}
+  solucao={<>设 <Eq>{`S: U \\to V`}</Eq> 和 <Eq>{`T: V \\to W`}</Eq> 线性。对任何 <Eq>{`u_1, u_2 \\in U`}</Eq> 和 <Eq>{`a \\in K`}</Eq>：加法：<Eq>{`(T\\circ S)(u_1+u_2) = T(S(u_1+u_2)) = T(S(u_1)+S(u_2)) = T(S(u_1))+T(S(u_2)) = (T\\circ S)(u_1)+(T\\circ S)(u_2)`}</Eq>。标量：类似。因此 <Eq>{`T \\circ S`}</Eq> 线性。<Eq>{`\\square`}</Eq></>}
+>
+**证明。** 证明线性变换的复合是线性的。设 $S: U \to V$ 和 $T: V \to W$ 都线性。证明 $T \circ S: U \to W$ 是线性的。
+</Exercicio>
+
+<Exercicio numero="112.42" dificuldade="demonstracao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4.ª ed.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.2", licensa: "CC-BY-NC" }}
+  solucao={<>设 <Eq>{`T: V \\to W`}</Eq> 线性且 <Eq>{`c_1, \\ldots, c_n \\in K`}</Eq>，<Eq>{`v_1, \\ldots, v_n \\in V`}</Eq>。那么：<Eq>{`T\\left(\\sum_{i=1}^n c_i v_i\\right) = \\sum_{i=1}^n c_i T(v_i)`}</Eq>。通过归纳证明：基 $n=1$ 是标量保持；步骤：<Eq>{`T(c_1v_1 + \\cdots + c_n v_n) = T(c_1v_1 + \\cdots + c_{n-1}v_{n-1}) + T(c_n v_n) = \\sum_{i=1}^{n-1}c_i T(v_i) + c_n T(v_n)`}</Eq>。<Eq>{`\\square`}</Eq></>}
+>
+**证明。** 通过归纳证明每个线性变换保持任意线性组合：$T\!\left(\sum c_i v_i\right) = \sum c_i T(v_i)$。
+</Exercicio>
+
+<Exercicio numero="112.43" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§ILT Teorema KILT", pagina: "p. 338", licenca: "GNU FDL" }}
+  solucao={<>(<Eq>{`\\Rightarrow`}</Eq>) 如果 <Eq>{`T`}</Eq> 单射且 <Eq>{`T(v)=0=T(0)`}</Eq>，那么 <Eq>{`v=0`}</Eq>，因此 <Eq>{`\\ker T = \\{0\\}`}</Eq>。(<Eq>{`\\Leftarrow`}</Eq>) 如果 <Eq>{`\\ker T = \\{0\\}`}</Eq> 且 <Eq>{`T(u)=T(v)`}</Eq>，那么 <Eq>{`T(u-v) = T(u)-T(v) = 0`}</Eq>，因此 <Eq>{`u-v \\in \\ker T = \\{0\\}`}</Eq>，因此 <Eq>{`u=v`}</Eq>。<Eq>{`\\square`}</Eq></>}
+>
+**证明。** 证明：$T$ 线性单射 $\iff \ker T = \{0\}$。
+</Exercicio>
+
+<Exercicio numero="112.44" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT Teorema MBLT", pagina: "p. 325", licensa: "GNU FDL" }}
+  solucao={<>设 <Eq>{`\\mathcal{B} = \\{v_1,\\ldots,v_n\\}`}</Eq> 是 <Eq>{`V`}</Eq> 的基。每个 <Eq>{`v \\in V`}</Eq> 唯一写成 <Eq>{`v = \\sum a_i v_i`}</Eq>。定义 <Eq>{`T(v) = \\sum a_i w_i`}</Eq> 其中 <Eq>{`w_i \\in W`}</Eq> 任意：(i) <Eq>{`T`}</Eq> 良定义（表示的唯一性）；(ii) 是线性的（通过构造）；(iii) 对这些基值唯一（任何其他有相同值的与这个在所有线性组合中一致）。这证明基完全决定线性变换。<Eq>{`\\square`}</Eq></>}
+>
+**证明。** 证明线性扩展定理：给定向量空间 $V$（维 $n$）和 $W$，以及向量 $w_1, \ldots, w_n \in W$ 任意，存在唯一线性变换 $T: V \to W$ 使得 $T(v_i) = w_i$ 对 $i = 1, \ldots, n$。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**Beezer — A First Course in Linear Algebra**](http://linear.ups.edu/) — Rob Beezer · 2022 · EN · GNU FDL。§LT（线性变换）和 §ILT（单线性变换）。**本课的主要来源。**
+- [**Hefferon — Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · 4.ª ed. · EN · CC-BY-SA。第 3 章（映射之间的空间）：平面变换的几何观点。
+- [**Axler — Linear Algebra Done Right**](https://linear.axler.net/) — Sheldon Axler · 4.ª ed. · EN · CC-BY-NC。§3A–§3B：线性映射作为一流对象；无行列式优先基础。

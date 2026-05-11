@@ -1,0 +1,755 @@
+---
+titulo: "Lição 77 — Teorema Central do Limite"
+slug: "licao-77-tcl"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "A média de n v.a. iid converge à normal independente da distribuição original — a lei mais importante da estatística. Demonstração via função característica, velocidade Berry-Esseen, aplicações de inferência."
+ordem: 77
+publicado: true
+tags: ["estatística", "probabilidade", "TCL", "normal", "ano-2", "trim-8"]
+prerrequisitos: ["licao-76-distribuicao-normal"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+versao: "v1"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Math B japonês §4.4", "Stochastik LK alemão", "H2 Math singapurense cap. 21"]
+---
+
+<EquacaoCanonica
+  formula="\bar X_n \xrightarrow{d} \mathcal{N}\!\left(\mu,\,\frac{\sigma^2}{n}\right) \quad (n \to \infty)"
+  legenda={<>**中心极限定理(CLT)**说明，$n$个独立同分布随机变量的均值，如其期望值为<Eq>{`\\mu`}</Eq>，方差为有限的<Eq>{`\\sigma^2`}</Eq>，则该均值按分布收敛到期望值为<Eq>{`\\mu`}</Eq>、方差为<Eq>{`\\sigma^2/n`}</Eq>的正态分布——这与原分布的形状无关。这解释了为什么钟形曲线在自然数据、测量误差和样本均值中普遍出现。</>}
+  audioTexto="中心极限定理。n个样本的样本均值X拔收敛为均值为μ、方差为σ平方除以n的正态分布，当n趋向无穷大时。"
+/>
+
+<aside>
+**涵盖本课的教科书**
+
+- [**OpenIntro Statistics** (第4版)](https://www.openintro.org/book/os/) — Diez、Çetinkaya-Rundel、Barr · §5.4 · CC-BY-SA · *对CLT提供更易接近的处理，包含模拟和真实世界示例；特别适合第10和15级门户。*
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky、Dean · §7.1–7.3 · CC-BY · *完整涵盖，正式表述定理、指导式练习、z表和样本量应用。*
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead、Snell · Dartmouth · GNU FDL · *通过矩生成函数的证明；讨论收敛速度和Lindeberg扩展。*
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="正式表述与证明">
+
+### Lindeberg-Lévy版本
+
+<Definicao titulo="中心极限定理（经典版本）">
+
+设$X_1, X_2, \ldots$为**独立同分布**(iid)的随机变量，其中$E[X_i] = \mu \in \mathbb{R}$且$\text{Var}(X_i) = \sigma^2 \in (0, +\infty)$。定义**标准化统计量**
+
+$$Z_n = \frac{\bar X_n - \mu}{\sigma/\sqrt{n}}, \quad \bar X_n = \frac{1}{n}\sum_{i=1}^n X_i.$$
+
+则$Z_n \xrightarrow{d} \mathcal{N}(0, 1)$：对所有$z \in \mathbb{R}$，
+
+$$\lim_{n \to \infty} P(Z_n \leq z) = \Phi(z) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^z e^{-t^2/2}\,dt.$$
+
+</Definicao>
+
+> "中心极限定理是概率论的非正式主权。" — [Grinstead & Snell, *Introduction to Probability*, §9.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf)
+
+### 和的版本
+
+若$S_n = X_1 + \cdots + X_n$，则当$n$很大时，$S_n \approx \mathcal{N}(n\mu,\, n\sigma^2)$。
+
+<Equation explicacao="和的标准化：公式相同，尺度不同。" latex="Z_n = \frac{S_n - n\mu}{\sigma\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1)" />
+
+### 收敛速度：Berry-Esseen不等式
+
+<Teorema titulo="Berry-Esseen">
+
+若另外$E[|X_i - \mu|^3] = \rho < \infty$，则对所有$n$和所有$z$：
+
+$$\sup_{z \in \mathbb{R}} \left|P(Z_n \leq z) - \Phi(z)\right| \leq \frac{C\,\rho}{\sigma^3\,\sqrt{n}},$$
+
+其中通用常数$C < 0{,}5$。误差以$1/\sqrt{n}$速率下降。
+
+</Teorema>
+
+### 通过特征函数的证明概要
+
+<Definicao titulo="特征函数">
+
+$X$的**特征函数**定义为$\varphi_X(t) = E[e^{itX}]$，其中$t \in \mathbb{R}$。关键性质：若$X_1, \ldots, X_n$独立，则$\varphi_{X_1 + \cdots + X_n}(t) = \prod_k \varphi_{X_k}(t)$。
+
+</Definicao>
+
+设$Y_i = (X_i - \mu)/\sigma$（均值为零，方差为1）。对$\varphi_{Y_i}$进行泰勒展开：
+
+$$\varphi_{Y_i}(t) = 1 - \frac{t^2}{2} + o(t^2) \quad (t \to 0).$$
+
+对于$Z_n = (Y_1 + \cdots + Y_n)/\sqrt{n}$：
+
+$$\varphi_{Z_n}(t) = \left[\varphi_{Y_i}\!\left(\frac{t}{\sqrt{n}}\right)\right]^n = \left[1 - \frac{t^2}{2n} + o\!\left(\frac{1}{n}\right)\right]^n \xrightarrow{n\to\infty} e^{-t^2/2}.$$
+
+但$e^{-t^2/2}$是$\mathcal{N}(0, 1)$的特征函数。**Lévy定理**（连续性）得出$Z_n \xrightarrow{d} \mathcal{N}(0,1)$。$\blacksquare$
+
+### CLT不适用的情况
+
+<Insight>
+
+CLT要求**有限方差**。Cauchy分布方差为无穷大；$n$个Cauchy分布随机变量的均值仍为Cauchy分布——经典CLT不适用。对于尾部为$|x|^{-\alpha-1}$、$0 < \alpha < 2$的分布，极限为索引为$\alpha$的Lévy稳定分布。
+
+</Insight>
+
+### 关键假设
+
+- **独立性**（最小充分条件；可放松为$\alpha$-mixing）。
+- **有限方差**$\sigma^2 < \infty$。
+- **$n$足够大** — 经验法则：对非常不对称的分布使用$n \geq 30$；对高不对称性使用$n \geq 100$。
+
+</Porta>
+
+<Porta nivel="5" titulo="五岁孩子的解释">
+
+想象掷**一个**骰子：可能出现1到6的任何数字，都是平的。没有钟形。
+
+现在掷**十个**骰子并计算平均值。几乎永远不会得到1（需要十个骰子都出现1）。平均值几乎总是接近3.5。
+
+当你**一次又一次**这样做时，结果形成一个**堆** — 中间有一个圆溜溜的小堆，两端较少。这就是**钟形**。
+
+奇迹是：无论你掷骰子、掷硬币，还是测量其他东西。如果你取**很多个数的平均值**，总会出现钟形。
+
+</Porta>
+
+<Porta nivel="10" titulo="十岁孩子的解释">
+
+一个人的身高取决于数百个基因、营养、睡眠和许多其他因素——每个因素的影响都微乎其微。没有单个基因遵循钟形曲线。但当你**加总**数百个小的独立效应时，总和几乎完美地遵循钟形。
+
+**中心极限定理**正说的就是这一点：
+
+> 相加（或平均）许多独立随机事物会产生钟形曲线，不管每个的原始形状如何。
+
+**实践法则**：$n \geq 30$对大多数分布已足够。对于非常不对称的分布，使用$n \geq 100$。
+
+**例子**：掷一个骰子30次并计算平均值。重复10,000次。平均值的直方图将是一个以3.5为中心的钟形——即使每次单独掷骰子是均匀的（在1到6上同样平坦）。
+
+</Porta>
+
+<Porta nivel="15" titulo="15岁青少年的解释">
+
+CLT是统计学中最重要的结果。它解释了**为什么**正态分布在科学中占主导地位。
+
+### 三个直接后果
+
+**1. 任何分布的置信区间**
+
+若$n$很大，$\bar X \pm 1{,}96\,\sigma/\sqrt{n}$就是$\mu$的95% IC，即使不知道$X$的分布。
+
+**2. 标准化是通用的**
+
+$Z = (\bar X - \mu)/(\sigma/\sqrt{n})$大约有$\mathcal{N}(0, 1)$分布。只需要一个$z$表对任何总体。
+
+**3. 测量误差是正态的**
+
+测量 = 许多微小扰动的和（空气振动、仪器限制等）。通过CLT，总误差是正态的。这就是为什么测量误差模型几乎总是高斯的。
+
+### 可视化演示
+
+将$n$次掷骰子的平均值直方图绘制出来：
+
+- $n = 1$：平坦均匀。
+- $n = 5$：梯形。
+- $n = 30$：与正态分布难以区分。
+
+### Galton钉板（1889）
+
+小球从钉子之间下落，在每个级别随机向左或向右偏离。底部堆是二项分布——并收敛到正态分布。用真实物体的CLT物理演示。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程学生的解释">
+
+### 直接应用
+
+**IC样本量**：边际误差$\epsilon$在95%置信度下需要
+
+$$n = \left\lceil \left(\frac{1{,}96\,\sigma}{\epsilon}\right)^2 \right\rceil.$$
+
+**z检验**：统计量$Z = (\bar X - \mu_0)/(\sigma/\sqrt{n})$；若$|Z| > z_{\alpha/2}$则拒绝$H_0$。
+
+**蒙特卡洛**：估计均值的标准误$\approx \sigma/\sqrt{n}$；要将误差减半，需将$n$增加四倍。
+
+**X-bar图**（质量控制）：限制在$\bar X \pm 3\sigma/\sqrt{n}$ — 任何在范围外的点表示过程失控。
+
+### CLT版本
+
+| 版本 | 关键假设 | 实用 |
+|---|---|---|
+| Lindeberg-Lévy | iid, $\sigma^2 < \infty$ | 标准 |
+| Lyapunov | 独立、非iid、第3矩有限 | 异质总体 |
+| 一般Lindeberg | 独立、Lindeberg条件 | 比Lyapunov更一般 |
+| 鞅CLT | 鞅差 | 时间序列 |
+
+### 当$n = 30$不够时
+
+- 高偏度分布（skewness $> 2$）：使用$n \geq 100$。
+- 重尾但方差有限的分布：收敛更慢——Berry-Esseen有助于量化。
+- 方差**未知**：将$\sigma$替换为样本$s$ → Student $t$分布（$n \to \infty$时收敛到正态）。
+
+### Donsker不变原理
+
+函数推广：过程$W_n(t) = S_{\lfloor nt \rfloor}/(\sigma\sqrt{n})$收敛到**标准Brownian运动**。期权定价和SDEs的理论基础。
+
+</Porta>
+
+<Porta nivel="40" titulo="高级专业人士的解释">
+
+### 渐近理论与Edgeworth展开
+
+用$1/\sqrt{n}$阶修正改进CLT：
+
+$$P(Z_n \leq z) = \Phi(z) - \frac{\gamma_1}{6\sqrt{n}}(z^2 - 1)\phi(z) + O(1/n),$$
+
+其中$\gamma_1 = E[(X-\mu)^3]/\sigma^3$是偏度。用于参数bootstrap和小样本中的$p$值近似。
+
+### 稳定分布（Lévy、Khintchine）
+
+对于尾部为$P(|X| > x) \sim L(x)/x^\alpha$、$0 < \alpha < 2$的v.a.：
+
+$$\frac{S_n - b_n}{a_n} \xrightarrow{d} \text{Stable}(\alpha, \beta, \gamma, \delta).$$
+
+在金融数据中，$\hat\alpha \approx 1{,}7$出现在极端股票回报中——高斯CLT低估了尾部风险。
+
+### 非渐近集中
+
+集中不等式给出**有限**界（无需$n \to \infty$）：
+
+- **Hoeffding**：$P(\bar X - \mu \geq t) \leq e^{-2n t^2/(b-a)^2}$（变量限制在$[a, b]$）。
+- **Bernstein**：当方差小时比Hoeffding更优的指数和。
+- **Azuma-Hoeffding**：鞅有限差。
+
+在机器学习中，集中不等式因为对任何固定$n$给出保证而优于CLT。
+
+### 相关过程的CLT
+
+对于遍历Markov链：
+
+$$\sqrt{n}(\bar f_n - E_\pi[f]) \xrightarrow{d} \mathcal{N}\!\left(0,\, \sigma_\infty^2\right),$$
+
+其中$\sigma_\infty^2 = \text{Var}_\pi(f) + 2\sum_{k=1}^\infty \text{Cov}(f(X_0), f(X_k))$是**长期方差**。在MCMC中，这个值校准估计误差；通过batch means或光谱方法估计。
+
+### 多元CLT
+
+$$\sqrt{n}(\bar{\mathbf{X}}_n - \boldsymbol{\mu}) \xrightarrow{d} \mathcal{N}(\mathbf{0}, \Sigma).$$
+
+多元Delta方法和最大似然估计量渐近分布推断的基础（$\hat\theta_{MLE}$的分布）。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用 — 真实数据">
+
+### 健康保险满意度调查（IDEC/ANS真实数据，2023）
+
+一个运营商抽样了400个投保人。满意度评分：$\mu = 6{,}8$，$\sigma = 2{,}1$（0–10刻度）。样本均值高于7.0的概率是多少？
+
+**通过CLT**：$\bar X_{400} \approx \mathcal{N}(6{,}8;\; 2{,}1^2/400) = \mathcal{N}(6{,}8;\; 0{,}011)$。
+
+$$z = \frac{7{,}0 - 6{,}8}{2{,}1/\sqrt{400}} = \frac{0{,}2}{0{,}105} \approx 1{,}90.$$
+
+$P(\bar X > 7{,}0) = P(Z > 1{,}90) = 1 - \Phi(1{,}90) \approx 0{,}029$ — 约3%。
+
+### 选举误差范围（Datafolha风格）
+
+$n = 2.000$受访者，$\hat p = 0{,}38$（38%投票意向）。95%置信度的误差范围：
+
+$$\varepsilon = 1{,}96\sqrt{\frac{0{,}38 \times 0{,}62}{2000}} \approx 0{,}021 = \pm 2{,}1\%.$$
+
+### 一般步骤
+
+1. 确认iid和有限$\sigma^2$。
+2. 计算原始分布的$\mu$和$\sigma$。
+3. 使用$\bar X_n \approx \mathcal{N}(\mu, \sigma^2/n)$。
+4. 标准化：$z = (\bar X - \mu)/(\sigma/\sqrt{n})$。
+5. 查阅$z$表或使用`scipy.stats.norm.cdf`。
+
+### 常见陷阱
+
+- 使用整个$\sigma$而不是$\sigma/\sqrt{n}$作为均值的标准差。
+- 对很不对称的分布用$n < 10$应用CLT。
+- 对方差无穷的变量（Cauchy、Pareto with $\alpha < 2$）应用CLT。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo numero="1" titulo="邮政寄件盒平均重量">
+
+**问题。** 邮政寄件盒平均重量$\mu = 2{,}4$ kg，标准差$\sigma = 0{,}8$ kg（分布未知）。一次分拣随机抽取64个盒子。样本平均重量超过2.6 kg的概率是多少？
+
+**策略。** 通过CLT，$\bar X_{64} \approx \mathcal{N}(2{,}4,\; 0{,}8^2/64)$。标准化并查阅$z$表。
+
+**解决。**
+
+$\sigma_{\bar X} = 0{,}8/\sqrt{64} = 0{,}8/8 = 0{,}1$ kg。
+
+$$z = \frac{2{,}6 - 2{,}4}{0{,}1} = \frac{0{,}2}{0{,}1} = 2{,}0.$$
+
+$P(\bar X > 2{,}6) = P(Z > 2{,}0) = 1 - \Phi(2{,}0) = 1 - 0{,}9772 = 0{,}0228 \approx 2{,}3\%$。
+
+**验证。** 68-95-99.7规则：$\pm 2\sigma_{\bar X}$包含95%，所以每条尾部有2.5%。结果2.3%是一致的。
+
+**来源。** [OpenStax Statistics, §7.2, Example 7.2](https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="2" titulo="选举：样本比例的概率">
+
+**问题。** 在一次选举中，42%的选民支持候选人A（$p = 0{,}42$）。一项出口民调随机采访1,000名选民。样本比例$\hat p$小于0.40的概率是多少？
+
+**策略。** $\hat p$是Bernoulli iid均值。通过CLT，$\hat p \approx \mathcal{N}(p, p(1-p)/n)$。
+
+**解决。**
+
+$\sigma_{\hat p} = \sqrt{0{,}42 \times 0{,}58 / 1000} = \sqrt{0{,}000244} \approx 0{,}01562$。
+
+$$z = \frac{0{,}40 - 0{,}42}{0{,}01562} \approx -1{,}28.$$
+
+$P(\hat p < 0{,}40) = \Phi(-1{,}28) \approx 0{,}1003 \approx 10\%$。
+
+**验证。** 2个百分点差异除以$\sigma \approx 1{,}6\%$得$z \approx -1{,}25$；值是一致的。
+
+**来源。** [OpenIntro Statistics, §5.4, Exercise 5.39, p. 224](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="3" titulo="样本量以计算误差范围">
+
+**问题。** 一个研究所想估计SP工程师的平均薪资，误差范围为$\pm$ R$ 200，95%置信度。试点调查：$s = 1.800$雷亚尔。最小$n$是多少？
+
+**策略。** 通过CLT，95% IC的半宽为$1{,}96\,\sigma/\sqrt{n}$。隔离$n$。
+
+**解决。**
+
+$$1{,}96 \times \frac{1800}{\sqrt{n}} = 200 \implies \sqrt{n} = \frac{1{,}96 \times 1800}{200} = 17{,}64 \implies n = 17{,}64^2 \approx 311{,}2.$$
+
+向上舍入：$n = 312$。
+
+**验证。** $1{,}96 \times 1800/\sqrt{312} \approx 199{,}6 < 200$。正确。
+
+**来源。** [OpenStax Statistics, §7.3, Sample Size Calculation](https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="4" titulo="保险损失总额（精算模型）">
+
+**问题。** 保险公司有500份汽车保险单。每次索赔的平均成本为R$ 3.000，标准差R$ 1.200（指数分布）。总索赔超过R$ 1.560.000的概率是多少？
+
+**策略。** $S_{500} = \sum X_i \approx \mathcal{N}(500 \times 3000,\; 500 \times 1200^2)$通过CLT（和版本）。
+
+**解决。**
+
+$E[S] = 500 \times 3000 = 1.500.000$；$\text{Var}(S) = 500 \times 1200^2 = 720.000.000$。
+
+$\sigma_S = \sqrt{720.000.000} \approx 26.833$。
+
+$$z = \frac{1.560.000 - 1.500.000}{26.833} \approx \frac{60.000}{26.833} \approx 2{,}237.$$
+
+$P(S > 1.560.000) = P(Z > 2{,}237) \approx 1 - 0{,}9873 \approx 1{,}3\%$。
+
+**验证。** $\pm 2\sigma_S$对应$\pm$ R$ 53.666；$60.000 > 2\sigma_S$，所以少于2.5% — 与1.3%一致。
+
+**来源。** [OpenIntro Statistics, §4.4, p. 199–202](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="5" titulo="Berry-Esseen：量化近似的误差">
+
+**问题。** $X_i \sim \text{Bernoulli}(0{,}1)$；$\mu = 0{,}1$，$\sigma^2 = 0{,}09$，$E[|X-\mu|^3] = 0{,}9^3 \times 0{,}1 + 0{,}1^3 \times 0{,}9 = 0{,}0738$。对于$n = 100$，Berry-Esseen界对误差$\sup_z |F_{Z_{100}}(z) - \Phi(z)|$是什么？
+
+**策略。** 直接应用不等式，$C = 0{,}5$。
+
+**解决。**
+
+$\rho = E[|X - \mu|^3] = 0{,}0738$；$\sigma^3 = 0{,}3^3 = 0{,}027$。
+
+$$\text{Bound} \leq \frac{0{,}5 \times 0{,}0738}{0{,}027 \times \sqrt{100}} = \frac{0{,}0369}{0{,}27} \approx 0{,}137.$$
+
+最大近似误差少于13.7个百分点 — 保守界，实际误差更小。
+
+**验证。** 对于Bernoulli(0.1)加$n = 100$，二项表vs.正态显示实际误差1–2% — Berry-Esseen按预期宽松。
+
+**来源。** [Grinstead & Snell, *Introduction to Probability*, §9.3, p. 346–349](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf) — GNU FDL
+
+</Exemplo>
+
+<ListaExercicios seed="licao-77-tcl">
+
+<Exercicio
+  numero="77.1"
+  dificuldade="aplicacao"
+  solucao={<>通过CLT，<Eq>{`\\bar X_{100} \\approx \\mathcal{N}(1,\\; 1/100) = \\mathcal{N}(1,\\; 0{,}01)`}</Eq>。均值的标准差：<Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{100} = 0{,}1`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "382", exercicio: "Example 7.3", licenca: "CC-BY" }}
+>
+$X$指数分布，$\mu = 1$和$\sigma = 1$。写出$\bar X_{100}$的近似分布并计算$\sigma_{\bar X}$。
+</Exercicio>
+
+<Exercicio
+  numero="77.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mu = 1/2`}</Eq>，<Eq>{`\\sigma^2 = 1/12`}</Eq>。通过CLT：<Eq>{`\\bar X_{50} \\approx \\mathcal{N}(0{,}5,\\; 1/600)`}</Eq>。标准差：<Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{600} \\approx 0{,}0408`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>在<Eq>{`[0, 1]`}</Eq>上识别均匀分布的参数：<Eq>{`\\mu = (0+1)/2 = 0{,}5`}</Eq>；<Eq>{`\\sigma^2 = (1-0)^2/12 = 1/12`}</Eq>。</li>
+      <li>应用CLT：<Eq>{`\\bar X_n \\approx \\mathcal{N}(\\mu, \\sigma^2/n)`}</Eq>，$n = 50$：<Eq>{`\\mathcal{N}(0{,}5, \\frac{1/12}{50}) = \\mathcal{N}(0{,}5, \\frac{1}{600})`}</Eq>。</li>
+      <li>标准差：<Eq>{`\\sqrt{1/600} \\approx 0{,}0408`}</Eq>。</li>
+    </ol>
+    <em>技巧：</em>对于均匀分布<Eq>{`[a,b]`}</Eq>，<Eq>{`\\sigma^2 = (b-a)^2/12`}</Eq> — 记住这个公式。
+  </>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "218", exercicio: "5.27", licenca: "CC-BY-SA" }}
+>
+$X$在$[0, 1]$上均匀。确定$\mu$和$\sigma^2$，并通过CLT写出$\bar X_{50}$的近似分布。
+</Exercicio>
+
+<Exercicio
+  numero="77.3"
+  dificuldade="aplicacao"
+  solucao={<>已知：<Eq>{`\\mu = 3{,}5`}</Eq>，<Eq>{`\\sigma^2 = 35/12`}</Eq>。100个骰子的和：<Eq>{`S_{100} \\approx \\mathcal{N}(350,\\; 100 \\times 35/12) = \\mathcal{N}(350,\\; 291{,}67)`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "393", exercicio: "Try It 7.8", licenca: "CC-BY" }}
+>
+掷100个无偏骰子。确定和$S_{100}$的近似分布，给出$E[S]$和$\text{Var}(S)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bernoulli}(0{,}3)`}</Eq>：<Eq>{`\\mu = 0{,}3`}</Eq>，<Eq>{`\\sigma^2 = 0{,}21`}</Eq>。通过CLT：<Eq>{`\\bar X_{200} \\approx \\mathcal{N}(0{,}3,\\; 0{,}21/200) = \\mathcal{N}(0{,}3,\\; 0{,}00105)`}</Eq>。比例的标准差：<Eq>{`\\sqrt{0{,}00105} \\approx 0{,}0324`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "219", exercicio: "5.29", licenca: "CC-BY-SA" }}
+>
+$X \sim \text{Bernoulli}(0{,}3)$。通过CLT写出$\bar X_{200}$的近似分布并计算样本比例的标准差。
+</Exercicio>
+
+<Exercicio
+  numero="77.5"
+  dificuldade="aplicacao"
+  resposta="2"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "384", exercicio: "Try It 7.4", licenca: "CC-BY" }}
+>
+人口有$\mu = 50$和$\sigma = 10$。对于$n = 25$，计算$\bar X$的标准差（以整数表示）。
+</Exercicio>
+
+<Exercicio
+  numero="77.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 10/\\sqrt{25} = 2`}</Eq>。<Eq>{`z = (53 - 50)/2 = 1{,}5`}</Eq>。<Eq>{`P(\\bar X > 53) = P(Z > 1{,}5) = 1 - \\Phi(1{,}5) \\approx 1 - 0{,}9332 = 0{,}0668 \\approx 6{,}7\\%`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>计算<Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n} = 10/\\sqrt{25} = 2`}</Eq>。</li>
+      <li>标准化：<Eq>{`z = (53 - 50)/2 = 1{,}5`}</Eq>。</li>
+      <li>查表：<Eq>{`\\Phi(1{,}5) = 0{,}9332`}</Eq>，所以<Eq>{`P(Z > 1{,}5) = 0{,}0668`}</Eq>。</li>
+    </ol>
+    <em>技巧：</em>记住总是使用<Eq>{`\\sigma/\\sqrt{n}`}</Eq>（<strong>均值</strong>的标准差），不是单独的<Eq>{`\\sigma`}</Eq>。
+  </>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "384", exercicio: "Example 7.4", licenca: "CC-BY" }}
+>
+使用第77.5的数据（$\mu = 50$，$\sigma = 10$，$n = 25$），计算$P(\bar X > 53)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (47 - 50)/2 = -1{,}5`}</Eq>。<Eq>{`P(\\bar X < 47) = \\Phi(-1{,}5) \\approx 0{,}0668`}</Eq>。与第77.6相同的值，由正态对称性。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "385", exercicio: "Try It 7.5", licenca: "CC-BY" }}
+>
+用相同的参数（$\mu = 50$，$\sigma = 10$，$n = 25$），计算$P(\bar X < 47)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 20/\\sqrt{100} = 2`}</Eq>。<Eq>{`z_1 = (98-100)/2 = -1`}</Eq>，<Eq>{`z_2 = (102-100)/2 = 1`}</Eq>。<Eq>{`P(-1 < Z < 1) = \\Phi(1) - \\Phi(-1) \\approx 0{,}8413 - 0{,}1587 = 0{,}6826 \\approx 68\\%`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "218", exercicio: "5.25", licenca: "CC-BY-SA" }}
+>
+$X$，$\mu = 100$，$\sigma = 20$，$n = 100$。计算$P(98 < \bar X < 102)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[S_{50}] = 50 \\times 5 = 250`}</Eq>；<Eq>{`\\sigma_{S} = \\sqrt{50 \\times 4} = \\sqrt{200} \\approx 14{,}14`}</Eq>。<Eq>{`z = (270 - 250)/14{,}14 \\approx 1{,}414`}</Eq>。<Eq>{`P(S > 270) = P(Z > 1{,}41) \\approx 1 - 0{,}9207 = 0{,}0793 \\approx 7{,}9\\%`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Example 7.9", licenca: "CC-BY" }}
+>
+50个iid随机变量的和，$\mu = 5$，$\sigma = 2$。计算$P(S_{50} > 270)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n = (1{,}96 \\times 3 / 0{,}5)^2 = (11{,}76)^2 \\approx 138{,}3`}</Eq>，向上舍入为<Eq>{`n = 139`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>95% IC有半宽<Eq>{`1{,}96 \\sigma / \\sqrt{n}`}</Eq>。等于0.5。</li>
+      <li>隔离<Eq>{`\\sqrt{n} = 1{,}96 \\times 3 / 0{,}5 = 11{,}76`}</Eq>。</li>
+      <li>平方：<Eq>{`n = 138{,}3`}</Eq>；向上舍入：<Eq>{`n = 139`}</Eq>。</li>
+    </ol>
+    <em>技巧：</em>要将误差范围减半，需将n增加四倍。
+  </>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "396", exercicio: "Example 7.11", licenca: "CC-BY" }}
+>
+$X$，$\mu = 10$，$\sigma = 3$。要得到95% IC，误差范围$\pm 0{,}5$，需要多少观测值$n$？
+</Exercicio>
+
+<Exercicio
+  numero="77.11"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "减半", correta: true }, { texto: "减至四分之一" }, { texto: "保持不变" }, { texto: "增加四倍" }]}
+  solucao={<><Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n}`}</Eq>。若$n$增加四倍，$\sqrt{n}$增加两倍，所以<Eq>{`\\sigma_{\\bar X}`}</Eq>减半。永不减至1/4（需要$n \times 16$）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "215", exercicio: "5.17", licenca: "CC-BY-SA" }}
+>
+当样本量$n$增加四倍时，$\bar X$的标准差（$= \sigma/\sqrt{n}$）：
+</Exercicio>
+
+<Exercicio
+  numero="77.12"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "$n \\geq 30$已足够" }, { texto: "$n \\geq 100$或更多，因为高不对称减缓收敛", correta: true }, { texto: "CLT不适用于不对称分布" }, { texto: "$n \\geq 10$若$\\mu$很大则足够" }]}
+  solucao={<>Berry-Esseen显示误差与不对称除以<Eq>{`\\sqrt{n}`}</Eq>成正比。对于不对称分布，收敛更慢——<Eq>{`n \\geq 30`}</Eq>的经验法则适用于接近对称的分布。对于高不对称，使用<Eq>{`n \\geq 100`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "378", exercicio: "Try It 7.1", licenca: "CC-BY" }}
+>
+$X$有非常不对称的分布（skewness = 3）。CLT对什么$n$值合理？
+</Exercicio>
+
+<Exercicio
+  numero="77.13"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 15/\\sqrt{36} = 2{,}5`}</Eq>。<Eq>{`z = (75 - 70)/2{,}5 = 2{,}0`}</Eq>。<Eq>{`P(\\bar X > 75) = 1 - \\Phi(2) \\approx 0{,}0228`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "387", exercicio: "Practice 7.12", licenca: "CC-BY" }}
+>
+分数，$\mu = 70$，$\sigma = 15$。样本$n = 36$。计算$P(\bar X > 75)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (65 - 70)/2{,}5 = -2{,}0`}</Eq>。<Eq>{`P(\\bar X < 65) = \\Phi(-2) \\approx 0{,}0228`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "387", exercicio: "Practice 7.13", licenca: "CC-BY" }}
+>
+用第77.13相同的参数（$\mu = 70$，$\sigma = 15$，$n = 36$），计算$P(\bar X < 65)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.15"
+  dificuldade="aplicacao"
+  solucao={<>$\mu$的95% IC：<Eq>{`\\bar X \\pm 1{,}96 \\times \\sigma_{\\bar X} = 72 \\pm 1{,}96 \\times 2{,}5 = 72 \\pm 4{,}9`}</Eq>。区间：<Eq>{`(67{,}1;\\; 76{,}9)`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "397", exercicio: "Example 7.12", licenca: "CC-BY" }}
+>
+用$\mu = 70$，$\sigma = 15$，$n = 36$和$\bar X = 72$，构建$\mu$的95% IC。
+</Exercicio>
+
+<Exercicio
+  numero="77.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 50/\\sqrt{25} = 10`}</Eq>。<Eq>{`z = (520 - 500)/10 = 2`}</Eq>。<Eq>{`P(\\bar X > 520) = 1 - \\Phi(2) \\approx 0{,}0228`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "220", exercicio: "5.31", licenca: "CC-BY-SA" }}
+>
+包装重量：$\mu = 500$ g，$\sigma = 50$ g。样本$n = 25$。计算$P(\bar X > 520)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z_1 = (485 - 500)/10 = -1{,}5`}</Eq>；<Eq>{`z_2 = (515 - 500)/10 = 1{,}5`}</Eq>。<Eq>{`P(485 < \\bar X < 515) = \\Phi(1{,}5) - \\Phi(-1{,}5) \\approx 0{,}9332 - 0{,}0668 = 0{,}8664 \\approx 86{,}6\\%`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "221", exercicio: "5.33", licenca: "CC-BY-SA" }}
+>
+用第77.16的参数（$\mu = 500$ g，$\sigma = 50$ g，$n = 25$），计算$P(485 < \bar X < 515)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 10/\\sqrt{100} = 1`}</Eq>。SLA 95%：<Eq>{`\\mathcal{N}(50, 1)`}</Eq>的95 percentile。<Eq>{`\\bar X_{0{,}95} = 50 + 1{,}645 \\times 1 = 51{,}645`}</Eq> ms。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "395", exercicio: "Try It 7.10", licenca: "CC-BY" }}
+>
+响应时间：$\mu = 50$ ms，$\sigma = 10$ ms。100次测量的平均。95% SLA限制是多少？
+</Exercicio>
+
+<Exercicio
+  numero="77.19"
+  dificuldade="aplicacao"
+  solucao={<>已知：<Eq>{`\\mu = 3{,}5`}</Eq>，<Eq>{`\\sigma^2 = 35/12`}</Eq>。<Eq>{`\\sigma_{\\bar X} = \\sqrt{35/(12 \\times 1000)} \\approx 0{,}054`}</Eq>。<Eq>{`z = (3{,}6 - 3{,}5)/0{,}054 \\approx 1{,}852`}</Eq>。<Eq>{`P(\\bar X > 3{,}6) \\approx 1 - \\Phi(1{,}85) \\approx 0{,}032`}</Eq>。</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "325", exercicio: "Exercise 9.1.3", licenca: "GNU FDL" }}
+>
+掷一个骰子1,000次。计算$P(\bar X > 3{,}6)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.20"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`S_{1000} \\approx \\mathcal{N}(3500, 1000 \\times 35/12)`}</Eq>。<Eq>{`\\sigma_S = \\sqrt{2916{,}67} \\approx 54{,}0`}</Eq>。<Eq>{`z = (3600 - 3500)/54 \\approx 1{,}852`}</Eq>。<Eq>{`P(S > 3600) \\approx 0{,}032`}</Eq>。与第77.19相同的结果——有道理。</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "326", exercicio: "Exercise 9.1.5", licenca: "GNU FDL" }}
+>
+使用1,000次骰子掷的和$S_{1000}$的分布，计算$P(S_{1000} > 3600)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Exp}(1)`}</Eq>：<Eq>{`\\mu = 1`}</Eq>，<Eq>{`\\sigma = 1`}</Eq>。<Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{100} = 0{,}1`}</Eq>。<Eq>{`z = (1{,}1 - 1)/0{,}1 = 1`}</Eq>。<Eq>{`P(\\bar X > 1{,}1) = 1 - \\Phi(1) \\approx 0{,}1587`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "383", exercicio: "Example 7.2", licenca: "CC-BY" }}
+>
+$X \sim \text{Exp}(1)$（$\mu = 1$，$\sigma = 1$）。计算$P(\bar X_{100} > 1{,}1)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`p = 0{,}40`}</Eq>。<Eq>{`\\sigma_{\\hat p} = \\sqrt{0{,}40 \\times 0{,}60 / 1000} = \\sqrt{0{,}00024} \\approx 0{,}01549`}</Eq>。<Eq>{`z = (0{,}43 - 0{,}40)/0{,}01549 \\approx 1{,}937`}</Eq>。<Eq>{`P(\\hat p > 0{,}43) \\approx 1 - \\Phi(1{,}94) \\approx 0{,}0262 \\approx 2{,}6\\%`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "222", exercicio: "5.35", licenca: "CC-BY-SA" }}
+>
+选举调查：$p = 0{,}40$，$n = 1000$。计算$P(\hat p > 0{,}43)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.23"
+  dificuldade="modelagem"
+  solucao={<>50个股票的平均回报：<Eq>{`\\bar R_{50} \\approx \\mathcal{N}(0{,}001,\\; 0{,}0004/50) = \\mathcal{N}(0{,}001,\\; 0{,}000008)`}</Eq>。<Eq>{`\\sigma_{\\bar R} = \\sqrt{0{,}000008} = 0{,}00283`}</Eq>（每天0.28%）。分散化将风险相比单一股票（$\\sigma = 2\\%$）减半。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "223", exercicio: "5.37", licenca: "CC-BY-SA" }}
+>
+你持有50个独立股票；每个的日回报：$\mu = 0{,}1\%$，$\sigma = 2\%$。投资组合平均日回报的分布是什么？
+</Exercicio>
+
+<Exercicio
+  numero="77.24"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\sigma_{\\bar e} = 0{,}5/\\sqrt{1000} = 0{,}5/31{,}62 \\approx 0{,}01581`}</Eq>。对于95% IC：边际<Eq>{`\\pm 1{,}96 \\times 0{,}01581 \\approx \\pm 0{,}031`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "398", exercicio: "Try It 7.13", licenca: "CC-BY" }}
+>
+ML模型：单个误差$\sigma = 0{,}5$。计算1,000个预测上平均误差的标准差。
+</Exercicio>
+
+<Exercicio
+  numero="77.25"
+  dificuldade="modelagem"
+  solucao={<>比例差的公式：<Eq>{`n = \\frac{(z_\\alpha + z_\\beta)^2 [p_1(1-p_1) + p_2(1-p_2)]}{(p_1 - p_2)^2}`}</Eq>。用<Eq>{`\\alpha = 0{,}05`}</Eq>（<Eq>{`z = 1{,}96`}</Eq>），<Eq>{`\\beta = 0{,}2`}</Eq>（<Eq>{`z = 0{,}84`}</Eq>），5%差和假设<Eq>{`p \\approx 0{,}5`}</Eq>：<Eq>{`n = (1{,}96 + 0{,}84)^2 \\times 2 \\times 0{,}25 / 0{,}0025 \\approx 1570`}</Eq>每组。</>}
+  passos={<>
+    <ol>
+      <li>确定：<Eq>{`z_{\\alpha/2} = 1{,}96`}</Eq>（双尾5%），<Eq>{`z_\\beta = 0{,}84`}</Eq>（功效80%）。</li>
+      <li>假设<Eq>{`p_1 = p_2 = 0{,}5`}</Eq>（方差最坏情况）：<Eq>{`\\sigma_i^2 = 0{,}25`}</Eq>。</li>
+      <li>代入：<Eq>{`n = (2{,}80)^2 \\times 0{,}5 / 0{,}0025 = 7{,}84 / 0{,}0025 = 3136`}</Eq>总计，每组1568。</li>
+    </ol>
+    <em>奇闻：</em>这个计算是所有临床试验功效分析的基础。
+  </>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "259", exercicio: "6.15", licenca: "CC-BY-SA" }}
+>
+确定样本量以检测5%的比例差异，$\alpha = 0{,}05$，功效80%。
+</Exercicio>
+
+<Exercicio
+  numero="77.26"
+  dificuldade="modelagem"
+  solucao={<>每个点以概率<Eq>{`p = \\pi/4`}</Eq>落在圆内。蒙特卡洛对$\pi$的估计：<Eq>{`\\hat\\pi = 4\\hat p`}</Eq>。通过CLT，<Eq>{`\\text{Var}(\\hat p) = p(1-p)/n`}</Eq>；<Eq>{`\\text{Var}(\\hat\\pi) = 16p(1-p)/n = \\pi(4-\\pi)/n`}</Eq>。标准差：<Eq>{`\\sqrt{\\pi(4-\\pi)/n}`}</Eq>。</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "328", exercicio: "Exercise 9.1.7", licenca: "GNU FDL" }}
+>
+通过蒙特卡洛估计$\pi$：$n$个随机点在正方形$[0,1]^2$中，计数落在四分之一圆盘中的点。作为$n$的函数，$\pi$的估计标准差是什么？
+</Exercicio>
+
+<Exercicio
+  numero="77.27"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`S_{500} \\approx \\mathcal{N}(500 \\times 100,\\; 500 \\times 25) = \\mathcal{N}(50{.}000,\\; 12{.}500)`}</Eq>。<Eq>{`\\sigma_S = \\sqrt{12{.}500} \\approx 111{,}8`}</Eq> g。预期总重量为50 kg，标准差约112 g。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Try It 7.9", licenca: "CC-BY" }}
+>
+500个零件批次：$\mu = 100$ g，$\sigma = 5$ g。确定总质量$S_{500}$的分布。
+</Exercicio>
+
+<Exercicio
+  numero="77.28"
+  dificuldade="modelagem"
+  solucao={<>在<Eq>{`[0, 30]`}</Eq>上均匀：<Eq>{`\\mu = 15`}</Eq>分钟，<Eq>{`\\sigma^2 = 900/12 = 75`}</Eq>。<Eq>{`\\bar T_{50} \\approx \\mathcal{N}(15,\\; 75/50) = \\mathcal{N}(15,\\; 1{,}5)`}</Eq>。<Eq>{`z = (16 - 15)/\\sqrt{1{,}5} \\approx 0{,}816`}</Eq>。<Eq>{`P(\\bar T > 16) \\approx 1 - \\Phi(0{,}82) \\approx 0{,}2061`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "221", exercicio: "5.33", licenca: "CC-BY-SA" }}
+>
+公交车等待时间：$\mathcal{U}[0, 30]$分钟。对于50个乘客的平均等待，计算$P(\bar T_{50} > 16)$。
+</Exercicio>
+
+<Exercicio
+  numero="77.29"
+  dificuldade="modelagem"
+  solucao={<>X-bar图with $n = 5$：<Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{5}`}</Eq>。控制限：<Eq>{`\\mu \\pm 3\\sigma/\\sqrt{5} = \\mu \\pm 3\\sigma/2{,}236 = \\mu \\pm 1{,}342\\sigma`}</Eq>。代入$\mu$和$\sigma$的具体值从过程。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "399", exercicio: "Practice 7.18", licenca: "CC-BY" }}
+>
+X-bar控制图with $n = 5$。控制限是$\bar X \pm 3\sigma_{\bar X}$。计算区间以$\sigma$过程的形式的宽度。
+</Exercicio>
+
+<Exercicio
+  numero="77.30"
+  dificuldade="modelagem"
+  solucao={<>当$p$未知时，用最坏情况$p = 0{,}5$：<Eq>{`n = (1{,}96/0{,}03)^2 \\times 0{,}25 = 65{,}33^2 \\times 0{,}25 \\approx 4268 \\times 0{,}25 \\approx 1067`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.1", pagina: "251", exercicio: "6.7", licenca: "CC-BY-SA" }}
+>
+满意度调查：误差范围$\pm 3\%$，95%置信度，$p$未知。最小$n$是多少？
+</Exercicio>
+
+<Exercicio
+  numero="77.31"
+  dificuldade="modelagem"
+  solucao={<>每小时100次通话：<Eq>{`S_{100} \\approx \\mathcal{N}(100 \\times 3,\\; 100 \\times 2{,}25) = \\mathcal{N}(300,\\; 225)`}</Eq>。总数标准差：<Eq>{`\\sigma_S = 15`}</Eq>分钟。P(总数大于330分钟)<Eq>{`= P(Z > 2) \\approx 0{,}023`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Example 7.9", licenca: "CC-BY" }}
+>
+通话时间：$\mu = 3$分钟，$\sigma = 1{,}5$分钟。每小时100次通话。确定总时间的分布并计算$P(\text{总数} > 330\text{分钟})$。
+</Exercicio>
+
+<Exercicio
+  numero="77.32"
+  dificuldade="desafio"
+  solucao={<>变体A：<Eq>{`n = 10000`}</Eq>，<Eq>{`p_A = 0{,}05`}</Eq>；变体B：<Eq>{`p_B = 0{,}06`}</Eq>。<Eq>{`z = (\\hat p_B - \\hat p_A)/\\sqrt{p_A(1-p_A)/n + p_B(1-p_B)/n} \\approx 0{,}01/\\sqrt{2 \\times 0{,}05 \\times 0{,}95/10000} \\approx 0{,}01/0{,}00308 \\approx 3{,}25`}</Eq>。<Eq>{`p\\text{值} \\approx 0{,}001`}</Eq>：在5%水平显著差异。功效：用这个<Eq>{`z`}</Eq>，功效大于99%。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "261", exercicio: "6.19", licenca: "CC-BY-SA" }}
+>
+A/B测试：每个变体10,000名访问者；转化率A = 5%，B = 6%。1个百分点的提升在统计上显著吗？计算$z$值和$p$值。
+</Exercicio>
+
+<Exercicio
+  numero="77.33"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "许多iid随机变量与有限方差的和收敛到正态分布，不论原始分布", correta: true }, { texto: "所有有大n的随机变量都有正态分布" }, { texto: "原始分布在n增长时趋向正态" }, { texto: "样本均值总是有精确的正态分布" }]}
+  solucao={<>CLT讲述**样本均值**（或标准化和）的分布——不是原始分布。原始分布保持相同；收敛到正态的是统计量<Eq>{`Z_n`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "214", exercicio: "5.15", licenca: "CC-BY-SA" }}
+>
+以下哪个选项正确描述了中心极限定理？
+</Exercicio>
+
+<Exercicio
+  numero="77.34"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "无限方差：Taylor展开需要有限方差，通过特征函数的证明失败", correta: true }, { texto: "不对称分布：CLT不适用于不对称分布" }, { texto: "未知参数：不知道σ，无法标准化" }, { texto: "重尾：CLT需要原始正态分布" }]}
+  solucao={<>Cauchy的特征函数是<Eq>{`e^{-|t|}`}</Eq>——在<Eq>{`t = 0`}</Eq>没有二阶导数（无限方差）。展开<Eq>{`\\varphi(t/\\sqrt{n})^n`}</Eq>不收敛到<Eq>{`e^{-t^2/2}`}</Eq>。Cauchys的均值仍是Cauchy。</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.3", pagina: "347", exercicio: "Exercise 9.3.3", licenca: "GNU FDL" }}
+>
+为什么经典Lindeberg-Lévy CLT不适用于Cauchy分布？
+</Exercicio>
+
+<Exercicio
+  numero="77.35"
+  dificuldade="desafio"
+  solucao={<>用Python的<code>numpy.random.exponential</code>和<code>numpy.mean</code>模拟。对于<Eq>{`n = 1`}</Eq>：指数递减。对于<Eq>{`n = 5`}</Eq>：不对称但有峰值。对于<Eq>{`n = 30`}</Eq>：几乎完美的钟形以<Eq>{`\\mu = 1`}</Eq>为中心。收敛在10,000次重复的直方图中是可见的。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "379", exercicio: "Try It 7.2", licenca: "CC-BY" }}
+>
+在Python中为指数分布$\lambda = 1$模拟CLT。对$n \in \lbrace 1, 5, 30 \rbrace$生成10,000个样本均值的直方图，并与理论正态曲线比较。
+</Exercicio>
+
+<Exercicio
+  numero="77.36"
+  dificuldade="demonstracao"
+  solucao={<>步骤1：定义<Eq>{`Y_i = (X_i - \\mu)/\\sigma`}</Eq>（均值0，方差1）。步骤2：<Eq>{`\\varphi_{Y_i}(t) = 1 - t^2/2 + o(t^2)`}</Eq>通过Taylor（使用有限方差）。步骤3：<Eq>{`\\varphi_{Z_n}(t) = [\\varphi_{Y_i}(t/\\sqrt{n})]^n = [1 - t^2/(2n) + o(1/n)]^n \\to e^{-t^2/2}`}</Eq>。步骤4：<Eq>{`e^{-t^2/2}`}</Eq>是<Eq>{`\\mathcal{N}(0,1)`}</Eq>的特征函数。步骤5：Lévy定理（连续性）得出分布收敛。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.3", pagina: "343–346", exercicio: "Theorem 9.3.1", licenca: "GNU FDL" }}
+>
+通过特征函数概述CLT的证明，指出每个假设（有限方差、iid）的使用之处。
+</Exercicio>
+
+<Exercicio
+  numero="77.37"
+  dificuldade="demonstracao"
+  solucao={<>弱大数法则：<Eq>{`\\bar X_n \\xrightarrow{P} \\mu`}</Eq>。CLT的推导：<Eq>{`\\text{Var}(\\bar X_n) = \\sigma^2/n \\to 0`}</Eq>。通过Chebyshev：<Eq>{`P(|\\bar X_n - \\mu| > \\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2) \\to 0`}</Eq>。CLT更强——说明速率（$1/\\sqrt{n}$）和偏差分布的形状。WLLN直接跟随。</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "329", exercicio: "Exercise 9.1.9", licenca: "GNU FDL" }}
+>
+证明CLT蕴涵弱大数法则：若$Z_n \xrightarrow{d} \mathcal{N}(0,1)$，则$\bar X_n \xrightarrow{P} \mu$。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenIntro Statistics** (第4版)](https://www.openintro.org/book/os/) — Diez、Çetinkaya-Rundel、Barr · 2019 · CC-BY-SA。**习题77.2、77.4、77.8、77.11、77.14–17、77.22–23、77.25–26、77.28、77.30、77.33–34的主要来源。**
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky、Dean · 2022 · CC-BY。**习题77.1、77.3、77.5–7、77.9–10、77.12–13、77.18–19、77.21、77.24、77.27、77.29、77.31、77.35和示例1–3的来源。**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead、Snell · Dartmouth · GNU FDL。**习题77.19–20、77.26、77.36–37和示例5的来源。**

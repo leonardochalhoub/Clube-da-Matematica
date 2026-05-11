@@ -1,0 +1,927 @@
+---
+titulo: "Lição 110 — Consolidação Trim 11: Inferência Estatística"
+slug: "licao-110-consolidacao-trim-11"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Workshop de síntese do trim 11: IC para média, testes z e t, ANOVA, qui-quadrado, regressão simples e múltipla, e inferência bayesiana — todos os pilares da estatística inferencial em um mapa integrado."
+ordem: 110
+publicado: true
+tags: ["estatística inferencial", "intervalo de confiança", "teste de hipótese", "regressão", "ANOVA", "qui-quadrado", "bayes", "ano-3", "trim-11"]
+prerrequisitos: ["licao-109-bayes"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM / Stochastik LK alemão", "Math B japonês (Estatística)", "H2 Mathematics (Singapura) — Statistics"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\hat\theta \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}};\quad T = \frac{\bar X - \mu_0}{s/\sqrt{n}};\quad P(\theta \mid D) \propto P(D \mid \theta)\,P(\theta)"
+  legenda={<><strong>第11三学期用三个方程总结</strong>：置信区间用来估计，检验统计量用来检验，贝叶斯定理用来更新信念。所有统计推断都是这三种形式的变体。</>}
+  audioTexto="第11学期用三个方程总结。第一个：估计量加减z乘以西格玛除以n的平方根——置信区间。第二个：大写T等于x平均减去μ0除以s除以n的平方根——检验统计量。第三个：θ的概率给定D正比于D的概率给定θ乘以θ的概率——贝叶斯定理。所有统计推断都是这三种形式的变体。"
+/>
+
+<aside>
+
+**本课程涉及的教材**
+
+- [**OpenIntro Statistics**（第4版）](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §5–8（置信区间、检验、回归、卡方） · **CC-BY-SA** · <em>对于高中高级水平推断综合最具教学性的文本；每章都包含实际数据的情景化练习。</em>
+- [**Statistics**（OpenStax）](https://openstax.org/details/books/statistics) — Illowsky, Dean · §8–13（置信区间、t检验、方差分析、卡方、回归） · **CC-BY** · <em>对第11三学期所有主题的系统覆盖，包含日常示例和分布表。</em>
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Poldrack · 第7–15章（检验、回归、贝叶斯） · **CC-BY-NC** · <em>现代方法，强调可重复性、效应量和p值批判——非常适合40岁成年人之门。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="第11三学期的正式综合">
+
+### 统计推断的三个支柱
+
+<Definicao titulo="支柱1——置信区间估计">
+
+设 $X_1, \ldots, X_n \overset{iid}{\sim} N(\mu, \sigma^2)$。
+
+**均值的双侧置信水平 $1-\alpha$ 置信区间**（$\sigma$ 已知）：
+
+<Equation explicacao="已知总体标准差的均值置信区间。" latex="\bar X \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}}" />
+
+**$\sigma$ 未知时的置信区间**——使用 t 分布，自由度为 $n-1$：
+
+<Equation explicacao="使用样本标准差的均值置信区间（更常见的实际应用）。" latex="\bar X \pm t_{\alpha/2;\,n-1}\frac{s}{\sqrt{n}}" />
+
+**样本量** 以获得最大误差界 $E$：
+
+<Equation explicacao="样本量公式：z的平方乘以西格玛，除以E的平方。" latex="n \geq \left(\frac{z_{\alpha/2}\,\sigma}{E}\right)^2" />
+
+</Definicao>
+
+> "置信区间为总体参数提供了一个合理的值域。正确的解释：如果多次重复该程序，构建的区间中有 $(1-\alpha)100\%$ 将包含真实参数。" — [OpenIntro Statistics §5.2](https://www.openintro.org/book/os/)
+
+<Definicao titulo="支柱2——假设检验（统一视角）">
+
+所有假设检验都遵循相同的框架：
+
+1. 陈述 $H_0$ 和 $H_1$。
+2. 计算 $H_0$ 下的**检验统计量**。
+3. 计算 **p值** = $P(\text{结果至少与观察结果一样极端} \mid H_0)$。
+4. 如果 $p \leq \alpha$，拒绝 $H_0$。
+
+**检验地图：**
+
+| 场景 | 统计量 | 分布 |
+|---|---|---|
+| 1个均值，$\sigma$ 已知 | $Z = (\bar X - \mu_0)/(\sigma/\sqrt{n})$ | $N(0,1)$ |
+| 1个均值，$\sigma$ 未知 | $T = (\bar X - \mu_0)/(s/\sqrt{n})$ | $t_{n-1}$ |
+| 2个独立均值 | Welch $T$ | $t_{\nu}$（Welch 自由度） |
+| $k$ 个均值 | $F = MS_B/MS_W$ | $F_{k-1,\,N-k}$ |
+| 列联表 | $\chi^2 = \sum (O-E)^2/E$ | $\chi^2_{(r-1)(c-1)}$ |
+| 比例vs参考值 | $Z = (\hat p - p_0)/\sqrt{p_0(1-p_0)/n}$ | $N(0,1)$ |
+
+</Definicao>
+
+<Definicao titulo="支柱3——回归与预测建模">
+
+**简单线性回归** $\hat Y = \hat\beta_0 + \hat\beta_1 X$：
+
+<Equation explicacao="简单回归的普通最小二乘估计量。" latex="\hat\beta_1 = \frac{S_{xy}}{S_{xx}},\quad \hat\beta_0 = \bar Y - \hat\beta_1 \bar X" />
+
+**多元回归** $\hat{\mathbf{y}} = X\hat{\boldsymbol\beta}$：
+
+<Equation explicacao="多元回归的向量最小二乘估计量。" latex="\hat{\boldsymbol\beta} = (X^\top X)^{-1} X^\top \mathbf{y}" />
+
+**决定系数**及其调整版本：
+
+<Equation explicacao="调整R平方对额外预测变量进行惩罚，这些变量对拟合没有贡献。" latex="R^2_{\text{adj}} = 1 - \frac{(1-R^2)(n-1)}{n-p-1}" />
+
+</Definicao>
+
+<Teorema titulo="贝叶斯信念更新规则">
+
+设 $\theta$ 为感兴趣的参数，$D$ 为观察数据：
+
+<Equation explicacao="后验分布正比于似然乘以先验。" latex="P(\theta \mid D) = \frac{P(D \mid \theta)\,P(\theta)}{P(D)} \propto P(D \mid \theta)\,P(\theta)" />
+
+**Beta-Binomial 共轭：** 如果 $\theta \sim \text{Beta}(\alpha, \beta)$ 且 $X \mid \theta \sim \text{Bin}(n, \theta)$，则：
+
+<Equation explicacao="当先验为Beta且似然为二项分布时的后验分布——先验通过累加成功和失败来更新。" latex="\theta \mid X \sim \text{Beta}(\alpha + X,\; \beta + n - X)" />
+
+</Teorema>
+
+<Insight>
+
+**深层统一性。** 线性回归、方差分析、t检验和卡方的对数线性模型都是**广义线性模型**的情况：$g(E[Y]) = X\beta$。掌握GLM就是掌握经典参数推断。
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<defs>
+  <marker id="arr110" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="70" width="110" height="36" rx="6" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="65" y="83" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">问题：</text>
+  <text x="65" y="97" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">估计μ？</text>
+</g>
+<g>
+  <line x1="120" x2="165" y1="88" y2="88" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="167" y="55" width="110" height="36" rx="6" fill="rgb(232 199 122 / 0.25)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="222" y="68" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">CI: X̄ ± t·s/√n</text>
+  <text x="222" y="82" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">n ≥ (z·σ/E)²</text>
+</g>
+<g>
+  <line x1="120" x2="165" y1="95" y2="115" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="167" y="105" width="110" height="36" rx="6" fill="rgb(61 122 95 / 0.25)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="222" y="118" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">检验 H₀</text>
+  <text x="222" y="132" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">z / t / F / χ²</text>
+</g>
+<g>
+  <line x1="277" y1="88" x2="322" y2="65" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="324" y="50" width="110" height="36" rx="6" fill="rgb(199 107 63 / 0.25)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="379" y="63" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">预测Y？</text>
+  <text x="379" y="77" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">回归OLS</text>
+</g>
+<g>
+  <line x1="277" y1="123" x2="322" y2="123" stroke="currentColor" strokeWidth="1.2" markerEnd="url(#arr110)"/>
+  <rect x="324" y="105" width="110" height="36" rx="6" fill="rgb(100 80 160 / 0.25)" stroke="rgb(100 80 160)" strokeWidth="1.2"/>
+  <text x="379" y="118" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">更新信念？</text>
+  <text x="379" y="132" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor">贝叶斯定理</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+第11三学期决策流程——每个统计问题都有相应的方法。
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="五岁小孩的讲法">
+
+想象你想知道**一个巨大罐子里有多少颗糖**。
+
+- 你不数所有的——拿一把，数一下，然后**猜一个区间**："应该有200到300颗"。这就是**置信区间**。
+- 你的朋友说"恰好有150颗"。你看了你的这把，想"如果只有150颗，这不太可能"。所以你说"我不相信！"——这就是**假设检验**。
+- 昨天你对这个罐子已经有所了解。今天你把"昨天的知识"和你现在数的东西结合起来，变得更聪明了。这就是**贝叶斯**——通过结合所知和所见来学习。
+
+这三种方法合在一起，就像是一个**很好的数字侦探**。
+
+</Porta>
+
+<Porta nivel="10" titulo="十岁小孩的讲法">
+
+你在第11三学期学会了**从样本中得出结论**。
+
+**之前是什么样，现在是什么样：**
+
+以前，你计算整个班级的平均数——你**有了**所有数据。现在你用一个**样本**学习，对**世界**做出声明。
+
+**三个方法：**
+
+1. **置信区间：** "有95%的置信度，学校的平均成绩在6.2到7.1之间。"你不知道确切的值——给出一个合理的区间。
+
+2. **假设检验：** "新教材提高了平均成绩吗？"你收集数据，计算如果没有改进这个结果的概率（p值），然后决定是否相信有改进。
+
+3. **贝叶斯：** 你在收集数据之前就已经知道一些东西。用贝叶斯，你把之前知道的（先验）和观察到的（数据）结合起来，更新信念。
+
+**选择方法：**
+
+- 我想估计一个均值：用 $t$ 的置信区间。
+- 我想比较两个组：$t$ 检验。
+- 我想比较好几个组：方差分析。
+- 我想交叉两个分类变量：卡方检验。
+- 我想从 $X$ 预测 $Y$：回归。
+- 我想更新我的信念：贝叶斯。
+
+</Porta>
+
+<Porta nivel="15" titulo="十五岁青少年的讲法">
+
+### 综合：频率论vs贝叶斯主义
+
+**频率论视角**（第102–108课）：
+
+- 参数（$\mu$、$\sigma$、$\beta$）是**未知常数**——它们没有分布。
+- 置信区间：关于重复假想实验的覆盖率。
+- p值：" 如果 $H_0$ 为真，这个结果的概率有多小？"
+
+**贝叶斯视角**（第109课）：
+
+- 参数有**反映不确定性的概率分布**。
+- 可信区间：" 给定观察数据，有95%的概率 $\theta \in [a, b]$。"
+- 更新：先验+似然=后验。
+
+### 第11三学期揭示的联系
+
+| 关系 | 细节 |
+|---|---|
+| 带虚拟变量的回归=t检验 | 1个二元预测变量→截距和系数是各组的均值 |
+| 方差分析=带k-1个虚拟变量的回归 | 模型的总F=方差分析的F |
+| 当 $k = 2$ 时 $F = T^2$ | 2个组的方差分析与双侧t检验相同 |
+| 均匀先验下的MAP=MLE | 当你没有先验信息时，频率论和贝叶斯一致 |
+
+### 经常犯的错误（永远不要犯这些）
+
+1. **$p = 0{,}06$ 不是 $H_0$ 的证据**——只是"在5%水平下我们不拒绝 $H_0$"。
+2. **统计显著性 $\neq$ 实际显著性**——微小的效应可能在 $n$ 很大时显著。
+3. **相关性 $\neq$ 因果性**——回归不证明原因。
+4. **$R^2$ 高 $\neq$ 模型好**——残差中可能有模式。
+5. **p-挖掘**——测试多个假设而不做多重比较修正会增加第一类错误。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程专业学生讲法">
+
+### 一切都是广义线性模型（GLM）
+
+线性回归、方差分析、t检验和卡方的对数线性模型都是**广义线性模型**的情况：
+
+$$g(E[Y]) = X\beta$$
+
+| 方法 | $Y$ 的分布 | 链接函数 $g$ |
+|---|---|---|
+| 线性回归 | 正态 | 恒等 |
+| 方差分析 | 正态 | 恒等 |
+| Logistic回归 | 伯努利 | Logit |
+| Poisson回归 | Poisson | Log |
+| 多项式回归 | 多项式 | 多元logit |
+
+掌握GLM=掌握所有经典参数推断。
+
+### 重新抽样：非参数替代方法
+
+- **Bootstrap：** 任何统计量的置信区间和标准错误，无需分布假设。
+- **排列：** 不需要正态性假设的p值。
+- **交叉验证：** 稳健的预测评估。
+
+### 功效分析（在实践中使用不足）
+
+在任何数据收集之前，计算样本量以用80%的功效检测最小相关效应：
+
+$$n = \frac{2\sigma^2(z_\alpha + z_\beta)^2}{\delta^2}$$
+
+其中 $\delta$ 是最小可检测差异，$z_\alpha$ 和 $z_\beta$ 对应第一类和第二类错误。
+
+没有功效分析，实验要么夭折，要么产生没人能重复的不确定结果。
+
+### 专业分析检查清单
+
+1. 预注册假设（OSF、AsPredicted）。
+2. 功效分析和 $n$ 计算。
+3. 用控制设计收集（随机化、盲法）。
+4. 验证假设（正态性、同方差性、独立性）。
+5. 报告：估计值+置信区间+效应量+p值。
+6. 残差诊断（回归）。
+7. 多重比较修正（Bonferroni、FDR）。
+
+</Porta>
+
+<Porta nivel="40" titulo="资深专业人士讲法">
+
+### 统计推断的哲学
+
+四所学派形成了当前的格局：
+
+- **Neyman-Pearson频率论：** 控制长期错误率（$\alpha$、$\beta$）。置信区间有频数覆盖，不是包含参数的概率。
+- **Fisher：** p值作为反对 $H_0$ 的连续证据度量。没有拒绝/不拒绝二分法。
+- **似然主义（Edwards）：** 似然比作为模型之间的证据度量。没有先验。
+- **贝叶斯（Jeffreys、Lindley、McElreath）：** 参数有分布；后验是完整答案。允许关于假设的直接概率声明。
+
+没有哪种方法普遍优越。选择取决于背景、目标和分析师接受的假设。
+
+### 重复危机和我们学到的东西
+
+2015年，开放科学合作组织复制了心理学的100项研究——只有36%复制成功。原因是工具性的：
+
+1. P-挖掘和HARKing（已知结果后的假设）。
+2. 忽视功效分析——小效应、样本不足。
+3. 多重比较无修正。
+4. 数据和代码不共享。
+5. 发表偏差（负结果不出现）。
+
+社区实现的解决方案：预注册、直接重复、开放科学、注册报告和 $p < 0{,}05$ 以外的指标（效应量、BIC、贝叶斯因子）。
+
+### 当前前沿
+
+- **因果推断（Pearl、Rubin）：** DAG、do-演算、工具变量、RDD、差分。经典统计估计关联；因果推断估计反事实。
+- **高维：** $p \gg n$。Lasso、岭、弹性网、knockoffs（Candès）用于FDR控制。
+- **选择性推断：** 变量选择后有效的p值。
+- **贝叶斯计算：** HMC（Stan）、变分推断、ABC。使复杂分层模型易处理。
+- **预测vs推理模型：** 机器学习最大化预测准确度；推断最大化可解释性和因果有效性。Breiman（2001）称这为"两种文化"。
+
+### 统计学中的伦理
+
+操纵数据、事后选择检验而不披露、不报告预指定分析——这些做法越过了科学诚信的底线。美国统计学会关于p值的声明（2016）对任何专业人士都是必读的。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用">
+
+### 案例1——圣保罗的平均租金
+
+一家房地产公司从南区2卧室公寓中抽样 $n = 49$ 套。平均样本租金 R\$ 2.850/月，样本标准差 R\$ 420/月。
+
+**平均租金的95%置信区间：**
+$t_{0,025;\,48} \approx 2{,}011$。误差界：$2{,}011 \times 420/7 = 120{,}66$。
+置信区间：R\$ 2.729 至 R\$ 2.971。
+
+**检验：** 市政府声称平均租金是 R\$ 2.700。$T = (2850 - 2700)/(420/7) = 2{,}50$。双侧p值 $\approx 0{,}016 < 0{,}05$。拒绝 $H_0$。
+
+### 案例2——ENEM中的组间比较
+
+公立学校学生（组1，$n_1 = 200$，$\bar X_1 = 540$，$s_1 = 80$）vs私立（组2，$n_2 = 200$，$\bar X_2 = 590$，$s_2 = 75$）。Welch $T$，差异的95%置信区间。
+
+### 案例3——登陆页面A/B测试
+
+版本A：1000名访客中有120次转化。版本B：150/1000。比例差异的z检验：
+$\hat p_A = 0{,}12$，$\hat p_B = 0{,}15$，$\hat p = 0{,}135$。
+$Z = (0{,}15 - 0{,}12)/\sqrt{0{,}135 \cdot 0{,}865 \cdot (1/1000 + 1/1000)} = 2{,}09$。
+双侧p值 $\approx 0{,}037 < 0{,}05$。B在5%水平上更好。
+
+### 案例4——肥料和产量（方差分析）
+
+4种肥料，每种25株植物，产量（kg/ha）。方差分析 $F(3, 96)$。如果 $F > F_{0,05;\,3,96} \approx 2{,}70$，某些肥料不同。事后检验：Tukey HSD。
+
+### 案例5——房产价格回归
+
+$Y$ = 价格（千雷亚尔），$X_1 = m^2$，$X_2$ = 卧室数，$X_3$ = 年龄。用 $n = 200$ 套房产进行OLS拟合。解释每个 $\hat\beta_i$、$R^2_{\text{adj}}$和残差诊断。
+
+### 案例6——质量控制中的贝叶斯
+
+一批零件中有缺陷比例 $\theta$。先验：$\text{Beta}(2, 18)$（经验：约10%缺陷）。检查 $n = 50$，发现 $x = 8$ 个缺陷。后验：$\text{Beta}(10, 60)$。后验平均：$10/70 \approx 14{,}3\%$。95%可信区间通过Beta的分位数。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo titulo="ENEM平均成绩的95%置信区间（标准差未知）" numero="1">
+
+**问题。** 2023年ENEM数学科目的 $n = 36$ 名考生样本平均分 $\bar X = 580$ 分，样本标准差 $s = 90$ 分。为总体平均分 $\mu$ 构建95%置信区间。
+
+**策略。** 因为 $\sigma$ 未知，使用 $n - 1 = 35$ 自由度的 $t$ 分布。从表中找 $t_{0,025;\,35}$。
+
+**解决。**
+
+$t_{0,025;\,35} = 2{,}030$。
+
+误差界：$E = 2{,}030 \times \frac{90}{\sqrt{36}} = 2{,}030 \times 15 = 30{,}45$。
+
+95%置信区间：$(580 - 30{,}45\;;\; 580 + 30{,}45) = (549{,}55\;;\; 610{,}45)$。
+
+**验证。** 误差界随 $s$ 增加而增加，随 $\sqrt{n}$ 增加而减少。对于 $n = 144$，误差界为 $2{,}030 \times 90/12 = 15{,}2$——一半，因为 $n$ 增加了四倍。
+
+**来源。** [OpenIntro Statistics §5.2](https://www.openintro.org/book/os/) — 练习 5.5，第222页 · CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo titulo="单样本t检验与政府目标的比较" numero="2">
+
+**问题。** 政府声称UBS平均就诊时间为 $\mu_0 = 20$ 分钟。一次审计抽样 $n = 25$ 次就诊：$\bar X = 24{,}8$ 分钟，$s = 7{,}2$ 分钟。在 $\alpha = 5\%$ 水平上，有证据证明真实平均值超过20分钟吗？
+
+**策略。** 单侧右尾t检验（$H_1: \mu > 20$），$df = 24$。
+
+**解决。**
+
+$T = \frac{24{,}8 - 20}{7{,}2/\sqrt{25}} = \frac{4{,}8}{1{,}44} = 3{,}33$。
+
+$t_{0,05;\,24} = 1{,}711$（单侧）。因为 $3{,}33 > 1{,}711$，拒绝 $H_0$。
+
+p值：$P(t_{24} \geq 3{,}33) \approx 0{,}001 < 0{,}05$。有证据证明平均时间超过20分钟。
+
+**验证。** 95%单侧置信区间下界：$24{,}8 - 1{,}711 \times 1{,}44 = 22{,}33$ 分钟。值 $\mu_0 = 20$ 在此限制下，确认拒绝。
+
+**来源。** [Statistics, OpenStax §9.4](https://openstax.org/books/statistics/pages/9-4-comparing-two-independent-population-means) — 改编自例9.10，第476页 · CC-BY。
+
+</Exemplo>
+
+<Exemplo titulo="单因素方差分析——3种肥料的产量" numero="3">
+
+**问题。** 三种肥料在 $n_i = 10$ 株植物的组中进行了测试。产量（kg）：$\bar X_1 = 12{,}0$，$\bar X_2 = 14{,}5$，$\bar X_3 = 13{,}2$。总平均 $\bar X = 13{,}23$。$SS_W = 162$（组内平方和）。在5%水平上，肥料之间有差异吗？
+
+**策略。** 方差分析：计算 $SS_B$，获得 $F$，与 $F_{0,05;\,2,\,27}$ 比较。
+
+**解决。**
+
+$SS_B = 10[(12{,}0 - 13{,}23)^2 + (14{,}5 - 13{,}23)^2 + (13{,}2 - 13{,}23)^2]$
+$= 10[1{,}513 + 1{,}613 + 0{,}001] = 31{,}27$。
+
+$MS_B = 31{,}27/2 = 15{,}64$；$MS_W = 162/27 = 6{,}00$。
+
+$F = 15{,}64 / 6{,}00 = 2{,}61$。
+
+$F_{0,05;\,2,\,27} \approx 3{,}35$。因为 $2{,}61 < 3{,}35$，**不拒绝 $H_0$** ——在5%水平上没有证据表明肥料之间有差异。
+
+**验证。** p值 $\approx 0{,}092 > 0{,}05$。结果一致。如果每组 $n_i = 20$，功效会更大，可能会有拒绝。
+
+**来源。** [OpenIntro Statistics §7.5](https://www.openintro.org/book/os/) — 基于方差分析例，第319页 · CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo titulo="简单线性回归——薪资对工作经验" numero="4">
+
+**问题。** 以 $n = 20$ 名专业人员为例：$\bar X = 8$ 年，平均薪资 R\$ 6.200（$\bar Y = 6.200$），$S_{xx} = 180$，$S_{xy} = 54.000$。拟合回归模型并解释系数。
+
+**策略。** 用最小二乘公式计算 $\hat\beta_1$ 和 $\hat\beta_0$；在背景中解释。
+
+**解决。**
+
+$\hat\beta_1 = S_{xy}/S_{xx} = 54.000/180 = 300$。
+
+$\hat\beta_0 = \bar Y - \hat\beta_1 \bar X = 6.200 - 300 \times 8 = 3.800$。
+
+模型：$\hat Y = 3.800 + 300\,X$（单位：雷亚尔，$X$ 单位：年）。
+
+**解释。** 每增加一年工作经验，平均薪资增加 R\$ 300。截距 R\$ 3.800 是0年经验时的估计薪资（外推——谨慎使用）。
+
+**验证。** 对于 $X = 10$ 年：$\hat Y = 3.800 + 3.000 = 6.800$ 雷亚尔（R\$ 6.800）。鉴于 $\bar Y = 6.200$ 当 $\bar X = 8$，是合理的。
+
+**来源。** [OpenIntro Statistics §8.2](https://www.openintro.org/book/os/) — 基于练习 8.13（薪资数据），第360页 · CC-BY-SA。
+
+</Ejemplo>
+
+<Exemplo titulo="贝叶斯更新——生产线上的缺陷比例" numero="5">
+
+**问题。** 一位质量工程师相信生产线的缺陷比例 $\theta$ 先验为 $\text{Beta}(3, 17)$（先验平均 $= 3/20 = 15\%$）。检查 $n = 40$ 个零件并发现 $X = 4$ 个缺陷。后验分布是什么？对 $\theta$ 的新点估计是什么？
+
+**策略。** 使用Beta-Binomial共轭：后验 $= \text{Beta}(\alpha + X, \beta + n - X)$。
+
+**解决。**
+
+后验：$\text{Beta}(3 + 4,\; 17 + 40 - 4) = \text{Beta}(7, 53)$。
+
+后验平均：$7/(7+53) = 7/60 \approx 11{,}7\%$。
+
+95%可信区间：$\text{Beta}(7, 53)$ 的2.5%和97.5%分位数，约 $[0{,}049;\; 0{,}221]$。
+
+**验证。** 之前：先验平均15%。看到40个中的4个缺陷后（最大似然估计=10%），后验转移到11.7%——先验和数据的加权平均。随着样本量增加，后验越来越接近最大似然估计。
+
+**来源。** [Statistical Thinking for the 21st Century, Ch. 15](https://statsthinking21.org/) — Beta-Binomial例的结构，§15.3 · CC-BY-NC。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-110-consolidacao-trim-11">
+
+<Exercicio
+  numero="110.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.1", pagina: "213", exercicio: "5.1", licenca: "CC-BY-SA" }}
+  solucao={<>95%置信区间：<Eq>{`\\bar X \\pm z_{0,025}\\,\\sigma/\\sqrt{n} = 50 \\pm 1{,}96 \\times 8/8 = 50 \\pm 1{,}96`}</Eq>。区间：<Eq>{`(48{,}04\\;; 51{,}96)`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>识别：<Eq>{`n=64`}</Eq>，<Eq>{`\\bar x = 50`}</Eq>，<Eq>{`\\sigma = 8`}</Eq>（已知）。<em>为什么：</em><Eq>{`\\sigma`}</Eq>已知→使用 <Eq>{`z`}</Eq>，不用 <Eq>{`t`}</Eq>。</li>
+      <li>临界值：<Eq>{`z_{0,025} = 1{,}96`}</Eq>。</li>
+      <li>误差界：<Eq>{`E = 1{,}96 \\times 8/\\sqrt{64} = 1{,}96`}</Eq>。</li>
+      <li>置信区间：<Eq>{`(48{,}04\\;; 51{,}96)`}</Eq>。</li>
+    </ol>
+    <p><em>窍门：</em>用 <Eq>{`n = 64`}</Eq>，<Eq>{`\\sqrt{n} = 8`}</Eq>——快速心算。</p>
+  </>}
+>
+$n = 64$，$\bar x = 50$，$\sigma = 8$（已知）。为 $\mu$ 构建95%置信区间。
+</Exercicio>
+
+<Exercicio
+  numero="110.2"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "234", exercicio: "5.15", licenca: "CC-BY-SA" }}
+  solucao={<>用同样的数据（<Eq>{`\\bar x = 50`}</Eq>，<Eq>{`s = 8`}</Eq>，<Eq>{`n=64`}</Eq>）：<Eq>{`T = (50-48)/(8/8) = 2`}</Eq>。双侧p值 <Eq>{`\\approx 0{,}046`}</Eq>。在5%水平上拒绝 <Eq>{`H_0`}</Eq>。</>}
+>
+用上一个练习的数据（$\bar x = 50$，$s = 8$，$n = 64$），检验 $H_0: \mu = 48$ vs $H_1: \mu \neq 48$ 在5%水平上。计算 $T$ 并做决定。
+</Exercicio>
+
+<Exercicio
+  numero="110.3"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/10-1-comparing-two-independent-population-means", secao: "§10.1", pagina: "497", exercicio: "ex. 10.1", licenca: "CC-BY" }}
+  solucao={<>Welch：<Eq>{`T = (100-95)/\\sqrt{100/50 + 144/60} = 5/\\sqrt{4{,}4} \\approx 5/2{,}098 \\approx 2{,}38`}</Eq>。用Welch自由度 <Eq>{`\\approx 106`}</Eq>，p值 <Eq>{`\\approx 0{,}019`}</Eq>。拒绝 <Eq>{`H_0`}</Eq>。</>}
+>
+两个独立样本：$\bar x_1 = 100$，$s_1 = 10$，$n_1 = 50$；$\bar x_2 = 95$，$s_2 = 12$，$n_2 = 60$。在5%水平上执行双侧Welch t检验。
+</Exercicio>
+
+<Exercicio
+  numero="110.4"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "318", exercicio: "7.27", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`SS_B = 20[(10-12)^2+(12-12)^2+(14-12)^2] = 20 \\cdot 8 = 160`}</Eq>。<Eq>{`MS_B = 80`}</Eq>。如果 <Eq>{`MS_W = \\sigma^2 = 4`}</Eq> 则 <Eq>{`F = 80/4 = 20`}</Eq>。<Eq>{`F_{0,05;2,57} \\approx 3{,}16`}</Eq>。拒绝 <Eq>{`H_0`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>总平均：<Eq>{`\\bar X = (10+12+14)/3 = 12`}</Eq>。</li>
+      <li><Eq>{`SS_B = 20\\sum(\\bar X_i - \\bar X)^2 = 20(4+0+4) = 160`}</Eq>。<em>为什么：</em><Eq>{`n_i = 20`}</Eq>植物每组。</li>
+      <li><Eq>{`MS_B = SS_B/(k-1) = 160/2 = 80`}</Eq>。</li>
+      <li><Eq>{`F = MS_B/MS_W = 80/4 = 20 \\gg 3{,}16`}</Eq>。强烈拒绝。</li>
+    </ol>
+    <p><em>注意：</em>用 <Eq>{`F = 20`}</Eq> 和 <Eq>{`F_{crit} \\approx 3{,}16`}</Eq>，p值非常小——巨大的效应。</p>
+  </>}
+>
+三个组各 $n_i = 20$ 株植物，平均 $\bar X_1 = 10$，$\bar X_2 = 12$，$\bar X_3 = 14$。假设 $\sigma^2 = 4$（组内方差），计算方差分析的 $F$ 并在5%水平上做决定。
+</Exercicio>
+
+<Exercicio
+  numero="110.5"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "348", exercicio: "8.1", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`\\hat Y = 5 + 2 \\times 10 = 25`}</Eq>。</>}
+>
+拟合模型：$\hat Y = 5 + 2X$。对 $X = 10$ 的点预测是多少？
+</Exercicio>
+
+<Exercicio
+  numero="110.6"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "655", exercicio: "ex. 12.9", licenca: "CC-BY" }}
+  solucao={<><Eq>{`R^2_{\\text{adj}} = 1 - (1 - 0{,}8)(50-1)/(50-4-1) = 1 - 0{,}2 \\times 49/45 = 1 - 0{,}2178 \\approx 0{,}782`}</Eq>。</>}
+>
+$R^2 = 0{,}8$，$n = 50$，$p = 4$ 个预测变量。计算 $R^2_{\text{adj}}$。
+</Exercicio>
+
+<Exercicio
+  numero="110.7"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "291", exercicio: "6.33", licenca: "CC-BY-SA" }}
+  solucao={<>$2 \times 3$ 表：<Eq>{`df = (2-1)(3-1) = 2`}</Eq>。<Eq>{`\\chi^2_{0,05;\\,2} = 5{,}991`}</Eq>。因为 <Eq>{`\\chi^2 = 8 > 5{,}991`}</Eq>，拒绝独立性假设。</>}
+>
+列联表 $2 \times 3$ 产生 $\chi^2 = 8$。自由度有多少个？在5%水平上有关联吗？
+</Exercicio>
+
+<Exercicio
+  numero="110.8"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "ex. 15.1", licenca: "CC-BY-NC" }}
+  solucao={<>先验：<Eq>{`\\text{Beta}(2, 2)`}</Eq>。似然：<Eq>{`\\text{Bin}(10, \\theta)`}</Eq>，<Eq>{`X = 8`}</Eq>。后验：<Eq>{`\\text{Beta}(2+8, 2+10-8) = \\text{Beta}(10, 4)`}</Eq>。</>}
+>
+先验 $\theta \sim \text{Beta}(2, 2)$。观察 $X = 8$ 次成功在 $n = 10$ 次试验中。$\theta$ 的后验分布是什么？
+</Exercicio>
+
+<Exercicio
+  numero="110.9"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "ex. 15.2", licenca: "CC-BY-NC" }}
+  solucao={<>后验 <Eq>{`\\text{Beta}(10, 4)`}</Eq>：平均 <Eq>{`= 10/(10+4) = 10/14 \\approx 0{,}714`}</Eq>。估计点MAP=众数= <Eq>{`(10-1)/(14-2) = 9/12 = 0{,}75`}</Eq>。</>}
+>
+用上一个练习的后验 $\text{Beta}(10, 4)$，计算后验平均和MAP（后验分布的众数）。
+</Exercicio>
+
+<Exercicio
+  numero="110.10"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela z", pagina: "A-1", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`z_{0,025} = 1{,}960`}</Eq>。95%置信区间的双侧临界值。</>}
+>
+从标准正态分布表中找：$z_{0,025}$ 是多少？（答：$1{,}960$。）
+</Exercicio>
+
+<Exercicio
+  numero="110.11"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela t", pagina: "A-3", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`t_{0,025;\\,19} = 2{,}093`}</Eq>。19个自由度的 <Eq>{`t`}</Eq> 分布，双侧区域5%。</>}
+>
+从 t 表中找：$t_{0,025;\,19}$。（答：$2{,}093$。）
+</Exercicio>
+
+<Exercicio
+  numero="110.12"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela F", pagina: "A-5", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`F_{0,05;\\,2,\\,27} \\approx 3{,}35`}</Eq>。方差分析临界值，<Eq>{`k=3`}</Eq> 组，<Eq>{`N-k=27`}</Eq> 误差自由度。</>}
+>
+从F表中找 $F_{0,05;\,2,\,27}$。（答：${\approx}\,3{,}35$。）
+</Exercicio>
+
+<Exercicio
+  numero="110.13"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/appendix", secao: "Apêndice — Tabela chi²", pagina: "A-7", exercicio: "leitura de tabela", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\chi^2_{0,05;\\,4} = 9{,}488`}</Eq>。</>}
+>
+找 $\chi^2_{0,05;\,4}$。（答：$9{,}488$。）
+</Exercicio>
+
+<Exercicio
+  numero="110.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 独立性卡方检验", correta: false },
+    { texto: "B) 单因素方差分析", correta: false },
+    { texto: "C) 两个独立样本的Welch t检验", correta: true },
+    { texto: "D) 单样本t检验", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "300", exercicio: "ex. 7.10", licenca: "CC-BY-SA" }}
+  solucao={<>两个独立的连续均值，标准差未知：正确的方法是<strong>Welch t检验</strong>（C）。卡方用于分类变量；方差分析用于3个或以上组；单样本 <Eq>{`t`}</Eq> 检验与固定值比较。</>}
+>
+哪个检验适合比较公司中男性和女性的平均薪资，样本独立，方差未知？
+</Exercicio>
+
+<Exercicio
+  numero="110.15"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 方差分析", correta: false },
+    { texto: "B) 独立性卡方检验", correta: true },
+    { texto: "C) 线性回归", correta: false },
+    { texto: "D) 配对t检验", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "285", exercicio: "ex. 6.25", licenca: "CC-BY-SA" }}
+  solucao={<>性别和政党是两个<strong>分类变量</strong>——合适的检验是<strong>独立性卡方检验</strong>（B）。方差分析和t检验需要连续变量；线性回归预测数值。</>}
+>
+调查有100个人，记录性别（男/女）和偏好政党（A/B/C）。哪个检验验证变量间的关联？
+</Exercicio>
+
+<Exercicio
+  numero="110.16"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 单样本t检验", correta: false },
+    { texto: "B) 拟合度卡方检验", correta: false },
+    { texto: "C) 单因素方差分析", correta: true },
+    { texto: "D) Welch双侧t检验", correta: false },
+  ]}
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-4-test-of-two-variances", secao: "§13.1", pagina: "658", exercicio: "ex. 13.2", licenca: "CC-BY" }}
+  solucao={<>四个剂量（四个组）和一个连续变量（体重减轻）：<strong>单因素方差分析</strong>（C）。Welch <Eq>{`t`}</Eq> 仅适用于2个组；卡方不适用于连续变量。</>}
+>
+一项研究测试4种药物剂量（低、中、高、安慰剂）对20个患者/组的体重减轻（kg）的影响。分析方法是什么？
+</Exercicio>
+
+<Exercicio
+  numero="110.17"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 两个独立样本的Welch t检验", correta: false },
+    { texto: "B) 配对t检验", correta: true },
+    { texto: "C) 方差分析", correta: false },
+    { texto: "D) 独立性卡方检验", correta: false },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "308", exercicio: "ex. 7.17", licenca: "CC-BY-SA" }}
+  solucao={<>一个<em>同一个人</em>的之前和之后的体重：数据是<strong>配对的</strong>。应用<strong>配对t检验</strong>（B），分析差值 <Eq>{`D_i = X_{i,\\text{之后}} - X_{i,\\text{之前}}`}</Eq>。</>}
+>
+测量20个人的体重在3个月节食前后。数据是配对的。正确的检验是什么？
+</Exercicio>
+
+<Exercicio
+  numero="110.18"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/9-1-null-and-alternative-hypotheses", secao: "§9.1", pagina: "454", exercicio: "ex. 9.3", licenca: "CC-BY" }}
+  solucao={<>双侧p值：<Eq>{`2 \\times P(Z \\geq 2{,}1) = 2 \\times (1 - 0{,}9821) = 2 \\times 0{,}0179 = 0{,}036`}</Eq>。在5%水平上拒绝 <Eq>{`H_0`}</Eq>。</>}
+>
+在双侧检验中得到统计量 $Z = 2{,}1$。计算p值并在 $\alpha = 5\%$ 水平上做决定。
+</Exercicio>
+
+<Exercicio
+  numero="110.19"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "244", exercicio: "5.23", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`n \\geq (z_{0,025}\\,\\sigma/E)^2 = (1{,}96 \\times 10/2)^2 = (9{,}8)^2 = 96{,}04`}</Eq>。因此 <Eq>{`n \\geq 97`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>公式：<Eq>{`n \\geq (z_{\\alpha/2}\\,\\sigma/E)^2`}</Eq>。<em>为什么：</em>来自置信区间——在不等式 <Eq>{`z \\cdot \\sigma/\\sqrt{n} \\leq E`}</Eq> 中解离 <Eq>{`n`}</Eq>。</li>
+      <li>代入：<Eq>{`n \\geq (1{,}96 \\times 10/2)^2 = 9{,}8^2 = 96{,}04`}</Eq>。</li>
+      <li>向上舍入：<Eq>{`n = 97`}</Eq>。<em>窍门：</em>总是向上舍入，永远不要向下舍入——保证边际。</li>
+    </ol>
+  </>}
+>
+对于95%置信区间，误差界 $E = 2$ 和 $\sigma = 10$，最小样本量是多少？
+</Exercicio>
+
+<Exercicio
+  numero="110.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 小——效应不相关", correta: false },
+    { texto: "B) 中等——效应中等", correta: true },
+    { texto: "C) 大——强效应", correta: false },
+    { texto: "D) 巨大——Cohen d > 1", correta: false },
+  ]}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.3", exercicio: "classificação Cohen", licenca: "CC-BY-NC" }}
+  solucao={<>按Cohen惯例（1988）：<Eq>{`d = 0{,}2`}</Eq> = 小；<Eq>{`d = 0{,}5`}</Eq> = <strong>中等</strong>（B）；<Eq>{`d = 0{,}8`}</Eq> = 大。分心选项A和C映射常见的阈值混淆。</>}
+>
+Cohen的 $d = 0{,}5$。按Cohen惯例，效应量大小是多少？
+</Exercicio>
+
+<Exercicio
+  numero="110.21"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "293", exercicio: "6.37", licenca: "CC-BY-SA" }}
+  solucao={<>Cramér的 <Eq>{`V = 0{,}25`}</Eq>：<strong>中等</strong>效应。惯例：<Eq>{`V \\leq 0{,}1`}</Eq> 小；<Eq>{`0{,}1 < V \\leq 0{,}3`}</Eq> 中等；<Eq>{`V > 0{,}3`}</Eq> 大。</>}
+>
+列联表产生Cramér的 $V = 0{,}25$。分类效应量。
+</Exercicio>
+
+<Exercicio
+  numero="110.22"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.3", exercicio: "eta2", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`\\eta^2 = 0{,}10`}</Eq>：<strong>中等</strong>效应。惯例：<Eq>{`\\eta^2 = 0{,}01`}</Eq> 小；<Eq>{`0{,}06`}</Eq> 中等；<Eq>{`0{,}14`}</Eq> 大（Cohen, 1988）。</>}
+>
+方差分析产生 $\eta^2 = 0{,}10$。效应量大小是多少？
+</Exercicio>
+
+<Exercicio
+  numero="110.23"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 弱证据支持H₁", correta: false },
+    { texto: "B) 中等证据支持H₁", correta: true },
+    { texto: "C) 强证据支持H₁", correta: false },
+    { texto: "D) 轶事证据——不相关", correta: false },
+  ]}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.4", exercicio: "Bayes Factor", licenca: "CC-BY-NC" }}
+  solucao={<>按Jeffreys量表：<Eq>{`BF_{10} = 5`}</Eq> 表示<strong>中等证据</strong>支持 <Eq>{`H_1`}</Eq>（B）。<Eq>{`BF < 3`}</Eq> 弱；<Eq>{`3 \\leq BF < 10`}</Eq> 中等；<Eq>{`10 \\leq BF < 30`}</Eq> 强。</>}
+>
+$BF_{10} = 5$。按Jeffreys量表，这代表对 $H_1$ 的什么样强度的证据？
+</Exercicio>
+
+<Exercicio
+  numero="110.24"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "220", exercicio: "5.9", licenca: "CC-BY-SA" }}
+  solucao={<>频率论置信区间：关于程序的声明——在95%的假想样本中，区间将包含 <Eq>{`\\mu`}</Eq>。贝叶斯可信区间：关于参数的声明——" 给定观察数据，概率95%的是 <Eq>{`\\theta \\in [a,b]`}</Eq>"。</>}
+>
+各用一句话：频率论置信区间（95%）和贝叶斯可信区间（95%）的解释有什么区别？
+</Exercicio>
+
+<Exercicio
+  numero="110.25"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "231", exercicio: "5.13", licenca: "CC-BY-SA" }}
+  solucao={<>第一类错误：拒绝真实的 <Eq>{`H_0`}</Eq>（假阳性）——概率 <Eq>{`\\alpha`}</Eq>。第二类错误：不拒绝虚假的 <Eq>{`H_0`}</Eq>（假阴性）——概率 <Eq>{`\\beta = 1 - \\text{功效}`}</Eq>。</>}
+>
+在一个假设检验中，用一句话区分第一类错误与第二类错误。
+</Exercicio>
+
+<Exercicio
+  numero="110.26"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.2", exercicio: "efeito prático", licenca: "CC-BY-NC" }}
+  solucao={<>统计显著性（<Eq>{`p < \\alpha`}</Eq>）表示效应可能不为零。实际显著性评估效应是否足够大以在现实世界中重要——当 <Eq>{`n`}</Eq> 很大时，微小效应在统计上显著，但实际上无关。</>}
+>
+区分：统计显著性与实际显著性。为什么一个结果可能在统计上显著但实际上无关？
+</Exercicio>
+
+<Exercicio
+  numero="110.27"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "378", exercicio: "8.29", licenca: "CC-BY-SA" }}
+  solucao={<>关联：变量一起变化（相关、系数 <Eq>{`r`}</Eq>）。因果关系：改变 <Eq>{`X`}</Eq> <em>产生</em> 改变 <Eq>{`Y`}</Eq>。回归和相关衡量关联——因果推断需要实验设计或专门方法（工具变量、RCT）。</>}
+>
+区分：统计关联与因果关系。为什么线性回归衡量关联而不是原因？
+</Exercicio>
+
+<Exercicio
+  numero="110.28"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "305", exercicio: "7.15", licenca: "CC-BY-SA" }}
+  solucao={<>配对数据：两个组的观察自然配对（同一个体前/后、孪生兄弟等）——分析差值 <Eq>{`D_i`}</Eq>。独立样本：组间无观察对应——直接比较均值。</>}
+>
+区分：配对数据与独立样本。各举一个例子。
+</Exercicio>
+
+<Exercicio
+  numero="110.29"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "641", exercicio: "ex. 12.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`R^2`}</Eq> 是模型解释的 <Eq>{`Y`}</Eq> 方差比例——添加任何预测变量时增加（或保持）。<Eq>{`R^2_{\\text{adj}}`}</Eq> 对添加的每个额外预测变量进行惩罚：只有当预测变量改善超出随机预期的拟合时才增加。</>}
+>
+在多元回归中区分：$R^2$ 与 $R^2_{\text{adj}}$。为什么第二个对于比较预测变量数量不同的模型更可靠？
+</Exercicio>
+
+<Exercicio
+  numero="110.30"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.1", exercicio: "prior/posterior", licenca: "CC-BY-NC" }}
+  solucao={<>先验：看到数据<em>之前</em>关于 <Eq>{`\\theta`}</Eq> 的概率分布——编码先验知识。后验：看到数据<em>之后</em>的更新分布——通过贝叶斯定理结合先验与数据似然。</>}
+>
+在贝叶斯推断中，区分：先验分布与后验分布。
+</Exercicio>
+
+<Exercicio
+  numero="110.31"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "265", exercicio: "6.13", licenca: "CC-BY-SA" }}
+  solucao={<>比例差异的z检验：<Eq>{`\\hat p_A = 0{,}08`}</Eq>，<Eq>{`\\hat p_B = 0{,}11`}</Eq>，<Eq>{`\\hat p = 0{,}095`}</Eq>。<Eq>{`Z = (0{,}11-0{,}08)/\\sqrt{0{,}095 \\times 0{,}905 \\times 2/1000} \\approx 2{,}30`}</Eq>。双侧p值 <Eq>{`\\approx 0{,}021`}</Eq>。频率论：拒绝 <Eq>{`H_0`}</Eq>。贝叶斯：<Eq>{`\\text{Beta}(81, 921)`}</Eq> vs <Eq>{`\\text{Beta}(111, 891)`}</Eq>——通过模拟计算 <Eq>{`P(\\theta_B > \\theta_A)`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>频率论：计算合并 <Eq>{`\\hat p`}</Eq>，统计量 <Eq>{`Z`}</Eq>，双侧p值。</li>
+      <li>贝叶斯：先验 <Eq>{`\\text{Beta}(1,1)`}</Eq>（非信息）。后验A：<Eq>{`\\text{Beta}(81, 921)`}</Eq>；后验B：<Eq>{`\\text{Beta}(111, 891)`}</Eq>。</li>
+      <li>模拟100,000对 <Eq>{`(\\theta_A, \\theta_B)`}</Eq> 并计算 <Eq>{`P(\\theta_B > \\theta_A)`}</Eq>。<em>注意：</em>B超过A的概率对业务决策的直接性强于p值。</li>
+    </ol>
+  </>}
+>
+A/B测试：版本A在1000名访客中获得80次转化；版本B获得110/1000。应用比例差异的z检验（频率论）并用先验 $\text{Beta}(1,1)$ 估计 $P(\theta_B > \theta_A)$ 的贝叶斯方法。
+</Exercicio>
+
+<Exercicio
+  numero="110.32"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "309", exercicio: "7.19", licenca: "CC-BY-SA" }}
+  solucao={<>差值 <Eq>{`D_i`}</Eq> = 用药后压力减用药前；平均 <Eq>{`\\bar D = -7`}</Eq> mmHg。<Eq>{`T = -7/(5/8) = -11{,}2`}</Eq>。<Eq>{`t_{0,025;63} \\approx 1{,}998`}</Eq>。拒绝 <Eq>{`H_0`}</Eq>。95%置信区间：<Eq>{`-7 \\pm 1{,}998 \\times 5/8 = -7 \\pm 1{,}25 = (-8{,}25\\;; -5{,}75)`}</Eq> mmHg。</>}
+>
+临床试验：药物降低血压。对 $n = 64$ 名患者，配对差值（用药前$-$用药后）有 $\bar D = 7$ mmHg 和 $s_D = 5$ mmHg。进行配对t检验（单侧：$H_1: \mu_D > 0$）并为平均减少量构建95%置信区间。
+</Exercicio>
+
+<Exercicio
+  numero="110.33"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§9.1", pagina: "396", exercicio: "9.3", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`R^2`}</Eq> 从0.70增加到0.78，添加卧室数。<Eq>{`R^2_{\\text{adj}}`}</Eq>（用 <Eq>{`p=1`}</Eq> 和 <Eq>{`p=2`}</Eq>，<Eq>{`n=200`}</Eq>）：0.699和0.778。调整后的增量是实质性的。卧室变量有真正贡献。值得包含，但检查VIF以查找多重共线性。</>}
+>
+房产价格回归：仅用 $m^2$ 的模型有 $R^2 = 0{,}70$（$n = 200$）。添加卧室数后，$R^2 = 0{,}78$。计算每个模型的 $R^2_{\text{adj}}$ 并决定额外预测变量是否合理。
+</Exercicio>
+
+<Exercicio
+  numero="110.34"
+  dificuldade="modelagem"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "665", exercicio: "ex. 13.5", licenca: "CC-BY" }}
+  solucao={<>验证：Levene（同方差性）、Shapiro-Wilk按组。方差分析：<Eq>{`F(4, 145)`}</Eq>，<Eq>{`F_{crit} \\approx 2{,}44`}</Eq>。如果 <Eq>{`F > 2{,}44`}</Eq>，Tukey HSD用于多重比较。报告：<Eq>{`F`}</Eq>、<Eq>{`df`}</Eq>、p值、<Eq>{`\\eta^2`}</Eq> 和哪些对用95%置信区间差值不同。</>}
+>
+五种饮食，每种30个人。概述完整分析协议：假设检验、方差分析、事后分析和所有要报告的内容。
+</Exercicio>
+
+<Exercicio
+  numero="110.35"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§6.4", pagina: "290", exercicio: "6.29", licenca: "CC-BY-SA" }}
+  solucao={<>$4 \times 3$ 表：<Eq>{`df = (4-1)(3-1) = 6`}</Eq>。用 <Eq>{`E_{ij} = R_i C_j / N`}</Eq> 计算 <Eq>{`\\chi^2 = \\sum (O-E)^2/E`}</Eq>。Cramér的 <Eq>{`V = \\sqrt{\\chi^2 / (N \\cdot \\min(r-1, c-1))}`}</Eq>。标准化残差：<Eq>{`e_{ij} = (O_{ij} - E_{ij})/\\sqrt{E_{ij}}`}</Eq> 识别对关联贡献最大的单元格。</>}
+>
+选举调查：4个地区（北、东北、东南、南）$\times$ 3名候选人。列联表，$N = 400$。计算自由度，执行卡方、Cramér的V，并识别最大标准化残差的单元格。
+</Exercicio>
+
+<Exercicio
+  numero="110.36"
+  dificuldade="compreensao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 9", pagina: "online §9.5", exercicio: "p-hacking", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`p = 0{,}06`}</Eq> 意思是："如果 <Eq>{`H_0`}</Eq> 为真，有6%的概率获得这个或更极端的结果"。这不是 <Eq>{`H_0`}</Eq> 的证据——不拒绝可能由于样本量不足（低功效）。缺乏证据不是缺乏的证据。</>}
+>
+证明为什么 $p = 0{,}06$ 不构成 $H_0$ 为真的证据。
+</Exercicio>
+
+<Exercicio
+  numero="110.37"
+  dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§9.3", pagina: "410", exercicio: "demonstração regressão-t", licenca: "CC-BY-SA" }}
+  solucao={<>设 <Eq>{`X`}</Eq> 虚拟：<Eq>{`X_i = 0`}</Eq>（组1）或 <Eq>{`X_i = 1`}</Eq>（组2）。最小二乘：<Eq>{`\\hat\\beta_0 = \\bar Y_1`}</Eq>，<Eq>{`\\hat\\beta_1 = \\bar Y_2 - \\bar Y_1`}</Eq>。系数的t统计量：<Eq>{`t = \\hat\\beta_1/SE(\\hat\\beta_1)`}</Eq>。用 <Eq>{`SE(\\hat\\beta_1) = s_p\\sqrt{1/n_1 + 1/n_2}`}</Eq>（等方差），这正是两个样本t检验。</>}
+>
+证明一个二元虚拟变量的简单线性回归（0/1指示组）产生完全相同的结果作为两个独立样本t检验（等方差）。
+</Exercicio>
+
+<Exercicio
+  numero="110.38"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistics, OpenStax", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "662", exercicio: "relação F-T", licenca: "CC-BY" }}
+  solucao={<>方差分析仅有 <Eq>{`k=2`}</Eq> 组：<Eq>{`SS_B = n_1 n_2 (\\bar X_1 - \\bar X_2)^2/(n_1+n_2)`}</Eq>。<Eq>{`MS_B = SS_B`}</Eq>（1 df）。<Eq>{`T^2 = (\\bar X_1 - \\bar X_2)^2 / [s_p^2(1/n_1+1/n_2)]`}</Eq>。展开：<Eq>{`F = MS_B/MS_W = T^2`}</Eq>。因此 <Eq>{`F_{1, N-2} = T^2_{N-2}`}</Eq>。</>}
+>
+证明当方差分析仅有 $k = 2$ 组时，F统计量等于双侧t检验的T统计量的平方。明确自由度。
+</Exercicio>
+
+<Exercicio
+  numero="110.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.2", exercicio: "MAP = MLE", licenca: "CC-BY-NC" }}
+  solucao={<>MAP：<Eq>{`\\hat\\theta_{MAP} = \\arg\\max_\\theta [\\log P(D|\\theta) + \\log P(\\theta)]`}</Eq>。用均匀先验 <Eq>{`P(\\theta) = c`}</Eq>（常数），<Eq>{`\\log P(\\theta) = \\log c`}</Eq> 不依赖于 <Eq>{`\\theta`}</Eq>。然后 <Eq>{`\\hat\\theta_{MAP} = \\arg\\max_\\theta \\log P(D|\\theta) = \\hat\\theta_{MLE}`}</Eq>。</>}
+>
+证明带均匀先验的MAP估计量与最大似然估计（MLE）完全相同。从MAP定义开始。
+</Exercicio>
+
+<Exercicio
+  numero="110.40"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4ª ed.", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "247", exercicio: "power analysis", licenca: "CC-BY-SA" }}
+  solucao={<>功效分析：给定 <Eq>{`\\delta`}</Eq>（最小相关差异），<Eq>{`\\sigma`}</Eq>，<Eq>{`\\alpha = 0{,}05`}</Eq> 和80%功效，计算 <Eq>{`n \\geq 2\\sigma^2(z_\\alpha + z_\\beta)^2/\\delta^2`}</Eq>。完整流程：1) 功效分析→ <Eq>{`n`}</Eq>；2) 用随机化收集至 <Eq>{`n`}</Eq>；3) 用置信区间进行z/t检验；4) 效应量；5) 所有元素报告；6) 诊断和限制。</>}
+>
+用伪代码或结构化列表描述电商转化率A/B测试的完整流程：从功效分析（最小可检测效应2个百分点，$\alpha = 5\%$，80%功效）到最终报告，包括统计审查者需要的所有元素。
+</Exercicio>
+
+<Exercicio
+  numero="110.41"
+  dificuldade="desafio"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.5", exercicio: "bayes vs freq", licenca: "CC-BY-NC" }}
+  solucao={<>频率论：从长期控制第一类错误率；当分析师没有信息先验且想保证假阳性率时适当。贝叶斯：直接提供 <Eq>{`P(\\theta_B > \\theta_A \\mid \\text{数据})`}</Eq>——对序列决策更自然（可在期中停止），融入先验知识，不需要事先定义固定 <Eq>{`n`}</Eq>。在在线A/B中，贝叶斯因序列决策和非统计利益相关者可解释性更优。</>}
+>
+用详细文本（至少200字）比较在在线A/B测试中何时优选频率论方法与贝叶斯方法。考虑：可解释性、序列决策、先验融入和错误保证。
+</Exercicio>
+
+<Exercicio
+  numero="110.42"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Ch. 15", pagina: "online §15.3", exercicio: "conjugada Beta-Bin", licenca: "CC-BY-NC" }}
+  solucao={<>先验：<Eq>{`P(\\theta) \\propto \\theta^{\\alpha-1}(1-\\theta)^{\\beta-1}`}</Eq>。似然：<Eq>{`P(X|\\theta) \\propto \\theta^X(1-\\theta)^{n-X}`}</Eq>。后验：<Eq>{`P(\\theta|X) \\propto \\theta^{\\alpha+X-1}(1-\\theta)^{\\beta+n-X-1}`}</Eq>——核是 <Eq>{`\\text{Beta}(\\alpha+X, \\beta+n-X)`}</Eq> 的核。归一化常数是 <Eq>{`B(\\alpha+X, \\beta+n-X)^{-1}`}</Eq>，确认Beta形式。</>}
+  passos={<>
+    <ol>
+      <li>不带归一化常数写Beta先验 <Eq>{`\\text{Beta}(\\alpha,\\beta)`}</Eq>：<Eq>{`P(\\theta) \\propto \\theta^{\\alpha-1}(1-\\theta)^{\\beta-1}`}</Eq>。</li>
+      <li>写二项似然：<Eq>{`P(X|\\theta) = \\binom{n}{X}\\theta^X(1-\\theta)^{n-X} \\propto \\theta^X(1-\\theta)^{n-X}`}</Eq>。<em>为什么：</em>二项系数 <Eq>{`\\binom{n}{X}`}</Eq> 不依赖 <Eq>{`\\theta`}</Eq>，在比例中掉落。</li>
+      <li>相乘：<Eq>{`P(\\theta|X) \\propto \\theta^{\\alpha+X-1}(1-\\theta)^{\\beta+n-X-1}`}</Eq>。</li>
+      <li>识别核：这是 <Eq>{`\\text{Beta}(\\alpha+X, \\beta+n-X)`}</Eq> 的密度函数核。</li>
+    </ol>
+    <p><em>趣事：</em>Beta分布被称为二项的共轭正好因为先验和后验有相同的分布族——更新只是加指数。</p>
+  </>}
+>
+通过积分（或通过核识别）证明如果 $\theta \sim \text{Beta}(\alpha, \beta)$ 且 $X \mid \theta \sim \text{Bin}(n, \theta)$，则 $\theta \mid X \sim \text{Beta}(\alpha + X,\; \beta + n - X)$。
+</Exercicio>
+
+</ListaExercicios>
+
+## 参考资源
+
+- [**OpenIntro Statistics**（第4版）](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · CC-BY-SA。**置信区间、检验、方差分析、卡方和回归的主要来源**（§5–9）。
+- [**Statistics**（OpenStax）](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY。**置信区间、z和t检验、分布表的实际例子来源**（§8–13）。
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC。**贝叶斯推断、效应量、可重复性和重复危机来源**（第9、15章）。

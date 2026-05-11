@@ -1,0 +1,689 @@
+---
+titulo: "Lição 62 — Otimização aplicada"
+slug: "licao-62-otimizacao"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Método geral de otimização com uma variável: modelar, derivar, classificar. Problemas clássicos de caixa, lata, cerca, custo e lucro."
+ordem: 62
+publicado: true
+tags: ["otimizacao", "derivada", "modelagem", "ano-2", "trim-7"]
+prerrequisitos: ["licao-61-maximos-minimos"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano EM", "Equiv. Math II/III japonês", "Equiv. Analysis Klasse 12 alemã", "Equiv. H2 Maths Singapura"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{建模} \to Q = f(x) \to f'(x^*) = 0 \to \text{分类}"
+  legenda={<>在<strong>应用优化</strong>中：确定要最大化或最小化的量 <em>Q</em>，利用约束条件将 <em>Q</em> 表示为单变量函数，求导，找到临界点 <Eq>{`x^*`}</Eq>，并比较 <Eq>{`f(x^*)`}</Eq> 与物理定义域的端点值。</>}
+  audioTexto="应用优化。四步骤程序：使用约束条件将要优化的量建模为单变量函数；求导并令其为零以找到临界点；通过二阶导数的符号分类；以及与物理定义域端点比较以获得全局最优值。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    涵盖本课程的书籍
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-3-3-optimization.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §3.3 Global Optimization · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">正式的优化程序，面积、体积和经济建模问题。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.7 Applied Optimization Problems · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">经典问题：无盖盒、圆柱形罐头、矩形围栏——本课程练习的来源。</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §4.3 Applied Optimization · CC-BY-NC · </span>
+      <em className="text-clube-mist">隔板变化、多个约束和最小距离问题。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="通用方法和基础">
+
+### 约束优化问题
+
+<Definicao titulo="通用结构">
+
+一个**优化问题**有三个要素：
+
+1. 一个**目标函数** <Eq>{`Q`}</Eq>，我们想要最大化或最小化。
+2. 一个或多个**决策变量**和由上下文决定的**物理定义域** <Eq>{`[a, b]`}</Eq>。
+3. 一个或多个**约束**，关联变量——用来化简为单变量。
+
+</Definicao>
+
+### 优化算法（单变量）
+
+<Definicao titulo="标准程序">
+
+1. **定义**要优化的量，并用有物理意义的名称为变量命名。
+2. **写出**方程 <Eq>{`Q = f(x, y, \\ldots)`}</Eq> 的目标函数。
+3. **使用约束**消除次要变量，得到 <Eq>{`Q = f(x)`}</Eq>，定义域为 <Eq>{`x \\in [a, b]`}</Eq>。
+4. **应用绝对极值算法**：内部临界点加端点评估。
+5. **解释**问题背景下的结果（单位、物理可行性）。
+
+</Definicao>
+
+> "Suppose we wish to find the value(s) of x for which a given function Q is maximized or minimized. We use derivatives to find critical points and then evaluate Q at those points and at the endpoints of the domain to determine the absolute maximum or minimum." — [Active Calculus §3.3](https://activecalculus.org/single/sec-3-3-optimization.html)
+
+### 典型例子：体积固定的圆柱形罐头
+
+<Definicao titulo="罐头问题">
+
+已知：体积 <Eq>{`V`}</Eq> 固定（参数）。最小化总表面积 <Eq>{`A = 2\\pi r^2 + 2\\pi r h`}</Eq>。
+
+**约束：** <Eq>{`\\pi r^2 h = V \\Rightarrow h = V/(\\pi r^2)`}</Eq>。
+
+**化简目标函数：**
+<Eq display>{`A(r) = 2\\pi r^2 + \\frac{2V}{r}, \quad r > 0`}</Eq>
+
+**临界点：**
+<Eq display>{`A'(r) = 4\\pi r - \\frac{2V}{r^2} = 0 \\implies r^* = \\sqrt[3]{\\frac{V}{2\\pi}}`}</Eq>
+
+**最优尺寸：** 代入得 <Eq>{`h^* = 2r^*`}</Eq>。最少材料的罐头**高度等于直径**。
+
+</Definicao>
+
+<Insight>
+
+最优罐头（<Eq>{`h = 2r`}</Eq>）最小化表面积/体积比。真实的饮料罐偏离这个比例是由于堆积和强度因素，而不是纯数学优化。
+
+</Insight>
+
+> "The optimal cylinder has height equal to diameter — this is a consequence of the symmetry of the problem and appears frequently in packaging design." — [OpenStax Calculus Vol. 1, §4.7](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems)
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 500 200" className="w-full">
+  <defs>
+    <marker id="arr62" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g>
+    <line x1="40" y1="160" x2="470" y2="160" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr62)"/>
+    <line x1="60" y1="175" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr62)"/>
+    <path d="M 80,20 C 100,150 170,175 240,155 C 310,135 380,145 450,100" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+    <circle cx="240" cy="155" r="5" fill="rgb(232 199 122)"/>
+    <line x1="240" y1="155" x2="240" y2="160" stroke="rgb(232 199 122)" strokeWidth="1" strokeDasharray="3,2"/>
+    <text x="240" y="175" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">r*</text>
+    <text x="260" y="152" fontSize="9" fontFamily="ui-monospace,monospace" fill="rgb(232 199 122)">最小值</text>
+    <text x="140" y="18" fontSize="11" fontFamily="serif" fill="currentColor" fillOpacity="0.7">A(r)</text>
+    <text x="465" y="163" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.6">r</text>
+  </g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+<Eq>{`A(r)`}</Eq> 的示意图：在最优点 <Eq>{`r^*`}</Eq> 前递减，之后递增。最小值是唯一的内部临界点。
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="给5岁儿童">
+
+想象你有一根绳子，想为你的小狗做**最大的围栏**来玩耍。
+
+如果你把围栏做得**很长很窄**，小狗很难从一边走到另一边。
+
+如果做成**小正方形**，小狗就有更多地方玩！
+
+诀窍是：用相同长度的绳子，不同的形状会有不同大小的空间。**正确的形状会封闭更多空间。** 数学帮我们找到最好的形状！
+
+</Porta>
+
+<Porta nivel="10" titulo="给10岁儿童">
+
+你有40米的围栏，想围成一个矩形畜栏。最大的畜栏面积是多少？
+
+设宽为 <Eq>{`x`}</Eq>。长为 <Eq>{`20 - x`}</Eq>（因为周长必须是40米）。
+
+面积：<Eq>{`A(x) = x \\cdot (20 - x) = 20x - x^2`}</Eq>。
+
+导数：<Eq>{`A'(x) = 20 - 2x = 0 \\Rightarrow x = 10`}</Eq>。
+
+最大的畜栏是 <Eq>{`10 \\times 10 = 100`}</Eq> 平方米——是一个**正方形**！
+
+</Porta>
+
+<Porta nivel="15" titulo="给高中生">
+
+应用优化有一个四步的方法。反复练习这些步骤直到它们变成自动的。
+
+**第1步——建模：** 读题，写出目标函数 <Eq>{`Q`}</Eq>（你想最大/最小化什么）。
+
+**第2步——化简：** 用约束消除多余变量。你需要 <Eq>{`Q = f(x)`}</Eq>，**只有一个**变量。
+
+**第3步——求导：** 计算 <Eq>{`f'(x)`}</Eq>，令其为零，找 <Eq>{`x^*`}</Eq>。
+
+**第4步——比较：** 在 <Eq>{`x^*`}</Eq> 和物理定义域的边界处评估 <Eq>{`f`}</Eq>。最大（或最小）值获胜。
+
+**第2步的建议：** 当题目说"周长固定"、"体积固定"、"预算固定"，这就是约束。分离一个变量并代入。
+
+**注意物理定义域：** 长度是正数；<Eq>{`0 < x < L`}</Eq>。永远不要忽略这一点。
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程学生">
+
+单变量优化是通用数学规划问题中最简单的情况。这里技术是直接的：极值定理保证了如果定义域是紧的且 <Eq>{`f`}</Eq> 连续，最优值存在——绝对极值算法会找到它。
+
+**当定义域是开的或无界时：** 最优值可能是唯一临界点。标准论证是：如果 <Eq>{`f(x) \\to +\\infty`}</Eq> 当 <Eq>{`x \\to 0^+`}</Eq> 和 <Eq>{`x \\to +\\infty`}</Eq> 时，且存在唯一内部临界点具有 <Eq>{`f'' > 0`}</Eq>，那么该点是全局最小值（不仅是局部的）。这个论证在罐头问题中明确出现。
+
+**二阶建模：** 在经济学中，边际成本 <Eq>{`C'(x)`}</Eq> 和边际收入 <Eq>{`R'(x)`}</Eq> 决定最大利润点：<Eq>{`L'(x) = R'(x) - C'(x) = 0`}</Eq>，即边际收入 = 边际成本。这是新古典微观经济学的中心原理。
+
+**扩展：** 在两个变量的情况下，<Eq>{`\\nabla f = 0`}</Eq> 与约束 <Eq>{`g = 0`}</Eq> 导致拉格朗日乘数法——本课程后的自然下一步。
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士">
+
+约束优化问题根源于17世纪的变分法。欧拉和拉格朗日推广到泛函——"哪个函数 <Eq>{`y(x)`}</Eq> 最小化 <Eq>{`\\int F(x,y,y') dx`}</Eq>？" 欧拉-拉格朗日方程是 <Eq>{`f'(x^*) = 0`}</Eq> 在无穷维空间的推广。
+
+在最优控制（庞特里亚金，1950年代）中，问题是"哪个控制函数 <Eq>{`u(t)`}</Eq> 最小化轨迹上的成本？" 庞特里亚金最大值原理将本课程方法推广到动态系统。直接应用：火箭轨迹、资源管理、算法交易。
+
+在当代机器学习中，神经网络训练问题是超高维优化（数十亿参数）。本课程的直觉——"梯度指向函数增长的地方；零梯度是最优值的候选"——是梯度下降（SGD、Adam等）的基础。
+
+圆柱形罐头经济学在包装设计中重新出现：铝的成本按面积计算，而不是体积。比例 <Eq>{`h = 2r`}</Eq>（数学最优）让步于运输约束（堆积：更低矮的罐子）和销售（更大的标签）。真实工程是具有多个约束和冲突目标的优化。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="巴西实际应用">
+
+**问题：** 圣保罗一家小包装厂接到订单制作无盖纸板盒，尺寸为 12 厘米 × 8 厘米。为制盒，在四个角裁剪边长 <Eq>{`x`}</Eq> 厘米的正方形并折起边缘。
+
+底面尺寸：<Eq>{`(12 - 2x) \\times (8 - 2x)`}</Eq>。高度：<Eq>{`x`}</Eq>。定义域：<Eq>{`0 < x < 4`}</Eq>。
+
+<Eq display>{`V(x) = x(12-2x)(8-2x) = 4x^3 - 40x^2 + 96x`}</Eq>
+
+<Eq display>{`V'(x) = 12x^2 - 80x + 96 = 4(3x^2 - 20x + 24)`}</Eq>
+
+根：<Eq>{`x = \\frac{20 \\pm \\sqrt{400 - 288}}{6} = \\frac{20 \\pm \\sqrt{112}}{6}`}</Eq>。
+
+<Eq>{`x_1 \\approx 1{,}57`}</Eq> 厘米（可行）和 <Eq>{`x_2 \\approx 5{,}10`}</Eq> 厘米（超出定义域）。
+
+<Eq>{`V(1{,}57) \\approx 67{,}6`}</Eq> 立方厘米。因此，裁剪约 **1.57 厘米** 的正方形最大化盒子体积——一个直接的结果，可在工厂现场应用。
+
+**在巴西：** 这种问题出现在包装优化中以减少材料浪费，与寻求ISO 14001认证（环境管理）的公司相关。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo titulo="一边固定的矩形围栏">
+
+**问题。** 一个农民有120米的围栏，用现有的墙作为长边。最大面积的牧地尺寸是什么？
+
+**策略。** 确定目标函数（面积）和约束（三条自由边的周长 = 120米）。消除一个变量并最大化。
+
+**解决方案。**
+
+设 <Eq>{`x`}</Eq> = 宽度（两边）和 <Eq>{`y`}</Eq> = 长度（与墙相对的边）。约束：<Eq>{`2x + y = 120 \\Rightarrow y = 120 - 2x`}</Eq>。
+
+面积：<Eq>{`A(x) = xy = x(120 - 2x) = 120x - 2x^2`}</Eq>。定义域：<Eq>{`0 < x < 60`}</Eq>。
+
+<Eq display>{`A'(x) = 120 - 4x = 0 \\implies x = 30 \\text{ 米}`}</Eq>
+
+<Eq>{`y = 120 - 60 = 60`}</Eq> 米。最大面积：<Eq>{`30 \\times 60 = 1800`}</Eq> 平方米。
+
+**验证。** <Eq>{`A''(30) = -4 < 0`}</Eq> → 最大值确认。在端点：<Eq>{`A(0) = A(60) = 0`}</Eq>。
+
+**来源。** [OpenStax Calculus Vol. 1, §4.7, Example 4.33](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="无盖盒的最大体积">
+
+**问题。** 从边长36厘米的方形纸板中，在四个角裁剪相等的正方形并折起边缘以形成无盖盒。哪个裁剪的大小最大化体积？
+
+**策略。** 用裁剪正方形的边长 <Eq>{`x`}</Eq> 表示体积，求导，找临界点。
+
+**解决方案。**
+
+底面：<Eq>{`(36 - 2x)^2`}</Eq>。高度：<Eq>{`x`}</Eq>。定义域：<Eq>{`0 < x < 18`}</Eq>。
+
+<Eq display>{`V(x) = x(36-2x)^2 = x(1296 - 144x + 4x^2) = 4x^3 - 144x^2 + 1296x`}</Eq>
+
+<Eq display>{`V'(x) = 12x^2 - 288x + 1296 = 12(x^2 - 24x + 108) = 12(x-6)(x-18)`}</Eq>
+
+根：<Eq>{`x = 6`}</Eq>（可行）和 <Eq>{`x = 18`}</Eq>（端点，<Eq>{`V = 0`}</Eq>）。
+
+<Eq>{`V(6) = 6 \\cdot 24^2 = 6 \\cdot 576 = 3456`}</Eq> 立方厘米。
+
+**验证。** <Eq>{`V''(6) = 24 \\cdot 6 - 288 = -144 < 0`}</Eq> → 最大值。
+
+**来源。** [OpenStax Calculus Vol. 1, §4.7, Example 4.32](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="最小表面积的圆柱形罐">
+
+**问题。** 一个圆柱形罐必须容纳 <Eq>{`V = 1000`}</Eq> 立方厘米。确定最小化材料总面积的半径和高度。
+
+**策略。** 使用 <Eq>{`h = V/(\\pi r^2)`}</Eq> 将面积表示为半径的函数，求导。
+
+**解决方案。**
+
+<Eq display>{`A(r) = 2\\pi r^2 + \\frac{2V}{r} = 2\\pi r^2 + \\frac{2000}{r}`}</Eq>
+
+<Eq display>{`A'(r) = 4\\pi r - \\frac{2000}{r^2} = 0 \\implies r^3 = \\frac{2000}{4\\pi} = \\frac{500}{\\pi}`}</Eq>
+
+<Eq display>{`r^* = \\sqrt[3]{\\frac{500}{\\pi}} \\approx 5{,}42 \\text{ 厘米}`}</Eq>
+
+<Eq>{`h^* = 1000/(\\pi \\cdot r^{*2}) \\approx 10{,}84`}</Eq> 厘米 <Eq>{`= 2r^*`}</Eq> ——高度等于直径。
+
+**验证。** <Eq>{`A''(r) = 4\\pi + 4000/r^3 > 0`}</Eq> 对所有 <Eq>{`r > 0`}</Eq> ——全局最小值。
+
+**来源。** [Active Calculus §3.3, Activity 3.3.2](https://activecalculus.org/single/sec-3-3-optimization.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="点到直线的最小距离">
+
+**问题。** 确定直线 <Eq>{`y = 2x + 3`}</Eq> 上最接近原点的点。
+
+**策略。** 最小化 <Eq>{`d^2 = x^2 + y^2`}</Eq>（等价于最小化 <Eq>{`d`}</Eq>）代入 <Eq>{`y = 2x + 3`}</Eq>。
+
+**解决方案。**
+
+<Eq display>{`D(x) = x^2 + (2x+3)^2 = 5x^2 + 12x + 9`}</Eq>
+
+<Eq display>{`D'(x) = 10x + 12 = 0 \\implies x^* = -\\tfrac{6}{5}`}</Eq>
+
+<Eq>{`y^* = 2(-6/5) + 3 = 3/5`}</Eq>。距离：<Eq>{`d = \\sqrt{(6/5)^2 + (3/5)^2} = \\sqrt{45/25} = 3\\sqrt{5}/5`}</Eq>。
+
+**验证。** <Eq>{`D''(x) = 10 > 0`}</Eq> → 最小值。解析点-直线距离公式得同样结果：<Eq>{`d = |0 - 0 + 3|/\\sqrt{5} = 3/\\sqrt{5} = 3\\sqrt{5}/5`}</Eq>。
+
+**来源。** [APEX Calculus §4.3, Example 4.3.2](https://www.apexcalculus.com/) · CC-BY-NC
+
+</Exemplo>
+
+<Exemplo titulo="非线性成本下的最大利润">
+
+**问题。** 一个企业有收入 <Eq>{`R(x) = 200x - x^2`}</Eq> 和成本 <Eq>{`C(x) = x^3/3 - 7x^2 + 111x + 50`}</Eq>，对 <Eq>{`x \\in [0, 14]`}</Eq> 单位。最大化利润。
+
+**策略。** 利润 <Eq>{`L = R - C`}</Eq>。求导，找临界点，与端点比较。
+
+**解决方案。**
+
+<Eq display>{`L(x) = 200x - x^2 - \\frac{x^3}{3} + 7x^2 - 111x - 50 = -\\frac{x^3}{3} + 6x^2 + 89x - 50`}</Eq>
+
+<Eq display>{`L'(x) = -x^2 + 12x + 89`}</Eq>
+
+判别式：<Eq>{`144 + 356 = 500`}</Eq>。根：<Eq>{`x = \\frac{-12 \\pm \\sqrt{500}}{-2}`}</Eq>。在 <Eq>{`[0,14]`}</Eq> 的正根：<Eq>{`x^* \\approx 14`}</Eq> ...重新计算：<Eq>{`x = (12 + \\sqrt{500})/2 \\approx (12 + 22{,}36)/2 \\approx 17{,}18`}</Eq>（超出）。较小的根：<Eq>{`(12 - 22{,}36)/2 \\approx -5{,}18`}</Eq>（超出）。因此 <Eq>{`L'(x) > 0`}</Eq> 在 <Eq>{`[0,14]`}</Eq> ——<Eq>{`L`}</Eq> 递增：最大值在端点 <Eq>{`x = 14`}</Eq>。
+
+<Eq>{`L(14) = -2744/3 + 6(196) + 89(14) - 50 = -914{,}67 + 1176 + 1246 - 50 \\approx 1457`}</Eq>。
+
+**验证。** 检查 <Eq>{`L(0) = -50`}</Eq> 确认在端点 <Eq>{`x = 14`}</Eq> 的绝对最大值。
+
+**来源。** [Active Calculus §3.3, Exercise 3.3.4](https://activecalculus.org/single/sec-3-3-optimization.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-62-otimizacao">
+
+<Exercicio
+  numero="62.1"
+  dificuldade="aplicacao"
+  solucao={<>周长：<Eq>{`2x + 2y = 100 \\Rightarrow y = 50 - x`}</Eq>。面积：<Eq>{`A(x) = x(50-x) = 50x - x^2`}</Eq>。<Eq>{`A'(x) = 50 - 2x = 0 \\Rightarrow x = 25`}</Eq>。最大面积：<Eq>{`25 \\times 25 = 625`}</Eq> 平方米（正方形）。</>}
+  passos={<><ol><li>命名尺寸：宽 <Eq>{`x`}</Eq>，长 <Eq>{`y`}</Eq>。</li><li>约束：<Eq>{`2x + 2y = 100`}</Eq>，因此 <Eq>{`y = 50 - x`}</Eq>。</li><li>目标函数：<Eq>{`A = xy = x(50-x)`}</Eq>。定义域：<Eq>{`0 < x < 50`}</Eq>。</li><li>求导并令零：<Eq>{`A'(x) = 50 - 2x = 0 \\Rightarrow x = 25`}</Eq>。</li><li><Eq>{`A''(25) = -2 < 0`}</Eq> → 最大值。<Eq>{`A_\\max = 625`}</Eq> 平方米。</li></ol><em>技巧：</em> 在所有周长固定的矩形中，正方形有最大面积。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+用100米的围栏，能围成的最大矩形面积是多少？
+
+</Exercicio>
+
+<Exercicio
+  numero="62.2"
+  dificuldade="aplicacao"
+  solucao={<>设 <Eq>{`x`}</Eq> 为宽。<Eq>{`3x + 2y = 120 \\Rightarrow y = (120-3x)/2`}</Eq>。面积：<Eq>{`A = xy = x(120-3x)/2 = 60x - 3x^2/2`}</Eq>。<Eq>{`A' = 60 - 3x = 0 \\Rightarrow x = 20`}</Eq>。<Eq>{`y = 30`}</Eq>。最大面积：<Eq>{`20 \\times 30 = 600`}</Eq> 平方米。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+一个矩形牧地由一条与宽平行的围栏从中间分开。围栏总长（周长 + 分隔线）是120米。最大化面积。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.3"
+  dificuldade="aplicacao"
+  solucao={<>体积：<Eq>{`V = \\pi r^2 h`}</Eq>。侧面积：<Eq>{`A = 2\\pi r h + \\pi r^2`}</Eq>（顶盖，底部开放）。对于 <Eq>{`V = 500`}</Eq> 立方厘米：<Eq>{`h = 500/(\\pi r^2)`}</Eq>。<Eq>{`A(r) = 2\\pi r \\cdot 500/(\\pi r^2) + \\pi r^2 = 1000/r + \\pi r^2`}</Eq>。<Eq>{`A'(r) = -1000/r^2 + 2\\pi r = 0 \\Rightarrow r^3 = 500/\\pi`}</Eq>。<Eq>{`r^* = (500/\\pi)^{1/3} \\approx 5{,}42`}</Eq> 厘米，<Eq>{`h = 500/(\\pi \\cdot 5{,}42^2) \\approx 5{,}42`}</Eq> 厘米（直径的一半）。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+一个圆柱形杯子（有底但无顶）必须有500立方厘米的体积。哪些尺寸最小化所用材料？
+
+</Exercicio>
+
+<Exercicio
+  numero="62.4"
+  dificuldade="aplicacao"
+  solucao={<>方形底边长 <Eq>{`x`}</Eq>，高 <Eq>{`h`}</Eq>。体积：<Eq>{`x^2 h = 32 \\Rightarrow h = 32/x^2`}</Eq>。成本：底部2元/平方厘米，侧面1元/平方厘米。<Eq>{`C = 2 \\cdot 2x^2 + 1 \\cdot 4xh = 4x^2 + 4x \\cdot 32/x^2 = 4x^2 + 128/x`}</Eq>。<Eq>{`C'(x) = 8x - 128/x^2 = 0 \\Rightarrow x^3 = 16 \\Rightarrow x = 2\\sqrt[3]{2} \\approx 2{,}52`}</Eq> 厘米。<Eq>{`h = 32/(2{,}52)^2 \\approx 5{,}04`}</Eq> 厘米。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+一个方形底无顶的矩形盒必须有32立方厘米的体积。底部材料成本2元/平方厘米，侧面成本1元/平方厘米。最小化总成本。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.5"
+  dificuldade="aplicacao"
+  solucao={<>设 <Eq>{`x`}</Eq> 和 <Eq>{`y`}</Eq> 满足 <Eq>{`x + y = 20`}</Eq>。最大化 <Eq>{`P = xy = x(20-x) = 20x - x^2`}</Eq>。<Eq>{`P'(x) = 20 - 2x = 0 \\Rightarrow x = 10`}</Eq>。<Eq>{`P_\\max = 100`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+两个正数的和是20。找两个数使其乘积最大。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.6"
+  dificuldade="aplicacao"
+  solucao={<>设 <Eq>{`x`}</Eq> 为正数。最小化 <Eq>{`f(x) = x + 4/x`}</Eq>。<Eq>{`f'(x) = 1 - 4/x^2 = 0 \\Rightarrow x = 2`}</Eq>。<Eq>{`f(2) = 2 + 2 = 4`}</Eq>。<Eq>{`f''(2) = 8/8 > 0`}</Eq> → 最小值。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+找正数 <Eq>{`x`}</Eq> 使 <Eq>{`x`}</Eq> 与其倒数乘以4的和最小。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.7"
+  dificuldade="aplicacao"
+  solucao={<>点 <Eq>{`(x, 0)`}</Eq> 在实轴上。到 <Eq>{`A = (2, 3)`}</Eq> 的距离：<Eq>{`D^2 = (x-2)^2 + 9`}</Eq>。最小化 <Eq>{`D^2`}</Eq>：<Eq>{`2(x-2) = 0 \\Rightarrow x = 2`}</Eq>。最近的点：<Eq>{`(2, 0)`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+找 <Eq>{`x`}</Eq> 轴上最接近点 <Eq>{`(2, 3)`}</Eq> 的点。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.8"
+  dificuldade="aplicacao"
+  solucao={<>点 <Eq>{`(x, y)`}</Eq> 在直线 <Eq>{`y = x`}</Eq> 上。<Eq>{`D^2 = (x-4)^2 + (x-2)^2 = 2x^2 - 12x + 20`}</Eq>。<Eq>{`4x - 12 = 0 \\Rightarrow x = 3`}</Eq>。最近的点：<Eq>{`(3, 3)`}</Eq>。距离：<Eq>{`\\sqrt{(3-4)^2 + (3-2)^2} = \\sqrt{2}`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+找直线 <Eq>{`y = x`}</Eq> 上最接近点 <Eq>{`(4, 2)`}</Eq> 的点。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.9"
+  dificuldade="aplicacao"
+  solucao={<>从24 × 9厘米纸板。设 <Eq>{`x`}</Eq> 为裁剪。底面：<Eq>{`(24-2x)(9-2x)`}</Eq>，高 <Eq>{`x`}</Eq>。<Eq>{`V = x(24-2x)(9-2x) = 4x^3 - 66x^2 + 216x`}</Eq>。<Eq>{`V' = 12x^2 - 132x + 216 = 12(x^2 - 11x + 18) = 12(x-2)(x-9)`}</Eq>。<Eq>{`x = 2`}</Eq>（可行，因为 <Eq>{`x < 4{,}5`}</Eq>）。<Eq>{`V(2) = 2 \\cdot 20 \\cdot 5 = 200`}</Eq> 立方厘米。</>}
+  passos={<><ol><li>设 <Eq>{`x`}</Eq> 为裁剪的正方形边长。定义域：<Eq>{`0 < x < 4{,}5`}</Eq>。</li><li>底面尺寸：<Eq>{`(24-2x)`}</Eq> × <Eq>{`(9-2x)`}</Eq>。</li><li>体积：<Eq>{`V = x(24-2x)(9-2x)`}</Eq>。展开。</li><li>求导，因式分解，找根。只有 <Eq>{`x = 2`}</Eq> 在定义域内。</li><li>评估 <Eq>{`V(2)`}</Eq> 并与 <Eq>{`V(0) = 0`}</Eq> 和 <Eq>{`V(4{,}5) = 0`}</Eq> 比较。</li></ol><em>技巧：</em> 端点给出 <Eq>{`V = 0`}</Eq>；唯一内部临界点是最大值。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+从24厘米 × 9厘米的纸板中，在四个角裁剪一个正方形并折起边缘。确定最大化无顶盒体积的裁剪。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.10"
+  dificuldade="aplicacao"
+  solucao={<>收入：<Eq>{`R(x) = px = (200 - 2x)x = 200x - 2x^2`}</Eq>。<Eq>{`R'(x) = 200 - 4x = 0 \\Rightarrow x = 50`}</Eq>。最优价格：<Eq>{`p = 200 - 2(50) = 100`}</Eq>。最大收入：<Eq>{`50 \\times 100 = 5000`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+产品的需求函数是 <Eq>{`p(x) = 200 - 2x`}</Eq>（价格元/单位，<Eq>{`x`}</Eq> 销售单位）。最大化总收入 <Eq>{`R = px`}</Eq>。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.11"
+  dificuldade="aplicacao"
+  solucao={<>利润：<Eq>{`L = R - C = 140x - (x^2 + 40x + 100) = -x^2 + 100x - 100`}</Eq>。<Eq>{`L'(x) = -2x + 100 = 0 \\Rightarrow x = 50`}</Eq>。<Eq>{`L(50) = -2500 + 5000 - 100 = 2400`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+一个企业有收入 <Eq>{`R(x) = 140x`}</Eq> 和成本 <Eq>{`C(x) = x^2 + 40x + 100`}</Eq>。确定最大化利润的产量。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.12"
+  dificuldade="aplicacao"
+  solucao={<>总体积：<Eq>{`2x^2 h = 96 \\Rightarrow h = 48/x^2`}</Eq>（双层叠放盒：两个隔间高度 <Eq>{`h/2`}</Eq> ... 重新解释：单层盒）。对方形盒 <Eq>{`x^2 h = 96`}</Eq>：<Eq>{`h = 96/x^2`}</Eq>。面积：<Eq>{`A = 2x^2 + 4xh = 2x^2 + 384/x`}</Eq>。<Eq>{`A' = 4x - 384/x^2 = 0 \\Rightarrow x^3 = 96 \\Rightarrow x = \\sqrt[3]{96} \\approx 4{,}58`}</Eq> 厘米。<Eq>{`h \\approx 4{,}58`}</Eq> 厘米（最优立方体）。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+一个方形底带盖的盒必须有96立方厘米的体积。最小化总表面积。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "使用约束消除变量，得到单变量函数", correta: true },
+    { texto: "对约束求导并令其为零" },
+    { texto: "同时最大化和最小化约束" },
+    { texto: "将约束作为项添加到目标函数" }
+  ]}
+  solucao={<>在约束优化中，约束的作用是减少变量数量。代入 <Eq>{`Q`}</Eq> 以得到单变量函数，然后用导数优化。对约束求导并令其为零是拉格朗日方法（下一课，多变量）。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+在约束优化问题中，约束方程的正确作用是什么？
+
+</Exercicio>
+
+<Exercicio
+  numero="62.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "在临界点和物理定义域端点评估f", correta: true },
+    { texto: "仅取 f' = 0 的临界点" },
+    { texto: "在所有点应用二阶导数测试" },
+    { texto: "将临界点代入约束" }
+  ]}
+  solucao={<>绝对极值算法要求在所有内部临界点和端点评估 <Eq>{`f`}</Eq>。忽视端点是常见错误——全局最优可能在物理定义域的边界。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+要找到 <Eq>{`f`}</Eq> 在 <Eq>{`[a, b]`}</Eq> 上的绝对最大值或最小值，必须：
+
+</Exercicio>
+
+<Exercicio
+  numero="62.15"
+  dificuldade="aplicacao"
+  solucao={<>圆柱内接于半径 <Eq>{`R`}</Eq> 的球。关系：<Eq>{`r^2 + (h/2)^2 = R^2 \\Rightarrow r^2 = R^2 - h^2/4`}</Eq>。体积：<Eq>{`V = \\pi r^2 h = \\pi h(R^2 - h^2/4)`}</Eq>。<Eq>{`V'(h) = \\pi(R^2 - 3h^2/4) = 0 \\Rightarrow h = 2R/\\sqrt{3}`}</Eq>。<Eq>{`r = R\\sqrt{2/3}`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+确定内接于半径 <Eq>{`R`}</Eq> 的球的最大体积圆柱的尺寸。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.16"
+  dificuldade="aplicacao"
+  solucao={<>点 <Eq>{`(x, y)`}</Eq> 在抛物线 <Eq>{`y = x^2`}</Eq> 上。到点 <Eq>{`(0, 3)`}</Eq> 的距离：<Eq>{`D^2 = x^2 + (x^2-3)^2 = x^4 - 5x^2 + 9`}</Eq>。<Eq>{`(D^2)' = 4x^3 - 10x = 2x(2x^2-5) = 0`}</Eq>。根：<Eq>{`x = 0`}</Eq> 和 <Eq>{`x = \\pm\\sqrt{5/2}`}</Eq>。在 <Eq>{`x = 0`}</Eq>：距离 <Eq>{`3`}</Eq>（局部最大）。在 <Eq>{`x = \\pm\\sqrt{5/2}`}</Eq>：距离 <Eq>{`\\sqrt{9 - 25/4} = \\sqrt{11/4} = \\sqrt{11}/2 \\approx 1{,}66`}</Eq> → 最近的点。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+确定抛物线 <Eq>{`y = x^2`}</Eq> 上最接近点 <Eq>{`(0, 3)`}</Eq> 的点。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.17"
+  dificuldade="modelagem"
+  solucao={<>成本 <Eq>{`C = 2x + 3y`}</Eq>，约束 <Eq>{`xy = 300`}</Eq>，故 <Eq>{`y = 300/x`}</Eq>。<Eq>{`C(x) = 2x + 900/x`}</Eq>。<Eq>{`C' = 2 - 900/x^2 = 0 \\Rightarrow x = \\sqrt{450} \\approx 21{,}2`}</Eq> 米。<Eq>{`y = 300/21{,}2 \\approx 14{,}1`}</Eq> 米。最小成本：<Eq>{`C \\approx 2(21{,}2) + 900/21{,}2 \\approx 84{,}8`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+一个300平方米的矩形区域将被围栏。东边（长 <Eq>{`x`}</Eq>）成本2元/米，其他边每米成本3元。最小化总成本。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.18"
+  dificuldade="modelagem"
+  solucao={<>高度：<Eq>{`h(t) = -5t^2 + 20t + 3`}</Eq>（重力加速度 <Eq>{`\\approx 10`}</Eq> 米/秒²）。<Eq>{`h'(t) = -10t + 20 = 0 \\Rightarrow t = 2`}</Eq> 秒。最大高度：<Eq>{`h(2) = -20 + 40 + 3 = 23`}</Eq> 米。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+物体从高度3米以初速度20米/秒竖直向上抛出。模型：<Eq>{`h(t) = -5t^2 + 20t + 3`}</Eq>。确定最大高度。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.19"
+  dificuldade="modelagem"
+  solucao={<>总成本：<Eq>{`C(r) = 10 \\cdot 2\\pi r^2 + 6 \\cdot 2\\pi rh`}</Eq>。用 <Eq>{`\\pi r^2 h = 200`}</Eq>：<Eq>{`h = 200/(\\pi r^2)`}</Eq>。<Eq>{`C(r) = 20\\pi r^2 + 2400/r`}</Eq>。<Eq>{`C'(r) = 40\\pi r - 2400/r^2 = 0 \\Rightarrow r^3 = 60/\\pi`}</Eq>。<Eq>{`r^* \\approx 2{,}67`}</Eq> 厘米。<Eq>{`h \\approx 8{,}93`}</Eq> 厘米。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+一个200立方厘米的圆柱形罐，底面和顶盖材料成本10元/平方厘米，侧面成本6元/平方厘米。确定最小化成本的尺寸。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.20"
+  dificuldade="modelagem"
+  solucao={<>半圆周长加两条直边：<Eq>{`\\pi r + 2l = 20 \\Rightarrow l = (20 - \\pi r)/2`}</Eq>。面积：<Eq>{`A = \\pi r^2/2 + 2rl = \\pi r^2/2 + r(20 - \\pi r) = 20r - \\pi r^2/2`}</Eq>。<Eq>{`A' = 20 - \\pi r = 0 \\Rightarrow r = 20/\\pi \\approx 6{,}37`}</Eq> 米。<Eq>{`l = 0`}</Eq> ——理想走廊是纯半圆。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+健身房走廊是矩形，两短边为半圆（椭圆跑道）。总周长20米。确定最大化内部面积的半径 <Eq>{`r`}</Eq>。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.21"
+  dificuldade="aplicacao"
+  solucao={<>设 <Eq>{`x`}</Eq> 为一个数。最小化 <Eq>{`f(x) = x^2 + (10-x)^2 = 2x^2 - 20x + 100`}</Eq>。<Eq>{`f'(x) = 4x - 20 = 0 \\Rightarrow x = 5`}</Eq>。两个数都是5；平方和最小：<Eq>{`25 + 25 = 50`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+两个数的和是10。找使其平方和最小的两个数。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.22"
+  dificuldade="aplicacao"
+  solucao={<>设 <Eq>{`x`}</Eq> 和 <Eq>{`y`}</Eq> 满足 <Eq>{`x + y = 1`}</Eq>。最大化 <Eq>{`P = x^2 y = x^2(1-x)`}</Eq>。<Eq>{`P' = 2x(1-x) - x^2 = x(2 - 3x) = 0`}</Eq>。根：<Eq>{`x = 0`}</Eq>（最小值）和 <Eq>{`x = 2/3`}</Eq>。<Eq>{`y = 1/3`}</Eq>。<Eq>{`P_\\max = (4/9)(1/3) = 4/27`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+两个非负数的和是1。最大化第一个数的平方与第二个数的乘积。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.23"
+  dificuldade="aplicacao"
+  solucao={<>矩形内接于半径5的半圆。顶点在 <Eq>{`(x, y)`}</Eq>，满足 <Eq>{`x^2 + y^2 = 25`}</Eq>。面积：<Eq>{`A = 2x \\cdot y = 2x\\sqrt{25-x^2}`}</Eq>。最大化 <Eq>{`A^2 = 4x^2(25-x^2)`}</Eq>。<Eq>{`(A^2)' = 4(50x - 4x^3) = 0 \\Rightarrow x = \\sqrt{25/2} = 5/\\sqrt{2}`}</Eq>。<Eq>{`y = 5/\\sqrt{2}`}</Eq>。<Eq>{`A_\\max = 25`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+确定内接于半径5的半圆的矩形最大面积。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.24"
+  dificuldade="aplicacao"
+  solucao={<>距离：<Eq>{`D^2 = (x-1)^2 + y^2 = (x-1)^2 + (x^2-2)^2`}</Eq>。<Eq>{`(D^2)' = 2(x-1) + 4x(x^2-2) = 2x - 2 + 4x^3 - 8x = 4x^3 - 6x - 2 = 2(2x^3 - 3x - 1)`}</Eq>。有理根：<Eq>{`x = -1/2`}</Eq> ... 测试：<Eq>{`2(-1/8) - 3(-1/2) - 1 = -1/4 + 3/2 - 1 = 1/4 \\neq 0`}</Eq>。试 <Eq>{`x = -1`}</Eq>：<Eq>{`-2 + 3 - 1 = 0`}</Eq>。故 <Eq>{`x = -1`}</Eq>。点：<Eq>{`(-1, 1)`}</Eq>。（除法：<Eq>{`2x^3-3x-1 = (x+1)(2x^2-2x-1)`}</Eq>。其他根：<Eq>{`x = (1\\pm\\sqrt{3})/2`}</Eq>。最接近 <Eq>{`(1,0)`}</Eq> 的：<Eq>{`x = (1+\\sqrt{3})/2 \\approx 1{,}37`}</Eq>，给出点 <Eq>{`(1{,}37, -0{,}12)`}</Eq> 更近。）</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+确定曲线 <Eq>{`y = x^2 - 2`}</Eq> 上最接近点 <Eq>{`(1, 0)`}</Eq> 的点。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.25"
+  dificuldade="aplicacao"
+  solucao={<>接收 <Eq>{`n`}</Eq> 名额外乘客超过100人。票价：<Eq>{`80 - 0{,}50n`}</Eq>。收入：<Eq>{`R(n) = (100+n)(80-0{,}5n) = 8000 + 30n - 0{,}5n^2`}</Eq>。<Eq>{`R' = 30 - n = 0 \\Rightarrow n = 30`}</Eq>。总人数：130。票价：65元。收入：<Eq>{`130 \\times 65 = 8450`}</Eq>。</>}
+  passos={<><ol><li>定义 <Eq>{`n`}</Eq> = 超过100人基础的额外乘客。</li><li>每人票价：<Eq>{`80 - 0{,}50n`}</Eq>。</li><li>总收入：<Eq>{`R = (100+n)(80-0{,}5n)`}</Eq>。</li><li>展开并求导：<Eq>{`R'(n) = 30 - n`}</Eq>。</li><li>零：<Eq>{`n = 30`}</Eq>。用 <Eq>{`R'' = -1 < 0`}</Eq> 确认。</li></ol><em>技巧：</em> 在打折票价问题中，最优值很少在边界——通常是唯一内部临界点。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+一个旅游团对100人的团体收费80元/人。每增加一名乘客，所有人的票价下降0.50元。多少乘客最大化收入？
+
+</Exercicio>
+
+<Exercicio
+  numero="62.26"
+  dificuldade="modelagem"
+  solucao={<>设 <Eq>{`x`}</Eq> 为每亩植树数。每树产量：<Eq>{`300 + 20(x-25)`}</Eq> 个橙子... 重新解释：每亩25棵树时，每树600个橙子。每增加一棵树，每树少12个。设 <Eq>{`n`}</Eq> 为额外树数。总产量：<Eq>{`(25+n)(600-12n)`}</Eq>。<Eq>{`T' = 600 - 12n + (25+n)(-12) = 600 - 12n - 300 - 12n = 300 - 24n = 0 \\Rightarrow n = 12{,}5`}</Eq>，故37或38棵（两者都检验）。<Eq>{`T(12) = 37 \\cdot 456 = 16872`}</Eq>；<Eq>{`T(13) = 38 \\cdot 444 = 16872`}</Eq>。两个都最优：37或38棵树。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+一个橙园每亩25棵树，每树产600个橙子。每增加一棵树，每树产量减少12个。每亩多少棵树最大化总产量？
+
+</Exercicio>
+
+<Exercicio
+  numero="62.27"
+  dificuldade="aplicacao"
+  solucao={<>窗户：半径 <Eq>{`r`}</Eq> 的半圆在宽 <Eq>{`2r`}</Eq>、高 <Eq>{`h`}</Eq> 的矩形上。周长：<Eq>{`\\pi r + 2h + 2r = 10 \\Rightarrow h = (10 - \\pi r - 2r)/2`}</Eq>。面积：<Eq>{`A = \\pi r^2/2 + 2rh = \\pi r^2/2 + r(10 - \\pi r - 2r) = 10r - 2r^2 - \\pi r^2/2`}</Eq>。<Eq>{`A' = 10 - 4r - \\pi r = 0 \\Rightarrow r = 10/(4+\\pi) \\approx 1{,}40`}</Eq> 米。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+一个"诺曼"窗由矩形加上半圆组成。总周长10米。确定最大化窗户面积的半圆半径。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.28"
+  dificuldade="demonstracao"
+  solucao={<>设 <Eq>{`x, y > 0`}</Eq> 满足 <Eq>{`x + y = S`}</Eq>（常数）。最大化 <Eq>{`P = xy = x(S-x)`}</Eq>。<Eq>{`P'(x) = S - 2x = 0 \\Rightarrow x = S/2`}</Eq>。<Eq>{`y = S/2`}</Eq>。因此 <Eq>{`xy \\leq (S/2)^2 = (x+y)^2/4`}</Eq>，等号成立当且仅当 <Eq>{`x = y`}</Eq>。这证明了AM-GM不等式：<Eq>{`\\sqrt{xy} \\leq (x+y)/2`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+用微积分证明：在所有和固定为 <Eq>{`S`}</Eq> 的正数对中，当两个数相等时乘积最大。（这为两项AM-GM不等式证明。）
+
+</Exercicio>
+
+<Exercicio
+  numero="62.29"
+  dificuldade="demonstracao"
+  solucao={<>总面积：<Eq>{`A = 2\\pi r h + 2\\pi r^2`}</Eq>。用 <Eq>{`\\pi r^2 h = V \\Rightarrow h = V/(\\pi r^2)`}</Eq>：<Eq>{`A(r) = 2V/r + 2\\pi r^2`}</Eq>。求导：<Eq>{`A'(r) = -2V/r^2 + 4\\pi r = 0 \\Rightarrow 4\\pi r^3 = 2V \\Rightarrow r^3 = V/(2\\pi)`}</Eq>。故 <Eq>{`h = V/(\\pi r^2) = (4\\pi r^3 \\cdot 2)/(4\\pi r^2) = 2r`}</Eq>。因此 <Eq>{`h = 2r`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+证明：对于体积固定为 <Eq>{`V`}</Eq> 的最小表面积圆柱，满足 <Eq>{`h = 2r`}</Eq>（高度等于直径）。
+
+</Exercicio>
+
+<Exercicio
+  numero="62.30"
+  dificuldade="desafio"
+  solucao={<>点 <Eq>{`(a, b)`}</Eq> 在椭圆 <Eq>{`x^2/A^2 + y^2/B^2 = 1`}</Eq> 上。内接矩形面积：<Eq>{`R = 4ab`}</Eq>。参数化：<Eq>{`a = A\\cos\\theta`}</Eq>，<Eq>{`b = B\\sin\\theta`}</Eq>。<Eq>{`R(\\theta) = 4AB\\cos\\theta\\sin\\theta = 2AB\\sin(2\\theta)`}</Eq>。当 <Eq>{`\\sin(2\\theta) = 1`}</Eq> 时最大，即 <Eq>{`\\theta = \\pi/4`}</Eq>。<Eq>{`R_\\max = 2AB`}</Eq>。尺寸：<Eq>{`a = A/\\sqrt{2}`}</Eq>，<Eq>{`b = B/\\sqrt{2}`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+确定内接于椭圆 <Eq>{`x^2/A^2 + y^2/B^2 = 1`}</Eq> 的矩形最大面积，边平行于坐标轴。
+
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- **Boelkins, Matt. Active Calculus 2.0.** Grand Valley State University, 2022. CC-BY-NC-SA. [activecalculus.org/single/sec-3-3-optimization.html](https://activecalculus.org/single/sec-3-3-optimization.html)
+- **OpenStax. Calculus Volume 1.** Strang, Herman et al., 2023. CC-BY-NC-SA. [openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems)
+- **Hartman, G. et al. APEX Calculus.** Virginia Military Institute, 2023. CC-BY-NC. [apexcalculus.com](https://www.apexcalculus.com/)

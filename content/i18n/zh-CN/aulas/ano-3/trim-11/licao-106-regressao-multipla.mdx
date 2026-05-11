@@ -1,0 +1,625 @@
+---
+titulo: "Lição 106 — Regressão múltipla"
+slug: "licao-106-regressao-multipla"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Modelo com p preditores, solução matricial OLS, R² ajustado, multicolinearidade, seleção de variáveis e diagnóstico de pressupostos."
+ordem: 106
+publicado: true
+tags: ["estatística inferencial", "regressão múltipla", "OLS", "ano-3", "trim-11"]
+prerrequisitos: ["licao-105-regressao-simples"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik LK alemão (Klasse 12)", "H2 Mathematics Singapura (§15)", "econometria introdutória"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{y}"
+  legenda={<>在具有 <Eq>{`p`}</Eq> 个预测变量的<strong>多元回归</strong>中，OLS 估计量是正规方程组的矩阵解。每个系数 <Eq>{`\\hat\\beta_j`}</Eq> 衡量 <Eq>{`X_j`}</Eq> 对 <Eq>{`Y`}</Eq> 的影响，保持其他预测变量固定——这称为<em>偏效应</em>。</>}
+  audioTexto="多元回归。贝塔帽向量等于 X 转置 X 的逆，乘以 X 转置 Y。每个系数贝塔 j 帽是预测变量 j 的偏效应，控制其他变量。简单回归的矩阵推广。"
+/>
+
+<aside>
+
+**本课程涵盖的教科书**
+
+- [**OpenIntro Statistics** (4th ed.)](https://www.openintro.org/book/os/) · §8.1–8.4 · CC-BY-SA · <em>多元回归的教学处理，包括偏系数解释、调整 R² 和模型选择；在线数据集可用于复现。</em>
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §13.1–13.5 · CC-BY · <em>应用方法，包括多元回归的方差分析表、全局和偏 F 检验以及真实数据示例。</em>
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) · Regressão múltipla · CC-BY-SA · <em>葡萄牙语参考资料，使用与巴西工程课程兼容的矩阵记号。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 多元线性回归模型
+
+<Definicao titulo="模型和矩阵记号">
+
+对于 $n$ 个观测和 $p$ 个预测变量：
+
+$$Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i2} + \cdots + \beta_p X_{ip} + \varepsilon_i, \quad \varepsilon_i \stackrel{i.i.d.}{\sim} \mathcal{N}(0,\sigma^2)$$
+
+矩阵形式：$\mathbf{Y} = X\boldsymbol\beta + \boldsymbol\varepsilon$，其中：
+
+- $\mathbf{Y} \in \mathbb{R}^n$：反应变量向量。
+- $X \in \mathbb{R}^{n\times(p+1)}$：设计矩阵（第一列为 1，代表截距）。
+- $\boldsymbol\beta \in \mathbb{R}^{p+1}$：系数向量。
+- $\boldsymbol\varepsilon \in \mathbb{R}^n$：误差向量。
+
+</Definicao>
+
+> "多元回归模型为 $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_k x_k + \varepsilon$。系数 $\beta_i$ 衡量当所有其他预测变量固定时，$x_i$ 每增加一个单位对 $y$ 的期望变化。" — [OpenIntro Statistics, §8.1](https://www.openintro.org/book/os/), p. 362
+
+<Definicao titulo="OLS 估计量和正规方程">
+
+最小化 $SSE = \|\mathbf{Y} - X\boldsymbol\beta\|^2$ 导出正规方程组：
+
+$$X^TX\hat{\boldsymbol\beta} = X^T\mathbf{Y}$$
+
+其解（当 $X^TX$ 可逆时）为：
+
+<Equation explicacao="矩阵 OLS 估计量：存在于预测变量线性无关时。" latex="\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{Y}" />
+
+估计量的方差-协方差矩阵为：
+
+<Equation explicacao="估计量的协方差：与 X'X 成反比。更多数据或 X 中更多变异会减少方差。" latex="\text{Cov}(\hat{\boldsymbol\beta}) = \sigma^2 (X^TX)^{-1}" />
+
+</Definicao>
+
+### 拟合度量
+
+<Definicao titulo="调整 R²">
+
+添加任何预测变量时，$R^2$ 都会增加——即使是不相关的变量。调整 R² 对参数数量进行惩罚：
+
+<Equation explicacao="调整 R²：对复杂性进行惩罚。添加弱预测变量时可能会下降。" latex="\bar R^2 = 1 - \frac{SSE/(n-p-1)}{SST/(n-1)}" />
+
+如果 $\bar R^2$ 随新预测变量增加，该预测变量改进模型；如果下降，则有害。
+
+</Definicao>
+
+### 推断
+
+<Definicao titulo="偏 t 检验和全局 F 检验">
+
+**偏 $t$ 检验**对于 $H_0: \beta_j = 0$（其他预测变量在模型中）：
+
+<Equation explicacao="测试给定其他变量已在模型中时，预测变量 Xj 是否有显著效应。" latex="T_j = \frac{\hat\beta_j}{SE(\hat\beta_j)} \sim t_{n-p-1}" />
+
+**全局 $F$ 检验**对于 $H_0: \beta_1 = \cdots = \beta_p = 0$：
+
+<Equation explicacao="测试整个模型是否比 Y 的均值解释更多。" latex="F = \frac{SSR/p}{SSE/(n-p-1)} \sim F_{p,\,n-p-1}" />
+
+</Definicao>
+
+<Definicao titulo="多重共线性和 VIF">
+
+当两个或更多预测变量高度相关时，$X^TX$ 变成近似奇异，$SE(\hat\beta_j)$ 膨胀——系数变得不稳定且难以解释。
+
+**方差膨胀因子：**
+
+<Equation explicacao="VIF 衡量预测变量 j 的方差由于与其他预测变量的相关性增加多少。VIF > 10 令人担忧。" latex="VIF_j = \frac{1}{1 - R_j^2}" />
+
+其中 $R_j^2$ 是 $X_j$ 对其他预测变量的回归的 $R^2$。
+
+</Definicao>
+
+<Insight>
+
+在简单回归中，$\hat\beta_1$ 和相关系数总是同号。在多元回归中，$X_j$ 和 $Y$ 之间的相关性可能与 $\hat\beta_j$ 的符号相反（抑制效应）。这是因为偏系数对其他预测变量进行控制。
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 160" className="w-full">
+<g>
+  <text x="10" y="20" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8" fontWeight="bold">设计矩阵 X (n=4, p=2)</text>
+  <rect x="10" y="30" width="200" height="110" rx="4" fill="none" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1"/>
+  <text x="20" y="50" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₁₁   X₁₂</text>
+  <text x="20" y="70" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₂₁   X₂₂</text>
+  <text x="20" y="90" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₃₁   X₃₂</text>
+  <text x="20" y="110" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₄₁   X₄₂</text>
+  <text x="60" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×(p+1)</text>
+</g>
+<g>
+  <text x="230" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">×</text>
+</g>
+<g>
+  <rect x="250" y="30" width="60" height="110" rx="4" fill="none" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1"/>
+  <text x="270" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₀</text>
+  <text x="270" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₁</text>
+  <text x="270" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₂</text>
+  <text x="280" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">(p+1)×1</text>
+</g>
+<g>
+  <text x="335" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">=</text>
+</g>
+<g>
+  <rect x="355" y="30" width="50" height="110" rx="4" fill="none" stroke="rgb(26 77 92)" strokeOpacity="0.5" strokeWidth="1.5"/>
+  <text x="375" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₁</text>
+  <text x="375" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₂</text>
+  <text x="375" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₃</text>
+  <text x="375" y="115" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₄</text>
+  <text x="380" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×1</text>
+</g>
+<g>
+  <text x="425" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">+</text>
+</g>
+<g>
+  <rect x="445" y="30" width="60" height="110" rx="4" fill="none" stroke="rgb(199 107 63)" strokeOpacity="0.5" strokeWidth="1.5"/>
+  <text x="465" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₁</text>
+  <text x="465" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₂</text>
+  <text x="465" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₃</text>
+  <text x="465" y="115" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₄</text>
+  <text x="475" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×1</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+模型的矩阵表示：$\mathbf{Y} = X\boldsymbol\beta + \boldsymbol\varepsilon$。$X$ 中的第一列 1 产生截距 $\beta_0$。
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="五岁儿童的版本">
+
+在上一堂课中，你用**一把尺子**来用一个东西预测另一个：用身高预测体重。
+
+现在想象你想预测一个人的体重，有**两条信息**：身高和年龄。有两条信息一起，你的预测会变得更好！
+
+多元回归就像同时有**多把尺子**——每把测量不同的东西——它们一起做出更精确的预测。
+
+</Porta>
+
+<Porta nivel="10" titulo="十岁儿童的版本">
+
+在简单回归中，你只用**一个变量**($X$) 来预测 ($Y$)。但我们几乎总是有更多的可用信息。
+
+例如，要预测**房子的价格**，你可以使用：
+- $X_1$ = 面积，平方米
+- $X_2$ = 房间数
+- $X_3$ = 到市中心的距离，单位公里
+
+多元回归拟合如下形式的公式：
+
+$$\hat Y = \hat\beta_0 + \hat\beta_1 X_1 + \hat\beta_2 X_2 + \hat\beta_3 X_3$$
+
+每个 $\hat\beta_j$ 说：「如果我将 $X_j$ 增加一个单位，保持其他固定，平均来说 $Y$ 变化多少？」
+
+</Porta>
+
+<Porta nivel="15" titulo="十五岁青少年的版本">
+
+多元回归通过包括 $p$ 个预测变量来推广简单回归。模型是：
+
+$$Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p + \varepsilon$$
+
+**系数解释：** $\hat\beta_j$ 是 $X_j$ 对 $Y$ 的影响，**保持所有其他预测变量固定**（偏效应或「其他条件相同」）。
+
+**为什么这重要？** 想象用经验年限 ($X_1$) 和教育水平 ($X_2$) 预测员工工资。经验对工资的影响在你控制教育程度时不同，相比于你忽视教育程度时。
+
+**R² vs. 调整 R²：** 添加任何变量会增加 $R^2$，即使它无关。$\bar R^2$（调整）对额外变量进行惩罚——在比较不同数量预测变量的模型时使用它。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程学生版本">
+
+**模型的矩阵代数**
+
+给定 $X \in \mathbb{R}^{n\times(p+1)}$ 列满秩为 $p+1$（线性无关预测变量），OLS 解决：
+
+$$\min_{\boldsymbol\beta} \|\mathbf{Y} - X\boldsymbol\beta\|^2 \implies \hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{Y}$$
+
+拟合值向量是 $\hat{\mathbf{Y}} = H\mathbf{Y}$，其中 $H = X(X^TX)^{-1}X^T$ 是**帽子矩阵**（到 $X$ 列空间的正交投影）。残差 $\mathbf{e} = (I-H)\mathbf{Y}$ 与 $\hat{\mathbf{Y}}$ 正交。
+
+**多元方差分析表**
+
+| 来源 | SS | df | MS | F |
+|---|---|---|---|---|
+| 回归 | $SSR$ | $p$ | $SSR/p$ | $MSR/MSE$ |
+| 误差 | $SSE$ | $n-p-1$ | $SSE/(n-p-1)$ | — |
+| 总计 | $SST$ | $n-1$ | — | — |
+
+**变量选择：** AIC、BIC、$\bar R^2$、交叉验证。自动方法：逐步（向前、向后、双向）——有用但不能代替实质性推理。
+
+**多重共线性：** $\text{det}(X^TX) \to 0$ 意味着逆不稳定。岭回归 ($L_2$)：$\hat{\boldsymbol\beta}_{ridge} = (X^TX + \lambda I)^{-1}X^T\mathbf{Y}$ 无需选择的正则化；Lasso ($L_1$) 自动选择变量。
+
+</Porta>
+
+<Porta nivel="40" titulo="资深专业人士版本">
+
+多元回归在社会科学、流行病学和金融的实证分析中占主导地位。中心方法论辩论：
+
+**因果识别：** 有控制的 OLS 无法解决内生性。「潜在结果模型」（Rubin）区分因果效应与条件关联。基于外生变异的设计（自然实验、RDD、DiD、IV）是现代经济学因果推断的语言——由 2021 年经济学诺贝尔奖认可（Card、Angrist、Imbens）。参见 [nobelprize.org/prizes/economic-sciences/2021/summary/](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/)。
+
+**过拟合和验证：** 在小样本中有许多预测变量 ($p \approx n$)，OLS 过拟合。正则化（岭、lasso、弹性网）和 $k$ 折交叉验证是机器学习的标准；在计量经济学中，使用单独的测试数据仍然是规范。
+
+**稳健标准误差：** 异方差性和序列相关性违反 $\text{Cov}(\boldsymbol\varepsilon) = \sigma^2 I$。White (HC) 和 Newey-West (HAC) 误差纠正方差矩阵，无需为异方差指定函数形式。
+
+**高维回归 ($p > n$)：** OLS 无有唯一解。Lasso 通过坐标下降、PCR、PLS。后选择推断（去偏 Lasso）是活跃的研究领域。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="巴西应用">
+
+**圣保罗房产价格（按 IBGE FipeZap 标准模拟数据）**
+
+将销售价格 $Y$（单位千巴西雷亚尔）对面积 $X_1$（平方米）、房间数 $X_2$ 和到地铁距离 $X_3$（公里）进行回归。$n=150$ 笔交易：
+
+$$\hat Y = 180 + 4{,}2 X_1 + 35 X_2 - 12 X_3$$
+
+- $\hat\beta_1 = 4{,}2$：每平方米额外值，平均每平方米 4,200 巴西雷亚尔（控制房间和地铁）。
+- $\hat\beta_2 = 35$：每额外房间增加 35,000 巴西雷亚尔（控制面积和地铁）。
+- $\hat\beta_3 = -12$：每多一公里到地铁减少 12,000 巴西雷亚尔（控制面积和房间）。
+- $R^2 = 0{,}78$，$\bar R^2 = 0{,}77$：模型解释 77% 的价格变异性，按复杂性调整。
+
+**全局 F 检验：** $F = 172{,}4$，p 值小于 0.001——三个预测变量一起高度显著。
+
+**注意：** 面积和房间数之间的多重共线性 ($r = 0{,}69$) 膨胀 $SE$——计算的 VIF：$VIF_1 = 2{,}3$，$VIF_2 = 2{,}1$，$VIF_3 = 1{,}1$。全部低于 10：多重共线性可接受。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的示例
+
+<Exemplo numero="106.1" titulo="两个预测变量的拟合和解释">
+
+**问题。** 年薪 $Y$（千巴西雷亚尔）对经验 $X_1$（年）和教育 $X_2$（学年）的回归得到：$\hat Y = -12 + 2{,}8 X_1 + 5{,}2 X_2$，$n=50$，$R^2=0{,}74$，$\bar R^2=0{,}73$。
+
+解释每个系数并为有 10 年经验和 16 年学习的专业人士计算预测。
+
+**策略。** 将每个 $\hat\beta_j$ 解释为偏效应（其他条件相同）。在调整方程中代入值。
+
+**解决方案。**
+
+- $\hat\beta_0 = -12$：截距（单独没有实质解释——没有专业人士有零年经验和学习）。
+- $\hat\beta_1 = 2{,}8$：控制教育，每额外经验年与平均每年 2,800 巴西雷亚尔更多关联。
+- $\hat\beta_2 = 5{,}2$：控制经验，每额外学年与平均每年 5,200 巴西雷亚尔更多关联。
+
+预测：$\hat Y = -12 + 2{,}8\times10 + 5{,}2\times16 = -12+28+83{,}2 = 99{,}2$ 千巴西雷亚尔/年。
+
+**验证。** $\bar R^2 = 0{,}73$ 接近 $R^2 = 0{,}74$：仅 2 个预测变量，很少惩罚——模型节俭。
+
+**资源。** [OpenIntro Statistics, §8.1, 示例 8.1](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.2" titulo="模型选择中的调整 R²">
+
+**问题。** 三个模型预测家庭用电消费 ($n=80$)：
+
+| 模型 | 预测变量 | $R^2$ | $\bar R^2$ |
+|---|---|---|---|
+| M1 | 面积 | 0,61 | 0,61 |
+| M2 | 面积 + 居住者数 | 0,71 | 0,70 |
+| M3 | 面积 + 居住者数 + 收入 + 温度 + 星期几 | 0,74 | 0,70 |
+
+选择哪个模型？
+
+**策略。** 比较 $\bar R^2$——对预测变量数进行惩罚。
+
+**解决方案。**
+
+M2 和 M3 有相同的 $\bar R^2 = 0{,}70$，但 M3 使用 5 个预测变量对 M2 的 2 个。按奥卡姆剃刀原则（节俭），**M2 是首选**：添加 3 个预测变量不改进 $\bar R^2$——它们不提供净信息。
+
+注意 M3 的 $R^2$ (0,74) 超过 M2 (0,71)——但 $R^2$ 总是随额外预测变量增加，即使是不相关的。
+
+**验证。** 可以用 AIC/BIC 确认：$AIC = n\ln(SSE/n) + 2(p+1)$——越低越好。
+
+**资源。** [OpenIntro Statistics, §8.3, 表 8.7](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.3" titulo="全局 F 检验和方差分析表">
+
+**问题。** $p=3$ 个预测变量的回归，$n=40$：$SST=2400$，$SSE=720$。组建方差分析表并在 5% 水平测试 $H_0: \beta_1=\beta_2=\beta_3=0$。
+
+**策略。** 计算 SSR、df、MS、F；与临界值 $F_{3,36;\,0{,}05}$ 比较。
+
+**解决方案。**
+
+$SSR = 2400-720 = 1680$；$R^2 = 1680/2400 = 0{,}70$。
+
+| 来源 | SS | df | MS | F |
+|---|---|---|---|---|
+| 回归 | 1680 | 3 | 560 | 28,0 |
+| 误差 | 720 | 36 | 20 | — |
+| 总计 | 2400 | 39 | — | — |
+
+$F_{3,36;\,0{,}05} \approx 2{,}87$。由于 $F = 28{,}0 \gg 2{,}87$，我们拒绝 $H_0$：整个模型高度显著。
+
+**验证。** $MSE = 20 \implies \hat\sigma = \sqrt{20} \approx 4{,}47$——$Y$ 单位的残差标准偏差。
+
+**资源。** [OpenStax Statistics, §13.4](https://openstax.org/books/statistics/pages/13-4-facts-about-the-f-distribution) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="106.4" titulo="通过 VIF 检测多重共线性">
+
+**问题。** 车辆价格 ($Y$) 对动力 ($X_1$)、排量 ($X_2$) 和重量 ($X_3$) 的回归。辅助回归：$R_1^2=0{,}89$（$X_1$ 对 $X_2, X_3$），$R_2^2=0{,}91$，$R_3^2=0{,}85$。计算 VIF 并评估。
+
+**策略。** $VIF_j = 1/(1-R_j^2)$。
+
+**解决方案。**
+
+$VIF_1 = 1/(1-0{,}89) = 9{,}09$；$VIF_2 = 1/(1-0{,}91) = 11{,}1$；$VIF_3 = 1/(1-0{,}85) = 6{,}67$。
+
+$VIF_2 = 11{,}1 > 10$：排量与其他变量呈现严重多重共线性。
+
+**行动：** 从模型中删除 $X_2$ 或将 $X_1$ 和 $X_2$ 组合成复合指标（主成分分析）。
+
+**验证。** 删除 $X_2$ 后，为剩余预测变量重新计算 VIF。
+
+**资源。** [OpenIntro Statistics, §8.4](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.5" titulo="虚拟变量和交互">
+
+**问题。** 用经验 $X_1$（年）和性别 $D$（1=女性，0=男性）预测工资 $Y$（千巴西雷亚尔/年）。结果：$\hat Y = 45 + 2{,}5X_1 - 8D$。
+
+解释 $D$ 的系数并为以下计算预期工资：(a) 有 10 年经验的男性；(b) 有 10 年经验的女性。
+
+**策略。** 虚拟变量创建两个不同的截距（每个性别一个），同时保持斜率相等。
+
+**解决方案。**
+
+$\hat\beta_D = -8$：控制经验，女性平均每年比男性少赚 8,000 巴西雷亚尔——粗差异（不是因果，因为我们不控制部门、职位、工作时间）。
+
+(a) 男性 ($D=0$)，$X_1=10$：$\hat Y = 45 + 25 - 0 = 70$ 千巴西雷亚尔/年。
+
+(b) 女性 ($D=1$)，$X_1=10$：$\hat Y = 45 + 25 - 8 = 62$ 千巴西雷亚尔/年。
+
+**验证。** 差异对任何经验水平都是常数 ($-8$)——无交互模型假设加性效应。为了允许不同斜率，添加 $X_1 \times D$。
+
+**资源。** [OpenIntro Statistics, §8.2, 示例 8.4](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-106-regressao-multipla">
+
+<Exercicio
+  numero="106.1"
+  dificuldade="aplicacao"
+  solucao={<>每个预测变量的偏效应：保持其他固定。<Eq>{`\\hat\\beta_1 = 3{,}2`}</Eq>：每额外平方米增加 3,200 巴西雷亚尔到价格，控制房间和楼层。<Eq>{`\\hat\\beta_2 = 28`}</Eq>：每额外房间增加 28,000 巴西雷亚尔。<Eq>{`\\hat\\beta_3 = 5{,}5`}</Eq>：每额外楼层增加 5,500 巴西雷亚尔。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "8.1", licenca: "CC-BY-SA" }}
+>
+回归：$\hat Y = 50 + 3{,}2X_1 + 28X_2 + 5{,}5X_3$（价格千巴西雷亚尔，面积平方米，房间，楼层）。解释每个系数。
+</Exercicio>
+
+<Exercicio
+  numero="106.2"
+  dificuldade="aplicacao"
+  passos={<>
+    <ol>
+      <li>标识值：<Eq>{`X_1=80`}</Eq> 平方米，<Eq>{`X_2=3`}</Eq> 房间，<Eq>{`X_3=5`}</Eq> 楼层。</li>
+      <li>代入方程：<Eq>{`\\hat Y = 50 + 3{,}2 \\times 80 + 28 \\times 3 + 5{,}5 \\times 5`}</Eq>。</li>
+      <li><Eq>{`= 50 + 256 + 84 + 27{,}5 = 417{,}5`}</Eq> 千巴西雷亚尔。</li>
+      <li>残差：<Eq>{`e = 450 - 417{,}5 = 32{,}5`}</Eq> 千巴西雷亚尔。公寓成本比模型预测高 32,500 巴西雷亚尔。</li>
+      <li><em>技巧：</em>正残差 = 观测在预期之上（可能指示未由预测变量捕获的特权位置）。</li>
+    </ol>
+  </>}
+  solucao={<>预测：450,000 巴西雷亚尔。残差：32,500 巴西雷亚尔（公寓在模型预测之上）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "8.3", licenca: "CC-BY-SA" }}
+>
+使用 $\hat Y = 50 + 3{,}2X_1 + 28X_2 + 5{,}5X_3$，为 80 平方米、3 房间、5 楼、观测价格 450,000 巴西雷亚尔的公寓计算预测和残差。
+</Exercicio>
+
+<Exercicio
+  numero="106.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\bar R^2 = 1 - \\frac{SSE/(n-p-1)}{SST/(n-1)} = 1 - \\frac{800/36}{2000/39} = 1 - \\frac{22{,}2}{51{,}3} = 1 - 0{,}433 = 0{,}567`}</Eq>。与 <Eq>{`R^2 = 1-800/2000 = 0{,}60`}</Eq> 比较：调整拟合略微下降。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "373", exercicio: "8.19", licenca: "CC-BY-SA" }}
+>
+$n=40$，$p=3$ 预测变量，$SST=2000$，$SSE=800$。计算 $R^2$ 和 $\bar R^2$。
+</Exercicio>
+
+<Exercicio
+  numero="106.4"
+  dificuldade="aplicacao"
+  solucao={<>M1: <Eq>{`\\bar R^2_1 = 1-(1-0{,}60)\\times(n-1)/(n-2)`}</Eq>。$n=50$：<Eq>{`\\bar R^2_1 = 1-0{,}40\\times49/48 = 1-0{,}408 = 0{,}592`}</Eq>。M2: <Eq>{`\\bar R^2_2 = 1-0{,}35\\times49/46 = 1-0{,}373 = 0{,}627`}</Eq>。M3: <Eq>{`\\bar R^2_3 = 1-0{,}32\\times49/43 = 1-0{,}365 = 0{,}635`}</Eq>。M3 有更高 <Eq>{`\\bar R^2`}</Eq>：三者中最优。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "374", exercicio: "8.21", licenca: "CC-BY-SA" }}
+>
+$n=50$。三个模型，$p=1,3,6$ 预测变量，$SSE/SST = 0{,}40$；$0{,}35$；$0{,}32$。计算每个的 $\bar R^2$ 并指出最优的。
+</Exercicio>
+
+<Exercicio
+  numero="106.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`SSR = 0{,}72 \\times 3600 = 2592`}</Eq>；<Eq>{`SSE = 3600 - 2592 = 1008`}</Eq>；<Eq>{`MSR = 2592/4 = 648`}</Eq>；<Eq>{`MSE = 1008/55 = 18{,}3`}</Eq>；<Eq>{`F = 648/18{,}3 = 35{,}4`}</Eq>。临界值 <Eq>{`F_{4,55;\\,0{,}05} \\approx 2{,}54`}</Eq>：拒绝 <Eq>{`H_0`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-4-facts-about-the-f-distribution", secao: "§13.4", pagina: "710", exercicio: "13.9", licenca: "CC-BY" }}
+>
+$n=60$，$p=4$，$SST=3600$，$R^2=0{,}72$。组建方差分析表并在 5% 水平测试模型。
+</Exercicio>
+
+<Exercicio
+  numero="106.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`VIF_j = 1/(1-R_j^2)`}</Eq>。<Eq>{`VIF_1 = 1/(1-0{,}30) = 1{,}43`}</Eq>；<Eq>{`VIF_2 = 1/(1-0{,}70) = 3{,}33`}</Eq>；<Eq>{`VIF_3 = 1/(1-0{,}92) = 12{,}5`}</Eq>。<Eq>{`VIF_3 > 10`}</Eq>：预测变量 3 呈现严重多重共线性。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "376", exercicio: "8.25", licenca: "CC-BY-SA" }}
+>
+3 个预测变量的辅助回归：$R_1^2=0{,}30$，$R_2^2=0{,}70$，$R_3^2=0{,}92$。计算 VIF 并标识严重多重共线性。
+</Exercicio>
+
+<Exercicio
+  numero="106.7"
+  dificuldade="aplicacao"
+  passos={<>
+    <ol>
+      <li>虚拟变量模型：<Eq>{`\\hat Y = \\hat\\beta_0 + \\hat\\beta_1 X_1 + \\hat\\beta_2 D`}</Eq> 其中 <Eq>{`D=1`}</Eq> 如果接受治疗，<Eq>{`D=0`}</Eq> 如果控制。</li>
+      <li><Eq>{`\\hat\\beta_2`}</Eq> 是在控制 <Eq>{`X_1`}</Eq> 时，接受治疗和对照之间的 <Eq>{`Y`}</Eq> 平均差异。</li>
+      <li><Eq>{`\\hat\\beta_2 = 12{,}4`}</Eq>：该计划与给定相同家庭收入水平时笔记中平均增加 12.4 分相关。</li>
+      <li><em>注意：</em>这仍然不是因果效应——需要随机化或准实验设计。</li>
+    </ol>
+  </>}
+  solucao={<>虚拟变量系数表示参与计划与在控制家庭收入时笔记中多 12.4 分相关。因果效应需要适当的实验设计。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "368", exercicio: "8.9", licenca: "CC-BY-SA" }}
+>
+ENEM 笔记对家庭收入 ($X_1$) 和补考计划参与 ($D$: 1=是，0=否) 的回归：$\hat Y = 480 + 8{,}2X_1 + 12{,}4D$，$n=200$。解释 $\hat\beta_D = 12{,}4$。
+</Exercicio>
+
+<Exercicio
+  numero="106.8"
+  dificuldade="aplicacao"
+  solucao={<>$t$ 检验：<Eq>{`T = 2{,}8/0{,}7 = 4{,}0`}</Eq>。$df = n-p-1 = 50-3-1 = 46$，<Eq>{`t_{46;\\,0{,}025} \\approx 2{,}013`}</Eq>。由于 <Eq>{`|T| = 4{,}0 > 2{,}013`}</Eq>，我们拒绝 <Eq>{`H_0: \\beta_1 = 0`}</Eq>。预测变量 <Eq>{`X_1`}</Eq> 在 5% 水平显著。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-the-regression-equation", secao: "§13.3", pagina: "706", exercicio: "13.7", licenca: "CC-BY" }}
+>
+$n=50$，$p=3$，$\hat\beta_1=2{,}8$，$SE(\hat\beta_1)=0{,}7$。在 5% 水平双尾测试 $H_0:\beta_1=0$。
+</Exercicio>
+
+<Exercicio
+  numero="106.9"
+  dificuldade="aplicacao"
+  solucao={<>$\beta_2$ 的 95% 置信区间：<Eq>{`\\hat\\beta_2 \\pm t_{46;\\,0{,}025} \\times SE(\\hat\\beta_2) = 5{,}2 \\pm 2{,}013 \\times 1{,}8 = 5{,}2 \\pm 3{,}62 = (1{,}58;\\; 8{,}82)`}</Eq>。置信区间不包含 0：<Eq>{`\\beta_2`}</Eq> 在 5% 水平显著。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "364", exercicio: "8.5", licenca: "CC-BY-SA" }}
+>
+$n=50$，$p=3$，$\hat\beta_2=5{,}2$，$SE(\hat\beta_2)=1{,}8$。为 $\beta_2$ 构造 95% 置信区间。使用 $t_{46;\,0{,}025}\approx 2{,}013$。
+</Exercicio>
+
+<Exercicio
+  numero="106.10"
+  dificuldade="aplicacao"
+  solucao={<>在任何有截距的回归中，残差之和总是零：<Eq>{`\\sum e_i = 0`}</Eq>。因此第五个残差是 <Eq>{`e_5 = -(3{,}2 - 1{,}5 - 0{,}8 + 2{,}1) = -5{,}0`}</Eq>。验证：和 <Eq>{`3{,}2-1{,}5-0{,}8+2{,}1-5{,}0 = 0`}</Eq>。正确。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "8.3 (adaptado)", licenca: "CC-BY-SA" }}
+>
+回归的五个残差中的四个是：$3{,}2$；$-1{,}5$；$-0{,}8$；$2{,}1$。第五个残差是什么？
+</Exercicio>
+
+<Exercicio
+  numero="106.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "添加无关预测变量时 R² 总是下降", correta: false },
+    { texto: "添加无关预测变量时调整 R² 可能下降", correta: true },
+    { texto: "R² 和调整 R² 总是相等", correta: false },
+    { texto: "调整 R² 总是大于 R²", correta: false }
+  ]}
+  solucao={<><Eq>{`R^2`}</Eq> 添加预测变量时从不下降（OLS 的数学特性）。<Eq>{`\\bar R^2`}</Eq> 对预测变量数进行惩罚，当添加的预测变量较弱时可以下降。这就是为什么 <Eq>{`\\bar R^2`}</Eq> 是比较不同数量预测变量的模型的适当标准。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "373", exercicio: "8.17", licenca: "CC-BY-SA" }}
+>
+关于 $R^2$ 和调整 $R^2$ 的哪个说法是正确的？
+</Exercicio>
+
+<Exercicio
+  numero="106.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "多重共线性使估计量有偏", correta: false },
+    { texto: "多重共线性膨胀系数的标准误差", correta: true },
+    { texto: "多重共线性使全局 F 检验无效", correta: false },
+    { texto: "多重共线性仅当 VIF = 0 时发生", correta: false }
+  ]}
+  solucao={<>多重共线性不使估计量偏置（它们仍然是 BLUE），但使 <Eq>{`X^TX`}</Eq> 近似奇异，膨胀 <Eq>{`(X^TX)^{-1}`}</Eq> 从而 <Eq>{`SE`}</Eq>。单个 $t$ 检验失去功效，但全局 <Eq>{`F`}</Eq> 检验和预测仍然可靠。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "375", exercicio: "8.23", licenca: "CC-BY-SA" }}
+>
+多重共线性在多元回归中的主要实际效应是什么？
+</Exercicio>
+
+<Exercicio
+  numero="106.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "多元回归中 X₁ 的系数等于 Y 对 X₁ 的简单回归中的系数", correta: false },
+    { texto: "向模型添加 X₂ 可能改变 X₁ 的符号", correta: true },
+    { texto: "偏系数总是小于简单系数", correta: false },
+    { texto: "在多元回归中，β₁ 衡量 X₁ 和 Y 之间的边际相关性", correta: false }
+  ]}
+  solucao={<>现象称为「符号反转」或抑制效应。当 <Eq>{`X_2`}</Eq> 与 <Eq>{`X_1`}</Eq> 相关时发生，使得控制 <Eq>{`X_2`}</Eq> 揭示 <Eq>{`X_1`}</Eq> 与 <Eq>{`Y`}</Eq> 的真实关系。经典例子：消防泵与损害的正相关——当控制火灾大小时，效应可能改变。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "369", exercicio: "8.11", licenca: "CC-BY-SA" }}
+>
+关于多元回归中偏系数的哪个说法是正确的？
+</Exercicio>
+
+<Exercicio
+  numero="106.14"
+  dificuldade="modelagem"
+  solucao={<>$p = 4$ 预测变量：<Eq>{`MSE = SSE/(n-p-1) = 5400/(80-4-1) = 5400/75 = 72`}</Eq>。<Eq>{`\\hat\\sigma = \\sqrt{72} \\approx 8{,}49`}</Eq> 千巴西雷亚尔。典型家庭在预期消费中平均误差约 8,490 巴西雷亚尔。<Eq>{`\\bar R^2 = 1-(72)/(SST/79)`}</Eq>。$SST = 18000$：<Eq>{`\\bar R^2 = 1-72/227{,}8 = 1-0{,}316 = 0{,}684`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-the-regression-equation", secao: "§13.3", pagina: "705", exercicio: "13.5", licenca: "CC-BY" }}
+>
+家庭月度支出（千巴西雷亚尔）对 4 个社会经济预测变量的回归：$n=80$，$SST=18000$，$SSE=5400$。计算 $MSE$，$\hat\sigma$ 和 $\bar R^2$。
+</Exercicio>
+
+<Exercicio
+  numero="106.15"
+  dificuldade="modelagem"
+  passos={<>
+    <ol>
+      <li>无交互模型：男性和女性的斜率相等的单条直线。</li>
+      <li>男性 (<Eq>{`D=0`}</Eq>)：<Eq>{`\\hat Y = 45 + 2{,}5X_1`}</Eq>。女性 (<Eq>{`D=1`}</Eq>)：<Eq>{`\\hat Y = 45 + 2{,}5X_1 - 8 = 37 + 2{,}5X_1`}</Eq>。</li>
+      <li>性别间薪资差异对任何经验水平都是 8,000 巴西雷亚尔的常数。</li>
+      <li>要测试差异是否随经验变化，添加交互项 <Eq>{`X_1 \\times D`}</Eq>。</li>
+      <li><em>注意：</em>交互模型是 <Eq>{`\\hat Y = \\beta_0 + \\beta_1 X_1 + \\beta_2 D + \\beta_3(X_1 \\cdot D)`}</Eq>。如果 <Eq>{`\\hat\\beta_3`}</Eq> 显著，性别差异随经验变化。</li>
+    </ol>
+  </>}
+  solucao={<>男性 10 年：70,000 巴西雷亚尔。女性 10 年：62,000 巴西雷亚尔。无交互模型中薪资差距为 8,000 巴西雷亚尔常数。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "368", exercicio: "8.9", licenca: "CC-BY-SA" }}
+>
+模型：$\hat Y = 45 + 2{,}5X_1 - 8D$（薪资千巴西雷亚尔，经验年份，$D$=1 如果女性）。计算以下工资：(a) 男性，10 年；(b) 女性，10 年。如何包含交互来验证差距是否随经验变化？
+</Exercicio>
+
+<Exercicio
+  numero="106.16"
+  dificuldade="modelagem"
+  solucao={<>比较有无 <Eq>{`X_3`}</Eq> 的模型：如果包括 <Eq>{`X_3`}</Eq> 时 <Eq>{`\\bar R^2`}</Eq> 上升，保持。替代：对 <Eq>{`\\hat\\beta_3`}</Eq> 进行偏 $t$ 检验。如果 p 值小于 0.05，<Eq>{`X_3`}</Eq> 给定其他显著。AIC 标准：<Eq>{`AIC = n\\ln(SSE/n) + 2(p+1)`}</Eq>，越低越好。使用 VIF 检查 <Eq>{`X_3`}</Eq> 是否引入严重多重共线性。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "372", exercicio: "8.15", licenca: "CC-BY-SA" }}
+>
+研究者有 2 个预测变量的回归模型（$R^2=0{,}65$，$\bar R^2=0{,}64$）并考虑添加第三个预测变量。描述两个标准来决定是否包含它。
+</Exercicio>
+
+<Exercicio
+  numero="106.17"
+  dificuldade="desafio"
+  solucao={<>帽子矩阵 <Eq>{`H = X(X^TX)^{-1}X^T`}</Eq> 是对称的 (<Eq>{`H^T=H`}</Eq>) 和幂等的 (<Eq>{`H^2=H`}</Eq>)。幂等性：<Eq>{`H^2 = X(X^TX)^{-1}X^TX(X^TX)^{-1}X^T = X(X^TX)^{-1}X^T = H`}</Eq>。这确认 <Eq>{`H`}</Eq> 是正交投影：应用两次得到相同结果。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "代数证明", licenca: "CC-BY-SA" }}
+>
+证明帽子矩阵 $H = X(X^TX)^{-1}X^T$ 是幂等的：$H^2 = H$。
+</Exercicio>
+
+<Exercicio
+  numero="106.18"
+  dificuldade="desafio"
+  passos={<>
+    <ol>
+      <li>$n=6$，$p=2$：组建 <Eq>{`X`}</Eq>（1 列，<Eq>{`X_1`}</Eq> 列，<Eq>{`X_2`}</Eq> 列）。</li>
+      <li>计算 <Eq>{`X^TX`}</Eq>（3×3 矩阵）。</li>
+      <li>计算 <Eq>{`(X^TX)^{-1}`}</Eq>。</li>
+      <li>计算 <Eq>{`X^T\\mathbf{y}`}</Eq>（3×1 向量）。</li>
+      <li>乘以：<Eq>{`\\hat{\\boldsymbol\\beta} = (X^TX)^{-1}X^T\\mathbf{y}`}</Eq>。</li>
+      <li><em>好奇心：</em>在现实应用中，<Eq>{`(X^TX)^{-1}`}</Eq> 通过 QR 分解数值计算，不是直接逆（数值更稳定）。</li>
+    </ol>
+  </>}
+  solucao={<>用提供的数据组建矩阵，计算乘积并获得 <Eq>{`\\hat{\\boldsymbol\\beta}`}</Eq>。这个练习最好用矩阵计算器或 R/Python 解决。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "8.1 (matricial)", licenca: "CC-BY-SA" }}
+>
+数据：$n=6$ 观测，$Y=(10,14,18,12,16,20)$，$X_1=(1,2,3,2,3,4)$，$X_2=(5,4,3,6,5,4)$。写出设计矩阵 $X$ 并陈述计算 $\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{y}$ 的过程（不需要手工执行逆——描述步骤）。
+</Exercicio>
+
+<Exercicio
+  numero="106.19"
+  dificuldade="demonstracao"
+  solucao={<>我们必须显示 <Eq>{`\\sum e_i = 0`}</Eq>。因为 <Eq>{`\\mathbf{e} = (I-H)\\mathbf{Y}`}</Eq> 和 <Eq>{`X`}</Eq> 的第一列是 1 向量 (<Eq>{`\\mathbf{1}`}</Eq>)，我们有 <Eq>{`X^T\\mathbf{e} = X^T(I-H)\\mathbf{Y} = X^T\\mathbf{Y} - X^TX(X^TX)^{-1}X^T\\mathbf{Y} = \\mathbf{0}`}</Eq>。<Eq>{`X^T`}</Eq> 的第一行是 <Eq>{`\\mathbf{1}^T`}</Eq>，因此 <Eq>{`\\mathbf{1}^T\\mathbf{e} = \\sum e_i = 0`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "证明", licenca: "CC-BY-SA" }}
+>
+证明在任何有截距的回归中，使用正交性 $X^T\mathbf{e} = \mathbf{0}$，$\sum_{i=1}^n e_i = 0$。
+</Exercicio>
+
+<Exercicio
+  numero="106.20"
+  dificuldade="desafio"
+  solucao={<>添加预测变量时 <Eq>{`\\bar R^2`}</Eq> 变化的公式：<Eq>{`\\bar R^2`}</Eq> 增加当且仅当新预测变量的偏 <Eq>{`F`}</Eq> 值大于 1。等价地：放大模型的 <Eq>{`\\bar R^2`}</Eq> > 缩减模型的 <Eq>{`\\bar R^2`}</Eq> <Eq>{`\\Leftrightarrow`}</Eq> <Eq>{`T_j^2 > 1`}</Eq>。这显示 <Eq>{`\\bar R^2`}</Eq> 标准比 5% 水平 $t$ 检验更不保守（要求 <Eq>{`|T_j| > t_{n-p-1;\\,0{,}025} \\approx 2`}</Eq>）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "374", exercicio: "8.23 (conceitual)", licenca: "CC-BY-SA" }}
+>
+显示向模型添加预测变量增加 $\bar R^2$ 当且仅当新预测变量的 |T| 统计量大于 1。
+</Exercicio>
+
+</ListaExercicios>
+
+## 资源
+
+- [**OpenIntro Statistics** (4th ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · 第 8 章（多元和逻辑回归）。系数解释、$\bar R^2$、多重共线性和虚拟变量的主要资源。
+- [**Statistics** — OpenStax](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · 第 13 章（线性回归和相关——多元）。多元回归方差分析表和全局 F 检验的资源。
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) — 协作 · CC-BY-SA · 多元回归部分。葡萄牙语参考资料，包含矩阵记号。

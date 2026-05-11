@@ -1,0 +1,1006 @@
+---
+titulo: "Lição 57 — Aproximação linear e diferencial"
+slug: "licao-57-aproximacao-linear"
+categoria: "aulas"
+subcategoria: "ano-2-trim-6"
+descricao: "Reta tangente como aproximação local. Diferencial dy. Estimativa de erro via segunda derivada. Newton-Raphson como linearização iterada."
+ordem: 57
+publicado: true
+tags: ["aproximacao linear", "diferencial", "linearizacao", "taylor", "ano-2", "trim-6"]
+prerrequisitos: ["licao-52-regras-derivacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano do programa (Cálculo I)", "Equiv. Math III japonês §4", "Equiv. Leistungskurs Differentialrechnung alemão", "H2 Math singapurense §4.3"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="L(x) = f(a) + f'(a)(x - a)"
+  legenda={<><strong>线性化</strong>函数 <em>f</em> 在点 <em>a</em> 处的：在 <Eq>{`(a,\\,f(a))`}</Eq> 处的曲线切线是 <em>f</em> 在 <em>a</em> 附近的最好的线性近似。误差为 <Eq>{`O((x-a)^2)`}</Eq> — 比距离基点的距离衰减快得多。</>}
+  audioTexto="L 等于 x，等于 f 在 a，加 f 导数在 a，乘以括号 x 减 a，闭合括号。读作：f 在 a 处的线性化。是用作函数局部线性近似的切线。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    涵盖此课程的教科书
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-1-8-tan-line-approx.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §1.8 "The tangent line approximation" · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">主要来源，具有引导式活动、误差理论和作为迭代线性化的牛顿-拉夫逊法。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.2 "Linear Approximations and Differentials" · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">完整处理微分 dy、误差传播和物理应用示例。</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman et al. — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §4.4 "Differentials" · CC-BY-NC · </span>
+      <em className="text-clube-mist">难度递增的习题；多元函数的全微分。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义和误差理论">
+
+### 线性化
+
+<Definicao titulo="函数 f 在 a 处的线性化">
+
+设 $f$ 在 $a$ 处可导。$f$ 在 $a$ 处的**线性化**（或**线性近似**）是仿射函数
+
+$$L(x) = f(a) + f'(a)(x - a).$$
+
+它是满足 $L(a) = f(a)$ 和 $L'(a) = f'(a)$ 的唯一仿射函数：在基点处与 $f$ 有相同的值和相同的导数。
+
+</Definicao>
+
+> "如果 $f$ 在 $a$ 处可导，则 $L(x) = f(a) + f'(a)(x - a)$ 称为 $f$ 在 $a$ 处的*线性化*。近似 $f(x) \approx L(x)$ 称为 $f$ 在 $a$ 处的*线性近似*或*切线近似*。" — [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials)
+
+### 微分
+
+<Definicao titulo="微分 dy">
+
+对于 $y = f(x)$，$y$ 的**微分**为
+
+$$dy = f'(x)\,dx,$$
+
+其中 $dx$ 是 $x$ 中的任意变化（不必是无穷小）。微分代表 $f$ 的**线性变化**：它是当 $x$ 变化 $dx$ 时切线上升或下降的量。
+
+实际变化为 $\Delta y = f(x + dx) - f(x)$。当 $dx \to 0$ 时：
+
+$$\Delta y - dy = O(dx^2), \quad \text{因此} \quad \Delta y \approx dy.$$
+
+</Definicao>
+
+> "我们将 $dx$ 和 $dy$ 定义为实变量，使得以下方程成立：$dy = f'(x)\,dx$。微分 $dy$ 是实际变化 $\Delta y$ 的线性近似。" — [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials)
+
+### 通过泰勒估计误差
+
+<Teorema titulo="线性化的误差（具有拉格朗日余项的泰勒）">
+
+如果 $f$ 在包含 $a$ 和 $x$ 的区间内二阶可导，则存在 $\xi$ 在 $a$ 和 $x$ 之间，使得
+
+$$f(x) = f(a) + f'(a)(x - a) + \frac{f''(\xi)}{2}(x - a)^2.$$
+
+因此线性化的**误差**为 $f(x) - L(x) = \dfrac{f''(\xi)}{2}(x-a)^2$。如果在 $a$ 和 $x$ 之间的所有 $t$ 上 $|f''(t)| \leq M_2$，则
+
+$$|f(x) - L(x)| \leq \frac{M_2}{2}(x - a)^2.$$
+
+误差是**二次的**，相对于到基点的距离 — 比距离本身衰减快得多。
+
+</Teorema>
+
+### 图形：切线作为局部近似
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 460 240" className="w-full">
+<defs>
+  <marker id="arrla" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<line x1="30" y1="200" x2="430" y2="200" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrla)"/>
+<line x1="80" y1="220" x2="80" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrla)"/>
+<text x="435" y="205" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">x</text>
+<text x="84" y="17" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">y</text>
+<path d="M 100,185 Q 160,140 220,105 Q 280,72 360,50" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+<text x="365" y="47" fontSize="10" fontFamily="serif" fontStyle="italic" fill="rgb(26 77 92)">y = f(x)</text>
+<line x1="140" y1="170" x2="340" y2="70" stroke="rgb(232 199 122)" strokeWidth="2"/>
+<text x="342" y="67" fontSize="10" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">L(x)</text>
+<circle cx="220" cy="105" r="4" fill="rgb(26 77 92)"/>
+<line x1="220" y1="105" x2="220" y2="200" stroke="currentColor" strokeOpacity="0.4" strokeDasharray="4,3" strokeWidth="1"/>
+<text x="216" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">a</text>
+<circle cx="300" cy="80" r="3" fill="rgb(26 77 92)"/>
+<circle cx="300" cy="95" r="3" fill="rgb(232 199 122)"/>
+<line x1="300" y1="80" x2="300" y2="95" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+<text x="305" y="90" fontSize="9" fontFamily="sans-serif" fill="rgb(199 107 63)">误差</text>
+<line x1="300" y1="200" x2="300" y2="205" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1"/>
+<text x="296" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">x</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+切线 <Eq>{`L(x)`}</Eq> 在 <Eq>{`(a, f(a))`}</Eq> 处与 <Eq>{`f`}</Eq> 的图形相切。曲线与直线之间的误差（橙色线段）随距离 <Eq>{`|x-a|`}</Eq> 的平方而增长。
+</figcaption>
+</figure>
+
+### 在 $a = 0$ 处的经典近似（麦克劳林线性）
+
+| $f(x)$ | $L(x)$ 在 $a = 0$ | 对以下有效 |
+|---|---|---|
+| $e^x$ | $1 + x$ | $x$ 很小 |
+| $\sin x$ | $x$ | $x$ 以弧度计，很小 |
+| $\cos x$ | $1$ | $x$ 很小 |
+| $\ln(1 + x)$ | $x$ | $x$ 很小 |
+| $(1 + x)^n$ | $1 + nx$ | $x$ 很小 |
+| $\sqrt{1 + x}$ | $1 + x/2$ | $x$ 很小 |
+| $\tan x$ | $x$ | $x$ 很小 |
+| $\arctan x$ | $x$ | $x$ 很小 |
+
+### 误差传播
+
+对于 $y = f(x)$，在 $x$ 中有不确定性 $\sigma_x$：
+
+$$\sigma_y \approx |f'(x)|\,\sigma_x.$$
+
+对于多变量函数 $y = f(x_1, \ldots, x_n)$，有独立误差 $\sigma_i$：
+
+$$\sigma_y^2 \approx \sum_{i=1}^{n} \left(\frac{\partial f}{\partial x_i}\right)^2 \sigma_i^2.$$
+
+<Insight>
+
+**为什么误差是二次的？** 任何在 $a$ 处可导的函数"局部看起来像一条直线"— 这是微积分的本质。线性化精确地捕捉了这条直线。剩余部分从泰勒的 2 阶项开始，因此当 $|x-a|$ 减半时，误差下降了 4 倍。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="给 5 岁孩子">
+
+想象你想知道一个半径为 4.5 厘米的苹果有多重。你只有一个针对半径 4 厘米的秤。
+
+想法："一个稍微大一点的苹果会稍微重一点"。重多少？如果它以直线方式增长，很容易计算。
+
+这就是线性近似：当某个东西改变一个**小小的量**时，我们假装它以直线方式改变。对于小的改变，这效果很好。
+
+直线是描述变化的最简单方式。在任何点附近，曲线看起来很像与它相切的直线。
+
+</Porta>
+
+<Porta nivel="10" titulo="给 10 岁孩子">
+
+你想计算 $\sqrt{4{,}1}$，没有计算器。你知道 $\sqrt{4} = 2$。
+
+函数 $f(x) = \sqrt{x}$ 在 $x = 4$ 处有一个**斜率**。这个斜率是导数：
+
+$$f'(x) = \frac{1}{2\sqrt{x}}, \quad f'(4) = \frac{1}{4}.$$
+
+从 $x = 4$ 出发向右走 $0{,}1$，函数上升 $0{,}1 \times \frac{1}{4} = 0{,}025$。
+
+$$\sqrt{4{,}1} \approx 2 + 0{,}025 = 2{,}025.$$
+
+真实值：$2{,}02485\ldots$ — 误差仅 $0{,}00015$。对于心算来说非常好。
+
+### 通用配方
+
+1. 找到 $a$ 接近 $x$，使得 $f(a)$ 容易计算。
+2. 计算 $f'(a)$。
+3. 使用 $f(x) \approx f(a) + f'(a)(x - a)$。
+
+### 为什么有效？
+
+**切线**到 $f$ 在 $(a, f(a))$ 处的图形是通过该点并跟随曲线的最好的直线。对于短距离，曲线和直线几乎相同。
+
+| 想近似 | 选择的 $a$ | 心算 |
+|---|---|---|
+| $\sqrt{25{,}1}$ | $25$ | $5 + 0{,}1/10 = 5{,}01$ |
+| $e^{0{,}1}$ | $0$ | $1{,}1$ |
+| $\sin(0{,}2)$ | $0$ | $0{,}2$ |
+| $\ln(0{,}95)$ | $1$ | $0{,}95 - 1 = -0{,}05$ |
+
+</Porta>
+
+<Porta nivel="15" titulo="给 15 岁青少年">
+
+线性化 $L(x) = f(a) + f'(a)(x - a)$ 是整个应用科学中最常用的工具。每当有人建立"小扰动"模型时，就在使用线性化。
+
+### 附带误差检查的配方
+
+1. 识别 $a$ 接近 $x$，使得 $f(a)$ 和 $f'(a)$ 已知。
+2. $L(x) = f(a) + f'(a)(x - a)$。
+3. 估计误差：$|f(x) - L(x)| \leq \frac{M_2}{2}(x - a)^2$，其中 $M_2 = \max|f''|$ 在区间上。
+
+### 微分
+
+$dy = f'(x)\,dx$ 是当 $x$ 改变 $dx$ 时 $y$ 的线性变化。
+
+**工程的经验规则**：如果你用误差 $\Delta x$ 测量 $x$，则 $y = f(x)$ 中的误差近似为 $|f'(x)| \cdot |\Delta x|$。
+
+### 例子：测量误差
+
+你测量球的半径为 $r = 5{,}0 \pm 0{,}1$ 厘米。体积：$V = \frac{4}{3}\pi r^3$。
+
+$$dV = 4\pi r^2\,dr = 4\pi(25)(0{,}1) = 10\pi \approx 31{,}4 \text{ 立方厘米}。$$
+
+标称体积：$\approx 524$ 立方厘米。相对误差：$31{,}4/524 \approx 6\%$。
+
+### 有效性的限制
+
+$|x - a|$ 越大，切线离曲线越远。对于 $|f''|$ 大（有很多曲率）的函数，误差增长很快。在使用近似之前，始终比较 $|f''|/2 \cdot (x-a)^2$ 与所需的精度。
+
+<Insight>
+
+**1% 规则的实践**：如果函数在区间上曲率不太大，线性化的误差小于 1%。对于 $\sin x$ 在零附近，这对 $x \approx 0{,}24$ 弧度（约 14°）有效。对于 $e^x$ 在零附近，对 $x \approx 0{,}14$ 有效。对于 $\sqrt{x}$ 在 $a$ 附近，相对误差是 $\approx (x-a)^2/(8a^2)$ — 随着 $a$ 增大而减少。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程学生">
+
+线性化是**局部近似的工程学**：一阶（线性）、二阶（抛物线）等。完整工具包是泰勒。
+
+### 泰勒与余项和误差控制
+
+$$f(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k + R_n(x),$$
+
+其中 $R_n(x) = \dfrac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$（拉格朗日）。线性化对应 $n = 1$。
+
+**工程师策略**：选择 $n$ 使得 $|R_n| <$ 指定的容差。对于 $\sqrt{4{,}1}$ 有 $10^{-3}$ 的容差：
+
+$$|R_1| = \frac{|f''(\xi)|}{2}(0{,}1)^2 = \frac{1}{8 \xi^{3/2} \cdot 2}(0{,}01) \leq \frac{0{,}01}{8 \cdot 8} = 1{,}56 \times 10^{-4} < 10^{-3}. \quad \checkmark$$
+
+### 跨域应用
+
+- **物理**：简单摆。$\ddot{\theta} = -(g/L)\sin\theta$。对于小 $\theta$，$\sin\theta \approx \theta$：简谐振荡器 $\ddot{\theta} = -(g/L)\theta$。周期 $T = 2\pi\sqrt{L/g}$，与 $\theta$ 无关。对 $|\theta| \lesssim 10°$ 有效。
+- **控制**：非线性系统 $\dot{x} = F(x)$ 在操作点 $x^*$ 的线性化产生 $\dot{\xi} = J_F(x^*)\xi$ — 状态空间矩阵。
+- **金融**：Delta 对冲 $\Delta V \approx \Delta_{\text{greek}} \cdot \Delta S$。误差是伽玛（二阶，$\Gamma \cdot (\Delta S)^2/2$）。
+- **优化**：梯度下降 $\theta \leftarrow \theta - \eta \nabla L(\theta)$ 最小化 $L$ 的线性近似，沿最陡下降方向。
+- **数值**：牛顿-拉夫逊通过迭代 $x_{n+1} = x_n - f(x_n)/f'(x_n)$ 求解 $f(x) = 0$ — 每一步都是局部线性化 + 切线的零点。二次收敛：$|e_{n+1}| \leq C\,|e_n|^2$。
+
+### 增量法（统计）
+
+对于 $Y = g(X)$，$X$ 集中在 $\mu$ 和方差 $\sigma^2$：
+
+$$\text{Var}(g(X)) \approx \bigl(g'(\mu)\bigr)^2 \sigma^2.$$
+
+误差传播 = 线性化 + 方差。所有敏感性分析的基础。
+
+### 线性化何时失败
+
+- $f$ 在 $a$ 处不可导（例如：$f(x) = |x|$ 在 $a = 0$）。
+- $|x - a|$ 不是很小且 $f''$ 不能忽略。
+- $f'(a) = 0$ 且 $f''(a) \neq 0$（最小值/最大值点）：$L(x) = f(a)$ 是常数；使用二阶泰勒。
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士">
+
+线性化是**局部分析的通用范式**。在任何数量平稳地取决于参数的领域中，第一步总是：线性化。
+
+### 动力系统的定性分析
+
+对于 $\dot{x} = F(x)$，有不动点 $x^*$（$F(x^*) = 0$），**哈特曼-格罗布曼定理**保证：如果雅可比矩阵 $J = DF(x^*)$ 没有实部为零的特征值，则非线性系统的相图**拓扑共轭**于邻域中线性系统 $\dot{\xi} = J\xi$ 的相图。非线性不动点的局部稳定性 = 线性化的稳定性。
+
+### 希腊字母作为多元泰勒系数
+
+$$dV \approx \Delta\,dS + \tfrac{1}{2}\Gamma\,dS^2 + \Theta\,dt + \mathcal{V}\,d\sigma + \rho\,dr + \cdots$$
+
+每个希腊字母是 $V(S, \sigma, r, t)$ 的偏导数。按希腊字母对冲是截断的泰勒近似的敞口。Delta 对冲误差是 $\Gamma \cdot (\Delta S)^2$ 的阶数。
+
+### EDP 中的伴随分析
+
+对于 $J(\theta) = \int \phi(u_\theta)\,dx$，其中 $u_\theta$ 是由 $\theta$ 参数化的 EDP 的解，梯度 $dJ/d\theta$ 可以通过**伴随方法**计算：1 个前向 EDP + 1 个线性化伴随 EDP — 成本与 $\dim(\theta)$ 无关。CFD 优化和神经算子学习的基础。
+
+### 机器学习：线性化作为理论基础
+
+- **影响函数**（Koh–Liang，ICML 2017）：通过在 $\theta^*$ 处线性化 KKT 条件，删除训练点 $i$ 对最小化器 $\theta^*$ 的影响。
+- **神经切线核**：宽度 $\to \infty$ 的网络在初始化处的参数化诱导核中表现为**线性回归器** — 围绕 $\theta_0$ 的线性化。
+- **对抗例子**：$f_\theta(x)$ 的线性化解释了漏洞 $\sim \epsilon \|\nabla_x f_\theta(x)\|_\infty$（Goodfellow 等的 FGSM 攻击）。
+
+### 超越泰勒：帕德与渐近展开
+
+当泰勒收敛缓慢或发散时，**帕德**近似 $f(x) \approx P_m(x)/Q_n(x)$ 提供扩展的收敛半径。**渐近展开**（Watson、驻相法）处理 $x \to \infty$ 情况，泰勒不适用 — 在光学、量子物理和算法分析中有用。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实践 — 巴西真实场景">
+
+### 场景 1：生产成本和边际分析
+
+圣贝尔纳多-坎波的一家冶金厂将生产成本建模为 $C(q) = \sqrt{50q + 100}$ 千元，其中 $q$ 是吨数。为了在不运行完整系统的情况下估计从 $q = 30$ 增加到 $q = 31$ 吨的额外成本：
+
+$C'(q) = \dfrac{50}{2\sqrt{50q+100}} = \dfrac{25}{\sqrt{50q+100}}$。
+
+在 $q = 30$：$C(30) = \sqrt{1600} = 40$ 和 $C'(30) = 25/40 = 0{,}625$。
+
+估计：$\Delta C \approx 0{,}625$ 千元（625 元）。真实值：$C(31) = \sqrt{1650} \approx 40{,}620$ — 误差仅 5 元。
+
+### 场景 2：测量误差在地形测量中
+
+一名土木工程师测量方形地块的面积，边长为 $s = 20{,}0 \pm 0{,}05$ 米。面积：$A = s^2$。
+
+$$dA = 2s\,ds = 2(20)(0{,}05) = 2{,}0 \text{ 平方米}。$$
+
+标称面积：400 平方米。相对误差：$2{,}0/400 = 0{,}5\%$。INCRA 在地理参考中要求 1% 的容差 — 该测量在限制内。
+
+### 场景 3：可变利率储蓄收益
+
+储蓄在一年内以 $(1 + r/12)^{12}$ 的回报率，其中 $r$ 是月利率。对于 $r = 0{,}5\%$ 每月，年回报系数是 $(1{,}005)^{12}$。在 $x = 0$ 处使用 $f(x) = (1+x)^{12}$ 的线性化：
+
+$$f'(0) = 12, \quad L(0{,}005) = 1 + 12(0{,}005) = 1{,}06.$$
+
+结果：每年约 6%。精确值：$(1{,}005)^{12} = 1{,}0617$ — 近似误差 0.2 个百分点。
+
+### 标准工作流
+
+1. 选择 $a$ 接近 $x$，使得 $f(a)$ 和 $f'(a)$ 容易计算。
+2. 计算 $L(x) = f(a) + f'(a)(x - a)$。
+3. 估计最大误差：$M_2 = \max_{t \in [a,x]}|f''(t)|$，然后 $|\text{误差}| \leq M_2(x-a)^2/2$。
+4. 如果误差可接受，使用 $L(x)$。否则，升级到二阶泰勒。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo titulo="平方根的线性近似（直接应用）" numero="1">
+
+**问题：** 用线性化近似 $\sqrt{9{,}2}$，不用计算器。估计最大误差。
+
+**策略：** 我们识别 $f(x) = \sqrt{x}$ 并选择 $a = 9$，因为 $\sqrt{9} = 3$ 是精确的，$9{,}2$ 接近 $9$。
+
+**解答：**
+
+1. $f(x) = \sqrt{x}$，$f(9) = 3$。
+2. $f'(x) = \dfrac{1}{2\sqrt{x}}$，$f'(9) = \dfrac{1}{6}$。
+3. 线性化：$L(x) = 3 + \dfrac{1}{6}(x - 9)$。
+4. 在 $x = 9{,}2$：$L(9{,}2) = 3 + \dfrac{0{,}2}{6} = 3 + 0{,}0\overline{3} \approx 3{,}0333$。
+
+**误差估计：**
+
+$f''(x) = -\dfrac{1}{4x^{3/2}}$。在 $[9, 9{,}2]$ 上：$|f''(t)| \leq \dfrac{1}{4 \cdot 9^{3/2}} = \dfrac{1}{108}$。
+
+$$|\text{误差}| \leq \frac{1/108}{2}(0{,}2)^2 = \frac{0{,}04}{216} \approx 0{,}000185.$$
+
+**验证：** $\sqrt{9{,}2} \approx 3{,}03315$。实际误差：$|3{,}0333 - 3{,}03315| \approx 0{,}00015 < 0{,}000185$。估计已确认。
+
+**来源。** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="球体体积中的微分和误差传播（中级）" numero="2">
+
+**问题：** 球的半径测量为 $r = 6{,}0$ 厘米，最大误差为 $0{,}05$ 厘米。使用微分估计体积 $V = \frac{4}{3}\pi r^3$ 中的最大误差。
+
+**策略：** 我们使用微分 $dV = V'(r)\,dr$ 来线性化误差。微分是 $V$ 变化的线性近似。
+
+**解答：**
+
+1. $V(r) = \dfrac{4}{3}\pi r^3$，$V'(r) = 4\pi r^2$。
+2. 从 $r = 6$ 和 $dr = 0{,}05$：
+
+$$dV = 4\pi(6)^2 (0{,}05) = 4\pi \cdot 36 \cdot 0{,}05 = 7{,}2\pi \approx 22{,}62 \text{ 立方厘米}。$$
+
+3. 标称体积：$V(6) = \dfrac{4}{3}\pi(216) = 288\pi \approx 904{,}8$ 立方厘米。
+
+4. 相对误差：$\dfrac{dV}{V} = \dfrac{7{,}2\pi}{288\pi} = \dfrac{7{,}2}{288} = 0{,}025 = 2{,}5\%$。
+
+**验证：** $r$ 中的 $0{,}8\%$ 不确定性传播到体积中的 $2{,}5\%$ — 系数 3，因为 $V \propto r^3$（指数 3）。通用规则：对于 $f(x) = x^n$，$f$ 中的相对误差是 $x$ 中相对误差的 $n$ 倍。
+
+**来源。** [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials) — CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="三角函数的近似和误差估计（中级）" numero="3">
+
+**问题：** 用线性化根据 $\sin(30°)$ 和 $\cos(30°)$ 来近似 $\sin(32°)$。与精确值比较。
+
+**策略：** 我们转换为弧度（微积分中必需）并在 $a = \pi/6$ 处线性化 $\sin$。
+
+**解答：**
+
+1. $f(x) = \sin x$，$a = \pi/6$（对应 $30°$）。
+2. $f(a) = \sin(\pi/6) = 1/2$，$f'(a) = \cos(\pi/6) = \sqrt{3}/2$。
+3. $x = 32° = 32\pi/180$ 弧度。$x - a = 2\pi/180 = \pi/90$。
+
+$$L(x) = \frac{1}{2} + \frac{\sqrt{3}}{2} \cdot \frac{\pi}{90} = 0{,}5 + 0{,}866 \cdot 0{,}03491 \approx 0{,}5 + 0{,}03023 = 0{,}53023.$$
+
+**比较：** $\sin(32°) = 0{,}52992$。误差：$|0{,}53023 - 0{,}52992| = 0{,}00031$。
+
+**验证：** $|f''(t)| = |\sin(t)| \leq \sin(32°) < 0{,}530$。界：$\dfrac{0{,}530}{2}\left(\dfrac{\pi}{90}\right)^2 \approx 0{,}265 \cdot 0{,}001218 \approx 0{,}000323 > 0{,}000310$。界满足。
+
+**来源。** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Ejemplo>
+
+<Exemplo titulo="牛顿-拉夫逊作为迭代线性化（高级）" numero="4">
+
+**问题：** 用牛顿-拉夫逊从 $x_0 = 1{,}5$ 开始找 $\sqrt[3]{2}$，精确到三位小数。
+
+**策略：** 我们重新表述为 $f(x) = x^3 - 2 = 0$ 并应用 $x_{n+1} = x_n - f(x_n)/f'(x_n)$，它来自在 $x_n$ 处将切线的零点零化。
+
+**解答：**
+
+$f(x) = x^3 - 2$，$f'(x) = 3x^2$。
+
+| 迭代 | $x_n$ | $f(x_n)$ | $f'(x_n)$ | $x_{n+1}$ |
+|---|---|---|---|---|
+| 0 | $1{,}5$ | $1{,}375$ | $6{,}75$ | $1{,}2963$ |
+| 1 | $1{,}2963$ | $0{,}1786$ | $5{,}040$ | $1{,}2609$ |
+| 2 | $1{,}2609$ | $0{,}00595$ | $4{,}771$ | $1{,}2599$ |
+| 3 | $1{,}2599$ | $0{,}0000064$ | $4{,}763$ | $1{,}25992$ |
+
+**验证：** 3 次迭代后：$x_3 = 1{,}25992$，与 $\sqrt[3]{2} = 1{,}25992105\ldots$ 在显示的六位数字上一致。收敛是**二次的**：每次迭代正确的位数大约翻倍。
+
+**来源。** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="多元线性化 — 有两个不确定性的欧姆定律（挑战）" numero="5">
+
+**问题：** 电阻由 $R = V/I$ 计算。测量给出 $V = 12{,}0 \pm 0{,}3$ 伏和 $I = 2{,}00 \pm 0{,}05$ 安。使用线性误差传播估计 $R$ 中的不确定性。
+
+**策略：** 我们使用基于多元函数微分的误差传播公式：$\sigma_R^2 \approx (\partial R/\partial V)^2 \sigma_V^2 + (\partial R/\partial I)^2 \sigma_I^2$。
+
+**解答：**
+
+1. $R(V, I) = V/I$。偏导数：
+
+$$\frac{\partial R}{\partial V} = \frac{1}{I} = \frac{1}{2{,}00} = 0{,}5 \text{ 欧/伏}, \quad \frac{\partial R}{\partial I} = -\frac{V}{I^2} = -\frac{12{,}0}{4{,}00} = -3{,}0 \text{ 欧/安}。$$
+
+2. 传播的方差：
+
+$$\sigma_R^2 \approx (0{,}5)^2(0{,}3)^2 + (-3{,}0)^2(0{,}05)^2 = 0{,}0225 + 0{,}0225 = 0{,}045 \text{ 欧}^2。$$
+
+$$\sigma_R \approx \sqrt{0{,}045} \approx 0{,}212 \text{ 欧}。$$
+
+3. 结果：$R = 6{,}00 \pm 0{,}21$ 欧。
+
+**验证：** $V$ 和 $I$ 中的不确定性对 $R$ 中的总不确定性贡献相等 — 这个特定值组合的特征。
+
+**来源。** [APEX Calculus §4.4](https://www.apexcalculus.com/) — Hartman et al. · CC-BY-NC.
+</Exemplo>
+
+<ListaExercicios seed="licao-57-aproximacao-linear">
+
+> **笔记本清单。** 有 40 道练习分为 4 个难度递增的块。在纸上解决。来源：Active Calculus §1.8 (CC-BY-NC-SA)、OpenStax Calculus Vol.1 §4.2 (CC-BY-NC-SA) 和 APEX Calculus §4.4 (CC-BY-NC)。
+
+### A 块 — 直接线性化（57.1 至 57.12）
+
+<Exercicio
+  numero="57.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.1", exercicio: "1.8.1", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$2{,}025$", correta: true },
+    { texto: "$2{,}050$" },
+    { texto: "$2{,}010$" },
+    { texto: "$2{,}000$" },
+  ]}
+  solucao={<>对于 <Eq>{`f(x) = \\sqrt{x}`}</Eq> 在 <Eq>{`a = 4`}</Eq>：<Eq>{`f(4) = 2`}</Eq>，<Eq>{`f'(4) = 1/4`}</Eq>。因此 <Eq>{`L(4{,}1) = 2 + (1/4)(0{,}1) = 2{,}025`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>识别函数和基点。</strong> <Eq>{`f(x) = \\sqrt{x}`}</Eq>，<Eq>{`a = 4`}</Eq>。我们选择 <Eq>{`a = 4`}</Eq> 因为 <Eq>{`\\sqrt{4} = 2`}</Eq> 是精确的。</li>
+      <li><strong>计算 a 处的导数。</strong> <Eq>{`f'(x) = 1/(2\\sqrt{x})`}</Eq>，所以 <Eq>{`f'(4) = 1/(2 \\cdot 2) = 1/4`}</Eq>。</li>
+      <li><strong>写出线性化。</strong> <Eq>{`L(x) = 2 + \\frac{1}{4}(x - 4)`}</Eq>。</li>
+      <li><strong>评估在 x = 4,1。</strong> <Eq>{`L(4{,}1) = 2 + \\frac{1}{4}(0{,}1) = 2 + 0{,}025 = 2{,}025`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：真实误差是 <Eq>{`\\sqrt{4{,}1} = 2{,}02485`}</Eq>；线性化的误差仅 0.00015 — 少于 0.01%。</em></p>
+  </>}
+>
+用 $a = 4$ 处的线性化近似 $\sqrt{4{,}1}$。
+</Exercicio>
+
+<Exercicio
+  numero="57.2"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.2", exercicio: "1.8.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>，<Eq>{`a = 9`}</Eq>。<Eq>{`f'(9) = 1/6`}</Eq>。<Eq>{`L(9{,}06) = 3 + (1/6)(0{,}06) = 3{,}01`}</Eq>。真实值：<Eq>{`\\sqrt{9{,}06} \\approx 3{,}0100`}</Eq>。</>}
+>
+用 $a = 9$ 处的线性化近似 $\sqrt{9{,}06}$。与真实值比较。
+</Exercicio>
+
+<Exercicio
+  numero="57.3"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.1", exercicio: "4.2.1", licenca: "CC-BY-NC-SA" }}
+  resposta="$0{,}05$"
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`f'(0) = \\cos 0 = 1`}</Eq>。<Eq>{`L(x) = x`}</Eq>。然后 <Eq>{`\\sin(0{,}05) \\approx 0{,}05`}</Eq>。真实值：<Eq>{`0{,}04998`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>基点。</strong> <Eq>{`a = 0`}</Eq> 因为 <Eq>{`\\sin(0) = 0`}</Eq> 和 <Eq>{`\\cos(0) = 1`}</Eq> 很平凡。</li>
+      <li><strong>a 处的导数。</strong> <Eq>{`f'(x) = \\cos x`}</Eq>，<Eq>{`f'(0) = 1`}</Eq>。</li>
+      <li><strong>线性化。</strong> <Eq>{`L(x) = 0 + 1 \\cdot x = x`}</Eq>。近似 <Eq>{`\\sin x \\approx x`}</Eq> 在物理中很基本（小振动）。</li>
+      <li><strong>评估。</strong> <Eq>{`L(0{,}05) = 0{,}05`}</Eq>。误差：<Eq>{`|0{,}05 - 0{,}04998| = 0{,}00002`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：公式 <Eq>{`\\sin x \\approx x`}</Eq> 对 <Eq>{`|x|`}</Eq> 高达约 0.17 弧度（10°）有效，误差小于 0.5%。</em></p>
+  </>}
+>
+用 $a = 0$ 处的线性化近似 $\sin(0{,}05)$。
+</Exercicio>
+
+<Exercicio
+  numero="57.4"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.2", exercicio: "4.2.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\cos x`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`f'(0) = -\\sin 0 = 0`}</Eq>。<Eq>{`L(x) = 1`}</Eq>。然后 <Eq>{`\\cos(0{,}1) \\approx 1`}</Eq>。真实值：<Eq>{`0{,}9950`}</Eq>。一阶误差在此为零：<Eq>{`f'(0) = 0`}</Eq>，所以线性化是常数，我们需要二阶泰勒来改进。</>}
+>
+用 $a = 0$ 处的线性化近似 $\cos(0{,}1)$。解释为什么结果是令人惊讶的不精确。
+</Exercicio>
+
+<Exercicio
+  numero="57.5"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.3", exercicio: "1.8.3", licenca: "CC-BY-NC-SA" }}
+  resposta="$1{,}03$"
+  solucao={<><Eq>{`f(x) = e^x`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`f(0) = 1`}</Eq>，<Eq>{`f'(0) = 1`}</Eq>。<Eq>{`L(x) = 1 + x`}</Eq>。<Eq>{`L(0{,}03) = 1{,}03`}</Eq>。真实值：<Eq>{`e^{0{,}03} = 1{,}03045`}</Eq>。</>}
+>
+用 $a = 0$ 处的线性化近似 $e^{0{,}03}$。
+</Exercicio>
+
+<Exercicio
+  numero="57.6"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.3", exercicio: "4.2.3", licenca: "CC-BY-NC-SA" }}
+  resposta="$0{,}05$"
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq>，<Eq>{`a = 1`}</Eq>。<Eq>{`f(1) = 0`}</Eq>，<Eq>{`f'(1) = 1`}</Eq>。<Eq>{`L(x) = x - 1`}</Eq>。<Eq>{`L(1{,}05) = 0{,}05`}</Eq>。真实值：<Eq>{`\\ln(1{,}05) = 0{,}04879`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>基点。</strong> <Eq>{`a = 1`}</Eq> 因为 <Eq>{`\\ln(1) = 0`}</Eq> 是精确和简单的。</li>
+      <li><strong>a 处的导数。</strong> <Eq>{`f'(x) = 1/x`}</Eq>，<Eq>{`f'(1) = 1`}</Eq>。</li>
+      <li><strong>线性化。</strong> <Eq>{`L(x) = 0 + 1 \\cdot (x - 1) = x - 1`}</Eq>。等价地：<Eq>{`\\ln(1 + u) \\approx u`}</Eq> 对于 <Eq>{`u`}</Eq> 很小。</li>
+      <li><strong>评估。</strong> <Eq>{`L(1{,}05) = 1{,}05 - 1 = 0{,}05`}</Eq>。误差：<Eq>{`|0{,}05 - 0{,}04879| = 0{,}00121`}</Eq>，即 2.5% 误差。</li>
+    </ol>
+    <p><em>技巧：公式 <Eq>{`\\ln(1+u) \\approx u`}</Eq> 在金融中被广泛使用，当 <Eq>{`u`}</Eq> 很小时，将复合利率转换为简单利率。</em></p>
+  </>}
+>
+用 $a = 1$ 处的线性化近似 $\ln(1{,}05)$。
+</Exercicio>
+
+<Exercicio
+  numero="57.7"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.4", exercicio: "1.8.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = (1+x)^{10}`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`f'(0) = 10`}</Eq>。<Eq>{`L(x) = 1 + 10x`}</Eq>。<Eq>{`L(0{,}02) = 1{,}2`}</Eq>。真实值：<Eq>{`1{,}02^{10} = 1{,}2190`}</Eq> — 误差 1.6%。</>}
+>
+用 $(1+x)^{10}$ 在 $x = 0$ 处的线性化近似 $(1{,}02)^{10}$。
+</Exercicio>
+
+<Exercicio
+  numero="57.8"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.1", exercicio: "4.4.1", licenca: "CC-BY-NC" }}
+  resposta="$3{,}019$"
+  solucao={<><Eq>{`f(x) = x^{1/3}`}</Eq>，<Eq>{`a = 27`}</Eq>。<Eq>{`f(27) = 3`}</Eq>，<Eq>{`f'(27) = (1/3)(27)^{-2/3} = 1/27`}</Eq>。<Eq>{`L(27{,}5) = 3 + (1/27)(0{,}5) = 3 + 0{,}0185 \\approx 3{,}019`}</Eq>。真实值：<Eq>{`27{,}5^{1/3} \\approx 3{,}0185`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>基点。</strong> <Eq>{`a = 27`}</Eq> 因为 <Eq>{`27^{1/3} = 3`}</Eq> 是完美立方体精确。</li>
+      <li><strong>a 处的导数。</strong> <Eq>{`f'(x) = \\frac{1}{3}x^{-2/3}`}</Eq>，<Eq>{`f'(27) = \\frac{1}{3} \\cdot 27^{-2/3} = \\frac{1}{3} \\cdot \\frac{1}{9} = \\frac{1}{27}`}</Eq>。</li>
+      <li><strong>线性化。</strong> <Eq>{`L(x) = 3 + \\frac{1}{27}(x - 27)`}</Eq>。</li>
+      <li><strong>评估。</strong> <Eq>{`L(27{,}5) = 3 + \\frac{0{,}5}{27} \\approx 3{,}0185`}</Eq>。</li>
+    </ol>
+    <p><em>好奇：牛顿用这种类型的计算来计算不用计算器的根。该方法在《通用算术》（1707）中被发表。</em></p>
+  </>}
+>
+用 $a = 27$ 处的线性化近似 $\sqrt[3]{27{,}5}$。
+</Exercicio>
+
+<Exercicio
+  numero="57.9"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.5", exercicio: "4.2.5", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\tan x`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`f(0) = 0`}</Eq>，<Eq>{`f'(x) = \\sec^2 x`}</Eq>，<Eq>{`f'(0) = 1`}</Eq>。线性化：<Eq>{`L(x) = x`}</Eq>。</>}
+>
+写出 $f(x) = \tan x$ 在 $a = 0$ 处的线性化。这个线性化与 $a = 0$ 处 $\sin x$ 的线性化相同 — 为什么？
+</Exercicio>
+
+<Exercicio
+  numero="57.10"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.2", exercicio: "4.4.2", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = \\arctan x`}</Eq>，<Eq>{`a = 1`}</Eq>。<Eq>{`f(1) = \\pi/4`}</Eq>，<Eq>{`f'(x) = 1/(1+x^2)`}</Eq>，<Eq>{`f'(1) = 1/2`}</Eq>。线性化：<Eq>{`L(x) = \\pi/4 + (1/2)(x-1)`}</Eq>。</>}
+>
+写出 $f(x) = \arctan x$ 在 $a = 1$ 处的线性化。
+</Exercicio>
+
+<Exercicio
+  numero="57.11"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.6", exercicio: "1.8.6", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = e^x \\sin x`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`f(0) = 0`}</Eq>。积法则：<Eq>{`f'(x) = e^x \\sin x + e^x \\cos x`}</Eq>。<Eq>{`f'(0) = 0 + 1 = 1`}</Eq>。线性化：<Eq>{`L(x) = x`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>评估 f 在 a = 0。</strong> <Eq>{`f(0) = e^0 \\sin 0 = 1 \\cdot 0 = 0`}</Eq>。</li>
+      <li><strong>用积法则计算 f'(x)。</strong> <Eq>{`f'(x) = (e^x)' \\sin x + e^x (\\sin x)' = e^x \\sin x + e^x \\cos x`}</Eq>。</li>
+      <li><strong>评估 f'(0)。</strong> <Eq>{`f'(0) = e^0 \\sin 0 + e^0 \\cos 0 = 0 + 1 = 1`}</Eq>。</li>
+      <li><strong>写出 L(x)。</strong> <Eq>{`L(x) = 0 + 1 \\cdot (x - 0) = x`}</Eq>。</li>
+    </ol>
+    <p><em>观察：即使是复杂的乘积，线性化也很简单 — <Eq>{`e^x \\sin x \\approx x`}</Eq> 在零附近 — 因为两个因子都有简单的线性化，相乘为 <Eq>{`(1+x) \\cdot x \\approx x`}</Eq> 对于 <Eq>{`x`}</Eq> 小。</em></p>
+  </>}
+>
+写出 $f(x) = e^x \sin x$ 在 $a = 0$ 处的线性化。
+</Exercicio>
+
+<Exercicio
+  numero="57.12"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.7", exercicio: "1.8.7", licenca: "CC-BY-NC-SA" }}
+  resposta="$7{,}0714$"
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>，<Eq>{`a = 49`}</Eq>。<Eq>{`f(49) = 7`}</Eq>，<Eq>{`f'(49) = 1/14`}</Eq>。<Eq>{`L(50) = 7 + (1/14)(1) = 7{,}0714`}</Eq>。真实值：<Eq>{`\\sqrt{50} = 7{,}0711`}</Eq>。</>}
+>
+用 $a = 49$ 处的线性化近似 $\sqrt{50}$。
+</Exercicio>
+
+### B 块 — 微分、误差和物理应用（57.13 至 57.26）
+
+<Exercicio
+  numero="57.13"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.6", exercicio: "4.2.6", licenca: "CC-BY-NC-SA" }}
+  resposta="$dy = 0{,}12$"
+  solucao={<><Eq>{`y = x^3`}</Eq>。<Eq>{`dy = 3x^2\\,dx`}</Eq>。在 <Eq>{`x = 2`}</Eq>，<Eq>{`dx = 0{,}01`}</Eq>：<Eq>{`dy = 3(4)(0{,}01) = 0{,}12`}</Eq>。真实变化：<Eq>{`\\Delta y = (2{,}01)^3 - 8 = 0{,}120601`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>写出微分。</strong> <Eq>{`dy = \\frac{d}{dx}(x^3)\\,dx = 3x^2\\,dx`}</Eq>。微分是导数乘以 x 的变化。</li>
+      <li><strong>替换值。</strong> <Eq>{`x = 2`}</Eq>，<Eq>{`dx = 0{,}01`}</Eq>：<Eq>{`dy = 3(2)^2(0{,}01) = 3 \\cdot 4 \\cdot 0{,}01 = 0{,}12`}</Eq>。</li>
+      <li><strong>用真实变化确认。</strong> <Eq>{`\\Delta y = (2{,}01)^3 - 2^3 = 8{,}120601 - 8 = 0{,}120601`}</Eq>。差异：<Eq>{`0{,}120601 - 0{,}12 = 0{,}000601`}</Eq>。少于 0.5%。</li>
+    </ol>
+    <p><em>技巧：微分总是一阶形式 — 忽略 <Eq>{`dx`}</Eq> 中的所有二阶项。<Eq>{`\\Delta y`}</Eq> 和 <Eq>{`dy`}</Eq> 之间的差异正是这些更高阶项。</em></p>
+  </>}
+>
+计算 $y = x^3$ 在 $x = 2$，$dx = 0{,}01$ 处的微分 $dy$。与真实变化 $\Delta y$ 比较。
+</Exercicio>
+
+<Exercicio
+  numero="57.14"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.7", exercicio: "4.2.7", licenca: "CC-BY-NC-SA" }}
+  resposta="$dy = 0{,}1$"
+  solucao={<><Eq>{`y = e^x`}</Eq>。<Eq>{`dy = e^x\\,dx`}</Eq>。在 <Eq>{`x = 0`}</Eq>，<Eq>{`dx = 0{,}1`}</Eq>：<Eq>{`dy = e^0 \\cdot 0{,}1 = 0{,}1`}</Eq>。真实值：<Eq>{`e^{0{,}1} - 1 = 0{,}1052`}</Eq>。</>}
+>
+计算 $y = e^x$ 在 $x = 0$，$dx = 0{,}1$ 处的微分 $dy$。
+</Exercicio>
+
+<Exercicio
+  numero="57.15"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.8", exercicio: "1.8.8", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>，<Eq>{`a = \\pi/6`}</Eq>（30°）。<Eq>{`f'(\\pi/6) = \\cos(\\pi/6) = \\sqrt{3}/2 \\approx 0{,}866`}</Eq>。差异：<Eq>{`1° = \\pi/180 \\approx 0{,}01745`}</Eq> 弧度。<Eq>{`L = 0{,}5 + 0{,}866 \\times 0{,}01745 \\approx 0{,}5151`}</Eq>。真实值：<Eq>{`\\sin(31°) = 0{,}5150`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>转换角为弧度。</strong> <Eq>{`a = 30° = \\pi/6`}</Eq>，<Eq>{`x = 31° = 31\\pi/180`}</Eq>。</li>
+      <li><strong>计算 x - a。</strong> <Eq>{`x - a = 1° = \\pi/180 \\approx 0{,}01745`}</Eq> 弧度。</li>
+      <li><strong>a 处的导数。</strong> <Eq>{`f'(\\pi/6) = \\cos(\\pi/6) = \\sqrt{3}/2 \\approx 0{,}866`}</Eq>。</li>
+      <li><strong>线性化。</strong> <Eq>{`L = 0{,}5 + 0{,}866 \\times 0{,}01745 \\approx 0{,}5151`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：在给定角度（以度为单位）线性化三角函数时，在应用导数之前总是转换为弧度。度数对通常导数不起作用。</em></p>
+  </>}
+>
+用 $a = 30°$ 处 $\sin$ 的线性化近似 $\sin(31°)$。使用 $\sin(30°) = 0{,}5$ 和 $\cos(30°) = \sqrt{3}/2$。
+</Exercicio>
+
+<Exercicio
+  numero="57.16"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.3", exercicio: "4.4.3", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = \\cos x`}</Eq>，<Eq>{`a = \\pi/3`}</Eq>（60°）。<Eq>{`f(\\pi/3) = 0{,}5`}</Eq>，<Eq>{`f'(\\pi/3) = -\\sin(\\pi/3) = -\\sqrt{3}/2`}</Eq>。差异：<Eq>{`59° - 60° = -\\pi/180`}</Eq>。<Eq>{`L = 0{,}5 + (-0{,}866)(-\\pi/180) \\approx 0{,}5151`}</Eq>。</>}
+>
+用 $a = 60°$ 处 $\cos$ 的线性化近似 $\cos(59°)$。
+</Exercicio>
+
+<Exercicio
+  numero="57.17"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.8", exercicio: "4.2.8", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$L(x) = 1 + x/2$", correta: true },
+    { texto: "$L(x) = 1 + x$" },
+    { texto: "$L(x) = 1 - x/2$" },
+    { texto: "$L(x) = x/2$" },
+  ]}
+  solucao={<><Eq>{`f(x) = \\sqrt{1+x}`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`f(0) = 1`}</Eq>，<Eq>{`f'(x) = 1/(2\\sqrt{1+x})`}</Eq>，<Eq>{`f'(0) = 1/2`}</Eq>。<Eq>{`L(x) = 1 + x/2`}</Eq>。干扰项 B 忽略导数的 1/2 因子。干扰项 C 出错符号。干扰项 D 忘记在 a = 0 处的值。</>}
+>
+$f(x) = \sqrt{1 + x}$ 在 $a = 0$ 处的线性化是什么？
+</Exercicio>
+
+<Exercicio
+  numero="57.18"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.9", exercicio: "1.8.9", licenca: "CC-BY-NC-SA" }}
+  resposta="$0{,}4938$"
+  solucao={<><Eq>{`g(x) = x^{-1/2}`}</Eq>，<Eq>{`a = 4`}</Eq>。<Eq>{`g(4) = 1/2`}</Eq>，<Eq>{`g'(x) = -1/(2x^{3/2})`}</Eq>，<Eq>{`g'(4) = -1/16`}</Eq>。<Eq>{`L(4{,}1) = 0{,}5 - (1/16)(0{,}1) = 0{,}5 - 0{,}00625 = 0{,}4938`}</Eq>。</>}
+>
+用 $a = 4$ 处的线性化近似 $1/\sqrt{4{,}1}$。
+</Exercicio>
+
+<Exercicio
+  numero="57.19"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.9", exercicio: "4.2.9", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq>，<Eq>{`a = e`}</Eq>。<Eq>{`f(e) = 1`}</Eq>，<Eq>{`f'(e) = 1/e`}</Eq>。<Eq>{`L(x) = 1 + (x-e)/e`}</Eq>。</>}
+>
+写出 $f(x) = \ln x$ 在 $a = e$ 处的线性化。
+</Exercicio>
+
+<Exercicio
+  numero="57.20"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.10", exercicio: "1.8.10", licenca: "CC-BY-NC-SA" }}
+  solucao={<>$\sqrt{4{,}1}$ 线性化的绝对误差：<Eq>{`|L(4{,}1) - \\sqrt{4{,}1}| = |2{,}025 - 2{,}024846| \\approx 0{,}000154`}</Eq>。理论界：<Eq>{`M_2(0{,}1)^2/2`}</Eq> 其中 <Eq>{`M_2 = 1/(4 \\cdot 4^{3/2}) = 1/32`}</Eq>。界：<Eq>{`(1/32)(0{,}01)/2 = 0{,}000156`}</Eq>。实际误差在界内。</>}
+>
+计算 $\sqrt{4{,}1}$ 在 $a = 4$ 处线性化的绝对误差，与 $\sqrt{4{,}1} \approx 2{,}024846$ 比较。验证误差在界 $M_2 h^2/2$ 内。
+</Exercicio>
+
+<Exercicio
+  numero="57.21"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.11", exercicio: "1.8.11", licenca: "CC-BY-NC-SA" }}
+  resposta="$x_1 = 2{,}25$"
+  solucao={<><Eq>{`f(x) = x^2 - 5`}</Eq>，<Eq>{`f'(x) = 2x`}</Eq>。用 <Eq>{`x_0 = 2`}</Eq>：<Eq>{`x_1 = 2 - (4-5)/4 = 2 + 1/4 = 2{,}25`}</Eq>。真实值：<Eq>{`\\sqrt{5} = 2{,}2361`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>重新表述问题。</strong> 找到 <Eq>{`\\sqrt{5}`}</Eq> 等同于求解 <Eq>{`x^2 - 5 = 0`}</Eq>。定义 <Eq>{`f(x) = x^2 - 5`}</Eq>，<Eq>{`f'(x) = 2x`}</Eq>。</li>
+      <li><strong>应用牛顿-拉夫逊。</strong> <Eq>{`x_1 = x_0 - f(x_0)/f'(x_0) = 2 - (4 - 5)/(2 \\cdot 2) = 2 - (-1)/4 = 2 + 0{,}25 = 2{,}25`}</Eq>。</li>
+      <li><strong>评估误差。</strong> <Eq>{`|\\sqrt{5} - 2{,}25| = |2{,}2361 - 2{,}25| = 0{,}0139`}</Eq>。我们从 0 开始，1 次迭代后已有 2 位正确数字。</li>
+    </ol>
+    <p><em>技巧：收敛是二次的 — 在下一次迭代中，误差将为 <Eq>{`\\approx C(0{,}014)^2 \\approx 0{,}0001`}</Eq>，免费给出 2 位小数。</em></p>
+  </>}
+>
+执行一次牛顿-拉夫逊迭代，从 $x_0 = 2$ 开始找 $\sqrt{5}$。
+</Exercicio>
+
+<Exercicio
+  numero="57.22"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.4", exercicio: "4.4.4", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = x^3 - 2`}</Eq>，<Eq>{`f'(x) = 3x^2`}</Eq>。<Eq>{`x_1 = 1 - (-1)/3 = 4/3 \\approx 1{,}333`}</Eq>。<Eq>{`f(4/3) = 64/27 - 2 = 10/27`}</Eq>。<Eq>{`x_2 = 4/3 - (10/27)/(3 \\cdot 16/9) = 4/3 - 10/144 \\approx 1{,}2637`}</Eq>。真实：<Eq>{`2^{1/3} = 1{,}2599`}</Eq>。</>}
+>
+执行两次牛顿-拉夫逊迭代，用 $x_0 = 1$ 求解 $x^3 - 2 = 0$。
+</Exercicio>
+
+<Exercicio
+  numero="57.23"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.11", exercicio: "4.2.11", licenca: "CC-BY-NC-SA" }}
+  resposta="$dV \approx 10\pi \approx 31{,}4$ 立方厘米"
+  solucao={<><Eq>{`V = (4/3)\\pi r^3`}</Eq>。<Eq>{`dV = 4\\pi r^2\\,dr`}</Eq>。用 <Eq>{`r = 5`}</Eq>，<Eq>{`dr = 0{,}1`}</Eq>：<Eq>{`dV = 4\\pi(25)(0{,}1) = 10\\pi \\approx 31{,}4`}</Eq> 立方厘米。相对误差：<Eq>{`10\\pi/(500\\pi/3) \\approx 6\\%`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><strong>体积微分。</strong> <Eq>{`V = \\frac{4}{3}\\pi r^3 \\Rightarrow dV = 4\\pi r^2\\,dr`}</Eq>。注意 <Eq>{`4\\pi r^2`}</Eq> 是球的表面积 — 在几何上有意义。</li>
+      <li><strong>替换值。</strong> <Eq>{`r = 5`}</Eq> 厘米，<Eq>{`dr = 0{,}1`}</Eq> 厘米：<Eq>{`dV = 4\\pi(25)(0{,}1) = 10\\pi \\approx 31{,}4`}</Eq> 立方厘米。</li>
+      <li><strong>计算相对误差。</strong> <Eq>{`V(5) = (4/3)\\pi(125) = 500\\pi/3 \\approx 524`}</Eq> 立方厘米。相对误差：<Eq>{`31{,}4/524 \\approx 6\\%`}</Eq>。</li>
+    </ol>
+    <p><em>好奇：体积中的相对误差是半径中相对误差的 3 倍 — 因为 <Eq>{`V \\propto r^3`}</Eq> 的直接结果。通用规则：对于 <Eq>{`f(x) = x^n`}</Eq>，<Eq>{`f`}</Eq> 中的相对误差是 <Eq>{`x`}</Eq> 中相对误差的 <Eq>{`n`}</Eq> 倍。</em></p>
+  </>}
+>
+球的半径为 $r = 5{,}0 \pm 0{,}1$ 厘米。用微分估计体积 $V = \frac{4}{3}\pi r^3$ 中的最大误差。
+</Exercicio>
+
+<Exercicio
+  numero="57.24"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.6", exercicio: "4.4.6", licenca: "CC-BY-NC" }}
+  resposta="$0{,}5\%$"
+  solucao={<><Eq>{`T = 2\\pi\\sqrt{L/g}`}</Eq>。<Eq>{`dT/T = (1/2)\\,dL/L`}</Eq>。<Eq>{`L`}</Eq> 中 1% 的相对误差导致 <Eq>{`dT/T = 0{,}5\\%`}</Eq>。周期中的误差是长度中误差的一半。</>}
+  passos={<>
+    <ol>
+      <li><strong>将 T 写成 L 的幂。</strong> <Eq>{`T = 2\\pi g^{-1/2} L^{1/2}`}</Eq>。<Eq>{`L`}</Eq> 的指数是 <Eq>{`1/2`}</Eq>。</li>
+      <li><strong>相对误差规则。</strong> 对于 <Eq>{`T \\propto L^{1/2}`}</Eq>，<Eq>{`T`}</Eq> 中的相对误差是 <Eq>{`L`}</Eq> 中相对误差的 <Eq>{`1/2`}</Eq> 倍。</li>
+      <li><strong>应用。</strong> <Eq>{`dT/T = (1/2) \\cdot 1\\% = 0{,}5\\%`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：指数作为相对误差的乘法因子出现。对于平方根（指数 1/2），相对误差减半。对于平方（指数 2），相对误差翻倍。</em></p>
+  </>}
+>
+摆的周期为 $T = 2\pi\sqrt{L/g}$。如果长度 $L$ 有 $1\%$ 的相对误差，$T$ 中的相对误差是多少？
+</Exercicio>
+
+<Exercicio
+  numero="57.25"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.13", exercicio: "4.2.13", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`R = V/I`}</Eq>。<Eq>{`\\partial R/\\partial V = 1/I`}</Eq>，<Eq>{`\\partial R/\\partial I = -V/I^2`}</Eq>。<Eq>{`\\sigma_R^2 \\approx (\\sigma_V/I)^2 + (V\\sigma_I/I^2)^2`}</Eq>，所以 <Eq>{`\\sigma_R = \\sqrt{(\\sigma_V/I)^2 + (V\\sigma_I/I^2)^2}`}</Eq>。公式为独立误差以二次方式传播误差。</>}
+>
+对于 $R = V/I$，有独立误差 $\sigma_V$ 和 $\sigma_I$，用偏导数写 $\sigma_R$ 的误差传播公式。
+</Exercicio>
+
+<Exercicio
+  numero="57.26"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.7", exercicio: "4.4.7", licenca: "CC-BY-NC" }}
+  resposta="$dA \approx 1{,}2$ 平方厘米"
+  solucao={<><Eq>{`A = \\pi r^2`}</Eq>。<Eq>{`dA = 2\\pi r\\,dr`}</Eq>。用 <Eq>{`r = 3`}</Eq>，<Eq>{`dr = 0{,}064`}</Eq>（因为 <Eq>{`dA = 1{,}2 \\Rightarrow dr = 1{,}2/(2\\pi \\cdot 3) = 0{,}0637`}</Eq>）：<Eq>{`dA = 2\\pi(3)(0{,}0637) \\approx 1{,}2`}</Eq> 平方厘米。</>}
+>
+圆的面积为 $A = \pi r^2$，$r = 3{,}0 \pm 0{,}064$ 厘米。用微分估计 $A$ 中的最大误差。
+</Exercicio>
+
+### C 块 — 概念理解（57.27 至 57.34）
+
+<Exercicio
+  numero="57.27"
+  dificuldade="compreensao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.12", exercicio: "1.8.12", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "二次：$O((x-a)^2)$", correta: true },
+    { texto: "线性：$O(x-a)$" },
+    { texto: "对数：$O(\\ln(x-a))$" },
+    { texto: "指数：$O(e^{x-a})$" },
+  ]}
+  solucao={<>根据泰勒定理与拉格朗日余项：<Eq>{`f(x) - L(x) = f''(\\xi)(x-a)^2/2`}</Eq>。误差随到基点距离的平方增长。干扰项 B 与线性化本身的增长混淆。干扰项 C 和 D 在泰勒中没有基础。</>}
+  passos={<>
+    <ol>
+      <li><strong>用余项写泰勒。</strong> <Eq>{`f(x) = f(a) + f'(a)(x-a) + \\frac{f''(\\xi)}{2}(x-a)^2`}</Eq> 对于某些 <Eq>{`\\xi`}</Eq> 在 <Eq>{`a`}</Eq> 和 <Eq>{`x`}</Eq> 之间。</li>
+      <li><strong>识别误差。</strong> <Eq>{`f(x) - L(x) = \\frac{f''(\\xi)}{2}(x-a)^2`}</Eq>。项在 <Eq>{`(x-a)`}</Eq> 中是二次的。</li>
+      <li><strong>解释。</strong> 如果 <Eq>{`|x-a|`}</Eq> 减半，误差下降 4 倍。如果增加到两倍，误差乘以 4。</li>
+    </ol>
+    <p><em>技巧："2 阶"意味着误差中 <Eq>{`(x-a)`}</Eq> 的指数是 2 — 这就是为什么线性化对小距离非常有用，但对大距离失败。</em></p>
+  </>}
+>
+为什么线性化的误差 $|f(x) - L(x)|$ 被称为 $O((x-a)^2)$？哪个定理支持这一点？
+</Exercicio>
+
+<Exercicio
+  numero="57.28"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.14", exercicio: "4.2.14", licenca: "CC-BY-NC-SA" }}
+  solucao={<>当 <Eq>{`f'(a) = 0`}</Eq> 时，线性化 <Eq>{`L(x) = f(a)`}</Eq> 是常数。$f$ 在 $a$ 附近的行为由曲率（$f''$）主导，而不是斜率。线性化在这些点上没有用处的不精确 — 使用 2 阶泰勒：<Eq>{`f(x) \\approx f(a) + f''(a)(x-a)^2/2`}</Eq>。</>}
+>
+在什么情况下，$f$ 在 $a$ 处的线性化特别不精确，即使对于 $x$ 接近 $a$？在这些情况下应该做什么？
+</Exercicio>
+
+<Exercicio
+  numero="57.29"
+  dificuldade="compreensao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.13", exercicio: "1.8.13", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>，<Eq>{`a = 0`}</Eq>：<Eq>{`f'(0) = \\cos(0) = 1`}</Eq>。线性化：<Eq>{`L(x) = x`}</Eq>。近似 <Eq>{`\\sin x \\approx x`}</Eq> 的误差小于 1%，用于 <Eq>{`|x| < 0{,}17`}</Eq> 弧度（约 10°）。误差界是 <Eq>{`|x|^2/2`}</Eq>；用于 1% 的 <Eq>{`\\sin x \\approx x`}</Eq>，解决 <Eq>{`x^2/2 < 0{,}01 x`}</Eq>，即 <Eq>{`x < 0{,}02`}</Eq> — 但工程的实用标准是到 14°。</>}
+>
+证明 $\sin x \approx x$ 是在 $a = 0$ 处 $\sin$ 的线性化。误差小于 1% 时 $x$（以弧度计）的值是多少？
+</Exercicio>
+
+<Exercicio
+  numero="57.30"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.15", exercicio: "4.2.15", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$\\Delta y \\to dy$ 当 $\\Delta x \\to 0$", correta: true },
+    { texto: "$\\Delta y = dy$ 总是" },
+    { texto: "$dy = \\Delta y$ 仅当 $f$ 是线性" },
+    { texto: "$\\Delta y > dy$ 总是" },
+  ]}
+  solucao={<><Eq>{`\\Delta y = f(x + \\Delta x) - f(x)`}</Eq> 是真实变化。<Eq>{`dy = f'(x)\\,\\Delta x`}</Eq> 是线性变化。差异 <Eq>{`\\Delta y - dy = O(\\Delta x^2)`}</Eq> 比 <Eq>{`\\Delta x`}</Eq> 衰减得更快。干扰项 B 忽略了二阶误差。干扰项 C 对于仿射函数是正确的，但问题是关于一般相等。干扰项 D 是虚假的：对于凹函数 <Eq>{`\\Delta y < dy`}</Eq>。</>}
+>
+$\Delta y$（真实变化）和 $dy$（微分）之间的关系是什么？
+</Exercicio>
+
+<Exercicio
+  numero="57.31"
+  dificuldade="compreensao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.8", exercicio: "4.4.8", licenca: "CC-BY-NC" }}
+  solucao={<>牛顿-拉夫逊：<Eq>{`x_{n+1} = x_n - f(x_n)/f'(x_n)`}</Eq>。来源：我们零化 $x_n$ 处 $f$ 的线性化。切线是 <Eq>{`L(x) = f(x_n) + f'(x_n)(x - x_n)`}</Eq>；零化：<Eq>{`x = x_n - f(x_n)/f'(x_n)`}</Eq>。每次迭代是一个局部线性化，其零点变成下一个估计。</>}
+>
+根据线性化解释牛顿-拉夫逊公式 $x_{n+1} = x_n - f(x_n)/f'(x_n)$ 的来源。
+</Exercicio>
+
+<Exercicio
+  numero="57.32"
+  dificuldade="compreensao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.14", exercicio: "1.8.14", licenca: "CC-BY-NC-SA" }}
+  resposta="$\approx 1{,}06$"
+  solucao={<><Eq>{`f(x) = (1+x)^{30}`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`f'(0) = 30`}</Eq>。<Eq>{`L(0{,}002) = 1 + 30(0{,}002) = 1{,}06`}</Eq>。精确值：<Eq>{`(1{,}002)^{30} \\approx 1{,}0618`}</Eq>。</>}
+>
+用线性化近似 $(1{,}002)^{30}$。
+</Exercicio>
+
+<Exercicio
+  numero="57.33"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.16", exercicio: "4.2.16", licensa: "CC-BY-NC-SA" }}
+  resposta="$3\%$"
+  solucao={<><Eq>{`V = s^3`}</Eq>。<Eq>{`dV = 3s^2\\,ds`}</Eq>。<Eq>{`V`}</Eq> 中的相对误差：<Eq>{`dV/V = 3\\,ds/s = 3 \\times 1\\% = 3\\%`}</Eq>。指数 3 作为乘法因子出现。</>}
+  passos={<>
+    <ol>
+      <li><strong>体积微分。</strong> <Eq>{`V = s^3 \\Rightarrow dV = 3s^2\\,ds`}</Eq>。</li>
+      <li><strong>相对误差。</strong> 将 <Eq>{`dV`}</Eq> 除以 <Eq>{`V`}</Eq>：<Eq>{`dV/V = 3s^2 ds / s^3 = 3(ds/s)`}</Eq>。</li>
+      <li><strong>替换。</strong> <Eq>{`ds/s = 1\\% \\Rightarrow dV/V = 3 \\times 1\\% = 3\\%`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：对于任何 <Eq>{`f(x) = x^n`}</Eq>，<Eq>{`f`}</Eq> 中的相对误差是 <Eq>{`x`}</Eq> 中相对误差的 <Eq>{`n`}</Eq> 倍。这直接来自应用于微分的幂规则。</em></p>
+  </>}
+>
+立方体的边用 $1\%$ 的相对误差测量。体积 $V = s^3$ 中的相对误差是多少？
+</Exercicio>
+
+<Exercicio
+  numero="57.34"
+  dificuldade="compreensao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.9", exercicio: "4.4.9", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`g(x) = (1+x)^{-1/2}`}</Eq>，<Eq>{`a = 0`}</Eq>。<Eq>{`g'(x) = -\\frac{1}{2}(1+x)^{-3/2}`}</Eq>，<Eq>{`g'(0) = -1/2`}</Eq>。<Eq>{`L(x) = 1 - x/2`}</Eq>。这是指数 $-1/2$ 的二项式近似。</>}
+>
+写出 $g(x) = 1/\sqrt{1+x}$ 在 $a = 0$ 处的线性化。
+</Exercicio>
+
+### D 块 — 挑战和证明（57.35 至 57.40）
+
+<Exercicio
+  numero="57.35"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.15", exercicio: "1.8.15", licenca: "CC-BY-NC-SA" }}
+  solucao={<>$a = 0$ 处 $e^x$ 的线性化：<Eq>{`L(1) = 1 + 1 = 2`}</Eq>。真实值：<Eq>{`e^1 = 2{,}71828`}</Eq>。绝对误差：<Eq>{`|2{,}71828 - 2| = 0{,}71828`}</Eq>。相对误差：<Eq>{`0{,}71828 / 2{,}71828 \\approx 26{,}4\\%`}</Eq>。这很大，因为 $x = 1$ 远离 $a = 0$：误差界是 <Eq>{`e \\cdot 1^2/2 \\approx 1{,}36`}</Eq>，比实际误差大得多但不为零。</>}
+  passos={<>
+    <ol>
+      <li><strong>计算 L(1)。</strong> <Eq>{`L(x) = 1 + x`}</Eq>；<Eq>{`L(1) = 2`}</Eq>。</li>
+      <li><strong>真实值。</strong> <Eq>{`e^1 = e \\approx 2{,}71828`}</Eq>。</li>
+      <li><strong>绝对误差。</strong> <Eq>{`|e - 2| = 0{,}71828`}</Eq>。</li>
+      <li><strong>相对误差。</strong> <Eq>{`0{,}71828/2{,}71828 \\approx 26{,}4\\%`}</Eq>。大：点 $x = 1$ 远离 $a = 0$。</li>
+    </ol>
+    <p><em>观察：为了改进对 $x = 1$ 的近似，使用基点 $a = 1$ 和 $e^{0{,}1}$ 作为目标 — 或使用更高次数的泰勒。</em></p>
+  </>}
+>
+计算 $a = 0$ 处 $e^x$ 线性化在近似 $e^1 = e$ 时的绝对和相对误差。结果是否令人惊讶？解释。
+</Exercicio>
+
+<Exercicio
+  numero="57.36"
+  dificuldade="desafio"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.10", exercicio: "4.4.10", licenca: "CC-BY-NC" }}
+  solucao={<>如果 <Eq>{`f'(x_n) = 0`}</Eq>，$x_n$ 处的切线是水平的，永远不会与 $x$ 轴相交。牛顿-拉夫逊试图用 <Eq>{`f'(x_n) = 0`}</Eq> 除法：未定义。例子：<Eq>{`f(x) = x^2`}</Eq>，根在 <Eq>{`x^* = 0`}</Eq>，<Eq>{`f'(0) = 0`}</Eq>。在这种情况下，牛顿震荡或发散 — 水平切线不提供方向信息。</>}
+>
+当 $f'(x_n) = 0$ 时，牛顿-拉夫逊失败。几何解释并给出这发生的函数的例子。
+</Exercicio>
+
+<Exercicio
+  numero="57.37"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.16", exercicio: "1.8.16", licenca: "CC-BY-NC-SA" }}
+  solucao={<>从泰勒定理：<Eq>{`f(x) = L(x) + f''(\\xi)(x-a)^2/2`}</Eq>。所以 <Eq>{`|f(x) - L(x)| = |f''(\\xi)||x-a|^2/2 \\leq M_2(x-a)^2/2`}</Eq> 其中 <Eq>{`M_2 = \\max_{[a,x]}|f''|`}</Eq>。界是 <Eq>{`M_2 h^2/2`}</Eq> 其中 <Eq>{`h = |x - a|`}</Eq>。</>}
+>
+从泰勒定理与拉格朗日余项推导误差界 $|f(x) - L(x)| \leq \frac{M_2}{2}(x-a)^2$。
+</Exercicio>
+
+<Exercicio
+  numero="57.38"
+  dificuldade="desafio"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.11", exercicio: "4.4.11", licenca: "CC-BY-NC" }}
+  resposta="$dV = 15\pi \approx 47{,}1$ 立方厘米"
+  solucao={<><Eq>{`V = \\pi r^2 h`}</Eq>。全微分：<Eq>{`dV = 2\\pi r h\\,dr + \\pi r^2\\,dh`}</Eq>。用 <Eq>{`r = 5`}</Eq>，<Eq>{`h = 10`}</Eq>，<Eq>{`dr = 0{,}1`}</Eq>，<Eq>{`dh = 0{,}2`}</Eq>：<Eq>{`dV = 2\\pi(5)(10)(0{,}1) + \\pi(25)(0{,}2) = 10\\pi + 5\\pi = 15\\pi \\approx 47{,}1`}</Eq> 立方厘米。</>}
+  passos={<>
+    <ol>
+      <li><strong>全微分。</strong> 对于两个变量的函数：<Eq>{`dV = \\frac{\\partial V}{\\partial r}\\,dr + \\frac{\\partial V}{\\partial h}\\,dh`}</Eq>。</li>
+      <li><strong>偏导数。</strong> <Eq>{`\\partial V/\\partial r = 2\\pi r h`}</Eq>，<Eq>{`\\partial V/\\partial h = \\pi r^2`}</Eq>。</li>
+      <li><strong>替换。</strong> <Eq>{`dV = 2\\pi(5)(10)(0{,}1) + \\pi(25)(0{,}2) = 10\\pi + 5\\pi = 15\\pi \\approx 47{,}1`}</Eq> 立方厘米。</li>
+    </ol>
+    <p><em>技巧：全微分推广一维微分到多元函数 — 每个变量贡献其偏导数乘以其变化。</em></p>
+  </>}
+>
+圆柱体体积：$V = \pi r^2 h$。用 $r = 5{,}0 \pm 0{,}1$ 厘米和 $h = 10{,}0 \pm 0{,}2$ 厘米，用全微分估计 $V$ 中的最大误差。
+</Exercicio>
+
+<Exercicio
+  numero="57.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.17", exercicio: "1.8.17", licenca: "CC-BY-NC-SA" }}
+  solucao={<>完整泰勒级数：<Eq>{`f(x) = \\sum_{k=0}^{\\infty} \\frac{f^{(k)}(a)}{k!}(x-a)^k`}</Eq>。在 $k = 1$ 截断：<Eq>{`P_1(x) = f(a) + f'(a)(x-a) = L(x)`}</Eq>。线性化是 $f$ 在 $a$ 处的 1 次泰勒多项式。误差 <Eq>{`f(x) - P_1(x) = \\sum_{k=2}^{\\infty} \\frac{f^{(k)}(a)}{k!}(x-a)^k`}</Eq> 有主导项 <Eq>{`O((x-a)^2)`}</Eq>。</>}
+>
+证明 $L(x) = f(a) + f'(a)(x-a)$ 是 $f$ 在 $a$ 处的 1 次泰勒多项式，且误差是 $O((x-a)^2)$。
+</Exercicio>
+
+<Exercicio
+  numero="57.40"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.18", exercicio: "1.8.18", licenca: "CC-BY-NC-SA" }}
+  solucao={<>设 $x^*$ 是真实根（$f(x^*) = 0$），$e_n = x_n - x^*$。在 $x^*$ 处的泰勒：<Eq>{`f(x_n) = f'(x^*) e_n + f''(\\xi_n) e_n^2/2`}</Eq>。牛顿迭代：<Eq>{`e_{n+1} = x_{n+1} - x^* = x_n - f(x_n)/f'(x_n) - x^*`}</Eq>。展开并简化：<Eq>{`e_{n+1} \\approx -f''(x^*) e_n^2 / (2f'(x^*))`}</Eq>。因此 <Eq>{`|e_{n+1}| \\leq C|e_n|^2`}</Eq> 其中 <Eq>{`C = |f''(x^*)| / (2|f'(x^*)|)`}</Eq>。二次收敛。</>}
+>
+证明牛顿-拉夫逊有二次收敛：如果 $e_n = x_n - x^*$ 是第 $n$ 次迭代的误差且 $f'(x^*) \neq 0$，则 $|e_{n+1}| \leq C\,|e_n|^2$ 对某个常数 $C > 0$。
+</Exercicio>
+
+</ListaExercicios>
+
+</content>
+```
+
+OK: `/home/leochalhoub/Clube-da-Matematica/content/i18n/zh-CN/aulas/ano-2/trim-6/licao-57-aproximacao-linear.mdx`

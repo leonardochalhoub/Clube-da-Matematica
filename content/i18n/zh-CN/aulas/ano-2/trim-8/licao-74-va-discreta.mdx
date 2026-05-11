@@ -1,0 +1,846 @@
+---
+titulo: "Lição 74 — Variável aleatória discreta"
+slug: "licao-74-va-discreta"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "PMF, esperança, variância e LOTUS. O conceito que unifica probabilidade e estatística e abre caminho para todas as distribuições nomeadas."
+ordem: 74
+publicado: true
+tags: ["estatística", "probabilidade", "variável aleatória", "esperança", "variância", "ano-2", "trim-8"]
+prerrequisitos: ["licao-73"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math — Singapura", "AP Statistics — EUA", "Math B — Japão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="E[X] = \sum_x x \cdot P(X = x), \quad \text{Var}(X) = E[X^2] - (E[X])^2"
+  legenda={<>一个<strong>离散随机变量</strong><Eq>{`X`}</Eq>将样本空间的结果映射到可数的数值。<strong>期望</strong>是<Eq>{`X`}</Eq>的长期加权平均；<strong>方差</strong>衡量其离散程度。所有命名分布——二项分布、泊松分布、几何分布——都是这个结构的特例。</>}
+  audioTexto="离散随机变量。期望是每个值乘以其概率的和。方差是X平方的期望减去期望的平方。"
+/>
+
+<aside>
+
+**涵盖此课程的书籍**
+
+- [**OpenIntro Statistics** (第4版)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §3.1–3.2 · CC-BY-SA · <em>对离散随机变量、PMF、期望和方差的清晰介绍；包含真实数据示例和命名分布。</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §4.1–4.3 · CC-BY · <em>PMF、期望、方差、离散CDF；涵盖赌注、保险和博彩的分级练习；符合AP课程标准。</em>
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §5.1–5.2 · GNU FDL · <em>严格的基础、条件期望、全期望定律和矩；演示练习。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### 离散随机变量
+
+<Definicao titulo="离散随机变量">
+
+给定概率空间 $(\Omega, \mathcal F, P)$，一个**随机变量** $X$ 是一个可测函数 $X: \Omega \to \mathbb{R}$（对所有博雷尔集 $B$，$X^{-1}(B) \in \mathcal F$）。$X$ 是**离散的**，如果它的值在可数集 $\{x_1, x_2, \ldots\}$ 中。
+
+</Definicao>
+
+> "A random variable is a numerical measure of the outcome of a probability experiment... a discrete random variable has a countable number of values." — [OpenStax Statistics §4.1](https://openstax.org/books/statistics/pages/4-1-probability-distribution-function-pdf-for-a-discrete-random-variable)
+
+<Definicao titulo="概率质量函数 (PMF)">
+
+$X$ 的 **PMF** 是 $p_X: \mathbb{R} \to [0,1]$ 定义为：
+
+$$p_X(x) = P(X = x)$$
+
+它满足：
+1. 对所有 $x$，$p_X(x) \geq 0$。
+2. $\displaystyle\sum_{x} p_X(x) = 1$（求和覆盖所有满足 $p_X(x) > 0$ 的值）。
+
+**离散CDF** 是 $F_X(x) = P(X \leq x) = \displaystyle\sum_{x_i \leq x} p_X(x_i)$ —— 阶跃函数，右连续。
+
+</Definicao>
+
+<Definicao titulo="期望和方差">
+
+$X$ 的**期望**（期望值），当 $\sum_x |x| p_X(x) < \infty$ 时：
+
+$$E[X] = \sum_x x \cdot p_X(x)$$
+
+**统计学家的无意识法则 (LOTUS)：** 对任何函数 $g$：
+
+$$E[g(X)] = \sum_x g(x) \cdot p_X(x)$$
+
+**方差**和**标准差**：
+
+$$\text{Var}(X) = E\!\left[(X - E[X])^2\right] = E[X^2] - (E[X])^2, \quad \sigma_X = \sqrt{\text{Var}(X)}$$
+
+</Definicao>
+
+> "The expected value of a random variable is denoted by the Greek letter mu ($\mu$). The expected value is often called the long-term average or mean." — [OpenStax Statistics §4.2](https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation)
+
+<Teorema titulo="期望的线性性">
+
+对任何随机变量 $X, Y$（即使相关）和常数 $a, b, c \in \mathbb{R}$：
+
+$$E[aX + bY + c] = a\,E[X] + b\,E[Y] + c$$
+
+**推论：** $\text{Var}(aX + b) = a^2\,\text{Var}(X)$。
+
+对于 $X, Y$ **独立**：$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$。
+
+</Teorema>
+
+<Insight>
+
+期望的线性性在**没有独立性的情况下也成立**——这是令人惊讶且极其强大的。如果你从一副牌中不放回地抽5张，想要得到红桃数的期望，可以使用指示符 $I_k = \mathbf{1}[\text{第}k\text{张牌是红桃}]$ 并直接应用线性性：$E[\text{红桃}] = 5 \cdot 13/52$，无需计算超几何分布。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="5岁小朋友">
+
+想象一个掷骰子的游戏。每次掷骰子，你赢得掷出的数字个棒棒糖。
+
+- 你可以赢得1、2、3、4、5或6个棒棒糖。
+- 每个数字的概率相等：六分之一。
+
+在许多次投掷中，你**平均**赢得多少棒棒糖？
+
+加起来：1 + 2 + 3 + 4 + 5 + 6 = 21。除以6 = **平均3.5个棒棒糖**。
+
+一次投掷不能赢得3.5个棒棒糖——但如果投掷100次，你总共会赢得大约350个棒棒糖。这个3.5数字就是**期望值**：许多次投掷中的平均值。
+
+</Porta>
+
+<Porta nivel="10" titulo="10岁小朋友">
+
+**随机变量**是"游戏结果"的花哨名字。例如：掷两个骰子求和。结果可以是2、3、...、12——每个都有不同的概率。
+
+| $X$ (和) | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| $P$ | 1/36 | 2/36 | 3/36 | 4/36 | 5/36 | **6/36** | 5/36 | 4/36 | 3/36 | 2/36 | 1/36 |
+
+**期望**：把每个值乘以它的概率然后相加。得到**7**——最可能的值且是长期平均。
+
+**方差**：衡量结果围绕7变化多少（平方是为了避免抵消）。
+
+如果你投掷1000次，平均总和会非常接近7。这就是期望值在行动。
+
+</Porta>
+
+<Porta nivel="15" titulo="15岁青少年">
+
+每当你说随机实验的"平均而言"，你实际上在计算期望。
+
+### 随机变量和观察数据的区别
+
+- **随机变量**：尚未观察——由理论概率描述。
+- **数据**：已观察——由统计数据描述（样本均值，$s$）。
+
+期望 $\approx$ 理论总体均值。方差 $\approx$ 理论 $\sigma^2$。
+
+### 例子：公平赌注 vs 不利赌注
+
+你以0.3的概率赢得10元，以0.7的概率失去3元：
+
+$$E[X] = 10 \cdot 0{,}3 + (-3) \cdot 0{,}7 = 3 - 2{,}1 = +0{,}90$$
+
+有利的赌注——平均每次赌注赢得0.90元。
+
+美式轮盘：在红色上赌1元（18/38的概率）：
+
+$$E[X] = 1 \cdot \frac{18}{38} + (-1) \cdot \frac{20}{38} = \frac{-2}{38} \approx -0{,}053$$
+
+赌场平均保留5.3%——这就是为什么他们赚取数十亿。
+
+### 线性性是超级能力
+
+$E[X+Y] = E[X] + E[Y]$ **总是成立**（即使相关）。如果一个骰子有 $E[X_i] = 3{,}5$，那么100个骰子的总和期望是 $100 \times 3{,}5 = 350$。不需要计算总和的分布。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程学学生">
+
+离散随机变量是概率建模的"乐高积木"。
+
+### 基本分布（在后续课程中深化）
+
+| 分布 | PMF | $E[X]$ | $\text{Var}(X)$ | 典型应用 |
+|---|---|---|---|---|
+| 伯努利($p$) | $P(X=1)=p$ | $p$ | $p(1-p)$ | 二进制成功/失败 |
+| 二项式($n,p$) | $\binom{n}{k}p^k(1-p)^{n-k}$ | $np$ | $np(1-p)$ | $n$次独立试验 |
+| 几何($p$) | $(1-p)^{k-1}p$ | $1/p$ | $(1-p)/p^2$ | 首次成功的试验次数 |
+| 泊松($\lambda$) | $e^{-\lambda}\lambda^k/k!$ | $\lambda$ | $\lambda$ | 时间间隔内的罕见事件 |
+
+### 矩生成函数 (MGF)
+
+$$M_X(t) = E[e^{tX}] = \sum_x e^{tx} p_X(x)$$
+
+当在零附近存在时，它唯一确定分布。在 $t=0$ 处的导数给出矩：$E[X^k] = M_X^{(k)}(0)$。中心工具用于独立随机变量的和（和的MGF是MGF的乘积）。
+
+### 独立变量 vs. 不相关变量
+
+$X, Y$ **独立** $\iff P(X=x, Y=y) = P(X=x)P(Y=y)$ 对所有 $x,y$。
+
+独立性 $\Rightarrow$ $\text{Cov}(X,Y) = 0$。反之不成立：零相关不意味着独立。
+
+### 估计
+
+对于 $X_1, \ldots, X_n$ 来自 $X$ 的独立同分布，$E[X]$ 的无偏估计是**样本均值** $\bar X = (1/n)\sum X_i$，方差 $\text{Var}(\bar X) = \sigma^2/n$ —— 随 $n$ 减小（大数定律）。
+
+</Porta>
+
+<Porta nivel="40" titulo="资深专业人士">
+
+### 期望作为勒贝格积分
+
+在概率空间 $(\Omega, \mathcal F, P)$ 中，期望是勒贝格积分：
+
+$$E[X] = \int_\Omega X(\omega)\,dP(\omega)$$
+
+在离散情况下，这简化为通常的和。与连续情况（黎曼积分）和混合情况的统一是自动的——相同公式。
+
+### 条件期望作为随机变量
+
+$E[X \mid Y = y]$ 是 $y$ 的确定函数。$E[X \mid Y]$ 是一个**随机变量**（$Y$ 的函数）。**全期望定律**（塔性质）：
+
+$$E[X] = E\!\left[E[X \mid Y]\right]$$
+
+分层的严格推广：通过条件于 $Y$ 计算 $E[X]$，然后取平均。
+
+### 收敛性和不等式
+
+- **Markov**: 对 $X \geq 0$，$P(X \geq a) \leq E[X]/a$。
+- **Chebyshev**: $P(|X - \mu| \geq k\sigma) \leq 1/k^2$。
+- **Jensen**: $\phi$ 凸 $\Rightarrow \phi(E[X]) \leq E[\phi(X)]$。推理和ML的证明基础（例：对数似然）。
+
+### 没有有限期望的随机变量
+
+Cauchy分布：$f(x) = 1/[\pi(1+x^2)]$。积分 $\int |x| f(x)\,dx$ 发散——没有期望。大数定律对Cauchy失败：样本均值不收敛到"总体均值"。在金融中，帕累托尾（$\alpha < 1$）的收益表现类似。
+
+### 生成函数
+
+| 类型 | 定义 | 支撑 | 主要用途 |
+|---|---|---|---|
+| MGF | $E[e^{tX}]$ | $\mathbb{R}$ | 矩、独立和 |
+| PGF | $E[z^X]$ | $\mathbb{N}$ | 分支过程、队列 |
+| 特征函数 | $E[e^{itX}]$ | 总存在 | 中心极限定理、Lévy连续性 |
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用">
+
+### 5步配方
+
+1. **识别随机变量 $X$** 并列出其支撑（可能的值）。
+2. **构造PMF**：每个值的概率。验证：和 = 1。
+3. **期望**：$\sum x \cdot p(x)$。
+4. **$E[X^2]$**：$\sum x^2 \cdot p(x)$。
+5. **方差**：$E[X^2] - (E[X])^2$。
+
+### 在电子表格中 (Excel / LibreOffice)
+
+列A：$X$的值。列B：概率 $p(X)$。列C：$= A \times B$（对期望的贡献）。`=SUM(C:C)` = 期望。列D：$= A^2 \times B$。`=SUM(D:D) - SUM(C:C)^2` = 方差。
+
+### 在Python中 (scipy)
+
+```python
+from scipy import stats
+import numpy as np
+
+# 公平骰子
+valores = np.arange(1, 7)
+probs = np.ones(6) / 6
+media = np.dot(valores, probs)          # 3.5
+variancia = np.dot(valores**2, probs) - media**2  # 2.917
+
+# 使用scipy的通用离散分布
+X = stats.rv_discrete(values=(valores, probs))
+print(X.mean(), X.var())   # 3.5, 2.9166
+```
+
+### 常见错误
+
+- **混淆 $E[g(X)]$ 和 $g(E[X])$**：仅在 $g$ 线性时相等（Jensen!）。$E[X^2] \neq (E[X])^2$。
+- **忘记 $\sum p(x) = 1$**：计算期望前验证。
+- **不验证独立性就加方差**：$\text{Var}(X+Y) = \text{Var}(X) + \text{Var}(Y)$ 仅在 $X, Y$ 独立时成立。
+- **使用没有有限期望的随机变量的期望**：Cauchy、Pareto与 $\alpha < 1$。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo numero="74.1" titulo="有3个值的随机变量的PMF、期望和方差" dificuldade="basico">
+
+**问题。** $X$ 取值1、2、3，概率分别为0.2、0.5、0.3。计算 $E[X]$ 和 $\text{Var}(X)$。
+
+**策略。** 直接应用定义。通过LOTUS计算 $E[X^2]$ 并使用方差公式。
+
+**解决方案。**
+
+$$E[X] = 1 \cdot 0{,}2 + 2 \cdot 0{,}5 + 3 \cdot 0{,}3 = 0{,}2 + 1{,}0 + 0{,}9 = 2{,}1$$
+
+$$E[X^2] = 1^2 \cdot 0{,}2 + 2^2 \cdot 0{,}5 + 3^2 \cdot 0{,}3 = 0{,}2 + 2{,}0 + 2{,}7 = 4{,}9$$
+
+$$\text{Var}(X) = 4{,}9 - (2{,}1)^2 = 4{,}9 - 4{,}41 = 0{,}49$$
+
+**验证。** $\sigma = \sqrt{0{,}49} = 0{,}7$。区间 $[E[X] \pm \sigma] = [1{,}4;\; 2{,}8]$ —— 包含值2和部分1和3。与分布围绕2.1中心、离散程度中等一致。
+
+**来源。** [OpenStax Statistics §4.2](https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="74.2" titulo="公平骰子——完整PMF和矩" dificuldade="basico">
+
+**问题。** $X$ 是公平骰子的结果。计算 $E[X]$、$E[X^2]$ 和 $\text{Var}(X)$。
+
+**策略。** 均匀PMF：对 $x \in \{1, 2, 3, 4, 5, 6\}$，$p_X(x) = 1/6$。使用算术级数的和。
+
+**解决方案。**
+
+$$E[X] = \frac{1}{6}(1 + 2 + 3 + 4 + 5 + 6) = \frac{21}{6} = 3{,}5$$
+
+$$E[X^2] = \frac{1}{6}(1 + 4 + 9 + 16 + 25 + 36) = \frac{91}{6}$$
+
+$$\text{Var}(X) = \frac{91}{6} - \left(\frac{7}{2}\right)^2 = \frac{91}{6} - \frac{49}{4} = \frac{182 - 147}{12} = \frac{35}{12} \approx 2{,}917$$
+
+**验证。** $\sigma = \sqrt{35/12} \approx 1{,}71$。极端值（1和6）距离均值约 $1{,}5\sigma$ —— 与对称离散均匀分布一致。
+
+**来源。** [OpenIntro Statistics §3.1](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="74.3" titulo="期望的线性性——两个骰子的和" dificuldade="intermediario">
+
+**问题。** 掷两个公平骰子。计算和 $S = X_1 + X_2$ 的期望和方差。
+
+**策略。** 使用期望的线性性，对方差使用骰子的独立性。
+
+**解决方案。**
+
+通过线性性：$E[S] = E[X_1] + E[X_2] = 3{,}5 + 3{,}5 = 7$。
+
+由于 $X_1$ 和 $X_2$ 独立：$\text{Var}(S) = \text{Var}(X_1) + \text{Var}(X_2) = \frac{35}{12} + \frac{35}{12} = \frac{35}{6} \approx 5{,}83$。
+
+**验证。** $E[S] = 7$ 是最可能的值（36种可能中有6种组合和为7）。$\sigma_S = \sqrt{35/6} \approx 2{,}42$。区间 $[4{,}58;\; 9{,}42]$ 包含最常见的结果——可信。
+
+**来源。** [OpenIntro Statistics §3.2](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="74.4" titulo="公平赌注——保险和彩票" dificuldade="intermediario">
+
+**问题。** 一家保险公司每年对保险收取800元保费，在事故发生（概率1%）时支付50.000元。保险公司每份保单的预期利润是多少？
+
+**策略。** 将利润建模为随机变量并计算期望。
+
+**解决方案。** 设 $L$ 为保险公司每份保单的利润。
+
+- 以0.99的概率（无事故）：$L = 800$（收取保费，无需支付）。
+- 以0.01的概率（事故）：$L = 800 - 50.000 = -49.200$。
+
+$$E[L] = 800 \cdot 0{,}99 + (-49.200) \cdot 0{,}01 = 792 - 492 = 300$$
+
+**验证。** 精算上公平的保费为 $E[\text{赔偿}] = 50.000 \times 0{,}01 = 800元$。保险公司收取800元，所以300元的预期利润覆盖管理费用和利润。商业上有意义。
+
+**来源。** [OpenStax Statistics §4.2](https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="74.5" titulo="LOTUS和非线性函数的方差" dificuldade="avancado">
+
+**问题。** $X$ 取值0、1、2，概率分别为0.3、0.5、0.2。通过LOTUS直接计算 $E[(X - E[X])^2]$ 并使用 $E[X^2] - (E[X])^2$ 验证。
+
+**策略。** 通过两种方法计算 $E[X]$ 和 $\text{Var}(X)$。
+
+**解决方案。** $E[X] = 0 \cdot 0{,}3 + 1 \cdot 0{,}5 + 2 \cdot 0{,}2 = 0{,}9$。
+
+**通过LOTUS** 使用 $g(x) = (x - 0{,}9)^2$：
+
+$$E[(X-0{,}9)^2] = (0-0{,}9)^2 \cdot 0{,}3 + (1-0{,}9)^2 \cdot 0{,}5 + (2-0{,}9)^2 \cdot 0{,}2$$
+$$= 0{,}81 \cdot 0{,}3 + 0{,}01 \cdot 0{,}5 + 1{,}21 \cdot 0{,}2 = 0{,}243 + 0{,}005 + 0{,}242 = 0{,}49$$
+
+**通过替代公式：**
+
+$$E[X^2] = 0 \cdot 0{,}3 + 1 \cdot 0{,}5 + 4 \cdot 0{,}2 = 1{,}3$$
+$$\text{Var}(X) = 1{,}3 - 0{,}81 = 0{,}49 \checkmark$$
+
+**验证。** 两种方法一致。公式 $E[X^2] - (E[X])^2$ 计算上更可取（单次数据遍历）；LOTUS在定义中概念上更透明。
+
+**来源。** [Introduction to Probability — Grinstead, Snell §5.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-74-va-discreta">
+
+### 块A — PMF和基本计算 (74.1 到 74.14)
+
+<Exercicio
+  numero="74.1"
+  dificuldade="aplicacao"
+  resposta="2,1"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "224", exercicio: "4.2.1", licenca: "CC-BY" }}
+  solucao={<><Eq>{`E[X] = 1 \\cdot 0{,}2 + 2 \\cdot 0{,}5 + 3 \\cdot 0{,}3 = 0{,}2 + 1{,}0 + 0{,}9 = 2{,}1`}</Eq>。</>}
+>
+
+$X$ 取值1、2、3，概率分别为0.2、0.5、0.3。计算 $E[X]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.2"
+  dificuldade="aplicacao"
+  resposta="4,9"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "224", exercicio: "4.2.3", licenca: "CC-BY" }}
+  solucao={<>通过LOTUS：<Eq>{`E[X^2] = 1 \\cdot 0{,}2 + 4 \\cdot 0{,}5 + 9 \\cdot 0{,}3 = 0{,}2 + 2{,}0 + 2{,}7 = 4{,}9`}</Eq>。</>}
+  passos={<><ol><li>使用<Eq>{`g(x) = x^2`}</Eq>应用LOTUS：<Eq>{`E[X^2] = \\sum_x x^2 p(x)`}</Eq>。</li><li>计算：<Eq>{`1^2 \\times 0{,}2 + 2^2 \\times 0{,}5 + 3^2 \\times 0{,}3 = 0{,}2 + 2{,}0 + 2{,}7`}</Eq>。</li></ol><em>技巧：</em>LOTUS = 相同的<Eq>{`X`}</Eq>的PMF，只在和中用<Eq>{`g(x)`}</Eq>替换<Eq>{`x`}</Eq>。无需推导<Eq>{`X^2`}</Eq>的分布。</>}
+>
+
+同上一个练习的 $X$。计算 $E[X^2]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.3"
+  dificuldade="aplicacao"
+  resposta="0,49"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "225", exercicio: "4.2.5", licenca: "CC-BY" }}
+  solucao={<><Eq>{`\\text{Var}(X) = E[X^2] - (E[X])^2 = 4{,}9 - (2{,}1)^2 = 4{,}9 - 4{,}41 = 0{,}49`}</Eq>。</>}
+>
+
+同上的 $X$。计算 $\text{Var}(X)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.4"
+  dificuldade="aplicacao"
+  solucao={<>公平骰子：<Eq>{`E[X] = (1+2+3+4+5+6)/6 = 21/6 = 3{,}5`}</Eq>。<Eq>{`E[X^2] = (1+4+9+16+25+36)/6 = 91/6`}</Eq>。<Eq>{`\\text{Var}(X) = 91/6 - 49/4 = (182-147)/12 = 35/12 \\approx 2{,}917`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "96", exercicio: "3.1", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>PMF：对<Eq>{`x \\in \\{1,2,3,4,5,6\\}`}</Eq>，<Eq>{`p(x) = 1/6`}</Eq>。</li><li><Eq>{`E[X] = \\frac{1}{6}\\sum_{k=1}^6 k = \\frac{21}{6} = \\frac{7}{2}`}</Eq>。</li><li><Eq>{`E[X^2] = \\frac{1}{6}\\sum_{k=1}^6 k^2 = \\frac{91}{6}`}</Eq>（使用<Eq>{`n=6`}</Eq>的公式<Eq>{`\\sum k^2 = n(n+1)(2n+1)/6`}</Eq>）。</li><li><Eq>{`\\text{Var}(X) = \\frac{91}{6} - \\frac{49}{4} = \\frac{35}{12}`}</Eq>。</li></ol><em>心算技巧：</em>对<Eq>{`\\{1,\\ldots,n\\}`}</Eq>上的均匀分布：<Eq>{`E = (n+1)/2`}</Eq>，<Eq>{`\\text{Var} = (n^2-1)/12`}</Eq>。对<Eq>{`n=6`}</Eq>：<Eq>{`35/12`}</Eq>。✓</>}
+>
+
+公平骰子（$X \in \{1,2,3,4,5,6\}$，$p = 1/6$）。计算 $E[X]$ 和 $\text{Var}(X)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.5"
+  dificuldade="aplicacao"
+  solucao={<>公平硬币：$X=1$（正面）概率0.5；$X=0$（反面）概率0.5。<Eq>{`E[X] = 1 \\cdot 0{,}5 + 0 \\cdot 0{,}5 = 0{,}5`}</Eq>。<Eq>{`E[X^2] = 1 \\cdot 0{,}5 + 0 \\cdot 0{,}5 = 0{,}5`}</Eq>。<Eq>{`\\text{Var}(X) = 0{,}5 - 0{,}25 = 0{,}25 = p(1-p)`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "226", exercicio: "4.2.7", licenca: "CC-BY" }}
+>
+
+公平硬币：$X = 1$ 如果正面，$X = 0$ 如果反面。计算 $E[X]$ 和 $\text{Var}(X)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.6"
+  dificuldade="aplicacao"
+  resposta="7"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "97", exercicio: "3.3", licenca: "CC-BY-SA" }}
+  solucao={<>通过线性性：<Eq>{`E[X_1 + X_2] = E[X_1] + E[X_2] = 3{,}5 + 3{,}5 = 7`}</Eq>。</>}
+>
+
+两个公平骰子的和 $S = X_1 + X_2$。计算 $E[S]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.7"
+  dificuldade="aplicacao"
+  solucao={<>通过独立性：<Eq>{`\\text{Var}(S) = \\text{Var}(X_1) + \\text{Var}(X_2) = 35/12 + 35/12 = 35/6 \\approx 5{,}83`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "104", exercicio: "3.9", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>骰子独立：<Eq>{`\\text{Var}(X_1 + X_2) = \\text{Var}(X_1) + \\text{Var}(X_2)`}</Eq>。</li><li>每个骰子：<Eq>{`\\text{Var}(X_i) = 35/12`}</Eq>。</li><li>和：<Eq>{`35/12 + 35/12 = 70/12 = 35/6`}</Eq>。</li></ol><em>警告：</em>方差相加仅在独立时。若有依赖，需通过协方差计算。</>}
+>
+
+两个独立骰子的和 $S = X_1 + X_2$。计算 $\text{Var}(S)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.8"
+  dificuldade="aplicacao"
+  solucao={<>$\{1, 2, \ldots, n\}$ 上的离散均匀：<Eq>{`E[X] = \\frac{1}{n}\\sum_{k=1}^n k = \\frac{n(n+1)/2}{n} = \\frac{n+1}{2}`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "227", exercicio: "4.2.9", licenca: "CC-BY" }}
+>
+
+$X$ 在 $\{1, 2, \ldots, n\}$ 上均匀。计算 $E[X]$ 关于 $n$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.9"
+  dificuldade="aplicacao"
+  solucao={<>为了和为1：<Eq>{`c(1+2+3+4) = 10c = 1 \\Rightarrow c = 1/10`}</Eq>。<Eq>{`E[X] = (1 \\cdot 1 + 2 \\cdot 2 + 3 \\cdot 3 + 4 \\cdot 4)/10 = 30/10 = 3`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "98", exercicio: "3.5", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>条件<Eq>{`\\sum p(x) = 1`}</Eq>：<Eq>{`c(1+2+3+4) = 1 \\Rightarrow c = 1/10`}</Eq>。</li><li>PMF：对<Eq>{`k=1,2,3,4`}</Eq>，<Eq>{`p(k) = k/10`}</Eq>。</li><li><Eq>{`E[X] = \\sum k \\cdot (k/10) = (1+4+9+16)/10 = 30/10 = 3`}</Eq>。</li></ol><em>技巧：</em>计算期望前总是归一化：<Eq>{`\\sum p(x) = 1`}</Eq>确定常数。</>}
+>
+
+$P(X = k) = c \cdot k$ 对 $k \in \{1, 2, 3, 4\}$。找到 $c$ 并计算 $E[X]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.10"
+  dificuldade="aplicacao"
+  solucao={<>几何级数：<Eq>{`\\sum_{k=1}^\\infty (1/2)^k = \\frac{1/2}{1-1/2} = 1`}</Eq> ✓。<Eq>{`E[X] = \\sum_{k=1}^\\infty k(1/2)^k`}</Eq>。使用<Eq>{`r = 1/2`}</Eq>的<Eq>{`\\sum k r^k = r/(1-r)^2`}</Eq>：<Eq>{`E[X] = (1/2)/(1/2)^2 = 2`}</Eq>。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "191", exercicio: "5.1.1", licenca: "GNU FDL" }}
+>
+
+对 $k = 1, 2, \ldots$，$P(X = k) = (1/2)^k$。验证它是有效PMF并计算 $E[X]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.11"
+  dificuldade="aplicacao"
+  solucao={<>每张彩票的利润：以<Eq>{`10^{-7}`}</Eq>的概率赢得1.000.000元，成本5元。<Eq>{`E[\\text{利润}] = 10^6 \\cdot 10^{-7} - 5 = 0{,}10 - 5{,}00 = -4{,}90`}</Eq>。平均每张彩票损失4.90元。从期望值的角度看，不值得购买。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "228", exercicio: "4.2.11", licenca: "CC-BY" }}
+>
+
+彩票：以 $10^{-7}$ 的概率赢得100万元，每张彩票成本5元。计算每张彩票的 $E[\text{利润}]$。值得购买吗？
+
+</Exercicio>
+
+<Exercicio
+  numero="74.12"
+  dificuldade="aplicacao"
+  resposta="4"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "99", exercicio: "3.7", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`E[X] = 100 \\cdot 0{,}4 + (-60) \\cdot 0{,}6 = 40 - 36 = 4`}</Eq>。赌注略有利（正期望利润）。</>}
+>
+
+赌注：以0.4的概率赢得100元，以0.6的概率失去60元。计算 $E[X]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.13"
+  dificuldade="aplicacao"
+  resposta="18"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "229", exercicio: "4.2.13", licenca: "CC-BY" }}
+  solucao={<>通过线性性：<Eq>{`E[2X + 3Y - 1] = 2E[X] + 3E[Y] - 1 = 10 + 9 - 1 = 18`}</Eq>。</>}
+>
+
+$E[X] = 5$，$E[Y] = 3$。计算 $E[2X + 3Y - 1]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.14"
+  dificuldade="aplicacao"
+  resposta="26"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "105", exercicio: "3.11", licenca: "CC-BY-SA" }}
+  solucao={<>从方差公式：<Eq>{`\\text{Var}(X) = E[X^2] - (E[X])^2 \\Rightarrow E[X^2] = \\text{Var}(X) + (E[X])^2 = 9 + 16 = 25`}</Eq>。然后<Eq>{`E[X^2 + 1] = E[X^2] + 1 = 26`}</Eq>。</>}
+>
+
+$X$ 有 $E[X] = 4$ 和 $\text{Var}(X) = 9$。计算 $E[X^2 + 1]$。
+
+</Exercicio>
+
+### 块B — 线性性和LOTUS (74.15 到 74.24)
+
+<Exercicio
+  numero="74.15"
+  dificuldade="aplicacao"
+  resposta="350"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "230", exercicio: "4.2.15", licenca: "CC-BY" }}
+  solucao={<>100个独立骰子：<Eq>{`E[\\sum_{i=1}^{100} X_i] = 100 \\cdot E[X] = 100 \\cdot 3{,}5 = 350`}</Eq>。</>}
+>
+
+100个独立骰子。总和的期望。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.16"
+  dificuldade="aplicacao"
+  solucao={<>通过独立性：<Eq>{`\\text{Var}(\\sum X_i) = 100 \\cdot \\text{Var}(X) = 100 \\cdot 35/12 = 3500/12 \\approx 291{,}7`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "106", exercicio: "3.13", licenca: "CC-BY-SA" }}
+>
+
+100个独立骰子。总和的方差。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[X^2] = 0 \\cdot 0{,}3 + 1 \\cdot 0{,}5 + 4 \\cdot 0{,}2 = 0 + 0{,}5 + 0{,}8 = 1{,}3`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "231", exercicio: "4.2.17", licenca: "CC-BY" }}
+>
+
+$X \in \{0, 1, 2\}$ 概率分别为0.3、0.5、0.2。计算 $E[X^2]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[X] = 0{,}9`}</Eq>。通过线性性：<Eq>{`E[3X + 2] = 3 \\cdot 0{,}9 + 2 = 2{,}7 + 2 = 4{,}7`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "107", exercicio: "3.15", licenca: "CC-BY-SA" }}
+>
+
+同上的 $X$。通过线性性计算 $E[3X + 2]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.19"
+  dificuldade="aplicacao"
+  solucao={<>通过LOTUS使用 $g(x) = (x-1)^2$：<Eq>{`E[(X-1)^2] = (0-1)^2 \\cdot 0{,}3 + (1-1)^2 \\cdot 0{,}5 + (2-1)^2 \\cdot 0{,}2 = 0{,}3 + 0 + 0{,}2 = 0{,}5`}</Eq>。注意：<Eq>{`\\text{Var}(X) = E[(X-E[X])^2] = E[(X-0{,}9)^2] = 0{,}49 \\neq 0{,}5`}</Eq> —— 注意：<Eq>{`E[(X-1)^2]`}</Eq>不是方差因为1不是均值。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "192", exercicio: "5.1.3", licenca: "GNU FDL" }}
+>
+
+同上的 $X$。通过LOTUS计算 $E[(X-1)^2]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.20"
+  dificuldade="aplicacao"
+  solucao={<>设<Eq>{`I_k = 1`}</Eq>如果第<Eq>{`k`}</Eq>张牌是王牌，否则0。对所抽的5张牌中的每一张，<Eq>{`P(I_k = 1) = 4/52`}</Eq>。通过线性性：<Eq>{`E[\\text{王牌}] = \\sum_{k=1}^5 E[I_k] = 5 \\cdot 4/52 = 20/52 \\approx 0{,}385`}</Eq>。线性性在没有独立性的情况下也起作用（不放回抽样）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "108", exercicio: "3.17", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>定义指示符<Eq>{`I_k = 1`}</Eq>如果第<Eq>{`k`}</Eq>张牌是王牌。</li><li>由对称性对抽的5张牌中的每一张，<Eq>{`P(I_k = 1) = 4/52`}</Eq>。</li><li>线性性：<Eq>{`E[I_1 + \\ldots + I_5] = 5 \\times 4/52 = 5/13`}</Eq>。</li></ol><em>趣事：</em>这种指示符技巧（Waring, 1792；Boole）对计算计数的期望普遍有用。</>}
+>
+
+从一副牌中不放回地抽5张。使用指示符和线性性计算王牌数的期望。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.21"
+  dificuldade="aplicacao"
+  solucao={<>生日对：<Eq>{`\\binom{n}{2}`}</Eq>个可能的对。每对共享生日的概率<Eq>{`1/365`}</Eq>。通过线性性：<Eq>{`E[\\text{对}] = \\binom{n}{2}/365 = n(n-1)/730`}</Eq>。对<Eq>{`n=30`}</Eq>：<Eq>{`E = 30 \\cdot 29/730 \\approx 1{,}19`}</Eq>个预期对。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "193", exercicio: "5.1.5", licenca: "GNU FDL" }}
+>
+
+在 $n$ 个人中，共享相同生日的对数的期望。使用指示符。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.22"
+  dificuldade="aplicacao"
+  solucao={<>从有5个红球和15个蓝球的罐子中不放回地抽10个。定义指示符<Eq>{`I_k = 1`}</Eq>如果第<Eq>{`k`}</Eq>个抽出的球是红的。由对称性，<Eq>{`P(I_k = 1) = 5/20 = 1/4`}</Eq>。<Eq>{`E[\\text{红球}] = 10 \\cdot 1/4 = 2{,}5`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "232", exercicio: "4.2.19", licenca: "CC-BY" }}
+>
+
+含有5个红球和15个蓝球的罐子。不放回地抽取10个。红球数的期望。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.23"
+  dificuldade="aplicacao"
+  solucao={<>保险：以1% = 0.01的概率支付10万元。<Eq>{`E[\\text{赔偿}] = 100.000 \\times 0{,}01 = 1.000`}</Eq>。精算上公平的保费 = 1000元。实际上，保险公司收取更多（1200到1500元）来覆盖费用和利润。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "233", exercicio: "4.2.21", licenca: "CC-BY" }}
+>
+
+保险：有1%的机会支付10万元。精算上公平的保费是多少？
+
+</Exercicio>
+
+<Exercicio
+  numero="74.24"
+  dificuldade="aplicacao"
+  solucao={<>欧洲轮盘：37个格子（0到36）。在一个数字上赌1元：以1/37的概率赢得35元，以36/37的概率失去1元。<Eq>{`E[X] = 35 \\cdot (1/37) - 1 \\cdot (36/37) = (35-36)/37 = -1/37 \\approx -0{,}027`}</Eq>。赌场平均保留2.7%。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "100", exercicio: "3.8", licenca: "CC-BY-SA" }}
+>
+
+欧洲轮盘（37个格子）：在一个数字上赌1元，赔率35:1。计算每轮的 $E[X]$。
+
+</Exercicio>
+
+### 块C — 使用巴西数据的建模 (74.25 到 74.34)
+
+<Exercicio
+  numero="74.25"
+  dificuldade="modelagem"
+  solucao={<>每个访客的收入：以10% = 0.10的概率赚取200元；以0.90的概率0元。<Eq>{`E[\\text{收入/访客}] = 200 \\cdot 0{,}1 + 0 \\cdot 0{,}9 = 20`}</Eq>。对1000个访客：总收入 = 20.000元。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "234", exercicio: "4.2.23", licenca: "CC-BY" }}
+>
+
+电子商务：10%的访客购买；平均订单价值200元。对1000个访客计算预期收入。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.26"
+  dificuldade="modelagem"
+  solucao={<>每个分类的成本：以5%的概率错误时成本50元，以95%的概率0元。<Eq>{`E[\\text{成本/分类}] = 50 \\times 0{,}05 = 2{,}50`}</Eq>。对1000个分类：总成本 = 2500元。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "101", exercicio: "3.9", licanca: "CC-BY-SA" }}
+>
+
+准确率95%的ML模型。每个错误成本50元。1000个分类的预期总成本。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.27"
+  dificuldade="modelagem"
+  solucao={<>生产线：2%不合格，批次50个。<Eq>{`X \\sim \\text{Bin}(50, 0{,}02)`}</Eq>（预期下一课）。<Eq>{`E[X] = 50 \\times 0{,}02 = 1`}</Eq>。<Eq>{`\\text{Var}(X) = 50 \\times 0{,}02 \\times 0{,}98 = 0{,}98`}</Eq>。预期：每批次1个不合格产品，方差约1。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-3-binomial-distribution", secao: "§4.3", pagina: "244", exercicio: "4.3.1", licenca: "CC-BY" }}
+>
+
+生产线：2%的零件不合格。50个零件的批次。不合格零件数的期望和方差。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.28"
+  dificuldade="modelagem"
+  solucao={<>每个操作员每分钟：<Eq>{`E[X] = 1 \\times 0{,}2 + 2 \\times 0{,}5 + 3 \\times 0{,}3 = 0{,}2 + 1{,}0 + 0{,}9 = 2{,}1`}</Eq>个客户/分钟。每小时（60分钟）：<Eq>{`E[\\text{客户/小时}] = 60 \\times 2{,}1 = 126`}</Eq>个服务。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "102", exercicio: "3.11", licenca: "CC-BY-SA" }}
+>
+
+呼叫中心：操作员每分钟服务1、2或3个客户，概率分别为0.2、0.5、0.3。每小时的预期服务人数。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.29"
+  dificuldade="modelagem"
+  solucao={<>投掷直到首次正面：<Eq>{`X \\sim \\text{Geometric}(p = 0{,}5)`}</Eq>。<Eq>{`E[X] = 1/p = 2`}</Eq>。平均需要2次投掷才能得到首次正面。几何分布模型化"直到首次成功的试验次数"。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "235", exercicio: "4.2.25", licenca: "CC-BY" }}
+  passos={<><ol><li><Eq>{`P(X = k) = (1/2)^{k-1} \\cdot (1/2) = (1/2)^k`}</Eq> 对 $k = 1, 2, \ldots$</li><li><Eq>{`E[X] = \\sum_{k=1}^\\infty k (1/2)^k`}</Eq>。使用<Eq>{`r = 1/2`}</Eq>的<Eq>{`\\sum kr^k = r/(1-r)^2`}</Eq>：<Eq>{`E[X] = (1/2)/(1/2)^2 = 2`}</Eq>。</li></ol><em>心算技巧：</em>成功概率为 $p$ 的几何分布有 $E[X] = 1/p$ —— 记住这个结果。</>}
+>
+
+你投掷硬币直到得到正面。投掷次数的期望。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.30"
+  dificuldade="modelagem"
+  solucao={<>泊松，$\lambda = 5$/秒。在1分钟 = 60秒内，期望 = <Eq>{`60 \\times 5 = 300`}</Eq>个请求。通过线性性：60个iid泊松(5)随机变量的和的期望<Eq>{`60 \\times 5 = 300`}</Eq>方差300（泊松自成比例）。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "236", exercicio: "4.2.27", licenca: "CC-BY" }}
+>
+
+服务器平均每秒接收5个请求（泊松）。1分钟内请求数的期望。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.31"
+  dificuldade="modelagem"
+  solucao={<>INSS：工资达1320元的7.5%税率。自由职业者工资变化：1500元（30%的时间）或1000元（70%的时间）。缴款：127.50或75.00元。<Eq>{`E[\\text{缴款}] = 127{,}50 \\times 0{,}3 + 75 \\times 0{,}7 = 38{,}25 + 52{,}50 = 90{,}75`}</Eq>，即90.75元。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.1", pagina: "103", exercicio: "3.12", licenca: "CC-BY-SA" }}
+>
+
+自由职业者：获得1500元（30%的时间）或1000元（70%的时间）。简化INSS税率：月工资的7.5%。计算预期月缴款。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.32"
+  dificuldade="modelagem"
+  solucao={<>基金月收益：$X$为+2%（概率0.6）或-1%（概率0.4）。<Eq>{`E[X] = 0{,}02 \\times 0{,}6 + (-0{,}01) \\times 0{,}4 = 0{,}012 - 0{,}004 = 0{,}008`}</Eq>或0.8%/月。<Eq>{`E[X^2] = 0{,}0004 \\times 0{,}6 + 0{,}0001 \\times 0{,}4 = 0{,}00028`}</Eq>。<Eq>{`\\text{Var}(X) = 0{,}00028 - 0{,}000064 = 0{,}000216`}</Eq>。<Eq>{`\\sigma \\approx 1{,}47\\%`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "237", exercicio: "4.2.29", licenca: "CC-BY" }}
+>
+
+投资基金：月收益+2%概率0.6或-1%概率0.4。计算预期月收益和方差。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.33"
+  dificuldade="modelagem"
+  solucao={<>有3个供应商的店铺：A（40%订单，3天交付）、B（35%，5天）、C（25%，7天）。<Eq>{`E[\\text{交付}] = 3 \\times 0{,}4 + 5 \\times 0{,}35 + 7 \\times 0{,}25 = 1{,}2 + 1{,}75 + 1{,}75 = 4{,}7`}</Eq>天。<Eq>{`E[\\text{交付}^2] = 9 \\times 0{,}4 + 25 \\times 0{,}35 + 49 \\times 0{,}25 = 3{,}6 + 8{,}75 + 12{,}25 = 24{,}6`}</Eq>。<Eq>{`\\text{Var} = 24{,}6 - 22{,}09 = 2{,}51`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "109", exercicio: "3.14", licenca: "CC-BY-SA" }}
+>
+
+有3个供应商的店铺：A（40%订单，3天）、B（35%，5天）、C（25%，7天）。计算平均交付时间和方差。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.34"
+  dificuldade="modelagem"
+  solucao={<>返利：20%的购买返5元，80%返0元。<Eq>{`E[\\text{返利/购买}] = 5 \\times 0{,}2 = 1{,}00`}</Eq>。每月50次购买：月返利 = 50元。每次购买的方差：<Eq>{`E[X^2] - (E[X])^2 = 25 \\times 0{,}2 - 1 = 4`}</Eq>。月方差（独立）：<Eq>{`50 \\times 4 = 200`}</Eq>。<Eq>{`\\sigma \\approx 14{,}14`}</Eq>元。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "238", exercicio: "4.2.31", licenca: "CC-BY" }}
+>
+
+返利信用卡：20%的购买返5元，否则0元。每月50次购买，计算预期月返利和标准差。
+
+</Exercicio>
+
+### 块D — 理解和证明 (74.35 到 74.40)
+
+<Exercicio
+  numero="74.35"
+  dificuldade="compreensao"
+  solucao={<>LOTUS起作用是因为函数 $g$ 对 $X$ 的期望是在 $X$ 的分布上计算的——无需推导 $g(X)$ 的分布。正式地：<Eq>{`E[g(X)] = \\sum_x g(x) p_X(x)`}</Eq>。$X$ 的PMF已编码所有必要的信息——只需在和中用 $g(x)$ 替换 $x$。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "194", exercicio: "5.1.7", licenca: "GNU FDL" }}
+>
+
+为什么LOTUS起作用？用2-3行文字（不用公式）解释。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.36"
+  dificuldade="compreensao"
+  opcoes={[{texto: "期望的线性性从积分/和的定义而来——不需要独立性", correta: true}, {texto: "线性性仅对独立变量有效"}, {texto: "线性性仅对相同分布的变量有效"}, {texto: "期望的线性性一般无效，仅在特殊情况下"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "110", exercicio: "3.16", licenca: "CC-BY-SA" }}
+  solucao={<>期望的线性性来自和的线性性：<Eq>{`E[X+Y] = \\sum_{x,y}(x+y)p(x,y) = \\sum_x x p_X(x) + \\sum_y y p_Y(y) = E[X]+E[Y]`}</Eq>。这种和的代数对 $X$ 和 $Y$ 之间关系不做任何假设。</>}
+>
+
+为什么期望的线性性 $E[X+Y] = E[X] + E[Y]$ 在 $X$ 和 $Y$ 相关时仍然成立？
+
+</Exercicio>
+
+<Exercicio
+  numero="74.37"
+  dificuldade="desafio"
+  solucao={<>我们要求 $X$ 有2个值 $a, b$，$E[X] = 0$，$\\text{Var}(X) = 1$。设 $P(X=a) = p$。条件：$ap + b(1-p) = 0$ 和 $a^2p + b^2(1-p) - 0 = 1$。简单解：$a = 1$，$b = -1$，$p = 1/2$。验证：$E[X] = 0$，$E[X^2] = 1$，$\\text{Var} = 1$。另一个：$a = \\sqrt{2}$，$b = -\\sqrt{2}$，$p = 1/2$如果 $b = -\\sqrt{2}$也可以。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "198", exercicio: "5.2.1", licenca: "GNU FDL" }}
+>
+
+构造一个恰好有2个值的离散随机变量，满足 $E[X] = 0$ 和 $\text{Var}(X) = 1$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.38"
+  dificuldade="demonstracao"
+  solucao={<>证明：<Eq>{`\\text{Var}(X) = E[(X - \\mu)^2]`}</Eq>，其中 $\mu = E[X]$。展开：<Eq>{`E[X^2 - 2\\mu X + \\mu^2] = E[X^2] - 2\\mu E[X] + \\mu^2`}</Eq>（线性性）。代入 $E[X] = \mu$：<Eq>{`= E[X^2] - 2\\mu^2 + \\mu^2 = E[X^2] - \\mu^2 = E[X^2] - (E[X])^2`}</Eq>。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.2", pagina: "111", exercicio: "3.18", licenca: "CC-BY-SA" }}
+>
+
+从定义 $\text{Var}(X) = E[(X - \mu)^2]$ 证明恒等式 $\text{Var}(X) = E[X^2] - (E[X])^2$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.39"
+  dificuldade="demonstracao"
+  solucao={<>对离散独立的：<Eq>{`E[XY] = \\sum_x \\sum_y xy \\cdot P(X=x, Y=y) = \\sum_x \\sum_y xy \\cdot P(X=x)P(Y=y)`}</Eq>（由独立性）<Eq>{`= \\left(\\sum_x x P(X=x)\\right)\\left(\\sum_y y P(Y=y)\\right) = E[X] E[Y]`}</Eq>。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "199", exercicio: "5.2.3", licenca: "GNU FDL" }}
+>
+
+证明如果 $X, Y$ 是离散独立的，那么 $E[XY] = E[X]\,E[Y]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="74.40"
+  dificuldade="demonstracao"
+  solucao={<>Markov不等式：设 $X \geq 0$ 和 $a > 0$。<Eq>{`E[X] = \\sum_x x p(x) \\geq \\sum_{x \\geq a} x p(x) \\geq a \\sum_{x \\geq a} p(x) = a P(X \\geq a)`}</Eq>。因此 $P(X \\geq a) \\leq E[X]/a$。对Chebyshev：在 $Y = (X - \\mu)^2$ 和阈值 $k^2 \\sigma^2$ 上应用Markov：<Eq>{`P(Y \\geq k^2\\sigma^2) \\leq E[Y]/(k^2\\sigma^2) = \\sigma^2/(k^2\\sigma^2) = 1/k^2`}</Eq>。由于 $Y \\geq k^2\\sigma^2 \\iff |X-\\mu| \\geq k\\sigma$，Chebyshev成立。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "200", exercicio: "5.2.5", licenca: "GNU FDL" }}
+>
+
+证明Markov不等式（$P(X \geq a) \leq E[X]/a$ 对 $X \geq 0$）和Chebyshev不等式（$P(|X - \mu| \geq k\sigma) \leq 1/k^2$）。
+
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenIntro Statistics** (第4版)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · EN · CC-BY-SA。**主要来源 — §3.1（PMF、期望）和 §3.2（方差、线性性、独立性）。**
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · EN · CC-BY。**§4.1–4.3 — 离散随机变量、PMF、CDF、期望、方差；AP水平练习。**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · 1997 · EN · GNU FDL。**§5.1–5.2 — 期望、方差、LOTUS、Markov和Chebyshev不等式；演示练习。**

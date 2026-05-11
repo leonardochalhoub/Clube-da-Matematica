@@ -1,0 +1,719 @@
+---
+titulo: "Lição 69 — Método de Newton-Raphson"
+slug: "licao-69-newton-raphson"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Iteração x_{n+1} = x_n - f(x_n)/f'(x_n) para raízes. Convergência quadrática, falhas, bacias de atração."
+ordem: 69
+publicado: true
+tags: ["Newton-Raphson", "raízes", "numérico", "iteração", "ano-2", "trim-7"]
+prerrequisitos: ["licao-65-taylor", "licao-52-regras-derivacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["2.º ano do programa (17 anos)", "Equiv. Math III japonês (métodos numéricos)", "Equiv. Klasse 12 LK alemã (Numerik)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}"
+  legenda={<>**牛顿-拉弗逊方法**通过迭代来逼近方程 <Eq>{`f(x)=0`}</Eq> 的根 <Eq>{`r`}</Eq>：从接近 <Eq>{`r`}</Eq> 的 <Eq>{`x_0`}</Eq> 开始，在每一步中用 <Eq>{`x_n`}</Eq> 处的切线替代 <Eq>{`f`}</Eq>，然后取切线与 <Eq>{`x`}</Eq> 轴的交点。在适当的条件下，收敛是**二阶的**：每次迭代正确位数翻倍。</>}
+  audioTexto="牛顿-拉弗逊方法。x_{n+1} 等于 x_n 减去 f(x_n) 除以 f'(x_n)。在每一步中，我们用该点处的切线代替函数，使用切线的零点作为下一个估计值。当我们从根附近开始时，收敛是二阶的：正确位数每次迭代翻倍。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    本课覆盖的书籍
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        APEX Calculus — Hartman et al.
+      </a>
+      <span className="text-clube-mist"> · §4.4 Newton's Method · CC-BY-NC · </span>
+      <em className="text-clube-mist">几何推导、迭代表格、失败情况和停止准则。本课示例的主要参考。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/calculus-volume-1" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.9 Newton's Method · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">包含收敛性的正式表述、应用练习（内部收益率、多项式的根）和图形可视化。</em>
+    </li>
+    <li>
+      <a href="https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        REAMAT — Cálculo Numérico (Python)
+      </a>
+      <span className="text-clube-mist"> · cap. 3 Zeros de funções · CC-BY-SA · </span>
+      <em className="text-clube-mist">Python实现、与二分法和割线法的比较、数值误差分析。实践部分的来源。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="定义、推导和收敛性">
+
+### 牛顿-拉弗逊迭代
+
+<Definicao titulo="牛顿-拉弗逊迭代">
+设 $f: I \to \mathbb{R}$ 在区间 $I$ 上可微，$x_0 \in I$ 是根的初始估计。**牛顿-拉弗逊迭代**定义为序列：
+
+$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}, \quad n = 0, 1, 2, \ldots$$
+
+几何上，$x_{n+1}$ 是 $f$ 在点 $(x_n, f(x_n))$ 处的切线与 $x$ 轴的交点。
+</Definicao>
+
+> "Newton's Method is a technique to approximate the solution of $f(x) = 0$. It works when one can perform repeated evaluations of $f$ and $f'$, making it ideal for functions like polynomials, exponentials, and trigonometric functions." — [APEX Calculus, §4.4](https://www.apexcalculus.com/)
+
+### 通过线性逼近（一阶泰勒展开）的推导
+
+若 $r$ 是 $f$ 的根且 $x_n$ 接近 $r$，根据泰勒展开：
+
+$$0 = f(r) \approx f(x_n) + f'(x_n)(r - x_n).$$
+
+求解 $r$：$r \approx x_n - f(x_n)/f'(x_n) = x_{n+1}$。迭代将下一个估计定义为线性逼近的零点。
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 480 260" className="w-full max-w-[520px] mx-auto block">
+<defs>
+  <marker id="arr69" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="30" y1="220" x2="460" y2="220" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr69)"/>
+  <line x1="60" y1="250" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr69)"/>
+  <text x="455" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor">x</text>
+  <text x="65" y="18" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor">y</text>
+</g>
+<g>
+  <path d="M 80,200 Q 200,60 380,80 Q 420,82 440,120" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+</g>
+<g>
+  <circle cx="290" cy="95" r="4" fill="rgb(232 199 122)"/>
+  <text x="295" y="90" fontSize="9" fill="rgb(232 199 122)">$(x_n, f(x_n))$</text>
+  <line x1="180" y1="155" x2="400" y2="40" stroke="rgb(199 107 63)" strokeWidth="1.5" strokeDasharray="5,3"/>
+  <circle cx="350" cy="220" r="4" fill="rgb(199 107 63)"/>
+  <text x="345" y="235" fontSize="9" textAnchor="middle" fill="rgb(199 107 63)">$x_{n+1}$</text>
+  <line x1="290" y1="220" x2="290" y2="95" stroke="currentColor" strokeWidth="1" strokeDasharray="3,3" strokeOpacity="0.5"/>
+  <text x="290" y="234" fontSize="9" textAnchor="middle" fill="currentColor" fillOpacity="0.7">$x_n$</text>
+</g>
+<g>
+  <circle cx="228" cy="220" r="4" fill="rgb(26 77 92)"/>
+  <text x="228" y="238" fontSize="9" textAnchor="middle" fill="rgb(26 77 92)">$r$</text>
+</g>
+<text x="30" y="16" fontSize="10" fontFamily="serif" fill="rgb(26 77 92)">$y = f(x)$</text>
+<text x="300" y="60" fontSize="9" fill="rgb(199 107 63)">tangente em $x_n$</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+$(x_n, f(x_n))$ 处的切线与 $x$ 轴交于 $x_{n+1}$，总是更接近根 $r$（蓝色填充点）——只要 $x_0$ 足够接近。
+</figcaption>
+</figure>
+
+### 局部收敛定理
+
+<Teorema titulo="牛顿-拉弗逊的二阶收敛">
+设 $f \in C^2$ 在 $r$ 的开邻域内，$f(r) = 0$ 且 $f'(r) \neq 0$。则存在 $\delta > 0$ 使得对所有满足 $|x_0 - r| < \delta$ 的 $x_0$：
+
+1. 序列 $\{x_n\}$ 良定义且收敛到 $r$。
+2. 存在**二阶收敛**：$|x_{n+1} - r| \leq C\, |x_n - r|^2$，其中 $C = \dfrac{|f''(r)|}{2|f'(r)|}$。
+</Teorema>
+
+**证明（草图）。** 设 $e_n = x_n - r$。$f$ 在 $r$ 处的泰勒展开：
+
+$$0 = f(r) = f(x_n) + f'(x_n)(r - x_n) + \frac{f''(\xi_n)}{2}(r - x_n)^2$$
+
+对某个 $\xi_n$ 在 $x_n$ 和 $r$ 之间。从迭代，$x_{n+1} - r = x_n - f(x_n)/f'(x_n) - r$。代入并化简：
+
+$$e_{n+1} = -\frac{f''(\xi_n)}{2 f'(x_n)}\, e_n^2.$$
+
+当 $x_n \to r$ 时，$\xi_n \to r$ 且 $f'(x_n) \to f'(r) \neq 0$，因此 $|e_{n+1}|/|e_n|^2 \to |f''(r)|/(2|f'(r)|) = C$。$\square$
+
+### 病态情况和失败
+
+<Definicao titulo="牛顿-拉弗逊何时失败">
+- **迭代处导数为零**：$f'(x_n) = 0$ — 分母为零，迭代未定义。
+- **初值离根太远**：序列可能发散或跳到另一个根。
+- **重根**（重数 $m \geq 2$）：收敛仅为**线性**，$|e_{n+1}| \approx (1 - 1/m)|e_n|$。修正：使用 $x_{n+1} = x_n - m\, f(x_n)/f'(x_n)$。
+- **循环**：序列进入周期轨道（例：$f(x) = x^3 - 2x + 2$，$x_0 = 0$）。
+</Definicao>
+
+<Insight>
+**牛顿盆地。** 对于复杂函数 $f$，集合 $\{x_0 \in \mathbb{C} : x_n \to r_k\}$ 是根 $r_k$ 的**吸引盆**。不同盆之间的边界是**分形**——由Cayley在1879年发现的自相似结构，仍在动力系统中被研究。
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="给5岁孩子的解释">
+
+想象你想**找到一条画在地上的蛇在哪里穿过**。你看**一小段**它，并画一条**直线**按它去的方向。然后你看这条**直线**在哪里穿过地面。
+
+这个点**更接近**真正的穿过点。你从那里重复这个技巧，就会更接近。几次尝试后，你就找到了！
+
+蛇是函数 $f$。地面是 $x$ 轴。直线是切线。"找穿过在哪里"就是我们称之为牛顿-拉弗逊的方法。
+
+</Porta>
+
+<Porta nivel="10" titulo="给10岁孩子的解释">
+
+要找到 $f(x) = 0$ 的地方（曲线在哪里穿过 $x$ 轴）：
+
+1. 选择一个接近根的猜测 $x_0$。
+2. 计算 $f(x_0)$（那里曲线的高度）和 $f'(x_0)$（那里曲线的斜率）。
+3. 画切线。这条线与 $x$ 轴的交点是你的新猜测 $x_1$。
+4. 重复。
+
+公式是 $x_{n+1} = x_n - f(x_n)/f'(x_n)$。
+
+**示例：求 $\sqrt{2}$。** 我想要 $x^2 = 2$，即 $f(x) = x^2 - 2 = 0$。由于 $f'(x) = 2x$，迭代变为 $x_{n+1} = (x_n + 2/x_n)/2$。
+
+- $x_0 = 1$
+- $x_1 = (1 + 2)/2 = 1{,}5$
+- $x_2 = (1{,}5 + 2/1{,}5)/2 \approx 1{,}4167$
+- $x_3 \approx 1{,}41421568...$
+
+已经有5位数正确了！每一步，正确的位数翻倍。
+
+</Porta>
+
+<Porta nivel="15" titulo="给15岁青少年的解释">
+
+牛顿-拉弗逊是计算器内部用来计算 $\sqrt{a}$、$\ln a$、$\sin^{-1} a$ 和许多其他值的根求解算法。
+
+### 理念：线性化
+
+用 $x_n$ 处的切线替换 $f$：$L(x) = f(x_n) + f'(x_n)(x - x_n)$。求解 $L(x) = 0$：
+
+$$x = x_n - \frac{f(x_n)}{f'(x_n)}.$$
+
+这就是 $x_{n+1}$。在下一次迭代中，你使用 $x_{n+1}$ 作为新的切点。
+
+### 为什么这么快？
+
+误差 $e_n = x_n - r$ 满足 $e_{n+1} \approx C\, e_n^2$。这意味着：
+- $e_0 = 10^{-1}$ → $e_1 \approx 10^{-2}$ → $e_2 \approx 10^{-4}$ → $e_3 \approx 10^{-8}$ → $e_4 \approx 10^{-16}$。
+
+在4步内，你就获得了机器精度（双精度）。这是**二阶收敛**。
+
+### 何时失败
+
+- **$f'(x_n) \approx 0$**：接近零的除法，巨大跳跃。
+- **猜测离远点**：可能发散或收敛到另一个根。
+- **重根**：收敛退化为线性。
+
+### 合理的停止准则
+
+结合两个测试：$|f(x_n)| < \varepsilon_f$ **且** $|x_{n+1} - x_n| < \varepsilon_x$。仅使用第一个在重根附近可能失败。
+
+### 直接应用
+
+- **$\sqrt{a}$**：$f(x) = x^2 - a$ → 赫伦/巴比伦迭代。
+- **$1/a$ 不用除法**：$f(x) = 1/x - a$ → $x_{n+1} = x_n(2 - ax_n)$。
+- **内部收益率（IRR）**：$(1+r)^{-1}$ 多项式的根。
+- **均衡点**：经济模型中供给=需求的地方。
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程学学生的解释">
+
+牛顿-拉弗逊是数值计算的基石。几乎所有非线性求解器——在MATLAB、Python/SciPy、Julia中——都使用牛顿或其变体作为引擎。
+
+### 严格的误差分析
+
+误差 $e_n = x_n - r$。在 $r$ 处的二阶泰勒展开：
+
+$$0 = f(r) = f(x_n) + f'(x_n)(r - x_n) + \frac{f''(\xi_n)}{2}(r - x_n)^2.$$
+
+分离 $e_{n+1} = x_{n+1} - r$：
+
+$$e_{n+1} = -\frac{f''(\xi_n)}{2 f'(x_n)}\, e_n^2.$$
+
+当 $x_n \to r$ 时：$|e_{n+1}|/|e_n|^2 \to C = |f''(r)|/(2|f'(r)|)$。收敛恰好是二阶的。
+
+### 全局vs局部收敛
+
+牛顿**局部**收敛（接近根）。为了全局保证：
+- **$f$ 凸递增**（或凹递减）且 $f(x_0) > 0$：牛顿全局收敛。
+- **Kantorovich条件**：$|f(x_0) f''(x_0)| \leq |f'(x_0)|^2 / 2$ — 量化条件即使不知道根在哪也保证收敛。
+
+### 拟牛顿和割线法
+
+解析计算 $f'$ 可能昂贵或困难。**割线法**近似 $f'(x_n) \approx (f(x_n) - f(x_{n-1}))/(x_n - x_{n-1})$：**超线性**收敛，指数 $\phi \approx 1{,}618$（黄金比）。
+
+在多元优化中：BFGS和L-BFGS通过秩更新构造Hessian的近似。它们是`scipy.optimize`、`sklearn`、PyTorch（Adam是亲戚）的标准。
+
+### 牛顿在 $\mathbb{R}^n$ 中（系统）
+
+对于 $\vec f: \mathbb{R}^n \to \mathbb{R}^n$：
+
+$$\vec x_{n+1} = \vec x_n - J(\vec x_n)^{-1} \vec f(\vec x_n),$$
+
+其中 $J$ 是Jacobian矩阵。实际上不反演 $J$ ——通过LU分解求解线性系统 $J \Delta x = -f$。应用：电网的潮流分析、非线性结构分析、PDE配置法。
+
+### Black-Scholes中的隐含波动率
+
+给定市场期权价格 $V_{\text{mkt}}$，求 $\sigma$ 使得 $V_{BS}(\sigma) = V_{\text{mkt}}$。定义 $g(\sigma) = V_{BS}(\sigma) - V_{\text{mkt}}$ 并应用牛顿。导数 $g'(\sigma) = \partial V_{BS}/\partial \sigma$ 是**vega** ——以闭式形式可得。收敛在3-5次迭代内达到5-6位小数。
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士的解释">
+
+牛顿-拉弗逊有理论扩展影响计算复杂性、函数分析甚至数论。
+
+### Kantorovich定理（1948）
+
+给定Banach空间中的 $f: B \to B$，Kantorovich关于 $f(x_0)$、$f'(x_0)$ 和 $f''$ 给出量化条件，保证根的存在和牛顿的二阶收敛——所有这一切仅从**单个初始点** $x_0$ 推断。现代函数分析的基础。
+
+### 黎曼流形上的牛顿
+
+在测地线优化中，牛顿通过Levi-Civita连接推广：
+
+$$x_{n+1} = \exp_{x_n}\!\!\left(-H_n^{-1}\,\text{grad}\, f(x_n)\right),$$
+
+其中 $\exp$ 是指数映射，$H_n$ 是黎曼Hessian算子。出现在矩阵流形（Stiefel、Grassmann）的优化、几何深度学习和SO(3)上的最优控制中。
+
+### Smale的alpha理论
+
+Stephen Smale（1981）给出准则 $\alpha(f, x_0) < 3 - 2\sqrt{2}$ 仅基于 $x_0$ 处的导数，保证牛顿的二阶收敛。与算法在 $\mathbb{R}$ 上的复杂性理论的联系——Smale "二十一世纪的18个问题"的一部分。
+
+### 牛顿分形和复动力系统
+
+对于复平面中的 $f(z) = z^3 - 1$，三个牛顿盆之间的边界是**Julia集**——Hausdorff维数 $> 1$ 的分形，不可数，有无限自相似结构。Cayley在1879年提出问题；Blanchard在1984年严格分析。
+
+### 历史联系
+
+牛顿（1669，*De Analysi*）用该方法求多项式的根。Raphson（1690，*Analysis Aequationum*）发表了简化版本。Simpson（1740）推广到任意函数。Cauchy（19世纪）用导数形式化。Kantorovich（1948）在Banach空间给出严格分析。今天：每个计算器、每个物理模拟器、每个科学库都在某个层级使用牛顿。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实践——配方和现实场景">
+
+### 5步食谱
+
+1. 将问题改写为 $f(x) = 0$ 的形式。
+2. 解析计算 $f'$（或使用自动微分）。
+3. 通过图形检查或几步二分法选择 $x_0$。
+4. 迭代：$x_{n+1} = x_n - f(x_n)/f'(x_n)$。
+5. 当 $|f(x_n)| < \varepsilon$ **且** $|x_{n+1} - x_n| < \delta$ 时停止。通常 $\varepsilon = \delta = 10^{-8}$ 是安全的。
+
+### 场景1：太阳能项目的IRR
+
+太阳能项目：初始投资 R$ 50000 (巴西雷亚尔)，年回报 R$ 12000，持续6年。IRR $r$ 求解：
+
+$$f(r) = -50000 + \sum_{k=1}^{6} \frac{12000}{(1+r)^k} = 0.$$
+
+从 $x_0 = 0{,}10$（10%）开始：$f(0{,}10) > 0$，$f(0{,}30) < 0$。牛顿在5次迭代内收敛到 $r \approx 0{,}1120$（年率11.20%）。
+
+### 场景2：通过非线性欧姆定律校准电阻
+
+热敏电阻 $R(T) = R_0 \exp[B(1/T - 1/T_0)]$。测量给出 $R = 4{,}7\,\text{k}\Omega$。已知 $R_0 = 10\,\text{k}\Omega$，$B = 3950$，$T_0 = 298$ K，求 $T$。定义 $f(T) = R_0 e^{B(1/T - 1/T_0)} - 4700$。从 $T_0 = 300$ K 开始的牛顿在4次迭代内收敛。
+
+### 场景3：硬件中的平方根（FPGA/CPU）
+
+Heron算法——迭代 $x_{n+1} = (x_n + a/x_n)/2$ ——是牛顿应用于 $f(x) = x^2 - a$。现代处理器（Intel、ARM）恰好在微码中实现这个用于 `sqrt` 指令。从8位查找表近似开始，用2-3步牛顿精化到双精度（64位）。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解答的示例
+
+<Exemplo titulo="基本迭代：估算10的立方根（介绍）" numero="1">
+
+**问题。** 从 $x_0 = 2$ 开始，对 $\sqrt[3]{10}$ 应用3次牛顿-拉弗逊迭代。
+
+**策略。** 定义 $f(x) = x^3 - 10$，使得 $f(x) = 0 \Leftrightarrow x = \sqrt[3]{10}$。计算 $f'(x) = 3x^2$ 并应用迭代 $x_{n+1} = x_n - (x_n^3 - 10)/(3x_n^2)$。
+
+**求解。**
+
+$x_0 = 2$
+
+$x_1 = 2 - (8 - 10)/(12) = 2 + 2/12 = 2{,}16\overline{6}$
+
+$x_2 = 2{,}1667 - (2{,}1667^3 - 10)/(3 \cdot 2{,}1667^2) \approx 2{,}1544$
+
+$x_3 \approx 2{,}15443...$
+
+精确值是 $\sqrt[3]{10} = 2{,}154435\ldots$ 第3次迭代时已有5位正确。
+
+**验证。** $2{,}15443^3 \approx 9{,}9997 \approx 10$。一致。
+
+**来源。** [APEX Calculus §4.4, Example 4.4.1](https://www.apexcalculus.com/) — CC-BY-NC.
+
+</Exemplo>
+
+<Exemplo titulo="循环和失败：f(x) = x^3 - 2x + 2, x_0 = 0（理解）" numero="2">
+
+**问题。** 证明对 $f(x) = x^3 - 2x + 2$ 和 $x_0 = 0$ 的牛顿-拉弗逊**不收敛**——进入循环。
+
+**策略。** 计算 $f'(x) = 3x^2 - 2$ 并验证从 $x_0 = 0$ 迭代发生什么。
+
+**求解。**
+
+$x_1 = 0 - f(0)/f'(0) = 0 - 2/(-2) = 1$
+
+$x_2 = 1 - f(1)/f'(1) = 1 - (1 - 2 + 2)/(3 - 2) = 1 - 1/1 = 0$
+
+$x_3 = 0$（回到开始）。
+
+序列在 $0$ 和 $1$ 之间无限振荡。$f$ 的唯一实根是 $x \approx -1{,}769$ ——初值 $x_0 = 0$ 太远且在几何上位置错误。
+
+**验证。** $f(0) = 2 > 0$，$f(1) = 1 > 0$，$f(-2) = -8 + 4 + 2 < 0$ ——根在 $(-2, -1)$，不在 $0$ 附近。
+
+**来源。** [OpenStax Calculus Vol. 1 §4.9, Example 4.9.4](https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method) — CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="重根：(x-1)^2 中的线性收敛（中等）" numero="3">
+
+**问题。** 比较对 $f(x) = (x-1)^2$ 从 $x_0 = 2$ 开始的标准公式和修改公式 $x_{n+1} = x_n - 2f(x_n)/f'(x_n)$ 的牛顿-拉弗逊收敛。
+
+**策略。** $f(x) = (x-1)^2$，$f'(x) = 2(x-1)$。标准迭代：$x_{n+1} = x_n - (x_n-1)^2/(2(x_n-1)) = x_n - (x_n-1)/2 = (x_n+1)/2$。修改迭代 $m = 2$：$x_{n+1} = x_n - 2(x_n-1)^2/(2(x_n-1)) = x_n - (x_n - 1) = 1$（在**1步**内收敛）。
+
+**求解。**
+
+标准公式：$x_0 = 2$，$x_1 = 1{,}5$，$x_2 = 1{,}25$，$x_3 = 1{,}125$，$x_4 = 1{,}0625$。误差每步减半：**线性收敛**，比率 $1/2$。
+
+修改公式：$x_1 = 2 - 2 \cdot 1/2 = 1$。1次迭代收敛。
+
+**验证。** 标准迭代后 $k$ 步的误差：$e_k = (1/2)^k$。10步后 $e_{10} = 2^{-10} \approx 10^{-3}$。修改版中，$e_1 = 0$ 精确。
+
+**来源。** [APEX Calculus §4.4, Discussion after Theorem 4.4.1](https://www.apexcalculus.com/) — CC-BY-NC.
+
+</Exemplo>
+
+<Exemplo titulo="投资的IRR：多项式的根在利率中（建模）" numero="4">
+
+**问题。** 投资成本 R$ 1000 (巴西雷亚尔)，第1年末回报 R$ 400，第2年末 R$ 400，第3年末 R$ 300。使用牛顿-拉弗逊找到IRR。
+
+**策略。** IRR $r$ 是 $f(r) = -1000 + 400/(1+r) + 400/(1+r)^2 + 300/(1+r)^3$ 的根。通过导数计算并用 $x_0 = 0{,}10$ 应用牛顿。
+
+**求解。** 设 $u = 1/(1+r)$。则 $f = -1000 + 400u + 400u^2 + 300u^3$。
+
+$f'(r) = -400u^2 - 800u^3 - 900u^4$（对 $u$ 在 $r$ 中导数：$du/dr = -u^2$）。
+
+用 $r_0 = 0{,}10$ 迭代（$u_0 \approx 0{,}9091$）：
+
+$f(0{,}10) = -1000 + 363{,}6 + 330{,}6 + 225{,}4 = -80{,}4$
+
+$f'(0{,}10) \approx -330 - 657 - 676 = -1663$
+
+$r_1 = 0{,}10 - (-80{,}4)/(-1663) \approx 0{,}1517$
+
+3次迭代后：$r \approx 0{,}1493$（年率14.93%）。
+
+**验证。** $f(0{,}1493) = -1000 + 400/1{,}1493 + 400/1{,}1493^2 + 300/1{,}1493^3 \approx 0{,}01$（几乎为零）。
+
+**来源。** [OpenStax Calculus Vol. 1 §4.9, Exercises 4.9](https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method) — CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="系统中的牛顿 2x2：非线性市场均衡（挑战）" numero="5">
+
+**问题。** 非线性供给和需求：$Q_d = 100 - p^2$ 和 $Q_s = 10 p^{0{,}5}$。通过系统牛顿找到均衡 $(p^*, Q^*)$。
+
+**策略。** 定义 $f_1(p, Q) = Q - 100 + p^2 = 0$ 和 $f_2(p, Q) = Q - 10\sqrt{p} = 0$。系统牛顿是 $J \Delta \vec{x} = -\vec{f}$，Jacobian为 $J = \partial(f_1, f_2)/\partial(p, Q)$。
+
+**求解。**
+
+$$J = \begin{pmatrix} 2p & 1 \\ -5/\sqrt{p} & 1 \end{pmatrix}$$
+
+初始猜测：$p_0 = 5$，$Q_0 = 75$。
+
+步骤1：$f_1(5, 75) = 75 - 100 + 25 = 0$；$f_2(5, 75) = 75 - 10\sqrt{5} \approx 52{,}6$。
+
+步骤2：求解 $J \Delta \vec x = -(0, 52{,}6)^T$。
+
+$J = \begin{pmatrix} 10 & 1 \\ -2{,}24 & 1 \end{pmatrix}$，$\det J \approx 12{,}24$。
+
+$\Delta p = -52{,}6/12{,}24 \approx -4{,}3$，$\Delta Q \approx 43$。
+
+3次迭代后：$p^* \approx 9{,}08$，$Q^* \approx 17{,}4$。
+
+**验证。** $Q_d(9{,}08) = 100 - 82{,}4 = 17{,}6 \approx Q^*$。$Q_s(9{,}08) = 10\sqrt{9{,}08} \approx 30{,}1$ ——差异表明迭代需要更多步骤或符号解的修订。
+
+**来源。** [REAMAT Cálculo Numérico cap. 3.3](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — CC-BY-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-69-newton-raphson">
+
+<Exercicio numero="69.1" dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "223", exercicio: "ex. 1", licenca: "CC-BY-NC" }}
+  solucao={<>对于 <Eq>{`f(x)=x^2-2`}</Eq>，<Eq>{`f'(x)=2x`}</Eq>。迭代是 <Eq>{`x_{n+1}=(x_n+2/x_n)/2`}</Eq>。从 <Eq>{`x_0=1`}</Eq> 开始：<Eq>{`x_1=1{,}5`}</Eq>，<Eq>{`x_2\\approx1{,}4167`}</Eq>，<Eq>{`x_3\\approx1{,}41421568`}</Eq>。正确值：<Eq>{`\\sqrt2=1{,}41421356\\ldots`}</Eq> 3步内已有5位正确。</>}
+  passos={<>
+    <ol>
+      <li>识别 <Eq>{`f(x)=x^2-2`}</Eq> 和 <Eq>{`f'(x)=2x`}</Eq>。<em>为什么：</em> $f$ 的根恰好是 <Eq>{`\\sqrt2`}</Eq>。</li>
+      <li>简化迭代：<Eq>{`x_{n+1}=x_n-(x_n^2-2)/(2x_n)=(x_n+2/x_n)/2`}</Eq>。<em>为什么：</em> 这是赫伦（巴比伦）公式，有4000年历史。</li>
+      <li>计算：<Eq>{`x_1=(1+2)/2=1{,}5`}</Eq>，<Eq>{`x_2=(1{,}5+2/1{,}5)/2\\approx1{,}4167`}</Eq>，<Eq>{`x_3\\approx1{,}41421568`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：</em> 公式 <Eq>{`x_{n+1}=(x_n+a/x_n)/2`}</Eq> 对任何 <Eq>{`\\sqrt{a}`}</Eq> 都有效——只需替换 <Eq>{`a`}</Eq>。</p>
+  </>}
+>
+$f(x) = x^2 - 2$，$x_0 = 1$。应用3次牛顿-拉弗逊迭代。与 $\sqrt{2} = 1{,}41421356\ldots$ 比较
+</Exercicio>
+
+<Exercicio numero="69.2" dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "223", exercicio: "ex. 2", licenca: "CC-BY-NC" }}
+  solucao={<>对于 <Eq>{`f(x)=x^2-5`}</Eq>，<Eq>{`f'(x)=2x`}</Eq>。迭代：<Eq>{`x_{n+1}=(x_n+5/x_n)/2`}</Eq>。从 <Eq>{`x_0=2`}</Eq> 开始：<Eq>{`x_1=2{,}25`}</Eq>，<Eq>{`x_2\\approx2{,}2361`}</Eq>，<Eq>{`x_3\\approx2{,}23606797\\ldots`}</Eq> 精确值：<Eq>{`\\sqrt5=2{,}2360679\\ldots`}</Eq></>}
+>
+$f(x) = x^2 - 5$，$x_0 = 2$。应用3次迭代估算 $\sqrt{5}$。
+</Exercicio>
+
+<Exercicio numero="69.3" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 407", licenca: "CC-BY-NC-SA" }}
+  solucao={<>对于 <Eq>{`f(x)=x^3-2`}</Eq>，<Eq>{`f'(x)=3x^2`}</Eq>。迭代：<Eq>{`x_{n+1}=x_n-(x_n^3-2)/(3x_n^2)`}</Eq>。从 <Eq>{`x_0=1`}</Eq> 开始：<Eq>{`x_1=1{,}3333`}</Eq>，<Eq>{`x_2\\approx1{,}2639`}</Eq>，<Eq>{`x_3\\approx1{,}25993`}</Eq>。精确值：<Eq>{`\\sqrt[3]{2}\\approx1{,}25992105`}</Eq>。</>}
+>
+$f(x) = x^3 - 2$，$x_0 = 1$。应用3次迭代估算 $\sqrt[3]{2}$。
+</Exercicio>
+
+<Exercicio numero="69.4" dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "ex. 7", licenca: "CC-BY-NC" }}
+  solucao={<>对于 <Eq>{`f(x)=\\cos x-x`}</Eq>，<Eq>{`f'(x)=-\\sin x-1`}</Eq>。从 <Eq>{`x_0=1`}</Eq> 开始：<Eq>{`x_1=1-(cos1-1)/(-\\sin1-1)\\approx0{,}7391`}</Eq>，<Eq>{`x_2\\approx0{,}7391`}</Eq>。收敛了：$\cos$ 的不动点是 <Eq>{`x\\approx0{,}73909`}</Eq>（Dottie常数）。</>}
+>
+$f(x) = \cos x - x$，$x_0 = 1$。应用3次迭代估算 $\cos$ 的不动点。
+</Exercicio>
+
+<Exercicio numero="69.5" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 411", licenca: "CC-BY-NC-SA" }}
+  solucao={<>对于 <Eq>{`f(x)=e^x-2`}</Eq>，<Eq>{`f'(x)=e^x`}</Eq>。迭代：<Eq>{`x_{n+1}=x_n-(e^{x_n}-2)/e^{x_n}=x_n-1+2e^{-x_n}`}</Eq>。从 <Eq>{`x_0=1`}</Eq> 开始：<Eq>{`x_1\\approx0{,}7358`}</Eq>，<Eq>{`x_2\\approx0{,}6934`}</Eq>，<Eq>{`x_3\\approx0{,}6931`}</Eq>。精确值：<Eq>{`\\ln2\\approx0{,}6931`}</Eq>。</>}
+>
+$f(x) = e^x - 2$，$x_0 = 1$。应用3次迭代估算 $\ln 2$。
+</Exercicio>
+
+<Exercicio numero="69.6" dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "ex. 9", licenca: "CC-BY-NC" }}
+  solucao={<>对于 <Eq>{`f(x)=x\\ln x-1`}</Eq>，<Eq>{`f'(x)=\\ln x+1`}</Eq>。从 <Eq>{`x_0=2`}</Eq> 开始：<Eq>{`x_1=2-(2\\ln2-1)/(\\ln2+1)\\approx1{,}7630`}</Eq>，<Eq>{`x_2\\approx1{,}7632`}</Eq>。根：<Eq>{`x\\approx1{,}7632`}</Eq>（满足 <Eq>{`x\\ln x=1`}</Eq>）。</>}
+>
+$f(x) = x \ln x - 1$，$x_0 = 2$。用4位小数近似根。
+</Exercicio>
+
+<Exercicio numero="69.7" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 409", licenca: "CC-BY-NC-SA" }}
+  solucao={<>对于 <Eq>{`f(x)=\\sin x`}</Eq>，<Eq>{`f'(x)=\\cos x`}</Eq>。从 <Eq>{`x_0=3`}</Eq> 开始：<Eq>{`x_1=3-\\sin3/\\cos3\\approx3-0{,}1411/(-0{,}9900)\\approx3{,}1425`}</Eq>，<Eq>{`x_2\\approx3{,}14159`}</Eq>。收敛到 <Eq>{`\\pi`}</Eq>。</>}
+>
+$f(x) = \sin x$，$x_0 = 3$。数值证明迭代收敛到 $\pi$。
+</Exercicio>
+
+<Exercicio numero="69.8" dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "ex. 11", licenca: "CC-BY-NC" }}
+  solucao={<>对于 <Eq>{`f(x)=x^3-x-1`}</Eq>，<Eq>{`f'(x)=3x^2-1`}</Eq>。从 <Eq>{`x_0=1{,}5`}</Eq> 开始：<Eq>{`x_1\\approx1{,}3478`}</Eq>，<Eq>{`x_2\\approx1{,}3247`}</Eq>，<Eq>{`x_3\\approx1{,}32472`}</Eq>。实根：塑性常数 <Eq>{`\\rho\\approx1{,}3247`}</Eq>。</>}
+>
+$f(x) = x^3 - x - 1$，$x_0 = 1{,}5$。近似实根（塑性常数 $\approx 1{,}3247$）。
+</Exercicio>
+
+<Exercicio numero="69.9" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 413", licenca: "CC-BY-NC-SA" }}
+  solucao={<>对于 <Eq>{`f(x)=x^2-x-1`}</Eq>，<Eq>{`f'(x)=2x-1`}</Eq>。从 <Eq>{`x_0=1{,}5`}</Eq> 开始：<Eq>{`x_1=(1{,}5^2-0{,}5)/2=1{,}625`}</Eq>，<Eq>{`x_2\\approx1{,}6180`}</Eq>，<Eq>{`x_3\\approx1{,}61803`}</Eq>。黄金比 <Eq>{`\\phi=(1+\\sqrt5)/2\\approx1{,}61803`}</Eq>。</>}
+>
+$f(x) = x^2 - x - 1$，$x_0 = 1{,}5$。近似黄金比 $\phi = (1 + \sqrt{5})/2$。
+</Exercicio>
+
+<Exercicio numero="69.10" dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "ex. 13", licenca: "CC-BY-NC" }}
+  solucao={<>对于 <Eq>{`f(x)=\\tan x-x`}</Eq>，<Eq>{`f'(x)=\\sec^2 x-1=\\tan^2 x`}</Eq>。大于 <Eq>{`\\pi`}</Eq> 的最小正根接近 <Eq>{`4{,}49`}</Eq>。从 <Eq>{`x_0=4{,}5`}</Eq> 开始：3次迭代后，<Eq>{`x\\approx4{,}4934`}</Eq>。</>}
+>
+$f(x) = \tan x - x$，$x_0 = 4{,}5$。近似大于 $\pi$ 的最小正根。
+</Exercicio>
+
+<Exercicio numero="69.11" dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "225", exercicio: "ex. 15", licenca: "CC-BY-NC" }}
+  solucao={<>我们要求 <Eq>{`f(x)=x^2-a`}</Eq> 的根，所以 <Eq>{`f'(x)=2x`}</Eq>。牛顿给出 <Eq>{`x_{n+1}=x_n-(x_n^2-a)/(2x_n)=(x_n+a/x_n)/2`}</Eq>。这恰好是赫伦公式。已证。</>}
+  passos={<>
+    <ol>
+      <li>定义问题：我们要 <Eq>{`\\sqrt{a}`}</Eq>，它是 <Eq>{`f(x)=x^2-a`}</Eq> 的根。</li>
+      <li>计算 <Eq>{`f'(x)=2x`}</Eq>。</li>
+      <li>应用牛顿：<Eq>{`x_{n+1}=x_n-(x_n^2-a)/(2x_n)`}</Eq>。</li>
+      <li>简化：<Eq>{`x_{n+1}=(2x_n^2-x_n^2+a)/(2x_n)=(x_n^2+a)/(2x_n)=(x_n+a/x_n)/2`}</Eq>。这是赫伦公式。</li>
+    </ol>
+    <p><em>有趣的是：</em> 巴比伦人在粘土板（YBC 7289，约公元前1800年）上用这个公式计算 <Eq>{`\\sqrt2`}</Eq>，有6位小数正确。</p>
+  </>}
+>
+证明计算 $\sqrt{a}$ 的赫伦公式 $x_{n+1} = (x_n + a/x_n)/2$ 恰好是应用于 $f(x) = x^2 - a$ 的牛顿-拉弗逊。
+</Exercicio>
+
+<Exercicio numero="69.12" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 417", licenca: "CC-BY-NC-SA" }}
+  solucao={<>对于 <Eq>{`\\sqrt[n]{a}`}</Eq>，定义 <Eq>{`f(x)=x^n-a`}</Eq>，<Eq>{`f'(x)=nx^{n-1}`}</Eq>。牛顿给出 <Eq>{`x_{n+1}=x_n-(x_n^n-a)/(nx_n^{n-1})=x_n(1-1/n)+a/(nx_n^{n-1})=\\frac{(n-1)x_n}{n}+\\frac{a}{nx_n^{n-1}}`}</Eq>。对 <Eq>{`n=2`}</Eq> 回收赫伦。</>}
+>
+推广：计算 $\sqrt[n]{a}$ 的牛顿迭代是什么？应用 $n = 3$，$a = 8$，$x_0 = 2$（2步）。
+</Exercicio>
+
+<Exercicio numero="69.13" dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "225", exercicio: "ex. 17", licenca: "CC-BY-NC" }}
+  solucao={<>我们要 <Eq>{`1/a`}</Eq>：<Eq>{`f(x)=1/x-a`}</Eq> 的根。<Eq>{`f'(x)=-1/x^2`}</Eq>。牛顿：<Eq>{`x_{n+1}=x_n-(1/x_n-a)/(-1/x_n^2)=x_n+x_n^2(1/x_n-a)=x_n(2-ax_n)`}</Eq>。迭代中完全没有除法！从 <Eq>{`a=7`}</Eq>，<Eq>{`x_0=0{,}1`}</Eq> 开始：<Eq>{`x_1=0{,}1(2-0{,}7)=0{,}13`}</Eq>，<Eq>{`x_2\\approx0{,}1430`}</Eq>，<Eq>{`x_3\\approx0{,}1429`}</Eq>。正确：<Eq>{`1/7\\approx0{,}1429`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>建模：<Eq>{`1/a`}</Eq> 是 <Eq>{`f(x)=1/x-a`}</Eq> 的根。</li>
+      <li><Eq>{`f'(x)=-x^{-2}`}</Eq>。牛顿：<Eq>{`x_{n+1}=x_n-(1/x_n-a)/(-1/x_n^2)`}</Eq>。</li>
+      <li>简化：<Eq>{`x_{n+1}=x_n+x_n^2(1/x_n-a)=2x_n-ax_n^2=x_n(2-ax_n)`}</Eq>。</li>
+      <li>观察：迭代只用乘法和减法——**零除法**。理想用于除法昂贵的硬件。</li>
+    </ol>
+    <p><em>有趣的是：</em> 早期RISC处理器（MIPS，某些ARM）恰好这样实现除法：8位查找表 <Eq>{`1/a`}</Eq> + 2步牛顿。</p>
+  </>}
+>
+证明 $x_{n+1} = x_n(2 - ax_n)$ 通过牛顿计算 $1/a$ 而不用任何除法操作。应用 $a = 7$，$x_0 = 0{,}1$（3步）。
+</Exercicio>
+
+<Exercicio numero="69.14" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 419", licenca: "CC-BY-NC-SA" }}
+  solucao={<>要最小化 <Eq>{`g(x)=x^4-4x+1`}</Eq>，找 <Eq>{`g'(x)=4x^3-4`}</Eq> 的零。牛顿：<Eq>{`x_{n+1}=x_n-(4x_n^3-4)/(12x_n^2)=x_n-(x_n^3-1)/(3x_n^2)`}</Eq>。从 <Eq>{`x_0=1{,}5`}</Eq> 开始：<Eq>{`x_1\\approx1{,}315`}</Eq>，<Eq>{`x_2\\approx1{,}261`}</Eq>，<Eq>{`x_3\\approx1{,}2599`}</Eq>。最小值在 <Eq>{`x\\approx1{,}26`}</Eq>，<Eq>{`g(1{,}26)\\approx-3{,}0`}</Eq>。</>}
+>
+最小化 $g(x) = x^4 - 4x + 1$ 通过对 $g'(x) = 0$ 应用牛顿-拉弗逊，从 $x_0 = 1{,}5$ 开始。
+</Exercicio>
+
+<Exercicio numero="69.15" dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "225", exercicio: "ex. 19", licenca: "CC-BY-NC" }}
+  solucao={<>定义 <Eq>{`f(r)=-1000+300/(1+r)+400/(1+r)^2+500/(1+r)^3`}</Eq>。在 <Eq>{`r_0=0{,}15`}</Eq> 计算：<Eq>{`f\\approx-1000+260{,}9+302{,}5+328{,}6=−108`}</Eq>。导数 <Eq>{`f'(r)=-300/(1+r)^2-800/(1+r)^3-1500/(1+r)^4\\approx-2095`}</Eq>。<Eq>{`r_1\\approx0{,}15-(-108)/(-2095)\\approx0{,}0985`}</Eq>。3次迭代后，IRR <Eq>{`\\approx10{,}1\\%`}</Eq>。</>}
+>
+现金流：$-1000$，$300$，$400$，$500$（年0、1、2、3）。IRR $r$ 是 $f(r) = -1000 + 300/(1+r) + 400/(1+r)^2 + 500/(1+r)^3 = 0$ 的根。用牛顿从 $r_0 = 0{,}15$ 开始。
+</Exercicio>
+
+<Exercicio numero="69.16" dificuldade="modelagem"
+  fonte={{ livro: "REAMAT — Cálculo Numérico (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "cap. 3", pagina: "45", exercicio: "ex. 3.4", licenca: "CC-BY-SA" }}
+  solucao={<>定义 <Eq>{`g(\\sigma)=V_{BS}(\\sigma)-V_{\\text{mkt}}`}</Eq>。导数是vega：<Eq>{`g'(\\sigma)=S\\sqrt{T}\\phi(d_1)`}</Eq> 其中 <Eq>{`\\phi`}</Eq> 是标准正态。牛顿通常从 <Eq>{`\\sigma_0=0{,}20`}</Eq>（20%）在3-5次迭代内收敛。这是所有期权定价引擎的基础。</>}
+>
+在Black-Scholes中，给定期权的市场价格 $V_{\text{mkt}}$，解释如何用牛顿-拉弗逊找隐含波动率 $\sigma$。Vega在迭代中的角色是什么？
+</Exercicio>
+
+<Exercicio numero="69.17" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 421", licenca: "CC-BY-NC-SA" }}
+  solucao={<>范德瓦尔斯方程：<Eq>{`(P+a/V^2)(V-b)=RT`}</Eq>。重新排列：<Eq>{`f(V)=(P+a/V^2)(V-b)-RT=0`}</Eq>。导数 <Eq>{`f'(V)`}</Eq> 并应用牛顿。对 <Eq>{`\\text{CO}_2`}</Eq> 用 <Eq>{`a=3{,}59`}</Eq>，<Eq>{`b=0{,}0427`}</Eq>，<Eq>{`P=10`}</Eq> atm，<Eq>{`T=300`}</Eq> K：初值 <Eq>{`V_0=RT/P\\approx2{,}46`}</Eq>（理想气体）。牛顿在4步内收敛。</>}
+>
+在范德瓦尔斯方程 $(P + a/V^2)(V - b) = RT$ 中，给定 $P$、$T$（和气体常数），用牛顿找摩尔体积 $V$。勾勒迭代。
+</Exercicio>
+
+<Exercicio numero="69.18" dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "225", exercicio: "ex. 21", licenca: "CC-BY-NC" }}
+  solucao={<>开普勒方程：<Eq>{`f(E)=E-e\\sin E-M=0`}</Eq>。<Eq>{`f'(E)=1-e\\cos E`}</Eq>。牛顿：<Eq>{`E_{n+1}=E_n-(E_n-e\\sin E_n-M)/(1-e\\cos E_n)`}</Eq>。对 <Eq>{`e=0{,}3`}</Eq>，<Eq>{`M=1`}</Eq> rad，<Eq>{`E_0=1`}</Eq>：<Eq>{`E_1\\approx1{,}337`}</Eq>，<Eq>{`E_2\\approx1{,}318`}</Eq>，<Eq>{`E_3\\approx1{,}3172`}</Eq>。解：<Eq>{`E\\approx1{,}317`}</Eq> rad。</>}
+>
+开普勒方程：$E - e \sin E = M$。对 $e = 0{,}3$（离心率）和 $M = 1$ rad（平近点角），用牛顿从 $E_0 = 1$ 找偏近点角 $E$（4次迭代）。
+</Exercicio>
+
+<Exercicio numero="69.19" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 收敛到离 x_0 最近的根" },
+    { texto: "B) 可能在两点之间无限循环" },
+    { texto: "C) 当根是重根时总是发散", correta: true },
+    { texto: "D) 当 f'(x_n) = 0 时停止并返回 x_0" },
+  ]}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "460", exercicio: "conceitual", licenca: "CC-BY-NC-SA" }}
+  solucao={<>选项C中的论述作为普遍化是**假的**：重根牛顿**不必然发散**——收敛，但仅**线性**（不二阶）。要识别的正确选项是B：当 <Eq>{`f(x)=x^3-2x+2`}</Eq> 且 <Eq>{`x_0=0`}</Eq> 时，序列在0和1之间循环。答案：B。</>}
+>
+当初值 $x_0$ 离根很远时，牛顿-拉弗逊可以表现什么行为？
+</Exercicio>
+
+<Exercicio numero="69.20" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) |f(x_n)| < ε，因为保证找到了根" },
+    { texto: "B) |x_{n+1} - x_n| < δ 仅，因为函数可在平台附近" },
+    { texto: "C) 仅 n > 10，因为牛顿总在10步内收敛" },
+    { texto: "D) |f(x_n)| < ε 和 |x_{n+1} - x_n| < δ 两者，因为单独任一都可能失败", correta: true },
+  ]}
+  fonte={{ livro: "REAMAT — Cálculo Numérico (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "cap. 3", pagina: "47", exercicio: "conceitual", licenca: "CC-BY-SA" }}
+  solucao={<>稳健准则：使用**两者** <Eq>{`|f(x_n)|<\\varepsilon`}</Eq> 和 <Eq>{`|x_{n+1}-x_n|<\\delta`}</Eq>。单独 <Eq>{`|f|<\\varepsilon`}</Eq> 可在重根失败（函数平台）。单独 <Eq>{`|\\Delta x|<\\delta`}</Eq> 可在迭代平台处过早停止。答案：D。</>}
+>
+牛顿-拉弗逊最稳健的停止准则是什么？
+</Exercicio>
+
+<Exercicio numero="69.21" dificuldade="compreensao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "223", exercicio: "conceitual 1", licenca: "CC-BY-NC" }}
+  solucao={<>对 <Eq>{`f(x)=x^3-2x+2`}</Eq>，<Eq>{`f'(x)=3x^2-2`}</Eq>。<Eq>{`x_1=0-f(0)/f'(0)=0-2/(-2)=1`}</Eq>。<Eq>{`x_2=1-f(1)/f'(1)=1-1/1=0`}</Eq>。<Eq>{`x_3=0`}</Eq>。完美循环 <Eq>{`0\\to1\\to0\\to\\cdots`}</Eq>。唯一实根在 <Eq>{`(-2,-1)`}</Eq>，远离初值。</>}
+>
+证明对 $f(x) = x^3 - 2x + 2$ 和 $x_0 = 0$ 的牛顿-拉弗逊在 $0$ 和 $1$ 之间无限循环。
+</Exercicio>
+
+<Exercicio numero="69.22" dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 415", licenca: "CC-BY-NC-SA" }}
+  solucao={<>对 <Eq>{`f(x)=x^2`}</Eq>（二重根在0），<Eq>{`f'(x)=2x`}</Eq>。牛顿：<Eq>{`x_{n+1}=x_n-x_n^2/(2x_n)=x_n/2`}</Eq>。误差是 <Eq>{`e_{n+1}=e_n/2`}</Eq> ——**线性**收敛，比率 <Eq>{`1/2`}</Eq>。对单根，误差走 <Eq>{`Ce_n^2`}</Eq>（二次）。重根"降级"收敛因为 <Eq>{`f'(0)=0`}</Eq> 使常数 <Eq>{`C=f''(r)/(2f'(r))\\to\\infty`}</Eq>。</>}
+>
+$f(x) = x^2$（二重根在 $x = 0$），$x_0 = 1$。证明牛顿-拉弗逊仅线性收敛，比率 $1/2$。
+</Exercicio>
+
+<Exercicio numero="69.23" dificuldade="compreensao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "conceitual 3", licenca: "CC-BY-NC" }}
+  solucao={<>对 <Eq>{`f(x)=x^{1/3}`}</Eq>，<Eq>{`f'(x)=(1/3)x^{-2/3}`}</Eq>。牛顿：<Eq>{`x_{n+1}=x_n-x_n^{1/3}/((1/3)x_n^{-2/3})=x_n-3x_n=-2x_n`}</Eq>。从 <Eq>{`x_0=1`}</Eq>：<Eq>{`1\\to-2\\to4\\to-8\\to\\cdots`}</Eq> ——**发散**，因子 <Eq>{`-2`}</Eq>。根 <Eq>{`r=0`}</Eq> 有 <Eq>{`f'(0)`}</Eq> 未定义，违反方法的要求。</>}
+>
+$f(x) = x^{1/3}$ 在 $x = 0$ 有根但 $f'(0)$ 不存在。牛顿-拉弗逊发生什么？从 $x_0 = 1$ 计算4次迭代。
+</Exercicio>
+
+<Exercicio numero="69.24" dificuldade="aplicacao"
+  fonte={{ livro: "REAMAT — Cálculo Numérico (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "cap. 3", pagina: "44", exercicio: "ex. 3.2", licenca: "CC-BY-SA" }}
+  solucao={<>割线法对 <Eq>{`f(x)=x^2-2`}</Eq>，$x_0=1$，$x_1=2$：<Eq>{`x_2=2-f(2)(2-1)/(f(2)-f(1))=2-2\\cdot1/(2-(-1))=2-2/3\\approx1{,}333`}</Eq>。超线性收敛（指数 <Eq>{`\\approx1{,}618`}</Eq>）：比牛顿慢但不计算 <Eq>{`f'`}</Eq>。</>}
+>
+对 $f(x) = x^2 - 2$，用割线法（$x_0 = 1$，$x_1 = 2$）迭代4次。与牛顿（练习69.1）比较。
+</Exercicio>
+
+<Exercicio numero="69.25" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 423", licenca: "CC-BY-NC-SA" }}
+  solucao={<>对 <Eq>{`f(x)=x^3-3x+1`}</Eq>，<Eq>{`f'(x)=3x^2-3`}</Eq>。有3个实根。从 <Eq>{`x_0=2`}</Eq>：收敛到 <Eq>{`x\\approx1{,}532`}</Eq>。从 <Eq>{`x_0=-2`}</Eq>：收敛到 <Eq>{`x\\approx-1{,}879`}</Eq>。从 <Eq>{`x_0=0{,}5`}</Eq>：收敛到 <Eq>{`x\\approx0{,}347`}</Eq>。<Eq>{`x_0`}</Eq> 的选择决定达到哪个根。</>}
+>
+$f(x) = x^3 - 3x + 1$ 有3个实根。分别从 $x_0 = 2$、$x_0 = -2$、$x_0 = 0{,}5$ 应用牛顿。每个初值找到哪个根？
+</Exercicio>
+
+<Exercicio numero="69.26" dificuldade="desafio"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "226", exercicio: "ex. 25", licenca: "CC-BY-NC" }}
+  solucao={<>修改的重根迭代（$m=2$）：<Eq>{`x_{n+1}=x_n-2f(x_n)/f'(x_n)`}</Eq>。对 <Eq>{`f(x)=(x-1)^2`}</Eq>，<Eq>{`f'(x)=2(x-1)`}</Eq>。修改牛顿：<Eq>{`x_{n+1}=x_n-2(x_n-1)^2/(2(x_n-1))=x_n-(x_n-1)=1`}</Eq>。恰好在**1步**收敛到任何 <Eq>{`x_0`}</Eq>。标准公式需无穷多个线性步。</>}
+>
+重根修改牛顿：$x_{n+1} = x_n - 2f(x_n)/f'(x_n)$。应用到 $f(x) = (x-1)^2$，从 $x_0 = 3$ 开始。与标准迭代比较。
+</Exercicio>
+
+<Exercicio numero="69.27" dificuldade="desafio"
+  fonte={{ livro: "REAMAT — Cálculo Numérico (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "cap. 3", pagina: "50", exercicio: "ex. 3.8", licenca: "CC-BY-SA" }}
+  solucao={<>要最小化 <Eq>{`g`}</Eq>，找 <Eq>{`g^\\prime`}</Eq> 的零。<Eq>{`g^\\prime=0`}</Eq> 上的牛顿用 <Eq>{`x_{n+1}=x_n-g^\\prime(x_n)/g^{\\prime\\prime}(x_n)`}</Eq> ——与标准牛顿相同公式但用 <Eq>{`f=g^\\prime`}</Eq>。对 <Eq>{`g(x)=e^x-3x`}</Eq>：<Eq>{`g^\\prime=e^x-3`}</Eq>，<Eq>{`g^{\\prime\\prime}=e^x`}</Eq>。从 <Eq>{`x_0=0`}</Eq>：<Eq>{`x_1=0-(1-3)/1=2`}</Eq>，<Eq>{`x_2=2-(e^2-3)/e^2\\approx1{,}099`}</Eq>，<Eq>{`x_3\\approx1{,}0986`}</Eq>。最小值在 <Eq>{`x^*=\\ln3\\approx1{,}0986`}</Eq>。</>}
+>
+优化牛顿：证明对 $g'(x) = 0$ 应用牛顿来最小化 $g$ 等价于标准牛顿且 $f = g'$。应用到最小化 $g(x) = e^x - 3x$，从 $x_0 = 0$ 开始。
+</Exercicio>
+
+<Exercicio numero="69.28" dificuldade="desafio"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 427", licenca: "CC-BY-NC-SA" }}
+  solucao={<>复平面上 <Eq>{`f(z)=z^3-1`}</Eq> 的牛顿盆：3个根是 <Eq>{`1`}</Eq>，<Eq>{`\\omega=e^{2\\pi i/3}`}</Eq>，<Eq>{`\\omega^2=e^{4\\pi i/3}`}</Eq>。盆有分形边界（Julia集）。在 <Eq>{`\\mathbb{R}`}</Eq> 上：唯一实根是 <Eq>{`x=1`}</Eq>。任何 <Eq>{`x_0>0`}</Eq> 在 <Eq>{`\\mathbb{R}`}</Eq> 中收敛到 <Eq>{`1`}</Eq>。对 <Eq>{`x_0<0`}</Eq>：可收敛到 <Eq>{`1`}</Eq> 或振荡取决于精确点。</>}
+>
+对复平面上的 $f(z) = z^3 - 1$，定性描述3个牛顿盆。在实轴上，$x_0 = 2$ 和 $x_0 = -0{,}5$ 达到哪个根？
+</Exercicio>
+
+<Exercicio numero="69.29" dificuldade="demonstracao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "220", exercicio: "Theorem 4.4.1", licenca: "CC-BY-NC" }}
+  solucao={<>误差 <Eq>{`e_n=x_n-r`}</Eq>。$f$ 在 $r$ 处泰勒展开：<Eq>{`0=f(r)=f(x_n)+f'(x_n)(r-x_n)+\\frac{f''(\\xi_n)}{2}(r-x_n)^2`}</Eq>。从迭代：<Eq>{`x_{n+1}-r=x_n-f(x_n)/f'(x_n)-r=-\\frac{f''(\\xi_n)}{2f'(x_n)}(x_n-r)^2`}</Eq>，即 <Eq>{`e_{n+1}=-\\frac{f''(\\xi_n)}{2f'(x_n)}e_n^2`}</Eq>。当 <Eq>{`x_n\\to r`}</Eq>：<Eq>{`|e_{n+1}|/|e_n|^2\\to|f''(r)|/(2|f'(r)|)=C`}</Eq>。二阶收敛。$\square$</>}
+  passos={<>
+    <ol>
+      <li>定义 <Eq>{`e_n=x_n-r`}</Eq>。要证 <Eq>{`e_{n+1}=O(e_n^2)`}</Eq>。</li>
+      <li>围 <Eq>{`x_n`}</Eq> 展开 <Eq>{`f(r)`}</Eq> 到2阶：<Eq>{`0=f(x_n)+f'(x_n)(r-x_n)+\\frac{f''(\\xi_n)}{2}(r-x_n)^2`}</Eq>。</li>
+      <li>分离 <Eq>{`f(x_n)/f'(x_n)`}</Eq>：<Eq>{`f(x_n)/f'(x_n)=(r-x_n)+\\frac{f''(\\xi_n)}{2f'(x_n)}(r-x_n)^2`}</Eq>。</li>
+      <li>计算 <Eq>{`e_{n+1}=x_{n+1}-r=x_n-f(x_n)/f'(x_n)-r`}</Eq>。代入：<Eq>{`e_{n+1}=\\frac{f''(\\xi_n)}{2f'(x_n)}e_n^2`}</Eq>。</li>
+      <li>取 <Eq>{`n\\to\\infty`}</Eq>：常数收敛到 <Eq>{`C=|f''(r)|/(2|f'(r)|)`}</Eq>。</li>
+    </ol>
+    <p><em>观察：</em> 假设 <Eq>{`f'(r)\\neq0`}</Eq> 是本质的——若 <Eq>{`f'(r)=0`}</Eq>（重根），常数爆炸，分析破裂。</p>
+  </>}
+>
+通过二阶泰勒证明牛顿-拉弗逊的二阶收敛。识别常数 $C = |f''(r)|/(2|f'(r)|)$。
+</Exercicio>
+
+<Exercicio numero="69.30" dificuldade="demonstracao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "221", exercicio: "Remark 4.4.2", licenca: "CC-BY-NC" }}
+  solucao={<>若 $f$ 凸递增且有单根 $r$，$f(x_0)>0$，则 <Eq>{`x_0>r`}</Eq>。<Eq>{`x_0`}</Eq> 处的切线**在**曲线下方（凸）。所以切线零点满足 <Eq>{`x_1>r`}</Eq> 也。归纳，所有 <Eq>{`x_n>r`}</Eq> 且序列单调递减。因为下界为 $r$，收敛。极限只能是 <Eq>{`r`}</Eq>。$\square$</>}
+>
+证明：若 $f$ 凸递增且有单根 $r$，$x_0 > r$ 且 $f(x_0) > 0$，牛顿-拉弗逊收敛到 $r$。
+</Exercicio>
+
+<Exercicio numero="69.31" dificuldade="demonstracao"
+  fonte={{ livro: "REAMAT — Cálculo Numérico (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "cap. 3", pagina: "52", exercicio: "ex. 3.10", licenca: "CC-BY-SA" }}
+  solucao={<>对 $\vec f:\mathbb{R}^n\to\mathbb{R}^n$，线性化：<Eq>{`\\vec f(\\vec x_n+\\Delta\\vec x)\\approx\\vec f(\\vec x_n)+J(\\vec x_n)\\Delta\\vec x=\\vec 0`}</Eq>。这给 <Eq>{`J(\\vec x_n)\\Delta\\vec x=-\\vec f(\\vec x_n)`}</Eq>。对 <Eq>{`\\Delta\\vec x`}</Eq> 求解线性系统（LU或QR），然后 <Eq>{`\\vec x_{n+1}=\\vec x_n+\\Delta\\vec x`}</Eq>。在类似标量情况的条件下收敛仍是二阶的。</>}
+>
+将牛顿-拉弗逊推广到 $\vec{f}: \mathbb{R}^n \to \mathbb{R}^n$。写出每步要求解的线性系统，识别Jacobian $J$ 的角色。
+</Exercicio>
+
+<Exercicio numero="69.32" dificuldade="demonstracao"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "463", exercicio: "ex. 431", licenca: "CC-BY-NC-SA" }}
+  solucao={<>赫伦迭代：<Eq>{`x_{n+1}=(x_n+a/x_n)/2`}</Eq>。设 <Eq>{`e_n=x_n-\\sqrt{a}`}</Eq>。则 <Eq>{`x_{n+1}-\\sqrt{a}=(x_n^2-2\\sqrt{a}x_n+a)/(2x_n)=(x_n-\\sqrt{a})^2/(2x_n)=e_n^2/(2x_n)`}</Eq>。因此 <Eq>{`e_{n+1}=e_n^2/(2x_n)\\leq e_n^2/(2\\sqrt{a})`}</Eq> 当 <Eq>{`x_n>\\sqrt{a}`}</Eq>。归纳（若 <Eq>{`x_0>\\sqrt{a}`}</Eq>，所有 <Eq>{`x_n>\\sqrt{a}`}</Eq>），序列二阶收敛到 <Eq>{`\\sqrt{a}`}</Eq> 对任何 <Eq>{`x_0>0`}</Eq>。$\square$</>}
+>
+证明赫伦迭代 $x_{n+1} = (x_n + a/x_n)/2$ 对任何 $x_0 > 0$ 二阶收敛到 $\sqrt{a}$。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman, Heinold, Siemers, Chalishajar · CC-BY-NC。**主要来源 — §4.4 Newton's Method。**
+- [**OpenStax Calculus Volume 1**](https://openstax.org/details/books/calculus-volume-1) — Strang, Herman et al. · CC-BY-NC-SA。§4.9 Newton's Method。应用练习（内部收益率、系统）。
+- [**REAMAT — Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS Reamat Colaborativo · CC-BY-SA。第3章 方程的根。Python实现、与二分法和割线法的比较、数值误差分析。

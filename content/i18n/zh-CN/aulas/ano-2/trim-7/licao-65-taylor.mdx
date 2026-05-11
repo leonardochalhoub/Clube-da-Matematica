@@ -1,0 +1,797 @@
+---
+titulo: "Lição 65 — Polinômio de Taylor"
+slug: "licao-65-taylor"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Aproximação local de funções suaves por polinômios: série de Taylor/Maclaurin, resíduo de Lagrange e séries clássicas de e^x, sin x, cos x."
+ordem: 65
+publicado: true
+tags: ["Taylor", "Maclaurin", "série", "aproximação", "resíduo", "ano-2", "trim-7"]
+prerrequisitos: ["licao-64-l-hopital", "licao-52-regras-derivacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano EM avançado", "Equiv. Math III japonês", "Equiv. Leistungskurs Analysis alemão", "Cálculo I universitário"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="P_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x - a)^k"
+  legenda={<><strong>泰勒多项式</strong>是围绕点 <Eq>{`a`}</Eq> 的 <Eq>{`n`}</Eq> 阶多项式，它是对函数 <Eq>{`f`}</Eq> 的最佳局部 <Eq>{`n`}</Eq> 次多项式逼近。每个系数 <Eq>{`f^{(k)}(a)/k!`}</Eq> 确保多项式与函数在点 <Eq>{`a`}</Eq> 处有<em>相同的函数值、相同的斜率、相同的曲率</em>——直到<em>第</em> <Eq>{`k`}</Eq> <em>阶导数</em>。当 <Eq>{`a = 0`}</Eq> 时，称为<strong>麦克劳林级数</strong>。</>}
+  audioTexto="泰勒多项式 n 阶，围绕点 a 的展开。Sigma，k 从零到 n，f 在 a 处的第 k 阶导数，除以 k 的阶乘，乘以 x 减 a 的 k 次方。当 a 等于零时，该多项式被称为麦克劳林多项式。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    涵盖本课程的书籍
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-8-5-taylor.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §8.5 Taylor Polynomials and Taylor Series · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">采用主动学习方式，通过引导式活动从线性逼近出发构建泰勒多项式——特别适合第 15 阶阅读。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 2
+      </a>
+      <span className="text-clube-mist"> · §6.3 Taylor and Maclaurin Series · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">经典级数表、拉格朗日余项及关于极限的习题——练习的首要参考。</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/downloads" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman et al. — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §8.6 Taylor Polynomials · CC-BY-NC · </span>
+      <em className="text-clube-mist">严格处理，通过拉格朗日余项估计误差；适合第 25 阶和证明题。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义与性质">
+
+### 泰勒多项式
+
+<Definicao titulo="n 阶泰勒多项式">
+设 $f: I \to \mathbb{R}$ 在 $a \in I$ 处有 $n$ 阶导数。$f$ 在 $a$ 处的**n 阶泰勒多项式**为
+$$P_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!} (x - a)^k = f(a) + f'(a)(x-a) + \frac{f''(a)}{2!}(x-a)^2 + \cdots + \frac{f^{(n)}(a)}{n!}(x-a)^n.$$
+
+当 $a = 0$ 时，$P_n$ 称为 $f$ 的**n 阶麦克劳林多项式**。
+</Definicao>
+
+> "If $f$ has $n$ derivatives at $x = a$, then the $n$th-order Taylor polynomial of $f$ centered at $a$ is $p_n(x) = \sum_{k=0}^n \frac{f^{(k)}(a)}{k!}(x-a)^k$." — [APEX Calculus §8.6](https://www.apexcalculus.com/downloads)
+
+<Teorema titulo="泰勒多项式的唯一性">
+$P_n$ 是唯一的次数 $\leq n$ 的多项式，满足对 $k = 0, 1, \ldots, n$ 有 $P_n^{(k)}(a) = f^{(k)}(a)$。
+</Teorema>
+
+### 拉格朗日余项
+
+<Definicao titulo="泰勒余项（拉格朗日形式）">
+若 $f$ 在 $a$ 的某邻域内有 $n+1$ 阶连续导数，则**余项** $R_n(x) = f(x) - P_n(x)$ 满足
+$$R_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$$
+其中 $\xi$ 严格介于 $a$ 与 $x$ 之间。
+</Definicao>
+
+> "Let $f$ have $n + 1$ derivatives on an open interval $I$ and let $a \in I$. For each $x \in I$ there exists a value $c$ between $a$ and $x$ such that $R_n(x) = \frac{f^{(n+1)}(c)}{(n+1)!}(x-a)^{n+1}$." — [OpenStax Calculus Vol. 2 §6.3](https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series)
+
+### 经典麦克劳林级数
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4 overflow-x-auto">
+<table className="min-w-full text-sm font-mono">
+<thead>
+<tr className="border-b border-clube-mist-soft/40">
+<th className="py-1 pr-4 text-left font-semibold">函数</th>
+<th className="py-1 text-left font-semibold">麦克劳林级数</th>
+<th className="py-1 pl-4 text-left font-semibold">收敛半径</th>
+</tr>
+</thead>
+<tbody>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$e^x$</td>
+<td className="py-1">$1 + x + \tfrac{x^2}{2!} + \tfrac{x^3}{3!} + \cdots = \displaystyle\sum_{k=0}^\infty \tfrac{x^k}{k!}$</td>
+<td className="py-1 pl-4">$\infty$</td>
+</tr>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$\sin x$</td>
+<td className="py-1">$x - \tfrac{x^3}{3!} + \tfrac{x^5}{5!} - \cdots = \displaystyle\sum_{k=0}^\infty \tfrac{(-1)^k x^{2k+1}}{(2k+1)!}$</td>
+<td className="py-1 pl-4">$\infty$</td>
+</tr>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$\cos x$</td>
+<td className="py-1">$1 - \tfrac{x^2}{2!} + \tfrac{x^4}{4!} - \cdots = \displaystyle\sum_{k=0}^\infty \tfrac{(-1)^k x^{2k}}{(2k)!}$</td>
+<td className="py-1 pl-4">$\infty$</td>
+</tr>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$\ln(1+x)$</td>
+<td className="py-1">$x - \tfrac{x^2}{2} + \tfrac{x^3}{3} - \cdots = \displaystyle\sum_{k=1}^\infty \tfrac{(-1)^{k+1} x^k}{k}$</td>
+<td className="py-1 pl-4">$(-1,1]$</td>
+</tr>
+<tr className="border-b border-clube-mist-soft/20">
+<td className="py-1 pr-4">$\dfrac{1}{1-x}$</td>
+<td className="py-1">$1 + x + x^2 + x^3 + \cdots = \displaystyle\sum_{k=0}^\infty x^k$</td>
+<td className="py-1 pl-4">$(-1,1)$</td>
+</tr>
+<tr>
+<td className="py-1 pr-4">$\arctan x$</td>
+<td className="py-1">$x - \tfrac{x^3}{3} + \tfrac{x^5}{5} - \cdots = \displaystyle\sum_{k=0}^\infty \tfrac{(-1)^k x^{2k+1}}{2k+1}$</td>
+<td className="py-1 pl-4">$[-1,1]$</td>
+</tr>
+</tbody>
+</table>
+</figure>
+
+<Insight titulo="通过泰勒级数的欧拉恒等式">
+在 $e^x$ 的级数中令 $x \to ix$：
+$$e^{ix} = \sum_{k=0}^\infty \frac{(ix)^k}{k!} = \underbrace{\sum_{k=0}^\infty \frac{(-1)^k x^{2k}}{(2k)!}}_{\cos x} + i\underbrace{\sum_{k=0}^\infty \frac{(-1)^k x^{2k+1}}{(2k+1)!}}_{\sin x}.$$
+因此 $e^{ix} = \cos x + i\sin x$。当 $x = \pi$ 时：$e^{i\pi} + 1 = 0$ ——欧拉恒等式。
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="给 5 岁小朋友讲">
+
+想象一条**弯曲的曲线**。你想在某个点附近**复制**它，但只能用直尺和铅笔。
+
+你把直尺放在曲线在那个点处的倾斜角度上。已经有点像了！
+
+如果你再加上一个**圆弧**来调整曲线度，它就会更像了。
+
+每**添加一样东西**（倾斜、弯曲、下一样...），复制就更加逼真。泰勒多项式就是**完美复制的秘诀**——项越多，越准确。
+
+</Porta>
+
+<Porta nivel="10" titulo="给 10 岁小朋友讲">
+
+想法很简单：任何"表现良好"的函数都可以在某个点附近**用多项式来模仿**。
+
+麦克劳林公式（当点是 $0$ 时）是：
+
+$$f(x) \approx f(0) + f'(0)\cdot x + \frac{f''(0)}{2}\cdot x^2 + \frac{f'''(0)}{6}\cdot x^3 + \cdots$$
+
+每个新项都用上了一个更高阶的导数。项越多 = 模仿得越好。
+
+**正弦的例子：** 在 $x = 0$ 处：$\sin 0 = 0$，$\cos 0 = 1$，$-\sin 0 = 0$，$-\cos 0 = -1$，...
+
+所以 $\sin x \approx x - x^3/6 + x^5/120 - \cdots$
+
+对于小的 $x$，$\sin x \approx x$ 就够用了——当 $x < 0{,}1$ 弧度时误差小于 $0{,}2\%$！
+
+</Porta>
+
+<Porta nivel="15" titulo="给 15 岁少年讲">
+
+泰勒是**任意函数与多项式之间的桥梁**——多项式是最容易计算的。
+
+**秘诀：**
+1. 选择一个点 $a$（通常 $a = 0$ ——麦克劳林级数）。
+2. 计算 $f(a),\, f'(a),\, f''(a),\, \ldots,\, f^{(n)}(a)$。
+3. 组织成 $P_n(x) = \sum_{k=0}^n \frac{f^{(k)}(a)}{k!}(x-a)^k$。
+
+**每个学生都应该记住的级数：**
+
+- $e^x = 1 + x + x^2/2 + x^3/6 + \cdots$
+- $\sin x = x - x^3/6 + x^5/120 - \cdots$
+- $\cos x = 1 - x^2/2 + x^4/24 - \cdots$
+- $\ln(1+x) = x - x^2/2 + x^3/3 - \cdots$ 当 $|x| < 1$
+
+**三个直接应用：**
+
+- **逼近数值：** $\sin(0{,}1) \approx 0{,}1 - 0{,}001/6 \approx 0{,}09983$。
+- **解极限：** $\lim_{x\to 0}\frac{e^x - 1 - x}{x^2} = \lim_{x\to 0}\frac{x^2/2 + O(x^3)}{x^2} = \frac{1}{2}$。
+- **工程学：** $\sin\theta \approx \theta$ 当 $\theta$ 是小角度时——简化摆的微分方程。
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程学学生讲">
+
+泰勒是**工程师的手术刀**：没有它，就没有线性化，没有小信号分析，没有牛顿-拉夫逊法，没有龙格-库塔法。
+
+### 余项的形式
+
+$$f(x) = P_n(x) + R_n(x)$$
+
+**拉格朗日形式：** $R_n = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$，某个 $\xi$ 在 $a$ 与 $x$ 之间。
+
+**积分形式：** $R_n = \int_a^x \frac{(x-t)^n}{n!} f^{(n+1)}(t)\, dt$。
+
+**Big-O：** $R_n = O((x-a)^{n+1})$ ——快速阅读误差阶数。
+
+### 实际应用
+
+- **线性化：** $f(x) \approx f(x_0) + f'(x_0)(x - x_0)$ ——电子学与控制中小信号分析的基础。
+- **牛顿-拉夫逊：** 使用 1 阶泰勒：$f(x) \approx f(x_n) + f'(x_n)(x - x_n) = 0$ 得出 $x_{n+1} = x_n - f(x_n)/f'(x_n)$。
+- **龙格-库塔：** 通过多变量泰勒在 $t$ 和 $y$ 上推导；RK4 有全局误差 $O(h^4)$。
+- **色散关系：** $\omega(k) \approx \omega_0 + v_g(k - k_0) + \cdots$ ——群速度作为泰勒系数。
+
+### 多变量泰勒（2 阶）
+
+$$f(\vec x) \approx f(\vec a) + \nabla f(\vec a)^T (\vec x - \vec a) + \tfrac{1}{2}(\vec x - \vec a)^T H(\vec a)(\vec x - \vec a)$$
+
+其中 $H$ 是**黑塞矩阵**。对数值优化至关重要。
+
+### 收敛：不总是有保证的
+
+$f(x) = e^{-1/x^2}$（$f(0) = 0$）在 $0$ 处所有导数都为零，因此对所有 $n$ 都有 $P_n = 0$。但 $f \neq 0$ ——光滑函数但**不解析**。泰勒级数确实存在，但**不收敛到** $f$。
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士讲">
+
+泰勒是复分析、微扰论、数学物理和二阶优化的胚胎。
+
+### 复分析：全纯函数就是解析函数
+
+每个**全纯函数** $f: \Omega \to \mathbb{C}$ 都等于它在任何其定义的开圆盘中的泰勒级数（柯西，1820 年代）。这在 $\mathbb{R}$ 上要强大得多：光滑性（$C^\infty$）不保证解析性；全纯性则保证。美妙之处在这种刚性。
+
+### 量子扰动
+
+$H = H_0 + \lambda V$：本征能量展开成关于 $\lambda$ 的泰勒级数：$E_n(\lambda) = E_n^{(0)} + \lambda E_n^{(1)} + \lambda^2 E_n^{(2)} + \cdots$ 系数通过 Rayleigh-Schrödinger 法。这是泰勒应用在算子空间。
+
+### 渐近级数与收敛级数
+
+Stirling：$\ln(n!) \sim n\ln n - n + \tfrac{1}{2}\ln(2\pi n) + \sum_k B_{2k}/(2k(2k-1)n^{2k-1})$。这个级数对**任何固定的** $n$ 都**发散**，但截断后给出很好的数值近似。哲学上的差异：一个级数即使发散也可能有用——误差会在爆炸之前先减小。
+
+### Padé 近似
+
+有理近似 $f(x) \approx P_m(x)/Q_n(x)$ 对有奇点的函数比泰勒有更好的有效半径。用于量子力学（Padé-Borel 方法）和级数收敛加速。
+
+### 历史背景
+
+Brook Taylor（1715）发表了 *Methodus Incrementorum*，没有收敛性证明。Maclaurin（1742）推广了 $a = 0$ 的情况。Lagrange（1797）形式化了余项。Cauchy（1820 年代）通过围道积分严格证明。这整套机器已经准备好让 Maxwell 构建电磁学，让 Einstein 在平坦度量附近线性化测地线。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用">
+
+**4 步食谱：**
+
+1. **辨别展开点** $a$（通常 $0$）。
+2. **计算导数** $f(a), f'(a), f''(a), \ldots$ 直到所需的阶。
+3. **组织** $P_n(x) = \sum_{k=0}^n \frac{f^{(k)}(a)}{k!}(x-a)^k$。
+4. **估计误差**：对交替级数递减，$|R_n| < $ 第一个省略项的绝对值。
+
+### 操作技巧
+
+- **替换：** $\sin(x^2) = x^2 - (x^2)^3/6 + \cdots = x^2 - x^6/6 + \cdots$ ——直接来自 sin 级数。
+- **乘法：** $e^x \sin x = (1 + x + x^2/2 + \cdots)(x - x^3/6 + \cdots)$，展开至所需阶。
+- **积分/求导：** $\arctan x = \int_0^x \frac{1}{1+t^2}\, dt = \int_0^x (1 - t^2 + t^4 - \cdots)\, dt = x - x^3/3 + x^5/5 - \cdots$
+
+### 巴西背景——利率
+
+在金融中，$(1 + r)^n \approx 1 + nr$ 对小利率 $r$（1 阶泰勒）。相对误差：大约 $\binom{n}{2} r^2$。对于月利率 $r = 1\%$ 和 $n = 12$ 月：误差 $\approx 66 \times 0{,}0001 = 0{,}66\%$ ——对快速年回报率估计来说可以忽略。
+
+### Python/SymPy 验证
+
+```python
+import sympy as sp
+x = sp.symbols('x')
+sp.series(sp.sin(x), x, 0, 8)       # sin x 的麦克劳林展开至 x^7
+sp.series(sp.exp(x)*sp.cos(x), x, 0, 5)
+```
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的例子
+
+<Exemplo titulo="e^x 的麦克劳林展开至 4 阶（直接应用）" numero="1">
+
+**问题。** 求 $f(x) = e^x$ 的 4 阶麦克劳林多项式，并估计 $x = 0{,}5$ 处的误差。
+
+**策略。** 由于 $\frac{d^k}{dx^k}e^x = e^x$，所有在 $a = 0$ 处的导数都等于 $1$。直接组织 $P_4$。使用拉格朗日余项，其中 $f^{(5)} = e^x$。
+
+**求解。**
+
+1. **在 $0$ 处的导数：** 对所有 $k$ 有 $f^{(k)}(0) = e^0 = 1$。
+2. **多项式：** $P_4(x) = 1 + x + \dfrac{x^2}{2} + \dfrac{x^3}{6} + \dfrac{x^4}{24}$。
+3. **$x = 0{,}5$ 处的误差：** $|R_4(0{,}5)| \leq \dfrac{e^\xi}{5!}(0{,}5)^5 \leq \dfrac{e^{0{,}5}}{120}\cdot\dfrac{1}{32} \approx \dfrac{1{,}649}{120 \cdot 32} \approx 0{,}000430$。
+4. **近似值：** $P_4(0{,}5) = 1 + 0{,}5 + 0{,}125 + 0{,}02083 + 0{,}002604 \approx 1{,}6484$。精确值：$e^{0{,}5} \approx 1{,}6487$ ——误差小于 $3 \times 10^{-4}$。✓
+
+**验证。** 估计的误差 $4{,}3 \times 10^{-4}$ 大于实际误差 $3 \times 10^{-4}$：拉格朗日余项是一个上界。✓
+
+**来源。** [OpenStax Calculus Vol. 2, §6.3, Example 6.17](https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series) — CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="ln x 在 a = 1 处的泰勒展开（中级）" numero="2">
+
+**问题。** 求 $f(x) = \ln x$ 在 $a = 1$ 处的 3 阶泰勒多项式。
+
+**策略。** 计算 $f, f', f'', f'''$ 在 $x = 1$ 处的值。以 $(x - 1)$ 为变量组织 $P_3$。
+
+**求解。**
+
+1. **导数：** $f(x) = \ln x$，$f'(x) = 1/x$，$f''(x) = -1/x^2$，$f'''(x) = 2/x^3$。
+2. **在 $a = 1$ 处：** $f(1) = 0$，$f'(1) = 1$，$f''(1) = -1$，$f'''(1) = 2$。
+3. **多项式：**
+$$P_3(x) = 0 + 1\cdot(x-1) + \frac{-1}{2!}(x-1)^2 + \frac{2}{3!}(x-1)^3 = (x-1) - \frac{(x-1)^2}{2} + \frac{(x-1)^3}{3}.$$
+4. **在 $x = 1{,}1$ 处的测试：** $P_3(1{,}1) = 0{,}1 - 0{,}005 + 0{,}000333 \approx 0{,}09533$。精确值：$\ln(1{,}1) \approx 0{,}09531$。✓
+
+**验证。** $\ln(1+u) = u - u^2/2 + u^3/3 - \cdots$ 级数中令 $u = x - 1$ 与 $P_3$ 相符。✓
+
+**来源。** [Active Calculus §8.5, Activity 8.5.3](https://activecalculus.org/single/sec-8-5-taylor.html) — CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="通过泰勒求极限：lim (sin x - x)/x^3（中级）" numero="3">
+
+**问题。** 计算 $\displaystyle\lim_{x \to 0} \frac{\sin x - x}{x^3}$。
+
+**策略。** 将 $\sin x$ 的麦克劳林级数代入分子并化简。避免了多次应用洛必达法则。
+
+**求解。**
+
+1. **级数：** $\sin x = x - \dfrac{x^3}{6} + \dfrac{x^5}{120} - \cdots$
+2. **分子：** $\sin x - x = -\dfrac{x^3}{6} + \dfrac{x^5}{120} - \cdots$
+3. **除以 $x^3$：** $\dfrac{\sin x - x}{x^3} = -\dfrac{1}{6} + \dfrac{x^2}{120} - \cdots$
+4. **极限：** 当 $x \to 0$ 时，所有含 $x$ 的项都趋于零。极限是 $\mathbf{-1/6}$。
+
+**验证。** 应用洛必达法则三次也会得到 $-1/6$，但泰勒方法更快。✓
+
+**来源。** [OpenStax Calculus Vol. 2, §6.3, Example 6.20](https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series) — CC-BY-NC-SA。
+</Ejemplo>
+
+<Exemplo titulo="近似 sin x ≈ x 对摆的误差（建模）" numero="4">
+
+**问题。** 一个摆使用近似 $\sin\theta \approx \theta$。对于 $\theta = 15° = \pi/12$ 弧度，相对误差百分比是多少？
+
+**策略。** 精确计算 $\sin(\pi/12)$ 并与 $\pi/12$ 比较。通过级数的下一项估计误差：$-\theta^3/6$。
+
+**求解。**
+
+1. **弧度制的角度：** $\theta = \pi/12 \approx 0{,}2618$ 弧度。
+2. **精确值：** $\sin(\pi/12) = \sin(15°) = (\sqrt{6} - \sqrt{2})/4 \approx 0{,}2588$。
+3. **近似：** $\theta = 0{,}2618$。
+4. **绝对误差：** $|0{,}2618 - 0{,}2588| = 0{,}0030$。
+5. **相对误差：** $0{,}0030 / 0{,}2588 \approx 1{,}16\%$。
+6. **通过泰勒：** 误差 $\approx \theta^3/6 = (0{,}2618)^3/6 \approx 0{,}00298$ ——非常接近计算的误差。✓
+
+**验证。** 对于 $\theta < 0{,}1$ 弧度（约 $5{,}7°$），误差降至 $0{,}017\%$ 以下——证实了工程学中的使用。✓
+
+**来源。** [APEX Calculus §8.6, Exercise 8.6.13](https://www.apexcalculus.com/downloads) — CC-BY-NC。
+</Exemplo>
+
+<Exemplo titulo="通过复合的麦克劳林展开：e^(sin x) 至 3 阶（进阶）" numero="5">
+
+**问题。** 求 $f(x) = e^{\sin x}$ 的麦克劳林多项式至 3 阶。
+
+**策略。** 将 $\sin x$ 的级数代入 $e^u$ 的级数，聚集项至 $x^3$。
+
+**求解。**
+
+1. **sin 的级数：** $\sin x = x - x^3/6 + O(x^5)$。
+2. **$u = \sin x$：** 则 $e^u = 1 + u + u^2/2 + u^3/6 + O(u^4)$。
+3. **替换：** $u = x - x^3/6 + \cdots$，因此：
+   - $u = x - x^3/6$
+   - $u^2 = x^2 - 2x\cdot x^3/6 + \cdots = x^2 + O(x^4)$
+   - $u^3 = x^3 + O(x^5)$
+4. **组织：**
+$$e^{\sin x} = 1 + \left(x - \tfrac{x^3}{6}\right) + \frac{x^2}{2} + \frac{x^3}{6} + O(x^4) = 1 + x + \frac{x^2}{2} + 0 \cdot x^3 + O(x^4).$$
+5. **结果：** $P_3(x) = 1 + x + \dfrac{x^2}{2}$。
+
+**验证。** 在 $x = 0$：$f(0) = e^0 = 1$ ✓。$f'(0) = e^{\sin 0}\cos 0 = 1$ ✓。$f''(0) = e^{\sin 0}(\cos^2 0 - \sin 0) = 1$ ✓。
+
+**来源。** [APEX Calculus §8.6, Exercises 8.6.17–8.6.20](https://www.apexcalculus.com/downloads) — CC-BY-NC。
+</Exemplo>
+
+<ListaExercicios seed="licao-65-taylor">
+
+### 块 A — 直接麦克劳林展开（65.1 至 65.12）
+
+<Exercicio
+  numero="65.1"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`e^x`}</Eq> 在 <Eq>{`x=0`}</Eq> 处的所有导数都等于 <Eq>{`1`}</Eq>。因此 <Eq>{`P_4(x) = 1 + x + x^2/2 + x^3/6 + x^4/24`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Example 6.17", licenca: "CC-BY-NC-SA" }}
+>
+写出 $f(x) = e^x$ 到 $x^4$ 的麦克劳林多项式。
+</Exercicio>
+
+<Exercicio
+  numero="65.2"
+  dificuldade="aplicacao"
+  solucao={<>使用 <Eq>{`\\sin`}</Eq> 和 <Eq>{`\\cos`}</Eq> 在 0 处的交替导数：<Eq>{`P_7(x) = x - x^3/6 + x^5/120 - x^7/5040`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Example 6.16", licenca: "CC-BY-NC-SA" }}
+>
+写出 $f(x) = \sin x$ 到 $x^7$ 的麦克劳林多项式。
+</Exercicio>
+
+<Exercicio
+  numero="65.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P_6(x) = 1 - x^2/2 + x^4/24 - x^6/720`}</Eq>。<Eq>{`\\cos`}</Eq> 在 0 处的奇数阶导数为零。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Table 6.2", licenca: "CC-BY-NC-SA" }}
+>
+写出 $f(x) = \cos x$ 到 $x^6$ 的麦克劳林多项式。
+</Exercicio>
+
+<Exercicio
+  numero="65.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f^{(k)}(0)/k! = (-1)^{k+1}/k`}</Eq> 对 <Eq>{`k \\geq 1`}</Eq>。因此 <Eq>{`P_4(x) = x - x^2/2 + x^3/3 - x^4/4`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>导数：<Eq>{`f = \\ln(1+x)`}</Eq>，<Eq>{`f' = 1/(1+x)`}</Eq>，<Eq>{`f'' = -1/(1+x)^2`}</Eq>，<Eq>{`f''' = 2/(1+x)^3`}</Eq>，<Eq>{`f'''' = -6/(1+x)^4`}</Eq>。</li>
+      <li>在 <Eq>{`x=0`}</Eq>：<Eq>{`f(0)=0`}</Eq>，<Eq>{`f'(0)=1`}</Eq>，<Eq>{`f''(0)=-1`}</Eq>，<Eq>{`f'''(0)=2`}</Eq>，<Eq>{`f''''(0)=-6`}</Eq>。</li>
+      <li>除以 <Eq>{`k!`}</Eq>：系数为 <Eq>{`0, 1, -1/2, 1/3, -1/4`}</Eq>。</li>
+      <li>组织：<Eq>{`P_4(x) = x - x^2/2 + x^3/3 - x^4/4`}</Eq>。</li>
+      <li><em>诀窍：</em>系数遵循 <Eq>{`(-1)^{k+1}/k`}</Eq> 的模式——认识这一点避免计算高阶导数。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Table 6.2", licenca: "CC-BY-NC-SA" }}
+>
+写出 $f(x) = \ln(1+x)$ 到 $x^4$ 的麦克劳林多项式。
+</Exercicio>
+
+<Exercicio
+  numero="65.5"
+  dificuldade="aplicacao"
+  resposta="$P_5(x) = 1 + x + x^2 + x^3 + x^4 + x^5$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Table 6.2", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = 1/(1-x)$ 到 $x^5$ 的麦克劳林展开——只是几何级数。
+</Exercicio>
+
+<Exercicio
+  numero="65.6"
+  dificuldade="aplicacao"
+  solucao={<>使用二项式且 <Eq>{`\\alpha = 1/2`}</Eq>：<Eq>{`P_3(x) = 1 + x/2 - x^2/8 + x^3/16`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Activity 8.5.2", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = (1+x)^{1/2}$ 到 $x^3$ 的麦克劳林展开。计算 $f'$、$f''$、$f'''$ 在 $x = 0$ 处的值。
+</Exercicio>
+
+<Exercicio
+  numero="65.7"
+  dificuldade="aplicacao"
+  resposta="$P_5(x) = x - x^3/3 + x^5/5$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Table 6.2", licenca: "CC-BY-NC-SA" }}
+>
+$\arctan x$ 到 $x^5$ 的麦克劳林展开（通过对 $1/(1+x^2)$ 积分）。
+</Exercicio>
+
+<Exercicio
+  numero="65.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sinh x = x + x^3/6 + x^5/120`}</Eq> 和 <Eq>{`\\cosh x = 1 + x^2/2 + x^4/24`}</Eq>。它们是 <Eq>{`\\sin`}</Eq> 和 <Eq>{`\\cos`}</Eq> 的级数，去掉交替符号。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.9", licenca: "CC-BY-NC" }}
+>
+$\sinh x$ 和 $\cosh x$ 到 $x^5$ 的麦克劳林展开。
+</Exercicio>
+
+<Exercicio
+  numero="65.9"
+  dificuldade="aplicacao"
+  resposta="$P_4(x) = 1 - x + x^2/2 - x^3/6 + x^4/24$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.4", licenca: "CC-BY-NC-SA" }}
+>
+$e^{-x}$ 到 $x^4$ 的麦克劳林展开（在 $e^x$ 中直接替换）。
+</Exercicio>
+
+<Exercicio
+  numero="65.10"
+  dificuldade="aplicacao"
+  solucao={<>写 <Eq>{`\\tan x = \\sin x / \\cos x`}</Eq> 并除级数：<Eq>{`P_5(x) = x + x^3/3 + 2x^5/15`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.5", licenca: "CC-BY-NC-SA" }}
+>
+$\tan x$ 到 $x^5$ 的麦克劳林展开，使用 $\sin/\cos$。
+</Exercicio>
+
+<Exercicio
+  numero="65.11"
+  dificuldade="aplicacao"
+  resposta="$P_4(x) = 1 - 2x^2 + 2x^4/3$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.11", licenca: "CC-BY-NC" }}
+>
+$\cos(2x)$ 到 $x^4$ 的麦克劳林展开，通过替换。
+</Exercicio>
+
+<Exercicio
+  numero="65.12"
+  dificuldade="aplicacao"
+  solucao={<>在 $e^x$ 的级数中令 $x \to x^2$：<Eq>{`P_6(x) = 1 + x^2 + x^4/2 + x^6/6`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`e^u = 1 + u + u^2/2 + u^3/6 + \\cdots`}</Eq> 的级数。</li>
+      <li>令 <Eq>{`u = x^2`}</Eq>：<Eq>{`e^{x^2} = 1 + x^2 + x^4/2 + x^6/6 + \\cdots`}</Eq>。</li>
+      <li>至 6 阶：<Eq>{`P_6(x) = 1 + x^2 + x^4/2 + x^6/6`}</Eq>。</li>
+      <li><em>诀窍：</em>通过替换的复合避免了直接求 <Eq>{`e^{x^2}`}</Eq> 的导数——快得多。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.13", licenca: "CC-BY-NC" }}
+>
+$e^{x^2}$ 到 $x^6$ 的麦克劳林展开。
+</Exercicio>
+
+### 块 B — 复合与乘法（65.13 至 65.22）
+
+<Exercicio
+  numero="65.13"
+  dificuldade="aplicacao"
+  resposta="$P_8(x) = 1 - x^4/2 + x^8/24$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.14", licenca: "CC-BY-NC" }}
+>
+$\cos(x^2)$ 到 $x^8$ 的麦克劳林展开。
+</Exercicio>
+
+<Exercicio
+  numero="65.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\ln(1 - x^2) = \\ln(1 + (-x^2))`}</Eq>。在 <Eq>{`\\ln(1+u)`}</Eq> 的级数中令 <Eq>{`u = -x^2`}</Eq>：<Eq>{`P_6(x) = -x^2 - x^4/2 - x^6/3`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.12", licenca: "CC-BY-NC-SA" }}
+>
+$\ln(1 - x^2)$ 到 $x^6$ 的麦克劳林展开。
+</Exercicio>
+
+<Exercicio
+  numero="65.15"
+  dificuldade="aplicacao"
+  resposta="$P_6(x) = 1 - x^2 + x^4 - x^6$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.9", licenca: "CC-BY-NC-SA" }}
+>
+$1/(1+x^2)$ 到 $x^6$ 的麦克劳林展开（几何级数，$u = -x^2$）。
+</Exercicio>
+
+<Exercicio
+  numero="65.16"
+  dificuldade="aplicacao"
+  solucao={<>乘积：<Eq>{`(1 + x + x^2/2 + \\cdots)(x - x^3/6 + \\cdots)`}</Eq>。聚集至 <Eq>{`x^4`}</Eq>：<Eq>{`P_4(x) = x + x^2 + x^3/3 - x^4/6`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.19", licenca: "CC-BY-NC" }}
+>
+$e^x \sin x$ 到 $x^4$ 的麦克劳林展开。
+</Exercicio>
+
+<Exercicio
+  numero="65.17"
+  dificuldade="aplicacao"
+  resposta="$P_5(x) = x - 4x^3/3 + 2x^5/15$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.18", licenca: "CC-BY-NC" }}
+>
+$\sin x \cos x$ 到 $x^5$ 的麦克劳林展开（或使用 $\sin(2x)/2$）。
+</Exercicio>
+
+<Exercicio
+  numero="65.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`x e^{-x} = x(1 - x + x^2/2 - x^3/6 + \\cdots)`}</Eq>。乘法后：<Eq>{`P_4(x) = x - x^2 + x^3/2 - x^4/6`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.6", licenca: "CC-BY-NC-SA" }}
+>
+$x e^{-x}$ 到 $x^4$ 的麦克劳林展开。
+</Exercicio>
+
+<Exercicio
+  numero="65.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq>。在 <Eq>{`a=1`}</Eq> 处的导数：<Eq>{`f(1)=0`}</Eq>，<Eq>{`f'(1)=1`}</Eq>，<Eq>{`f''(1)=-1`}</Eq>，<Eq>{`f'''(1)=2`}</Eq>，<Eq>{`f''''(1)=-6`}</Eq>。因此 <Eq>{`P_4(x) = (x-1) - (x-1)^2/2 + (x-1)^3/3 - (x-1)^4/4`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>计算导数：<Eq>{`f'=1/x, f''=-1/x^2, f'''=2/x^3, f''''=-6/x^4`}</Eq>。</li>
+      <li>在 <Eq>{`a=1`}</Eq> 处计算：<Eq>{`0, 1, -1, 2, -6`}</Eq>。</li>
+      <li>除以 <Eq>{`k!`}</Eq>：系数为 <Eq>{`0, 1, -1/2, 1/3, -1/4`}</Eq>。</li>
+      <li>用 <Eq>{`(x-1)^k`}</Eq> 组织。</li>
+      <li><em>有趣的是：</em>这正是 <Eq>{`\\ln(1+u)`}</Eq> 展开式，令 <Eq>{`u = x-1`}</Eq> ——通过替换验证。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Activity 8.5.3", licenca: "CC-BY-NC-SA" }}
+>
+$\ln x$ 在 $a = 1$ 处、4 阶的泰勒展开。
+</Exercicio>
+
+<Exercicio
+  numero="65.20"
+  dificuldade="aplicacao"
+  resposta="$P_3(x) = 1 + (x-1)/2 - (x-1)^2/8 + (x-1)^3/16$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.22", licenca: "CC-BY-NC" }}
+>
+$\sqrt{x}$ 在 $a = 1$ 处、3 阶的泰勒展开。
+</Exercicio>
+
+<Exercicio
+  numero="65.21"
+  dificuldade="aplicacao"
+  solucao={<>$1/x$ 在 $a=1$ 处的泰勒展开：<Eq>{`f^{(k)}(1) = (-1)^k k!`}</Eq>，因此 <Eq>{`P_3(x) = 1 - (x-1) + (x-1)^2 - (x-1)^3`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.21", licenca: "CC-BY-NC" }}
+>
+$1/x$ 在 $a = 1$ 处、3 阶的泰勒展开。
+</Exercicio>
+
+<Exercicio
+  numero="65.22"
+  dificuldade="aplicacao"
+  resposta="$P_4(x) = 1 - (x-\pi/4) - (x-\pi/4)^2 + (x-\pi/4)^3/3 + (x-\pi/4)^4/6$（简化）"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.24", licenca: "CC-BY-NC" }}
+>
+$\cos x$ 在 $a = \pi/4$ 处、4 阶的泰勒展开。
+</Exercicio>
+
+### 块 C — 通过泰勒求极限（65.23 至 65.30）
+
+<Exercicio
+  numero="65.23"
+  dificuldade="modelagem"
+  resposta="$1/2$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Example 6.20", licenca: "CC-BY-NC-SA" }}
+>
+使用泰勒计算 $\displaystyle\lim_{x \to 0} \frac{e^x - 1 - x}{x^2}$。
+</Exercicio>
+
+<Exercicio
+  numero="65.24"
+  dificuldade="modelagem"
+  resposta="$-1/6$"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.20", licenca: "CC-BY-NC-SA" }}
+>
+使用泰勒计算 $\displaystyle\lim_{x \to 0} \frac{\sin x - x}{x^3}$。
+</Exercicio>
+
+<Exercicio
+  numero="65.25"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\cos x = 1 - x^2/2 + x^4/24 - \\cdots`}</Eq> 的级数。分子：<Eq>{`\\cos x - 1 + x^2/2 = x^4/24 - \\cdots`}</Eq>。除以 <Eq>{`x^4`}</Eq>：极限是 <Eq>{`1/24`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.21", licenca: "CC-BY-NC-SA" }}
+>
+计算 $\displaystyle\lim_{x \to 0} \frac{\cos x - 1 + x^2/2}{x^4}$。
+</Exercicio>
+
+<Exercicio
+  numero="65.26"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\sin x = x - x^3/6 + \\cdots`}</Eq>，<Eq>{`\\tan x = x + x^3/3 + \\cdots`}</Eq>。分子：<Eq>{`\\sin x - \\tan x = -x^3/2 + \\cdots`}</Eq>。除以 <Eq>{`x^3`}</Eq>：极限是 <Eq>{`-1/2`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.29", licenca: "CC-BY-NC" }}
+>
+计算 $\displaystyle\lim_{x \to 0} \frac{\sin x - \tan x}{x^3}$。
+</Exercicio>
+
+<Exercicio
+  numero="65.27"
+  dificuldade="modelagem"
+  resposta="$\approx 0{,}09531$（用 $P_4$ 得到 4 位精确数字）"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.9", licenca: "CC-BY-NC-SA" }}
+>
+使用麦克劳林级数估计 $\ln(1{,}1)$，误差小于 $10^{-4}$。说明需要哪个阶。
+</Exercicio>
+
+<Exercicio
+  numero="65.28"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`P_5(0.1) = 0.1 - 0.1^3/6 + 0.1^5/120 \\approx 0.099833`}</Eq>。通过拉格朗日估计误差：<Eq>{`|R_5| \\leq (0.1)^7/5040 \\approx 2 \\times 10^{-10}`}</Eq>。用 5 阶可得 6 位精度。</>}
+  passos={<>
+    <ol>
+      <li>级数：<Eq>{`\\sin x = x - x^3/6 + x^5/120 - x^7/5040 + \\cdots`}</Eq>。</li>
+      <li>在 <Eq>{`x = 0{,}1`}</Eq>：<Eq>{`0.1 - 0.000167 + 0.0000000833 \\approx 0.099833`}</Eq>。</li>
+      <li>通过莱布尼兹法则（交替级数）：下一项 <Eq>{`|{-x^7/5040}| \\approx 2 \\times 10^{-11}`}</Eq>。</li>
+      <li>5 阶保证 6 位小数。✓</li>
+      <li><em>诀窍：</em>对交替级数递减，误差小于第一个省略项的绝对值。</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Activity 8.5.4", licenca: "CC-BY-NC-SA" }}
+>
+估计 $\sin(0{,}1)$，误差小于 $10^{-6}$。说明使用的阶数。
+</Exercicio>
+
+<Exercicio
+  numero="65.29"
+  dificuldade="modelagem"
+  resposta="$\sqrt{1{,}1} \approx 1{,}04879$（用 $P_3$ 得到 3 位精确数字）"
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.16", licenca: "CC-BY-NC-SA" }}
+>
+使用 $a = 0$ 处 $\sqrt{1+x}$ 的泰勒展开至 2 阶来估计 $\sqrt{1{,}1}$。
+</Exercicio>
+
+<Exercicio
+  numero="65.30"
+  dificuldade="modelagem"
+  solucao={<>物理学中：<Eq>{`E = mc^2(1 - v^2/c^2)^{-1/2}`}</Eq>。二项级数，<Eq>{`u = v^2/c^2`}</Eq>：<Eq>{`(1-u)^{-1/2} = 1 + u/2 + 3u^2/8 + \\cdots`}</Eq>。因此 <Eq>{`E \\approx mc^2 + \\frac{1}{2}mv^2 + \\cdots`}</Eq>。第一项是静止能量，第二项是古典动能。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.40", licenca: "CC-BY-NC-SA" }}
+>
+相对论能量：$E = mc^2/\sqrt{1 - v^2/c^2}$。按 $v/c$ 的幂展开，并指出 $E_0 = mc^2$ 和 $E_k = \frac{1}{2}mv^2$ 项。
+</Exercicio>
+
+### 块 D — 理解与证明（65.31 至 65.40）
+
+<Exercicio
+  numero="65.31"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "在 $a$ 处与 $f$ 有相同的函数值、相同的导数，以及直到 $n$ 阶的相同导数。", correta: true },
+    { texto: "是唯一经过点 $(a, f(a))$ 的 $n$ 次多项式。" },
+    { texto: "最小化整个 $\\mathbb{R}$ 上的最大误差。" },
+    { texto: "在 $n+1$ 个不同的点上与 $f$ 相符。" },
+  ]}
+  solucao={<>特征性质是 <Eq>{`P_n^{(k)}(a) = f^{(k)}(a)`}</Eq> 对 <Eq>{`k = 0, 1, \\ldots, n`}</Eq>。没有其他 $n$ 次多项式同时满足所有这些等式。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Preview Activity 8.5.1", licenca: "CC-BY-NC-SA" }}
+>
+是什么使 $P_n$ 成为在 $a$ 处的"最佳 $n$ 次多项式逼近"？
+</Exercicio>
+
+<Exercicio
+  numero="65.32"
+  dificuldade="compreensao"
+  solucao={<>若 <Eq>{`f`}</Eq> 是次数 $\leq n$ 的多项式，则对 $k \leq n$ 有 <Eq>{`f^{(k)}`}</Eq> 相同。因此 <Eq>{`P_n`}</Eq> 和 <Eq>{`f`}</Eq> 有相同的系数——它们相等。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.7", licenca: "CC-BY-NC" }}
+>
+证明：若 $f$ 是次数 $\leq n$ 的多项式，则 $P_n = f$ 精确相等（不仅仅是逼近）。
+</Exercicio>
+
+<Exercicio
+  numero="65.33"
+  dificuldade="compreensao"
+  solucao={<>对 $e^x$：<Eq>{`|R_n(x)| \\leq e^{|x|}|x|^{n+1}/(n+1)!`}</Eq>。由于 <Eq>{`|x|^{n+1}/(n+1)! \\to 0`}</Eq> 对所有固定的 <Eq>{`x`}</Eq>（阶乘增长快于幂），余项趋于零。收敛半径无穷。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.10", licensa: "CC-BY-NC-SA" }}
+>
+使用拉格朗日余项估计证明 $e^x$ 的收敛半径无穷大。
+</Exercicio>
+
+<Exercicio
+  numero="65.34"
+  dificuldade="compreensao"
+  solucao={<>汇率：<Eq>{`e^r \\approx 1 + r + r^2/2`}</Eq>。对 <Eq>{`r = 0{,}12`}</Eq>（年率 12%）：<Eq>{`e^{0{,}12} \\approx 1{,}1275`}</Eq>。对单利：<Eq>{`1{,}12`}</Eq>。差异约 <Eq>{`0{,}7\\%`}</Eq> ——长期计算中相关。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.12", licenca: "CC-BY-NC-SA" }}
+>
+在金融学中，$(1 + r/n)^n \to e^r$ 当 $n \to \infty$（连续复利）。使用 $e^r$ 的泰勒展开估计年增长因子 $r = 12\%$ 并与单利比较。
+</Exercicio>
+
+<Exercicio
+  numero="65.35"
+  dificuldade="desafio"
+  solucao={<><Eq>{`e^{ix} = \\sum (ix)^k/k!`}</Eq>。$k$ 为偶数的项：<Eq>{`(-1)^{k/2} x^k/(k!)`}</Eq>，即 <Eq>{`\\cos x`}</Eq> 的级数。奇数项：<Eq>{`i(-1)^{(k-1)/2} x^k/(k!)`}</Eq>，即 <Eq>{`i \\sin x`}</Eq>。因此 <Eq>{`e^{ix} = \\cos x + i \\sin x`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.38", licenca: "CC-BY-NC-SA" }}
+>
+通过分离 $e^z$ 级数的偶数和奇数项推导欧拉公式 $e^{ix} = \cos x + i\sin x$。
+</Exercicio>
+
+<Exercicio
+  numero="65.36"
+  dificuldade="desafio"
+  solucao={<><Eq>{`f(x) = e^{-1/x^2}`}</Eq> 且 <Eq>{`f(0) = 0`}</Eq>。对任何 <Eq>{`n`}</Eq>，<Eq>{`f^{(n)}(0) = \\lim_{x\\to 0} p(1/x)e^{-1/x^2} = 0`}</Eq>（$1/x$ 中的多项式乘以 $e^{-1/x^2}$ 趋于零，因为 $e$ 的增长超过任何多项式）。因此对所有 $n$ 有 <Eq>{`P_n = 0`}</Eq>，但 <Eq>{`f \\neq 0`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.13", licenca: "CC-BY-NC-SA" }}
+>
+证明 $f(x) = e^{-1/x^2}$（$f(0) = 0$）在 0 处的所有导数都为零——因此对所有 $n$ 有 $P_n = 0$，但 $f \neq P_n$。
+</Exercicio>
+
+<Exercicio
+  numero="65.37"
+  dificuldade="demonstracao"
+  solucao={<>拉格朗日余项：<Eq>{`|R_n(x)| \\leq M|x|^{n+1}/(n+1)!`}</Eq> 其中 <Eq>{`M = \\max|f^{(n+1)}|`}</Eq> 在区间上。对 $e^x$，<Eq>{`M = e^{|x|}`}</Eq>（固定）。由于 <Eq>{`|x|^{n+1}/(n+1)! \\to 0`}</Eq>，余项趋于零。因此 <Eq>{`P_n \\to f`}</Eq> 对所有 <Eq>{`x`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.31", licenca: "CC-BY-NC" }}
+>
+证明 $e^x$ 的麦克劳林级数对所有 $x \in \mathbb{R}$ 收敛到 $e^x$（使用拉格朗日余项估计）。
+</Exercicio>
+
+<Exercicio
+  numero="65.38"
+  dificuldade="demonstracao"
+  solucao={<>应用 1D 泰勒到 <Eq>{`g(t) = f(\\vec a + t\\vec h)`}</Eq> 对 <Eq>{`t \\in [0,1]`}</Eq>。则 <Eq>{`g'(t) = \\nabla f \\cdot \\vec h`}</Eq> 和 <Eq>{`g''(t) = \\vec h^T H \\vec h`}</Eq>。在 $t=0$ 处应用 $g$ 的 2 阶泰勒，在 $t=1$ 处计算，得出多变量结果。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "Exercise 8.5.14", licenca: "CC-BY-NC-SA" }}
+>
+通过沿参数直线约化到 1D 泰勒来证明 2 阶多变量泰勒（含黑塞矩阵）。
+</Exercicio>
+
+<Exercicio
+  numero="65.39"
+  dificuldade="demonstracao"
+  solucao={<>通过拉格朗日余项：在 <Eq>{`a`}</Eq> 与 <Eq>{`x`}</Eq> 之间存在 <Eq>{`\\xi`}</Eq> 使得 <Eq>{`R_n(x) = f^{(n+1)}(\\xi)(x-a)^{n+1}/(n+1)!`}</Eq>。这是广义平均值定理——通过对余项 $R_n$ 作为 $a$ 的函数应用 MVT 证明。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/downloads", secao: "§8.6", pagina: "Exercise 8.6.32", licenca: "CC-BY-NC" }}
+>
+通过广义平均值定理证明余项的拉格朗日形式。
+</Exercicio>
+
+<Exercicio
+  numero="65.40"
+  dificuldade="demonstracao"
+  solucao={<>对 <Eq>{`1/(1+t^2) = \\sum (-1)^k t^{2k}`}</Eq> 级数从 <Eq>{`0`}</Eq> 到 <Eq>{`x`}</Eq> 积分：<Eq>{`\\arctan x = \\sum (-1)^k x^{2k+1}/(2k+1)`}</Eq>。在 <Eq>{`x=1`}</Eq>：<Eq>{`\\pi/4 = 1 - 1/3 + 1/5 - 1/7 + \\cdots`}</Eq>（莱布尼兹级数）。因此 <Eq>{`\\pi = 4(1 - 1/3 + 1/5 - \\cdots)`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series", secao: "§6.3", pagina: "Exercise 6.3.37", licenca: "CC-BY-NC-SA" }}
+>
+对级数 $1/(1+t^2) = \sum (-1)^k t^{2k}$ 积分得到 $\arctan x$ 级数。利用此推导莱布尼兹公式：$\pi/4 = 1 - 1/3 + 1/5 - 1/7 + \cdots$
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**Active Calculus**](https://activecalculus.org/single/sec-8-5-taylor.html) — Boelkins · 2024 · §8.5 Taylor Polynomials and Taylor Series · CC-BY-NC-SA. **首要来源。**
+- [**Calculus Volume 2**](https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series) — OpenStax · 2016 · §6.3 Taylor and Maclaurin Series · CC-BY-NC-SA.
+- [**APEX Calculus**](https://www.apexcalculus.com/downloads) — Hartman et al. · 2024 · v5.0 · §8.6 Taylor Polynomials · CC-BY-NC.

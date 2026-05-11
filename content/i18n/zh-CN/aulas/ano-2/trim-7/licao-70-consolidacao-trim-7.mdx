@@ -1,0 +1,1019 @@
+---
+titulo: "Lição 70 — Consolidação Trim 7: máximos, L'Hôpital, Taylor, Newton"
+slug: "licao-70-consolidacao-trim-7"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Workshop integrado de Cálculo Diferencial aplicado: otimização, esboço de gráficos, L'Hôpital, Taylor, concavidade, análise marginal, cinemática e Newton-Raphson. Todas as técnicas derivam da linearização local."
+ordem: 70
+publicado: true
+tags: ["consolidação", "otimização", "L'Hôpital", "Taylor", "Newton-Raphson", "cinemática", "análise marginal", "concavidade", "ano-2", "trim-7"]
+prerrequisitos: ["licao-69-newton-raphson"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["2.º ano EM", "Equiv. Math II/III japonês cap. 6–7", "Equiv. Leistungskurs Differentialrechnung alemão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="f(x) \approx \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k"
+  legenda={<><strong>泰勒级数</strong>是第7学期的骨架：它统一了优化（<Eq>{`f'(a)=0`}</Eq>）、洛必达法则（线性逼近的比），函数草图（<Eq>{`f''`}</Eq>的符号）、牛顿-拉夫逊法（切线迭代）和边际分析（导数作为瞬时变化率）。本学期的每一个工具都是这个公式的特例。</>}
+  audioTexto="f在a处的泰勒级数。k从0求和到n：f的k阶导数在a处，除以k的阶乘，乘以(x减a)的k次方。第7学期的每节课都是这个多项式逼近的特例。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    涵盖本课的书籍
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §3.3–3.4（优化）, §2.6（洛必达）, §8.4–8.5（泰勒） · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">应用优化和泰勒级数的主要资源；带有探究性方法的活跃练习。</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §3.1–3.3（极值和函数草图）, §6.7（洛必达）, §8.8（牛顿-拉夫逊） · CC-BY-NC · </span>
+      <em className="text-clube-mist">函数分析流程的详尽参考，包含运动学和边际分析的例子。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/calculus-volume-1" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.3（极值）, §4.7（应用优化）, §4.8（洛必达） · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">经典优化问题（罐头、盒子、围栏）附详细逐步求解。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="统一理论：线性化及其应用">
+
+### 核心概念：泰勒逼近
+
+<Definicao titulo="n阶泰勒多项式">
+
+设$f$在$a$处$n$次可微。$f$在$a$处的**n阶泰勒多项式**为：
+
+$$P_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k$$
+
+特殊情况：
+- **0阶：** $P_0(x) = f(a)$（常数逼近）。
+- **1阶：** $P_1(x) = f(a) + f'(a)(x-a)$（线性化——切线）。
+- **2阶：** $P_2(x) = f(a) + f'(a)(x-a) + \dfrac{f''(a)}{2}(x-a)^2$（抛物线化）。
+
+当$a = 0$时，称为**麦克劳林多项式**。
+
+</Definicao>
+
+> "The Taylor polynomial of degree $n$ centered at $x=a$ is the unique polynomial of degree $n$ that agrees with $f$ in value and in all its first $n$ derivatives at $x=a$." — [Active Calculus §8.4](https://activecalculus.org/single/sec-8-4-taylor.html)
+
+### 优化：临界点和二阶导数检验
+
+<Definicao titulo="极值导数判别法">
+
+设$f$在$[a,b]$连续，在$(a,b)$可微。
+
+- **临界点：** $c \in (a,b)$使得$f'(c) = 0$或$f'(c)$不存在。
+- **二阶导数检验：** 若$f'(c) = 0$且$f''(c)$存在：
+  - $f''(c) > 0 \Rightarrow f$在$c$处有**局部最小值**。
+  - $f''(c) < 0 \Rightarrow f$在$c$处有**局部最大值**。
+  - $f''(c) = 0 \Rightarrow$检验无结论。
+- **绝对极值：** 比较$f$在内部临界点和端点$f(a)$、$f(b)$处的值。
+
+</Definicao>
+
+> "Finding the maximum and minimum values of a function also has practical significance because we can use this method to solve optimization problems, such as increasing profit, minimizing cost, and maximizing area." — [OpenStax Calculus Vol. 1 §4.3](https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima)
+
+<Teorema titulo="费马定理（必要条件）">
+若$f$在$c$处有局部极值且$f'(c)$存在，则$f'(c) = 0$。
+
+**证明（概要）。** 假设在$c$处有局部最大值。对于$h > 0$充分小：$f(c+h) - f(c) \leq 0$，故$[f(c+h)-f(c)]/h \leq 0$；取$h \to 0^+$，得$f'(c) \leq 0$。对于$h < 0$：$[f(c+h)-f(c)]/h \geq 0$；取$h \to 0^-$，得$f'(c) \geq 0$。因此$f'(c) = 0$。$\square$
+</Teorema>
+
+### 凹凸性和拐点
+
+<Definicao titulo="凹凸性和拐点">
+
+- $f$在$I$上**凸**（凹向上）若$f'' > 0$在$I$上。几何上：切线位于图像下方；$f(x) \geq P_1(x)$。
+- $f$在$I$上**凹**（凹向下）若$f'' < 0$在$I$上。
+- **拐点：** $c$处$f''$改变符号。
+
+</Definicao>
+
+<Insight>
+
+**凹凸性和2阶泰勒。** 若$f'' > 0$在$a$处，则$P_2(x) - f(a) = f'(a)(x-a) + \frac{f''(a)}{2}(x-a)^2$。对于靠近$a$的$x$，当$f'(a) = 0$时二次项主导，确认$f'' > 0$的临界点是局部最小值。二阶导数检验因此是2阶泰勒的直接推论。
+
+</Insight>
+
+### 洛必达法则：线性化的比
+
+<Definicao titulo="洛必达法则">
+
+若$\lim_{x \to a} f(x) = 0$且$\lim_{x \to a} g(x) = 0$（或两者都是$\pm\infty$），且$\lim_{x \to a} f'(x)/g'(x)$存在，则：
+
+$$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
+
+</Definicao>
+
+> "L'Hôpital's Rule applies whenever both $f(x) \to 0$ and $g(x) \to 0$ as $x \to a$, or whenever $f(x) \to \pm\infty$ and $g(x) \to \pm\infty$." — [OpenStax Calculus Vol. 1 §4.8](https://openstax.org/books/calculus-volume-1/pages/4-8-l-hopital-s-rule)
+
+**1阶泰勒的思想。** 对于$a = 0$：$f(x) \approx f'(0) x$和$g(x) \approx g'(0) x$，故$f(x)/g(x) \approx f'(0)/g'(0)$。洛必达正是形式化这种线性化比的思想。
+
+### 牛顿-拉夫逊法：切线迭代
+
+<Definicao titulo="牛顿-拉夫逊法">
+
+为求$f(x) = 0$的根，给定初始估计$x_0$：
+
+$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$
+
+每个$x_{n+1}$是点$(x_n, f(x_n))$处$f$的切线的零点。
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 400 200" className="w-full max-w-[500px] mx-auto block">
+<defs>
+  <marker id="arrtrim7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="20" y1="160" x2="380" y2="160" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrtrim7)"/>
+  <line x1="60" y1="180" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1"/>
+  <text x="375" y="155" fontSize="9" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">x</text>
+  <text x="65" y="25" fontSize="9" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">y</text>
+</g>
+<g>
+  <path d="M 80,40 C 120,20 160,60 200,110 C 240,160 280,175 340,165" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+  <text x="345" y="163" fontSize="9" fontFamily="serif" fontStyle="italic" fill="rgb(26 77 92)">f</text>
+</g>
+<g>
+  <line x1="220" y1="30" x2="260" y2="160" stroke="rgb(232 199 122)" strokeWidth="1.5" strokeDasharray="5,3"/>
+  <circle cx="240" cy="118" r="4" fill="rgb(232 199 122)"/>
+  <line x1="240" y1="118" x2="240" y2="160" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" strokeDasharray="3,2"/>
+  <text x="242" y="170" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">x₀</text>
+  <text x="258" y="155" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">x₁</text>
+  <circle cx="255" cy="160" r="3" fill="currentColor" fillOpacity="0.5"/>
+</g>
+<g>
+  <text x="80" y="195" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.6">x₀处的切线穿过x轴于x₁，是更好的根的逼近</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+牛顿-拉夫逊法：点<em>x₀</em>处曲线的切线穿过x轴于<em>x₁</em>，收敛到真实根。
+</figcaption>
+</figure>
+
+### 统一的函数分析流程
+
+<Definicao titulo="完整草图过程">
+
+给定$f$，按顺序进行：
+
+1. **定义域：** $f$定义的地方。
+2. **截距和对称性：** $f(0)$、$f$的零点、奇偶性。
+3. **渐近行为：** $\lim_{x\to\pm\infty} f(x)$；奇点处的竖直渐近线。
+4. **$f'$：** 临界点、符号表单调性。
+5. **$f''$：** 凹凸性、拐点。
+6. **绝对极值**（闭域）：比较临界点和边界处的$f$值。
+7. **草图**，包含收集的信息。
+
+</Definicao>
+
+</Porta>
+
+<Porta nivel="5" titulo="5岁孩子的讲法">
+
+这整个学期都是用特殊工具**探索函数**。
+
+- 一个工具显示**山峰在哪里**（优化）。
+- 另一个显示**曲线像碗还是像帽子**（凹凸性）。
+- 第三个**猜测计算器给出零除以零时的结果**（洛必达）。
+- 又一个**用多项式给函数拍照**——越多项越清晰（泰勒）。
+- 最后一个**找出没人知道的答案，通过猜测和纠正**（牛顿）。
+
+所有这些工具从根本上做同一件事：**看点处的切线**。就像用一把尺子贴在曲线上来理解整条曲线。
+
+</Porta>
+
+<Porta nivel="10" titulo="10岁孩子的讲法">
+
+这个学期是关于**用导数做有用的事**：
+
+- **优化：** 如果你想用一张纸建造最大的盒子，导数找到正确的尺寸。
+- **函数草图：** 想画一个函数但不想绘1000个点？看$f'$和$f''$。
+- **洛必达：** 有时极限给出$0/0$看起来不可能。这条规则用导数来解决。
+- **泰勒：** 任何函数在某点附近都可被多项式**模拟**。项越多，模拟越好。这是计算器如何计算$\sin(0.3)$的方式。
+- **牛顿-拉夫逊：** 想知道$f(x) = 0$的根但手工解不了？从猜测开始，用切线纠正。5步后你有15位小数。
+
+中心点：**切线是微积分最强大的工具**。
+
+</Porta>
+
+<Porta nivel="15" titulo="15岁青少年的讲法">
+
+### 统一的思想：线性化
+
+整个第7学期都围绕：
+
+$$f(x) \approx f(a) + f'(a)(x - a)$$
+
+每堂课用不同的方式用它：
+
+| 课程 | 核心思想 | 关键公式 |
+|---|---|---|
+| 62 — 优化 | 水平切线 | $f'(c) = 0$ |
+| 63 — 草图 | $f'$和$f''$的符号 | 流程 |
+| 64 — 洛必达 | 切线的比 | $\lim f/g = \lim f'/g'$ |
+| 65 — 泰勒 | 切线加曲率 | $\sum f^{(k)}/k! \cdot (x-a)^k$ |
+| 66 — 凹凸性 | 切线的曲率 | $f'' > 0$凸 |
+| 67 — 边际 | 经济背景下的切线 | $MC = C'(q)$ |
+| 68 — 运动学 | 时间下的切线 | $v = s'$, $a = s''$ |
+| 69 — 牛顿 | 切线迭代 | $x_{n+1} = x_n - f/f'$ |
+
+### 考试前学习什么
+
+1. 掌握**草图流程**（形式门中7步）。
+2. 记住**洛必达解决的不定式**：$0/0$、$\infty/\infty$和形式$0 \cdot \infty$、$\infty - \infty$、$0^0$、$1^\infty$、$\infty^0$（降低到前两种）。
+3. 知道5个基本函数的**麦克劳林展开**：$e^x$、$\sin x$、$\cos x$、$\ln(1+x)$、$(1+x)^\alpha$。
+4. 对牛顿法：总是**验证收敛性**，在根的区域绘制$f$和$f'$。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程学生的讲法">
+
+### 逼近阶层和何时使用每阶
+
+| 阶 | 多项式$P_n$ | 费用 | 何时使用 |
+|---|---|---|---|
+| 0 | $f(a)$ | 平凡 | 刻度预检查 |
+| 1 | $f(a)+f'(a)(x-a)$ | 1导数 | 控制线性化、牛顿法、洛必达 |
+| 2 | $+f''(a)/2 \cdot (x-a)^2$ | 2导数 | 曲率、极值检验、误差分析 |
+| $n$ | $+\ldots+f^{(n)}/n! \cdot (x-a)^n$ | $n$导数 | 数值精度、微妙极限 |
+
+### 牛顿-拉夫逊法：二次收敛
+
+若$f$在根$r$附近是$C^2$且$f'(r) \neq 0$，则误差$e_n = x_n - r$满足：
+
+$$e_{n+1} \approx -\frac{f''(r)}{2f'(r)} e_n^2$$
+
+**二次收敛**：正确的小数位数在每次迭代翻倍。实际上，6-10次迭代给出15位数精度（`float64`精度）。
+
+**收敛失败：** 牛顿法在以下情况发散：
+- $f'(x_n) \approx 0$（切线接近水平靠近$x_n$），
+- 根的重数大于1（线性收敛，非二次），
+- 初始猜测离根远且函数在$x_0$和$r$间有极值。
+
+### 边际分析和经济优化
+
+对于竞争企业，收入$R(q) = p \cdot q$，成本$C(q)$：
+
+- **利润：** $\pi(q) = p \cdot q - C(q)$。
+- **一阶条件：** $\pi'(q^*) = p - C'(q^*) = 0 \Rightarrow p = MC$。
+- **二阶条件：** $\pi''(q^*) = -C''(q^*) < 0 \Rightarrow C'' > 0$（边际成本上升）。
+- **垄断者：** $R(q) = p(q) \cdot q$；条件变为$MR = MC$而非$p = MC$。
+
+### 跨域连接
+
+| 工具 | 工程应用 |
+|---|---|
+| 优化 | 产品设计、LP/QP、ML超参数调优 |
+| 洛必达 | 算法渐近分析（Big-O）、滤波器增益计算 |
+| 泰勒 | 工作点线性化（线性控制、小信号） |
+| 牛顿 | 数值求解器、修改梯度下降、雅可比逆 |
+| 运动学 | 机器人（速度雅可比）、轨迹控制 |
+
+</Porta>
+
+<Porta nivel="40" titulo="资深职业人士的讲法">
+
+### 历史视角：350年的线性化
+
+泰勒公式（布鲁克·泰勒，1715）统一了牛顿、格雷戈里和莱布尼茨的零散结果。泰勒认识到**每个解析函数局部都是多项式**——而多项式是人类（和计算机）知道完美计算的东西。
+
+纪尧姆·洛必达（1696）付钱给约翰·伯努利发表他的发现，声称是自己的——包括现在以他的名字命名的规则。伯努利是真正的作者。微积分历史充满优先权纠纷（牛顿vs莱布尼茨最大），但数学本身完好无损。
+
+牛顿（1669，*De analysi*）用幂级数以前所未有的精度计算根——同样的算法`scipy.optimize.newton`今天实现。牛顿直觉探索的二次收敛在1948年被康托罗维奇形式化，使他在1975年获得经济学奖（用于线性规划和泛函分析的应用，但数学工具是相同的）。
+
+### 线性化今天的位置
+
+- **ML：** 梯度下降是1阶牛顿法（梯度无Hessian）。Adam、Adagrad、RMSProp是不显式计算$f''$的曲率近似变体。BFGS和L-BFGS是拟牛顿，迭代地积累曲率信息。
+- **量子物理：** 扰动是1阶泰勒（前几项）和2阶（修正）。Rayleigh-Schrödinger扰动理论——泰勒阶层的直接应用。
+- **金融：** Black-Scholes（第119课）用随机泰勒（伊藤引理）——布朗过程的2阶版本。希腊数（Delta、Gamma）是选项价格关于标的资产的泰勒系数。
+- **控制工程：** 在工作点的线性化是泰勒$P_1$应用于非线性模型。经典PID控制器设计在此线性化工作。
+
+### 这个学期真正教了什么
+
+不是分开的技术。是一个单一思想——用递增次数的多项式逼近函数——在八个不同背景中。内化这个的人理解JAX、PyTorch和TensorFlow为什么实现自动微分：它们是计算1阶泰勒系数（梯度）的机器。下一步（Hessian、曲率、二阶方法）是2阶泰勒。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实践——真实巴西数据的例子">
+
+### 案例1：巴西市场的产品定价
+
+Franca市（SP）的一个鞋业公司的成本函数$C(q) = 0.5q^2 + 20q + 800$（雷亚尔），每天生产$q$对鞋。售价为60雷亚尔/对。最大利润：
+
+$\pi(q) = 60q - C(q) = -0.5q^2 + 40q - 800$
+
+$\pi'(q) = -q + 40 = 0 \Rightarrow q^* = 40$对/天。
+
+$\pi(40) = -0.5 \cdot 1600 + 40 \cdot 40 - 800 = -800 + 1600 - 800 = 0$雷亚尔。
+
+利润为零——公司处于平衡点。要盈利，需要降低固定成本（800雷亚尔）或提高价格。
+
+### 案例2：联邦公路车辆运动学
+
+一辆卡车在BR-381上的位置为$s(t) = 20t - 0.5t^2$（米），对于$0 \leq t \leq 20$ s（紧急制动阶段）。速度为零：$v(t) = 20 - t = 0 \Rightarrow t = 20$ s。停止距离：$s(20) = 400 - 200 = 200$米。减速度：$a = s'' = -1$ m/s²。与干燥沥青上满载卡车的制动相符。
+
+### 案例3：通过泰勒近似SELIC利率
+
+若中央银行基准利率$r(t)$可近似为$r(t) \approx r(0) + r'(0) t$（单位月），前一季度$r(0) = 10.5\%$且$r'(0) = 0.25\%$/月，3个月后预期利率为$r(3) \approx 10.5 + 0.75 = 11.25\%$。这是1阶泰勒线性化应用于宏观经济预测。
+
+### 学期末检查清单
+
+在考虑第7学期掌握之前，你应该不查书就能做到：
+
+- [ ] 找任意$f$（多项式或有理）的临界点和极值。
+- [ ] 用完整流程草图$f(x) = xe^{-x}$。
+- [ ] 通过洛必达或泰勒计算$\lim_{x\to 0}(\sin x - x)/x^3$。
+- [ ] 将$\cos x$展开为6阶麦克劳林。
+- [ ] 对$f(x) = x^3 - 2$执行3次牛顿迭代。
+- [ ] 给定$C(q) = q^2 + 10q$和$p = 30$，求$q^*$和$\pi^*$。
+- [ ] 给定$s(t) = t^3 - 6t^2 + 9t$，求$v = 0$的时刻和$[0,4]$上的总距离。
+
+</Porta>
+
+</DuasPortas>
+
+## 求解例子
+
+<Exemplo titulo="无盖盒优化（应用）" numero="1">
+
+**问题：** 从$24 \times 24$ cm的纸板，在四个角剪边长为$x$的正方形，折起来形成无盖盒子。求$x$使体积最大。
+
+**策略：** 用$x$表达体积，通过$V'(x) = 0$找临界点，用二阶导数检验确认最大值，验证$x$在物理定义域$0 < x < 12$。
+
+**求解：**
+
+1. **体积：** $V(x) = x(24 - 2x)^2$，定义域：$x \in (0, 12)$。
+2. **展开：** $V(x) = x(576 - 96x + 4x^2) = 4x^3 - 96x^2 + 576x$。
+3. **求导：** $V'(x) = 12x^2 - 192x + 576 = 12(x^2 - 16x + 48) = 12(x-4)(x-12)$。
+4. **$(0,12)$中的临界点：** $x = 4$（$x = 12$在边界，体积为零）。
+5. **检验：** $V''(x) = 24x - 192$；$V''(4) = 96 - 192 = -96 < 0 \Rightarrow$局部最大值。
+6. **最大体积：** $V(4) = 4(24 - 8)^2 = 4 \cdot 256 = 1024\ \text{cm}^3$。
+
+**验证：** $V(0) = 0$，$V(12) = 0$，$V(4) = 1024 > 0$。最大值在定义域内部。检查：$V(4) = 4 \cdot 16^2 = 4 \cdot 256 = 1024$。
+
+**资源。** [OpenStax Calculus Vol. 1 §4.7, ex. 4.41](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems) — 许可CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="洛必达不定式极限（应用）" numero="2">
+
+**问题：** 计算$\displaystyle\lim_{x \to 0} \frac{e^x - 1 - x}{x^2}$。
+
+**策略：** 形式是$x = 0$时的$0/0$。应用洛必达一次，验证新形式是否仍为$0/0$；若是，再应用一次。或者，用$e^x$的麦克劳林更快得到结果。
+
+**求解：**
+
+1. **验证形式：** $e^0 - 1 - 0 = 0$且$0^2 = 0$——不定式$0/0$。
+2. **第一次应用洛必达：**
+$$\lim_{x \to 0} \frac{e^x - 1}{2x}$$
+仍为$0/0$（分子$\to 0$，分母$\to 0$）。
+3. **第二次应用：**
+$$\lim_{x \to 0} \frac{e^x}{2} = \frac{e^0}{2} = \frac{1}{2}.$$
+4. **通过泰勒验证：** $e^x = 1 + x + x^2/2 + O(x^3)$，故$e^x - 1 - x = x^2/2 + O(x^3)$。则$\frac{e^x - 1 - x}{x^2} \to \frac{x^2/2}{x^2} = \frac{1}{2}$。一致。
+
+**验证：** 对于$x = 0.1$：分子$= e^{0.1} - 1.1 \approx 1.10517 - 1.1 = 0.00517$；分母$= 0.01$；比率$\approx 0.517 \approx 1/2$。
+
+**资源。** [Active Calculus §2.6, 不定式练习](https://activecalculus.org/single/sec-2-8-lhopital.html) — 许可CC-BY-NC-SA。
+</Exemplo>
+
+<Exemplo titulo="麦克劳林展开和极限（中级）" numero="3">
+
+**问题：** 用$\sin x$的麦克劳林级数计算$\displaystyle\lim_{x \to 0} \frac{\sin x - x + x^3/6}{x^5}$。
+
+**策略：** 将$\sin x$展开到5阶麦克劳林，代入分子简化——泰勒方法比应用5次洛必达更优雅。
+
+**求解：**
+
+1. **$\sin x$的麦克劳林：**
+$$\sin x = x - \frac{x^3}{6} + \frac{x^5}{120} - \frac{x^7}{5040} + \cdots$$
+2. **分子：**
+$$\sin x - x + \frac{x^3}{6} = \left(x - \frac{x^3}{6} + \frac{x^5}{120} - \cdots\right) - x + \frac{x^3}{6} = \frac{x^5}{120} + O(x^7).$$
+3. **极限：**
+$$\lim_{x \to 0} \frac{x^5/120 + O(x^7)}{x^5} = \frac{1}{120}.$$
+
+**验证：** 对于$x = 0.1$：$\sin(0.1) \approx 0.099833417$；$\sin x - x + x^3/6 = 0.099833417 - 0.1 + 0.000166667 = 0.000000083$；$x^5 = 10^{-5}$；比率$\approx 0.0083 \approx 1/120 = 0.00833$。
+
+**资源。** [Active Calculus §8.4](https://activecalculus.org/single/sec-8-4-taylor.html) — 许可CC-BY-NC-SA。
+</Ejemplo>
+
+<Exemplo titulo="有理函数的完整草图（中级）" numero="4">
+
+**问题：** 草图$f(x) = \dfrac{x^2}{x^2 - 1}$，识别定义域、渐近线、极值和凹凸性。
+
+**策略：** 遵循7步函数分析流程。函数是有理的，分母零点易识别。
+
+**求解：**
+
+1. **定义域：** $x^2 - 1 \neq 0 \Rightarrow x \neq \pm 1$。定义域：$\mathbb{R} \setminus \{-1, 1\}$。
+2. **截距/对称性：** $f(0) = 0$（截距）。零点：$x^2 = 0 \Rightarrow x = 0$。$f(-x) = f(x)$：偶函数（关于$y$轴对称）。
+3. **渐近线：** 竖直渐近线在$x = \pm 1$；水平：$\lim_{x\to\pm\infty} f(x) = 1$（渐近线$y = 1$）。
+4. **$f'$：** $f'(x) = \dfrac{-2x}{(x^2-1)^2}$。临界点：$x = 0$。符号：$f' > 0$对$x < 0$；$f' < 0$对$x > 0$——$x = 0$处局部最大值。
+5. **$f''$：** $f''(x) = \dfrac{2(3x^2+1)}{(x^2-1)^3}$。对于$x \in (-1,1)$：分母$< 0$，分子$> 0$，故$f'' < 0$（凹）。对于$|x| > 1$：$f'' > 0$（凸）。定义域内无拐点（$f''$符号变化在定义域外$x = \pm 1$）。
+6. **极值：** $f(0) = 0$——$(-1,1)$中的局部（和绝对）最大值。
+
+**验证：** $f(0) = 0 < 1 = \lim_{x\to\infty} f(x)$有意义：在$(-1,1)$中函数从0到边界的$-\infty$再回来；最大值为$f(0)=0$。
+
+**资源。** [APEX Calculus §3.5, ex. 42](https://www.apexcalculus.com/) — 许可CC-BY-NC。
+</Exemplo>
+
+<Exemplo titulo="超越方程的牛顿-拉夫逊法（真实建模）" numero="5">
+
+**问题：** 投资10000雷亚尔，月利率$r$待定增长。12个月后，本利和为11268雷亚尔。解方程$f(r) = (1+r)^{12} - 1.1268 = 0$用牛顿-拉夫逊法，初始$x_0 = 0.01$（月1%）。
+
+**策略：** $f'(r) = 12(1+r)^{11}$。迭代$x_{n+1} = x_n - f(x_n)/f'(x_n)$直到稳定。
+
+**求解：**
+
+迭代1：$f(0.01) = (1.01)^{12} - 1.1268 = 1.12683 - 1.1268 = 0.00003$。
+$f'(0.01) = 12 \cdot (1.01)^{11} = 12 \cdot 1.11567 = 13.388$。
+$x_1 = 0.01 - 0.00003/13.388 \approx 0.009998$。
+
+2次迭代后，$r^* \approx 1.00\%$月（标称年率$\approx 12.68\%$ p.a.）。
+
+**验证：** $(1.01)^{12} = 1.12683 \approx 1.1268$。与题意一致。
+
+**资源。** [APEX Calculus §6.1, 牛顿-拉夫逊应用](https://www.apexcalculus.com/) — 许可CC-BY-NC。
+</Exemplo>
+
+<ListaExercicios seed="licao-70-consolidacao-trim-7">
+
+> **巩固清单。** 40题分4块覆盖第7学期的8个主题。在纸上解答——网站仅显示答案和求解。资源：Active Calculus §3.3–3.4, §2.6, §8.4; APEX Calculus §3.1–3.5, §6.7; OpenStax Calculus Vol. 1 §4.3, §4.7, §4.8。
+
+### A块——优化和函数草图（70.1至70.13）
+
+<Exercicio
+  numero="70.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "§3.1", pagina: "185", exercicio: "ex. 3.1.3", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`f'(x) = 3x^2 - 12x + 9 = 3(x-1)(x-3)`}</Eq>. 临界点：<Eq>{`x=1, x=3`}</Eq>. <Eq>{`f''(x)=6x-12`}</Eq>: <Eq>{`f''(1)=-6<0`}</Eq>（局部最大值），<Eq>{`f''(3)=6>0`}</Eq>（局部最小值）。拐点在<Eq>{`x=2`}</Eq>（<Eq>{`f''=0`}</Eq>符号改变）。
+  </>}
+  passos={<>
+    <ol>
+      <li>计算<Eq>{`f'`}</Eq>并因式分解。<em>为什么：</em>临界点是<Eq>{`f'=0`}</Eq>处。</li>
+      <li>做<Eq>{`f'`}</Eq>的符号表：在<Eq>{`(-\\infty,1)`}</Eq>为正，在<Eq>{`(1,3)`}</Eq>为负，在<Eq>{`(3,+\\infty)`}</Eq>为正。</li>
+      <li>计算<Eq>{`f''`}</Eq>并在临界点处评估。<em>为什么：</em>二阶导数检验确认极值类型。</li>
+      <li>找拐点：<Eq>{`f''(2)=0`}</Eq>且<Eq>{`f''`}</Eq>在<Eq>{`x=2`}</Eq>改变符号。</li>
+    </ol>
+    <p><em>技巧：</em>正系数三次函数总有左边一个局部最大值和右边一个局部最小值。</p>
+  </>}
+>
+求$f(x) = x^3 - 6x^2 + 9x + 1$的临界点、局部极值和拐点。
+</Exercicio>
+
+<Exercicio
+  numero="70.2"
+  dificuldade="aplicacao"
+  resposta="最大值在$x=1$，值$1/e$"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "§3.1", pagina: "186", exercicio: "ex. 3.1.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`f'(x)=e^{-x} - xe^{-x} = e^{-x}(1-x)`}</Eq>. 临界点：<Eq>{`x=1`}</Eq>. <Eq>{`f''(1) = e^{-1}(1-1) + e^{-1}(-1) = -e^{-1} < 0`}</Eq>：最大值。<Eq>{`f(1)=1/e`}</Eq>. 在<Eq>{`x=0`}</Eq>：<Eq>{`f(0)=0`}</Eq>. 绝对最大值在<Eq>{`x=1`}</Eq>。
+  </>}
+  passos={<>
+    <ol>
+      <li>用乘积法则求导：<Eq>{`f'(x) = 1\\cdot e^{-x} + x\\cdot(-e^{-x}) = e^{-x}(1-x)`}</Eq>。</li>
+      <li>因为<Eq>{`e^{-x}>0`}</Eq>总是，<Eq>{`f'`}</Eq>的符号就是<Eq>{`(1-x)`}</Eq>的符号。临界点：<Eq>{`x=1`}</Eq>。</li>
+      <li>符号表：<Eq>{`f'>0`}</Eq>在<Eq>{`(0,1)`}</Eq>，<Eq>{`f'<0`}</Eq>在<Eq>{`(1,\\infty)`}</Eq>——$x=1$处最大值。</li>
+      <li>比较边界：<Eq>{`f(0)=0 < f(1)=1/e \\approx 0.368`}</Eq>且<Eq>{`f(x)\\to 0`}</Eq>当<Eq>{`x\\to\\infty`}</Eq>。故<Eq>{`x=1`}</Eq>是绝对最大值。</li>
+    </ol>
+    <p><em>趣味：</em>函数<Eq>{`xe^{-x}`}</Eq>模型概率分布Gamma参数为2——分布的众数恰是<Eq>{`x=1`}</Eq>。</p>
+  </>}
+>
+在$[0, +\infty)$上最大化$f(x) = xe^{-x}$。绝对最大值是什么？
+</Exercicio>
+
+<Exercicio
+  numero="70.3"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.5", pagina: "178", exercicio: "ex. 14", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=(x^2-4)/x = x - 4/x`}</Eq>. 竖直渐近线：<Eq>{`x=0`}</Eq>. 斜渐近线：<Eq>{`y=x`}</Eq>. <Eq>{`f'(x)=1+4/x^2>0`}</Eq>总是（无极值）。<Eq>{`f''(x)=-8/x^3`}</Eq>：对<Eq>{`x<0`}</Eq>凹向上，对<Eq>{`x>0`}</Eq>凹向下。函数无零点在定义域内。
+  </>}
+>
+草图$f(x) = (x^2 - 4)/x$。识别渐近线、单调性和凹凸性。
+</Exercicio>
+
+<Exercicio
+  numero="70.4"
+  dificuldade="aplicacao"
+  resposta="最小值在$x=2$，值$4$"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "§4.7", pagina: "454", exercicio: "ex. 4.7.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`f'(x)=1-4/x^2=0 \\Rightarrow x=2`}</Eq>（在定义域<Eq>{`(0,\\infty)`}</Eq>）。<Eq>{`f''(x)=8/x^3>0`}</Eq>：最小值。<Eq>{`f(2)=2+4/2=4`}</Eq>。
+  </>}
+>
+在$(0, +\infty)$上求$f(x) = x + 4/x$的绝对最小值。
+</Exercicio>
+
+<Exercicio
+  numero="70.5"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "§4.7", pagina: "456", exercicio: "ex. 4.7.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    圆柱罐：半径<Eq>{`r`}</Eq>，高<Eq>{`h`}</Eq>，<Eq>{`V = \\pi r^2 h = 1000`}</Eq> cm³。材料<Eq>{`S = 2\\pi r^2 + 2\\pi r h = 2\\pi r^2 + 2000/r`}</Eq>。<Eq>{`S'(r)=4\\pi r - 2000/r^2=0 \\Rightarrow r^3=500/\\pi \\Rightarrow r\\approx 5.42`}</Eq> cm；<Eq>{`h=2r\\approx 10.84`}</Eq> cm（高=直径是经典结果）。
+  </>}
+  passos={<>
+    <ol>
+      <li>变量：<Eq>{`r`}</Eq>（半径）和<Eq>{`h`}</Eq>（高）。目标：最小化总面积<Eq>{`S`}</Eq>。</li>
+      <li>约束：<Eq>{`\\pi r^2 h = 1000`}</Eq>，则<Eq>{`h = 1000/(\\pi r^2)`}</Eq>。</li>
+      <li>代入<Eq>{`S`}</Eq>：<Eq>{`S(r) = 2\\pi r^2 + 2\\pi r \\cdot 1000/(\\pi r^2) = 2\\pi r^2 + 2000/r`}</Eq>。</li>
+      <li>求导并令为零：<Eq>{`S'(r)=4\\pi r - 2000/r^2=0 \\Rightarrow 4\\pi r^3=2000`}</Eq>。</li>
+      <li>确认最小值：<Eq>{`S''(r)=4\\pi + 4000/r^3 > 0`}</Eq>总是。</li>
+    </ol>
+    <p><em>注释：</em>通用结果——固定体积最小材料的罐总是<Eq>{`h = 2r`}</Eq>（高等于直径）。实际饮料罐因制造限制偏差。</p>
+  </>}
+>
+体积$V = 1000\ \text{cm}^3$的圆柱罐用最小材料建造。求最优半径和高。
+</Exercicio>
+
+<Exercicio
+  numero="70.6"
+  dificuldade="modelagem"
+  resposta="$x = 5/3$ cm（约），$V \approx 1185\ \text{cm}^3$"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "§4.7", pagina: "457", exercicio: "ex. 4.7.6", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`V(x) = x(20-2x)(30-2x)`}</Eq>，<Eq>{`x \\in (0,10)`}</Eq>。<Eq>{`V'(x) = 12x^2 - 200x + 600 = 4(3x^2-50x+150)=4(3x-20)(x-...) `}</Eq>。根：<Eq>{`x=(50\\pm\\sqrt{2500-1800})/6 = (50\\pm \\sqrt{700})/6`}</Eq>。<Eq>{`\\sqrt{700}\\approx 26.46`}</Eq>。根：<Eq>{`x\\approx 12.74`}</Eq>（定义域外）且<Eq>{`x\\approx 3.92`}</Eq>。<Eq>{`V(3.92) = 3.92 \\cdot 12.16 \\cdot 22.16 \\approx 1056`}</Eq> cm³。
+  </>}
+>
+从$20 \times 30\ \text{cm}$纸板，在角剪$x \times x$正方形并折起。哪个$x$最大化盒子体积？
+</Exercicio>
+
+<Exercicio
+  numero="70.7"
+  dificuldade="modelagem"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-4-applied-opt.html", secao: "§3.4", pagina: "208", exercicio: "ex. 3.4.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    距离平方：<Eq>{`D(x) = (x-3)^2 + (x^2-0)^2 = (x-3)^2 + x^4`}</Eq>。<Eq>{`D'(x)=2(x-3)+4x^3=0`}</Eq>。通过检验/牛顿：<Eq>{`x\\approx 0.926`}</Eq>。最小距离：<Eq>{`d = \\sqrt{D(0.926)}`}</Eq>。
+  </>}
+>
+求抛物线$y = x^2$上离点$(3, 0)$最近的点。
+</Exercicio>
+
+<Exercicio
+  numero="70.8"
+  dificuldade="modelagem"
+  resposta="$l = 100$ m, $w = 50$ m, 面积$= 5000\ \text{m}^2$"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "§4.7", pagina: "455", exercicio: "ex. 4.7.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    平行于墙的长：<Eq>{`l`}</Eq>；垂直宽：<Eq>{`w`}</Eq>。围栏：<Eq>{`l + 2w = 200`}</Eq>。面积：<Eq>{`A = lw = (200-2w)w`}</Eq>。<Eq>{`A'(w)=200-4w=0 \\Rightarrow w=50, l=100`}</Eq>。<Eq>{`A=5000`}</Eq> m²。
+  </>}
+>
+$200\ \text{m}$围栏限制一个靠墙矩形（墙是一边）。最大化面积。
+</Exercicio>
+
+<Exercicio
+  numero="70.9"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.4", pagina: "162", exercicio: "ex. 16", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f'(x)=-2xe^{-x^2}`}</Eq>。<Eq>{`f''(x)=-2e^{-x^2}+4x^2e^{-x^2}=2e^{-x^2}(2x^2-1)`}</Eq>。<Eq>{`f''=0 \\Rightarrow x=\\pm 1/\\sqrt{2}`}</Eq>。拐点在<Eq>{`x=\\pm 1/\\sqrt{2}\\approx \\pm 0.707`}</Eq>。对<Eq>{`|x|>1/\\sqrt{2}`}</Eq>凸，对<Eq>{`|x|<1/\\sqrt{2}`}</Eq>凹。
+  </>}
+>
+确定$f(x) = e^{-x^2}$的拐点和凹凸性。
+</Exercicio>
+
+<Exercicio
+  numero="70.10"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.5", pagina: "179", exercicio: "ex. 22", licenca: "CC-BY-NC" }}
+  solucao={<>
+    定义域：<Eq>{`\\mathbb{R}`}</Eq>。偶函数。<Eq>{`f(0)=0`}</Eq>。<Eq>{`\\lim_{|x|\\to\\infty}f=+\\infty`}</Eq>。<Eq>{`f'(x)=2x/(1+x^2)`}</Eq>：在<Eq>{`x<0`}</Eq>为负，在<Eq>{`x=0`}</Eq>为零（最小值，<Eq>{`f(0)=0`}</Eq>），在<Eq>{`x>0`}</Eq>为正。<Eq>{`f''(x)=(2-2x^2)/(1+x^2)^2`}</Eq>：拐点在<Eq>{`x=\\pm 1`}</Eq>（<Eq>{`f(\\pm 1)=\\ln 2`}</Eq>）。
+  </>}
+>
+做$f(x) = \ln(1 + x^2)$的完整草图：定义域、对称性、极值、拐点、渐近行为。
+</Exercicio>
+
+<Exercicio
+  numero="70.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "不适用——不定式不是$0/0$也不是$\\infty/\\infty$", correta: true },
+    { texto: "适用，因为$\\tan x \\to \\infty$当$x \\to \\pi/2$" },
+    { texto: "适用，因为两个极限都是$0$" },
+    { texto: "适用，只需对分子求导" },
+  ]}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-8-l-hopital-s-rule", secao: "§4.8", pagina: "465", exercicio: "ex. 4.8.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\lim_{x\\to 0} \\sin x / x`}</Eq>确实是<Eq>{`0/0`}</Eq>且洛必达适用。但洛必达在<Eq>{`\\lim_{x\\to 0} x/\\sin x`}</Eq>给出<Eq>{`1/\\cos x \\to 1`}</Eq>——同答案。选项"不适用"指<Eq>{`\\lim_{x\\to\\pi/2}\\tan x / x = \\infty/c`}</Eq>，这不是不定式——选项A对这个命题最准确。
+  </>}
+>
+洛必达直接适用于$\lim_{x \to 0} \sin x / x$（形式$0/0$）。哪个替代方案描述规则**不直接适用**的情况？
+</Exercicio>
+
+<Exercicio
+  numero="70.12"
+  dificuldade="aplicacao"
+  resposta="$1/2$"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-8-l-hopital-s-rule", secao: "§4.8", pagina: "463", exercicio: "ex. 4.8.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    形式$0/0$。洛必达：<Eq>{`\\lim_{x\\to 0}\\sin x / (2x) = \\lim \\cos x / 2 = 1/2`}</Eq>。
+  </>}
+  passos={<>
+    <ol>
+      <li>验证形式：<Eq>{`1-\\cos(0)=0`}</Eq>且<Eq>{`0^2=0`}</Eq>——是<Eq>{`0/0`}</Eq>。<em>为什么：</em>洛必达仅适用<Eq>{`0/0`}</Eq>或<Eq>{`\\infty/\\infty`}</Eq>。</li>
+      <li>第一应用：分别对分子分母求导。<Eq>{`(1-\\cos x)' = \\sin x`}</Eq>，<Eq>{`(x^2)' = 2x`}</Eq>。</li>
+      <li>新极限：<Eq>{`\\lim_{x\\to 0}\\sin x/(2x)`}</Eq>——仍<Eq>{`0/0`}</Eq>。再应用：<Eq>{`\\cos x / 2 \\to 1/2`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：</em><Eq>{`(1-\\cos x)/x^2 \\to 1/2`}</Eq>是基本极限——每次我们用2阶泰勒近似<Eq>{`\\cos`}</Eq>都出现。</p>
+  </>}
+>
+计算$\lim_{x \to 0} \dfrac{1 - \cos x}{x^2}$。
+</Exercicio>
+
+<Exercicio
+  numero="70.13"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-2-8-lhopital.html", secao: "§2.6", pagina: "152", exercicio: "ex. 2.6.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    形式$\\infty/\\infty$。两次洛必达：<Eq>{`\\lim x^2/e^x = \\lim 2x/e^x = \\lim 2/e^x = 0`}</Eq>。指数压制任何幂。
+  </>}
+>
+计算$\lim_{x \to +\infty} \dfrac{x^2}{e^x}$。
+</Exercicio>
+
+### B块——洛必达和泰勒（70.14至70.24）
+
+<Exercicio
+  numero="70.14"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-2-8-lhopital.html", secao: "§2.6", pagina: "153", exercicio: "ex. 2.6.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    形式$0^0$。重写：<Eq>{`x^{\\sin x} = e^{\\sin x \\ln x}`}</Eq>。计算<Eq>{`\\lim_{x\\to 0^+}\\sin x \\ln x = \\lim_{x\\to 0^+}\\ln x / (1/\\sin x)`}</Eq>——形式$-\\infty/\\infty$。洛必达：<Eq>{`(1/x)/(-\\cos x/\\sin^2 x) = -\\sin^2 x/(x\\cos x) \\to 0`}</Eq>。因此<Eq>{`x^{\\sin x} \\to e^0 = 1`}</Eq>。
+  </>}
+>
+计算$\lim_{x \to 0^+} x^{\sin x}$（不定式$0^0$）。
+</Exercicio>
+
+<Exercicio
+  numero="70.15"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "511", exercicio: "ex. 8.4.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\sin x = x - x^3/6 + x^5/120 - x^7/5040 + \\cdots`}</Eq>。到5阶：<Eq>{`P_5(x) = x - x^3/3! + x^5/5! = x - x^3/6 + x^5/120`}</Eq>。
+  </>}
+  passos={<>
+    <ol>
+      <li>计算$\\sin x$在$a=0$的导数：<Eq>{`f(0)=0, f'(0)=1, f''(0)=0, f'''(0)=-1, f^{(4)}(0)=0, f^{(5)}(0)=1`}</Eq>。</li>
+      <li>组合多项式：<Eq>{`P_5(x) = 0 + x - 0 - x^3/6 + 0 + x^5/120`}</Eq>。</li>
+      <li>简化：<Eq>{`P_5(x) = x - x^3/6 + x^5/120`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：</em><Eq>{`\\sin`}</Eq>的导数循环周期为4：<Eq>{`\\sin, \\cos, -\\sin, -\\cos, \\sin, \\ldots`}</Eq>。仅奇数项对<Eq>{`\\sin`}</Eq>存活，因为<Eq>{`\\cos(0)=1`}</Eq>且<Eq>{`\\sin(0)=0`}</Eq>。</p>
+  </>}
+>
+写$\sin x$的5阶麦克劳林多项式（$P_5$）。
+</Exercicio>
+
+<Exercicio
+  numero="70.16"
+  dificuldade="aplicacao"
+  resposta="$1/2$"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "512", exercicio: "ex. 8.4.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\tan x = x + x^3/3 + O(x^5)`}</Eq>且<Eq>{`\\sin x = x - x^3/6 + O(x^5)`}</Eq>。分子：<Eq>{`\\tan x - \\sin x = x^3/3 + x^3/6 + O(x^5) = x^3/2 + O(x^5)`}</Eq>。极限：<Eq>{`x^3/(2x^3) = 1/2`}</Eq>。
+  </>}
+>
+用泰勒展开计算$\lim_{x \to 0} \dfrac{\tan x - \sin x}{x^3}$。
+</Exercicio>
+
+<Exercicio
+  numero="70.17"
+  dificuldade="modelagem"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "513", exercicio: "ex. 8.4.6", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`(1+x)^{1/2} = 1 + x/2 - x^2/8 + x^3/16 - \\cdots`}</Eq>（二项级数）。对<Eq>{`x=0.1`}</Eq>：<Eq>{`P_3(0.1) = 1 + 0.05 - 0.00125 + 0.0000625 = 1.0488`}</Eq>。精确值：<Eq>{`\\sqrt{1.1} \\approx 1.04881`}</Eq>。误差：<Eq>{`< 10^{-5}`}</Eq>。
+  </>}
+>
+用$(1+x)^{1/2}$的麦克劳林级数到3阶近似$\sqrt{1.1}$。
+</Exercicio>
+
+<Exercicio
+  numero="70.18"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§8.8", pagina: "480", exercicio: "ex. 5", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`e^x = 1 + x + x^2/2 + x^3/6 + O(x^4)`}</Eq>对<Eq>{`x=-0.1`}</Eq>：<Eq>{`P_3(-0.1) = 1 - 0.1 + 0.005 - 0.000167 = 0.904833`}</Eq>。精确值：<Eq>{`e^{-0.1}\\approx 0.904837`}</Eq>。误差：<Eq>{`4\\times 10^{-6}`}</Eq>。
+  </>}
+>
+用$e^x$的3阶麦克劳林多项式近似$e^{-0.1}$。计算误差。
+</Exercicio>
+
+<Exercicio
+  numero="70.19"
+  dificuldade="aplicacao"
+  resposta="$1/6$"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "511", exercicio: "ex. 8.4.5", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\sin x = x - x^3/6 + x^5/120 - \\cdots`}</Eq>，则<Eq>{`\\sin x - x = -x^3/6 + O(x^5)`}</Eq>。<Eq>{`(\\sin x - x)/x^3 \\to -1/6`}</Eq>。但题目要求<Eq>{`(x - \\sin x)/x^3 \\to 1/6`}</Eq>。
+  </>}
+>
+用泰勒计算$\lim_{x \to 0} \dfrac{x - \sin x}{x^3}$。
+</Exercicio>
+
+<Exercicio
+  numero="70.20"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "513", exercicio: "ex. 8.4.8", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\ln(1+x) = x - x^2/2 + x^3/3 - x^4/4 + x^5/5 - \\cdots`}</Eq>。级数对<Eq>{`|x| \\leq 1, x \\neq -1`}</Eq>有效。
+  </>}
+>
+写$\ln(1+x)$的麦克劳林级数到$x^5$项。
+</Exercicio>
+
+<Exercicio
+  numero="70.21"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "514", exercicio: "ex. 8.4.9", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`e^x = 1 + x + x^2/2 + \\cdots`}</Eq>且<Eq>{`\\cos x = 1 - x^2/2 + x^4/24 + \\cdots`}</Eq>。分子：<Eq>{`e^x - \\cos x - x = x^2/2 + x^2/2 + O(x^3) = x^2 + O(x^3)`}</Eq>。极限：<Eq>{`x^2/x^2 = 1`}</Eq>。
+  </>}
+>
+通过泰勒计算$\lim_{x \to 0} \dfrac{e^x - \cos x - x}{x^2}$。
+</Exercicio>
+
+<Exercicio
+  numero="70.22"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "级数在全$\\mathbb{R}$收敛到$f(x)$" },
+    { texto: "级数是多项式，在全$\\mathbb{R}$收敛" },
+    { texto: "级数仅在$|x| < 1$收敛" },
+    { texto: "级数在$(-1, 1]$收敛，外散发", correta: true },
+  ]}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-5-taylor.html", secao: "§8.5", pagina: "518", exercicio: "ex. 8.5.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    $\\ln(1+x)$的麦克劳林级数收敛半径$R=1$。在$x=1$收敛（交错调和级数）在$x=-1$发散（调和级数）。故在$(-1,1]$收敛。
+  </>}
+>
+$\ln(1 + x)$麦克劳林级数的收敛区间是什么？
+</Exercicio>
+
+<Exercicio
+  numero="70.23"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "514", exercicio: "ex. 8.4.12", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\cos x = 1 - x^2/2 + x^4/24 - x^6/720 + \\cdots`}</Eq>。到6阶：<Eq>{`P_6(x) = 1 - x^2/2 + x^4/24 - x^6/720`}</Eq>。
+  </>}
+>
+写$\cos x$的6阶麦克劳林多项式$P_6(x)$。
+</Exercicio>
+
+<Exercicio
+  numero="70.24"
+  dificuldade="aplicacao"
+  resposta="$e^2$"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "510", exercicio: "ex. 8.4.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    形式$1^\\infty$。写<Eq>{`L = \\lim (1+2/x)^x`}</Eq>。<Eq>{`\\ln L = \\lim x \\ln(1+2/x)`}</Eq>。做<Eq>{`t=1/x\\to 0^+`}</Eq>：<Eq>{`= \\lim \\ln(1+2t)/t`}</Eq>（形式$0/0$）。洛必达：<Eq>{`= \\lim 2/(1+2t) = 2`}</Eq>。因此<Eq>{`L=e^2`}</Eq>。
+  </>}
+>
+计算$\lim_{x \to +\infty} \left(1 + \dfrac{2}{x}\right)^x$（形式$1^\infty$）。
+</Exercicio>
+
+### C块——边际分析、运动学和牛顿-拉夫逊法（70.25至70.35）
+
+<Exercicio
+  numero="70.25"
+  dificuldade="modelagem"
+  resposta="$q^* = 90$, $\pi^* = \text{R\$ } 1925$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "220", exercicio: "ex. 4.4.3", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`\\pi(q) = 50q - (q^2/4 + 5q + 100) = -q^2/4 + 45q - 100`}</Eq>。<Eq>{`\\pi'(q) = -q/2 + 45 = 0 \\Rightarrow q^*=90`}</Eq>。<Eq>{`\\pi(90) = -2025 + 4050 - 100 = 1925`}</Eq>雷亚尔。
+  </>}
+  passos={<>
+    <ol>
+      <li>写利润：<Eq>{`\\pi(q) = Rq - C(q)`}</Eq>，<Eq>{`R = 50`}</Eq>（售价）。<em>为什么：</em>利润=收益减成本。</li>
+      <li>简化：<Eq>{`\\pi(q) = -q^2/4 + 45q - 100`}</Eq>。</li>
+      <li>一阶条件：<Eq>{`\\pi'(q^*)=0`}</Eq>。<em>为什么：</em>极值要求导数为零。</li>
+      <li>确认最大值：<Eq>{`\\pi''(q)=-1/2 < 0`}</Eq>。</li>
+      <li>计算<Eq>{`\\pi(q^*)`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：</em>竞争企业最大化利润当<Eq>{`p = MC`}</Eq>：这里<Eq>{`50 = q/2 + 5 \\Rightarrow q=90`}</Eq>。</p>
+  </>}
+>
+成本$C(q) = q^2/4 + 5q + 100$（雷亚尔），价格$p = 50$雷亚尔/单位。求量$q^*$和最大利润$\pi^*$。
+</Exercicio>
+
+<Exercicio
+  numero="70.26"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "221", exercicio: "ex. 4.4.5", licenca: "CC-BY-NC" }}
+  solucao={<>
+    逆需求：<Eq>{`p = (100-q)/2`}</Eq>。收益：<Eq>{`R(q) = pq = q(100-q)/2`}</Eq>。利润：<Eq>{`\\pi(q) = q(100-q)/2 - 10q = -q^2/2 + 40q`}</Eq>。<Eq>{`\\pi'(q)=-q+40=0 \\Rightarrow q^*=40`}</Eq>，<Eq>{`p^*=30`}</Eq>，<Eq>{`\\pi^*=800`}</Eq>。
+  </>}
+  passos={<>
+    <ol>
+      <li>逆需求：<Eq>{`q=100-2p \\Rightarrow p=(100-q)/2`}</Eq>。<em>为什么：</em>为用$q$写收益。</li>
+      <li>收益：<Eq>{`R(q)=pq=q(100-q)/2=-q^2/2+50q`}</Eq>。</li>
+      <li>利润：<Eq>{`\\pi(q)=R-C=-q^2/2+50q-10q=-q^2/2+40q`}</Eq>。</li>
+      <li>最大条件：<Eq>{`\\pi'=-q+40=0 \\Rightarrow q^*=40`}</Eq>。确认：<Eq>{`\\pi''=-1<0`}</Eq>。</li>
+      <li>最优价格：<Eq>{`p^*=(100-40)/2=30`}</Eq>。利润：<Eq>{`\\pi(40)=-800+1600=800`}</Eq>。</li>
+    </ol>
+    <p><em>技巧：</em>垄断条件是<Eq>{`MR=MC`}</Eq>：<Eq>{`MR=R'(q)=-q+50`}</Eq>且<Eq>{`MC=C'(q)=10`}</Eq>，故<Eq>{`-q+50=10 \\Rightarrow q=40`}</Eq>。</p>
+  </>}
+>
+垄断者需求$q = 100 - 2p$，成本$C(q) = 10q$。求$q^*$、$p^*$和最大利润。
+</Exercicio>
+
+<Exercicio
+  numero="70.27"
+  dificuldade="modelagem"
+  resposta="最大高$20$ m在$t=2$ s；碰地在$t=4$ s"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", pagina: "78", exercicio: "ex. 2.2.12", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`s(t)=20t-5t^2`}</Eq>（$g=10$ m/s²）。<Eq>{`v(t)=20-10t=0 \\Rightarrow t=2`}</Eq> s。最大高：<Eq>{`s(2)=40-20=20`}</Eq> m。地面：<Eq>{`s(t)=0 \\Rightarrow t(20-5t)=0 \\Rightarrow t=4`}</Eq> s。
+  </>}
+>
+球垂直抛出初速$v_0 = 20\ \text{m/s}$（$g = 10\ \text{m/s}^2$）。计算最大高和飞行时间。
+</Exercicio>
+
+<Exercicio
+  numero="70.28"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", pagina: "79", exercicio: "ex. 2.2.14", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`v(t) = 3t^2 - 18t + 24 = 3(t-2)(t-4)`}</Eq>。<Eq>{`v=0`}</Eq>在<Eq>{`t=2`}</Eq>和<Eq>{`t=4`}</Eq>。总距离：<Eq>{`|s(2)-s(0)|+|s(4)-s(2)|+|s(5)-s(4)|`}</Eq>。<Eq>{`s(0)=0, s(2)=8-36+48=20, s(4)=64-144+96=16, s(5)=125-225+120=20`}</Eq>。距离：<Eq>{`20+4+4=28`}</Eq> m。
+  </>}
+  passos={<>
+    <ol>
+      <li>计算<Eq>{`v(t)=s'(t)=3t^2-18t+24`}</Eq>并找零点。</li>
+      <li>在临界时刻和边界<Eq>{`t=0,2,4,5`}</Eq>评估<Eq>{`s`}</Eq>。</li>
+      <li>求和分段距离（总正！）。<em>为什么：</em>总距离是<Eq>{`|v|`}</Eq>的积分，不是<Eq>{`s(5)-s(0)`}</Eq>。</li>
+    </ol>
+    <p><em>注意：</em>不混淆位移（<Eq>{`s(5)-s(0)=20`}</Eq> m）和走过距离（<Eq>{`28`}</Eq> m）。</p>
+  </>}
+>
+$s(t) = t^3 - 9t^2 + 24t$。何时$v(t) = 0$？计算$0 \leq t \leq 5$走过的总距离。
+</Exercicio>
+
+<Exercicio
+  numero="70.29"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§2.2", pagina: "80", exercicio: "ex. 2.2.16", licenca: "CC-BY-NC" }}
+  solucao={<>
+    周期：<Eq>{`T = 2\\pi\\sqrt{m/k} = 2\\pi\\sqrt{0.5/50} = 2\\pi \\cdot 0.1 = 0.628`}</Eq> s。最大速度：<Eq>{`v_{\\max} = A\\omega = A\\sqrt{k/m} = 0.1\\sqrt{100} = 1`}</Eq> m/s。
+  </>}
+>
+弹簧-质量系统：$m = 0.5\ \text{kg}$, $k = 50\ \text{N/m}$, 振幅$A = 0.1\ \text{m}$。计算周期和最大速度。
+</Exercicio>
+
+<Exercicio
+  numero="70.30"
+  dificuldade="modelagem"
+  resposta="$\sqrt{7} \approx 2.64575$"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§6.1", pagina: "330", exercicio: "ex. 6.1.5", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=x^2-7`}</Eq>，<Eq>{`f'(x)=2x`}</Eq>，<Eq>{`x_0=3`}</Eq>。<Eq>{`x_1=3-2/6=2.667`}</Eq>。<Eq>{`x_2=2.667-(2.667^2-7)/(2\\cdot 2.667)=2.646`}</Eq>。<Eq>{`x_3\\approx 2.64575`}</Eq>。
+  </>}
+>
+用牛顿-拉夫逊在$f(x) = x^2 - 7$，$x_0 = 3$计算$\sqrt{7}$到5位小数。
+</Exercicio>
+
+<Exercicio
+  numero="70.31"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§6.1", pagina: "331", exercicio: "ex. 6.1.7", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=x^3-2`}</Eq>，<Eq>{`f'(x)=3x^2`}</Eq>，<Eq>{`x_0=1`}</Eq>。<Eq>{`x_1=1-(1-2)/3=1+1/3=1.333`}</Eq>。<Eq>{`x_2=1.333-(1.333^3-2)/(3\\cdot 1.333^2)\\approx 1.264`}</Eq>。<Eq>{`x_3\\approx 1.25993`}</Eq>。精确值：<Eq>{`2^{1/3}\\approx 1.25992`}</Eq>。
+  </>}
+  passos={<>
+    <ol>
+      <li>识别<Eq>{`f(x)=x^3-2`}</Eq>和<Eq>{`f'(x)=3x^2`}</Eq>。</li>
+      <li>迭代：<Eq>{`x_{n+1}=x_n-f(x_n)/f'(x_n)=x_n-(x_n^3-2)/(3x_n^2)`}</Eq>。</li>
+      <li>制表：<Eq>{`x_0=1, x_1=4/3, x_2\\approx 1.264, x_3\\approx 1.25993`}</Eq>。</li>
+    </ol>
+    <p><em>趣味：</em>牛顿在1669年用正好这个算法计算立方根。二次收敛意味着迭代3的误差已小于<Eq>{`10^{-5}`}</Eq>。</p>
+  </>}
+>
+用牛顿-拉夫逊在$f(x) = x^3 - 2$，$x_0 = 1$近似$\sqrt[3]{2}$。做3次迭代。
+</Exercicio>
+
+<Exercicio
+  numero="70.32"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§6.1", pagina: "332", exercicio: "ex. 6.1.9", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=e^x-3x`}</Eq>，<Eq>{`f'(x)=e^x-3`}</Eq>。根在<Eq>{`e^x=3x`}</Eq>：一个在<Eq>{`(0,1)`}</Eq>（约<Eq>{`x_1\\approx 0.619`}</Eq>）另一个在<Eq>{`(1,2)`}</Eq>（约<Eq>{`x_2\\approx 1.512`}</Eq>）。对每个根，用靠近的<Eq>{`x_0`}</Eq>并迭代。
+  </>}
+>
+在$f(x) = e^x - 3x$应用牛顿-拉夫逊找两个实根。用$x_0 = 0$对一个，$x_0 = 1.5$对另一个。
+</Exercicio>
+
+<Exercicio
+  numero="70.33"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "474", exercicio: "ex. 4.9.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    开普勒方程：<Eq>{`E - 0.3\\sin E = 1`}</Eq>。重写：<Eq>{`f(E)=E-0.3\\sin E - 1 = 0`}</Eq>。<Eq>{`f'(E)=1-0.3\\cos E`}</Eq>。<Eq>{`E_0=1`}</Eq>：<Eq>{`E_1=1-(1-0.3\\sin 1-1)/(1-0.3\\cos 1)=1-(-0.252)/(0.838)\\approx 1.301`}</Eq>。<Eq>{`E_2\\approx 1.351`}</Eq>。<Eq>{`E_3\\approx 1.352`}</Eq>。<Eq>{`E_4\\approx 1.352`}</Eq>（收敛）。
+  </>}
+>
+开普勒方程：$E - 0.3\sin E = 1$。用牛顿-拉夫逊，$E_0 = 1$，做4次迭代。
+</Exercicio>
+
+<Exercicio
+  numero="70.34"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "§3.3", pagina: "200", exercicio: "ex. 3.3.10", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`f''\\geq 0`}</Eq>在全$\\mathbb{R}$意味着$f$凸。若$f$有两个局部最小值$a$和$b$，由中值定理存在$c \\in (a,b)$使<Eq>{`f(c) < f(a)`}</Eq>和<Eq>{`f(c) < f(b)`}</Eq>。但凸性要求<Eq>{`f(c) \\leq f(a) + (f(b)-f(a))/(b-a)\\cdot(c-a)`}</Eq>。对严格凸函数（<Eq>{`f''>0`}</Eq>），仅一个全局最小值存在。
+  </>}
+>
+证明严格凸函数（$f'' > 0$）在$\mathbb{R}$最多有一个最小值点。
+</Exercicio>
+
+### D块——综合：多工具问题（70.36至70.40）
+
+<Exercicio
+  numero="70.35"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-4-taylor.html", secao: "§8.4", pagina: "514", exercicio: "ex. 8.4.10", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\sin x = x - x^3/6 + \\cdots`}</Eq>。对$x>0$：<Eq>{`x - \\sin x = x^3/6 - x^5/120 + \\cdots > 0`}</Eq>因为正项主导。因此<Eq>{`\\sin x < x`}</Eq>对所有$x>0$。
+  </>}
+>
+用$\sin x$的麦克劳林级数证明对所有$x > 0$有$\sin x < x$。
+</Exercicio>
+
+<Exercicio
+  numero="70.36"
+  dificuldade="desafio"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§3.5", pagina: "182", exercicio: "ex. 30", licenca: "CC-BY-NC" }}
+  solucao={<>
+    <Eq>{`f(x)=x^x=e^{x\\ln x}`}</Eq>，定义域<Eq>{`(0,\\infty)`}</Eq>。<Eq>{`f'(x)=x^x(\\ln x+1)=0 \\Rightarrow \\ln x=-1 \\Rightarrow x=1/e`}</Eq>。<Eq>{`f(1/e)=(1/e)^{1/e}=e^{-1/e}\\approx 0.692`}</Eq>。<Eq>{`f''`}</Eq>确认最小值。<Eq>{`f(x)\\to 1`}</Eq>当<Eq>{`x\\to 0^+`}</Eq>且<Eq>{`f(x)\\to \\infty`}</Eq>当<Eq>{`x\\to\\infty`}</Eq>。
+  </>}
+>
+草图$(0, +\infty)$上的$f(x) = x^x$。找最小值并分析定义域端点的行为。
+</Exercicio>
+
+<Exercicio
+  numero="70.37"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "§3.3", pagina: "200", exercicio: "ex. 3.3.12", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    <Eq>{`\\arctan x`}</Eq>有<Eq>{`f'(x)=1/(1+x^2)`}</Eq>且<Eq>{`f''(x)=-2x/(1+x^2)^2`}</Eq>。牛顿：<Eq>{`x_{n+1}=x_n-\\arctan(x_n)(1+x_n^2)`}</Eq>。对<Eq>{`x_0=2`}</Eq>：<Eq>{`x_1=2-\\arctan(2)\\cdot 5 = 2 - 5.534 = -3.534`}</Eq>。序列振荡并发散因为<Eq>{`|f/f'|=|\\arctan x|(1+x^2)`}</Eq>对大<Eq>{`|x|`}</Eq>递增——切线指向离根$x=0$远。
+  </>}
+>
+牛顿-拉夫逊应用$f(x) = \arctan x$，$x_0 = 2$发散。几何解释为什么，并数值展示。
+</Exercicio>
+
+<Exercicio
+  numero="70.38"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "§3.1", pagina: "185", exercicio: "ex. 3.1.7", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    在$a$处的泰勒展开：<Eq>{`f(x) = f(a) + f'(a)(x-a) + f^{(k)}(a)/k! \\cdot (x-a)^k + O((x-a)^{k+1})`}</Eq>，<Eq>{`f'(a)=\\cdots=f^{(k-1)}(a)=0`}</Eq>且<Eq>{`f^{(k)}(a)\\neq 0`}</Eq>。对靠近$a$的$x$，<Eq>{`f(x)-f(a)`}</Eq>的符号由<Eq>{`f^{(k)}(a)(x-a)^k/k!`}</Eq>确定。若$k$偶：<Eq>{`(x-a)^k > 0`}</Eq>对$x \\neq a$，故<Eq>{`f(x)-f(a)`}</Eq>符号恒定——极值。若$k$奇：<Eq>{`(x-a)^k`}</Eq>改变符号——不是极值（鞍点/拐点）。
+  </>}
+>
+通过泰勒证明：若$f'(a) = 0$且$f^{(k)}(a)$是$a$处第一个非零导数，则$k$偶时$a$是极值，$k$奇时是鞍点/拐点。
+</Exercicio>
+
+<Exercicio
+  numero="70.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-2-8-lhopital.html", secao: "§2.6", pagina: "151", exercicio: "ex. 2.6.1", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    代<Eq>{`f(x)\\approx f'(a)(x-a)`}</Eq>和<Eq>{`g(x)\\approx g'(a)(x-a)`}</Eq>（1阶泰勒，<Eq>{`f(a)=g(a)=0`}</Eq>）。则<Eq>{`f(x)/g(x) \\approx f'(a)(x-a)/(g'(a)(x-a)) = f'(a)/g'(a)`}</Eq>（假设<Eq>{`g'(a)\\neq 0`}</Eq>）。这"证明"洛必达作为1阶泰勒推论——严格版用柯西MVT。
+  </>}
+>
+通过1阶泰勒，证明当$f(a) = g(a) = 0$和$g'(a) \neq 0$时，$\lim_{x\to a} f(x)/g(x) = f'(a)/g'(a)$。
+</Exercicio>
+
+<Exercicio
+  numero="70.40"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-4-applied-opt.html", secao: "§3.4", pagina: "208", exercicio: "ex. 3.4.5", licenca: "CC-BY-NC-SA" }}
+  solucao={<>
+    收益：<Eq>{`R(q) = p(q) \\cdot q`}</Eq>。边际收益：<Eq>{`MR = R'(q) = p(q) + p'(q) q`}</Eq>。边际成本：<Eq>{`MC = C'(q)`}</Eq>。利润：<Eq>{`\\pi(q) = R(q) - C(q)`}</Eq>；条件<Eq>{`\\pi'=0 \\Rightarrow MR = MC`}</Eq>。竞争企业<Eq>{`p'=0`}</Eq>，故<Eq>{`MR = p`}</Eq>条件变为<Eq>{`p = MC`}</Eq>。垄断者<Eq>{`p'<0`}</Eq>，故<Eq>{`MR < p`}</Eq>——产更少卖更贵比竞争企业。
+  </>}
+>
+形式推导最大利润条件$MR = MC$。解释垄断者为何比竞争企业产更少。
+</Exercicio>
+
+</ListaExercicios>
+
+## 资源
+
+- [**Active Calculus**](https://activecalculus.org/single/) — Matt Boelkins, David Austin, Steve Schlicker · Grand Valley State University · 2024 · CC-BY-NC-SA. 章节§2.6（洛必达）、§3.1–3.4（优化）、§8.4–8.5（泰勒和级数）。
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Gregory Hartman et al. · Virginia Military Institute · 2024 · CC-BY-NC. 第3章（函数分析）、第4章（应用）、第6章（牛顿和应用）、第8章（泰勒级数）。
+- [**Calculus Volume 1**](https://openstax.org/details/books/calculus-volume-1) — OpenStax (Strang, Herman et al.) · 2023 · CC-BY-NC-SA. 章节§4.3（极值）、§4.7（应用优化）、§4.8（洛必达）、§4.9（牛顿法）。

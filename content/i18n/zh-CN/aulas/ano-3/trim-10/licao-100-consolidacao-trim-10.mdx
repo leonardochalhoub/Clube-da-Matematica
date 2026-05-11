@@ -1,0 +1,792 @@
+---
+titulo: "Lição 100 — Consolidação Trimestre 10 (EDOs)"
+slug: "licao-100-consolidacao-trim-10"
+categoria: "aulas"
+subcategoria: "ano-3-trim-10"
+descricao: "第10学期常微分方程综合研讨：可分离型、一阶线性、种群模型、常系数二阶、振动、RLC电路、数值欧拉法和牛顿冷却。"
+ordem: 100
+publicado: true
+tags: ["EDO", "consolidação", "separável", "linear", "vibrações", "RLC", "Euler", "Newton", "ano-3", "trim-10"]
+prerrequisitos: ["licao-99-newton-resfriamento"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["AP Calculus BC (EUA)", "Leistungskurs Mathematik Klasse 12 (Alemanha)", "H2 Mathematics (Singapura)", "Spécialité Maths Terminale (França)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\underbrace{y' + p(x)\,y = q(x)}_{\text{1ª ordem linear}} \quad \Big| \quad \underbrace{ay'' + by' + cy = q(x)}_{\text{2ª ordem coef.\,constantes}}"
+  legenda={<>两个结构模型覆盖本学期几乎所有应用。左边使用<strong>积分因子</strong> <Eq>{`\\mu = e^{\\int p\\,dx}`}</Eq> 求解。右边使用<strong>特征方程</strong> <Eq>{`a\\lambda^2 + b\\lambda + c = 0`}</Eq> 求解。非解析情形使用欧拉法或RK4求解。</>}
+  audioTexto="第10学期综合训练。一阶常微分方程：可分离型、具有积分因子的线性型、马尔萨斯和逻辑斯谛种群模型、牛顿冷却。二阶常微分方程：特征方程、质量-弹簧振动、RLC电路。数值方法：欧拉法和四阶龙格-库塔法。"
+/>
+
+<aside>
+
+**涵盖本课程的书籍**
+
+- [**Notes on Diffy Qs**](https://www.jirka.org/diffyqs/) — Jiří Lebl · §1–2 and §7 · CC-BY-SA · <em>一阶和二阶解析常微分方程的主要参考资源，包含综合复习示例。</em>
+- [**REAMAT — 数值分析（Python）**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · 第8章 · CC-BY-SA · <em>欧拉法、截断误差、RK4和稳定性——学期数值复习。</em>
+- [**微积分第2卷**](https://openstax.org/details/books/calculus-volume-2) — OpenStax · §4.1–4.5 · CC-BY-NC-SA · <em>应用复习：可分离常微分方程、一阶线性、逻辑斯谛和冷却的综合问题。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="技术地图和决策标准">
+
+<Definicao titulo="常微分方程分类流程图">
+
+给定常微分方程，按顺序检查：
+
+1. **阶数？** 有多少个导数？仅有 <Eq>{`y'`}</Eq>：一阶。有 <Eq>{`y''`}</Eq>：二阶。
+2. **线性？** <Eq>{`y, y', y''`}</Eq> 中的所有项都是线性的吗（无乘积、无关于 <Eq>{`y`}</Eq> 的函数）？
+3. **一阶线性**: <Eq>{`y' + p(x)y = q(x)`}</Eq> → 积分因子 <Eq>{`\\mu = e^{\\int p\\,dx}`}</Eq>。
+4. **一阶可分离**: <Eq>{`y' = g(x)h(y)`}</Eq> → 分离并积分。
+5. **常系数二阶**: <Eq>{`ay'' + by' + cy = q(x)`}</Eq> → 特征方程 + <Eq>{`y_p`}</Eq> 通过待定系数法或参数变换。
+6. **非解析型**: 不符合上述任何形式的任何形式 → 数值方法（欧拉法/RK4）。
+
+</Definicao>
+
+> "存在性与唯一性定理说：在 <Eq>{`f`}</Eq> 和 <Eq>{`\\partial f/\\partial y`}</Eq> 连续的每个点 (x₀, y₀) 处，恰好存在一条解曲线。"
+> — [Lebl, *Notes on Diffy Qs* §1.2](https://www.jirka.org/diffyqs/html/intro_section.html)
+
+> "积分因子的想法是将左边写成精确导数。"
+> — [OpenStax *微积分第2卷* §4.5](https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations)
+
+**本学期的技术表：**
+
+| 常微分方程 | 标准形式 | 技术 | 通解 |
+|---|---|---|---|
+| 可分离 | <Eq>{`y' = g(x)h(y)`}</Eq> | 分离并积分 | 隐式 |
+| 一阶线性 | <Eq>{`y'+py=q`}</Eq> | <Eq>{`\\mu=e^{\\int p}`}</Eq> | <Eq>{`y = \\frac{1}{\\mu}\\int\\mu q\\,dx + C`}</Eq> |
+| 马尔萨斯 | <Eq>{`\\dot P = rP`}</Eq> | 可分离 | <Eq>{`P = P_0 e^{rt}`}</Eq> |
+| 逻辑斯谛 | <Eq>{`\\dot P = rP(1-P/K)`}</Eq> | 可分离 + 部分分数 | <Eq>{`P = K/(1+Ae^{-rt})`}</Eq> |
+| 冷却 | <Eq>{`\\dot T = -k(T-T_a)`}</Eq> | 可分离 | <Eq>{`T = T_a + (T_0-T_a)e^{-kt}`}</Eq> |
+| 二阶齐次 | <Eq>{`ay''+by'+cy=0`}</Eq> | 特征方程 <Eq>{`a\\lambda^2+b\\lambda+c=0`}</Eq> | 三种情况 |
+| 二阶非齐次 | <Eq>{`ay''+by'+cy=q`}</Eq> | <Eq>{`y_h + y_p`}</Eq> | 待定系数 |
+| 数值欧拉法 | 任意 | <Eq>{`y_{n+1}=y_n+hf`}</Eq> | 数列 |
+
+<Teorema titulo="二阶线性解的结构">
+
+如果 <Eq>{`y_1, y_2`}</Eq> 是 <Eq>{`ay'' + by' + cy = 0`}</Eq> 的线性无关解，且 <Eq>{`y_p`}</Eq> 是 <Eq>{`ay'' + by' + cy = q(x)`}</Eq> 的任意一个特解，那么非齐次方程的所有解都是
+
+<Equation latex="y = C_1 y_1 + C_2 y_2 + y_p, \quad C_1, C_2 \in \mathbb{R}." />
+
+**证明（概要）。** 设 <Eq>{`z`}</Eq> 为另一个解；则 <Eq>{`z - y_p`}</Eq> 满足齐次方程，因此属于由 <Eq>{`y_1, y_2`}</Eq> 生成的空间。 <Eq>{`\\square`}</Eq>
+
+</Teorema>
+
+<Insight>
+
+**电机械类比。** 表格
+
+| 机械 | 电气 |
+|---|---|
+| 质量 <Eq>{`m`}</Eq> | 电感 <Eq>{`L`}</Eq> |
+| 阻尼器 <Eq>{`c`}</Eq> | 电阻 <Eq>{`R`}</Eq> |
+| 弹簧 <Eq>{`k`}</Eq> | <Eq>{`1/C`}</Eq> |
+| 力 <Eq>{`F`}</Eq> | 电压 <Eq>{`V`}</Eq> |
+| 位置 <Eq>{`x`}</Eq> | 电荷 <Eq>{`Q`}</Eq> |
+
+之所以精确，是因为两个系统都由相同的二阶常微分方程建模。工程师用电路代替机械系统——更容易测量——然后将结果导入回去。
+
+</Insight>
+
+**SVG——常微分方程决策图**
+
+<svg viewBox="0 0 480 320" width="480" height="320" style={{fontFamily:"sans-serif",fontSize:"12px"}}>
+  <g>
+    <rect x="160" y="10" width="160" height="36" rx="6" fill="#e0f2fe" stroke="#0284c7" strokeWidth="1.5"/>
+    <text x="240" y="33" textAnchor="middle" fill="#0c4a6e">常微分方程来临</text>
+  </g>
+  <g>
+    <line x1="240" y1="46" x2="240" y2="80" stroke="#64748b" strokeWidth="1.2"/>
+    <polygon points="240,80 235,72 245,72" fill="#64748b"/>
+  </g>
+  <g>
+    <rect x="160" y="80" width="160" height="36" rx="6" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1.5"/>
+    <text x="240" y="103" textAnchor="middle" fill="#713f12">阶数？</text>
+  </g>
+  <g>
+    <line x1="160" y1="98" x2="60" y2="150" stroke="#64748b" strokeWidth="1.2"/>
+    <text x="100" y="128" textAnchor="middle" fill="#475569">一阶</text>
+  </g>
+  <g>
+    <line x1="320" y1="98" x2="420" y2="150" stroke="#64748b" strokeWidth="1.2"/>
+    <text x="380" y="128" textAnchor="middle" fill="#475569">二阶</text>
+  </g>
+  <g>
+    <rect x="10" y="150" width="100" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
+    <text x="60" y="163" textAnchor="middle" fill="#14532d" fontSize="11">可分离？</text>
+    <text x="60" y="178" textAnchor="middle" fill="#14532d" fontSize="10">→ 积分</text>
+  </g>
+  <g>
+    <rect x="120" y="150" width="100" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
+    <text x="170" y="163" textAnchor="middle" fill="#14532d" fontSize="11">线性？</text>
+    <text x="170" y="178" textAnchor="middle" fill="#14532d" fontSize="10">→ 积分因子</text>
+  </g>
+  <g>
+    <rect x="370" y="150" width="100" height="36" rx="6" fill="#fce7f3" stroke="#db2777" strokeWidth="1.5"/>
+    <text x="420" y="163" textAnchor="middle" fill="#831843" fontSize="11">常系数？</text>
+    <text x="420" y="178" textAnchor="middle" fill="#831843" fontSize="10">→ 特征</text>
+  </g>
+  <g>
+    <rect x="170" y="240" width="140" height="36" rx="6" fill="#f1f5f9" stroke="#475569" strokeWidth="1.5"/>
+    <text x="240" y="263" textAnchor="middle" fill="#1e293b">数值方法</text>
+  </g>
+  <g>
+    <line x1="60" y1="186" x2="60" y2="258" stroke="#64748b" strokeWidth="1" strokeDasharray="5,3"/>
+    <line x1="60" y1="258" x2="170" y2="258" stroke="#64748b" strokeWidth="1" strokeDasharray="5,3"/>
+    <text x="110" y="252" textAnchor="middle" fill="#475569" fontSize="10">非解析</text>
+  </g>
+</svg>
+
+</Porta>
+
+<Porta nivel="5" titulo="随时间变化的方程">
+
+我们学会了处理**始终在变化的东西**：冷却的温度、增长的种群、摇晃的桥梁。
+
+对于每种变化类型，都存在一个**不同的技巧**。有时数学将变量分离成一个简单的计算。有时需要一个"魔法因子"来简化一切。当没有技巧有效时，计算机一步步做**直到得到答案**。
+
+在这堂课中，我们汇总了所有技巧并为每个问题选择了正确的。
+
+</Porta>
+
+<Porta nivel="10" titulo="八种技术，一张地图">
+
+在第10学期期间，您学到了**八种**处理变化方程的方法：
+
+1. **可分离** — x和y分离：积分各边。
+2. **一阶线性** — 积分因子将其转换为一边。
+3. **马尔萨斯** — 成比例增长：指数。
+4. **逻辑斯谛** — 具有承载能力限制的增长。
+5. **二阶齐次** — 特征方程给出指数或正弦。
+6. **振动** — 质量-弹簧带阻尼和强迫。
+7. **RLC** — 与质量-弹簧相同，但有电子。
+8. **欧拉法/RK4** — 当没有闭式公式时，计算机逐步求解。
+
+**如何选择？** 看有多少个导数：仅有 <Eq>{`y'`}</Eq> → 一阶。有 <Eq>{`y''`}</Eq> → 二阶。如果您识别出规范模型之一（逻辑斯谛、冷却、质量-弹簧），请直接使用该模型。
+
+</Porta>
+
+<Porta nivel="15" titulo="决策流程图和常见错误">
+
+### 快速决策
+
+```
+常微分方程来临：
+├─ 仅有y'：一阶
+│  ├─ x和y分离？ → 可分离，积分
+│  ├─ 形式y' + p(x)y = q(x)？ → 积分因子
+│  └─ 都不是？ → 代换（伯努利、恰当）或数值
+└─ 有y''：二阶
+   ├─ 常系数？
+   │  ├─ 齐次 → 特征方程
+   │  └─ 非齐次 → y_h + y_p（待定系数）
+   └─ 变系数 → 柯西-欧拉、级数或数值
+```
+
+### 学期经典错误
+
+- **在可分离中忘记常数解**：如果 <Eq>{`h(y_0) = 0`}</Eq>，则 <Eq>{`y \\equiv y_0`}</Eq> 是奇异解。除以 <Eq>{`h(y)`}</Eq> 仅在根之外有效。
+- **在非线性常微分方程中使用积分因子**：<Eq>{`y' = y^2`}</Eq> 不是线性的，没有积分因子。
+- **混淆 <Eq>{`\\omega_0`}</Eq> 和 <Eq>{`\\omega_d`}</Eq>**：自然频率vs阻尼频率。<Eq>{`\\omega_d = \\omega_0\\sqrt{1-\\zeta^2}`}</Eq>。
+- **在刚性问题中使用大欧拉步长**：具有短时间常数的系统（R大的RLC）会破坏显式欧拉法的稳定性。
+- **共振**：当力的频率为 <Eq>{`\\omega_0`}</Eq> 和 <Eq>{`\\zeta = 0`}</Eq> 时，<Eq>{`y_p`}</Eq> 必须包含因子 <Eq>{`t`}</Eq>。
+
+### 快速验证
+
+始终将解代入原始常微分方程。如果结果不匹配，解是错误的。
+
+</Porta>
+
+<Porta nivel="25" titulo="工程地图：领域和规范常微分方程">
+
+常微分方程是**工程的语言**。每个领域都有其结构模型。
+
+### 机械
+
+- 平移动力学：<Eq>{`m\\ddot x = F`}</Eq>。
+- 线性振动：<Eq>{`m\\ddot x + c\\dot x + kx = F(t)`}</Eq>。品质因数 <Eq>{`Q = 1/(2\\zeta)`}</Eq>。
+- 稳定性：围绕平衡的线性化，<Eq>{`Df(x^*)`}</Eq> 的特征值。
+
+### 电气
+
+- RC、RL、LC、RLC：质量-弹簧的精确类似物。
+- 传输线：电报员方程（EDP → 分离的常微分方程）。
+- 电机：Park变换方程（dq0变换）。
+
+### 化学与过程
+
+- 一阶动力学：<Eq>{`\\dot c = -kc`}</Eq>。
+- 具有放热反应的CSTR：质量+能量平衡、耦合常微分方程组。
+- 扩散-反应（1D）：<Eq>{`D c'' = \\lambda c`}</Eq>（空间中的二阶常微分方程）。
+
+### 控制
+
+- PID控制二阶被控对象。闭环极点确定响应。
+- 状态反馈：<Eq>{`\\dot{\\mathbf x} = A\\mathbf x + B\\mathbf u`}</Eq>、<Eq>{`\\mathbf u = -K\\mathbf x`}</Eq>。
+- 劳斯-赫尔维茨准则：无需求解方程的稳定性。
+
+### 专业工作流程
+
+1. **从物理建模**（平衡）。
+2. **无量纲化** — 识别Bi、Re、<Eq>{`\\zeta`}</Eq>、<Eq>{`\\omega_0 T`}</Eq>。
+3. **线性化**如果 <Eq>{`\\Delta`}</Eq> 很小；解析变得容易。
+4. **求解**解析或数值。
+5. **使用实验或高保真度模拟进行验证**。
+6. **优化参数**（控制、尺寸）。
+
+</Porta>
+
+<Porta nivel="40" titulo="动力系统、伴随和现代前沿">
+
+### 几何和流
+
+每个自治常微分方程 <Eq>{`\\dot x = f(x)`}</Eq> 在流形上定义一个**流** <Eq>{`\\phi_t`}</Eq>。核心概念：
+
+- **平衡点**：<Eq>{`f(x^*) = 0`}</Eq>。哈特曼-格罗布曼：如果 <Eq>{`Df(x^*)`}</Eq> 没有纯虚特征值，<Eq>{`\\phi_t`}</Eq> 局部拓扑共轭于线性化。
+- **稳定/不稳定流形**：不变；构造相肖像。
+- **分岔**：鞍结、Hopf、周期倍增。参数分岔图。
+- **混沌**：正李亚普诺夫指数。洛伦兹吸引子。
+
+### 常微分方程的伴随
+
+为了优化函数 <Eq>{`J = \\int_0^T g(x,u)\\,dt`}</Eq> 受约束 <Eq>{`\\dot x = f(x,u)`}</Eq>，关于 <Eq>{`u`}</Eq> 的梯度通过**反向伴随方程**计算。成本：一次前向积分 + 一次反向，与 <Eq>{`u`}</Eq> 的维度无关。现代反向传播在神经常微分方程中的基础（Chen等人，NeurIPS 2018）。
+
+### 现代方法
+
+- **SINDy**（Brunton等人，2016）：通过稀疏回归从数据中识别常微分方程。
+- **神经常微分方程**：连续极限中的残差网络；用伴随训练。
+- **PINN**（Raissi等人，2019）：最小化常微分方程残差 + 数据。
+- **几何积分**：辛（Störmer-Verlet）保留能量；Lie群保留结构。
+
+### 相关诺贝尔奖
+
+詹姆斯·皮布尔斯因对物理宇宙学的理论贡献获得[2019年诺贝尔物理学奖](https://www.nobelprize.org/prizes/physics/2019/summary/)。弗里德曼方程——管辖宇宙膨胀——是尺度因子 <Eq>{`a(t)`}</Eq> 的一阶自治常微分方程。
+
+### 随机微分方程
+
+随机常微分方程：<Eq>{`dX = f(X)\\,dt + g(X)\\,dW`}</Eq>（Itô）。金融（Black-Scholes）、分子生物学（遗传噪声）、鲁棒控制。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="具有实际数据的综合应用">
+
+### 模型选择：实用规则
+
+在任何计算之前，在流程图中对问题进行分类。具有巴西背景的示例：
+
+**简单流行病（新冠肺炎，巴西）：** <Eq>{`\\dot I = (\\beta - \\gamma)I`}</Eq> 开始时。可分离 → 指数。当 <Eq>{`S`}</Eq> 下降时：<Eq>{`\\dot I = (\\beta S/N - \\gamma)I`}</Eq>、SIR系统、数值求解。
+
+**工业反应堆（巴西石油公司，炼油厂）：** 换热器出口温度：<Eq>{`mc_p \\dot T = UA(T_s - T)`}</Eq> — 一阶线性、积分因子。
+
+**结构（保利斯塔大厦在风中）：** 振动的基本模式：<Eq>{`m\\ddot x + c\\dot x + kx = F_0\\cos(\\omega t)`}</Eq>。共振担忧如果 <Eq>{`\\omega \\approx \\omega_0`}</Eq>。
+
+**音频滤波器（放大器，圣保罗）：** 低通RLC、<Eq>{`f_c = \\omega_0/(2\\pi) = 1/(2\\pi\\sqrt{LC})`}</Eq>。选择 <Eq>{`L`}</Eq> 和 <Eq>{`C`}</Eq> 为 <Eq>{`f_c = 1`}</Eq> kHz。
+
+**药物动力学（ANVISA）：** 药物消失：<Eq>{`\\dot C = -k_e C`}</Eq>。半衰期 <Eq>{`t_{1/2} = \\ln 2/k_e`}</Eq>。对于扑热息痛，<Eq>{`t_{1/2} \\approx 2`}</Eq> h。
+
+### 本学期速查表
+
+```
+可分离：  ∫ dy/h(y) = ∫ g(x) dx
+一阶线性：  μ = exp(∫ p dx), y = (1/μ)∫ μq dx + C
+逻辑斯谛：  P = K / (1 + A e^{−rt})
+冷却：T = T_a + (T_0 − T_a) e^{−kt}
+特征2阶：   a λ² + b λ + c = 0
+振动：   ω_0 = √(k/m), ζ = c/(2√(mk))
+RLC：        ω_0 = 1/√(LC), ζ = (R/2)√(C/L)
+欧拉法：      y_{n+1} = y_n + h f(t_n, y_n)
+```
+
+</Porta>
+
+</DuasPortas>
+
+## 已解决的示例
+
+<Exemplo titulo="分类和求解一阶可分离常微分方程">
+
+**问题。** 求解初值问题 <Eq>{`y' = 2xy`}</Eq>、<Eq>{`y(0) = 3`}</Eq>。
+
+**策略。** 验证是否可分离：重写为 <Eq>{`dy/y = 2x\\,dx`}</Eq> 并对各边积分。应用初始条件以确定常数。
+
+**解决方案。**
+
+<Equation latex="\frac{dy}{y} = 2x\,dx \;\Longrightarrow\; \ln|y| = x^2 + C_1 \;\Longrightarrow\; y = Ce^{x^2}." />
+
+初始条件：<Eq>{`y(0) = C = 3`}</Eq>。解：<Eq>{`y = 3e^{x^2}`}</Eq>。
+
+**验证。** <Eq>{`y' = 6xe^{x^2} = 2x\\cdot 3e^{x^2} = 2xy`}</Eq>。<Eq>{`y(0) = 3`}</Eq>。正确。
+
+**来源。** [Lebl, *Notes on Diffy Qs* §1.3](https://www.jirka.org/diffyqs/html/separable_section.html)、习题1.3.2。
+
+</Exemplo>
+
+<Exemplo titulo="积分因子：具有非平凡q(x)的一阶线性常微分方程">
+
+**问题。** 求解 <Eq>{`y' + (2/x)y = x^2`}</Eq>。
+
+**策略。** 识别 <Eq>{`p(x) = 2/x`}</Eq> 并计算 <Eq>{`\\mu = e^{\\int 2/x\\,dx} = x^2`}</Eq>。将常微分方程乘以 <Eq>{`\\mu`}</Eq> 并将左边识别为乘积的导数。
+
+**解决方案。**
+
+<Equation latex="\frac{d}{dx}(x^2 y) = x^4 \;\Longrightarrow\; x^2 y = \frac{x^5}{5} + C \;\Longrightarrow\; y = \frac{x^3}{5} + \frac{C}{x^2}." />
+
+**验证。** <Eq>{`y' = 3x^2/5 - 2C/x^3`}</Eq>。代入：<Eq>{`y' + 2y/x = 3x^2/5 - 2C/x^3 + 2x^2/5 + 2C/x^3 = x^2`}</Eq>。有效。
+
+**来源。** [OpenStax *微积分第2卷* §4.5](https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations)、示例4.14。
+
+</Exemplo>
+
+<Exemplo titulo="具有复根和初始条件的特征方程">
+
+**问题。** 求解初值问题 <Eq>{`y'' + 2y' + 5y = 0`}</Eq>、<Eq>{`y(0) = 1`}</Eq>、<Eq>{`y'(0) = -1`}</Eq>。
+
+**策略。** 计算特征方程 <Eq>{`\\lambda^2 + 2\\lambda + 5 = 0`}</Eq>。复根 <Eq>{`\\alpha \\pm i\\beta`}</Eq> 给出具有指数和三角函数的解。使用初始条件确定 <Eq>{`C_1, C_2`}</Eq>。
+
+**解决方案。**
+
+<Equation latex="\lambda = \frac{-2 \pm \sqrt{4-20}}{2} = -1 \pm 2i." />
+
+<Equation latex="y = e^{-x}(C_1\cos 2x + C_2 \sin 2x)." />
+
+在 <Eq>{`x=0`}</Eq> 处的初始条件：<Eq>{`y(0) = C_1 = 1`}</Eq>。
+
+<Equation latex="y' = -e^{-x}(C_1\cos 2x + C_2\sin 2x) + e^{-x}(-2C_1\sin 2x + 2C_2\cos 2x)." />
+
+<Eq>{`y'(0) = -C_1 + 2C_2 = -1 + 2C_2 = -1`}</Eq>、所以 <Eq>{`C_2 = 0`}</Eq>。
+
+解：<Eq>{`y = e^{-x}\\cos 2x`}</Eq>。
+
+**验证。** <Eq>{`y' = -e^{-x}\\cos 2x - 2e^{-x}\\sin 2x`}</Eq>；<Eq>{`y'' = e^{-x}\\cos 2x + 4e^{-x}\\sin 2x - 2e^{-x}\\sin 2x + ..`}</Eq> — 经过代数运算后，<Eq>{`y'' + 2y' + 5y = 0`}</Eq>。有效。
+
+**来源。** [Lebl, *Notes on Diffy Qs* §2.2](https://www.jirka.org/diffyqs/html/secondlc_section.html)、示例2.2.4。
+
+</Exemplo>
+
+<Exemplo titulo="具有真实人口数据的逻辑斯谛模型">
+
+**问题。** 一个城市的人口：2000年50000人、2010年80000人。估计的承载能力为200000人。逻辑斯谛模型 <Eq>{`\\dot P = rP(1-P/K)`}</Eq>。找到 <Eq>{`r`}</Eq> 并预测2030年的人口。
+
+**策略。** 逻辑斯谛解为 <Eq>{`P(t) = K/(1+Ae^{-rt})`}</Eq>。使用 <Eq>{`P(0) = 50`}</Eq> 找到 <Eq>{`A`}</Eq>；使用 <Eq>{`P(10) = 80`}</Eq> 找到 <Eq>{`r`}</Eq>；计算 <Eq>{`P(30)`}</Eq>。
+
+**解决方案。** <Eq>{`K = 200`}</Eq>、<Eq>{`P(0) = 200/(1+A) = 50 \\Rightarrow A = 3`}</Eq>。
+
+<Equation latex="P(t) = \frac{200}{1 + 3e^{-rt}}." />
+
+<Eq>{`P(10) = 200/(1+3e^{-10r}) = 80 \\Rightarrow 1 + 3e^{-10r} = 2{,}5 \\Rightarrow e^{-10r} = 0{,}5`}</Eq>。
+
+<Eq>{`r = \\ln 2/10 \\approx 0{,}0693`}</Eq> 年⁻¹。
+
+<Eq>{`P(30) = 200/(1 + 3e^{-30 \\times 0{,}0693}) = 200/(1 + 3 \\times 0{,}125) = 200/1{,}375 \\approx 145`}</Eq> 千。
+
+**验证。** <Eq>{`P(0) = 200/4 = 50`}</Eq>。<Eq>{`P(10) = 200/(1+3/2) = 200/2{,}5 = 80`}</Eq>。有效。
+
+**来源。** [OpenStax *微积分第2卷* §4.4](https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation)、示例4.11。
+
+</Exemplo>
+
+<Exemplo titulo="应用于牛顿冷却的欧拉法：误差vs步长">
+
+**问题。** 咖啡温度为90°C、<Eq>{`T_a = 22`}</Eq>°C、<Eq>{`k = 0{,}1`}</Eq> min⁻¹。使用欧拉法 <Eq>{`h = 2`}</Eq> min 计算 <Eq>{`T(4)`}</Eq>。与精确值比较。
+
+**策略。** 常微分方程：<Eq>{`T' = -0{,}1(T - 22)`}</Eq>、<Eq>{`T(0) = 90`}</Eq>。两个欧拉步骤。精确解：<Eq>{`T(t) = 22 + 68e^{-0{,}1t}`}</Eq>。
+
+**解决方案。**
+
+步骤1（<Eq>{`t=0 \\to 2`}</Eq>）：<Eq>{`f(0, 90) = -0{,}1(90-22) = -6{,}8`}</Eq>。<Eq>{`T(2) \\approx 90 + 2\\times(-6{,}8) = 76{,}4`}</Eq>°C。
+
+步骤2（<Eq>{`t=2 \\to 4`}</Eq>）：<Eq>{`f(2, 76{,}4) = -0{,}1(76{,}4-22) = -5{,}44`}</Eq>。<Eq>{`T(4) \\approx 76{,}4 + 2\\times(-5{,}44) = 65{,}52`}</Eq>°C。
+
+精确：<Eq>{`T(4) = 22 + 68e^{-0{,}4} = 22 + 68\\times 0{,}6703 \\approx 67{,}6`}</Eq>°C。
+
+误差：<Eq>{`67{,}6 - 65{,}5 = 2{,}1`}</Eq>°C（约3%）。对于 <Eq>{`h = 0{,}5`}</Eq> min，误差下降到0.13%。
+
+**验证。** 欧拉局部误差公式：<Eq>{`O(h^2) = O(4) = 0{,}1^2 \\times 68 \\times (e^{-0{,}1 \\times 0}/2) \\approx 0{,}34`}</Eq>°C每步，累积到~0.68°C — 正确的阶数。
+
+**来源。** [REAMAT UFRGS, *数值分析* 第8章](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html)、第8.2节、示例8.3。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-100-consolidacao-trim-10">
+
+<Exercicio
+  numero="100.1"
+  dificuldade="aplicacao"
+  solucao={<>可分离。<Eq>{`dy/y = 3x\\,dx`}</Eq>。<Eq>{`\\ln|y| = 3x^2/2 + C_1`}</Eq>。<Eq>{`y = Ce^{3x^2/2}`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "20", exercicio: "Exercise 1.3.1", licenca: "CC-BY-SA" }}
+>
+分类和求解：<Eq>{`y' = 3xy`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="100.2"
+  dificuldade="aplicacao"
+  solucao={<>一阶线性。<Eq>{`p = 1/x`}</Eq>、<Eq>{`\\mu = x`}</Eq>。<Eq>{`(xy)' = x^3`}</Eq>。<Eq>{`xy = x^4/4 + C`}</Eq>。<Eq>{`y = x^3/4 + C/x`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations", secao: "§4.5", pagina: "392", exercicio: "Exercise 4.5.101", licenca: "CC-BY-NC-SA" }}
+>
+分类和求解：<Eq>{`y' + y/x = x^2`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="100.3"
+  dificuldade="aplicacao"
+  solucao={<>特征：<Eq>{`\\lambda^2 + 4\\lambda + 4 = (\\lambda+2)^2 = 0`}</Eq>。重根 <Eq>{`\\lambda = -2`}</Eq>。<Eq>{`y = (C_1 + C_2 x)e^{-2x}`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>写下特征方程：<Eq>{`\\lambda^2 + 4\\lambda + 4 = 0`}</Eq>。</li>
+      <li>因式分解：<Eq>{`(\\lambda + 2)^2 = 0`}</Eq>、重根 <Eq>{`\\lambda = -2`}</Eq>。</li>
+      <li>重根需要两个项：<Eq>{`y = (C_1 + C_2 x)e^{-2x}`}</Eq>。</li>
+      <li>验证：<Eq>{`y'' + 4y' + 4y = 0`}</Eq>。经过代数运算后有效。</li>
+      <em>技巧：</em> 重根总是生成额外的x因子；没有它你只会有一个解，但二阶常微分方程需要两个自由参数。
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "82", exercicio: "Exercise 2.2.3", licenca: "CC-BY-SA" }}
+>
+分类和求解：<Eq>{`y'' + 4y' + 4y = 0`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="100.4"
+  dificuldade="aplicacao"
+  solucao={<>齐次：<Eq>{`y_h = C_1\\cos 3x + C_2\\sin 3x`}</Eq>。共振：强迫在自然频率。<Eq>{`y_p = x(A\\cos 3x + B\\sin 3x)`}</Eq>。代入：<Eq>{`A = 0`}</Eq>、<Eq>{`B = 1/6`}</Eq>。<Eq>{`y = C_1\\cos 3x + C_2\\sin 3x + (x/6)\\sin 3x`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/forcedosc_section.html", secao: "§2.6", pagina: "108", exercicio: "Exercise 2.6.3", licenca: "CC-BY-SA" }}
+>
+分类和求解：<Eq>{`y'' + 9y = \\cos 3x`}</Eq>（注意共振）。
+</Exercicio>
+
+<Exercicio
+  numero="100.5"
+  dificuldade="aplicacao"
+  solucao={<>逻辑斯谛：<Eq>{`K=100`}</Eq>、<Eq>{`r=0{,}1`}</Eq>、<Eq>{`P_0=5`}</Eq>。<Eq>{`A = (100-5)/5 = 19`}</Eq>。<Eq>{`P(t) = 100/(1+19e^{-0{,}1t})`}</Eq>。稳定平衡在 <Eq>{`P=100`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "380", exercicio: "Exercise 4.4.201", licenca: "CC-BY-NC-SA" }}
+>
+求解 <Eq>{`\\dot P = 0{,}1P(1 - P/100)`}</Eq>、<Eq>{`P(0) = 5`}</Eq>。稳定平衡值是多少？
+</Exercicio>
+
+<Exercicio
+  numero="100.6"
+  dificuldade="aplicacao"
+  solucao={<>牛顿冷却。<Eq>{`T(t) = 22 + 58e^{-0{,}05t}`}</Eq>。平衡：<Eq>{`T_a = 22`}</Eq>°C。对于 <Eq>{`T = 40`}</Eq>：<Eq>{`t = \\ln(58/18)/0{,}05 \\approx 23{,}5`}</Eq> min。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/auteq_section.html", secao: "§1.6", pagina: "38", exercicio: "Exercise 1.6.1", licenca: "CC-BY-SA" }}
+>
+求解 <Eq>{`\\dot T = -0{,}05(T - 22)`}</Eq>、<Eq>{`T(0) = 80`}</Eq>。温度达到40°C需要多长时间？
+</Exercicio>
+
+<Exercicio
+  numero="100.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`L=0{,}1`}</Eq>、<Eq>{`R=1`}</Eq>、<Eq>{`C=0{,}1`}</Eq>。特征：<Eq>{`0{,}1\\lambda^2 + \\lambda + 10 = 0`}</Eq>、<Eq>{`\\lambda = -5 \\pm 9{,}747i`}</Eq>。欠阻尼。<Eq>{`Q(t) = e^{-5t}(\\cos(9{,}747t) + 0{,}513\\sin(9{,}747t))`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "107", exercicio: "Exercise 2.6.1", licenca: "CC-BY-SA" }}
+>
+求解 <Eq>{`0{,}1\\ddot Q + \\dot Q + 10Q = 0`}</Eq>、<Eq>{`Q(0) = 1`}</Eq>、<Eq>{`\\dot Q(0) = 0`}</Eq>。对阻尼进行分类。
+</Exercicio>
+
+<Exercicio
+  numero="100.8"
+  dificuldade="aplicacao"
+  solucao={<>精确：<Eq>{`e^{-1} \\approx 0{,}3679`}</Eq>。欧拉 <Eq>{`h=0{,}1`}</Eq>：<Eq>{`y_1 = 1 - 0{,}1 = 0{,}9`}</Eq>；10步后、<Eq>{`y_{10} = (0{,}9)^{10} \\approx 0{,}3487`}</Eq>。相对误差：~5.2%。RK4给出误差小于0.001%。</>}
+  passos={<>
+    <ol>
+      <li>欧拉：<Eq>{`y_{n+1} = y_n + h(-y_n) = y_n(1-h) = y_n \\times 0{,}9`}</Eq>。</li>
+      <li>十步：<Eq>{`y_{10} = (0{,}9)^{10} \\approx 0{,}3487`}</Eq>。</li>
+      <li>精确：<Eq>{`e^{-1} \\approx 0{,}3679`}</Eq>。误差：0.0192。</li>
+      <li>欧拉误差为 <Eq>{`O(h) = O(0{,}1)`}</Eq> — 与步长成正比。</li>
+      <em>趣味事实：</em> 对于 <Eq>{`y' = -y`}</Eq>，显式欧拉法稳定当且仅当 <Eq>{`|1-h\\lambda| \\leq 1`}</Eq>、即 <Eq>{`h \\leq 2`}</Eq>。这里 <Eq>{`h = 0{,}1`}</Eq> 在稳定区域内。
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT UFRGS — 数值分析", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "第8章", pagina: "148", exercicio: "习题8.1", licenca: "CC-BY-SA" }}
+>
+将欧拉法应用于 <Eq>{`h = 0{,}1`}</Eq> 在 <Eq>{`y' = -y`}</Eq>、<Eq>{`y(0) = 1`}</Eq> 从 <Eq>{`t=0`}</Eq> 到 <Eq>{`t=1`}</Eq>。与 <Eq>{`e^{-1}`}</Eq> 比较。
+</Exercicio>
+
+<Exercicio
+  numero="100.9"
+  dificuldade="aplicacao"
+  solucao={<>重写：<Eq>{`y' = e^x \\cdot e^y`}</Eq>。可分离：<Eq>{`e^{-y}dy = e^x dx`}</Eq>。<Eq>{`-e^{-y} = e^x + C`}</Eq>。<Eq>{`y = -\\ln(-e^x - C)`}</Eq>（定义在 <Eq>{`e^x + C < 0`}</Eq> 处）。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "21", exercicio: "Exercise 1.3.5", licenca: "CC-BY-SA" }}
+>
+求解 <Eq>{`y' = e^{x+y}`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="100.10"
+  dificuldade="aplicacao"
+  solucao={<>齐次：<Eq>{`y_h = C_1 e^{2x} + C_2 e^{3x}`}</Eq>。待定系数的特解：<Eq>{`y_p = Ae^{4x}`}</Eq>。<Eq>{`16A - 20A + 6A = 1 \\Rightarrow 2A = 1 \\Rightarrow A = 1/2`}</Eq>。<Eq>{`y = C_1 e^{2x} + C_2 e^{3x} + e^{4x}/2`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nthorderle_section.html", secao: "§2.5", pagina: "98", exercicio: "Exercise 2.5.4", licenca: "CC-BY-SA" }}
+>
+求解 <Eq>{`y'' - 5y' + 6y = e^{4x}`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="100.11"
+  dificuldade="aplicacao"
+  solucao={<>无阻尼质量-弹簧：<Eq>{`\\omega_0 = \\sqrt{k/m} = \\sqrt{4} = 2`}</Eq> rad/s。<Eq>{`x(t) = \\cos 2t`}</Eq>。周期 <Eq>{`T = \\pi`}</Eq> s、幅度 <Eq>{`A = 1`}</Eq>、相位 <Eq>{`\\phi = 0`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "91", exercicio: "Exercise 2.4.1", licenca: "CC-BY-SA" }}
+>
+无阻尼质量-弹簧：<Eq>{`m = 1`}</Eq> kg、<Eq>{`k = 4`}</Eq> N/m、<Eq>{`x(0) = 1`}</Eq>、<Eq>{`\\dot x(0) = 0`}</Eq>。找周期、幅度和相位。
+</Exercicio>
+
+<Exercicio
+  numero="100.12"
+  dificuldade="aplicacao"
+  solucao={<>代入 <Eq>{`y = e^{2x}\\cos 3x`}</Eq>：<Eq>{`y' = 2e^{2x}\\cos 3x - 3e^{2x}\\sin 3x`}</Eq>；<Eq>{`y'' = e^{2x}(4\\cos 3x - 12\\sin 3x - 9\\cos 3x) = e^{2x}(-5\\cos 3x - 12\\sin 3x)`}</Eq>。那么 <Eq>{`y'' - 4y' + 13y = e^{2x}(-5-4\\times 2+13)\\cos 3x + e^{2x}(-12-4\\times(-3))\\sin 3x = 0`}</Eq>。有效。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "83", exercicio: "Exercise 2.2.6", licenca: "CC-BY-SA" }}
+>
+通过直接代入验证 <Eq>{`y = e^{2x}\\cos 3x`}</Eq> 求解 <Eq>{`y'' - 4y' + 13y = 0`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="100.13"
+  dificuldade="aplicacao"
+  solucao={<>逻辑斯谛 <Eq>{`K=1`}</Eq>、<Eq>{`r=1`}</Eq>：<Eq>{`y(t) = 1/(1+9e^{-t})`}</Eq>。<Eq>{`y \\to 1`}</Eq> 当 <Eq>{`t \\to \\infty`}</Eq>。对于 <Eq>{`y = 0{,}5`}</Eq>：<Eq>{`1 + 9e^{-t} = 2 \\Rightarrow e^{-t} = 1/9 \\Rightarrow t = \\ln 9 \\approx 2{,}2`}</Eq> 时间单位。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "382", exercicio: "Exercise 4.4.202", licenca: "CC-BY-NC-SA" }}
+>
+<Eq>{`\\dot y = y(1-y)`}</Eq>、<Eq>{`y(0) = 0{,}1`}</Eq>。极限值 <Eq>{`y(\\infty)`}</Eq> 是多少？<Eq>{`y = 0{,}5`}</Eq> 时的时间是什么？
+</Exercicio>
+
+<Exercicio
+  numero="100.14"
+  dificuldade="aplicacao"
+  solucao={<>一阶线性具有"共振"：<Eq>{`p = 2`}</Eq>、但强迫 <Eq>{`q = 3e^{-2x}`}</Eq> 也有指数 <Eq>{`-2`}</Eq>。积分因子：<Eq>{`\\mu = e^{2x}`}</Eq>。<Eq>{`(e^{2x}y)' = 3`}</Eq>。<Eq>{`e^{2x}y = 3x + C`}</Eq>。<Eq>{`y = (3x+C)e^{-2x}`}</Eq>。</>}
+  passos={<>
+    <ol>
+      <li>识别：<Eq>{`p = 2`}</Eq>、<Eq>{`q = 3e^{-2x}`}</Eq>。积分因子：<Eq>{`\\mu = e^{\\int 2\\,dx} = e^{2x}`}</Eq>。</li>
+      <li>相乘：<Eq>{`(e^{2x}y)' = e^{2x} \\cdot 3e^{-2x} = 3`}</Eq>。</li>
+      <li>积分：<Eq>{`e^{2x}y = 3x + C`}</Eq>。</li>
+      <li>解：<Eq>{`y = (3x + C)e^{-2x}`}</Eq>。</li>
+      <em>技巧：</em> "一阶共振"当 <Eq>{`q = Ae^{-px}`}</Eq> 时发生（指数等于 <Eq>{`-p`}</Eq>）。乘以 <Eq>{`\\mu = e^{px}`}</Eq> 后，右边变为常数，积分给出一个因子 <Eq>{`x`}</Eq> — 类似于二阶中的重根情况。
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "27", exercicio: "Exercise 1.4.4", licenca: "CC-BY-SA" }}
+>
+求解 <Eq>{`y' + 2y = 3e^{-2x}`}</Eq>。解释为什么会出现 <Eq>{`x`}</Eq> 因子。
+</Exercicio>
+
+<Exercicio
+  numero="100.15"
+  dificuldade="aplicacao"
+  solucao={<>伯努利 <Eq>{`n=2`}</Eq>：代换 <Eq>{`u = y^{-1}`}</Eq>、<Eq>{`u' = -y^{-2}y'`}</Eq>。常微分方程在 <Eq>{`u`}</Eq> 中：<Eq>{`u' - u = -x`}</Eq>。线性：<Eq>{`\\mu = e^{-x}`}</Eq>。<Eq>{`(e^{-x}u)' = -xe^{-x}`}</Eq>。<Eq>{`u = x + 1 + Ce^x`}</Eq>。<Eq>{`y = 1/(x+1+Ce^x)`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "30", exercicio: "Exercise 1.4.8", licenca: "CC-BY-SA" }}
+>
+伯努利：通过代换 <Eq>{`u = 1/y`}</Eq> 求解 <Eq>{`y' + y = xy^2`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="100.16"
+  dificuldade="aplicacao"
+  solucao={<>设 <Eq>{`v = y'`}</Eq>。那么 <Eq>{`v' = -v`}</Eq>。线性可分离：<Eq>{`v = Ce^{-x}`}</Eq>。积分：<Eq>{`y = -Ce^{-x} + D`}</Eq>、或 <Eq>{`y = Ae^{-x} + B`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "85", exercicio: "Exercise 2.2.8", licenca: "CC-BY-SA" }}
+>
+求解 <Eq>{`y'' = -y'`}</Eq>。（提示：通过设置 <Eq>{`v = y'`}</Eq> 降低到一阶。）
+</Exercicio>
+
+<Exercicio
+  numero="100.17"
+  dificuldade="aplicacao"
+  solucao={<>特征：<Eq>{`\\lambda^2 - 6\\lambda + 9 = (\\lambda-3)^2 = 0`}</Eq>。重根 <Eq>{`\\lambda = 3`}</Eq>。<Eq>{`y_h = (C_1 + C_2 x)e^{3x}`}</Eq>。特解（尝试 <Eq>{`y_p = Ae^{5x}`}</Eq>）：<Eq>{`25A - 30A + 9A = 4 \\Rightarrow 4A = 4 \\Rightarrow A = 1`}</Eq>。<Eq>{`y = (C_1+C_2 x)e^{3x} + e^{5x}`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nthorderle_section.html", secao: "§2.5", pagina: "99", exercicio: "Exercise 2.5.6", licenca: "CC-BY-SA" }}
+>
+求解 <Eq>{`y'' - 6y' + 9y = 4e^{5x}`}</Eq>。
+</Exercicio>
+
+<Exercicio
+  numero="100.18"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "可分离 — 对两边的dy/y(1−y)积分", correta: true },
+    { texto: "具有积分因子的线性" },
+    { texto: "二阶的特征方程" },
+    { texto: "欧拉法，因为它没有解析解" }
+  ]}
+  solucao={<>逻辑斯谛 <Eq>{`\\dot P = rP(1-P/K)`}</Eq> 是可分离的：<Eq>{`dP/(P(1-P/K)) = r\\,dt`}</Eq>。部分分数解左边的积分。它不是线性的（乘积 <Eq>{`P^2/K`}</Eq> 是非线性）。它有解析闭式解。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "377", exercicio: "Exercise 4.4.1", licenca: "CC-BY-NC-SA" }}
+>
+求解逻辑斯谛方程 <Eq>{`\\dot P = rP(1 - P/K)`}</Eq> 的正确技术是什么？
+</Exercicio>
+
+<Exercicio
+  numero="100.19"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "实根和负根：过阻尼，无振荡", correta: true },
+    { texto: "纯虚根：持续共振" },
+    { texto: "实部为正的根：系统稳定" },
+    { texto: "重根：系统不稳定" }
+  ]}
+  solucao={<>如果 <Eq>{`\\Delta = b^2 - 4ac > 0`}</Eq> 和两个根都是负数（<Eq>{`\\lambda_1, \\lambda_2 < 0`}</Eq>），解 <Eq>{`y = C_1 e^{\\lambda_1 x} + C_2 e^{\\lambda_2 x}`}</Eq> 衰减到零而不振荡——过阻尼。实部为负保证稳定性；实根（无虚部）保证无振荡。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "92", exercicio: "Exercise 2.4.4", licenca: "CC-BY-SA" }}
+>
+判别式 <Eq>{`\\Delta = b^2 - 4ac > 0`}</Eq> 且两根都是负数。<Eq>{`ay'' + by' + cy = 0`}</Eq> 解的行为是什么？
+</Exercicio>
+
+<Exercicio
+  numero="100.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "欧拉法一阶（误差O(h)）；RK4四阶（误差O(h^4)）", correta: true },
+    { texto: "欧拉更精确但更慢" },
+    { texto: "两者收敛阶相同" },
+    { texto: "RK4对刚性问题不稳定" }
+  ]}
+  solucao={<>欧拉在单个点用导数推进（切线）；局部误差<Eq>{`O(h^2)`}</Eq>、全局 <Eq>{`O(h)`}</Eq>。RK4使用四个估计的加权平均（Simpson-like）；全局误差 <Eq>{`O(h^4)`}</Eq>。要将误差减半：欧拉需要加倍步数；RK4只需要 <Eq>{`2^{1/4} \\approx 1{,}19`}</Eq> 倍的步数。</>}
+  fonte={{ livro: "REAMAT UFRGS — 数值分析", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "第8章", pagina: "152", exercicio: "习题8.3", licenca: "CC-BY-SA" }}
+>
+比较欧拉法和RK4的收敛阶。
+</Exercicio>
+
+<Exercicio
+  numero="100.21"
+  dificuldade="aplicacao"
+  solucao={<>法医冷却：<Eq>{`T_0 = 37`}</Eq>°C、<Eq>{`T_a = 20`}</Eq>°C、<Eq>{`k = 0{,}3`}</Eq> h⁻¹。尸体在10:00发现时 <Eq>{`T = 33`}</Eq>°C。<Eq>{`33 = 20 + 17e^{-0{,}3t} \\Rightarrow e^{-0{,}3t} = 13/17 \\Rightarrow t = \\ln(17/13)/0{,}3 \\approx 0{,}8939`}</Eq> h。死亡时间约10:00 - 0.9 ≈ 09:06。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/auteq_section.html", secao: "§1.6", pagina: "40", exercicio: "Exercise 1.6.5", licenca: "CC-BY-SA" }}
+>
+尸体在10:00发现时温度为33°C。房间20°C、<Eq>{`k = 0{,}3`}</Eq> h⁻¹。估计死亡时间。
+</Exercicio>
+
+<Exercicio
+  numero="100.22"
+  dificuldade="modelagem"
+  solucao={<>摩托车悬挂：<Eq>{`m = 200`}</Eq> kg、<Eq>{`k_s = 30000`}</Eq> N/m、<Eq>{`\\zeta = 0{,}5`}</Eq>。<Eq>{`\\omega_0 = \\sqrt{30000/200} = \\sqrt{150} \\approx 12{,}25`}</Eq> rad/s（1.95 Hz）。<Eq>{`c = 2\\zeta\\sqrt{mk} = 2 \\times 0{,}5 \\times \\sqrt{6 \\times 10^6} \\approx 2449`}</Eq> N·s/m。欠阻尼：<Eq>{`\\omega_d = \\omega_0\\sqrt{1-0{,}25} \\approx 10{,}61`}</Eq> rad/s。无超调。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "94", exercicio: "Exercise 2.4.7", licenca: "CC-BY-SA" }}
+>
+摩托车悬挂：<Eq>{`m = 200`}</Eq> kg、<Eq>{`k = 30`}</Eq> kN/m、<Eq>{`\\zeta = 0{,}5`}</Eq>。计算自然频率、阻尼系数并对制度分类。
+</Exercicio>
+
+<Exercicio
+  numero="100.23"
+  dificuldade="modelagem"
+  solucao={<>RC充电：<Eq>{`V_C(t) = 5(1 - e^{-t/\\tau})`}</Eq>、<Eq>{`\\tau = 5`}</Eq> ms。对于 <Eq>{`V_C = 4`}</Eq> V：<Eq>{`1 - e^{-t/\\tau} = 0{,}8 \\Rightarrow e^{-t/\\tau} = 0{,}2 \\Rightarrow t = 5\\ln 5 \\approx 8{,}05`}</Eq> ms。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "106", exercicio: "Exercise 2.6.4", licenca: "CC-BY-SA" }}
+>
+RC电路 <Eq>{`\\tau = RC = 5`}</Eq> ms、5 V阶跃源。<Eq>{`V_C = 4`}</Eq> V 在什么时刻？
+</Exercicio>
+
+<Exercicio
+  numero="100.24"
+  dificuldade="modelagem"
+  solucao={<>RC低通滤波器：<Eq>{`f_c = 1/(2\\pi RC) = 1`}</Eq> kHz。10 kHz 的衰减：<Eq>{`|H| = 1/\\sqrt{1+(f/f_c)^2} = 1/\\sqrt{101} \\approx 0{,}0995`}</Eq>。以dB：<Eq>{`20\\log_{10}(0{,}0995) \\approx -20{,}0`}</Eq> dB（接近20 dB/dec × 1十年）。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "110", exercicio: "Exercise 2.6.5", licenca: "CC-BY-SA" }}
+>
+RC低通滤波器、<Eq>{`f_c = 1`}</Eq> kHz。计算 <Eq>{`f = 10`}</Eq> kHz 处的衰减（以dB）。
+</Exercicio>
+
+<Exercicio
+  numero="100.25"
+  dificuldade="modelagem"
+  solucao={<>马尔萨斯：<Eq>{`P(t) = 1{,}4e^{0{,}004t}`}</Eq> 十亿、<Eq>{`t`}</Eq> 从2020年起的年份。在2050年（<Eq>{`t=30`}</Eq>）：<Eq>{`P = 1{,}4e^{0{,}12} \\approx 1{,}4 \\times 1{,}1275 = 1{,}579`}</Eq> 十亿。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-3-separable-equations", secao: "§4.3", pagina: "367", exercicio: "Exercise 4.3.203", licenca: "CC-BY-NC-SA" }}
+>
+中国：2020年14亿、年增长率0.4%。马尔萨斯模型预测2050年的人口。
+</Exercicio>
+
+<Exercicio
+  numero="100.26"
+  dificuldade="modelagem"
+  solucao={<>逻辑斯谛：<Eq>{`K=1{,}6`}</Eq> 十亿、<Eq>{`r=0{,}004`}</Eq>、<Eq>{`P_0=1{,}4`}</Eq>。<Eq>{`A = (1{,}6-1{,}4)/1{,}4 \\approx 0{,}143`}</Eq>。<Eq>{`P(30) = 1{,}6/(1+0{,}143e^{-0{,}12}) \\approx 1{,}6/1{,}126 \\approx 1{,}422`}</Eq> 十亿。与马尔萨斯的差异：<Eq>{`1{,}579 - 1{,}422 = 0{,}157`}</Eq> 十亿（1.57亿少）。承载能力减缓增长。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "381", exercicio: "Exercise 4.4.203", licenca: "CC-BY-NC-SA" }}
+>
+与前一个练习相同的数据，但使用逻辑斯谛模型 <Eq>{`K = 1{,}6`}</Eq> 十亿。在2050年与马尔萨斯比较。
+</Exercicio>
+
+<Exercicio
+  numero="100.27"
+  dificuldade="modelagem"
+  solucao={<>药物衰退：<Eq>{`C(t) = 100e^{-0{,}2t}`}</Eq> mg/L。对于 <Eq>{`C = 5`}</Eq>：<Eq>{`e^{-0{,}2t} = 0{,}05 \\Rightarrow t = \\ln(20)/0{,}2 = 5\\ln 20 \\approx 14{,}98`}</Eq> h。约15小时后。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-3-separable-equations", secao: "§4.3", pagina: "368", exercicio: "Exercise 4.3.204", licenca: "CC-BY-NC-SA" }}
+>
+药物：<Eq>{`C(0) = 100`}</Eq> mg/L、<Eq>{`k_e = 0{,}2`}</Eq> h⁻¹。浓度下降到5 mg/L需要多长时间？
+</Exercicio>
+
+<Exercicio
+  numero="100.28"
+  dificuldade="modelagem"
+  solucao={<>储罐：恒定体积100升。<Eq>{`\\dot s = 5\\times 2 - 5\\times(s/100) = 10 - s/20`}</Eq>。线性：<Eq>{`s(t) = 200(1 - e^{-t/20})`}</Eq>。在30分钟：<Eq>{`s = 200(1-e^{-1{,}5}) \\approx 200\\times 0{,}7769 = 155{,}4`}</Eq> g。</>}
+  passos={<>
+    <ol>
+      <li>入盐速率：<Eq>{`5 \\times 2 = 10`}</Eq> g/min。</li>
+      <li>储罐中的浓度：<Eq>{`s/100`}</Eq> g/L。出盐速率：<Eq>{`5 \\times s/100 = s/20`}</Eq> g/min。</li>
+      <li>常微分方程：<Eq>{`\\dot s = 10 - s/20`}</Eq>。线性 <Eq>{`p = 1/20`}</Eq>。</li>
+      <li>用 <Eq>{`s(0) = 0`}</Eq> 求解：<Eq>{`s(t) = 200(1 - e^{-t/20})`}</Eq>。</li>
+      <li><Eq>{`s(30) = 200(1 - e^{-1{,}5}) \\approx 155`}</Eq> g。</li>
+      <em>趣味事实：</em> 平衡浓度（<Eq>{`t \\to \\infty`}</Eq>）是 <Eq>{`200/100 = 2`}</Eq> g/L — 等于入浓度。储罐将始终达到源的浓度。
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "29", exercicio: "Exercise 1.4.6", licenca: "CC-BY-SA" }}
+>
+有100升纯水的储罐，每分钟接收5升2 g/L的盐水；完全混合的液体每分钟流出5升。30分钟内盐的数量是多少？
+</Exercicio>
+
+<Exercicio
+  numero="100.29"
+  dificuldade="modelagem"
+  solucao={<>持续投资：<Eq>{`\\dot S = rS + d`}</Eq> 其中 <Eq>{`r=0{,}05`}</Eq>、<Eq>{`d=12000`}</Eq>/年。不稳定平衡在 <Eq>{`S^* = -d/r = -240000`}</Eq>。解：<Eq>{`S(t) = (S_0 + d/r)e^{rt} - d/r`}</Eq>。以 <Eq>{`S_0 = 0`}</Eq>：<Eq>{`S(30) = 240000(e^{1{,}5} - 1) \\approx 240000 \\times 3{,}4817 = 835603`}</Eq>。资产：83.56万雷亚尔。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "28", exercicio: "Exercise 1.4.5", licenca: "CC-BY-SA" }}
+>
+持续供款投资：<Eq>{`\\dot S = 0{,}05 S + 12000`}</Eq>、<Eq>{`S(0) = 0`}</Eq>。30年内的资产是多少？
+</Exercicio>
+
+<Exercicio
+  numero="100.30"
+  dificuldade="modelagem"
+  solucao={<>核反应堆：<Eq>{`\\dot N = (k-1)N/\\tau`}</Eq> 其中 <Eq>{`k=1{,}001`}</Eq>、<Eq>{`\\tau = 10^{-3}`}</Eq> s。<Eq>{`\\dot N = N`}</Eq>（有效增长率：1 s⁻¹）。可分离：<Eq>{`N = N_0 e^{t}`}</Eq>。翻倍当 <Eq>{`e^t = 2 \\Rightarrow t = \\ln 2 \\approx 0{,}693`}</Eq> s。少于1秒 — 这就是为什么核反应堆需要控制棒。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "22", exercicio: "Exercise 1.3.9", licenca: "CC-BY-SA" }}
+>
+核反应堆：<Eq>{`\\dot N = (k-1)N/\\tau`}</Eq>、<Eq>{`\\tau = 10^{-3}`}</Eq> s、<Eq>{`k = 1{,}001`}</Eq>。功率翻倍需要多长时间？
+</Exercicio>
+
+<Exercicio
+  numero="100.31"
+  dificuldade="demonstracao"
+  solucao={<>通过直接计算展示。<Eq>{`y' + py = q`}</Eq> 的通解与 <Eq>{`\\mu = e^{\\int p}`}</Eq> 为 <Eq>{`y = \\frac{1}{\\mu}\\int \\mu q\\,dx + C/\\mu`}</Eq>。求导：<Eq>{`y' = -p\\mu/(\\mu)\\int\\mu q + q = -py + q`}</Eq>。因此 <Eq>{`y' + py = q`}</Eq>。唯一性：如果 <Eq>{`z`}</Eq> 是另一个解、<Eq>{`(y-z)' + p(y-z) = 0`}</Eq>；解：<Eq>{`y - z = C e^{-\\int p}`}</Eq>；唯一性来自初始条件确定 <Eq>{`C`}</Eq>。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "25", exercicio: "Exercise 1.4.1", licenca: "CC-BY-SA" }}
+>
+证明积分因子公式确实求解 <Eq>{`y' + p(x)y = q(x)`}</Eq>。同时证明给定初值的解的唯一性。
+</Exercicio>
+
+<Exercicio
+  numero="100.32"
+  dificuldade="demonstracao"
+  solucao={<><Eq>{`e^{\\alpha x}\\cos\\beta x`}</Eq> 和 <Eq>{`e^{\\alpha x}\\sin\\beta x`}</Eq> 的朗斯基行列式：由 <Eq>{`2\\times 2`}</Eq> 行列式计算。<Eq>{`W = e^{\\alpha x}\\cos\\beta x \\cdot e^{\\alpha x}(\\alpha\\sin\\beta x + \\beta\\cos\\beta x) - e^{\\alpha x}\\sin\\beta x \\cdot e^{\\alpha x}(\\alpha\\cos\\beta x - \\beta\\sin\\beta x)`}</Eq>。简化：<Eq>{`W = \\beta e^{2\\alpha x}(\\cos^2\\beta x + \\sin^2\\beta x) = \\beta e^{2\\alpha x} \\neq 0`}</Eq> 对于 <Eq>{`\\beta \\neq 0`}</Eq>。因此线性无关。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "84", exercicio: "Exercise 2.2.9", licenca: "CC-BY-SA" }}
+>
+证明 <Eq>{`e^{\\alpha x}\\cos\\beta x`}</Eq> 和 <Eq>{`e^{\\alpha x}\\sin\\beta x`}</Eq> 对于 <Eq>{`\\beta \\neq 0`}</Eq> 线性无关、通过计算朗斯基行列式。
+</Exercicio>
+
+<Exercicio
+  numero="100.33"
+  dificuldade="demonstracao"
+  solucao={<>欧拉在 <Eq>{`[t_n, t_{n+1}]`}</Eq> 的局部误差：由泰勒展开，<Eq>{`y(t_{n+1}) = y(t_n) + h y'(t_n) + h^2 y''(\\xi)/2`}</Eq>。欧拉计算 <Eq>{`y_{n+1} = y_n + h f(t_n, y_n)`}</Eq>。局部误差：<Eq>{`O(h^2)`}</Eq>。对 <Eq>{`N = T/h`}</Eq> 步求和：误差 <Eq>{`\\leq N \\cdot O(h^2) = (T/h) O(h^2) = O(h)`}</Eq>。欧拉全局一阶。</>}
+  fonte={{ livro: "REAMAT UFRGS — 数值分析", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "第8章", pagina: "150", exercicio: "习题8.2", licenca: "CC-BY-SA" }}
+>
+证明欧拉法有全局收敛阶1。
+</Exercicio>
+
+<Exercicio
+  numero="100.34"
+  dificuldade="desafio"
+  solucao={<>Lotka-Volterra：<Eq>{`\\dot x = x - 0{,}5xy`}</Eq>、<Eq>{`\\dot y = -0{,}5y + 0{,}25xy`}</Eq>。平衡点：(0,0) 和 <Eq>{`(2, 2)`}</Eq>。在(2,2)处，雅可比有纯虚特征值 → 闭合轨道。第一积分：<Eq>{`0{,}5\\ln y - 0{,}25 y + 0{,}5\\ln x - x = C`}</Eq>。没有闭式公式求周期；数值欧拉或RK4显示 <Eq>{`T \\approx 2\\pi/\\sqrt{(r_x)(r_y)} = 2\\pi/\\sqrt{0{,}5 \\times 0{,}25} \\approx 17{,}8`}</Eq> 单位对于接近平衡的条件。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nlstability_section.html", secao: "§8.2", pagina: "310", exercicio: "Exercise 8.2.3", licenca: "CC-BY-SA" }}
+>
+**Lotka-Volterra。** <Eq>{`\\dot x = x - 0{,}5xy`}</Eq>、<Eq>{`\\dot y = -0{,}5y + 0{,}25xy`}</Eq>。找平衡点，通过雅可比分析稳定性，并估计非平凡平衡附近的振荡周期。
+</Exercicio>
+
+<Exercicio
+  numero="100.35"
+  dificuldade="desafio"
+  solucao={<>大摆：<Eq>{`\\ddot\\theta + \\sin\\theta = 0`}</Eq>。能量积分：<Eq>{`\\dot\\theta^2/2 - \\cos\\theta = -\\cos\\theta_0`}</Eq>（用 <Eq>{`\\dot\\theta(0)=0`}</Eq>）。周期：<Eq>{`T = 4\\int_0^{\\theta_0} d\\theta/\\sqrt{2(\\cos\\theta - \\cos\\theta_0)}`}</Eq>。这是椭圆积分 <Eq>{`T = 4K(\\sin(\\theta_0/2))`}</Eq> 其中 <Eq>{`K`}</Eq> 是第一类完全椭圆积分。对于 <Eq>{`\\theta_0 = \\pi/2`}</Eq>：<Eq>{`T = 4K(\\sin\\pi/4) = 4K(1/\\sqrt{2}) \\approx 4 \\times 1{,}8541 = 7{,}416`}</Eq>（秒如果 <Eq>{`g/l=1`}</Eq>）、vs <Eq>{`2\\pi \\approx 6{,}28`}</Eq> 从小角度近似。</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nlstability_section.html", secao: "§8.2", pagina: "312", exercicio: "Exercise 8.2.6", licenca: "CC-BY-SA" }}
+>
+**大摆。** <Eq>{`\\ddot\\theta + \\sin\\theta = 0`}</Eq>、<Eq>{`\\theta(0) = \\pi/2`}</Eq>、<Eq>{`\\dot\\theta(0) = 0`}</Eq>。表示精确周期为椭圆积分并与小角度近似比较。
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- **Lebl，Jiří。** *Diffy Qs笔记：工程师的微分方程。* 版本6.4。CC-BY-SA。[jirka.org/diffyqs](https://www.jirka.org/diffyqs/) — §1.2–2.6，§8.2：一阶和二阶常微分方程、动力系统和综合复习的主要参考。
+- **OpenStax。** *微积分第2卷。* CC-BY-NC-SA。[openstax.org/details/books/calculus-volume-2](https://openstax.org/details/books/calculus-volume-2) — §4.3–4.5：可分离、线性、逻辑斯谛和冷却的综合问题。
+- **REAMAT UFRGS。** *数值分析（Python）。* CC-BY-SA。[ufrgs.br/reamat/CalculoNumerico/livro-py/main.html](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — 第8章：欧拉、收敛阶、RK4和稳定性。

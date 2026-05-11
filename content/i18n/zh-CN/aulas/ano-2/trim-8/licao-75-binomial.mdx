@@ -1,0 +1,850 @@
+---
+titulo: "Lição 75 — Distribuição binomial"
+slug: "licao-75-binomial"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "n ensaios de Bernoulli independentes. PMF binomial, esperança np, variância np(1-p). Aplicações em controle de qualidade, A/B test, genética e eleições."
+ordem: 75
+publicado: true
+tags: ["estatística", "probabilidade", "binomial", "bernoulli", "ano-2", "trim-8"]
+prerrequisitos: ["licao-74"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math — Singapura", "AP Statistics — EUA", "Math B — Japão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}, \quad E[X] = np, \quad \text{Var}(X) = np(1-p)"
+  legenda={<><strong>二项分布</strong> <Eq>{`\\text{Bin}(n, p)`}</Eq> 计数 <Eq>{`n`}</Eq> 次独立试验中的成功次数，每次成功概率为 <Eq>{`p`}</Eq>。因子 <Eq>{`\\binom{n}{k}`}</Eq> 计数安排成功的方式数；<Eq>{`p^k(1-p)^{n-k}`}</Eq> 是每种安排的概率。</>}
+  audioTexto="二项分布。n次试验中恰好k次成功的概率为n个k的组合数乘以p的k次方乘以1减p的n减k次方。期望为n乘以p，方差为n乘以p乘以1减p。"
+/>
+
+<aside>
+
+**涵盖本课程的书籍**
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §3.4 · CC-BY-SA · <em>BInS假设、PMF、通过伯努利分解得期望和方差；A/B测试、质量控制和选举调查的练习。</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §4.4 · CC-BY · <em>二项式表、TI-83/84计算、泊松和正态近似；具有医疗和商业背景的分级练习。</em>
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §5.1 · GNU FDL · <em>严格推导二项式PMF；MGF；泊松极限（稀有事件定律）及其证明；演示性练习。</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="严格定义">
+
+### BInS假设
+
+<Definicao titulo="伯努利试验和二项分布">
+
+**伯努利试验**是有两种结果的实验：成功（概率 $p$）和失败（概率 $1-p$）。随机变量 $Y_i = \mathbf{1}[\text{第}i\text{次试验成功}]$ 服从伯努利分布 $\text{Bernoulli}(p)$：$E[Y_i] = p$，$\text{Var}(Y_i) = p(1-p)$。
+
+$X \sim \text{Bin}(n, p)$ 当 $X = Y_1 + Y_2 + \cdots + Y_n$，其中 $Y_i$ 独立同分布于 $\text{Bernoulli}(p)$。
+
+**四项假设 (BInS)：**
+1. **B**inary（二分的）：每次试验只有2种结果。
+2. **I**ndependent（独立的）：试验相互独立。
+3. **n** fixed（n固定）：试验次数预先确定。
+4. **S**ame：$p$ 在所有试验中保持常数。
+
+</Definicao>
+
+> "If each trial in a binomial experiment has $p$ = 0.5, meaning the outcomes are equally likely, the distribution looks bell shaped. As $p$ moves away from 0.5, the graph skews right or left." — [OpenStax Statistics §4.4](https://openstax.org/books/statistics/pages/4-4-binomial-distribution)
+
+<Definicao titulo="二项式PMF">
+
+对于 $X \sim \text{Bin}(n, p)$ 和 $k \in \{0, 1, \ldots, n\}$：
+
+$$P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+
+正当性：$\binom{n}{k}$ 个不同的序列有恰好 $k$ 个成功，每个序列的概率为 $p^k(1-p)^{n-k}（由独立性）。
+
+归一化：$\sum_{k=0}^n \binom{n}{k} p^k (1-p)^{n-k} = (p + (1-p))^n = 1$（牛顿二项式定理）。
+
+</Definicao>
+
+<Teorema titulo="通过伯努利分解得矩">
+
+由期望的线性性和独立性：
+
+$$E[X] = \sum_{i=1}^n E[Y_i] = n \cdot p$$
+
+$$\text{Var}(X) = \sum_{i=1}^n \text{Var}(Y_i) = n \cdot p(1-p)$$
+
+独立性对于方差求和至关重要。
+
+</Teorema>
+
+<Teorema titulo="二项相加性">
+
+如果 $X_1 \sim \text{Bin}(n_1, p)$ 和 $X_2 \sim \text{Bin}(n_2, p)$ 独立且 **相同** $p$：
+
+$$X_1 + X_2 \sim \text{Bin}(n_1 + n_2, p)$$
+
+通过MGF证明：$M_{X_1+X_2}(t) = [(1-p+pe^t)^{n_1}][(1-p+pe^t)^{n_2}] = (1-p+pe^t)^{n_1+n_2}$。
+
+</Teorema>
+
+<Insight>
+
+$\text{Bin}(n, p)$ 的众数在 $\lfloor (n+1)p \rfloor$（或当 $(n+1)p$ 是整数时在两个值）。对于 $p = 0{,}5$，众数是 $n/2$ — 峰值恰好在中间，对称性最明显。当 $n \to \infty$ 时，分布趋向于正态钟形（De Moivre-Laplace定理，1733）。
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="给5岁小孩">
+
+想象你一次掷 **5枚硬币**。会出现多少个正面？
+
+- 可能出现0、1、2、3、4或5个正面。
+- 最常见的是 **2或3** 个正面。
+- 极少出现0或5个。
+
+**二项分布** 告诉你每种结果的确切概率。它像是一份概率日历，用于计数成功。
+
+</Porta>
+
+<Porta nivel="10" titulo="给10岁小孩">
+
+你掷10枚硬币。恰好出现7个正面的概率是多少？
+
+$$P(X = 7) = \binom{10}{7} \cdot 0{,}5^7 \cdot 0{,}5^3 = 120 \cdot \frac{1}{1024} \approx 11{,}7\%$$
+
+为什么是三部分？
+
+- $\binom{10}{7} = 120$：在10次投掷中得到7个正面的不同方式数。
+- $0{,}5^7$：每个正面出现的概率。
+- $0{,}5^3$：3个反面的概率。
+
+**平均来说**：$np = 10 \times 0{,}5 = 5$ 个正面。有意义：一半时间正面，一半时间反面。
+
+</Porta>
+
+<Porta nivel="15" titulo="给15岁青少年">
+
+二项分布是一个"机器"：告诉它有多少次试验（$n$）和成功的概率是多少（$p$），它就给你完整的分布。
+
+### 何时使用二项分布？
+
+检查4项BInS假设：
+
+- "在100次测试中，如果成功率是55%，60+次成功的概率是多少？" → 二项分布 ✓
+- "不放回抽签" → 不是（没有独立性），使用超几何分布。
+
+### 通过补集的累积概率
+
+对于"至少3次成功"：$P(X \geq 3) = 1 - P(X \leq 2) = 1 - P(0) - P(1) - P(2)$。
+
+只要能减少计算项数，就使用补集。
+
+### 有用的近似
+
+| 条件 | 近似 | 误差 |
+|---|---|---|
+| $n$ 很大，$p$ 中等（$np \geq 10$，$n(1-p) \geq 10$） | $\mathcal N(np, np(1-p))$ | 很小 |
+| $n$ 很大，$p$ 很小（$np = \lambda$ 常数） | $\text{Poisson}(\lambda)$ | 极好 |
+
+对于 $n = 100$，$p = 0{,}5$：$\mu = 50$，$\sigma = 5$。预期 $X \in [40, 60]$ 的置信度约为95%。
+
+### 高尔顿钉板
+
+Francis Galton在1873年建造"高尔顿钉板"来直观地展示二项分布：小球在钉子间下落，并按二项分布堆积。钟形自然出现 — 一个统计现代理论出现前的TCL的物理演示。
+
+</Porta>
+
+<Porta nivel="25" titulo="给工程学生">
+
+二项分布是应用统计的标准模型：质量控制、A/B测试、临床试验。
+
+### A/B测试（频率学派）
+
+变体A：100个访客，12次转化。变体B：100个，18次。
+
+$\hat p_A = 0{,}12$，$\hat p_B = 0{,}18$。在 $H_0: p_A = p_B$ 下，汇总估计量 $\hat p = (12+18)/200 = 0{,}15$。
+
+$$SE = \sqrt{\hat p(1-\hat p)(1/100 + 1/100)} = \sqrt{0{,}15 \times 0{,}85/50} \approx 0{,}0505$$
+
+$$z = (0{,}18 - 0{,}12)/0{,}0505 \approx 1{,}19 \implies p\text{-值} \approx 0{,}23$$
+
+差异不显著（需要更多数据）。
+
+### 最小样本量
+
+为了检测差异 $\delta$，功效 $1-\beta = 0{,}80$，$\alpha = 0{,}05$：
+
+$$n \approx \frac{(z_{\alpha/2} + z_\beta)^2 \cdot 2p(1-p)}{\delta^2}$$
+
+### 质量控制（p图表）
+
+$n$ 件产品中，$x$ 件有缺陷。$\hat p = x/n$。Shewhart控制限：
+
+$$UCL/LCL = \hat p \pm 3\sqrt{\hat p(1-\hat p)/n}$$
+
+如果下一批的 $\hat p$ 超出限制，过程"失控" — 调查特殊原因。
+
+### Python实现
+
+```python
+from scipy.stats import binom
+n, p = 100, 0.3
+print(binom.pmf(30, n, p))       # P(X = 30)
+print(binom.cdf(30, n, p))       # P(X <= 30)
+print(1 - binom.cdf(29, n, p))   # P(X >= 30)
+print(binom.ppf(0.95, n, p))     # 95% 分位数
+```
+
+</Porta>
+
+<Porta nivel="40" titulo="给资深专业人士">
+
+### 矩生成函数
+
+$$M_X(t) = E[e^{tX}] = (1 - p + pe^t)^n$$
+
+导数：$M_X'(0) = np = E[X]$；$M_X''(0) = np(1-p) + n^2p^2 = E[X^2]$。MGF平凡地证明了相加性。
+
+### 泊松极限（稀有事件定律，泊松1837）
+
+当 $n \to \infty$ 且 $p \to 0$，$\lambda = np$ 固定：
+
+$$\binom{n}{k} p^k (1-p)^{n-k} \to \frac{\lambda^k e^{-\lambda}}{k!}$$
+
+证明：$\binom{n}{k} \approx n^k/k!$，$(1-\lambda/n)^n \to e^{-\lambda}$，$(1-\lambda/n)^{-k} \to 1$。这就是为什么大规模生产中的稀有缺陷遵循泊松分布。
+
+### De Moivre-Laplace极限（1733/1812）
+
+TCL的特例：$(X - np)/\sqrt{np(1-p)} \to \mathcal N(0,1)$ 在分布上。De Moivre在1733年推导了经验结果；Laplace形式化。先于TCL一般表述数十年。
+
+### 贝叶斯推断 — 共轭先验Beta
+
+$$\text{先验：} p \sim \text{Beta}(\alpha, \beta), \quad X \mid p \sim \text{Bin}(n, p)$$
+
+$$\text{后验：} p \mid X = k \sim \text{Beta}(\alpha + k, \beta + n - k)$$
+
+纯增量更新：每个新数据点移动参数。在armed bandit问题、贝叶斯A/B测试、具有顺序数据的流失建模中基础。
+
+### 过度离散和扩展
+
+真实数据经常有 $\text{Var}(X) > np(1-p)$：试验不独立，$p$ 在单位间变化。解决方案：**beta-binomial**（二项式的混合，$p \sim \text{Beta}$）、**逻辑回归**（GLM二项式）、**广义估计方程**（GEE）用于相关数据。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="实际应用">
+
+### 5步秘诀
+
+1. **检查BInS**：二分的、独立的、$n$固定、$p$常数。
+2. **识别 $n$ 和 $p$**。
+3. **$P(X = k)$**：公式或软件。
+4. **$P(X \leq k)$ 或 $P(X \geq k)$**：CDF或补集 $1 - P(X \leq k-1)$。
+5. **$n$ 很大**：用 $\mathcal N(np, np(1-p))$（连续性修正）或泊松近似（如果 $p$ 很小）。
+
+### 在电子表格中
+
+| 函数 | 结果 |
+|---|---|
+| `BINOM.DIST(k; n; p; FALSE)` | $P(X = k)$ |
+| `BINOM.DIST(k; n; p; TRUE)` | $P(X \leq k)$ |
+| `BINOM.INV(n; p; alpha)` | 分位数 $\alpha$ |
+
+### 常见错误
+
+- **不放回抽签** → 使用超几何分布，不是二项分布。
+- **$p$ 在个体间变化** → 使用beta-binomial或逻辑回归。
+- **混淆 $P(X = k)$ 和 $P(X \leq k)$**：始终验证问题要求的是精确值还是累积值。
+- **在未验证 $np \geq 10$ 和 $n(1-p) \geq 10$ 的情况下用正态近似**。
+
+</Porta>
+
+</DuasPortas>
+
+## 解决的例子
+
+<Exemplo numero="75.1" titulo="直接PMF — 硬币" dificuldade="basico">
+
+**问题。** 掷5枚公平的硬币。计算 $P(X = 3)，其中 $X$ = 正面的次数。
+
+**策略。** $X \sim \text{Bin}(5, 0{,}5)$。直接应用二项式PMF。
+
+**求解。**
+
+$$P(X = 3) = \binom{5}{3} (0{,}5)^3 (0{,}5)^2 = 10 \times 0{,}125 \times 0{,}25 = 10/32 = 0{,}3125$$
+
+**验证。** $n=5$，$p=0{,}5$ 的完整表：P(0) = 1/32, P(1) = 5/32, P(2) = 10/32, P(3) = 10/32, P(4) = 5/32, P(5) = 1/32。总和 = 32/32 = 1 ✓。二项分布对于 $p = 0{,}5$ 是对称的。
+
+**来源。** [OpenIntro Statistics §3.4](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="75.2" titulo="通过分解的期望和方差" dificuldade="basico">
+
+**问题。** $X \sim \text{Bin}(20, 0{,}1)$。计算 $E[X]$、$\text{Var}(X)$ 和 $P(X = 0)$。
+
+**策略。** 使用矩的直接公式；PMF计算 $P(X=0)$。
+
+**求解。**
+
+$$E[X] = np = 20 \times 0{,}1 = 2$$
+
+$$\text{Var}(X) = np(1-p) = 20 \times 0{,}1 \times 0{,}9 = 1{,}8$$
+
+$$P(X = 0) = \binom{20}{0}(0{,}1)^0(0{,}9)^{20} = (0{,}9)^{20} \approx 0{,}1216$$
+
+**验证。** $\sigma = \sqrt{1{,}8} \approx 1{,}34$。区间 $[E \pm 2\sigma] = [-0{,}68;\; 4{,}68]$ — 值0到4覆盖约95%的分布。$P(X = 0) \approx 12\%$：合理，因为20次试验，$p = 0{,}1$ 时，无成功的概率非零。
+
+**来源。** [OpenStax Statistics §4.4](https://openstax.org/books/statistics/pages/4-4-binomial-distribution) — CC-BY。
+
+</Exemplo>
+
+<Exemplo numero="75.3" titulo="累积概率和补集" dificuldade="intermediario">
+
+**问题。** 生产线：3%的产品有缺陷。批量50件。计算 $P(\text{至少3件有缺陷})$？
+
+**策略。** $X \sim \text{Bin}(50, 0{,}03)$。使用补集：$P(X \geq 3) = 1 - P(X \leq 2)$。
+
+**求解。**
+
+$$P(X = 0) = (0{,}97)^{50} \approx 0{,}2181$$
+
+$$P(X = 1) = \binom{50}{1}(0{,}03)^1(0{,}97)^{49} = 50 \times 0{,}03 \times (0{,}97)^{49} \approx 0{,}3372$$
+
+$$P(X = 2) = \binom{50}{2}(0{,}03)^2(0{,}97)^{48} = 1225 \times 0{,}0009 \times (0{,}97)^{48} \approx 0{,}2555$$
+
+$$P(X \geq 3) = 1 - (0{,}2181 + 0{,}3372 + 0{,}2555) = 1 - 0{,}8108 \approx 0{,}189$$
+
+**验证。** $E[X] = 1{,}5$，$\sigma \approx 1{,}21$。平均只有1.5个缺陷，有 $\geq 3$ 个是不太可能的 — 18.9%是合理的（略高于平均一个标准差）。
+
+**来源。** [OpenIntro Statistics §3.4](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="75.4" titulo="正态近似（A/B测试）" dificuldade="intermediario">
+
+**问题。** 选举：候选人实际意图中有 $p = 0{,}52$。$n = 1000$ 受访者的调查。计算 $P(\hat p < 0{,}50)$ — 调查错误排名领导者的概率？
+
+**策略。** $X \sim \text{Bin}(1000, 0{,}52)$。由于 $np = 520 \geq 10$ 和 $n(1-p) = 480 \geq 10$，用 $\mathcal N(np, np(1-p))$ 近似。
+
+**求解。**
+
+$X \approx \mathcal N(520, 1000 \times 0{,}52 \times 0{,}48) = \mathcal N(520, 249{,}6)$。
+
+我们需要 $P(X < 500)（即 $\hat p < 0{,}50$ 等价于 $X < 500$）：
+
+$$z = \frac{500 - 520}{\sqrt{249{,}6}} = \frac{-20}{15{,}80} \approx -1{,}27$$
+
+$$P(X < 500) \approx \Phi(-1{,}27) \approx 0{,}102$$
+
+**验证。** 当候选人实际以52%领先时，调查显示平局或对手领先的概率约为10%。这证明了选举调查典型的误差幅度。
+
+**来源。** [OpenIntro Statistics §3.4](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<Exemplo numero="75.5" titulo="遗传学孟德尔分布 — 二项分布" dificuldade="avancado">
+
+**问题。** 杂合子杂交 $Aa \times Aa$：每个后代有概率 $1/4$ 是纯合显性 $AA$。在8个后代中，计算 $P(X = 2)$ 和 $E[X]$。
+
+**策略。** $X \sim \text{Bin}(8, 1/4)$。应用PMF和期望公式。
+
+**求解。**
+
+$$P(X = 2) = \binom{8}{2}\left(\frac{1}{4}\right)^2\left(\frac{3}{4}\right)^6 = 28 \times \frac{1}{16} \times \frac{729}{4096} = \frac{28 \times 729}{65536} = \frac{20412}{65536} \approx 0{,}3115$$
+
+$$E[X] = np = 8 \times \frac{1}{4} = 2, \quad \text{Var}(X) = 8 \times \frac{1}{4} \times \frac{3}{4} = \frac{3}{2}$$
+
+**验证。** 每窝8个后代中平均2个 $AA$ — 与孟德尔分离定律（25%）一致。$P(X = 2) \approx 31\%$ 是最可能值（分布在 $\lfloor (8+1)/4 \rfloor = 2$ 处的众数）。
+
+**来源。** [OpenIntro Statistics §3.4](https://www.openintro.org/book/os/) — CC-BY-SA。
+
+</Exemplo>
+
+<ListaExercicios seed="licao-75-binomial">
+
+### 块A — PMF和直接计算（75.1至75.14）
+
+<Exercicio
+  numero="75.1"
+  dificuldade="aplicacao"
+  resposta="0,3125"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "134", exercicio: "3.28", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`P(X=3) = \\binom{5}{3}(0{,}5)^3(0{,}5)^2 = 10/32 = 0{,}3125`}</Eq>。</>}
+  passos={<><ol><li><Eq>{`X \\sim \\text{Bin}(5, 0{,}5)`}</Eq>：5次试验，成功概率0.5。</li><li><Eq>{`\\binom{5}{3} = 10`}</Eq>（选择5中的哪3个是成功的方式数）。</li><li><Eq>{`(0{,}5)^3 \\times (0{,}5)^2 = 0{,}5^5 = 1/32`}</Eq>。</li><li><Eq>{`P = 10 \\times 1/32 = 10/32 = 5/16 \\approx 0{,}3125`}</Eq>。</li></ol><em>心算技巧：</em>对于 <Eq>{`p = 0{,}5`}</Eq>，<Eq>{`P(X=k) = \\binom{n}{k}/2^n`}</Eq>。</>}
+>
+
+$X \sim \text{Bin}(5, 0{,}5)$。计算 $P(X = 3)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=0) = (0{,}7)^{10} \\approx 0{,}0282`}</Eq>。使用对数：<Eq>{`10 \\ln(0{,}7) \\approx -3{,}567`}</Eq>，<Eq>{`e^{-3{,}567} \\approx 0{,}0282`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "249", exercicio: "4.4.1", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(10, 0{,}3)$。计算 $P(X = 0)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=2) = \\binom{8}{2}(0{,}25)^2(0{,}75)^6 = 28 \\times 0{,}0625 \\times 0{,}1780 \\approx 0{,}3115`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "135", exercicio: "3.30", licenca: "CC-BY-SA" }}
+>
+
+$X \sim \text{Bin}(8, 0{,}25)$。计算 $P(X = 2)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.4"
+  dificuldade="aplicacao"
+  solucao={<>补集：<Eq>{`P(X \\geq 1) = 1 - P(X=0) = 1 - (5/6)^6 \\approx 1 - 0{,}3349 = 0{,}6651`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "136", exercicio: "3.32", licenca: "CC-BY-SA" }}
+  passos={<><ol><li><Eq>{`X \\sim \\text{Bin}(6, 1/6)`}</Eq>：掷骰子6次，成功=掷出6。</li><li><Eq>{`P(X = 0) = (5/6)^6`}</Eq>（6次投掷中没有6）。</li><li><Eq>{`P(X \\geq 1) = 1 - (5/6)^6 \\approx 1 - 0{,}335 = 0{,}665`}</Eq>。</li></ol><em>窍门：</em>当题目说"至少一个"时，使用"没有"的补集 — 节省计算。</>}
+>
+
+$X \sim \text{Bin}(6, 1/6)$。通过补集计算 $P(X \geq 1)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.5"
+  dificuldade="aplicacao"
+  solucao={<>对于 <Eq>{`X \\sim \\text{Bin}(4, 0{,}5)`}</Eq>：P(0) = 1/16, P(1) = 4/16, P(2) = 6/16, P(3) = 4/16, P(4) = 1/16。总和 = 16/16 = 1 ✓。分布对称，峰值在2。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "250", exercicio: "4.4.3", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(4, 0{,}5)$。制作 $k = 0, 1, 2, 3, 4$ 的完整PMF表。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[X] = np = 20 \\times 0{,}1 = 2`}</Eq>。<Eq>{`\\text{Var}(X) = np(1-p) = 20 \\times 0{,}1 \\times 0{,}9 = 1{,}8`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "251", exercicio: "4.4.5", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(20, 0{,}1)$。计算 $E[X]$ 和 $\text{Var}(X)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.7"
+  dificuldade="aplicacao"
+  resposta="5"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "137", exercicio: "3.34", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`\\sigma = \\sqrt{np(1-p)} = \\sqrt{100 \\times 0{,}5 \\times 0{,}5} = \\sqrt{25} = 5`}</Eq>。</>}
+>
+
+$X \sim \text{Bin}(100, 0{,}5)$。计算 $\sigma = \sqrt{\text{Var}(X)}$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=5) = \\binom{10}{5}(0{,}5)^{10} = 252/1024 \\approx 0{,}2461`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "252", exercicio: "4.4.7", licenca: "CC-BY" }}
+>
+
+掷10枚硬币。计算 $P(\text{恰好5个正面})$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X \\geq 8) = P(8)+P(9)+P(10) = \\left[\\binom{10}{8}+\\binom{10}{9}+\\binom{10}{10}\\right]\\cdot(0{,}5)^{10} = (45+10+1)/1024 = 56/1024 \\approx 0{,}0547`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "138", exercicio: "3.36", licenca: "CC-BY-SA" }}
+  passos={<><ol><li><Eq>{`P(X \\geq 8) = P(8) + P(9) + P(10)`}</Eq>。</li><li><Eq>{`P(8) = \\binom{10}{8}(0{,}5)^{10} = 45/1024`}</Eq>。</li><li><Eq>{`P(9) = 10/1024`}</Eq>，<Eq>{`P(10) = 1/1024`}</Eq>。</li><li>总计：<Eq>{`56/1024 \\approx 0{,}0547`}</Eq>（5.5%）。</li></ol><em>注：</em>可以用补集 <Eq>{`1 - P(X \\leq 7)`}</Eq>，但由于上面项很少，直接求和更快。</>}
+>
+
+掷10枚硬币。计算 $P(\text{至少8个正面})$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=2) = \\binom{6}{2}(1/6)^2(5/6)^4 = 15 \\times (1/36) \\times (625/1296) = 15 \\times 625/46656 \\approx 0{,}2009`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "253", exercicio: "4.4.9", licenca: "CC-BY" }}
+>
+
+掷骰子6次。计算 $P(\text{恰好2个6})$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=0) = (5/6)^6 \\approx 0{,}3349`}</Eq>。在6次投掷中掷出零个6的概率约为33%。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "139", exercicio: "3.38", licenca: "CC-BY-SA" }}
+>
+
+掷骰子6次。计算 $P(\text{没有6})$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=0) = (1-p)^n`}</Eq> 且 <Eq>{`P(X=n) = p^n`}</Eq>。因此 <Eq>{`P(X=0)+P(X=n) = (1-p)^n + p^n`}</Eq>。对于 <Eq>{`p=0{,}5`}</Eq>，这是 <Eq>{`2 \\times (0{,}5)^n = 1/2^{n-1}`}</Eq>。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "195", exercicio: "5.1.9", licenca: "GNU FDL" }}
+>
+
+对于 $X \sim \text{Bin}(n, p)$，用 $n$ 和 $p$ 计算 $P(X = 0) + P(X = n)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.13"
+  dificuldade="aplicacao"
+  solucao={<>连续PMF的比率：<Eq>{`P(X=k)/P(X=k-1) = \\frac{(n-k+1)}{k} \\cdot \\frac{p}{1-p}`}</Eq>。推导：代入PMF并简化二项系数。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "196", exercicio: "5.1.11", licenca: "GNU FDL" }}
+>
+
+对于 $X \sim \text{Bin}(n, p)$，推导比率 $P(X = k)/P(X = k-1)$ 用 $n$、$p$ 和 $k$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.14"
+  dificuldade="aplicacao"
+  solucao={<>众数是使 <Eq>{`P(X=k)`}</Eq> 最大的 $k$ 值。使用比率：<Eq>{`P(k)/P(k-1) > 1 \\iff (n-k+1)p > k(1-p) \\iff k < (n+1)p`}</Eq>。因此众数是 <Eq>{`\\lfloor (n+1)p \\rfloor`}</Eq>（或两个整数，如果 <Eq>{`(n+1)p`}</Eq> 是整数）。对于 <Eq>{`n=10`}</Eq>，<Eq>{`p=0{,}3`}</Eq>：众数 = <Eq>{`\\lfloor 3{,}3 \\rfloor = 3`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "140", exercicio: "3.40", licanca: "CC-BY-SA" }}
+>
+
+证明 $\text{Bin}(n, p)$ 的众数是 $\lfloor (n+1)p \rfloor$。计算 $\text{Bin}(10, 0{,}3)$ 的众数。
+
+</Exercicio>
+
+### 块B — 近似和累积（75.15至75.26）
+
+<Exercicio
+  numero="75.15"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bin}(100, 0{,}3)`}</Eq>，<Eq>{`\\mu = 30`}</Eq>，<Eq>{`\\sigma = \\sqrt{21} \\approx 4{,}58`}</Eq>。正态近似：<Eq>{`P(X \\leq 25) \\approx \\Phi((25{,}5-30)/4{,}58) = \\Phi(-0{,}98) \\approx 0{,}164`}</Eq>（连续性修正）。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "254", exercicio: "4.4.11", licenca: "CC-BY" }}
+  passos={<><ol><li>参数：<Eq>{`\\mu = 30`}</Eq>，<Eq>{`\\sigma \\approx 4{,}58`}</Eq>。</li><li>检查条件：<Eq>{`np = 30 \\geq 10`}</Eq> 且 <Eq>{`n(1-p) = 70 \\geq 10`}</Eq> ✓。</li><li>连续性修正：<Eq>{`P(X \\leq 25) \\approx P(Z \\leq (25{,}5-30)/4{,}58) = P(Z \\leq -0{,}98)`}</Eq>。</li><li><Eq>{`\\Phi(-0{,}98) \\approx 0{,}164`}</Eq>。</li></ol><em>窍门：</em>连续性修正：<Eq>{`P(X \\leq k) \\approx \\Phi((k+0{,}5-\\mu)/\\sigma)`}</Eq>。</>}
+>
+
+$X \sim \text{Bin}(100, 0{,}3)$。用正态近似 $P(X \leq 25)$（使用连续性修正）。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bin}(1000, 0{,}001)`}</Eq>。<Eq>{`np = 1 = \\lambda`}</Eq>。泊松近似：<Eq>{`P(X=0) \\approx e^{-1} \\approx 0{,}368`}</Eq>。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "197", exercicio: "5.1.13", licenca: "GNU FDL" }}
+>
+
+$X \sim \text{Bin}(1000, 0{,}001)$。使用泊松近似计算 $P(X = 0)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bin}(50, 0{,}5)`}</Eq>，<Eq>{`\\mu = 25`}</Eq>，<Eq>{`\\sigma = \\sqrt{12{,}5} \\approx 3{,}54`}</Eq>。<Eq>{`P(X \\geq 30) \\approx P(Z \\geq (29{,}5-25)/3{,}54) = P(Z \\geq 1{,}27) \\approx 1 - 0{,}898 = 0{,}102`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "255", exercicio: "4.4.13", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(50, 0{,}5)$。用连续性修正的正态近似计算 $P(X \geq 30)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.18"
+  dificuldade="aplicacao"
+  solucao={<>相同 <Eq>{`p`}</Eq> 的二项和：<Eq>{`\\text{Bin}(10, 0{,}3) + \\text{Bin}(20, 0{,}3) \\sim \\text{Bin}(30, 0{,}3)`}</Eq>。<Eq>{`E[X] = 9`}</Eq>，<Eq>{`\\text{Var}(X) = 6{,}3`}</Eq>。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "198", exercicio: "5.1.15", licenca: "GNU FDL" }}
+>
+
+$X_1 \sim \text{Bin}(10, 0{,}3)$ 和 $X_2 \sim \text{Bin}(20, 0{,}3)$ 独立。$X_1 + X_2$ 的分布是什么？
+
+</Exercicio>
+
+<Exercicio
+  numero="75.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bin}(50, 0{,}02)`}</Eq>。<Eq>{`\\lambda = np = 1`}</Eq>。泊松：<Eq>{`P(X=0) \\approx e^{-1} \\approx 0{,}368`}</Eq>；<Eq>{`P(X=1) \\approx e^{-1} \\approx 0{,}368`}</Eq>；<Eq>{`P(X=2) \\approx e^{-1}/2 \\approx 0{,}184`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "256", exercicio: "4.4.15", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(50, 0{,}02)$。使用泊松近似计算 $P(X = 0)$、$P(X = 1)$ 和 $P(X = 2)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.20"
+  dificuldade="aplicacao"
+  solucao={<>选举调查：<Eq>{`X \\sim \\text{Bin}(1000, 0{,}52)`}</Eq>。<Eq>{`\\mu = 520`}</Eq>，<Eq>{`\\sigma = \\sqrt{1000 \\times 0{,}52 \\times 0{,}48} \\approx 15{,}8`}</Eq>。<Eq>{`P(X < 500) \\approx \\Phi((499{,}5-520)/15{,}8) = \\Phi(-1{,}30) \\approx 0{,}097`}</Eq>。调查显示领导者失败的概率约为10%。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "141", exercicio: "3.42", licenca: "CC-BY-SA" }}
+>
+
+选举：$p = 0{,}52$，$n = 1000$。近似 $P(\hat p < 0{,}50)$，调查错误排名领导者的概率。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.21"
+  dificuldade="aplicacao"
+  solucao={<>对于 <Eq>{`X \\sim \\text{Bin}(n, 0{,}5)`}</Eq>，当 <Eq>{`np \\geq 10`}</Eq> 且 <Eq>{`n(1-p) \\geq 10`}</Eq> 时正态近似很好。对于 <Eq>{`p = 0{,}5`}</Eq>：<Eq>{`n \\times 0{,}5 \\geq 10 \\Rightarrow n \\geq 20`}</Eq>。实际上，<Eq>{`n \\geq 30`}</Eq> 给出极好的视觉近似。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "257", exercicio: "4.4.17", licenca: "CC-BY" }}
+>
+
+对于 $X \sim \text{Bin}(n, 0{,}5)$，从什么时候开始认为正态近似很好？给出理由。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\text{Bin}(n, p)`}</Eq> 的方差是 <Eq>{`np(1-p)`}</Eq>。对于固定的 <Eq>{`n`}</Eq>，在 <Eq>{`p`}</Eq> 中最大化：导数 <Eq>{`n(1-2p) = 0 \\Rightarrow p = 0{,}5`}</Eq>。二阶导数 <Eq>{`-2n < 0`}</Eq>（最大值）。最大方差 = <Eq>{`n/4`}</Eq>。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "199", exercicio: "5.1.17", licenca: "GNU FDL" }}
+>
+
+证明对于固定的 $n$，$\text{Bin}(n, p)$ 的方差在 $p = 0{,}5$ 时最大。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.23"
+  dificuldade="aplicacao"
+  solucao={<>垃圾邮件过滤器：90%召回率。<Eq>{`X \\sim \\text{Bin}(500, 0{,}9)`}</Eq>。<Eq>{`\\mu = 450`}</Eq>，<Eq>{`\\sigma = \\sqrt{45} \\approx 6{,}71`}</Eq>。<Eq>{`P(X \\geq 470) \\approx P(Z \\geq (469{,}5-450)/6{,}71) = P(Z \\geq 2{,}91) \\approx 0{,}0018`}</Eq>（少于0.2%）。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "258", exercicio: "4.4.19", licenca: "CC-BY" }}
+>
+
+垃圾邮件过滤器，召回率90%。在500个真实垃圾邮件中，$P(\text{标记} \geq 470)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.24"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "因为它们是iid伯努利变量的总和，独立性保证了方差相加性", correta: true}, {texto: "因为二项分布的PMF总是相同的，无论参数如何"}, {texto: "因为两个二项分布的和总是二项分布，无论p的值如何"}, {texto: "因为当p = 0或p = 1时方差为零"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "142", exercicio: "3.44", licenca: "CC-BY-SA" }}
+  solucao={<>公式 <Eq>{`\\text{Var}(X) = np(1-p)`}</Eq> 来自写 <Eq>{`X = Y_1 + \\ldots + Y_n`}</Eq>，其中 <Eq>{`Y_i \\sim \\text{Bernoulli}(p)`}</Eq> iid。独立性保证方差相加：<Eq>{`\\text{Var}(X) = n \\cdot \\text{Var}(Y_i) = n \\cdot p(1-p)`}</Eq>。</>}
+>
+
+为什么公式 $\text{Var}(X) = np(1-p)$ 可以通过分解为伯努利变量推导？
+
+</Exercicio>
+
+### 块C — 用巴西数据建模（75.25至75.36）
+
+<Exercicio
+  numero="75.25"
+  dificuldade="modelagem"
+  solucao={<>生产线：3%有缺陷，批量50件。<Eq>{`X \\sim \\text{Bin}(50, 0{,}03)`}</Eq>。<Eq>{`P(X \\geq 3) = 1 - P(X \\leq 2) \\approx 1 - 0{,}811 = 0{,}189`}</Eq>（详细计算见本课程例3）。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "143", exercicio: "3.46", licenca: "CC-BY-SA" }}
+>
+
+生产线：3%有缺陷。批量50件。计算 $P(\text{至少3件有缺陷})$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.26"
+  dificuldade="modelagem"
+  solucao={<>疫苗效力85%。在100个接种者中，<Eq>{`X \\sim \\text{Bin}(100, 0{,}85)`}</Eq>。<Eq>{`\\mu = 85`}</Eq>，<Eq>{`\\sigma = \\sqrt{12{,}75} \\approx 3{,}57`}</Eq>。<Eq>{`P(X \\geq 90) \\approx P(Z \\geq (89{,}5-85)/3{,}57) = P(Z \\geq 1{,}26) \\approx 0{,}104`}</Eq>。约10%的概率。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "259", exercicio: "4.4.21", licenca: "CC-BY" }}
+>
+
+疫苗：效力85%。在100个接种者中，$P(\geq 90 \text{ 受保护})$。使用正态近似。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.27"
+  dificuldade="modelagem"
+  solucao={<>A/B测试：A有14/100 = 14%，B有22/100 = 22%。<Eq>{`\\hat p_{\\text{pool}} = 36/200 = 0{,}18`}</Eq>。<Eq>{`SE = \\sqrt{0{,}18 \\times 0{,}82 \\times (1/100+1/100)} = \\sqrt{0{,}002952} \\approx 0{,}0543`}</Eq>。<Eq>{`z = (0{,}22-0{,}14)/0{,}0543 \\approx 1{,}47`}</Eq>。<Eq>{`p\\text{-值} \\approx 0{,}14`}</Eq>。在5%水平上差异不显著。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "144", exercicio: "3.48", licenca: "CC-BY-SA" }}
+>
+
+A/B测试：变体A，100个访客，14个购买。变体B，100个访客，22个购买。计算比例差异的z检验的p值。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.28"
+  dificuldade="modelagem"
+  solucao={<>选举调查：<Eq>{`n = 1500`}</Eq>，误差幅度 = <Eq>{`1{,}96 \\times \\sqrt{p(1-p)/n}`}</Eq>。最坏情况：<Eq>{`p = 0{,}5`}</Eq>。<Eq>{`ME = 1{,}96 \\times \\sqrt{0{,}25/1500} = 1{,}96 \\times 0{,}01291 \\approx 0{,}025 = 2{,}5\\%`}</Eq>。是的，样本量对于 <Eq>{`\\pm 2{,}5\\%`}</Eq> 误差幅度在95%置信度下是充分的。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "260", exercicio: "4.4.23", licenca: "CC-BY" }}
+  passos={<><ol><li>95%时的误差幅度：<Eq>{`ME = z_{0{,}025} \\times \\sqrt{p(1-p)/n}`}</Eq>。</li><li>最坏情况：<Eq>{`p = 0{,}5`}</Eq>，最大化 <Eq>{`p(1-p) = 0{,}25`}</Eq>。</li><li><Eq>{`ME = 1{,}96 \\times \\sqrt{0{,}25/1500} = 1{,}96/\\sqrt{6000} \\approx 2{,}53\\%`}</Eq>。</li><li>由于 <Eq>{`2{,}53\\% \\approx 2{,}5\\%`}</Eq>，样本量是充分的（在边界）。</li></ol><em>有趣的事实：</em>巴西大多数调查的"3%误差幅度"来自 <Eq>{`n \\approx 1067`}</Eq>。</>}
+>
+
+选举调查：$n = 1500$，所需误差幅度 $\pm 2{,}5\%$ 在95%置信度。样本量充分吗？
+
+</Exercicio>
+
+<Exercicio
+  numero="75.29"
+  dificuldade="modelagem"
+  solucao={<>遗传学：<Eq>{`X \\sim \\text{Bin}(8, 1/4)`}</Eq>。<Eq>{`P(X=2) = \\binom{8}{2}(1/4)^2(3/4)^6 = 28 \\times (1/16) \\times (729/4096) \\approx 0{,}311`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "145", exercicio: "3.50", licenca: "CC-BY-SA" }}
+>
+
+遗传学：杂交 $Aa \times Aa$，每个后代有概率 $1/4$ 是 $AA$。在8个子女中，$P(\text{恰好2个是} AA)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.30"
+  dificuldade="modelagem"
+  solucao={<>呼叫中心：5%失败率，200个通话。<Eq>{`X \\sim \\text{Bin}(200, 0{,}05)`}</Eq>。<Eq>{`E[X] = 10`}</Eq>，<Eq>{`\\text{Var}(X) = 200 \\times 0{,}05 \\times 0{,}95 = 9{,}5`}</Eq>，<Eq>{`\\sigma = \\sqrt{9{,}5} \\approx 3{,}08`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "261", exercicio: "4.4.25", licenca: "CC-BY" }}
+>
+
+呼叫中心：5%的通话失败。在200个通话中，计算失败次数的期望和 $\sigma$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.31"
+  dificuldade="modelagem"
+  solucao={<>六西格玛：每百万3.4个缺陷 = <Eq>{`p = 3{,}4 \\times 10^{-6}`}</Eq>。在100万件产品中：<Eq>{`X \\sim \\text{Bin}(10^6, 3{,}4 \\times 10^{-6})`}</Eq>，<Eq>{`\\lambda = 3{,}4`}</Eq>。用泊松：<Eq>{`P(X=0) = e^{-3{,}4} \\approx 0{,}0334`}</Eq>（零缺陷的概率3.3%）。期望 = 3.4个缺陷。</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "200", exercicio: "5.1.19", licenca: "GNU FDL" }}
+>
+
+六西格玛（带1.5σ调整）：每百万3.4个缺陷率。在100万件产品中，使用泊松近似计算 $P(0 \text{ 缺陷})$ 和 $E[\text{缺陷}]$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.32"
+  dificuldade="modelagem"
+  solucao={<>赌注：30%赢R$ 100的机会，每次赌R$ 25。每次赌的利润：R$ 75（概率0.3）或R$ -25（概率0.7）。<Eq>{`E[\\text{利润/赌}] = 75 \\times 0{,}3 - 25 \\times 0{,}7 = 22{,}5 - 17{,}5 = 5`}</Eq>。在20次赌中：总利润 = R$ 100。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "262", exercicio: "4.4.27", licenca: "CC-BY" }}
+>
+
+赌注：30%赢R$ 100的机会。每次赌成本R$ 25。在20次赌中，总预期利润是多少？
+
+</Exercicio>
+
+<Exercicio
+  numero="75.33"
+  dificuldade="modelagem"
+  solucao={<>潜在客户转化：1%。要平均成交5笔交易：<Eq>{`E[X] = np = 5 \\Rightarrow n = 5/0{,}01 = 500`}</Eq> 个潜在客户。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "146", exercicio: "3.52", licenca: "CC-BY-SA" }}
+>
+
+潜在客户转化率：1%。要平均每月成交5笔交易，需要产生多少个潜在客户？
+
+</Exercicio>
+
+<Exercicio
+  numero="75.34"
+  dificuldade="modelagem"
+  solucao={<>ENEM：如果60%的候选人通过作文最低分，在20个学生的班级中：<Eq>{`X \\sim \\text{Bin}(20, 0{,}6)`}</Eq>。<Eq>{`P(X \\geq 15) \\approx P(Z \\geq (14{,}5-12)/2{,}19) = P(Z \\geq 1{,}14) \\approx 0{,}127`}</Eq>。期望 = 12，偏差 = 2.19。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "263", exercicio: "4.4.29", licenca: "CC-BY" }}
+>
+
+ENEM：60%的候选人达到作文最低分。在20名学生的班级中，计算 $E[X]$、$\sigma$ 和 $P(X \geq 15)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.35"
+  dificuldade="modelagem"
+  solucao={<>有30%红球的罐子。50次有放回抽签：二项分布有效（保持独立性）。<Eq>{`X \\sim \\text{Bin}(50, 0{,}3)`}</Eq>。<Eq>{`E[X] = 15`}</Eq>，<Eq>{`\\sigma \\approx 3{,}24`}</Eq>。<Eq>{`P(X = 15) = \\binom{50}{15}(0{,}3)^{15}(0{,}7)^{35} \\approx 0{,}1147`}</Eq>。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "147", exercicio: "3.54", licenca: "CC-BY-SA" }}
+>
+
+有30%红球的罐子。50次 **有** 放回抽签。为什么二项分布适用？计算 $E[X]$ 和 $P(X = 15)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.36"
+  dificuldade="modelagem"
+  solucao={<>公务员考试批准：8%通过率，30人班级。<Eq>{`X \\sim \\text{Bin}(30, 0{,}08)`}</Eq>。<Eq>{`E[X] = 2{,}4`}</Eq>。<Eq>{`P(X \\geq 1) = 1 - P(X=0) = 1 - (0{,}92)^{30} \\approx 1 - 0{,}0843 = 0{,}916`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "264", exercicio: "4.4.31", licenca: "CC-BY" }}
+>
+
+公务员考试：8%的通过率。30人班级。$E[\text{通过}]$ 和 $P(\text{至少1人通过})$。
+
+</Exercicio>
+
+### 块D — 理解和论证（75.37至75.42）
+
+<Exercicio
+  numero="75.37"
+  dificuldade="compreensao"
+  solucao={<>二项分布需要 **独立** 试验。不放回抽签违反独立性：随着之前的抽签，成功的概率会改变。示例：有5个红球和5个蓝球的罐子，3次不放回抽签。抽取1个红球后：红球概率从5/10下降到4/9。正确的分布是 **超几何分布**。</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "148", exercicio: "3.56", licenca: "CC-BY-SA" }}
+>
+
+为什么二项分布不适用于不放回抽签？给出一个数值反例，其中使用二项分布会给出错误的答案。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.38"
+  dificuldade="compreensao"
+  opcoes={[{texto: "二项分布使用有放回（独立试验）；超几何分布使用不放回", correta: true}, {texto: "二项分布是离散的；超几何分布是连续的"}, {texto: "二项分布有可变的p；超几何分布有固定的p"}, {texto: "二项分布计数失败；超几何分布计数成功"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "149", exercicio: "3.58", licenca: "CC-BY-SA" }}
+  solucao={<>基本差异在于试验的独立性。二项分布：独立试验（如有放回抽签）。超几何分布：不放回抽签，试验相依 — PMF是 <Eq>{`\\binom{K}{k}\\binom{N-K}{n-k}/\\binom{N}{n}`}</Eq>。</>}
+>
+
+二项分布和超几何分布之间的根本差异是什么？
+
+</Exercicio>
+
+<Exercicio
+  numero="75.39"
+  dificuldade="demonstracao"
+  solucao={<>伯努利分解：<Eq>{`X = Y_1 + \\ldots + Y_n`}</Eq>，<Eq>{`Y_i \\sim \\text{Bernoulli}(p)`}</Eq> iid。通过线性性：<Eq>{`E[X] = \\sum_{i=1}^n E[Y_i] = n \\cdot p`}</Eq>。对于方差，由于 <Eq>{`Y_i`}</Eq> 独立：<Eq>{`\\text{Var}(X) = \\sum \\text{Var}(Y_i) = n \\cdot p(1-p)`}</Eq>。独立性对于方差求和至关重要。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "150", exercicio: "3.60", licenca: "CC-BY-SA" }}
+>
+
+通过 $X = Y_1 + \cdots + Y_n$ 在伯努利变量中的分解证明 $E[X] = np$ 和 $\text{Var}(X) = np(1-p)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.40"
+  dificuldade="demonstracao"
+  solucao={<>泊松极限：固定 <Eq>{`\\lambda = np`}</Eq>。则 <Eq>{`p = \\lambda/n`}</Eq>。<Eq>{`\\binom{n}{k}(\\lambda/n)^k(1-\\lambda/n)^{n-k} = \\frac{n(n-1)\\cdots(n-k+1)}{k!} \\cdot \\frac{\\lambda^k}{n^k} \\cdot (1-\\lambda/n)^n (1-\\lambda/n)^{-k}`}</Eq>。当 <Eq>{`n \\to \\infty`}</Eq>：第一因子 <Eq>{`\\to 1`}</Eq>；<Eq>{`(1-\\lambda/n)^n \\to e^{-\\lambda}`}</Eq>；<Eq>{`(1-\\lambda/n)^{-k} \\to 1`}</Eq>。因此乘积收敛到 <Eq>{`\\lambda^k e^{-\\lambda}/k!`}</Eq>。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "201", exercicio: "5.1.21", licenca: "GNU FDL" }}
+>
+
+证明泊松极限：当 $n \to \infty$ 且 $\lambda$ 固定时，$\text{Bin}(n, \lambda/n) \to \text{Poisson}(\lambda)$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.41"
+  dificuldade="demonstracao"
+  solucao={<>二项式PMF有效：<Eq>{`\\sum_{k=0}^n \\binom{n}{k} p^k (1-p)^{n-k} = (p + (1-p))^n = 1^n = 1`}</Eq> 通过牛顿二项式定理。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "202", exercicio: "5.1.23", licenca: "GNU FDL" }}
+>
+
+使用二项式定理证明 $\sum_{k=0}^n \binom{n}{k} p^k (1-p)^{n-k} = 1$。
+
+</Exercicio>
+
+<Exercicio
+  numero="75.42"
+  dificuldade="demonstracao"
+  solucao={<>为了证明相加性，使用MGF。<Eq>{`M_X(t) = (1-p+pe^t)^{n_1}`}</Eq> 且 <Eq>{`M_Y(t) = (1-p+pe^t)^{n_2}`}</Eq>。由独立性：<Eq>{`M_{X+Y}(t) = M_X(t) \\cdot M_Y(t) = (1-p+pe^t)^{n_1+n_2}`}</Eq>，这是 <Eq>{`\\text{Bin}(n_1+n_2, p)`}</Eq> 的MGF。因为MGF唯一确定分布：<Eq>{`X+Y \\sim \\text{Bin}(n_1+n_2, p)`}</Eq>。<Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "203", exercicio: "5.1.25", licenca: "GNU FDL" }}
+>
+
+证明相加性：如果 $X \sim \text{Bin}(n_1, p)$ 和 $Y \sim \text{Bin}(n_2, p)$ 独立（相同 $p$），则 $X + Y \sim \text{Bin}(n_1 + n_2, p)$。
+
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · EN · CC-BY-SA. **主要来源 — §3.4 (BInS假设、PMF、期望、方差、A/B测试)。**
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · EN · CC-BY. **§4.4 — 二项式表、TI-83/84计算、泊松和正态近似；AP级别的练习。**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · 1997 · EN · GNU FDL. **§5.1 — PMF、MGF、泊松极限与证明；演示性练习。**

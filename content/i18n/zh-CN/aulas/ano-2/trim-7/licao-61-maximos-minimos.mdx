@@ -1,0 +1,740 @@
+---
+titulo: "Lição 61 — Máximos e mínimos"
+slug: "licao-61-maximos-minimos"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Pontos críticos, Teorema de Fermat, testes da 1ª e 2ª derivada, e o algoritmo de extremos absolutos em intervalos fechados."
+ordem: 61
+publicado: true
+tags: ["otimizacao", "maximos-minimos", "pontos-criticos", "derivada", "ano-2", "trim-7"]
+prerrequisitos: ["licao-60-consolidacao-trim-6"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano EM", "Equiv. Math II/III japonês", "Equiv. Analysis/Kurvendiskussion alemã"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="f'(c) = 0 \;\Longrightarrow\; c \text{ 极值的候选点}"
+  legenda={<><strong>费马定理</strong>：若 <em>f</em> 在内点 <em>c</em> 处有局部极值，且在 <em>c</em> 处可导，则 <Eq>{`f'(c) = 0`}</Eq>。使 <Eq>{`f'(c) = 0`}</Eq> 或 <Eq>{`f'(c)`}</Eq> 不存在的点称为<strong>临界点</strong>。</>}
+  audioTexto="费马定理。若 f 在内点 c 处有局部极值且在该点可导，则该点处的导数为零。导数为零或不存在的点是极值的候选点——我们称之为临界点。"
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    本课涵盖的书籍
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-3-1-tests.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §3.1 Using derivatives to identify extreme values · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">费马定理、临界点、第一和第二导数测试——本课的教学基础。</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.3 Maxima and Minima · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">极值的Weierstrass定理和闭区间[a, b]上的极值算法。</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §3.1 Extreme Values · CC-BY-NC · </span>
+      <em className="text-clube-mist">包含开区间和闭区间的分级练习；非可导函数的例子。</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="定义、定理和算法">
+
+### 局部极值和绝对极值
+
+<Definicao titulo="局部最大值和最小值">
+
+设 <Eq>{`f`}</Eq> 定义在定义域 <Eq>{`D`}</Eq> 上，<Eq>{`c \\in D`}</Eq>。
+
+- <Eq>{`c`}</Eq> 是 <Eq>{`f`}</Eq> 的**局部最大值点**，若存在 <Eq>{`\\delta > 0`}</Eq> 使得对所有 <Eq>{`x \\in D`}</Eq> 且 <Eq>{`|x - c| < \\delta`}</Eq>，有 <Eq>{`f(c) \\geq f(x)`}</Eq>。
+- <Eq>{`c`}</Eq> 是 <Eq>{`f`}</Eq> 的**局部最小值点**，若存在 <Eq>{`\\delta > 0`}</Eq> 使得对所有 <Eq>{`x \\in D`}</Eq> 且 <Eq>{`|x - c| < \\delta`}</Eq>，有 <Eq>{`f(c) \\leq f(x)`}</Eq>。
+- **绝对极值**（全局）：对**所有** <Eq>{`x \\in D`}</Eq>，<Eq>{`f(c) \\geq f(x)`}</Eq>（或 <Eq>{`\\leq`}</Eq>）。
+
+</Definicao>
+
+<Definicao titulo="临界点">
+
+<Eq>{`c`}</Eq> 是 <Eq>{`f`}</Eq> 的**临界点**，若：
+1. <Eq>{`c`}</Eq> 在定义域的内部，**且**
+2. <Eq>{`f'(c) = 0`}</Eq> 或 <Eq>{`f'(c)`}</Eq> 不存在。
+
+</Definicao>
+
+> "若 f 在 c 处有局部最大值或最小值，则 c 是 f 的临界点。" — [Active Calculus §3.1](https://activecalculus.org/single/sec-3-1-tests.html)
+
+<Teorema titulo="费马定理">
+
+若 <Eq>{`f`}</Eq> 在 <Eq>{`c`}</Eq> 处有局部极值（<Eq>{`c`}</Eq> 在定义域内部）且 <Eq>{`f`}</Eq> 在 <Eq>{`c`}</Eq> 处可导，则 <Eq display>{`f'(c) = 0.`}</Eq>
+
+**注意——逆命题为假。** <Eq>{`f'(c) = 0`}</Eq> 不意味着有极值：函数 <Eq>{`f(x) = x^3`}</Eq> 在 <Eq>{`x = 0`}</Eq> 时有 <Eq>{`f'(0) = 0`}</Eq>，但 <Eq>{`c = 0`}</Eq> 是拐点，不是极值点。
+
+</Teorema>
+
+<Insight>
+
+费马定理说：每个局部极值点（内部且可导）都是临界点。但不是每个临界点都是极值点。临界点是**候选点**——下面的测试来判定。
+
+</Insight>
+
+### 第一导数测试
+
+<Definicao titulo="符号变化判别法">
+
+设 <Eq>{`c`}</Eq> 是 <Eq>{`f`}</Eq> 连续的临界点。当 <Eq>{`x`}</Eq> 在 <Eq>{`c`}</Eq> 附近时：
+
+- <Eq>{`f'`}</Eq> 在 <Eq>{`c`}</Eq> 处从 <Eq>{`+`}</Eq> 变为 <Eq>{`-`}</Eq> → **局部最大值**。
+- <Eq>{`f'`}</Eq> 在 <Eq>{`c`}</Eq> 处从 <Eq>{`-`}</Eq> 变为 <Eq>{`+`}</Eq> → **局部最小值**。
+- <Eq>{`f'`}</Eq> 在 <Eq>{`c`}</Eq> 处不变号 → **既非最大值也非最小值**（拐点）。
+
+</Definicao>
+
+### 第二导数测试
+
+<Definicao titulo="凹凸性判别法">
+
+设 <Eq>{`c`}</Eq> 是满足 <Eq>{`f'(c) = 0`}</Eq> 且 <Eq>{`f''(c)`}</Eq> 存在的临界点：
+
+- <Eq>{`f''(c) > 0`}</Eq> → **局部最小值**（抛物线开口向上）。
+- <Eq>{`f''(c) < 0`}</Eq> → **局部最大值**（抛物线开口向下）。
+- <Eq>{`f''(c) = 0`}</Eq> → **不确定**（使用第一导数测试）。
+
+</Definicao>
+
+> "当第二导数测试不确定时，我们诉诸第一导数测试。" — [OpenStax Calculus Vol. 1, §4.5](https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph)
+
+### 极值的Weierstrass定理（极值定理）
+
+<Teorema titulo="闭区间上的绝对极值">
+
+若 <Eq>{`f`}</Eq> 在 <Eq>{`[a, b]`}</Eq> 上连续，则 <Eq>{`f`}</Eq> 在 <Eq>{`[a, b]`}</Eq> 的某点达到其绝对最大值和绝对最小值。
+
+</Teorema>
+
+### [a, b] 上绝对极值的算法
+
+<Definicao titulo="闭端点法">
+
+1. 找出 <Eq>{`f`}</Eq> 在内部 <Eq>{`(a, b)`}</Eq> 的所有临界点。
+2. 计算 <Eq>{`f`}</Eq> 在每个临界点和端点 <Eq>{`a`}</Eq>、<Eq>{`b`}</Eq> 处的值。
+3. **最大值**是绝对最大值；**最小值**是绝对最小值。
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 500 200" className="w-full">
+  <defs>
+    <marker id="arr61" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g>
+    <line x1="40" y1="160" x2="470" y2="160" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr61)"/>
+    <line x1="60" y1="170" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr61)"/>
+    <path d="M 80,140 C 130,40 160,150 200,100 C 240,50 300,160 360,80 C 400,40 430,130 450,120" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+    <circle cx="200" cy="100" r="4" fill="rgb(232 199 122)"/>
+    <text x="200" y="92" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">局部最小</text>
+    <circle cx="360" cy="80" r="4" fill="rgb(232 199 122)"/>
+    <text x="360" y="72" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">局部最小</text>
+    <circle cx="130" cy="72" r="4" fill="rgb(26 77 92)"/>
+    <text x="130" y="64" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">局部最大</text>
+    <circle cx="300" cy="135" r="4" fill="rgb(26 77 92)"/>
+    <text x="300" y="148" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">局部最大</text>
+    <text x="80" y="175" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">a</text>
+    <text x="450" y="175" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">b</text>
+    <circle cx="80" cy="140" r="3" fill="rgb(26 77 92)"/>
+    <circle cx="450" cy="120" r="3" fill="rgb(26 77 92)"/>
+  </g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+局部极值出现在临界点处（其中 <Eq>{`f'=0`}</Eq>）。绝对极值可能是局部极值，也可能在端点 <Eq>{`a`}</Eq> 和 <Eq>{`b`}</Eq> 处。
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="对于5岁儿童">
+
+想象一个**过山车**。有地方是**山顶**（周围都是最高点），有地方是**山谷**（周围都是最低点）。
+
+在山顶，如果你向两边看，你会看到周围都更低。在山谷底部，周围都更高。
+
+特殊的技巧：**当你恰好在山顶或山谷时，轨道是完全平的**——没有任何倾斜。这帮助我们找到这些特殊的地方！
+
+</Porta>
+
+<Porta nivel="10" titulo="对于10岁儿童">
+
+当你绘制函数的图形时，它上升和下降。最高点是**最大值**，最低点是**最小值**。
+
+**怎么找？** 在山丘的顶部或山谷的底部，图形的斜率是**零**——切线是水平的。所以：
+
+1. 计算 <Eq>{`f'(x)`}</Eq>。
+2. 求解 <Eq>{`f'(x) = 0`}</Eq>。
+3. 看函数是否在前面上升、后面下降（最大值），还是前面下降、后面上升（最小值）。
+
+例子：<Eq>{`f(x) = x^2`}</Eq>。导数：<Eq>{`f'(x) = 2x`}</Eq>。令其为零：<Eq>{`x = 0`}</Eq>。因为 <Eq>{`f'`}</Eq> 在 <Eq>{`x = 0`}</Eq> 处从负变为正，这是一个**最小值**——事实上，<Eq>{`x^2`}</Eq> 在 <Eq>{`x = 0`}</Eq> 处有其最小值。
+
+</Porta>
+
+<Porta nivel="15" titulo="对于高中学生">
+
+**核心问题：** 给定一个图，峰值和谷值在哪里？
+
+### 逐步过程
+
+1. **求导：** 计算 <Eq>{`f'(x)`}</Eq>。
+2. **临界点：** 求解 <Eq>{`f'(x) = 0`}</Eq> 并标记 <Eq>{`f'`}</Eq> 不存在的地方。
+3. **用第一测试分类：** 制作 <Eq>{`f'`}</Eq> 符号的表格。
+   - <Eq>{`(+)`}</Eq> 之前，<Eq>{`(-)`}</Eq> 之后 → 局部最大值。
+   - <Eq>{`(-)`}</Eq> 之前，<Eq>{`(+)`}</Eq> 之后 → 局部最小值。
+4. （快速替代）**第二测试：** 在临界点计算 <Eq>{`f''(c)`}</Eq>。
+   - <Eq>{`f''(c) < 0`}</Eq> → 最大值。<Eq>{`f''(c) > 0`}</Eq> → 最小值。<Eq>{`f''(c) = 0`}</Eq> → 使用第一测试。
+
+**在** <Eq>{`[a, b]`}</Eq> **上的绝对极值：** 在临界点和端点计算 <Eq>{`f`}</Eq>。最大值获胜；最小值获胜。
+
+**注意：** <Eq>{`f'(c) = 0`}</Eq> **不保证**极值。在 <Eq>{`f(x) = x^3`}</Eq> 中，有 <Eq>{`f'(0) = 0`}</Eq> 但 <Eq>{`x = 0`}</Eq> 是拐点——函数在那里不改变单调性。
+
+</Porta>
+
+<Porta nivel="25" titulo="对于工程学生">
+
+### 正式基础
+
+**费马定理**保证了可导的内部局部极值是临界点。逆命题不成立：<Eq>{`x^3`}</Eq> 表明 <Eq>{`f'(c) = 0`}</Eq> 可能发生在拐点处，没有单调性的变化。
+
+**极值定理**（Weierstrass）保证了当 <Eq>{`f`}</Eq> 在 <Eq>{`[a, b]`}</Eq> 上连续时绝对极值的存在——但不提供位置。绝对极值算法：
+
+1. 内部临界点（其中 <Eq>{`f' = 0`}</Eq> 或不存在）。
+2. 端点 <Eq>{`a, b`}</Eq>。
+3. 在所有点计算 <Eq>{`f`}</Eq>。绝对最大值和最小值是该集合的极值。
+
+### 测试
+
+**第一导数：** 分析 <Eq>{`f'`}</Eq> 在 <Eq>{`c`}</Eq> 周围的符号变化。更通用——即使 <Eq>{`f''(c)`}</Eq> 不存在或为零时也有效。
+
+**第二导数：** 在 <Eq>{`c`}</Eq> 处，其中 <Eq>{`f'(c) = 0`}</Eq>：若 <Eq>{`f''(c) > 0`}</Eq>，函数有正曲率（向上凹）→ 局部最小值。若 <Eq>{`f''(c) < 0`}</Eq>，向下凹 → 局部最大值。情况 <Eq>{`f''(c) = 0`}</Eq> 不确定：可能是拐点（<Eq>{`x^3`}</Eq>）、最小值（<Eq>{`x^4`}</Eq>）或最大值（<Eq>{`-x^4`}</Eq>）。
+
+**与变分法的联系：** 欧拉-拉格朗日条件是泛函优化中 <Eq>{`f'(c) = 0`}</Eq> 的推广，是分析力学和最优控制的支柱。
+
+</Porta>
+
+<Porta nivel="40" titulo="对于资深专业人士">
+
+寻找极值的问题与微积分本身一样古老。费马在牛顿和莱布尼茨正式化微积分的两十年前，就已经使用"适配法"（adequality）来寻找最大值和最小值——用 <Eq>{`x + e`}</Eq> 替换 <Eq>{`x`}</Eq>，等于原始值，然后让 <Eq>{`e \\to 0`}</Eq>。这是导数概念存在之前对导数的直觉。
+
+极值定理由Weierstrass在19世纪正式化，要求实数的完备性——一个性质，Cantor直到几十年后才公理化。没有完备性，有孔洞的连续统可能有一个从不达到其上确界的连续函数。
+
+在应用优化中：工程师、经济学家和数据科学家使用推广——约束的拉格朗日乘数法、非线性规划的KKT条件（Karush-Kuhn-Tucker）以及高维梯度为零。这堂课的直觉——"候选点是梯度消失的地方"——是通用的。高维中的挑战是区分最大值、最小值和鞍点（其中 <Eq>{`\\nabla f = 0`}</Eq> 但既不是最大值也不是最小值）。
+
+在机器学习中，梯度下降避免直接计算临界点：它在 <Eq>{`-\\nabla f`}</Eq> 方向迭代，收敛（我们希望）到局部最小值。背后的理论——学习速率、收敛——是这节课所学的直接应用。
+
+</Porta>
+
+<Porta nivel="pratica" titulo="巴西实际应用">
+
+**面包店的最大利润。** 一家面包店每天生产 <Eq>{`x`}</Eq> 单位的面包（以百计）。日利润（以雷亚尔计）按以下方式建模：
+
+<Eq display>{`L(x) = -2x^2 + 12x - 10, \quad x \in [0, 5]`}</Eq>
+
+**步骤1——临界点：** <Eq>{`L'(x) = -4x + 12 = 0 \\Rightarrow x = 3`}</Eq>。
+
+**步骤2——比较：** <Eq>{`L(0) = -10`}</Eq>，<Eq>{`L(3) = -18 + 36 - 10 = 8`}</Eq>，<Eq>{`L(5) = -50 + 60 - 10 = 0`}</Eq>。
+
+**结论：** 最大日利润R\$ 800，生产300个单位。低于100个单位（x小于1）或高于500个单位（x大于5）时，业务亏损。
+
+**与ENEM的联系：** 优化问题在ENEM中出现，使用二次模型。这里的算法——求导、设为零、与定义域端点比较——正是要求的方法。
+
+</Porta>
+
+</DuasPortas>
+
+## 已解答的例子
+
+<Exemplo titulo="三次多项式的临界点">
+
+**问题。** 找出 <Eq>{`f(x) = x^3 - 3x^2 - 9x + 5`}</Eq> 的所有临界点并分类。
+
+**策略。** 求导、设为零并使用第二导数测试。
+
+**求解。**
+
+<Eq display>{`f'(x) = 3x^2 - 6x - 9 = 3(x^2 - 2x - 3) = 3(x-3)(x+1)`}</Eq>
+
+临界点：<Eq>{`x = 3`}</Eq> 和 <Eq>{`x = -1`}</Eq>。
+
+第二导数：<Eq>{`f''(x) = 6x - 6`}</Eq>。
+
+- <Eq>{`f''(-1) = -12 < 0`}</Eq> → **局部最大值**在 <Eq>{`x = -1`}</Eq>，<Eq>{`f(-1) = -1 - 3 + 9 + 5 = 10`}</Eq>。
+- <Eq>{`f''(3) = 12 > 0`}</Eq> → **局部最小值**在 <Eq>{`x = 3`}</Eq>，<Eq>{`f(3) = 27 - 27 - 27 + 5 = -22`}</Eq>。
+
+**验证。** <Eq>{`f'`}</Eq> 的符号表：对 <Eq>{`x < -1`}</Eq>，<Eq>{`f' > 0`}</Eq>（上升）。对 <Eq>{`-1 < x < 3`}</Eq>，<Eq>{`f' < 0`}</Eq>（下降）。对 <Eq>{`x > 3`}</Eq>，<Eq>{`f' > 0`}</Eq>（上升）。与 <Eq>{`-1`}</Eq> 处最大值和 <Eq>{`3`}</Eq> 处最小值一致。
+
+**来源。** [Active Calculus §3.1, Activity 3.1.2](https://activecalculus.org/single/sec-3-1-tests.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="闭区间上的绝对极值">
+
+**问题。** 确定 <Eq>{`f(x) = x^3 - 6x^2 + 9x + 2`}</Eq> 在 <Eq>{`[0, 4]`}</Eq> 上的绝对极值。
+
+**策略。** 绝对极值算法：内部临界点 + 端点。
+
+**求解。**
+
+<Eq display>{`f'(x) = 3x^2 - 12x + 9 = 3(x^2 - 4x + 3) = 3(x-1)(x-3)`}</Eq>
+
+<Eq>{`(0,4)`}</Eq> 中的临界点：<Eq>{`x = 1`}</Eq> 和 <Eq>{`x = 3`}</Eq>。
+
+评估：
+
+- <Eq>{`f(0) = 2`}</Eq>
+- <Eq>{`f(1) = 1 - 6 + 9 + 2 = 6`}</Eq>
+- <Eq>{`f(3) = 27 - 54 + 27 + 2 = 2`}</Eq>
+- <Eq>{`f(4) = 64 - 96 + 36 + 2 = 6`}</Eq>
+
+**绝对最大值：** <Eq>{`f = 6`}</Eq>，在 <Eq>{`x = 1`}</Eq> 和 <Eq>{`x = 4`}</Eq> 处达到。**绝对最小值：** <Eq>{`f = 2`}</Eq>，在 <Eq>{`x = 0`}</Eq> 和 <Eq>{`x = 3`}</Eq> 处达到。
+
+**验证。** 端点处的极值是有效的——算法必须包括 <Eq>{`a`}</Eq> 和 <Eq>{`b`}</Eq>。
+
+**来源。** [OpenStax Calculus Vol. 1, §4.3, Example 4.13](https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="没有极值的临界点（拐点）">
+
+**问题。** 证明 <Eq>{`f(x) = x^3`}</Eq> 在 <Eq>{`x = 0`}</Eq> 处有临界点，但该点不是局部极值。
+
+**策略。** 应用第一导数测试来验证没有符号变化。
+
+**求解。**
+
+<Eq display>{`f'(x) = 3x^2`}</Eq>
+
+<Eq>{`f'(0) = 0`}</Eq> → <Eq>{`x = 0`}</Eq> 是临界点。
+
+对 <Eq>{`x < 0`}</Eq>：<Eq>{`3x^2 > 0`}</Eq>。对 <Eq>{`x > 0`}</Eq>：<Eq>{`3x^2 > 0`}</Eq>。<Eq>{`f'`}</Eq> 的符号**不变** → 无局部极值。
+
+**验证。** <Eq>{`f(-1) = -1 < f(0) = 0 < f(1) = 1`}</Eq>：函数在 <Eq>{`0`}</Eq> 的整个邻域中严格上升，确认既不是最大值也不是最小值。
+
+**来源。** [APEX Calculus §3.1, Example 3.1.3](https://www.apexcalculus.com/) · CC-BY-NC
+
+</Exemplo>
+
+<Exemplo titulo="带平方根的第一导数测试">
+
+**问题。** 找出 <Eq>{`f(x) = x^{2/3}`}</Eq> 的局部极值。
+
+**策略。** 导数在 <Eq>{`x = 0`}</Eq> 处不存在；即使没有 <Eq>{`f' = 0`}</Eq>，这也会创建一个临界点。
+
+**求解。**
+
+<Eq display>{`f'(x) = \\frac{2}{3}x^{-1/3} = \\frac{2}{3\\sqrt[3]{x}}`}</Eq>
+
+<Eq>{`f'(0)`}</Eq> 不存在（分母为零），且 <Eq>{`f(0) = 0`}</Eq> 存在 → <Eq>{`x = 0`}</Eq> 是临界点。
+
+符号表：对 <Eq>{`x < 0`}</Eq>，<Eq>{`x^{1/3} < 0`}</Eq>，所以 <Eq>{`f' < 0`}</Eq>。对 <Eq>{`x > 0`}</Eq>，<Eq>{`f' > 0`}</Eq>。在 <Eq>{`x = 0`}</Eq> 处从 <Eq>{`(-)`}</Eq> 到 <Eq>{`(+)`}</Eq> 的变化 → **局部最小值**。
+
+**验证。** <Eq>{`f(x) = x^{2/3} \\geq 0`}</Eq> 对所有 <Eq>{`x`}</Eq>，且 <Eq>{`f(0) = 0`}</Eq> → 也是绝对最小值。
+
+**来源。** [Active Calculus §3.1, Exercise 3.1.3](https://activecalculus.org/single/sec-3-1-tests.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="闭区间上三角函数的极值">
+
+**问题。** 确定 <Eq>{`f(x) = 2\\sin x - x`}</Eq> 在 <Eq>{`[0, 2\\pi]`}</Eq> 上的绝对极值。
+
+**策略。** 求导，找到临界点（余弦的根），应用算法。
+
+**求解。**
+
+<Eq display>{`f'(x) = 2\\cos x - 1 = 0 \\implies \\cos x = \\tfrac{1}{2} \\implies x = \\tfrac{\\pi}{3},\\; x = \\tfrac{5\\pi}{3}`}</Eq>
+
+在临界点和端点的评估：
+
+- <Eq>{`f(0) = 0`}</Eq>
+- <Eq>{`f(\\pi/3) = 2 \\cdot (\\sqrt{3}/2) - \\pi/3 = \\sqrt{3} - \\pi/3 \\approx 0{,}685`}</Eq>
+- <Eq>{`f(5\\pi/3) = 2 \\cdot (-\\sqrt{3}/2) - 5\\pi/3 = -\\sqrt{3} - 5\\pi/3 \\approx -6{,}97`}</Eq>
+- <Eq>{`f(2\\pi) = 0 - 2\\pi \\approx -6{,}28`}</Eq>
+
+**绝对最大值：** <Eq>{`f(\\pi/3) = \\sqrt{3} - \\pi/3`}</Eq>。**绝对最小值：** <Eq>{`f(5\\pi/3) = -\\sqrt{3} - 5\\pi/3`}</Eq>。
+
+**验证。** <Eq>{`f'`}</Eq> 的符号：在 <Eq>{`(0, \\pi/3)`}</Eq> 中为正，在 <Eq>{`(\\pi/3, 5\\pi/3)`}</Eq> 中为负，在 <Eq>{`(5\\pi/3, 2\\pi)`}</Eq> 中为正。最大值和最小值得到确认。
+
+**来源。** [OpenStax Calculus Vol. 1, §4.3, Example 4.14](https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima) · CC-BY-NC-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-61-maximos-minimos">
+
+<Exercicio
+  numero="61.1"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = x^2 - 4x + 3`}</Eq> 的临界点是 <Eq>{`f'(x) = 2x - 4 = 0`}</Eq> 的地方，所以 <Eq>{`x = 2`}</Eq>。因为 <Eq>{`f''(x) = 2 > 0`}</Eq>，这是局部最小值。值：<Eq>{`f(2) = 4 - 8 + 3 = -1`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+确定 <Eq>{`f(x) = x^2 - 4x + 3`}</Eq> 的临界点，并用第二导数测试将其分类。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 3x^2 - 12 = 0 \\Rightarrow x = \\pm 2`}</Eq>。在 <Eq>{`x = -2`}</Eq>：<Eq>{`f''(-2) = -12 < 0`}</Eq> → 局部最大值，<Eq>{`f(-2) = 16`}</Eq>。在 <Eq>{`x = 2`}</Eq>：<Eq>{`f''(2) = 12 > 0`}</Eq> → 局部最小值，<Eq>{`f(2) = -16`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+分类 <Eq>{`f(x) = x^3 - 12x`}</Eq> 的临界点。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`g'(t) = 2t - 6 = 0 \\Rightarrow t = 3`}</Eq>。在 <Eq>{`[1, 5]`}</Eq>：<Eq>{`g(1) = 1 - 6 + 8 = 3`}</Eq>，<Eq>{`g(3) = 9 - 18 + 8 = -1`}</Eq>，<Eq>{`g(5) = 25 - 30 + 8 = 3`}</Eq>。绝对最小值：<Eq>{`-1`}</Eq> 在 <Eq>{`t = 3`}</Eq>。绝对最大值：<Eq>{`3`}</Eq> 在 <Eq>{`t = 1`}</Eq> 和 <Eq>{`t = 5`}</Eq>。</>}
+  passos={<><ol><li>求导 <Eq>{`g(t) = t^2 - 6t + 8`}</Eq>：结果 <Eq>{`g'(t) = 2t - 6`}</Eq>。</li><li>令导数为零：<Eq>{`2t - 6 = 0 \\Rightarrow t = 3`}</Eq>，属于区间 <Eq>{`(1,5)`}</Eq>。</li><li>在三个点计算 <Eq>{`g`}</Eq>：<Eq>{`t = 1, 3, 5`}</Eq>。</li><li>比较：最小的是绝对最小值，最大的是绝对最大值。</li></ol><em>技巧：</em> 永远不要忘记在端点处计算——绝对极值经常出现在那里。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+找出 <Eq>{`g(t) = t^2 - 6t + 8`}</Eq> 在 <Eq>{`[1, 5]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`h'(x) = 4x^3 - 4x = 4x(x^2 - 1) = 4x(x-1)(x+1)`}</Eq>。临界点：<Eq>{`x = -1, 0, 1`}</Eq>。<Eq>{`h''(x) = 12x^2 - 4`}</Eq>。在 <Eq>{`x = \\pm 1`}</Eq>：<Eq>{`h'' = 8 > 0`}</Eq> → 最小值。在 <Eq>{`x = 0`}</Eq>：<Eq>{`h'' = -4 < 0`}</Eq> → 局部最大值。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+对 <Eq>{`h(x) = x^4 - 2x^2 + 1`}</Eq> 的所有临界点进行分类。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\cos x`}</Eq>。在 <Eq>{`[0, 2\\pi]`}</Eq> 的零点：<Eq>{`x = \\pi/2`}</Eq> 和 <Eq>{`x = 3\\pi/2`}</Eq>。<Eq>{`f(0) = 0`}</Eq>，<Eq>{`f(\\pi/2) = 1`}</Eq>，<Eq>{`f(3\\pi/2) = -1`}</Eq>，<Eq>{`f(2\\pi) = 0`}</Eq>。绝对最大值：<Eq>{`1`}</Eq>。绝对最小值：<Eq>{`-1`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+确定 <Eq>{`f(x) = \\sin x`}</Eq> 在 <Eq>{`[0, 2\\pi]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`p'(x) = 6x^2 - 6x - 36 = 6(x^2 - x - 6) = 6(x-3)(x+2)`}</Eq>。临界点：<Eq>{`x = 3`}</Eq> 和 <Eq>{`x = -2`}</Eq>。在 <Eq>{`x = -2`}</Eq>：<Eq>{`p''(-2) = 12(-2) - 6 = -30 < 0`}</Eq> → 局部最大值。在 <Eq>{`x = 3`}</Eq>：<Eq>{`p''(3) = 30 > 0`}</Eq> → 局部最小值。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+找出并分类 <Eq>{`p(x) = 2x^3 - 3x^2 - 36x + 1`}</Eq> 的临界点。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{1}{3}x^{-2/3}`}</Eq>。<Eq>{`f'`}</Eq> 在 <Eq>{`x = 0`}</Eq> 处不存在，但 <Eq>{`f(0) = 0`}</Eq> 存在。因为 <Eq>{`f' > 0`}</Eq> 对所有 <Eq>{`x \\neq 0`}</Eq>，没有符号变化：无局部极值。仅是奇异临界点（尖点）。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+分析 <Eq>{`f(x) = x^{1/3}`}</Eq> 的临界点。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{2}{3}x^{-1/3}`}</Eq>。在 <Eq>{`x = 0`}</Eq> 处不存在；<Eq>{`f'`}</Eq> 在 <Eq>{`x = 0`}</Eq> 处从 <Eq>{`-`}</Eq> 变为 <Eq>{`+`}</Eq> → 局部最小值。<Eq>{`f(0) = 0`}</Eq> 也是绝对最小值，因为对所有 <Eq>{`x`}</Eq> 有 <Eq>{`f(x) \\geq 0`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+对 <Eq>{`f(x) = x^{2/3}`}</Eq> 的临界点进行分类。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.9"
+  dificuldade="aplicacao"
+  solucao={<>在 <Eq>{`[-2, 3]`}</Eq>：<Eq>{`f'(x) = 3x^2 - 3 = 0 \\Rightarrow x = \\pm 1`}</Eq>。评估：<Eq>{`f(-2) = -8 + 6 + 5 = 3`}</Eq>，<Eq>{`f(-1) = -1 + 3 + 5 = 7`}</Eq>，<Eq>{`f(1) = 1 - 3 + 5 = 3`}</Eq>，<Eq>{`f(3) = 27 - 9 + 5 = 23`}</Eq>。绝对最大值：<Eq>{`23`}</Eq> 在 <Eq>{`x = 3`}</Eq>。绝对最小值：<Eq>{`3`}</Eq> 在 <Eq>{`x = -2`}</Eq> 和 <Eq>{`x = 1`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+找出 <Eq>{`f(x) = x^3 - 3x + 5`}</Eq> 在 <Eq>{`[-2, 3]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r'(\\theta) = -\\sin\\theta + \\cos\\theta = 0 \\Rightarrow \\tan\\theta = 1 \\Rightarrow \\theta = \\pi/4`}</Eq> 在 <Eq>{`[0, \\pi]`}</Eq>。评估：<Eq>{`r(0) = 1`}</Eq>，<Eq>{`r(\\pi/4) = \\sqrt{2}`}</Eq>，<Eq>{`r(\\pi) = -1`}</Eq>。绝对最大值：<Eq>{`\\sqrt{2}`}</Eq>。绝对最小值：<Eq>{`-1`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+确定 <Eq>{`r(\\theta) = \\cos\\theta + \\sin\\theta`}</Eq> 在 <Eq>{`[0, \\pi]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 4x^3 - 8x = 4x(x^2-2)`}</Eq>。零点：<Eq>{`x = 0`}</Eq> 和 <Eq>{`x = \\pm\\sqrt{2}`}</Eq>。在 <Eq>{`[-2, 2]`}</Eq>，所有都在区间内。评估：<Eq>{`f(-2) = 16 - 16 + 1 = 1`}</Eq>，<Eq>{`f(-\\sqrt{2}) = 4 - 8 + 1 = -3`}</Eq>，<Eq>{`f(0) = 1`}</Eq>，<Eq>{`f(\\sqrt{2}) = -3`}</Eq>，<Eq>{`f(2) = 1`}</Eq>。绝对最大值：<Eq>{`1`}</Eq>。绝对最小值：<Eq>{`-3`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+确定 <Eq>{`f(x) = x^4 - 4x^2 + 1`}</Eq> 在 <Eq>{`[-2, 2]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{x \\cdot x - (x^2+1) \\cdot 1}{x^2} = \\frac{-1}{x^2}`}</Eq>。因为 <Eq>{`f' < 0`}</Eq> 对所有 <Eq>{`x \\neq 0`}</Eq>，函数严格递减——没有 <Eq>{`f' = 0`}</Eq> 的临界点。在 <Eq>{`[1, 4]`}</Eq> 的极值：<Eq>{`f(1) = 2`}</Eq> （最小值），<Eq>{`f(4) = 4{,}25`}</Eq> ... 等等：<Eq>{`f(x) = x + 1/x`}</Eq>，<Eq>{`f'(x) = 1 - 1/x^2 = 0 \\Rightarrow x = 1`}</Eq>。在 <Eq>{`[1,4]`}</Eq>：<Eq>{`f(1) = 2`}</Eq>，<Eq>{`f(4) = 4{,}25`}</Eq>。绝对最小值：<Eq>{`2`}</Eq>。绝对最大值：<Eq>{`4{,}25`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+确定 <Eq>{`f(x) = x + \\dfrac{1}{x}`}</Eq> 在 <Eq>{`[1, 4]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "局部最大值，因为 f'' < 0 表示向下凹", correta: true },
+    { texto: "局部最小值，因为 f'' 是负数" },
+    { texto: "拐点，因为 f'' 不为零" },
+    { texto: "不确定——第二导数测试不适用" }
+  ]}
+  solucao={<>第二导数测试：若 <Eq>{`f'(c) = 0`}</Eq> 且 <Eq>{`f''(c) < 0`}</Eq>，函数在 <Eq>{`c`}</Eq> 处向下凹，形成局部最大值。干扰项B颠倒了结论；C将其与拐点混淆；D是假的，因为 <Eq>{`f''(c) \\neq 0`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+若 <Eq>{`f'(c) = 0`}</Eq> 且 <Eq>{`f''(c) = -5`}</Eq>，则点 <Eq>{`x = c`}</Eq> 是：
+
+</Exercicio>
+
+<Exercicio
+  numero="61.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "每个内部极值（f在其中可导）都是临界点", correta: true },
+    { texto: "每个临界点都是极值点" },
+    { texto: "极值可以在 f'(c) 为正的地方发生" },
+    { texto: "费马定理保证 f'(c) = 0 意味着极值" }
+  ]}
+  solucao={<>费马说：内部可导极值 → 临界点（从A到B的蕴含）。逆命题（B → A）是假的：<Eq>{`x^3`}</Eq> 在 <Eq>{`c = 0`}</Eq> 是经典反例。选项C与费马相矛盾。选项D颠倒了蕴含。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+关于费马定理，哪个说法是正确的？
+
+</Exercicio>
+
+<Exercicio
+  numero="61.15"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "f(c) = 0 对极值点的类型不确定；我们必须使用第一测试", correta: true },
+    { texto: "c 是局部最小值，因为导数消失" },
+    { texto: "c 总是拐点，当 f''(c) = 0" },
+    { texto: "极值定理保证 c 是绝对最小值" }
+  ]}
+  solucao={<>当 <Eq>{`f''(c) = 0`}</Eq> 时，第二导数测试不确定。例子：<Eq>{`x^4`}</Eq> 在 <Eq>{`0`}</Eq> 处最小；<Eq>{`-x^4`}</Eq> 最大；<Eq>{`x^3`}</Eq> 拐点。需要第一测试或直接符号分析。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+若 <Eq>{`f'(c) = 0`}</Eq> 且 <Eq>{`f''(c) = 0`}</Eq>，正确的结论是：
+
+</Exercicio>
+
+<Exercicio
+  numero="61.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 3x^2 - 6x = 3x(x-2)`}</Eq>。临界点：<Eq>{`x = 0`}</Eq> 和 <Eq>{`x = 2`}</Eq>。在 <Eq>{`[-1, 3]`}</Eq> 的评估：<Eq>{`f(-1) = -1 - 3 - 1 = -5`}</Eq>，<Eq>{`f(0) = -1`}</Eq>，<Eq>{`f(2) = 8 - 12 - 1 = -5`}</Eq>，<Eq>{`f(3) = 27 - 27 - 1 = -1`}</Eq>。绝对最大值：<Eq>{`-1`}</Eq>。绝对最小值：<Eq>{`-5`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+确定 <Eq>{`f(x) = x^3 - 3x^2 - 1`}</Eq> 在 <Eq>{`[-1, 3]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = e^x(x+1) = 0 \\Rightarrow x = -1`}</Eq>。因为 <Eq>{`e^x > 0`}</Eq> 总是成立。<Eq>{`f''(x) = e^x(x+2)`}</Eq>。<Eq>{`f''(-1) = e^{-1}(1) > 0`}</Eq> → 在 <Eq>{`x = -1`}</Eq> 处局部最小值，<Eq>{`f(-1) = -e^{-1}`}</Eq>。</>}
+  passos={<><ol><li>应用乘积法则：<Eq>{`f(x) = xe^x`}</Eq>，所以 <Eq>{`f'(x) = e^x + xe^x = e^x(1+x)`}</Eq>。</li><li>因为 <Eq>{`e^x > 0`}</Eq> 对所有 <Eq>{`x`}</Eq>，方程 <Eq>{`f'(x) = 0`}</Eq> 简化为 <Eq>{`1 + x = 0`}</Eq>，即 <Eq>{`x = -1`}</Eq>。</li><li>第二导数：<Eq>{`f''(x) = e^x(x+2)`}</Eq>。在 <Eq>{`x = -1`}</Eq>：<Eq>{`f''(-1) = e^{-1} > 0`}</Eq> → 局部最小值。</li><li>最小值：<Eq>{`f(-1) = -1 \\cdot e^{-1} = -1/e`}</Eq>。</li></ol><em>有趣的事实：</em> 这是 <Eq>{`xe^x`}</Eq> 的全局最小值，因为函数在两个端点处趋向 <Eq>{`+\\infty`}</Eq>（当 <Eq>{`x \\to +\\infty`}</Eq> 时显然；当 <Eq>{`x \\to -\\infty`}</Eq> 时，<Eq>{`xe^x \\to 0`}</Eq>，然后在上升到 <Eq>{`-1/e`}</Eq> 之前增长）。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+确定 <Eq>{`f(x) = xe^x`}</Eq> 的局部极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`g'(x) = \\frac{(x^2+1) - x \\cdot 2x}{(x^2+1)^2} = \\frac{1 - x^2}{(x^2+1)^2}`}</Eq>。零点：<Eq>{`x = \\pm 1`}</Eq>。在 <Eq>{`x = 1`}</Eq>：<Eq>{`g'`}</Eq> 之前为正，之后为负 → 局部最大值 <Eq>{`g(1) = 1/2`}</Eq>。在 <Eq>{`x = -1`}</Eq>：局部最小值 <Eq>{`g(-1) = -1/2`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+对 <Eq>{`g(x) = \\dfrac{x}{x^2 + 1}`}</Eq> 的局部极值进行分类。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{1}{x}`}</Eq>。因为对所有 <Eq>{`x > 0`}</Eq> 有 <Eq>{`f' > 0`}</Eq>，函数严格递增——无临界点，无局部极值。在 <Eq>{`[1, e]`}</Eq>：绝对最小值 <Eq>{`f(1) = 0`}</Eq>，绝对最大值 <Eq>{`f(e) = 1`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+确定 <Eq>{`f(x) = \\ln x`}</Eq> 在 <Eq>{`[1, e]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.20"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = -2x e^{-x^2}`}</Eq>。零点在 <Eq>{`x = 0`}</Eq>。<Eq>{`f''(0) = -2 < 0`}</Eq> → 局部最大值 <Eq>{`f(0) = 1`}</Eq>。因为当 <Eq>{`x \\to \\pm\\infty`}</Eq> 时 <Eq>{`f(x) \\to 0`}</Eq>，也是绝对最大值。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+确定 <Eq>{`f(x) = e^{-x^2}`}</Eq> 的极值（高斯曲线）。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 3x^2 - 3 = 0 \\Rightarrow x = \\pm 1`}</Eq>。在 <Eq>{`[0, 2]`}</Eq>，仅 <Eq>{`x = 1`}</Eq> 在内部。评估：<Eq>{`f(0) = 2`}</Eq>，<Eq>{`f(1) = 1 - 3 + 2 = 0`}</Eq>，<Eq>{`f(2) = 8 - 6 + 2 = 4`}</Eq>。绝对最大值：<Eq>{`4`}</Eq>。绝对最小值：<Eq>{`0`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+找出 <Eq>{`f(x) = x^3 - 3x + 2`}</Eq> 在 <Eq>{`[0, 2]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 2\\cos(2x)`}</Eq>。在 <Eq>{`[0, \\pi]`}</Eq> 的零点：<Eq>{`2x = \\pi/2`}</Eq> → <Eq>{`x = \\pi/4`}</Eq>；<Eq>{`2x = 3\\pi/2`}</Eq> → <Eq>{`x = 3\\pi/4`}</Eq>。评估：<Eq>{`f(0) = 0`}</Eq>，<Eq>{`f(\\pi/4) = 1`}</Eq>，<Eq>{`f(3\\pi/4) = -1`}</Eq>，<Eq>{`f(\\pi) = 0`}</Eq>。绝对最大值：<Eq>{`1`}</Eq>。绝对最小值：<Eq>{`-1`}</Eq>。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+确定 <Eq>{`f(x) = \\sin(2x)`}</Eq> 在 <Eq>{`[0, \\pi]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.23"
+  dificuldade="modelagem"
+  solucao={<>收入：<Eq>{`R(p) = p \\cdot q(p)`}</Eq>。带需求 <Eq>{`q(p) = 100 - 2p`}</Eq>：<Eq>{`R(p) = p(100 - 2p) = 100p - 2p^2`}</Eq>。<Eq>{`R'(p) = 100 - 4p = 0 \\Rightarrow p = 25`}</Eq>。<Eq>{`R''(25) = -4 < 0`}</Eq> → 最大值。最大收入：<Eq>{`R(25) = 25 \\cdot 50 = R\\$\\ 1250`}</Eq>。</>}
+  passos={<><ol><li>写出收入函数：<Eq>{`R(p) = p \\cdot q(p) = p(100-2p)`}</Eq>。</li><li>展开：<Eq>{`R(p) = 100p - 2p^2`}</Eq>。</li><li>求导并设为零：<Eq>{`R'(p) = 100 - 4p = 0 \\Rightarrow p^* = 25`}</Eq>。</li><li>确认最大值：<Eq>{`R''(p) = -4 < 0`}</Eq>。</li><li>计算最大收入：<Eq>{`R(25) = 2500 - 1250 = 1250`}</Eq>。</li></ol><em>技巧：</em> 收入 = 价格乘以数量；最大化收入与最大化利润不同（要减去成本）。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+一家公司销售一种产品，需求为 <Eq>{`q(p) = 100 - 2p`}</Eq> 单位，当价格为 <Eq>{`p`}</Eq> 雷亚尔时。哪个价格 <Eq>{`p`}</Eq> 最大化总收入？
+
+</Exercicio>
+
+<Exercicio
+  numero="61.24"
+  dificuldade="modelagem"
+  solucao={<>利润：<Eq>{`L(x) = R(x) - C(x) = 80x - (x^2 + 20x + 300) = -x^2 + 60x - 300`}</Eq>。<Eq>{`L'(x) = -2x + 60 = 0 \\Rightarrow x = 30`}</Eq>。<Eq>{`L''(30) = -2 < 0`}</Eq> → 最大值。最大利润：<Eq>{`L(30) = -900 + 1800 - 300 = 600`}</Eq>。最优产量：30个单位。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+一家工厂的成本为 <Eq>{`C(x) = x^2 + 20x + 300`}</Eq>（雷亚尔），收入为 <Eq>{`R(x) = 80x`}</Eq>，生产 <Eq>{`x`}</Eq> 个单位。生产多少单位可最大化利润？
+
+</Exercicio>
+
+<Exercicio
+  numero="61.25"
+  dificuldade="modelagem"
+  solucao={<>高度：<Eq>{`h(t) = -4{,}9t^2 + 19{,}6t + 2`}</Eq>。<Eq>{`h'(t) = -9{,}8t + 19{,}6 = 0 \\Rightarrow t = 2`}</Eq> 秒。最大高度：<Eq>{`h(2) = -19{,}6 + 39{,}2 + 2 = 21{,}6`}</Eq> 米。<Eq>{`h''(2) = -9{,}8 < 0`}</Eq> → 确认最大值。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+一枚模型火箭垂直发射，其高度（以米计）为 <Eq>{`h(t) = -4{,}9t^2 + 19{,}6t + 2`}</Eq>。确定达到的最大高度。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.26"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 2x - \\frac{2}{x^3}`}</Eq>。在 <Eq>{`x > 0`}</Eq>：<Eq>{`f'(x) = 0 \\Rightarrow 2x^4 = 2 \\Rightarrow x = 1`}</Eq>。<Eq>{`f''(1) = 2 + 6 = 8 > 0`}</Eq> → 局部最小值。<Eq>{`f(1) = 1 + 1 = 2`}</Eq>。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+找出 <Eq>{`f(x) = x^2 + \\dfrac{1}{x^2}`}</Eq> 在 <Eq>{`x > 0`}</Eq> 时的局部最小值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.27"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{x \\cdot 2x - (x^2-4)}{x^2} = \\frac{x^2 + 4}{x^2} > 0`}</Eq> 对所有 <Eq>{`x \\neq 0`}</Eq>。因此函数在每个定义域区间中严格递增——无局部极值。在 <Eq>{`[1,4]`}</Eq> 的极值：<Eq>{`f(1) = -3`}</Eq>（绝对最小值），<Eq>{`f(4) = 3`}</Eq>（绝对最大值）。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+确定 <Eq>{`f(x) = \\dfrac{x^2 - 4}{x}`}</Eq> 在 <Eq>{`[1, 4]`}</Eq> 上的绝对极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.28"
+  dificuldade="demonstracao"
+  solucao={<>假设 <Eq>{`f`}</Eq> 在 <Eq>{`c`}</Eq> 处有局部最大值，即对 <Eq>{`c`}</Eq> 附近的 <Eq>{`x`}</Eq> 有 <Eq>{`f(c) \\geq f(x)`}</Eq>。对小正数 <Eq>{`h`}</Eq>：<Eq>{`\\frac{f(c+h)-f(c)}{h} \\leq 0`}</Eq>。取极限：<Eq>{`f'(c) \\leq 0`}</Eq>。对小负数 <Eq>{`h`}</Eq>：<Eq>{`\\frac{f(c+h)-f(c)}{h} \\geq 0`}</Eq>。取极限：<Eq>{`f'(c) \\geq 0`}</Eq>。因此 <Eq>{`f'(c) = 0`}</Eq>。</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licensa: "CC-BY-NC-SA" }}
+>
+
+证明费马定理：若 <Eq>{`f`}</Eq> 在 <Eq>{`c`}</Eq> 处有局部最大值且在 <Eq>{`c`}</Eq> 处可导，则 <Eq>{`f'(c) = 0`}</Eq>。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.29"
+  dificuldade="demonstracao"
+  solucao={<>给定 <Eq>{`f(x) = x^3`}</Eq>，我们有 <Eq>{`f'(x) = 3x^2`}</Eq> 和 <Eq>{`f'(0) = 0`}</Eq>，所以 <Eq>{`x = 0`}</Eq> 是临界点。对任何 <Eq>{`\\delta > 0`}</Eq>：取 <Eq>{`x = -\\delta/2 < 0`}</Eq>；则 <Eq>{`f(-\\delta/2) = (-\\delta/2)^3 < 0 = f(0)`}</Eq>。但取 <Eq>{`x = \\delta/2 > 0`}</Eq>；则 <Eq>{`f(\\delta/2) > 0 = f(0)`}</Eq>。因此 <Eq>{`f(0)`}</Eq> 既不是最大值也不是最小值。<Eq>{`x = 0`}</Eq> 是拐点。</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licensa: "CC-BY-NC-SA" }}
+>
+
+证明 <Eq>{`f(x) = x^3`}</Eq> 在 <Eq>{`x = 0`}</Eq> 处有临界点，但该点不是局部极值。
+
+</Exercicio>
+
+<Exercicio
+  numero="61.30"
+  dificuldade="desafio"
+  solucao={<><Eq>{`f'(x) = 4x^3 - 4 = 0 \\Rightarrow x^3 = 1 \\Rightarrow x = 1`}</Eq>。<Eq>{`f(1) = 1 - 4 + 6 = 3`}</Eq>。<Eq>{`f''(1) = 12 > 0`}</Eq> → 局部最小值，且因为当 <Eq>{`x \\to \\pm\\infty`}</Eq> 时 <Eq>{`f \\to +\\infty`}</Eq>，是全局最小值。验证：对任何实数 <Eq>{`x`}</Eq>，<Eq>{`f(x) = (x^2-2)^2 + (x-1)^2 + 2 \\geq 3`}</Eq>？不是直接的；确认来自唯一临界点满足 <Eq>{`f'' > 0`}</Eq> 且在无穷远处的行为。</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licensa: "CC-BY-NC" }}
+>
+
+证明 <Eq>{`f(x) = x^4 - 4x + 6`}</Eq> 有唯一临界点，且这是函数的全局最小值。
+
+</Exercicio>
+
+</ListaExercicios>
+
+## 来源
+
+- **Boelkins, Matt. Active Calculus 2.0.** Grand Valley State University, 2022. CC-BY-NC-SA. [activecalculus.org/single/sec-3-1-tests.html](https://activecalculus.org/single/sec-3-1-tests.html)
+- **OpenStax. Calculus Volume 1.** Strang, Herman et al., 2023. CC-BY-NC-SA. [openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima](https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima)
+- **Hartman, G. et al. APEX Calculus.** Virginia Military Institute, 2023. CC-BY-NC. [apexcalculus.com](https://www.apexcalculus.com/)
