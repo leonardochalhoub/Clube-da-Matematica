@@ -104,14 +104,31 @@ function slugDoCaminho(caminho: string[]): string {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { caminho } = await params
+  const { locale, categoria, caminho } = await params
   const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
   if (!conteudo) return { title: 'Not found' }
-  return {
-    title: conteudo.meta.titulo,
-    description: conteudo.meta.descricao,
+
+  // Read translated frontmatter so <title> and meta description match the
+  // page's locale. Falls back to PT-BR meta if the translation file or its
+  // frontmatter can't be read.
+  let titulo = conteudo.meta.titulo
+  let descricao = conteudo.meta.descricao
+  if (locale in LOCALES && locale !== 'pt-BR') {
+    const info = LOCALES[locale as Locale]
+    const completo = caminhoCompleto(categoria, caminho)
+    const arquivo = caminhoArquivoMdx(completo, locale as Locale, info.speechLang)
+    if (arquivo) {
+      try {
+        const { data } = await lerMdxSource(arquivo)
+        if (typeof data.titulo === 'string') titulo = data.titulo
+        if (typeof data.descricao === 'string') descricao = data.descricao
+      } catch {
+        /* keep PT-BR meta */
+      }
+    }
   }
+  return { title: titulo, description: descricao }
 }
 
 const MDX_COMPONENTS = {
@@ -163,8 +180,10 @@ export default async function ConteudoLocalizadoPage({ params }: Props) {
   }
 
   let mdxRendered: React.ReactNode
+  let translatedFrontmatter: Record<string, unknown> = {}
   try {
-    const { content } = await lerMdxSource(arquivo)
+    const { content, data } = await lerMdxSource(arquivo)
+    translatedFrontmatter = data
     const compiled = await compileMDX({
       source: content,
       components: MDX_COMPONENTS,
@@ -178,6 +197,7 @@ export default async function ConteudoLocalizadoPage({ params }: Props) {
       `[i18n-fallback] compileMDX failed for ${locale}/${completo} — serving PT-BR fallback. Reason:`,
       err instanceof Error ? err.message : err,
     )
+    translatedFrontmatter = {}
     const ptArquivo = caminhoArquivoMdx(completo, 'pt-BR', 'pt-BR')
     if (!ptArquivo) notFound()
     const { content } = await lerMdxSource(ptArquivo)
@@ -192,9 +212,18 @@ export default async function ConteudoLocalizadoPage({ params }: Props) {
   const isAula = categoria === 'aulas'
   const isFinancas = categoria === 'financas-quantitativas'
 
+  // Merge translated frontmatter (titulo, descricao, usadoEm) over the
+  // canonical PT-BR meta so the page header renders in the page's locale.
+  // Frontmatter rule: slug / categoria / ordem / tags / prerrequisitos
+  // stay PT-BR (post-sweep), so spread-merge is safe.
+  const localizedMeta = {
+    ...conteudo.meta,
+    ...(translatedFrontmatter as Partial<typeof conteudo.meta>),
+  }
+
   return (
     <LessonPageShell
-      meta={conteudo.meta}
+      meta={localizedMeta}
       isAula={isAula}
       isFinancas={isFinancas}
       caminho={completo}
