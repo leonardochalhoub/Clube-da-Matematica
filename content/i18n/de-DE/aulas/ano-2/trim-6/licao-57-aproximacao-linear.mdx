@@ -1,0 +1,1007 @@
+---
+titulo: "Lektion 57 — Lineare Approximation und Differential"
+slug: "licao-57-aproximacao-linear"
+categoria: "aulas"
+subcategoria: "ano-2-trim-6"
+descricao: "Tangente als lokale Approximation. Differential dy. Fehlerabschätzung via zweite Ableitung. Newton-Raphson als iterierte Linearisierung."
+ordem: 57
+publicado: true
+tags: ["lineare approximation", "differential", "linearisierung", "taylor", "ano-2", "trim-6"]
+prerrequisitos: ["licao-52-regras-derivacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["2. Jahr des Programms (Calculus I)", "Equiv. Math III japanisch §4", "Equiv. Leistungskurs Differentialrechnung deutsch", "H2 Math singapurisch §4.3"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="L(x) = f(a) + f'(a)(x - a)"
+  legenda={<><strong>Linearisierung</strong> von <em>f</em> im Punkt <em>a</em>: die Tangente am Graphen in <Eq>{`(a,\\,f(a))`}</Eq> ist die beste lineare Approximation von <em>f</em> nahe <em>a</em>. Der Fehler ist <Eq>{`O((x-a)^2)`}</Eq> — schrumpft viel schneller als die Entfernung zum Basispunkt.</>}
+  audioTexto="L von x gleich f von a, plus f Strich von a, mal Klammer x minus a, Klammer zu. Lese: Linearisierung von f in a. Es ist die Tangente, verwendet als lokale Approximation der Funktion."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Bücher, die diese Lektion abdecken
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-1-8-tan-line-approx.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §1.8 "The tangent line approximation" · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Primärquelle mit geleiteten Aktivitäten, Fehlertheorie und Newton-Raphson als iterierte Linearisierung.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.2 "Linear Approximations and Differentials" · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Vollständige Behandlung von Differential dy, Fehlerfortpflanzung und physikalische Anwendungsbeispiele.</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman et al. — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §4.4 "Differentials" · CC-BY-NC · </span>
+      <em className="text-clube-mist">Aufgaben mit steigendem Schwierigkeitsgrad; totales Differential für Funktionen mehrerer Variablen.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Strenge Definition und Fehlertheorie">
+
+### Linearisierung
+
+<Definicao titulo="Linearisierung von f in a">
+
+Sei $f$ in $a$ differenzierbar. Die **Linearisierung** (oder **lineare Approximation**) von $f$ in $a$ ist die affine Funktion
+
+$$L(x) = f(a) + f'(a)(x - a).$$
+
+Sie ist die einzige affine Funktion, die $L(a) = f(a)$ und $L'(a) = f'(a)$ erfüllt: gleicher Wert und gleiche Ableitung wie $f$ im Basispunkt.
+
+</Definicao>
+
+> "Wenn $f$ in $a$ differenzierbar ist, dann heißt $L(x) = f(a) + f'(a)(x - a)$ die *Linearisierung* von $f$ in $a$. Die Approximation $f(x) \approx L(x)$ heißt die *lineare Approximation* oder *Tangentenapproximation* von $f$ in $a$." — [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials)
+
+### Differential
+
+<Definicao titulo="Differential dy">
+
+Für $y = f(x)$ ist das **Differential** von $y$
+
+$$dy = f'(x)\,dx,$$
+
+wobei $dx$ eine beliebige (nicht notwendig infinitesimale) Änderung in $x$ ist. Das Differential stellt die **lineare Änderung** von $f$ dar: wie viel die Tangente steigt oder fällt, wenn $x$ um $dx$ ändert.
+
+Die tatsächliche Änderung ist $\Delta y = f(x + dx) - f(x)$. Wenn $dx \to 0$:
+
+$$\Delta y - dy = O(dx^2), \quad \text{daher} \quad \Delta y \approx dy.$$
+
+</Definicao>
+
+> "Wir definieren $dx$ und $dy$ als reelle Variablen so, dass folgende Gleichung gilt: $dy = f'(x)\,dx$. Das Differential $dy$ ist eine lineare Approximation der tatsächlichen Änderung $\Delta y$." — [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials)
+
+### Fehlerabschätzung via Taylor
+
+<Teorema titulo="Fehler der Linearisierung (Taylor mit Lagrange-Rest)">
+
+Wenn $f$ zweimal differenzierbar in einem Intervall ist, das $a$ und $x$ enthält, dann existiert $\xi$ zwischen $a$ und $x$ so, dass
+
+$$f(x) = f(a) + f'(a)(x - a) + \frac{f''(\xi)}{2}(x - a)^2.$$
+
+Der **Fehler** der Linearisierung ist daher $f(x) - L(x) = \dfrac{f''(\xi)}{2}(x-a)^2$. Wenn $|f''(t)| \leq M_2$ für alle $t$ zwischen $a$ und $x$, dann
+
+$$|f(x) - L(x)| \leq \frac{M_2}{2}(x - a)^2.$$
+
+Der Fehler ist **quadratisch** in der Entfernung zum Basispunkt — schrumpft viel schneller als die Entfernung.
+
+</Teorema>
+
+### Abbildung: Tangente als lokale Approximation
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 460 240" className="w-full">
+<defs>
+  <marker id="arrla" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<line x1="30" y1="200" x2="430" y2="200" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrla)"/>
+<line x1="80" y1="220" x2="80" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrla)"/>
+<text x="435" y="205" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">x</text>
+<text x="84" y="17" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">y</text>
+<path d="M 100,185 Q 160,140 220,105 Q 280,72 360,50" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+<text x="365" y="47" fontSize="10" fontFamily="serif" fontStyle="italic" fill="rgb(26 77 92)">y = f(x)</text>
+<line x1="140" y1="170" x2="340" y2="70" stroke="rgb(232 199 122)" strokeWidth="2"/>
+<text x="342" y="67" fontSize="10" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">L(x)</text>
+<circle cx="220" cy="105" r="4" fill="rgb(26 77 92)"/>
+<line x1="220" y1="105" x2="220" y2="200" stroke="currentColor" strokeOpacity="0.4" strokeDasharray="4,3" strokeWidth="1"/>
+<text x="216" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">a</text>
+<circle cx="300" cy="80" r="3" fill="rgb(26 77 92)"/>
+<circle cx="300" cy="95" r="3" fill="rgb(232 199 122)"/>
+<line x1="300" y1="80" x2="300" y2="95" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+<text x="305" y="90" fontSize="9" fontFamily="sans-serif" fill="rgb(199 107 63)">Fehler</text>
+<line x1="300" y1="200" x2="300" y2="205" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1"/>
+<text x="296" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">x</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Die Tangente <Eq>{`L(x)`}</Eq> berührt den Graphen von <Eq>{`f`}</Eq> in <Eq>{`(a, f(a))`}</Eq>. Der Fehler (oranges Segment) zwischen Kurve und Gerade wächst mit dem Quadrat der Entfernung <Eq>{`|x-a|`}</Eq>.
+</figcaption>
+</figure>
+
+### Klassische Approximationen in $a = 0$ (Maclaurin linear)
+
+| $f(x)$ | $L(x)$ in $a = 0$ | Gültig für |
+|---|---|---|
+| $e^x$ | $1 + x$ | $x$ klein |
+| $\sin x$ | $x$ | $x$ in Radianten, klein |
+| $\cos x$ | $1$ | $x$ klein |
+| $\ln(1 + x)$ | $x$ | $x$ klein |
+| $(1 + x)^n$ | $1 + nx$ | $x$ klein |
+| $\sqrt{1 + x}$ | $1 + x/2$ | $x$ klein |
+| $\tan x$ | $x$ | $x$ klein |
+| $\arctan x$ | $x$ | $x$ klein |
+
+### Fehlerfortpflanzung
+
+Für $y = f(x)$ mit Unsicherheit $\sigma_x$ in $x$:
+
+$$\sigma_y \approx |f'(x)|\,\sigma_x.$$
+
+Für Funktionen mehrerer Variablen $y = f(x_1, \ldots, x_n)$ mit unabhängigen Fehlern $\sigma_i$:
+
+$$\sigma_y^2 \approx \sum_{i=1}^{n} \left(\frac{\partial f}{\partial x_i}\right)^2 \sigma_i^2.$$
+
+<Insight>
+
+**Warum ist der Fehler quadratisch?** Jede in $a$ differenzierbare Funktion "sieht lokal wie eine Gerade aus" — das ist das Wesen der Differentialrechnung. Die Linearisierung erfasst genau diese Gerade. Der Rest beginnt mit dem Term zweiter Ordnung von Taylor, sodass wenn man $|x-a|$ halbiert, der Fehler um den Faktor 4 fällt.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein 5-jähriges Kind">
+
+Stell dir vor, du möchtest wissen, wie schwer ein Apfel mit Radius 4,5 Zentimeter ist. Du hast nur eine Waage, die für einen mit genau 4 Zentimetern kalibriert ist.
+
+Die Idee: "Ein Apfel, der ein bisschen größer ist, wiegt ein bisschen mehr". Wie viel mehr? Wenn er in einer Geraden wächst, ist es leicht zu berechnen.
+
+Das ist lineare Approximation: Wenn sich etwas ein **bisschen** ändert, tun wir so, als würde es sich in einer geraden Linie ändern. Das funktioniert sehr gut bei kleinen Änderungen.
+
+Die Gerade ist die einfachste Art, eine Änderung zu beschreiben. Und nahe jedem Punkt sieht die Kurve ähnlich aus wie die Gerade, die sie berührt.
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein 10-jähriges Kind">
+
+Du möchtest $\sqrt{4{,}1}$ ohne Taschenrechner berechnen. Du weißt, dass $\sqrt{4} = 2$.
+
+Die Funktion $f(x) = \sqrt{x}$ hat eine **Steigung** bei $x = 4$. Diese Steigung ist die Ableitung:
+
+$$f'(x) = \frac{1}{2\sqrt{x}}, \quad f'(4) = \frac{1}{4}.$$
+
+Wenn du von $x = 4$ ausgehst und $0{,}1$ nach rechts gehst, steigt die Funktion um $0{,}1 \times \frac{1}{4} = 0{,}025$.
+
+$$\sqrt{4{,}1} \approx 2 + 0{,}025 = 2{,}025.$$
+
+Wirklicher Wert: $2{,}02485\ldots$ — Fehler nur $0{,}00015$. Ausgezeichnet für eine Kopfrechnung.
+
+### Das allgemeine Rezept
+
+1. Finde $a$ nahe $x$ mit $f(a)$ leicht zu berechnen.
+2. Berechne $f'(a)$.
+3. Verwende $f(x) \approx f(a) + f'(a)(x - a)$.
+
+### Warum funktioniert das?
+
+Die **Tangente** zum Graphen von $f$ in $(a, f(a))$ ist die beste Gerade, die durch diesen Punkt geht und die Kurve begleitet. Für kurze Entfernungen sind die Kurve und die Gerade praktisch identisch.
+
+| Approximiere | $a$ gewählt | Kopfrechnung |
+|---|---|---|
+| $\sqrt{25{,}1}$ | $25$ | $5 + 0{,}1/10 = 5{,}01$ |
+| $e^{0{,}1}$ | $0$ | $1{,}1$ |
+| $\sin(0{,}2)$ | $0$ | $0{,}2$ |
+| $\ln(0{,}95)$ | $1$ | $0{,}95 - 1 = -0{,}05$ |
+
+</Porta>
+
+<Porta nivel="15" titulo="Für einen 15-jährigen Jugendlichen">
+
+Die Linearisierung $L(x) = f(a) + f'(a)(x - a)$ ist das am häufigsten verwendete Werkzeug in aller angewandter Wissenschaft. Jedes Mal, wenn jemand ein Modell "kleiner Perturbationen" macht, verwendet er Linearisierung.
+
+### Rezept mit Fehlerverifikation
+
+1. Identifiziere $a$ nahe $x$ mit bekanntem $f(a)$ und $f'(a)$.
+2. $L(x) = f(a) + f'(a)(x - a)$.
+3. Schätze den Fehler ab: $|f(x) - L(x)| \leq \frac{M_2}{2}(x - a)^2$ wobei $M_2 = \max|f''|$ im Intervall.
+
+### Differential
+
+$dy = f'(x)\,dx$ ist die lineare Änderung von $y$, wenn $x$ um $dx$ ändert.
+
+**Ingenieur-Praktische Regel**: Wenn du $x$ mit Fehler $\Delta x$ misst, ist der Fehler in $y = f(x)$ ungefähr $|f'(x)| \cdot |\Delta x|$.
+
+### Beispiel: Messfehler
+
+Du misst den Radius einer Kugel als $r = 5{,}0 \pm 0{,}1$ cm. Volumen: $V = \frac{4}{3}\pi r^3$.
+
+$$dV = 4\pi r^2\,dr = 4\pi(25)(0{,}1) = 10\pi \approx 31{,}4 \text{ cm}^3.$$
+
+Nominalvolumen: $\approx 524$ cm³. Relativer Fehler: $31{,}4/524 \approx 6\%$.
+
+### Gültigkeitsbereich
+
+Je größer $|x - a|$, desto mehr weicht die Tangente von der Kurve ab. Für Funktionen mit großem $|f''|$ (viel Krümmung) wächst der Fehler schnell. Vergleiche immer $|f''|/2 \cdot (x-a)^2$ mit der erforderlichen Genauigkeit, bevor du die Approximation verwendest.
+
+<Insight>
+
+**1%-Praktische Regel:** Die Linearisierung hat Fehler unter 1%, wenn die Funktion im Intervall nicht viel krümmt. Für $\sin x$ um Null gilt dies bis $x \approx 0{,}24$ rad (etwa 14°). Für $e^x$ um Null bis $x \approx 0{,}14$. Für $\sqrt{x}$ um $a$ ist der relative Fehler $\approx (x-a)^2/(8a^2)$ — sinkt für großes $a$.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="Für einen Ingenieurstudierenden">
+
+Linearisierung ist die **Ingenieur-Kunst lokaler Approximation**: 1. Ordnung (linear), 2. Ordnung (parabolisch), etc. Das komplette Toolkit ist Taylor.
+
+### Taylor mit Rest und Fehlerkontrolle
+
+$$f(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k + R_n(x),$$
+
+mit $R_n(x) = \dfrac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$ (Lagrange). Linearisierung entspricht $n = 1$.
+
+**Ingenieur-Strategie**: Wähle $n$ so, dass $|R_n| <$ angegebene Toleranz. Für $\sqrt{4{,}1}$ mit Toleranz $10^{-3}$:
+
+$$|R_1| = \frac{|f''(\xi)|}{2}(0{,}1)^2 = \frac{1}{8 \xi^{3/2} \cdot 2}(0{,}01) \leq \frac{0{,}01}{8 \cdot 8} = 1{,}56 \times 10^{-4} < 10^{-3}. \quad \checkmark$$
+
+### Domänenübergreifende Anwendungen
+
+- **Physik**: Einfaches Pendel. $\ddot{\theta} = -(g/L)\sin\theta$. Für kleines $\theta$, $\sin\theta \approx \theta$: harmonischer Oszillator $\ddot{\theta} = -(g/L)\theta$. Periode $T = 2\pi\sqrt{L/g}$, unabhängig von $\theta$. Gültig für $|\theta| \lesssim 10°$.
+- **Steuerung**: Linearisierung von nichtlinearem System $\dot{x} = F(x)$ am Betriebspunkt $x^*$ ergibt $\dot{\xi} = J_F(x^*)\xi$ — die Zustandsraummatrix.
+- **Finanzen**: Delta-Hecking $\Delta V \approx \Delta_{\text{greek}} \cdot \Delta S$. Der Fehler ist Gamma (2. Ordnung, $\Gamma \cdot (\Delta S)^2/2$).
+- **Optimierung**: Gradienten-Abstieg $\theta \leftarrow \theta - \eta \nabla L(\theta)$ minimiert die lineare Approximation von $L$ in Richtung steilsten Abstiegs.
+- **Numerik**: Newton-Raphson löst $f(x) = 0$ durch Iteration $x_{n+1} = x_n - f(x_n)/f'(x_n)$ — jeder Schritt ist lokale Linearisierung + Nullstelle der Tangente. Quadratische Konvergenz: $|e_{n+1}| \leq C\,|e_n|^2$.
+
+### Delta-Methode (Statistik)
+
+Für $Y = g(X)$ mit $X$ konzentriert bei $\mu$ und Varianz $\sigma^2$:
+
+$$\text{Var}(g(X)) \approx \bigl(g'(\mu)\bigr)^2 \sigma^2.$$
+
+Fehlerfortpflanzung = Linearisierung + Varianzen. Grundlage aller Sensitivitätsanalyse.
+
+### Wenn Linearisierung fehlschlägt
+
+- $f$ nicht differenzierbar in $a$ (z.B. $f(x) = |x|$ bei $a = 0$).
+- $|x - a|$ nicht klein und $f''$ nicht vernachlässigbar.
+- $f'(a) = 0$ und $f''(a) \neq 0$ (Minimum/Maximum-Punkt): $L(x) = f(a)$ konstant; verwende 2. Ordnung Taylor.
+
+</Porta>
+
+<Porta nivel="40" titulo="Für einen leitenden Fachmann">
+
+Linearisierung ist das **universelle Paradigma lokaler Analyse**. In jeder Domäne, wo eine Größe sanft von Parametern abhängt, ist der erste Schritt immer: linearisieren.
+
+### Qualitative Analyse dynamischer Systeme
+
+Für $\dot{x} = F(x)$ mit Fixpunkt $x^*$ ($F(x^*) = 0$) garantiert der **Hartman-Grobman-Satz**: Wenn die Jacobi-Matrix $J = DF(x^*)$ keinen Eigenwert mit Realteil null hat, dann ist das Phasenporträt des nichtlinearen Systems **topologisch konjugiert** zu dem des linearen Systems $\dot{\xi} = J\xi$ in einer Umgebung von $x^*$. Lokale Stabilität der Nichtlinearen = Stabilität der Linearisierten.
+
+### Griechen als Koeffizienten multivariates Taylor
+
+$$dV \approx \Delta\,dS + \tfrac{1}{2}\Gamma\,dS^2 + \Theta\,dt + \mathcal{V}\,d\sigma + \rho\,dr + \cdots$$
+
+Jeder Grieche ist eine partielle Ableitung von $V(S, \sigma, r, t)$. Hecking durch Griechen ist abgeschnittene Taylor-Approximation der Exposition. Der Hecking-Fehler Delta ist Ordnung $\Gamma \cdot (\Delta S)^2$.
+
+### Adjungierte Analyse in PDEs
+
+Für $J(\theta) = \int \phi(u_\theta)\,dx$ mit $u_\theta$ Lösung einer durch $\theta$ parametrisierten PDE, kann der Gradient $dJ/d\theta$ durch die **adjungierte Methode** berechnet werden: 1 PDE direkt + 1 linearisierte adjungierte PDE — Kosten unabhängig von $\dim(\theta)$. Grundlage der Optimierung in CFD und neuronales Feldlernen.
+
+### Maschinelles Lernen: Linearisierung als theoretische Grundlage
+
+- **Einfluss-Funktionen** (Koh–Liang, ICML 2017): Effekt des Entfernens des Trainings-Datenpunkts $i$ im Minimierort $\theta^*$ via Linearisierung der KKT-Bedingungen bei $\theta^*$.
+- **Neural Tangent Kernel**: Netzwerke mit Breite $\to \infty$ verhalten sich wie **lineare Regressoren** im Kernel, der durch die Parametrisierung bei der Initialisierung induziert wird — Linearisierung um $\theta_0$.
+- **Adversarial examples**: Linearisierung von $f_\theta(x)$ erklärt die Anfälligkeit $\sim \epsilon \|\nabla_x f_\theta(x)\|_\infty$ (FGSM-Angriff von Goodfellow et al.).
+
+### Jenseits von Taylor: Padé und asymptotische Entwicklungen
+
+Wenn Taylor langsam konvergiert oder divergiert, bietet die **Padé**-Approximation $f(x) \approx P_m(x)/Q_n(x)$ erweiterten Konvergenzradius. **Asymptotische Entwicklungen** (Watson, Methode stationärer Phase) behandeln $x \to \infty$ wo Taylor nicht funktioniert — nützlich in Optik, Quantenphysik und Algorithmus-Analyse.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praxis — real brasilianische Szenarien">
+
+### Szenario 1: Produktionskosten und Grenzanalyse
+
+Ein Stahlwerk in São Bernardo do Campo modelliert die Produktionskosten als $C(q) = \sqrt{50q + 100}$ Tausend Reais, wobei $q$ die Menge in Tonnen ist. Um die zusätzlichen Kosten für den Übergang von $q = 30$ auf $q = 31$ Tonnen zu schätzen, ohne das ganze System zu fahren:
+
+$C'(q) = \dfrac{50}{2\sqrt{50q+100}} = \dfrac{25}{\sqrt{50q+100}}$.
+
+Bei $q = 30$: $C(30) = \sqrt{1600} = 40$ und $C'(30) = 25/40 = 0{,}625$.
+
+Schätzung: $\Delta C \approx 0{,}625$ Tausend Reais (R\$ 625). Wirklicher Wert: $C(31) = \sqrt{1650} \approx 40{,}620$ — Fehler nur R\$ 5.
+
+### Szenario 2: Messfehler in der Vermessung
+
+Ein Tiefbauingenieur misst die Fläche eines quadratischen Grundstücks mit Seitenlänge $s = 20{,}0 \pm 0{,}05$ m. Fläche: $A = s^2$.
+
+$$dA = 2s\,ds = 2(20)(0{,}05) = 2{,}0 \text{ m}^2.$$
+
+Nominalfläche: 400 m². Relativer Fehler: $2{,}0/400 = 0{,}5\%$. INCRA erfordert 1% Toleranz bei Geokodierung — diese Messung liegt innerhalb des Limits.
+
+### Szenario 3: Sparquoten mit variablem Satz
+
+Die Sparquote ergibt $(1 + r/12)^{12}$ pro Jahr, wobei $r$ der monatliche Satz ist. Für $r = 0{,}5\%$ pro Monat ist der Jahresfaktor $(1{,}005)^{12}$. Unter Verwendung von Linearisierung bei $x = 0$ mit $f(x) = (1+x)^{12}$:
+
+$$f'(0) = 12, \quad L(0{,}005) = 1 + 12(0{,}005) = 1{,}06.$$
+
+Ergebnis: ungefähr 6% pro Jahr. Wert exakt: $(1{,}005)^{12} = 1{,}0617$ — die Approximation fehlt um 0,2 Prozentpunkte.
+
+### Standard-Workflow
+
+1. Wähle $a$ nahe $x$ mit leicht berechenbarem $f(a)$ und $f'(a)$.
+2. Berechne $L(x) = f(a) + f'(a)(x - a)$.
+3. Schätze den maximalen Fehler ab: $M_2 = \max_{t \in [a,x]}|f''(t)|$, dann $|\text{Fehler}| \leq M_2(x-a)^2/2$.
+4. Wenn der Fehler akzeptabel ist, verwende $L(x)$. Wenn nicht, gehe zu 2. Ordnung Taylor über.
+
+</Porta>
+
+</DuasPortas>
+
+## Gelöste Beispiele
+
+<Exemplo titulo="Lineare Approximation einer Quadratwurzel (direkte Anwendung)" numero="1">
+
+**Problem:** Verwende Linearisierung, um $\sqrt{9{,}2}$ ohne Taschenrechner zu approximieren. Schätze den maximalen Fehler ab.
+
+**Strategie:** Wir identifizieren $f(x) = \sqrt{x}$ und wählen $a = 9$, weil $\sqrt{9} = 3$ exakt ist und $9{,}2$ nahe bei $9$ liegt.
+
+**Lösung:**
+
+1. $f(x) = \sqrt{x}$, $f(9) = 3$.
+2. $f'(x) = \dfrac{1}{2\sqrt{x}}$, $f'(9) = \dfrac{1}{6}$.
+3. Linearisierung: $L(x) = 3 + \dfrac{1}{6}(x - 9)$.
+4. Bei $x = 9{,}2$: $L(9{,}2) = 3 + \dfrac{0{,}2}{6} = 3 + 0{,}0\overline{3} \approx 3{,}0333$.
+
+**Fehlerabschätzung:**
+
+$f''(x) = -\dfrac{1}{4x^{3/2}}$. Bei $[9, 9{,}2]$: $|f''(t)| \leq \dfrac{1}{4 \cdot 9^{3/2}} = \dfrac{1}{108}$.
+
+$$|\text{Fehler}| \leq \frac{1/108}{2}(0{,}2)^2 = \frac{0{,}04}{216} \approx 0{,}000185.$$
+
+**Verifikation:** $\sqrt{9{,}2} \approx 3{,}03315$. Wirklicher Fehler: $|3{,}0333 - 3{,}03315| \approx 0{,}00015 < 0{,}000185$. Schätzung bestätigt.
+
+**Quelle.** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Differential und Fehlerfortpflanzung bei Kugelvolumen (Zwischenebene)" numero="2">
+
+**Problem:** Der Radius einer Kugel wird als $r = 6{,}0$ cm mit maximalem Fehler von $0{,}05$ cm gemessen. Schätze den maximalen Fehler im Volumen $V = \frac{4}{3}\pi r^3$.
+
+**Strategie:** Wir verwenden das Differential $dV = V'(r)\,dr$, um den Fehler zu linearisieren. Das Differential ist die lineare Approximation der Volumenänderung.
+
+**Lösung:**
+
+1. $V(r) = \dfrac{4}{3}\pi r^3$, $V'(r) = 4\pi r^2$.
+2. Mit $r = 6$ und $dr = 0{,}05$:
+
+$$dV = 4\pi(6)^2 (0{,}05) = 4\pi \cdot 36 \cdot 0{,}05 = 7{,}2\pi \approx 22{,}62 \text{ cm}^3.$$
+
+3. Nominalvolumen: $V(6) = \dfrac{4}{3}\pi(216) = 288\pi \approx 904{,}8$ cm³.
+
+4. Relativer Fehler: $\dfrac{dV}{V} = \dfrac{7{,}2\pi}{288\pi} = \dfrac{7{,}2}{288} = 0{,}025 = 2{,}5\%$.
+
+**Verifikation:** Eine Unsicherheit von $0{,}8\%$ im Radius verbreitet sich zu $2{,}5\%$ im Volumen — Faktor 3, weil $V \propto r^3$ (Exponent 3). Allgemeine Regel: Für $f(x) = x^n$ ist der relative Fehler in $f$ $n$-mal der relative Fehler in $x$.
+
+**Quelle.** [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials) — CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Approximation trigonometrischer Funktion und Fehlerabschätzung (Zwischenebene)" numero="3">
+
+**Problem:** Verwende Linearisierung, um $\sin(32°)$ in Bezug auf $\sin(30°)$ und $\cos(30°)$ zu approximieren. Vergleiche mit dem wirklichen Wert.
+
+**Strategie:** Wir konvertieren zu Radianten (obligatorisch in der Differentialrechnung) und linearisieren $\sin$ bei $a = \pi/6$.
+
+**Lösung:**
+
+1. $f(x) = \sin x$, $a = \pi/6$ (entsprechend 30°).
+2. $f(a) = \sin(\pi/6) = 1/2$, $f'(a) = \cos(\pi/6) = \sqrt{3}/2$.
+3. $x = 32° = 32\pi/180$ Radianten. $x - a = 2\pi/180 = \pi/90$.
+
+$$L(x) = \frac{1}{2} + \frac{\sqrt{3}}{2} \cdot \frac{\pi}{90} = 0{,}5 + 0{,}866 \cdot 0{,}03491 \approx 0{,}5 + 0{,}03023 = 0{,}53023.$$
+
+**Vergleich:** $\sin(32°) = 0{,}52992$. Fehler: $|0{,}53023 - 0{,}52992| = 0{,}00031$.
+
+**Verifikation:** $|f''(t)| = |\sin(t)| \leq \sin(32°) < 0{,}530$. Oben: $\dfrac{0{,}530}{2}\left(\dfrac{\pi}{90}\right)^2 \approx 0{,}265 \cdot 0{,}001218 \approx 0{,}000323 > 0{,}000310$. Die Oben ist erfüllt.
+
+**Quelle.** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Newton-Raphson als iterierte Linearisierung (fortgeschritten)" numero="4">
+
+**Problem:** Verwende Newton-Raphson, um $\sqrt[3]{2}$ mit drei Dezimalstellen zu finden, beginnend mit $x_0 = 1{,}5$.
+
+**Strategie:** Wir schreiben es als $f(x) = x^3 - 2 = 0$ um und wenden $x_{n+1} = x_n - f(x_n)/f'(x_n)$ an, was von der Nullstelle der Tangente zu $f$ bei $x_n$ kommt.
+
+**Lösung:**
+
+$f(x) = x^3 - 2$, $f'(x) = 3x^2$.
+
+| Iteration | $x_n$ | $f(x_n)$ | $f'(x_n)$ | $x_{n+1}$ |
+|---|---|---|---|---|
+| 0 | $1{,}5$ | $1{,}375$ | $6{,}75$ | $1{,}2963$ |
+| 1 | $1{,}2963$ | $0{,}1786$ | $5{,}040$ | $1{,}2609$ |
+| 2 | $1{,}2609$ | $0{,}00595$ | $4{,}771$ | $1{,}2599$ |
+| 3 | $1{,}2599$ | $0{,}0000064$ | $4{,}763$ | $1{,}25992$ |
+
+**Verifikation:** Nach 3 Iterationen: $x_3 = 1{,}25992$, stimmt mit $\sqrt[3]{2} = 1{,}25992105\ldots$ in den sechs angezeigten Dezimalstellen überein. Die Konvergenz ist **quadratisch**: die Anzahl der richtigen Dezimalstellen verdoppelt sich ungefähr bei jeder Iteration.
+
+**Quelle.** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Multivariate Linearisierung — Ohmsches Gesetz mit zwei Unsicherheiten (Herausforderung)" numero="5">
+
+**Problem:** Der elektrische Widerstand wird durch $R = V/I$ berechnet. Messungen liefern $V = 12{,}0 \pm 0{,}3$ V und $I = 2{,}00 \pm 0{,}05$ A. Schätze die Unsicherheit in $R$ unter Verwendung linearer Fehlerfortpflanzung.
+
+**Strategie:** Wir verwenden die Fehlerfortpflanzungsformel basierend auf dem totalen Differential für Funktionen zweier Variablen: $\sigma_R^2 \approx (\partial R/\partial V)^2 \sigma_V^2 + (\partial R/\partial I)^2 \sigma_I^2$.
+
+**Lösung:**
+
+1. $R(V, I) = V/I$. Partielle Ableitungen:
+
+$$\frac{\partial R}{\partial V} = \frac{1}{I} = \frac{1}{2{,}00} = 0{,}5 \text{ Ω/V}, \quad \frac{\partial R}{\partial I} = -\frac{V}{I^2} = -\frac{12{,}0}{4{,}00} = -3{,}0 \text{ Ω/A}.$$
+
+2. Verbreitete Varianz:
+
+$$\sigma_R^2 \approx (0{,}5)^2(0{,}3)^2 + (-3{,}0)^2(0{,}05)^2 = 0{,}0225 + 0{,}0225 = 0{,}045 \text{ Ω}^2.$$
+
+$$\sigma_R \approx \sqrt{0{,}045} \approx 0{,}212 \text{ Ω}.$$
+
+3. Ergebnis: $R = 6{,}00 \pm 0{,}21$ Ω.
+
+**Verifikation:** Die Unsicherheiten in $V$ und in $I$ tragen gleichermaßen zur Gesamtunsicherheit in $R$ bei — charakteristische Eigenschaft dieser speziellen Wertekombination.
+
+**Quelle.** [APEX Calculus §4.4](https://www.apexcalculus.com/) — Hartman et al. · CC-BY-NC.
+</Exemplo>
+
+<ListaExercicios seed="licao-57-aproximacao-linear">
+
+> **Heft-Liste.** Es gibt 40 Übungen in 4 Blöcken mit steigendem Schwierigkeitsgrad. Löse auf Papier. Quellen: Active Calculus §1.8 (CC-BY-NC-SA), OpenStax Calculus Vol.1 §4.2 (CC-BY-NC-SA) und APEX Calculus §4.4 (CC-BY-NC).
+
+### Block A — Direkte Linearisierung (57.1 bis 57.12)
+
+<Exercicio
+  numero="57.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.1", exercicio: "1.8.1", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$2{,}025$", correta: true },
+    { texto: "$2{,}050$" },
+    { texto: "$2{,}010$" },
+    { texto: "$2{,}000$" },
+  ]}
+  solucao={<>Für <Eq>{`f(x) = \\sqrt{x}`}</Eq> bei <Eq>{`a = 4`}</Eq>: <Eq>{`f(4) = 2`}</Eq>, <Eq>{`f'(4) = 1/4`}</Eq>. Also <Eq>{`L(4{,}1) = 2 + (1/4)(0{,}1) = 2{,}025`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Identifiziere die Funktion und den Basispunkt.</strong> <Eq>{`f(x) = \\sqrt{x}`}</Eq>, <Eq>{`a = 4`}</Eq>. Wir wählen <Eq>{`a = 4`}</Eq>, weil <Eq>{`\\sqrt{4} = 2`}</Eq> exakt ist.</li>
+      <li><strong>Berechne die Ableitung bei a.</strong> <Eq>{`f'(x) = 1/(2\\sqrt{x})`}</Eq>, also <Eq>{`f'(4) = 1/(2 \\cdot 2) = 1/4`}</Eq>.</li>
+      <li><strong>Schreibe die Linearisierung.</strong> <Eq>{`L(x) = 2 + \\frac{1}{4}(x - 4)`}</Eq>.</li>
+      <li><strong>Werte bei x = 4,1 aus.</strong> <Eq>{`L(4{,}1) = 2 + \\frac{1}{4}(0{,}1) = 2 + 0{,}025 = 2{,}025`}</Eq>.</li>
+    </ol>
+    <p><em>Trick: Der wirkliche Fehler ist <Eq>{`\\sqrt{4{,}1} = 2{,}02485`}</Eq>; Der Linearisierungsfehler ist nur 0,00015 — weniger als 0,01%.</em></p>
+  </>}
+>
+Approximiere $\sqrt{4{,}1}$ unter Verwendung von Linearisierung bei $a = 4$.
+</Exercicio>
+
+<Exercicio
+  numero="57.2"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.2", exercicio: "1.8.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>, <Eq>{`a = 9`}</Eq>. <Eq>{`f'(9) = 1/6`}</Eq>. <Eq>{`L(9{,}06) = 3 + (1/6)(0{,}06) = 3{,}01`}</Eq>. Wirklicher Wert: <Eq>{`\\sqrt{9{,}06} \\approx 3{,}0100`}</Eq>.</>}
+>
+Approximiere $\sqrt{9{,}06}$ unter Verwendung von Linearisierung bei $a = 9$. Vergleiche mit dem wirklichen Wert.
+</Exercicio>
+
+<Exercicio
+  numero="57.3"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.1", exercicio: "4.2.1", licenca: "CC-BY-NC-SA" }}
+  resposta="$0{,}05$"
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f'(0) = \\cos 0 = 1`}</Eq>. <Eq>{`L(x) = x`}</Eq>. Also <Eq>{`\\sin(0{,}05) \\approx 0{,}05`}</Eq>. Wirklicher Wert: <Eq>{`0{,}04998`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Basispunkt.</strong> <Eq>{`a = 0`}</Eq>, weil <Eq>{`\\sin(0) = 0`}</Eq> und <Eq>{`\\cos(0) = 1`}</Eq> trivial sind.</li>
+      <li><strong>Ableitung bei a.</strong> <Eq>{`f'(x) = \\cos x`}</Eq>, <Eq>{`f'(0) = 1`}</Eq>.</li>
+      <li><strong>Linearisierung.</strong> <Eq>{`L(x) = 0 + 1 \\cdot x = x`}</Eq>. Die Approximation <Eq>{`\\sin x \\approx x`}</Eq> ist grundlegend in der Physik (kleine Schwingungen).</li>
+      <li><strong>Auswertung.</strong> <Eq>{`L(0{,}05) = 0{,}05`}</Eq>. Fehler: <Eq>{`|0{,}05 - 0{,}04998| = 0{,}00002`}</Eq>.</li>
+    </ol>
+    <p><em>Trick: <Eq>{`\\sin x \\approx x`}</Eq> ist gültig für <Eq>{`|x|`}</Eq> bis etwa 0,17 rad (10°) mit Fehler unter 0,5%.</em></p>
+  </>}
+>
+Approximiere $\sin(0{,}05)$ unter Verwendung von Linearisierung bei $a = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="57.4"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.2", exercicio: "4.2.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\cos x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f'(0) = -\\sin 0 = 0`}</Eq>. <Eq>{`L(x) = 1`}</Eq>. Also <Eq>{`\\cos(0{,}1) \\approx 1`}</Eq>. Wirklicher Wert: <Eq>{`0{,}9950`}</Eq>. Der Fehler 1. Ordnung ist hier Null: <Eq>{`f'(0) = 0`}</Eq>, daher ist die Linearisierung konstant und wir brauchen 2. Ordnung Taylor zum Verbessern.</>}
+>
+Approximiere $\cos(0{,}1)$ unter Verwendung von Linearisierung bei $a = 0$. Erklär, warum das Ergebnis überraschend ungenau ist.
+</Exercicio>
+
+<Exercicio
+  numero="57.5"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.3", exercicio: "1.8.3", licenca: "CC-BY-NC-SA" }}
+  resposta="$1{,}03$"
+  solucao={<><Eq>{`f(x) = e^x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f(0) = 1`}</Eq>, <Eq>{`f'(0) = 1`}</Eq>. <Eq>{`L(x) = 1 + x`}</Eq>. <Eq>{`L(0{,}03) = 1{,}03`}</Eq>. Wirklicher Wert: <Eq>{`e^{0{,}03} = 1{,}03045`}</Eq>.</>}
+>
+Approximiere $e^{0{,}03}$ unter Verwendung von Linearisierung bei $a = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="57.6"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.3", exercicio: "4.2.3", licenca: "CC-BY-NC-SA" }}
+  resposta="$0{,}05$"
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq>, <Eq>{`a = 1`}</Eq>. <Eq>{`f(1) = 0`}</Eq>, <Eq>{`f'(1) = 1`}</Eq>. <Eq>{`L(x) = x - 1`}</Eq>. <Eq>{`L(1{,}05) = 0{,}05`}</Eq>. Wirklicher Wert: <Eq>{`\\ln(1{,}05) = 0{,}04879`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Basispunkt.</strong> <Eq>{`a = 1`}</Eq>, weil <Eq>{`\\ln(1) = 0`}</Eq> exakt und einfach ist.</li>
+      <li><strong>Ableitung bei a.</strong> <Eq>{`f'(x) = 1/x`}</Eq>, <Eq>{`f'(1) = 1`}</Eq>.</li>
+      <li><strong>Linearisierung.</strong> <Eq>{`L(x) = 0 + 1 \\cdot (x - 1) = x - 1`}</Eq>. Äquivalent: <Eq>{`\\ln(1 + u) \\approx u`}</Eq> für kleines <Eq>{`u`}</Eq>.</li>
+      <li><strong>Auswertung.</strong> <Eq>{`L(1{,}05) = 1{,}05 - 1 = 0{,}05`}</Eq>. Fehler: <Eq>{`|0{,}05 - 0{,}04879| = 0{,}00121`}</Eq>, oder 2,5% Fehler.</li>
+    </ol>
+    <p><em>Trick: Die Formel <Eq>{`\\ln(1+u) \\approx u`}</Eq> wird umfassend in Finanzen verwendet, um zusammengesetzte Sätze in einfache Sätze umzuwandeln, wenn <Eq>{`u`}</Eq> klein ist.</em></p>
+  </>}
+>
+Approximiere $\ln(1{,}05)$ unter Verwendung von Linearisierung bei $a = 1$.
+</Exercicio>
+
+<Exercicio
+  numero="57.7"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.4", exercicio: "1.8.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = (1+x)^{10}`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f'(0) = 10`}</Eq>. <Eq>{`L(x) = 1 + 10x`}</Eq>. <Eq>{`L(0{,}02) = 1{,}2`}</Eq>. Wirklicher Wert: <Eq>{`1{,}02^{10} = 1{,}2190`}</Eq> — 1,6% Fehler.</>}
+>
+Approximiere $(1{,}02)^{10}$ unter Verwendung von Linearisierung von $(1+x)^{10}$ bei $x = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="57.8"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.1", exercicio: "4.4.1", licenca: "CC-BY-NC" }}
+  resposta="$3{,}019$"
+  solucao={<><Eq>{`f(x) = x^{1/3}`}</Eq>, <Eq>{`a = 27`}</Eq>. <Eq>{`f(27) = 3`}</Eq>, <Eq>{`f'(27) = (1/3)(27)^{-2/3} = 1/27`}</Eq>. <Eq>{`L(27{,}5) = 3 + (1/27)(0{,}5) = 3 + 0{,}0185 \\approx 3{,}019`}</Eq>. Wirklicher Wert: <Eq>{`27{,}5^{1/3} \\approx 3{,}0185`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Basispunkt.</strong> <Eq>{`a = 27`}</Eq>, weil <Eq>{`27^{1/3} = 3`}</Eq> perfekter Würfel exakt ist.</li>
+      <li><strong>Ableitung bei a.</strong> <Eq>{`f'(x) = \\frac{1}{3}x^{-2/3}`}</Eq>, <Eq>{`f'(27) = \\frac{1}{3} \\cdot 27^{-2/3} = \\frac{1}{3} \\cdot \\frac{1}{9} = \\frac{1}{27}`}</Eq>.</li>
+      <li><strong>Linearisierung.</strong> <Eq>{`L(x) = 3 + \\frac{1}{27}(x - 27)`}</Eq>.</li>
+      <li><strong>Auswertung.</strong> <Eq>{`L(27{,}5) = 3 + \\frac{0{,}5}{27} \\approx 3{,}0185`}</Eq>.</li>
+    </ol>
+    <p><em>Kuriosität: Newton verwendete diese Art der Berechnung, um Wurzeln ohne Taschenrechner zu berechnen. Die Methode war in der Arithmetica Universalis (1707) veröffentlicht.</em></p>
+  </>}
+>
+Approximiere $\sqrt[3]{27{,}5}$ unter Verwendung von Linearisierung bei $a = 27$.
+</Exercicio>
+
+<Exercicio
+  numero="57.9"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.5", exercicio: "4.2.5", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\tan x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f(0) = 0`}</Eq>, <Eq>{`f'(x) = \\sec^2 x`}</Eq>, <Eq>{`f'(0) = 1`}</Eq>. Linearisierung: <Eq>{`L(x) = x`}</Eq>.</>}
+>
+Schreib die Linearisierung von $f(x) = \tan x$ bei $a = 0$. Diese Linearisierung ist identisch mit der von $\sin x$ bei $a = 0$ — warum?
+</Exercicio>
+
+<Exercicio
+  numero="57.10"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.2", exercicio: "4.4.2", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = \\arctan x`}</Eq>, <Eq>{`a = 1`}</Eq>. <Eq>{`f(1) = \\pi/4`}</Eq>, <Eq>{`f'(x) = 1/(1+x^2)`}</Eq>, <Eq>{`f'(1) = 1/2`}</Eq>. Linearisierung: <Eq>{`L(x) = \\pi/4 + (1/2)(x-1)`}</Eq>.</>}
+>
+Schreib die Linearisierung von $f(x) = \arctan x$ bei $a = 1$.
+</Exercicio>
+
+<Exercicio
+  numero="57.11"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.6", exercicio: "1.8.6", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = e^x \\sin x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f(0) = 0`}</Eq>. Produktregel: <Eq>{`f'(x) = e^x \\sin x + e^x \\cos x`}</Eq>. <Eq>{`f'(0) = 0 + 1 = 1`}</Eq>. Linearisierung: <Eq>{`L(x) = x`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Werte f bei a = 0 aus.</strong> <Eq>{`f(0) = e^0 \\sin 0 = 1 \\cdot 0 = 0`}</Eq>.</li>
+      <li><strong>Berechne f'(x) durch Produktregel.</strong> <Eq>{`f'(x) = (e^x)' \\sin x + e^x (\\sin x)' = e^x \\sin x + e^x \\cos x`}</Eq>.</li>
+      <li><strong>Werte f'(0) aus.</strong> <Eq>{`f'(0) = e^0 \\sin 0 + e^0 \\cos 0 = 0 + 1 = 1`}</Eq>.</li>
+      <li><strong>Schreib L(x).</strong> <Eq>{`L(x) = 0 + 1 \\cdot (x - 0) = x`}</Eq>.</li>
+    </ol>
+    <p><em>Bemerkung: Obwohl es ein komplexes Produkt ist, ist die Linearisierung einfach — <Eq>{`e^x \\sin x \\approx x`}</Eq> nahe null — weil beide Faktoren einfache Linearisierungen haben, die sich multiplizieren wie <Eq>{`(1+x) \\cdot x \\approx x`}</Eq> für kleines <Eq>{`x`}</Eq>.</em></p>
+  </>}
+>
+Schreib die Linearisierung von $f(x) = e^x \sin x$ bei $a = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="57.12"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.7", exercicio: "1.8.7", licenca: "CC-BY-NC-SA" }}
+  resposta="$7{,}0714$"
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>, <Eq>{`a = 49`}</Eq>. <Eq>{`f(49) = 7`}</Eq>, <Eq>{`f'(49) = 1/14`}</Eq>. <Eq>{`L(50) = 7 + (1/14)(1) = 7{,}0714`}</Eq>. Wirklicher Wert: <Eq>{`\\sqrt{50} = 7{,}0711`}</Eq>.</>}
+>
+Approximiere $\sqrt{50}$ unter Verwendung von Linearisierung bei $a = 49$.
+</Exercicio>
+
+### Block B — Differential, Fehler und physikalische Anwendungen (57.13 bis 57.26)
+
+<Exercicio
+  numero="57.13"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.6", exercicio: "4.2.6", licenca: "CC-BY-NC-SA" }}
+  resposta="$dy = 0{,}12$"
+  solucao={<><Eq>{`y = x^3`}</Eq>. <Eq>{`dy = 3x^2\\,dx`}</Eq>. Bei <Eq>{`x = 2`}</Eq>, <Eq>{`dx = 0{,}01`}</Eq>: <Eq>{`dy = 3(4)(0{,}01) = 0{,}12`}</Eq>. Wirkliche Änderung: <Eq>{`\\Delta y = (2{,}01)^3 - 8 = 0{,}120601`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Schreib das Differential.</strong> <Eq>{`dy = \\frac{d}{dx}(x^3)\\,dx = 3x^2\\,dx`}</Eq>. Das Differential ist die Ableitung mal die Änderung in x.</li>
+      <li><strong>Ersetze die Werte.</strong> <Eq>{`x = 2`}</Eq>, <Eq>{`dx = 0{,}01`}</Eq>: <Eq>{`dy = 3(2)^2(0{,}01) = 3 \\cdot 4 \\cdot 0{,}01 = 0{,}12`}</Eq>.</li>
+      <li><strong>Bestätige mit der wirklichen Änderung.</strong> <Eq>{`\\Delta y = (2{,}01)^3 - 2^3 = 8{,}120601 - 8 = 0{,}120601`}</Eq>. Differenz: <Eq>{`0{,}120601 - 0{,}12 = 0{,}000601`}</Eq>. Weniger als 0,5%.</li>
+    </ol>
+    <p><em>Trick: Das Differential ist immer eine Form 1. Ordnung — ignoriert alle Terme 2. Ordnung in <Eq>{`dx`}</Eq>. Der Unterschied zwischen <Eq>{`\\Delta y`}</Eq> und <Eq>{`dy`}</Eq> ist genau diese höheren Ordnung-Terme.</em></p>
+  </>}
+>
+Berechne das Differential $dy$ für $y = x^3$ bei $x = 2$, $dx = 0{,}01$. Vergleiche mit der wirklichen Änderung $\Delta y$.
+</Exercicio>
+
+<Exercicio
+  numero="57.14"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.7", exercicio: "4.2.7", licenca: "CC-BY-NC-SA" }}
+  resposta="$dy = 0{,}1$"
+  solucao={<><Eq>{`y = e^x`}</Eq>. <Eq>{`dy = e^x\\,dx`}</Eq>. Bei <Eq>{`x = 0`}</Eq>, <Eq>{`dx = 0{,}1`}</Eq>: <Eq>{`dy = e^0 \\cdot 0{,}1 = 0{,}1`}</Eq>. Wirklicher Wert: <Eq>{`e^{0{,}1} - 1 = 0{,}1052`}</Eq>.</>}
+>
+Berechne das Differential $dy$ für $y = e^x$ bei $x = 0$, $dx = 0{,}1$.
+</Exercicio>
+
+<Exercicio
+  numero="57.15"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.8", exercicio: "1.8.8", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>, <Eq>{`a = \\pi/6`}</Eq> (30°). <Eq>{`f'(\\pi/6) = \\cos(\\pi/6) = \\sqrt{3}/2 \\approx 0{,}866`}</Eq>. Differenz: <Eq>{`1° = \\pi/180 \\approx 0{,}01745`}</Eq> rad. <Eq>{`L = 0{,}5 + 0{,}866 \\times 0{,}01745 \\approx 0{,}5151`}</Eq>. Wirklicher Wert: <Eq>{`\\sin(31°) = 0{,}5150`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Konvertiere Winkel zu Radianten.</strong> <Eq>{`a = 30° = \\pi/6`}</Eq>, <Eq>{`x = 31° = 31\\pi/180`}</Eq>.</li>
+      <li><strong>Berechne x - a.</strong> <Eq>{`x - a = 1° = \\pi/180 \\approx 0{,}01745`}</Eq> rad.</li>
+      <li><strong>Ableitung bei a.</strong> <Eq>{`f'(\\pi/6) = \\cos(\\pi/6) = \\sqrt{3}/2 \\approx 0{,}866`}</Eq>.</li>
+      <li><strong>Linearisierung.</strong> <Eq>{`L = 0{,}5 + 0{,}866 \\times 0{,}01745 \\approx 0{,}5151`}</Eq>.</li>
+    </ol>
+    <p><em>Trick: Wenn Linearisierung trigonometrischer Funktionen in Grad angegebener Winkel, konvertiere IMMER zu Radianten vor Anwendung der Ableitung. Grad funktionieren nicht mit den üblichen Ableitungen.</em></p>
+  </>}
+>
+Approximiere $\sin(31°)$ unter Verwendung von Linearisierung von $\sin$ bei $a = 30°$. Verwende $\sin(30°) = 0{,}5$ und $\cos(30°) = \sqrt{3}/2$.
+</Exercicio>
+
+<Exercicio
+  numero="57.16"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.3", exercicio: "4.4.3", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = \\cos x`}</Eq>, <Eq>{`a = \\pi/3`}</Eq> (60°). <Eq>{`f(\\pi/3) = 0{,}5`}</Eq>, <Eq>{`f'(\\pi/3) = -\\sin(\\pi/3) = -\\sqrt{3}/2`}</Eq>. Differenz: <Eq>{`59° - 60° = -\\pi/180`}</Eq>. <Eq>{`L = 0{,}5 + (-0{,}866)(-\\pi/180) \\approx 0{,}5151`}</Eq>.</>}
+>
+Approximiere $\cos(59°)$ unter Verwendung von Linearisierung von $\cos$ bei $a = 60°$.
+</Exercicio>
+
+<Exercicio
+  numero="57.17"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.8", exercicio: "4.2.8", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$L(x) = 1 + x/2$", correta: true },
+    { texto: "$L(x) = 1 + x$" },
+    { texto: "$L(x) = 1 - x/2$" },
+    { texto: "$L(x) = x/2$" },
+  ]}
+  solucao={<><Eq>{`f(x) = \\sqrt{1+x}`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f(0) = 1`}</Eq>, <Eq>{`f'(x) = 1/(2\\sqrt{1+x})`}</Eq>, <Eq>{`f'(0) = 1/2`}</Eq>. <Eq>{`L(x) = 1 + x/2`}</Eq>. Ablenkung B ignoriert den Faktor 1/2 der Ableitung. Ablenkung C fehlt das Zeichen. Ablenkung D vergisst den Wert bei a = 0.</>}
+>
+Was ist die Linearisierung von $f(x) = \sqrt{1 + x}$ bei $a = 0$?
+</Exercicio>
+
+<Exercicio
+  numero="57.18"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.9", exercicio: "1.8.9", licenca: "CC-BY-NC-SA" }}
+  resposta="$0{,}4938$"
+  solucao={<><Eq>{`g(x) = x^{-1/2}`}</Eq>, <Eq>{`a = 4`}</Eq>. <Eq>{`g(4) = 1/2`}</Eq>, <Eq>{`g'(x) = -1/(2x^{3/2})`}</Eq>, <Eq>{`g'(4) = -1/16`}</Eq>. <Eq>{`L(4{,}1) = 0{,}5 - (1/16)(0{,}1) = 0{,}5 - 0{,}00625 = 0{,}4938`}</Eq>.</>}
+>
+Approximiere $1/\sqrt{4{,}1}$ unter Verwendung von Linearisierung bei $a = 4$.
+</Exercicio>
+
+<Exercicio
+  numero="57.19"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.9", exercicio: "4.2.9", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq>, <Eq>{`a = e`}</Eq>. <Eq>{`f(e) = 1`}</Eq>, <Eq>{`f'(e) = 1/e`}</Eq>. <Eq>{`L(x) = 1 + (x-e)/e`}</Eq>.</>}
+>
+Schreib die Linearisierung von $f(x) = \ln x$ bei $a = e$.
+</Exercicio>
+
+<Exercicio
+  numero="57.20"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.10", exercicio: "1.8.10", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Absoluter Fehler der Linearisierung von <Eq>{`\\sqrt{4{,}1}`}</Eq>: <Eq>{`|L(4{,}1) - \\sqrt{4{,}1}| = |2{,}025 - 2{,}024846| \\approx 0{,}000154`}</Eq>. Theoretisches Limit: <Eq>{`M_2(0{,}1)^2/2`}</Eq> wobei <Eq>{`M_2 = 1/(4 \\cdot 4^{3/2}) = 1/32`}</Eq>. Limit: <Eq>{`(1/32)(0{,}01)/2 = 0{,}000156`}</Eq>. Der wirkliche Fehler liegt innerhalb des Limits.</>}
+>
+Berechne den absoluten Fehler der Linearisierung von $\sqrt{4{,}1}$ bei $a = 4$, verglichen mit $\sqrt{4{,}1} \approx 2{,}024846$. Verifiziere, dass der Fehler innerhalb des Limits $M_2 h^2/2$ liegt.
+</Exercicio>
+
+<Exercicio
+  numero="57.21"
+  dificuldade="aplicacao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.11", exercicio: "1.8.11", licenca: "CC-BY-NC-SA" }}
+  resposta="$x_1 = 2{,}25$"
+  solucao={<><Eq>{`f(x) = x^2 - 5`}</Eq>, <Eq>{`f'(x) = 2x`}</Eq>. Mit <Eq>{`x_0 = 2`}</Eq>: <Eq>{`x_1 = 2 - (4-5)/4 = 2 + 1/4 = 2{,}25`}</Eq>. Wirklicher Wert: <Eq>{`\\sqrt{5} = 2{,}2361`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Reformuliere das Problem.</strong> $\sqrt{5}$ zu finden ist äquivalent zu Lösen <Eq>{`x^2 - 5 = 0`}</Eq>. Definiere <Eq>{`f(x) = x^2 - 5`}</Eq>, <Eq>{`f'(x) = 2x`}</Eq>.</li>
+      <li><strong>Wende Newton-Raphson an.</strong> <Eq>{`x_1 = x_0 - f(x_0)/f'(x_0) = 2 - (4 - 5)/(2 \\cdot 2) = 2 - (-1)/4 = 2 + 0{,}25 = 2{,}25`}</Eq>.</li>
+      <li><strong>Werte den Fehler aus.</strong> <Eq>{`|\\sqrt{5} - 2{,}25| = |2{,}2361 - 2{,}25| = 0{,}0139`}</Eq>. Wir begannen bei 0 und haben bereits 2 richtige Ziffern in 1 Iteration.</li>
+    </ol>
+    <p><em>Trick: Die Konvergenz ist quadratisch — in der nächsten Iteration würde der Fehler <Eq>{`\\approx C(0{,}014)^2 \\approx 0{,}0001`}</Eq> sein, was kostenlos 2 weitere Dezimalstellen ergibt.</em></p>
+  </>}
+>
+Führe eine Newton-Raphson-Iteration durch, um $\sqrt{5}$ zu finden, beginnend mit $x_0 = 2$.
+</Exercicio>
+
+<Exercicio
+  numero="57.22"
+  dificuldade="aplicacao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.4", exercicio: "4.4.4", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = x^3 - 2`}</Eq>, <Eq>{`f'(x) = 3x^2`}</Eq>. <Eq>{`x_1 = 1 - (-1)/3 = 4/3 \\approx 1{,}333`}</Eq>. <Eq>{`f(4/3) = 64/27 - 2 = 10/27`}</Eq>. <Eq>{`x_2 = 4/3 - (10/27)/(3 \\cdot 16/9) = 4/3 - 10/144 \\approx 1{,}2637`}</Eq>. Wirklich: <Eq>{`2^{1/3} = 1{,}2599`}</Eq>.</>}
+>
+Führe zwei Newton-Raphson-Iterationen durch, um $x^3 - 2 = 0$ mit $x_0 = 1$ zu lösen.
+</Exercicio>
+
+<Exercicio
+  numero="57.23"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.11", exercicio: "4.2.11", licenca: "CC-BY-NC-SA" }}
+  resposta="$dV \approx 10\pi \approx 31{,}4$ cm³"
+  solucao={<><Eq>{`V = (4/3)\\pi r^3`}</Eq>. <Eq>{`dV = 4\\pi r^2\\,dr`}</Eq>. Mit <Eq>{`r = 5`}</Eq>, <Eq>{`dr = 0{,}1`}</Eq>: <Eq>{`dV = 4\\pi(25)(0{,}1) = 10\\pi \\approx 31{,}4`}</Eq> cm³. Relativer Fehler: <Eq>{`10\\pi/(500\\pi/3) \\approx 6\\%`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Differenial des Volumens.</strong> <Eq>{`V = \\frac{4}{3}\\pi r^3 \\Rightarrow dV = 4\\pi r^2\\,dr`}</Eq>. Beachte, dass <Eq>{`4\\pi r^2`}</Eq> die Oberfläche der Kugel ist — ergibt geometrisch Sinn.</li>
+      <li><strong>Ersetze die Werte.</strong> <Eq>{`r = 5`}</Eq> cm, <Eq>{`dr = 0{,}1`}</Eq> cm: <Eq>{`dV = 4\\pi(25)(0{,}1) = 10\\pi \\approx 31{,}4`}</Eq> cm³.</li>
+      <li><strong>Berechne den relativen Fehler.</strong> <Eq>{`V(5) = (4/3)\\pi(125) = 500\\pi/3 \\approx 524`}</Eq> cm³. Relativer Fehler: <Eq>{`31{,}4/524 \\approx 6\\%`}</Eq>.</li>
+    </ol>
+    <p><em>Kuriosität: Der relative Fehler im Volumen ist 3-mal der relative Fehler im Radius — Konsequenz von <Eq>{`V \\propto r^3`}</Eq>. Allgemeine Regel: Für <Eq>{`f(x) = x^n`}</Eq> ist der relative Fehler in <Eq>{`f`}</Eq> $n$-mal der relative Fehler in <Eq>{`x`}</Eq>.</em></p>
+  </>}
+>
+Die Kugel hat Radius $r = 5{,}0 \pm 0{,}1$ cm. Schätze den maximalen Fehler im Volumen $V = \frac{4}{3}\pi r^3$ mit Differential.
+</Exercicio>
+
+<Exercicio
+  numero="57.24"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.6", exercicio: "4.4.6", licenca: "CC-BY-NC" }}
+  resposta="$0{,}5\%$"
+  solucao={<><Eq>{`T = 2\\pi\\sqrt{L/g}`}</Eq>. <Eq>{`dT/T = (1/2)\\,dL/L`}</Eq>. Relativer Fehler in <Eq>{`L`}</Eq> von 1% ergibt <Eq>{`dT/T = 0{,}5\\%`}</Eq>. Der Fehler in der Periode ist die Hälfte des Fehlers in der Länge.</>}
+  passos={<>
+    <ol>
+      <li><strong>Schreib T als Potenz von L.</strong> <Eq>{`T = 2\\pi g^{-1/2} L^{1/2}`}</Eq>. Der Exponent von <Eq>{`L`}</Eq> ist <Eq>{`1/2`}</Eq>.</li>
+      <li><strong>Regel des relativen Fehlers.</strong> Für <Eq>{`T \\propto L^{1/2}`}</Eq> ist der relative Fehler in <Eq>{`T`}</Eq> <Eq>{`1/2`}</Eq> mal der relative Fehler in <Eq>{`L`}</Eq>.</li>
+      <li><strong>Wende an.</strong> <Eq>{`dT/T = (1/2) \\cdot 1\\% = 0{,}5\\%`}</Eq>.</li>
+    </ol>
+    <p><em>Trick: Der Exponent erscheint als multiplikativer Faktor der relativen Fehler. Für Quadratwurzel (Exponent 1/2) sinkt der relative Fehler um die Hälfte. Für Quadratur (Exponent 2) verdoppelt sich der relative Fehler.</em></p>
+  </>}
+>
+Die Periode eines Pendels ist $T = 2\pi\sqrt{L/g}$. Wenn die Länge $L$ einen relativen Fehler von $1\%$ hat, was ist der relative Fehler in $T$?
+</Exercicio>
+
+<Exercicio
+  numero="57.25"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.13", exercicio: "4.2.13", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`R = V/I`}</Eq>. <Eq>{`\\partial R/\\partial V = 1/I`}</Eq>, <Eq>{`\\partial R/\\partial I = -V/I^2`}</Eq>. <Eq>{`\\sigma_R^2 \\approx (\\sigma_V/I)^2 + (V\\sigma_I/I^2)^2`}</Eq>, also <Eq>{`\\sigma_R = \\sqrt{(\\sigma_V/I)^2 + (V\\sigma_I/I^2)^2}`}</Eq>. Die Formel verbreitet die Fehler quadratisch für unabhängige Fehler.</>}
+>
+Für $R = V/I$ mit unabhängigen Fehlern $\sigma_V$ und $\sigma_I$, schreib die Fehlerfortpflanzungsformel für $\sigma_R$ unter Verwendung von partiellen Ableitungen.
+</Exercicio>
+
+<Exercicio
+  numero="57.26"
+  dificuldade="modelagem"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.7", exercicio: "4.4.7", licenca: "CC-BY-NC" }}
+  resposta="$dA \approx 1{,}2$ cm²"
+  solucao={<><Eq>{`A = \\pi r^2`}</Eq>. <Eq>{`dA = 2\\pi r\\,dr`}</Eq>. Mit <Eq>{`r = 3`}</Eq>, <Eq>{`dr = 0{,}064`}</Eq> (denn <Eq>{`dA = 1{,}2 \\Rightarrow dr = 1{,}2/(2\\pi \\cdot 3) = 0{,}0637`}</Eq>): <Eq>{`dA = 2\\pi(3)(0{,}0637) \\approx 1{,}2`}</Eq> cm².</>}
+>
+Die Fläche eines Kreises ist $A = \pi r^2$ mit $r = 3{,}0 \pm 0{,}064$ cm. Schätze den maximalen Fehler in $A$ mit dem Differential.
+</Exercicio>
+
+### Block C — Konzeptionelle Verständnis (57.27 bis 57.34)
+
+<Exercicio
+  numero="57.27"
+  dificuldade="compreensao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.12", exercicio: "1.8.12", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "Quadratisch: $O((x-a)^2)$", correta: true },
+    { texto: "Linear: $O(x-a)$" },
+    { texto: "Logarithmisch: $O(\\ln(x-a))$" },
+    { texto: "Exponenziell: $O(e^{x-a})$" },
+  ]}
+  solucao={<>Nach Taylor mit Lagrange-Rest: <Eq>{`f(x) - L(x) = f''(\\xi)(x-a)^2/2`}</Eq>. Der Fehler wächst mit dem Quadrat der Entfernung zum Basispunkt. Ablenkung B verwechselt mit dem Wachstum der Linearisierung selbst. Ablenkungen C und D haben keine Grundlage in Taylor.</>}
+  passos={<>
+    <ol>
+      <li><strong>Schreib Taylor mit Rest.</strong> <Eq>{`f(x) = f(a) + f'(a)(x-a) + \\frac{f''(\\xi)}{2}(x-a)^2`}</Eq> für ein <Eq>{`\\xi`}</Eq> zwischen <Eq>{`a`}</Eq> und <Eq>{`x`}</Eq>.</li>
+      <li><strong>Identifiziere den Fehler.</strong> <Eq>{`f(x) - L(x) = \\frac{f''(\\xi)}{2}(x-a)^2`}</Eq>. Der Term ist quadratisch in <Eq>{`(x-a)`}</Eq>.</li>
+      <li><strong>Interpretiere.</strong> Wenn <Eq>{`|x-a|`}</Eq> sich halbiert, fällt der Fehler um den Faktor 4. Wenn er sich verdoppelt, vervierfacht sich der Fehler.</li>
+    </ol>
+    <p><em>Trick: "2. Ordnung" bedeutet, dass der Exponent von <Eq>{`(x-a)`}</Eq> im Fehler 2 ist — deshalb ist die Linearisierung so nützlich für kleine Entfernungen, aber versagt für große Entfernungen.</em></p>
+  </>}
+>
+Warum wird der Fehler der Linearisierung $|f(x) - L(x)|$ als $O((x-a)^2)$ bezeichnet? Welcher Satz begründet das?
+</Exercicio>
+
+<Exercicio
+  numero="57.28"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.14", exercicio: "4.2.14", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Wenn <Eq>{`f'(a) = 0`}</Eq>, ist die Linearisierung <Eq>{`L(x) = f(a)`}</Eq> konstant. Das Verhalten von <Eq>{`f`}</Eq> nahe <Eq>{`a`}</Eq> wird von der Krümmung (<Eq>{`f''`}</Eq>) dominiert, nicht von der Steigung. Die Linearisierung ist nutzlos ungenau an diesen Punkten — verwende 2. Ordnung Taylor: <Eq>{`f(x) \\approx f(a) + f''(a)(x-a)^2/2`}</Eq>.</>}
+>
+In welcher Umgebung ist die Linearisierung von $f$ in $a$ besonders ungenau, selbst für $x$ nahe bei $a$? Was sollte man in diesen Fällen tun?
+</Exercicio>
+
+<Exercicio
+  numero="57.29"
+  dificuldade="compreensao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.13", exercicio: "1.8.13", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>, <Eq>{`a = 0`}</Eq>: <Eq>{`f'(0) = \\cos(0) = 1`}</Eq>. Linearisierung: <Eq>{`L(x) = x`}</Eq>. Die Approximation <Eq>{`\\sin x \\approx x`}</Eq> hat Fehler unter 1% für <Eq>{`|x| < 0{,}17`}</Eq> rad (etwa 10°). Das Fehler-Limit ist <Eq>{`|x|^2/2`}</Eq>; für 1% von <Eq>{`\\sin x \\approx x`}</Eq>, löse <Eq>{`x^2/2 < 0{,}01 x`}</Eq>, oder <Eq>{`x < 0{,}02`}</Eq> — aber das praktische Ingenieur-Kriterium ist bis 14°.</>}
+>
+Zeige, dass $\sin x \approx x$ die Linearisierung von $\sin$ bei $a = 0$ ist. Für welche Werte von $x$ (in Radianten) ist der Fehler unter 1%?
+</Exercicio>
+
+<Exercicio
+  numero="57.30"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.15", exercicio: "4.2.15", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$\\Delta y \\to dy$ wenn $\\Delta x \\to 0$", correta: true },
+    { texto: "$\\Delta y = dy$ immer" },
+    { texto: "$dy = \\Delta y$ nur wenn $f$ linear ist" },
+    { texto: "$\\Delta y > dy$ immer" },
+  ]}
+  solucao={<><Eq>{`\\Delta y = f(x + \\Delta x) - f(x)`}</Eq> ist die wirkliche Änderung. <Eq>{`dy = f'(x)\\,\\Delta x`}</Eq> ist die lineare Änderung. Die Differenz <Eq>{`\\Delta y - dy = O(\\Delta x^2)`}</Eq> tendiert zu null schneller als <Eq>{`\\Delta x`}</Eq>. Ablenkung B ignoriert den Fehler 2. Ordnung. Ablenkung C ist richtig für affine Funktionen, aber die Frage ist Gleichheit im Allgemeinen. Ablenkung D ist falsch: für konkave Funktionen <Eq>{`\\Delta y < dy`}</Eq>.</>}
+>
+Was ist die Beziehung zwischen $\Delta y$ (wirkliche Änderung) und $dy$ (Differential)?
+</Exercicio>
+
+<Exercicio
+  numero="57.31"
+  dificuldade="compreensao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.8", exercicio: "4.4.8", licenca: "CC-BY-NC" }}
+  solucao={<>Newton-Raphson: <Eq>{`x_{n+1} = x_n - f(x_n)/f'(x_n)`}</Eq>. Ursprung: wir nullen die Linearisierung von <Eq>{`f`}</Eq> bei <Eq>{`x_n`}</Eq>. Die Tangente ist <Eq>{`L(x) = f(x_n) + f'(x_n)(x - x_n)`}</Eq>; Nullen: <Eq>{`x = x_n - f(x_n)/f'(x_n)`}</Eq>. Jede Iteration ist eine lokale Linearisierung, deren Null die nächste Schätzung wird.</>}
+>
+Erkläre, woher die Newton-Raphson-Formel $x_{n+1} = x_n - f(x_n)/f'(x_n)$ in Begriffen der Linearisierung kommt.
+</Exercicio>
+
+<Exercicio
+  numero="57.32"
+  dificuldade="compreensao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.14", exercicio: "1.8.14", licenca: "CC-BY-NC-SA" }}
+  resposta="$\approx 1{,}06$"
+  solucao={<><Eq>{`f(x) = (1+x)^{30}`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f'(0) = 30`}</Eq>. <Eq>{`L(0{,}002) = 1 + 30(0{,}002) = 1{,}06`}</Eq>. Wirklicher Wert: <Eq>{`(1{,}002)^{30} \\approx 1{,}0618`}</Eq>.</>}
+>
+Verwende Linearisierung, um $(1{,}002)^{30}$ zu approximieren.
+</Exercicio>
+
+<Exercicio
+  numero="57.33"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.16", exercicio: "4.2.16", licenca: "CC-BY-NC-SA" }}
+  resposta="$3\%$"
+  solucao={<><Eq>{`V = s^3`}</Eq>. <Eq>{`dV = 3s^2\\,ds`}</Eq>. Relativer Fehler in <Eq>{`V`}</Eq>: <Eq>{`dV/V = 3\\,ds/s = 3 \\times 1\\% = 3\\%`}</Eq>. Der Exponent 3 erscheint als multiplikativer Faktor.</>}
+  passos={<>
+    <ol>
+      <li><strong>Differenial des Volumens.</strong> <Eq>{`V = s^3 \\Rightarrow dV = 3s^2\\,ds`}</Eq>.</li>
+      <li><strong>Relativer Fehler.</strong> Teile <Eq>{`dV`}</Eq> durch <Eq>{`V`}</Eq>: <Eq>{`dV/V = 3s^2 ds / s^3 = 3(ds/s)`}</Eq>.</li>
+      <li><strong>Ersetze.</strong> <Eq>{`ds/s = 1\\% \\Rightarrow dV/V = 3 \\times 1\\% = 3\\%`}</Eq>.</li>
+    </ol>
+    <p><em>Trick: Für jedes <Eq>{`f(x) = x^n`}</Eq> ist der relative Fehler in <Eq>{`f`}</Eq> $n$-mal der relative Fehler in <Eq>{`x`}</Eq>. Das folgt direkt aus der Potenzregel angewendet auf das Differential.</em></p>
+  </>}
+>
+Die Seite eines Würfels wird mit relativem Fehler von $1\%$ gemessen. Was ist der relative Fehler im Volumen $V = s^3$?
+</Exercicio>
+
+<Exercicio
+  numero="57.34"
+  dificuldade="compreensao"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.9", exercicio: "4.4.9", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`g(x) = (1+x)^{-1/2}`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`g'(x) = -\\frac{1}{2}(1+x)^{-3/2}`}</Eq>, <Eq>{`g'(0) = -1/2`}</Eq>. <Eq>{`L(x) = 1 - x/2`}</Eq>. Das ist die Binomial-Approximation für Exponent <Eq>{`-1/2`}</Eq>.</>}
+>
+Schreib die Linearisierung von $g(x) = 1/\sqrt{1+x}$ bei $a = 0$.
+</Exercicio>
+
+### Block D — Herausforderung und Beweis (57.35 bis 57.40)
+
+<Exercicio
+  numero="57.35"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.15", exercicio: "1.8.15", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Linearisierung von <Eq>{`e^x`}</Eq> bei <Eq>{`a = 0`}</Eq>: <Eq>{`L(1) = 1 + 1 = 2`}</Eq>. Wirklicher Wert: <Eq>{`e^1 = 2{,}71828`}</Eq>. Absoluter Fehler: <Eq>{`|2{,}71828 - 2| = 0{,}71828`}</Eq>. Relativer Fehler: <Eq>{`0{,}71828 / 2{,}71828 \\approx 26{,}4\\%`}</Eq>. Es ist groß, weil <Eq>{`x = 1`}</Eq> weit weg von <Eq>{`a = 0`}</Eq> ist: das Fehler-Limit ist <Eq>{`e \\cdot 1^2/2 \\approx 1{,}36`}</Eq>, viel größer als der wirkliche Fehler, aber nicht null.</>}
+  passos={<>
+    <ol>
+      <li><strong>Berechne L(1).</strong> <Eq>{`L(x) = 1 + x`}</Eq>; <Eq>{`L(1) = 2`}</Eq>.</li>
+      <li><strong>Wirklicher Wert.</strong> <Eq>{`e^1 = e \\approx 2{,}71828`}</Eq>.</li>
+      <li><strong>Absoluter Fehler.</strong> <Eq>{`|e - 2| = 0{,}71828`}</Eq>.</li>
+      <li><strong>Relativer Fehler.</strong> <Eq>{`0{,}71828/2{,}71828 \\approx 26{,}4\\%`}</Eq>. Groß: der Punkt <Eq>{`x = 1`}</Eq> ist weit weg von <Eq>{`a = 0`}</Eq>.</li>
+    </ol>
+    <p><em>Bemerkung: Um für <Eq>{`x = 1`}</Eq> zu verbessern, verwende Basispunkt <Eq>{`a = 1`}</Eq> und <Eq>{`e^{0{,}1}`}</Eq> als Ziel — oder verwende höher Grad Taylor.</em></p>
+  </>}
+>
+Berechne den absoluten und relativen Fehler der Linearisierung von $e^x$ bei $a = 0$ bei der Approximation von $e^1 = e$. Ist das Ergebnis überraschend? Erkläre.
+</Exercicio>
+
+<Exercicio
+  numero="57.36"
+  dificuldade="desafio"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.10", exercicio: "4.4.10", licenca: "CC-BY-NC" }}
+  solucao={<>Wenn <Eq>{`f'(x_n) = 0`}</Eq>, ist die Tangente bei <Eq>{`x_n`}</Eq> horizontal und kreuzt nie die <Eq>{`x`}</Eq>-Achse. Newton-Raphson versucht, durch <Eq>{`f'(x_n) = 0`}</Eq> zu dividieren: undefiniert. Beispiel: <Eq>{`f(x) = x^2`}</Eq> mit Nullstelle bei <Eq>{`x^* = 0`}</Eq> und <Eq>{`f'(0) = 0`}</Eq>. Newton oszilliert oder divergiert in diesem Fall — die horizontale Tangente gibt keine Richtungsinformation.</>}
+>
+Newton-Raphson versagt, wenn $f'(x_n) = 0$. Erkläre geometrisch und gib ein Beispiel einer Funktion, in der das auftritt.
+</Exercicio>
+
+<Exercicio
+  numero="57.37"
+  dificuldade="desafio"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.16", exercicio: "1.8.16", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Aus Taylor: <Eq>{`f(x) = L(x) + f''(\\xi)(x-a)^2/2`}</Eq>. Daher <Eq>{`|f(x) - L(x)| = |f''(\\xi)||x-a|^2/2 \\leq M_2(x-a)^2/2`}</Eq> wobei <Eq>{`M_2 = \\max_{[a,x]}|f''|`}</Eq>. Das Limit ist <Eq>{`M_2 h^2/2`}</Eq> mit <Eq>{`h = |x - a|`}</Eq>.</>}
+>
+Leite die Fehler-Oben $|f(x) - L(x)| \leq \frac{M_2}{2}(x-a)^2$ vom Taylor-Satz mit Lagrange-Rest ab.
+</Exercicio>
+
+<Exercicio
+  numero="57.38"
+  dificuldade="desafio"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.11", exercicio: "4.4.11", licenca: "CC-BY-NC" }}
+  resposta="$dV = 15\pi \approx 47{,}1$ cm³"
+  solucao={<><Eq>{`V = \\pi r^2 h`}</Eq>. Totales Differential: <Eq>{`dV = 2\\pi r h\\,dr + \\pi r^2\\,dh`}</Eq>. Mit <Eq>{`r = 5`}</Eq>, <Eq>{`h = 10`}</Eq>, <Eq>{`dr = 0{,}1`}</Eq>, <Eq>{`dh = 0{,}2`}</Eq>: <Eq>{`dV = 2\\pi(5)(10)(0{,}1) + \\pi(25)(0{,}2) = 10\\pi + 5\\pi = 15\\pi \\approx 47{,}1`}</Eq> cm³.</>}
+  passos={<>
+    <ol>
+      <li><strong>Totales Differential.</strong> Für Funktionen zweier Variablen: <Eq>{`dV = \\frac{\\partial V}{\\partial r}\\,dr + \\frac{\\partial V}{\\partial h}\\,dh`}</Eq>.</li>
+      <li><strong>Partielle Ableitungen.</strong> <Eq>{`\\partial V/\\partial r = 2\\pi r h`}</Eq>, <Eq>{`\\partial V/\\partial h = \\pi r^2`}</Eq>.</li>
+      <li><strong>Ersetze.</strong> <Eq>{`dV = 2\\pi(5)(10)(0{,}1) + \\pi(25)(0{,}2) = 10\\pi + 5\\pi = 15\\pi \\approx 47{,}1`}</Eq> cm³.</li>
+    </ol>
+    <p><em>Trick: Das totale Differential verallgemeinert das eindimensionale Differential auf Funktionen mehrerer Variablen — jede Variable trägt mit ihrer partiellen Ableitung mal ihrer Änderung bei.</em></p>
+  </>}
+>
+Volumen des Zylinders: $V = \pi r^2 h$. Mit $r = 5{,}0 \pm 0{,}1$ cm und $h = 10{,}0 \pm 0{,}2$ cm, schätze den maximalen Fehler in $V$ mit totalem Differential.
+</Exercicio>
+
+<Exercicio
+  numero="57.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.17", exercicio: "1.8.17", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Vollständige Taylor-Reihe: <Eq>{`f(x) = \\sum_{k=0}^{\\infty} \\frac{f^{(k)}(a)}{k!}(x-a)^k`}</Eq>. Abschneiden bei <Eq>{`k = 1`}</Eq>: <Eq>{`P_1(x) = f(a) + f'(a)(x-a) = L(x)`}</Eq>. Die Linearisierung ist das Taylor-Polynom Grad 1. Der Fehler <Eq>{`f(x) - P_1(x) = \\sum_{k=2}^{\\infty} \\frac{f^{(k)}(a)}{k!}(x-a)^k`}</Eq> hat dominanten Term <Eq>{`O((x-a)^2)`}</Eq>.</>}
+>
+Zeige, dass $L(x) = f(a) + f'(a)(x-a)$ das Taylor-Polynom Grad 1 von $f$ in $a$ ist, und dass der Fehler $O((x-a)^2)$ ist.
+</Exercicio>
+
+<Exercicio
+  numero="57.40"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.18", exercicio: "1.8.18", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Sei <Eq>{`x^*`}</Eq> die genaue Nullstelle (<Eq>{`f(x^*) = 0`}</Eq>), <Eq>{`e_n = x_n - x^*`}</Eq>. Taylor in <Eq>{`x^*`}</Eq>: <Eq>{`f(x_n) = f'(x^*) e_n + f''(\\xi_n) e_n^2/2`}</Eq>. Newton-Iteration: <Eq>{`e_{n+1} = x_{n+1} - x^* = x_n - f(x_n)/f'(x_n) - x^*`}</Eq>. Expand und vereinfache: <Eq>{`e_{n+1} \\approx -f''(x^*) e_n^2 / (2f'(x^*))`}</Eq>. Daher <Eq>{`|e_{n+1}| \\leq C|e_n|^2`}</Eq> mit <Eq>{`C = |f''(x^*)| / (2|f'(x^*)|)`}</Eq>. Quadratische Konvergenz.</>}
+>
+Zeige, dass Newton-Raphson quadratische Konvergenz hat: wenn $e_n = x_n - x^*$ der Fehler in der $n$-ten Iteration ist und $f'(x^*) \neq 0$, dann $|e_{n+1}| \leq C\,|e_n|^2$ für irgendeine Konstante $C > 0$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Quellen
+
+- [**Active Calculus**](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · 2024 · §1.8 "The tangent line approximation" · CC-BY-NC-SA. **Primärquelle.** Übungen 57.1–57.2, 57.5, 57.7, 57.11–57.12, 57.15, 57.20–57.21, 57.27, 57.29, 57.31, 57.35, 57.37, 57.39–57.40.
+- [**Calculus Volume 1**](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials) — OpenStax · 2016 · §4.2 "Linear Approximations and Differentials" · CC-BY-NC-SA. Übungen 57.3–57.4, 57.6, 57.13–57.14, 57.17–57.19, 57.23, 57.25, 57.28, 57.30, 57.33.
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman et al. · 2024 · v5 · §4.4 "Differentials" · CC-BY-NC. Übungen 57.8–57.10, 57.16, 57.22, 57.24, 57.26, 57.31, 57.34, 57.36, 57.38.

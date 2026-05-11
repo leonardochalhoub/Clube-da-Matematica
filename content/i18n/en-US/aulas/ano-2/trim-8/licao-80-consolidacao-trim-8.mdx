@@ -1,0 +1,890 @@
+---
+titulo: "Lesson 80 — Consolidation Term 8 — Applied Statistics and Probability"
+slug: "licao-80-consolidacao-trim-8"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Integrative workshop: central measures, variance, quartiles, discrete r.v., binomial, normal, CLT, correlation, and Bayes in real-world problems."
+ordem: 80
+publicado: true
+tags: ["estatística", "probabilidade", "consolidacao", "ano-2", "trim-8"]
+prerrequisitos: ["licao-79-bayes"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2025-05-14"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "Equiv. H2 Maths Statistics (Singapura)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{Dados} \xrightarrow{\text{descrever}} \hat\mu,\,\hat\sigma \xrightarrow{\text{modelar}} P(X) \xrightarrow{\text{inferir}} P(H \mid E)"
+  legenda={<>The <strong>complete pipeline</strong> of the term: summarizing data with <Eq>{`\\hat\\mu`}</Eq> and <Eq>{`\\hat\\sigma`}</Eq>, choosing a probabilistic model (binomial, normal), and updating beliefs via Bayes' rule <Eq>{`P(H\\mid E)`}</Eq>. Each arrow represents a lesson; this lesson weaves the arrows into a chain.</>}
+  audioTexto="Term 8 Pipeline. Data leads to descriptive statistics: estimated mean and standard deviation. Statistics lead to a probabilistic model: P of X. The model leads to Bayesian inference: probability of H given E."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books covering this lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://www.openintro.org/book/os/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenIntro Statistics (4th ed.)
+      </a>
+      <span className="text-clube-mist"> · §§2–3, 6–8 · CC-BY-SA · </span>
+      <em className="text-clube-mist">Primary source for the term: descriptive measures, distributions, CLT, regression, and Bayes with real-world data examples.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/statistics" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Statistics
+      </a>
+      <span className="text-clube-mist"> · chaps. 2–9 · CC-BY · </span>
+      <em className="text-clube-mist">Exercises contextualized in public health, business, and science; full coverage of binomial, normal, and CI.</em>
+    </li>
+    <li>
+      <a href="https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Grinstead &amp; Snell — Introduction to Probability
+      </a>
+      <span className="text-clube-mist"> · chaps. 1, 5–9 · GNU FDL · </span>
+      <em className="text-clube-mist">Theoretical rigor for discrete r.v., Law of Large Numbers, and CLT with accessible proofs.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Formal synthesis of the term">
+
+### Descriptive statistics
+
+<Definicao titulo="Position and dispersion measures">
+
+Given a sample $\{x_1, x_2, \ldots, x_n\}$:
+
+- **Sample mean**: $\bar x = \dfrac{1}{n}\sum_{i=1}^n x_i$
+- **Sample variance**: $s^2 = \dfrac{1}{n-1}\sum_{i=1}^n (x_i - \bar x)^2$
+- **Standard deviation**: $s = \sqrt{s^2}$
+- **Median**: central value after sorting ($Q_2$)
+- **Quartiles** $Q_1, Q_3$: median of the lower / upper half
+- **IQR**: $Q_3 - Q_1$
+- **Tukey fence**: outlier if $\lvert x - Q \rvert > 1{,}5 \cdot \text{IQR}$
+
+</Definicao>
+
+> "Variance is the average of the squared deviations from the mean. For a sample, divide by $n-1$ (Bessel's correction) instead of $n$." — [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/)
+
+### Discrete random variable
+
+<Definicao titulo="Expectation and variance of discrete r.v.">
+
+For r.v. $X$ with finite or countable support:
+
+$$E[X] = \sum_x x \cdot P(X = x)$$
+$$\text{Var}(X) = E[X^2] - (E[X])^2 = \sum_x x^2 P(X=x) - \mu^2$$
+
+**Linearity of expectation** (always valid):
+$$E[aX + bY] = a\,E[X] + b\,E[Y]$$
+
+**Variance of the sum** (only for independent variables):
+$$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$$
+
+</Definicao>
+
+> "Expectation is a weighted average of the possible values of $X$, weighted by their probabilities." — [Grinstead & Snell §6.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html)
+
+### Parametric distributions
+
+<Definicao titulo="Binomial, Normal, and approximation">
+
+**Binomial** $X \sim \text{Bin}(n,p)$:
+$$P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}, \quad E[X]=np, \quad \text{Var}(X)=np(1-p)$$
+
+**Normal** $X \sim \mathcal{N}(\mu, \sigma^2)$: density function
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+
+**Standardization**: $Z = (X - \mu)/\sigma \sim \mathcal{N}(0,1)$
+
+**68-95-99.7 Rule**: $P(\mu - k\sigma \leq X \leq \mu + k\sigma)$ is $\approx 68\%$, $\approx 95\%$, $\approx 99{,}7\%$ for $k = 1, 2, 3$.
+
+**Normal approximation to binomial**: if $np \geq 10$ and $n(1-p) \geq 10$, then $X \approx \mathcal{N}(np,\; np(1-p))$.
+
+</Definicao>
+
+### Central Limit Theorem
+
+<Teorema titulo="Central Limit Theorem (CLT)">
+
+Let $X_1, X_2, \ldots, X_n$ be iid r.v. with $E[X_i] = \mu$ and $\text{Var}(X_i) = \sigma^2 < \infty$. Then, for large $n$:
+
+$$\bar X = \frac{1}{n}\sum_{i=1}^n X_i \;\xrightarrow{\;d\;}\; \mathcal{N}\!\left(\mu,\; \frac{\sigma^2}{n}\right)$$
+
+Equivalently, $Z_n = \dfrac{\bar X - \mu}{\sigma/\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1)$.
+
+*The standard deviation of $\bar X$ is $\sigma/\sqrt{n}$, called the standard error.*
+
+</Teorema>
+
+> "The CLT is arguably the most important result in all of probability theory. It states that the distribution of the sample mean approaches normal regardless of the original distribution of $X$." — [OpenIntro Statistics §4.4](https://www.openintro.org/book/os/)
+
+### Correlation and regression
+
+<Definicao titulo="Pearson coefficient and least squares line">
+
+**Pearson correlation**:
+$$r = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sqrt{\sum(x_i-\bar x)^2 \cdot \sum(y_i - \bar y)^2}} \in [-1, 1]$$
+
+**Regression line** $\hat y = b_0 + b_1 x$:
+$$b_1 = r \cdot \frac{s_y}{s_x}, \quad b_0 = \bar y - b_1 \bar x$$
+
+$r^2$ = proportion of $Y$ variance explained by $X$.
+
+</Definicao>
+
+### Bayes' Rule
+
+<Definicao titulo="Bayesian updating">
+
+For hypothesis $H$ and evidence $E$:
+$$P(H \mid E) = \frac{P(E \mid H)\, P(H)}{P(E)}$$
+
+with $P(E) = P(E \mid H)P(H) + P(E \mid H^c)P(H^c)$ (law of total probability, two branches).
+
+- $P(H)$: **prior** (belief before evidence)
+- $P(E \mid H)$: **likelihood** (sensitivity)
+- $P(H \mid E)$: **posterior** (updated belief)
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<defs>
+  <marker id="arr80" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="75" width="90" height="50" rx="6" fill="rgb(26 77 92 / 0.2)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="55" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">Data</text>
+  <text x="55" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">sample</text>
+</g>
+<g>
+  <line x1="100" x2="138" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="119" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">EDA</text>
+</g>
+<g>
+  <rect x="140" y="75" width="100" height="50" rx="6" fill="rgb(232 199 122 / 0.25)" stroke="rgb(201 163 95)" strokeWidth="1.5"/>
+  <text x="190" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">Descriptive</text>
+  <text x="190" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">μ, σ, Q, r</text>
+</g>
+<g>
+  <line x1="240" x2="278" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="259" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">model</text>
+</g>
+<g>
+  <rect x="280" y="75" width="100" height="50" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.5"/>
+  <text x="330" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">Probability</text>
+  <text x="330" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">P(X), CLT</text>
+</g>
+<g>
+  <line x1="380" x2="418" y1="100" y2="100" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr80)"/>
+  <text x="399" y="93" textAnchor="middle" fontSize="8" fill="currentColor" fillOpacity="0.6">Bayes</text>
+</g>
+<g>
+  <rect x="420" y="75" width="120" height="50" rx="6" fill="rgb(199 107 63 / 0.2)" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+  <text x="480" y="96" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor">Inference</text>
+  <text x="480" y="113" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">P(H|E), decision</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Term 8 Pipeline. Each block corresponds to a group of lessons (72–73, 74–76, 77, 78–79).
+</figcaption>
+</figure>
+
+<Insight>
+
+**Why Bayes closes the cycle.** Descriptive statistics summarize what *happened*. Probabilistic distribution models what *could* happen. Bayes inverts this logic: given what we *observed*, it updates what we *believe* about the generating mechanism. The three stages are, together, the core of all quantitative scientific reasoning.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine you have a bag of colored marbles.
+
+- **Mean** is: "if I divide all the marbles among friends, how many does each get?"
+- **Standard deviation** is: "are each friend's marbles very different from the average, or almost the same?"
+- **Chance** is: "if I pick a marble without looking, what is the probability it's red?"
+- **Normal** is: when you have many, many marbles, most are near the middle and few are very far — this makes a little hill (bell curve).
+- **Bayes** is: you found a wet marble. Does that change what you think about which box it came from?
+
+This whole term taught how to do math with real-life marbles — school grades, market prices, exam results.
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+Let's put it all together in a real case: you are a data scientist for a fast-food chain.
+
+1. **Collection**: you measure the wait time of 200 orders. You calculate **mean = 8 min** and **standard deviation = 2 min** (lessons 72–73).
+2. **Boxplot** (lesson 73): you identify a neighborhood with a huge IQR — something is wrong at that location.
+3. **Model**: time $\approx \mathcal{N}(8, 4)$ (lesson 76). So 95% of orders arrive within $8 + 2 \times 2 = 12$ min.
+4. **CLT** (lesson 77): the mean of 25 orders in a day has distribution $\mathcal{N}(8,\; 4/25) = \mathcal{N}(8,\; 0{,}16)$. Much more precise.
+5. **Correlation** (lesson 78): daily temperature vs. ice cream sales: $r = 0{,}85$. High positive correlation.
+6. **Bayes** (lesson 79): if a customer complains, what is the probability that the order actually arrived late? It depends on the prevalence of delays and the false complaint rate.
+7. **Decision**: hire more staff in the problematic neighborhood on hot days.
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old">
+
+### The Term 8 Arc
+
+The entire term followed a construction logic:
+
+| Lessons | Topic | Central question |
+|---|---|---|
+| 72–73 | Descriptive measures | How to summarize a sample? |
+| 74 | Discrete r.v. + expectation | How to model random counting? |
+| 75 | Binomial | How many successes in $n$ trials with prob $p$? |
+| 76 | Normal | How to model symmetric continuous quantities? |
+| 77 | CLT | Why do means tend to normal? |
+| 78 | Correlation and regression | How to measure and model linear association? |
+| 79 | Bayes | How to update beliefs with evidence? |
+
+### Typical errors to avoid
+
+1. **Applying normal without checking**: make a histogram and Q-Q plot first.
+2. **Correlation is not causation**: ice cream and drownings have $r \approx 0{,}9$ — the confounder is heat.
+3. **Base rate fallacy**: a 99% accurate test can have low PPV if the disease is rare (lesson 79).
+4. **Reporting mean in skewed data**: average salary in Brazil is misleading — prefer median.
+5. **CLT with small $n$ in highly skewed distribution**: rule of thumb $n \geq 30$, but might need more.
+6. **Approximating binomial by normal without checking** $np \geq 10$ and $n(1-p) \geq 10$.
+
+### Connection to what comes next
+
+Terms 9–12 deepen:
+- Confidence intervals and formal hypothesis testing (year 3).
+- Multiple regression models.
+- Time series (ARIMA) and asset volatility.
+- Computational Bayesian inference (MCMC, Stan).
+
+</Porta>
+
+<Porta nivel="25" titulo="For an engineering student">
+
+### Formal hierarchy of the term
+
+Lessons 72–79 build a rigorous inference chain:
+
+**Level 1 — Descriptive statistics** (plug-in estimators): $\bar x, s^2, r$ are population moment estimators. Consistent by LLN: $\bar x \xrightarrow{P} \mu$.
+
+**Level 2 — Parametric models**: Binomial(n, p) and $\mathcal{N}(\mu, \sigma^2)$ are exponential families. Estimation by MLE: $\hat p = \bar x / n$ for binomial, $\hat\mu = \bar x$ for normal (both BLUE by Gauss-Markov theorem).
+
+**Level 3 — CLT and standard error**: The convergence $\sqrt{n}(\bar X - \mu) \xrightarrow{d} \mathcal{N}(0, \sigma^2)$ is stronger than LLN. It allows constructing confidence intervals: $\bar x \pm z_{\alpha/2} \cdot s/\sqrt{n}$.
+
+**Level 4 — Bayes**: Prior $\pi(\theta)$ + likelihood $\ell(\theta \mid x) \to$ posterior $\pi(\theta \mid x) \propto \ell(\theta \mid x)\pi(\theta)$. For large $n$, Bayesian posterior asymptotically coincides with MLE (Bernstein-von Mises).
+
+### Typical engineering applications
+
+- **Six Sigma**: $C_p = (\text{USL} - \text{LSL})/(6\sigma)$ — process capability. Goal: $C_p \geq 1{,}33$.
+- **Statistical control**: $\bar X$ and $R$ charts based on CLT.
+- **Reliability**: MTBF, exponential/Weibull distribution.
+- **Financial portfolio**: $\sigma_p^2 = w_A^2 \sigma_A^2 + w_B^2 \sigma_B^2 + 2w_A w_B \rho_{AB}\sigma_A\sigma_B$.
+- **Model diagnostics**: residuals must be $\sim\mathcal{N}(0,\sigma^2)$ iid. Q-Q plot and Shapiro-Wilk test.
+
+### Cross-domain connections
+
+- **Linear algebra**: covariance matrix $\Sigma$ generalizes $\sigma^2$; PCA is eigendecomposition of $\Sigma$.
+- **Calculus** (lesson 52+): log-likelihood optimization via gradient / Hessian.
+- **ODE**: stochastic models (SDEs) generalize deterministic ODEs with Gaussian noise.
+
+</Porta>
+
+<Porta nivel="40" titulo="For a senior professional">
+
+### What the term does NOT cover — and why it matters
+
+The classic topics are "20th-century statistics". Contemporary practices require critical extensions:
+
+**Causal inference (Pearl/Rubin):** correlation is not causation. Identification of causal effect via DAGs, do-calculus, instrumental variables. **Angrist and Imbens — 2021 Nobel in Economics** ([nobelprize.org/prizes/economic-sciences/2021/summary/](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/)) — prize for methodology of instrumental variables and difference-in-differences.
+
+**Heavy tails and finance:** classic CLT assumes $\sigma^2 < \infty$. Financial series have heavy tails (Lévy $\alpha$-stable distributions, $\alpha < 2$). Use of VaR without tail correction underestimated systemic risk in 2008.
+
+**Non-asymptotic concentration:** Hoeffding, McDiarmid, Talagrand provide PAC bounds with finite $n$ — theoretical foundation of generalization in ML, without needing $n \to \infty$.
+
+**Replicability crisis:** p-hacking, garden of forking paths, HARK (Hypothesizing After Results Known). Pre-registration movement and registered reports. Bayes Factor as an alternative to p-value.
+
+**Computational Bayesian statistics:** MCMC (Metropolis-Hastings, HMC/NUTS), variational inference, normalizing flows. Implementations: Stan, PyMC, NumPyro. Scales to hierarchical models with thousands of parameters.
+
+**Algorithmic bias:** non-robust estimators amplify systematic biases in training data. Fairness as an engineering requirement, not just an ethical one.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Practical application — Brazilian data">
+
+### Case 1 — INSS salaries
+
+The 2025 INSS limits the contribution salary to R$ 8,157.41. Suppose salaries of civil servants in an agency follow $\mathcal{N}(6000, 800^2)$.
+
+- Proportion above the ceiling: $Z = (8157 - 6000)/800 = 2{,}70$. Normal table: $P(Z > 2{,}70) \approx 0{,}35\%$.
+- Median = mean = R$ 6,000 (symmetric distribution).
+- IQR: $Q_1 = \mu - 0{,}675\sigma = 5460$, $Q_3 = 6540$. IQR = R$ 1,080.
+
+### Case 2 — ENEM: cohort comparison
+
+In 2024, public school candidates had a mean of 520 and standard deviation of 90 in Mathematics (hypothetical data for exercise). Private school candidates: mean 610, standard deviation 80.
+
+By CLT, in samples of 100 students from each group, the difference of means has distribution approximately:
+$$\bar X_{\text{priv}} - \bar X_{\text{pub}} \sim \mathcal{N}\!\left(90,\; \frac{80^2}{100} + \frac{90^2}{100}\right) = \mathcal{N}(90,\; 145)$$
+
+Standard deviation of the difference: $\sqrt{145} \approx 12$. The observed difference of 90 points is $90/12 = 7{,}5$ standard errors away — statistically incontestable.
+
+### Case 3 — COVID-19 diagnosis
+
+PCR test: sensitivity 95%, specificity 99%. In March 2020, estimated prevalence in Brazil: 0.5%.
+
+$$P(\text{COVID} \mid +) = \frac{0{,}95 \times 0{,}005}{0{,}95 \times 0{,}005 + 0{,}01 \times 0{,}995} \approx \frac{0{,}00475}{0{,}00475 + 0{,}00995} \approx 32\%$$
+
+An isolated positive test, with low prevalence, still leaves a 68% chance of being a false positive. This justified the requirement for two tests in some clinical protocols.
+
+</Porta>
+
+</DuasPortas>
+
+## Solved examples
+
+<Exemplo titulo="Variance, IQR, and outlier detection" numero="1">
+
+**Problem:** Consider the sample of service times (in minutes): 5, 7, 8, 8, 9, 10, 10, 11, 12, 30. Calculate mean, sample variance, median, $Q_1$, $Q_3$, IQR, and identify outliers by the Tukey fence.
+
+**Strategy:** Apply definitions in sequence: sort, locate quartiles, calculate IQR, apply $1{,}5 \cdot \text{IQR}$ criterion.
+
+**Resolution:**
+
+Sorted sample: 5, 7, 8, 8, 9, **10**, 10, 11, 12, 30. ($n = 10$)
+
+*Mean:* $\bar x = (5+7+8+8+9+10+10+11+12+30)/10 = 110/10 = 11$.
+
+*Sample variance:*
+
+$$s^2 = \frac{1}{9}\sum(x_i - 11)^2 = \frac{(−6)^2+(−4)^2+(−3)^2+(−3)^2+(−2)^2+(-1)^2+(-1)^2+0^2+1^2+19^2}{9}$$
+
+$$= \frac{36+16+9+9+4+1+1+0+1+361}{9} = \frac{438}{9} \approx 48{,}7 \implies s \approx 6{,}98$$
+
+*Median (position 5.5):* $(9 + 10)/2 = 9{,}5$.
+
+*$Q_1$ (median of the first 5):* 8.
+
+*$Q_3$ (median of the last 5):* 11.
+
+*IQR:* $11 - 8 = 3$.
+
+*Lower fence:* $8 - 1{,}5 \times 3 = 3{,}5$. *Upper fence:* $11 + 1{,}5 \times 3 = 15{,}5$.
+
+The value 30 is an outlier (above 15.5). The value 5 is within the fence (above 3.5).
+
+**Verification:** The mean (11) was inflated by the outlier 30; the median (9.5) better represents the center. IQR (3) is more robust than $s$ (6.98) in the presence of an outlier.
+
+**Source.** [OpenIntro Statistics §2.1–2.2](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Expectation and variance of discrete random variable" numero="2">
+
+**Problem:** A fair 4-sided die has $X \in \{1, 2, 3, 4\}$ with equal probabilities $1/4$. Calculate $E[X]$, $\text{Var}(X)$, and $E[3X - 2]$.
+
+**Strategy:** Apply the definition of expectation; use $\text{Var}(X) = E[X^2] - (E[X])^2$; apply linearity for $E[3X - 2]$.
+
+**Resolution:**
+
+$$E[X] = \frac{1}{4}(1 + 2 + 3 + 4) = \frac{10}{4} = 2{,}5$$
+
+$$E[X^2] = \frac{1}{4}(1 + 4 + 9 + 16) = \frac{30}{4} = 7{,}5$$
+
+$$\text{Var}(X) = 7{,}5 - (2{,}5)^2 = 7{,}5 - 6{,}25 = 1{,}25$$
+
+$$E[3X - 2] = 3 E[X] - 2 = 3 \times 2{,}5 - 2 = 5{,}5$$
+
+**Verification:** By symmetry, $E[X] = (1+4)/2 = 2{,}5$. For $\text{Var}$: the formula for discrete uniform distribution on $\{1,\ldots,n\}$ is $(n^2-1)/12 = (16-1)/12 = 1{,}25$. Checks out.
+
+**Source.** [Grinstead & Snell, Introduction to Probability §6.1, p. 224](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="Binomial and normal approximation" numero="3">
+
+**Problem:** A production line has a defect rate $p = 0{,}04$. In a batch of $n = 200$ parts, calculate $E[X]$, $\text{Var}(X)$, and use normal approximation to find $P(X \geq 12)$.
+
+**Strategy:** Verify approximation criterion ($np \geq 10$ and $n(1-p) \geq 10$), standardize with continuity correction.
+
+**Resolution:**
+
+$X \sim \text{Bin}(200, 0{,}04)$.
+
+$E[X] = 200 \times 0{,}04 = 8$. $\text{Var}(X) = 200 \times 0{,}04 \times 0{,}96 = 7{,}68$. $\sigma = \sqrt{7{,}68} \approx 2{,}77$.
+
+*Criterion:* $np = 8 < 10$. Normal approximation is borderline — the result is an estimate. In this exercise, we use it anyway to practice the technique.
+
+*With continuity correction:* $P(X \geq 12) \approx P\!\left(Z \geq \dfrac{11{,}5 - 8}{2{,}77}\right) = P(Z \geq 1{,}26)$.
+
+Table: $P(Z \geq 1{,}26) = 1 - \Phi(1{,}26) \approx 1 - 0{,}8962 = 0{,}1038 \approx 10{,}4\%$.
+
+**Verification:** Exact value via binomial: $P(X \geq 12) \approx 10{,}6\%$. Reasonable approximation, with 0.2 p.p. error.
+
+**Source.** [OpenStax Statistics §4.3 — Binomial Distribution, ex. 4.15](https://openstax.org/books/statistics/pages/4-3-geometric-distribution) and §6.3 — CC-BY license.
+
+</Exemplo>
+
+<Exemplo titulo="Central Limit Theorem — sample mean" numero="4">
+
+**Problem:** The weight of coffee packages of a brand has $\mu = 500$ g and $\sigma = 8$ g (distribution unknown). An inspection samples 64 packages. What is the probability that the sample mean is less than 498 g?
+
+**Strategy:** Apply CLT: $\bar X \sim \mathcal{N}(500,\; 8^2/64)$ for $n = 64$ large.
+
+**Resolution:**
+
+Standard error: $\sigma_{\bar X} = 8/\sqrt{64} = 8/8 = 1$ g.
+
+$$P(\bar X < 498) = P\!\left(Z < \frac{498 - 500}{1}\right) = P(Z < -2) = \Phi(-2) \approx 0{,}0228$$
+
+Probability $\approx 2{,}3\%$.
+
+**Verification:** The probability is low, as expected: 498 g is 2 standard deviations below the expected sample mean. Note that $n = 64$ is sufficient for CLT even without knowing the original distribution.
+
+**Source.** [OpenIntro Statistics §4.4 — Central Limit Theorem, p. 181](https://openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Bayes' Rule — diagnostic test with low prevalence" numero="5">
+
+**Problem:** A disease has 1% prevalence in the population. A test has 90% sensitivity and 95% specificity. A person tests positive. What is the probability that they are sick (PPV)?
+
+**Strategy:** Apply Bayes with $H = $ "sick", $E = $ "positive test". Calculate $P(E)$ by the law of total probability.
+
+**Resolution:**
+
+Data: $P(H) = 0{,}01$, $P(H^c) = 0{,}99$, $P(E \mid H) = 0{,}90$, $P(E \mid H^c) = 0{,}05$.
+
+$$P(E) = P(E \mid H)P(H) + P(E \mid H^c)P(H^c) = 0{,}90 \times 0{,}01 + 0{,}05 \times 0{,}99 = 0{,}009 + 0{,}0495 = 0{,}0585$$
+
+$$P(H \mid E) = \frac{P(E \mid H)\,P(H)}{P(E)} = \frac{0{,}009}{0{,}0585} \approx 0{,}1538 \approx 15{,}4\%$$
+
+**Verification:** Intuitive via tree: in 10,000 people, 100 sick, 9,900 healthy. Of the sick: $0{,}9 \times 100 = 90$ positive. Of the healthy: $0{,}05 \times 9900 = 495$ positive. Total positive: 585. PPV = $90/585 \approx 15{,}4\%$. Checks out.
+
+**Source.** [OpenIntro Statistics §2.2 — Conditional Probability, ex. 2.29, p. 88](https://openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-80-consolidacao-trim-8">
+
+> **Notebook list.** There are 40 exercises in 4 blocks. Solve on paper; use the formula list from the Formal Porta as reference. Sources: OpenIntro Statistics (OIS), OpenStax Statistics (OST), Grinstead-Snell (GS).
+
+### Block A — Descriptive statistics and distributions (80.1 to 80.14)
+
+<Exercicio
+  numero="80.1"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "51", exercicio: "2.1", licenca: "CC-BY-SA" }}
+  solucao={<>Sorted data: 4, 6, 8, 8, 9, 10, 10, 11, 12, 22. Median = <Eq>{`(9+10)/2 = 9{,}5`}</Eq>. <Eq>{`Q_1`}</Eq> = median of first 5 = 8. <Eq>{`Q_3`}</Eq> = median of last 5 = 11. <Eq>{`\\text{IQR} = 3`}</Eq>. Upper fence: <Eq>{`11 + 1{,}5\\times3 = 15{,}5`}</Eq>. Outlier: 22 (above 15.5).</>}
+  passos={<>
+    <ol>
+      <li>Sort the sample: 4, 6, 8, 8, 9, 10, 10, 11, 12, 22. With 10 values, the median is between positions 5 and 6: <Eq>{`(9+10)/2 = 9{,}5`}</Eq>.</li>
+      <li>Lower half (positions 1–5): 4, 6, 8, 8, 9 — median = 8 = <Eq>{`Q_1`}</Eq>. Upper half (positions 6–10): 10, 10, 11, 12, 22 — median = 11 = <Eq>{`Q_3`}</Eq>.</li>
+      <li>IQR = <Eq>{`Q_3 - Q_1 = 11 - 8 = 3`}</Eq>. Fences: lower = <Eq>{`8 - 1{,}5\\times3 = 3{,}5`}</Eq>, upper = <Eq>{`11 + 1{,}5\\times3 = 15{,}5`}</Eq>.</li>
+      <li>Check each value: 4 is above 3.5 (within). 22 is above 15.5 (outlier).</li>
+    </ol>
+    <em>Tip:</em> For <Eq>{`n`}</Eq> even, <Eq>{`Q_1`}</Eq> and <Eq>{`Q_3`}</Eq> are the medians of the two halves excluding the central median — or including, depending on the convention. OpenIntro uses "median of the first <Eq>{`n/2`}</Eq>".
+  </>}
+>
+Sample: 4, 6, 8, 8, 9, 10, 10, 11, 12, 22. Calculate median, $Q_1$, $Q_3$, IQR, and identify outliers by the Tukey fence.
+</Exercicio>
+
+<Exercicio
+  numero="80.2"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "52", exercicio: "2.3", licenca: "CC-BY-SA" }}
+  solucao={<>Mean = <Eq>{`(4+6+8+8+9+10+10+11+12+22)/10 = 100/10 = 10`}</Eq>. Sample variance: sum of squared deviations divided by 9. <Eq>{`s^2 = [(−6)^2+(−4)^2+(−2)^2+(−2)^2+(−1)^2+0^2+0^2+1^2+2^2+12^2]/9 = (36+16+4+4+1+0+0+1+4+144)/9 = 210/9 \\approx 23{,}3`}</Eq>. Deviation: <Eq>{`s \\approx 4{,}83`}</Eq>. Comparison: the mean (10) rose due to the presence of 22; the median (9.5) is more representative.</>}
+>
+Same sample as exercise 80.1. Calculate the mean and sample standard deviation. Compare with the median: which is more representative of the central position? Why?
+</Exercicio>
+
+<Exercicio
+  numero="80.3"
+  dificuldade="aplicacao"
+  resposta="$E[X]=6;\; \text{Var}(X)=4{,}2;\; \sigma\approx2{,}05$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "218", exercicio: "ex. 4.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\text{Bin}(20, 0{,}3)`}</Eq>. <Eq>{`E[X] = np = 20\\times0{,}3 = 6`}</Eq>. <Eq>{`\\text{Var}(X) = np(1-p) = 20\\times0{,}3\\times0{,}7 = 4{,}2`}</Eq>. Standard deviation: <Eq>{`\\sigma = \\sqrt{4{,}2} \\approx 2{,}05`}</Eq>.</>}
+>
+$X \sim \text{Bin}(20,\, 0{,}3)$. Calculate $E[X]$, $\text{Var}(X)$, and $\sigma$.
+</Exercicio>
+
+<Exercicio
+  numero="80.4"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "352", exercicio: "ex. 6.11", licenca: "CC-BY" }}
+  solucao={<>Criterion: <Eq>{`np = 6`}</Eq> and <Eq>{`n(1-p) = 14`}</Eq>. The criterion <Eq>{`np \\geq 10`}</Eq> is not satisfied (np = 6), so the normal approximation is rough here. To practice: <Eq>{`\\mu = 6`}</Eq>, <Eq>{`\\sigma = \\sqrt{4{,}2} \\approx 2{,}05`}</Eq>. With continuity correction: <Eq>{`P(X \\geq 10) \\approx P(Z \\geq (9{,}5-6)/2{,}05) = P(Z \\geq 1{,}71) \\approx 4{,}4\\%`}</Eq>.</>}
+>
+For $X \sim \text{Bin}(20,\, 0{,}3)$: verify the normal approximation criterion and, even if borderline, use the approximation with continuity correction to estimate $P(X \geq 10)$.
+</Exercicio>
+
+<Exercicio
+  numero="80.5"
+  dificuldade="aplicacao"
+  resposta="$P(X > 65) \approx 6{,}7\%$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "318", exercicio: "ex. 6.3", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\mathcal{N}(50, 100)`}</Eq>, so <Eq>{`\\sigma = 10`}</Eq>. <Eq>{`Z = (65-50)/10 = 1{,}5`}</Eq>. <Eq>{`P(X > 65) = P(Z > 1{,}5) = 1 - \\Phi(1{,}5) \\approx 1 - 0{,}9332 = 0{,}0668 \\approx 6{,}7\\%`}</Eq>.</>}
+>
+$X \sim \mathcal{N}(50,\, 100)$. Calculate $P(X > 65)$.
+</Exercicio>
+
+<Exercicio
+  numero="80.6"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "183", exercicio: "4.27", licenca: "CC-BY-SA" }}
+  solucao={<>By CLT, <Eq>{`\\bar X \\sim \\mathcal{N}(10,\\; 9/100) = \\mathcal{N}(10,\\; 0{,}09)`}</Eq>. Standard error: <Eq>{`\\sigma_{\\bar X} = 3/\\sqrt{100} = 0{,}3`}</Eq>. <Eq>{`P(\\bar X > 10{,}3) = P(Z > (10{,}3-10)/0{,}3) = P(Z > 1{,}0) = 1 - \\Phi(1) \\approx 15{,}9\\%`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Identify parameters: <Eq>{`\\mu = 10`}</Eq>, <Eq>{`\\sigma = 3`}</Eq>, <Eq>{`n = 100`}</Eq>.</li>
+      <li>By CLT, the sample mean has distribution: <Eq>{`\\bar X \\sim \\mathcal{N}(\\mu,\\; \\sigma^2/n) = \\mathcal{N}(10,\\; 9/100)`}</Eq>.</li>
+      <li>Calculate standard error: <Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n} = 3/10 = 0{,}3`}</Eq>.</li>
+      <li>Standardize: <Eq>{`Z = (10{,}3 - 10)/0{,}3 = 1{,}0`}</Eq>. Consult table: <Eq>{`P(Z > 1) \\approx 15{,}9\\%`}</Eq>.</li>
+    </ol>
+    <em>Tip:</em> Standard error decreases with <Eq>{`\\sqrt{n}`}</Eq>. Quadrupling the sample halves the standard error.
+  </>}
+>
+Sample $n = 100$ from population with $\mu = 10$, $\sigma = 3$. Calculate $P(\bar X > 10{,}3)$.
+</Exercicio>
+
+<Exercicio
+  numero="80.7"
+  dificuldade="aplicacao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "350", exercicio: "8.1", licenca: "CC-BY-SA" }}
+  solucao={<>Pairs $(x, y)$: (1, 2), (2, 4), (3, 5), (4, 4), (5, 7). <Eq>{`\\bar x = 3`}</Eq>, <Eq>{`\\bar y = 4{,}4`}</Eq>. <Eq>{`\\sum(x_i-\\bar x)(y_i-\\bar y) = (-2)(-2{,}4)+(-1)(-0{,}4)+(0)(0{,}6)+(1)(-0{,}4)+(2)(2{,}6) = 4{,}8+0{,}4+0-0{,}4+5{,}2 = 10`}</Eq>. <Eq>{`\\sum(x_i-\\bar x)^2 = 4+1+0+1+4 = 10`}</Eq>. <Eq>{`\\sum(y_i-\\bar y)^2 = 5{,}76+0{,}16+0{,}36+0{,}16+6{,}76 = 13{,}2`}</Eq>. <Eq>{`r = 10/\\sqrt{10 \\times 13{,}2} = 10/\\sqrt{132} \\approx 10/11{,}49 \\approx 0{,}870`}</Eq>. Line: <Eq>{`b_1 = r\\cdot s_y/s_x = 0{,}87\\times\\sqrt{13{,}2/4}/\\sqrt{10/4} = 1{,}0`}</Eq>; <Eq>{`b_0 = 4{,}4 - 1\\times3 = 1{,}4`}</Eq>. So <Eq>{`\\hat y = 1{,}4 + x`}</Eq>.</>}
+>
+Pairs $(x, y)$: (1, 2), (2, 4), (3, 5), (4, 4), (5, 7). Calculate Pearson correlation coefficient $r$ and regression line $\hat y = b_0 + b_1 x$.
+</Exercicio>
+
+<Exercicio
+  numero="80.8"
+  dificuldade="aplicacao"
+  resposta="$\text{PPV} \approx 27\%$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "88", exercicio: "2.29", licenca: "CC-BY-SA" }}
+  solucao={<>Prevalence 2%: <Eq>{`P(D) = 0{,}02`}</Eq>. Sens 90%: <Eq>{`P(+|D) = 0{,}90`}</Eq>. Spec 95%: <Eq>{`P(-|D^c) = 0{,}95`}</Eq>, so <Eq>{`P(+|D^c) = 0{,}05`}</Eq>. <Eq>{`P(+) = 0{,}9\\times0{,}02 + 0{,}05\\times0{,}98 = 0{,}018 + 0{,}049 = 0{,}067`}</Eq>. <Eq>{`\\text{PPV} = P(D|+) = 0{,}018/0{,}067 \\approx 0{,}268 \\approx 26{,}8\\%`}</Eq>.</>}
+>
+Disease with 2% prevalence, test with 90% sensitivity and 95% specificity. Calculate Positive Predictive Value (PPV).
+</Exercicio>
+
+<Exercicio
+  numero="80.9"
+  dificuldade="aplicacao"
+  resposta="$Y \sim \mathcal{N}(25,\; 16)$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "337", exercicio: "ex. 6.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`X \\sim \\mathcal{N}(10, 4)`}</Eq>. Linear transformation: <Eq>{`E[Y] = 2\\times10 + 5 = 25`}</Eq>. <Eq>{`\\text{Var}(Y) = 2^2 \\times 4 = 16`}</Eq> (constant does not change variance). So <Eq>{`Y \\sim \\mathcal{N}(25, 16)`}</Eq>.</>}
+>
+$Y = 2X + 5$ where $X \sim \mathcal{N}(10,\, 4)$. Determine the distribution of $Y$.
+</Exercicio>
+
+<Exercicio
+  numero="80.10"
+  dificuldade="aplicacao"
+  resposta="$E[S]=175;\; \sigma_S \approx 12{,}08$"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§6.2", pagina: "242", exercicio: "ex. 6.2.5", licenca: "GNU FDL" }}
+  solucao={<>For a fair die: <Eq>{`E[X] = 3{,}5`}</Eq>, <Eq>{`\\text{Var}(X) = 35/12 \\approx 2{,}917`}</Eq>. Sum of 50 independent dice <Eq>{`S = X_1+\\ldots+X_{50}`}</Eq>: <Eq>{`E[S] = 50\\times3{,}5 = 175`}</Eq>; <Eq>{`\\text{Var}(S) = 50\\times35/12 \\approx 145{,}83`}</Eq>; <Eq>{`\\sigma_S = \\sqrt{145{,}83} \\approx 12{,}08`}</Eq>. By CLT, <Eq>{`S \\approx \\mathcal{N}(175,\\; 145{,}83)`}</Eq>.</>}
+>
+A fair die is rolled 50 times. Calculate the expectation and standard deviation of the sum $S = X_1 + \cdots + X_{50}$.
+</Exercicio>
+
+<Exercicio
+  numero="80.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "The mean is always greater than the median" },
+    { texto: "Variance can be negative if data is negative" },
+    { texto: "IQR is immune to extreme outliers, unlike standard deviation", correta: true },
+    { texto: "Standard deviation and IQR measure the same thing, just on different scales" },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "60", exercicio: "2.5", licenca: "CC-BY-SA" }}
+  solucao={<>IQR depends only on quartiles, which are robust quantiles — an extreme outlier does not change <Eq>{`Q_1`}</Eq> or <Eq>{`Q_3`}</Eq> as long as it doesn't invade the central region. Standard deviation uses all squared deviations, so a single very large outlier can inflate it enormously. Other alternatives: (A) is false — in symmetric distributions, mean = median; (B) is false — variance is always non-negative (sum of squares); (D) is false — they measure distinct concepts.</>}
+>
+Which statement about dispersion measures is **correct**?
+</Exercicio>
+
+<Exercicio
+  numero="80.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$P(\\text{Bin}(10,0{,}5) = 5) > P(\\text{Bin}(100,0{,}5) = 50)$", correta: true },
+    { texto: "$P(\\text{Bin}(10,0{,}5) = 5) < P(\\text{Bin}(100,0{,}5) = 50)$" },
+    { texto: "$P(\\text{Bin}(10,0{,}5) = 5) = P(\\text{Bin}(100,0{,}5) = 50)$" },
+    { texto: "Both probabilities are equal to 0.5" },
+  ]}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "174", exercicio: "ex. 5.1.1", licenca: "GNU FDL" }}
+  solucao={<>By CLT, as <Eq>{`n`}</Eq> increases, the normalized binomial converges to normal, and the point probability of any value decreases (the distribution "flattens"). Calculating: <Eq>{`P(\\text{Bin}(10,0{,}5)=5) = \\binom{10}{5}(0{,}5)^{10} = 252/1024 \\approx 0{,}246`}</Eq>. For <Eq>{`n=100`}</Eq>: <Eq>{`\\binom{100}{50}(0{,}5)^{100} \\approx 0{,}0796`}</Eq> (by CLT: <Eq>{`f(50) \\approx 1/(5\\sqrt{2\\pi}) \\approx 0{,}0798`}</Eq>). So point probability falls with <Eq>{`n`}</Eq>.</>}
+>
+Which relationship is true for the point probabilities of the binomials at the mode?
+</Exercicio>
+
+<Exercicio
+  numero="80.13"
+  dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "186", exercicio: "4.31", licenca: "CC-BY-SA" }}
+  solucao={<>CLT refers to the distribution of <Eq>{`\\bar X`}</Eq> (sample mean), not individual <Eq>{`X`}</Eq>. For any distribution with <Eq>{`\\sigma^2 < \\infty`}</Eq>, when <Eq>{`n \\to \\infty`}</Eq>, the distribution of <Eq>{`\\sqrt{n}(\\bar X - \\mu)/\\sigma`}</Eq> converges to <Eq>{`\\mathcal{N}(0,1)`}</Eq>. Individual data points continue with the original distribution. Convergence speed depends on the skewness of the original distribution — for distributions close to normal, even <Eq>{`n=5`}</Eq> is sufficient; for Bernoulli(0.01), <Eq>{`n > 1000`}</Eq> might be needed.</>}
+>
+Explain in your own words: does the CLT state that, for large $n$, individual data points follow a normal distribution? If not, what exactly converges to normal?
+</Exercicio>
+
+<Exercicio
+  numero="80.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Correlation measures the intensity of any association between X and Y" },
+    { texto: "If $r = 0$, X and Y are independent" },
+    { texto: "Pearson coefficient measures only linear association; $r = 0$ does not imply independence", correta: true },
+    { texto: "If $r = 1$, every point is exactly on the regression line" },
+  ]}
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "356", exercicio: "8.7", licenca: "CC-BY-SA" }}
+  solucao={<>Pearson coefficient measures only the linear component of association. Classic example: <Eq>{`Y = X^2`}</Eq> with <Eq>{`X`}</Eq> symmetric around zero has <Eq>{`r = 0`}</Eq>, but Y depends functionally on X. Other alternatives: (A) is false — Pearson only detects linear association; (B) is false — <Eq>{`r=0`}</Eq> does not imply independence; (D) is false — <Eq>{`r = 1`}</Eq> implies points on the line, but the statement says "the coefficient is 1", not the inverse.</>}
+>
+Which statement about Pearson correlation is **correct**?
+</Exercicio>
+
+### Block B — Integrated modeling (80.15 to 80.27)
+
+<Exercicio
+  numero="80.15"
+  dificuldade="modelagem"
+  resposta="$P(T > 40{,}2\,\text{min}) \approx 5\%$; SLA up to $\approx 40{,}2$ min"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "337", exercicio: "ex. 6.9", licenca: "CC-BY" }}
+  solucao={<>Delivery time <Eq>{`T \\sim \\mathcal{N}(32,25)`}</Eq>. For 95% coverage: <Eq>{`z_{0{,}95} = 1{,}645`}</Eq>. Limit: <Eq>{`32 + 1{,}645 \\times 5 = 32 + 8{,}2 = 40{,}2`}</Eq> min. Therefore, 95% of deliveries arrive within 40.2 min.</>}
+  passos={<>
+    <ol>
+      <li>Identify: <Eq>{`T \\sim \\mathcal{N}(32, 5^2)`}</Eq>. We want <Eq>{`t^*`}</Eq> such that <Eq>{`P(T \\leq t^*) = 0{,}95`}</Eq>.</li>
+      <li>Standardize: <Eq>{`P(Z \\leq (t^* - 32)/5) = 0{,}95`}</Eq>. From normal table: <Eq>{`z_{0{,}95} \\approx 1{,}645`}</Eq>.</li>
+      <li>Solve: <Eq>{`(t^* - 32)/5 = 1{,}645 \\implies t^* = 32 + 5 \\times 1{,}645 = 40{,}2`}</Eq> min.</li>
+    </ol>
+    <em>Observation:</em> This is the <em>95th percentile</em> of the distribution. In logistics, it is the SLA (Service Level Agreement) for 95% of orders.
+  </>}
+>
+Pizza delivery time: $T \sim \mathcal{N}(32,\, 5^2)$ min. What is the maximum deadline covering 95% of deliveries?
+</Exercicio>
+
+<Exercicio
+  numero="80.16"
+  dificuldade="modelagem"
+  resposta="Expectation of violations = 5"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation", secao: "§4.2", pagina: "220", exercicio: "ex. 4.9", licenca: "CC-BY" }}
+  solucao={<>Each delivery violates the SLA (time greater than 40.2 min) with 5% probability. In 100 deliveries, the number of violations <Eq>{`V \\sim \\text{Bin}(100, 0{,}05)`}</Eq>. <Eq>{`E[V] = 100 \\times 0{,}05 = 5`}</Eq>.</>}
+>
+With the model from exercise 80.15 (SLA of 40.2 min, 5% violation rate), calculate the expectation of the number of violations in 100 deliveries.
+</Exercicio>
+
+<Exercicio
+  numero="80.17"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "353", exercicio: "8.3", licenca: "CC-BY-SA" }}
+  solucao={<>Hypothetical real estate data: <Eq>{`\\bar x = 80\\,\\text{m}^2`}</Eq>, <Eq>{`\\bar y = 450\\,000`}</Eq> (R$), <Eq>{`s_x = 20`}</Eq>, <Eq>{`s_y = 80\\,000`}</Eq>, <Eq>{`r = 0{,}8`}</Eq>. Slope: <Eq>{`b_1 = 0{,}8 \\times 80000/20 = 3200`}</Eq> (R$/m²). Intercept: <Eq>{`b_0 = 450000 - 3200\\times80 = 450000 - 256000 = 194000`}</Eq>. Line: <Eq>{`\\hat p = 194000 + 3200 \\cdot \\text{area}`}</Eq>. For average area (80 m²): <Eq>{`\\hat p = 450000`}</Eq> (trivially, as the line passes through the mean point).</>}
+>
+Real estate market: correlation between area and price is $r = 0{,}8$. Means $\bar x = 80\,\text{m}^2$, $\bar y = 450,000$ (R$); deviations $s_x = 20$, $s_y = 80,000$. Find the regression line and predict the price for an average-area property.
+</Exercicio>
+
+<Exercicio
+  numero="80.18"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "352", exercicio: "ex. 6.13", licenca: "CC-BY" }}
+  solucao={<>Daily returns of 100 independent stocks, each <Eq>{`\\sim \\mathcal{N}(0{,}001,\\; 0{,}02^2)`}</Eq>. Return of equal-weighted portfolio: <Eq>{`R = (1/100)\\sum X_i`}</Eq>. By CLT: <Eq>{`E[R] = 0{,}001`}</Eq>; <Eq>{`\\text{Var}(R) = (0{,}02)^2/100 = 4\\times10^{-6}`}</Eq>; <Eq>{`\\sigma_R = 0{,}002`}</Eq>. So <Eq>{`R \\sim \\mathcal{N}(0{,}001,\\; 4\\times10^{-6})`}</Eq>.</>}
+>
+Financial portfolio: 100 independent stocks, each with daily return $\sim \mathcal{N}(0{,}001,\; 0{,}02^2)$. Determine the distribution of the daily return of the equal-weighted portfolio.
+</Exercicio>
+
+<Exercicio
+  numero="80.19"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "340", exercicio: "ex. 6.11", licenca: "CC-BY" }}
+  solucao={<>Parts: <Eq>{`X \\sim \\mathcal{N}(10,\\; 0{,}02^2)`}</Eq> mm. Tolerance: <Eq>{`[9{,}9,\\; 10{,}1]`}</Eq>. <Eq>{`P(9{,}9 \\leq X \\leq 10{,}1) = P(-5 \\leq Z \\leq 5) \\approx 1 - 5{,}7\\times10^{-7}`}</Eq>. Defects per million: <Eq>{`\\approx 0{,}57`}</Eq> (extremely low, well-centered Six Sigma process).</>}
+>
+Six Sigma: parts with dimension $X \sim \mathcal{N}(10,\; 0{,}02^2)$ mm. Tolerance $10 \pm 0{,}1$ mm. Calculate the proportion of defects and estimate defects per million.
+</Exercicio>
+
+<Exercicio
+  numero="80.20"
+  dificuldade="modelagem"
+  resposta="CI 95%: $\hat p \pm 0{,}0196$, i.e., $(0{,}460;\; 0{,}500)$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§6.1", pagina: "248", exercicio: "6.1", licenca: "CC-BY-SA" }}
+  solucao={<>Election poll: <Eq>{`n = 2500`}</Eq>, <Eq>{`\\hat p = 0{,}48`}</Eq>. Standard error: <Eq>{`\\text{SE} = \\sqrt{\\hat p (1-\\hat p)/n} = \\sqrt{0{,}48\\times0{,}52/2500} = \\sqrt{0{,}2496/2500} \\approx 0{,}01`}</Eq>. CI 95%: <Eq>{`\\hat p \\pm 1{,}96 \\times 0{,}01 = 0{,}48 \\pm 0{,}0196`}</Eq>, i.e., <Eq>{`(0{,}460;\\; 0{,}500)`}</Eq>. The CI contains 0.50, so the result does not allow concluding who is ahead.</>}
+  passos={<>
+    <ol>
+      <li>CI formula for proportion: <Eq>{`\\hat p \\pm z_{\\alpha/2} \\cdot \\sqrt{\\hat p (1-\\hat p)/n}`}</Eq>. For 95%, <Eq>{`z_{0{,}025} = 1{,}96`}</Eq>.</li>
+      <li>Calculate SE: <Eq>{`\\sqrt{0{,}48 \\times 0{,}52 / 2500} = \\sqrt{9{,}984\\times10^{-5}} \\approx 0{,}00999 \\approx 0{,}01`}</Eq>.</li>
+      <li>CI: <Eq>{`0{,}48 \\pm 1{,}96 \\times 0{,}01 = 0{,}48 \\pm 0{,}0196`}</Eq>. Limits: 0.4604 to 0.4996.</li>
+      <li>Interpretation: 0.50 is outside the CI (by a minimal margin). There is marginal evidence that less than 50% prefer this candidate, but certainty is low.</li>
+    </ol>
+    <em>Curiosity:</em> Margin of error in Brazilian election polls = <Eq>{`\\pm 2`}</Eq> percentage points corresponds to <Eq>{`n \\approx 2500`}</Eq> (exactly this exercise).
+  </>}
+>
+Election poll: $n = 2500$, $\hat p = 0{,}48$. Construct a 95% confidence interval for the true proportion $p$.
+</Exercicio>
+
+<Exercicio
+  numero="80.21"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "87", exercicio: "2.27", licenca: "CC-BY-SA" }}
+  solucao={<>Spam: <Eq>{`P(\\text{spam}) = 0{,}3`}</Eq>, <Eq>{`P(\\text{"FREE"}|\\text{spam}) = 0{,}80`}</Eq>, <Eq>{`P(\\text{"FREE"}|\\text{ham}) = 0{,}05`}</Eq>. <Eq>{`P(\\text{"FREE"}) = 0{,}80\\times0{,}3 + 0{,}05\\times0{,}7 = 0{,}24 + 0{,}035 = 0{,}275`}</Eq>. <Eq>{`P(\\text{spam}|\\text{"FREE"}) = 0{,}24/0{,}275 \\approx 0{,}872 = 87{,}2\\%`}</Eq>. Classify as spam.</>}
+>
+Spam filter: 80% of spam contains "FREE", 5% of ham contains it. $P(\text{spam}) = 0{,}3$. An email contains "FREE" — apply Bayes and classify.
+</Exercicio>
+
+<Exercicio
+  numero="80.22"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/3-4-contingency-tables-and-probability-trees", secao: "§3.4", pagina: "196", exercicio: "ex. 3.14", licenca: "CC-BY" }}
+  solucao={<>Production line with 2% defects (<Eq>{`p = 0{,}02`}</Eq>), batch of <Eq>{`n=200`}</Eq>. Poisson approximation with <Eq>{`\\lambda = 200\\times0{,}02 = 4`}</Eq>: <Eq>{`P(X \\geq 5) = 1 - P(X \\leq 4) = 1 - e^{-4}(1 + 4 + 8 + 32/6 + 32/3)`}</Eq>... more directly: <Eq>{`P(X \\leq 4) = e^{-4}\\sum_{k=0}^{4}4^k/k! = e^{-4}(1+4+8+32/6+32/3)`}</Eq>. Numerically: <Eq>{`P(X \\leq 4) \\approx 0{,}629`}</Eq>, so <Eq>{`P(X \\geq 5) \\approx 0{,}371`}</Eq>. Normal approximation: <Eq>{`\\mu=4`}</Eq>, <Eq>{`\\sigma=2`}</Eq>; <Eq>{`P(X \\geq 5) \\approx P(Z \\geq (4{,}5-4)/2) = P(Z \\geq 0{,}25) \\approx 40{,}1\\%`}</Eq>. The two estimates differ; Poisson is more precise here (<Eq>{`n`}</Eq> large, <Eq>{`p`}</Eq> small).</>}
+>
+Production line: 2% defect rate, batch of 200 parts. Estimate $P(X \geq 5\text{ defects})$ via Poisson approximation and normal approximation. Compare results.
+</Exercicio>
+
+<Exercicio
+  numero="80.23"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "370", exercicio: "8.13", licenca: "CC-BY-SA" }}
+  solucao={<>Variance of 50/50 portfolio: <Eq>{`\\sigma_p^2 = (0{,}5)^2(0{,}01)^2 + (0{,}5)^2(0{,}02)^2 + 2(0{,}5)(0{,}5)(0{,}3)(0{,}01)(0{,}02)`}</Eq>. <Eq>{`= 0{,}25\\times0{,}0001 + 0{,}25\\times0{,}0004 + 0{,}5\\times0{,}3\\times0{,}0002`}</Eq>. <Eq>{`= 0{,}000025 + 0{,}0001 + 0{,}00003 = 0{,}000155`}</Eq>. <Eq>{`\\sigma_p = \\sqrt{0{,}000155} \\approx 0{,}01245 = 1{,}245\\%`}</Eq>. Compare with weighted average of deviations: <Eq>{`0{,}5\\times1\\% + 0{,}5\\times2\\% = 1{,}5\\%`}</Eq>. Partial correlation (<Eq>{`\\rho=0{,}3`}</Eq>) reduced risk below weighted average — benefit of diversification.</>}
+>
+Financial portfolio: assets A ($\sigma_A = 1\%$) and B ($\sigma_B = 2\%$) with correlation $\rho_{AB} = 0{,}3$. Calculate the standard deviation of a 50%/50% portfolio.
+</Exercicio>
+
+<Exercicio
+  numero="80.24"
+  dificuldade="modelagem"
+  resposta="Final PPV $\approx 61\%$"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "90", exercicio: "2.33", licenca: "CC-BY-SA" }}
+  solucao={<>Two independent positive tests, prevalence 1%. First test: sens 90%, spec 95%. Posterior after 1st test: <Eq>{`P(D|+_1) = (0{,}9\\times0{,}01)/(0{,}9\\times0{,}01 + 0{,}05\\times0{,}99) = 0{,}009/0{,}0585 \\approx 0{,}154`}</Eq>. Second test uses posterior as new prior: <Eq>{`P(D|+_1,+_2) = (0{,}85\\times0{,}154)/(0{,}85\\times0{,}154 + 0{,}10\\times0{,}846) = 0{,}1309/(0{,}1309+0{,}0846) = 0{,}1309/0{,}2155 \\approx 0{,}607`}</Eq>. With two independent sequential Bayes tests, PPV rises significantly.</>}
+>
+Two independent diagnostic tests, both positive: test 1 (sens 90%, spec 95%), test 2 (sens 85%, spec 90%). Prevalence 1%. Apply Bayes sequentially and calculate final PPV.
+</Exercicio>
+
+<Exercicio
+  numero="80.25"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-1-a-single-population-mean-using-the-normal-distribution", secao: "§8.1", pagina: "430", exercicio: "ex. 8.7", licenca: "CC-BY" }}
+  solucao={<>Vaccinated: 5/100 = 5% infection. Placebo: 25/100 = 25%. Vaccine efficacy: <Eq>{`1 - (\\text{risk vaccinated})/(\\text{risk placebo}) = 1 - 5\\%/25\\% = 1 - 0{,}2 = 80\\%`}</Eq>. To evaluate significance (simplified): difference of proportions <Eq>{`= 0{,}25 - 0{,}05 = 0{,}20`}</Eq>. Standard error of difference: <Eq>{`\\sqrt{0{,}05\\times0{,}95/100 + 0{,}25\\times0{,}75/100} = \\sqrt{0{,}000475 + 0{,}001875} = \\sqrt{0{,}00235} \\approx 0{,}0485`}</Eq>. Z-statistic: <Eq>{`0{,}20/0{,}0485 \\approx 4{,}1`}</Eq>. Highly significant (<Eq>{`p \\ll 0{,}001`}</Eq>).</>}
+>
+Vaccine clinical trial: 100 vaccinated, 5 sick; 100 placebo, 25 sick. Calculate vaccine efficacy and evaluate (informally) if the difference is statistically significant.
+</Exercicio>
+
+<Exercicio
+  numero="80.26"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "380", exercicio: "8.19", licenca: "CC-BY-SA" }}
+  solucao={<>Number of calls in 1 hour: <Eq>{`X \\sim \\text{Bin}(120, 0{,}02)`}</Eq>. <Eq>{`E[X] = 2{,}4`}</Eq>, <Eq>{`\\text{Var}(X) = 120\\times0{,}02\\times0{,}98 = 2{,}352`}</Eq>. Poisson approx with <Eq>{`\\lambda = 2{,}4`}</Eq>: <Eq>{`P(X = 0) = e^{-2{,}4} \\approx 0{,}091`}</Eq>; <Eq>{`P(X \\geq 1) \\approx 1 - 0{,}091 = 90{,}9\\%`}</Eq>.</>}
+>
+Call center: in each minute, each of 120 agents receives a call with 2% probability. Model the number of simultaneous calls in 1 minute and calculate $P(\text{at least 1 call})$.
+</Exercicio>
+
+<Exercicio
+  numero="80.27"
+  dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-2-using-the-normal-distribution", secao: "§6.2", pagina: "342", exercicio: "ex. 6.15", licenca: "CC-BY" }}
+  solucao={<>Heights of adult Brazilian men (illustrative data): men <Eq>{`\\sim \\mathcal{N}(173,\\; 7^2)`}</Eq> cm. Door 180 cm: <Eq>{`Z = (180-173)/7 = 1`}</Eq>. <Eq>{`P(H > 180) = P(Z > 1) \\approx 15{,}9\\%`}</Eq>. For 99% coverage: <Eq>{`z_{0{,}99} = 2{,}326`}</Eq>. Minimum door height: <Eq>{`173 + 2{,}326\\times7 \\approx 189{,}3`}</Eq> cm. In practice, Brazilian building codes require 2.40 m ceiling height to cover the distribution.</>}
+>
+Heights of adult men in Brazil: $\mu = 173$ cm, $\sigma = 7$ cm. What percentage does not pass through a 180 cm door? What door height covers 99% of the male population?
+</Exercicio>
+
+### Block C — Integrative challenges (80.28 to 80.35)
+
+<Exercicio
+  numero="80.28"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "65", exercicio: "2.13", licenca: "CC-BY-SA" }}
+  solucao={<>In highly right-skewed distributions (e.g., income, extreme wait times), the mean is inflated by extreme values. The median, being a robust quantile, better represents the "typical" value. IQR measures the dispersion of the central half of the distribution and is immune to outliers — that's why it's more informative than <Eq>{`\\sigma`}</Eq> when there is strong skewness or outliers. Practical example: Brazil's GDP per capita, where the mean is higher than the salary of 80% of people.</>}
+>
+Explain, with a numerical example, why in highly right-skewed distributions the median is more informative than the mean, and IQR more informative than standard deviation.
+</Exercicio>
+
+<Exercicio
+  numero="80.29"
+  dificuldade="desafio"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§9.1", pagina: "339", exercicio: "ex. 9.1.5", licenca: "GNU FDL" }}
+  solucao={<>The phenomenon is the convergence of the Bayesian estimator to the MLE in large samples (Bernstein-von Mises). For large <Eq>{`n`}</Eq>, the likelihood <Eq>{`L(\\theta|x_1,\\ldots,x_n)`}</Eq> dominates the prior <Eq>{`\\pi(\\theta)`}</Eq> in determining the posterior. Formally, if the prior is continuous and positive in the neighborhood of the MLE, the posterior <Eq>{`\\pi(\\theta|x^n)`}</Eq> converges (in total variation) to <Eq>{`\\mathcal{N}(\\hat\\theta_{MLE},\\; I(\\theta)^{-1}/n)`}</Eq>, where <Eq>{`I(\\theta)`}</Eq> is the Fisher information. Intuitively: sufficient data "drowns" the prior.</>}
+>
+Describe intuitively and mathematically how Bayesian inference converges to frequentist inference (MLE) as $n \to \infty$. Which theorem formalizes this convergence?
+</Exercicio>
+
+<Exercicio
+  numero="80.30"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "392", exercicio: "8.25", licenca: "CC-BY-SA" }}
+  solucao={<>Classic example: correlation between ice cream sales and number of drownings has <Eq>{`r \\approx 0{,}9`}</Eq>. The common cause is temperature. Both variables are caused by heat, there is no causal relationship between them. To construct: take <Eq>{`C = \\text{temperature}`}</Eq> (confounder), <Eq>{`X = \\text{ice cream sales}`}</Eq>, <Eq>{`Y = \\text{drownings}`}</Eq>. <Eq>{`X = a\\cdot C + \\varepsilon_1`}</Eq>, <Eq>{`Y = b\\cdot C + \\varepsilon_2`}</Eq>, with <Eq>{`\\varepsilon_1, \\varepsilon_2`}</Eq> independent. <Eq>{`\\text{Cov}(X,Y) = ab\\cdot\\text{Var}(C) \\neq 0`}</Eq>. Correlating X and Y is a spurious result derived from confounder C.</>}
+>
+Construct a data example where $r > 0{,}8$ but the relationship between $X$ and $Y$ is entirely explained by a confounder $C$. Explicit the mathematical mechanism.
+</Exercicio>
+
+<Exercicio
+  numero="80.31"
+  dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§4.4", pagina: "190", exercicio: "4.37", licenca: "CC-BY-SA" }}
+  solucao={<>Sum of 100 independent uniform numbers in [0,1]: <Eq>{`S = X_1+\\ldots+X_{100}`}</Eq> with <Eq>{`\\mu = 0{,}5`}</Eq>, <Eq>{`\\sigma^2 = 1/12`}</Eq>. By CLT: <Eq>{`S \\approx \\mathcal{N}(50,\\; 100/12) = \\mathcal{N}(50,\\; 8{,}33)`}</Eq>. <Eq>{`P(S > 55) = P(Z > (55-50)/\\sqrt{8{,}33}) = P(Z > 5/2{,}887) = P(Z > 1{,}732) \\approx 4{,}2\\%`}</Eq>.</>}
+>
+Generate (theoretically) 100 independent random variables $X_i \sim \text{Uniform}[0,1]$. Use CLT to approximate $P(X_1 + \cdots + X_{100} > 55)$.
+</Exercicio>
+
+<Exercicio
+  numero="80.32"
+  dificuldade="desafio"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§8.1", pagina: "305", exercicio: "ex. 8.1.1", licenca: "GNU FDL" }}
+  solucao={<>ENEM 2024 (hypothetical data): public school Math mean = 520, <Eq>{`\\sigma = 90`}</Eq>; private school = 610, <Eq>{`\\sigma = 80`}</Eq>. Samples <Eq>{`n_1 = n_2 = 100`}</Eq>. Difference of sample means: <Eq>{`\\bar X_2 - \\bar X_1 \\sim \\mathcal{N}(90,\\; 80^2/100 + 90^2/100) = \\mathcal{N}(90,\\; 64+81) = \\mathcal{N}(90,\\; 145)`}</Eq>. <Eq>{`\\sigma_{\\text{dif}} = \\sqrt{145} \\approx 12{,}04`}</Eq>. <Eq>{`P(\\bar X_2 - \\bar X_1 > 80) = P(Z > (80-90)/12{,}04) = P(Z > -0{,}83) \\approx 79{,}7\\%`}</Eq>.</>}
+>
+ENEM: public school has $\mu_1 = 520$, $\sigma_1 = 90$ (Math); private school has $\mu_2 = 610$, $\sigma_2 = 80$. Samples of $n=100$ from each. What is the probability that the private sample mean exceeds the public one by more than 80 points?
+</Exercicio>
+
+### Block D — Proofs (80.36 a 80.40)
+
+<Exercicio
+  numero="80.36"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§6.2", pagina: "235", exercicio: "ex. 6.2.1", licenca: "GNU FDL" }}
+  solucao={<>To prove <Eq>{`\\text{Var}(X) = E[X^2] - (E[X])^2`}</Eq>: starting from definition <Eq>{`\\text{Var}(X) = E[(X-\\mu)^2]`}</Eq> where <Eq>{`\\mu = E[X]`}</Eq>. Expand: <Eq>{`E[(X-\\mu)^2] = E[X^2 - 2\\mu X + \\mu^2] = E[X^2] - 2\\mu E[X] + \\mu^2 = E[X^2] - 2\\mu^2 + \\mu^2 = E[X^2] - \\mu^2 = E[X^2] - (E[X])^2`}</Eq>. The second step uses linearity of expectation; the third uses <Eq>{`E[X] = \\mu`}</Eq> and <Eq>{`E[\\mu^2] = \\mu^2`}</Eq> (constant).</>}
+>
+Prove that $\text{Var}(X) = E[X^2] - (E[X])^2$ from the definition $\text{Var}(X) = E[(X-\mu)^2]$.
+</Exercicio>
+
+<Exercicio
+  numero="80.37"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "175", exercicio: "ex. 5.1.5", licenca: "GNU FDL" }}
+  solucao={<>Let <Eq>{`X_i \\sim \\text{Bernoulli}(p)`}</Eq> be iid. The sum <Eq>{`S = X_1 + \\ldots + X_n`}</Eq> counts the number of successes in <Eq>{`n`}</Eq> independent trials. <Eq>{`P(S = k) = P(\\text{exactly } k \\text{ of } n \\text{ are 1}) = \\binom{n}{k} p^k (1-p)^{n-k}`}</Eq>, as there are <Eq>{`\\binom{n}{k}`}</Eq> ways to choose which <Eq>{`k`}</Eq> trials are success, each combination has probability <Eq>{`p^k(1-p)^{n-k}`}</Eq>, and trials are independent. This is exactly the PMF of Binomial(n, p). By the Law of Large Numbers: <Eq>{`\\bar X = S/n \\xrightarrow{P} E[X_1] = p`}</Eq>.</>}
+>
+Show that if $X_i \sim \text{Bernoulli}(p)$ are iid, then $S = \sum_{i=1}^n X_i \sim \text{Bin}(n,p)$. Conclude that $\bar X = S/n \xrightarrow{P} p$ by the Law of Large Numbers.
+</Exercicio>
+
+<Exercicio
+  numero="80.38"
+  dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics 4e", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "85", exercicio: "2.25", licenca: "CC-BY-SA" }}
+  solucao={<>Linearity of expectation: <Eq>{`E[aX + b] = \\sum_x (ax+b) P(X=x) = a\\sum_x x P(X=x) + b\\sum_x P(X=x) = a E[X] + b`}</Eq> (using <Eq>{`\\sum P(X=x) = 1`}</Eq>). Variance of linear transformation: <Eq>{`\\text{Var}(aX+b) = E[(aX+b - (aE[X]+b))^2] = E[(a(X-E[X]))^2] = a^2 E[(X-E[X])^2] = a^2 \\text{Var}(X)`}</Eq>. Constant <Eq>{`b`}</Eq> does not affect dispersion.</>}
+>
+Prove that $E[aX + b] = aE[X] + b$ and $\text{Var}(aX + b) = a^2 \text{Var}(X)$ for any $a, b \in \mathbb{R}$.
+</Exercicio>
+
+<Exercicio
+  numero="80.39"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "137", exercicio: "ex. 4.1.7", licenca: "GNU FDL" }}
+  solucao={<>Bayes' rule for two events: <Eq>{`P(H|E) = P(E \\cap H)/P(E)`}</Eq> (definition of conditional probability). By definition, <Eq>{`P(E \\cap H) = P(E|H) P(H)`}</Eq>. For <Eq>{`P(E)`}</Eq>, use law of total probability with partition <Eq>{`\\{H, H^c\\}`}</Eq>: <Eq>{`P(E) = P(E|H)P(H) + P(E|H^c)P(H^c)`}</Eq>. Substituting: <Eq>{`P(H|E) = P(E|H)P(H)/[P(E|H)P(H) + P(E|H^c)P(H^c)]`}</Eq>. Generalization for <Eq>{`n`}</Eq> exclusive and exhaustive hypotheses <Eq>{`\\{H_1,\\ldots,H_n\\}`}</Eq> follows analogously.</>}
+>
+Derive Bayes' rule $P(H \mid E) = P(E \mid H)\,P(H)/P(E)$ from the definition of conditional probability and the law of total probability.
+</Exercicio>
+
+<Exercicio
+  numero="80.40"
+  dificuldade="demonstracao"
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§9.2", pagina: "352", exercicio: "ex. 9.2.1", licenca: "GNU FDL" }}
+  solucao={<>Statement of CLT (weak form): if <Eq>{`X_i`}</Eq> are iid with <Eq>{`E[X_i]=\\mu`}</Eq> and <Eq>{`\\text{Var}(X_i)=\\sigma^2 < \\infty`}</Eq>, then <Eq>{`\\sqrt{n}(\\bar X_n - \\mu)/\\sigma \\xrightarrow{d} \\mathcal{N}(0,1)`}</Eq>. Sketch via characteristic function: the c.f. of <Eq>{`Z_n = \\sqrt{n}(\\bar X - \\mu)/\\sigma`}</Eq> is <Eq>{`\\varphi_{Z_n}(t) = [\\varphi_X(t/(\\sigma\\sqrt{n}))]^n`}</Eq>. Expanding <Eq>{`\\varphi_X`}</Eq> in Taylor: <Eq>{`\\varphi_X(s) = 1 - s^2\\sigma^2/2 + O(s^3)`}</Eq>. Substituting <Eq>{`s = t/(\\sigma\\sqrt{n})`}</Eq>: <Eq>{`\\varphi_{Z_n}(t) = [1 - t^2/(2n) + O(n^{-3/2})]^n \\to e^{-t^2/2}`}</Eq> as <Eq>{`n \\to \\infty`}</Eq>. But <Eq>{`e^{-t^2/2}`}</Eq> is exactly the c.f. of <Eq>{`\\mathcal{N}(0,1)`}</Eq>. By Lévy's continuity theorem, convergence of c.f. implies convergence in distribution.</>}
+>
+State the CLT formally. Sketch the proof via characteristic function (indicate the steps, justifying Lévy's continuity theorem is not required).
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**OpenIntro Statistics** (4th ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · **Primary source for the term.**
+- [**OpenStax — Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · Contextualized application exercises.
+- [**Grinstead & Snell — Introduction to Probability**](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL · Theoretical rigor for discrete r.v., LLN, and CLT.

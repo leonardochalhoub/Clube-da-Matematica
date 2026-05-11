@@ -1,0 +1,793 @@
+---
+titulo: "Lección 100 — Consolidación Trimestre 10 (EDOs)"
+slug: "licao-100-consolidacao-trim-10"
+categoria: "aulas"
+subcategoria: "ano-3-trim-10"
+descricao: "Taller integrador de EDOs: separables, lineales de 1ª orden, poblaciones, 2ª orden con coeficientes constantes, vibraciones, RLC, Euler numérico y enfriamiento de Newton."
+ordem: 100
+publicado: true
+tags: ["EDO", "consolidação", "separável", "linear", "vibrações", "RLC", "Euler", "Newton", "ano-3", "trim-10"]
+prerrequisitos: ["licao-99-newton-resfriamento"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["AP Calculus BC (EUA)", "Leistungskurs Mathematik Klasse 12 (Alemania)", "H2 Mathematics (Singapur)", "Spécialité Maths Terminale (Francia)"]
+versao: "v1"
+orden: 100
+---
+
+<EquacaoCanonica
+  formula="\underbrace{y' + p(x)\,y = q(x)}_{\text{1ª orden lineal}} \quad \Big| \quad \underbrace{ay'' + by' + cy = q(x)}_{\text{2ª orden coef.\,constantes}}"
+  legenda={<>Dos modelos estructurales cubren casi toda aplicación del trimestre. El de la izquierda se resuelve con <strong>factor integrante</strong> <Eq>{`\\mu = e^{\\int p\\,dx}`}</Eq>. El de la derecha se resuelve mediante la <strong>ecuación característica</strong> <Eq>{`a\\lambda^2 + b\\lambda + c = 0`}</Eq>. Casos no analíticos reciben Euler o RK4.</>}
+  audioTexto="Consolidación del trimestre 10. EDOs de primera orden: separables, lineales con factor integrante, modelos poblacionales Malthus y logístico, enfriamiento de Newton. EDOs de segunda orden: ecuación característica, vibraciones masa-muelle, circuito RLC. Métodos numéricos: Euler y Runge-Kutta de cuarta orden."
+/>
+
+<aside>
+
+**Libros que cubren esta lección**
+
+- [**Notes on Diffy Qs**](https://www.jirka.org/diffyqs/) — Jiří Lebl · §1–2 y §7 · CC-BY-SA · <em>Fuente primaria para EDOs analíticas de 1ª y 2ª orden con ejemplos de revisión integrada.</em>
+- [**REAMAT — Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · Cap. 8 · CC-BY-SA · <em>Euler, errores de truncamiento, RK4 y estabilidad — revisión numérica del trimestre.</em>
+- [**Calculus Volume 2**](https://openstax.org/details/books/calculus-volume-2) — OpenStax · §4.1–4.5 · CC-BY-NC-SA · <em>Revisión aplicada: EDOs separables, lineales de 1ª orden, logística y enfriamiento con problemas de síntesis.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Mapa de técnicas y criterios de decisión">
+
+<Definicao titulo="Flujograma de clasificación de EDOs">
+
+Dada una EDO ordinaria, recorra:
+
+1. **¿Orden?** ¿Cuántas derivadas hay? Solo <Eq>{`y'`}</Eq>: 1ª orden. Tiene <Eq>{`y''`}</Eq>: 2ª orden.
+2. **¿Lineal?** ¿Todos los términos en <Eq>{`y, y', y''`}</Eq> son lineales (sin productos, sin funciones de <Eq>{`y`}</Eq>)?
+3. **1ª orden lineal**: <Eq>{`y' + p(x)y = q(x)`}</Eq> → factor integrante <Eq>{`\\mu = e^{\\int p\\,dx}`}</Eq>.
+4. **1ª orden separable**: <Eq>{`y' = g(x)h(y)`}</Eq> → separa e integra.
+5. **2ª orden coef. constantes**: <Eq>{`ay'' + by' + cy = q(x)`}</Eq> → ecuación característica + <Eq>{`y_p`}</Eq> por coeficientes a determinar o variación de parámetros.
+6. **No analítica**: cualquier forma que no se encaja arriba → numérico (Euler/RK4).
+
+</Definicao>
+
+> "The existence and uniqueness theorem says: there is exactly one solution curve through each point (x₀, y₀) where f and ∂f/∂y are continuous."
+> — [Lebl, *Notes on Diffy Qs* §1.2](https://www.jirka.org/diffyqs/html/intro_section.html)
+
+> "The idea behind the integrating factor is to write the left-hand side as an exact derivative."
+> — [OpenStax *Calculus Vol. 2* §4.5](https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations)
+
+**Tabla de técnicas del trimestre:**
+
+| EDO | Forma canónica | Técnica | Solución general |
+|---|---|---|---|
+| Separable | <Eq>{`y' = g(x)h(y)`}</Eq> | Separa e integra | Implícita |
+| Lineal 1ª | <Eq>{`y'+py=q`}</Eq> | <Eq>{`\\mu=e^{\\int p}`}</Eq> | <Eq>{`y = \\frac{1}{\\mu}\\int\\mu q\\,dx + C`}</Eq> |
+| Malthus | <Eq>{`\\dot P = rP`}</Eq> | Separable | <Eq>{`P = P_0 e^{rt}`}</Eq> |
+| Logística | <Eq>{`\\dot P = rP(1-P/K)`}</Eq> | Separable + fracciones parciales | <Eq>{`P = K/(1+Ae^{-rt})`}</Eq> |
+| Enfriamiento | <Eq>{`\\dot T = -k(T-T_a)`}</Eq> | Separable | <Eq>{`T = T_a + (T_0-T_a)e^{-kt}`}</Eq> |
+| 2ª homogénea | <Eq>{`ay''+by'+cy=0`}</Eq> | Caract. <Eq>{`a\\lambda^2+b\\lambda+c=0`}</Eq> | 3 casos |
+| 2ª forzada | <Eq>{`ay''+by'+cy=q`}</Eq> | <Eq>{`y_h + y_p`}</Eq> | Coef. a det. |
+| Euler numérico | Cualquiera | <Eq>{`y_{n+1}=y_n+hf`}</Eq> | Secuencia |
+
+<Teorema titulo="Estructura de la solución lineal de 2ª orden">
+
+Si <Eq>{`y_1, y_2`}</Eq> son soluciones linealmente independientes de <Eq>{`ay'' + by' + cy = 0`}</Eq> y <Eq>{`y_p`}</Eq> es cualquier solución particular de <Eq>{`ay'' + by' + cy = q(x)`}</Eq>, entonces toda solución de la ecuación no-homogénea es
+
+<Equation latex="y = C_1 y_1 + C_2 y_2 + y_p, \quad C_1, C_2 \in \mathbb{R}." />
+
+**Prueba (bosquejo).** Sea <Eq>{`z`}</Eq> otra solución; entonces <Eq>{`z - y_p`}</Eq> satisface la homogénea, luego pertenece al espacio generado por <Eq>{`y_1, y_2`}</Eq>. <Eq>{`\\square`}</Eq>
+
+</Teorema>
+
+<Insight>
+
+**Analogía electro-mecánica.** La tabla
+
+| Mecánico | Eléctrico |
+|---|---|
+| Masa <Eq>{`m`}</Eq> | Inductancia <Eq>{`L`}</Eq> |
+| Amortiguador <Eq>{`c`}</Eq> | Resistencia <Eq>{`R`}</Eq> |
+| Muelle <Eq>{`k`}</Eq> | <Eq>{`1/C`}</Eq> |
+| Fuerza <Eq>{`F`}</Eq> | Tensión <Eq>{`V`}</Eq> |
+| Posición <Eq>{`x`}</Eq> | Carga <Eq>{`Q`}</Eq> |
+
+es exacta porque ambos sistemas se modelan mediante la misma EDO de 2ª orden. Los ingenieros intercambian sistemas mecánicos por circuitos — más fáciles de medir — e importan resultados atrás.
+
+</Insight>
+
+**SVG — Diagrama de decisión EDO**
+
+<svg viewBox="0 0 480 320" width="480" height="320" style={{fontFamily:"sans-serif",fontSize:"12px"}}>
+  <g>
+    <rect x="160" y="10" width="160" height="36" rx="6" fill="#e0f2fe" stroke="#0284c7" strokeWidth="1.5"/>
+    <text x="240" y="33" textAnchor="middle" fill="#0c4a6e">EDO llega</text>
+  </g>
+  <g>
+    <line x1="240" y1="46" x2="240" y2="80" stroke="#64748b" strokeWidth="1.2"/>
+    <polygon points="240,80 235,72 245,72" fill="#64748b"/>
+  </g>
+  <g>
+    <rect x="160" y="80" width="160" height="36" rx="6" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1.5"/>
+    <text x="240" y="103" textAnchor="middle" fill="#713f12">¿Orden?</text>
+  </g>
+  <g>
+    <line x1="160" y1="98" x2="60" y2="150" stroke="#64748b" strokeWidth="1.2"/>
+    <text x="100" y="128" textAnchor="middle" fill="#475569">1ª orden</text>
+  </g>
+  <g>
+    <line x1="320" y1="98" x2="420" y2="150" stroke="#64748b" strokeWidth="1.2"/>
+    <text x="380" y="128" textAnchor="middle" fill="#475569">2ª orden</text>
+  </g>
+  <g>
+    <rect x="10" y="150" width="100" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
+    <text x="60" y="163" textAnchor="middle" fill="#14532d" fontSize="11">¿Separable?</text>
+    <text x="60" y="178" textAnchor="middle" fill="#14532d" fontSize="10">→ Integra</text>
+  </g>
+  <g>
+    <rect x="120" y="150" width="100" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
+    <text x="170" y="163" textAnchor="middle" fill="#14532d" fontSize="11">¿Lineal?</text>
+    <text x="170" y="178" textAnchor="middle" fill="#14532d" fontSize="10">→ Factor integ.</text>
+  </g>
+  <g>
+    <rect x="370" y="150" width="100" height="36" rx="6" fill="#fce7f3" stroke="#db2777" strokeWidth="1.5"/>
+    <text x="420" y="163" textAnchor="middle" fill="#831843" fontSize="11">¿Coef. const?</text>
+    <text x="420" y="178" textAnchor="middle" fill="#831843" fontSize="10">→ Caract.</text>
+  </g>
+  <g>
+    <rect x="170" y="240" width="140" height="36" rx="6" fill="#f1f5f9" stroke="#475569" strokeWidth="1.5"/>
+    <text x="240" y="263" textAnchor="middle" fill="#1e293b">Numérico</text>
+  </g>
+  <g>
+    <line x1="60" y1="186" x2="60" y2="258" stroke="#64748b" strokeWidth="1" strokeDasharray="5,3"/>
+    <line x1="60" y1="258" x2="170" y2="258" stroke="#64748b" strokeWidth="1" strokeDasharray="5,3"/>
+    <text x="110" y="252" textAnchor="middle" fill="#475569" fontSize="10">no analítica</text>
+  </g>
+</svg>
+
+</Porta>
+
+<Porta nivel="5" titulo="Ecuaciones que cambian en el tiempo">
+
+Aprendimos a lidiar con **cosas que cambian todo el tiempo**: temperatura que va enfriándose, poblaciones que crecen, puentes que se balancean.
+
+Para cada tipo de cambio existe un **truco diferente**. A veces la matemática separa las variables en una cuenta simple. A veces necesita un "factor mágico" que facilita todo. Y cuando ningún truco funciona, la computadora hace **paso a pasito** hasta llegar a la respuesta.
+
+En esta lección juntamos todos los trucos y elegimos el correcto para cada problema.
+
+</Porta>
+
+<Porta nivel="10" titulo="Ocho técnicas, un mapa">
+
+A lo largo del trimestre 10, aprendiste **ocho maneras** de lidiar con ecuaciones de cambio:
+
+1. **Separable** — x e y se separan: integra cada lado.
+2. **Lineal de 1ª orden** — factor integrante transforma en un lado solo.
+3. **Malthus** — crecimiento proporcional: exponencial.
+4. **Logística** — crecimiento con límite de capacidad.
+5. **2ª orden homogénea** — ecuación característica da exponenciales o senos.
+6. **Vibraciones** — masa-muelle con amortiguamiento y forzamiento.
+7. **RLC** — idéntico al masa-muelle, pero con electrones.
+8. **Euler/RK4** — cuando no hay fórmula cerrada, la computadora resuelve paso a paso.
+
+**¿Cómo elegir?** Mira cuántas derivadas tiene: solo <Eq>{`y'`}</Eq> → primera orden. Tiene <Eq>{`y''`}</Eq> → segunda. Si reconoces uno de los modelos canónicos (logístico, enfriamiento, masa-muelle), usa aquél directamente.
+
+</Porta>
+
+<Porta nivel="15" titulo="Flujograma de decisión y errores comunes">
+
+### Decisión rápida
+
+```
+EDO llega:
+├─ Solo y': 1ª orden
+│  ├─ ¿Separa x e y? → separable, integra
+│  ├─ ¿Forma y' + p(x)y = q(x)? → factor integrante
+│  └─ ¿Ninguno? → sustitución (Bernoulli, exacta) o numérico
+└─ Tiene y'': 2ª orden
+   ├─ ¿Coef. constantes?
+   │  ├─ Homogénea → ecuación característica
+   │  └─ Forzada → y_h + y_p (coef. a det.)
+   └─ Coef. variables → Cauchy-Euler, serie o numérico
+```
+
+### Errores clásicos del trimestre
+
+- **Olvida soluciones constantes en separables**: si <Eq>{`h(y_0) = 0`}</Eq>, entonces <Eq>{`y \\equiv y_0`}</Eq> es solución singular. Divide por <Eq>{`h(y)`}</Eq> solo funciona fuera de las raíces.
+- **Usa factor integrante en EDO no-lineal**: <Eq>{`y' = y^2`}</Eq> no es lineal, no tiene factor integrante.
+- **Confunde <Eq>{`\\omega_0`}</Eq> y <Eq>{`\\omega_d`}</Eq>**: frecuencia natural vs. amortiguada. <Eq>{`\\omega_d = \\omega_0\\sqrt{1-\\zeta^2}`}</Eq>.
+- **Paso de Euler grande en problema stiff**: sistema con constante de tiempo corta (RLC con R grande) inestabiliza el Euler explícito.
+- **Resonancia**: cuando fuerza tiene frecuencia <Eq>{`\\omega_0`}</Eq> y <Eq>{`\\zeta = 0`}</Eq>, <Eq>{`y_p`}</Eq> debe incluir factor <Eq>{`t`}</Eq>.
+
+### Verificación rápida
+
+Siempre sustituye la solución en la EDO original. Si el resultado no cuadra, la solución está errada.
+
+</Porta>
+
+<Porta nivel="25" titulo="Mapa de ingeniería: dominios y EDOs canónicas">
+
+Las EDOs son el **lenguaje de la ingeniería**. Cada dominio tiene sus modelos estructurales.
+
+### Mecánica
+
+- Dinámica translacional: <Eq>{`m\\ddot x = F`}</Eq>.
+- Vibración lineal: <Eq>{`m\\ddot x + c\\dot x + kx = F(t)`}</Eq>. Factor de calidad <Eq>{`Q = 1/(2\\zeta)`}</Eq>.
+- Estabilidad: linealización en torno del equilibrio, autovalores de <Eq>{`Df(x^*)`}</Eq>.
+
+### Electricidad
+
+- RC, RL, LC, RLC: análogos exactos del masa-muelle.
+- Línea de transmisión: ecuación del telegrafista (EDP → EDO por separación).
+- Máquinas eléctricas: ecuaciones de Park (transformación dq0).
+
+### Química y procesos
+
+- Cinética de 1ª orden: <Eq>{`\\dot c = -kc`}</Eq>.
+- CSTR con reacción exotérmica: balance de masa + energía, sistema de EDOs acopladas.
+- Difusión-reacción (1D): <Eq>{`D c'' = \\lambda c`}</Eq> (EDO de 2ª orden en el espacio).
+
+### Control
+
+- PID controla planta de 2ª orden. Polos de lazo cerrado determinan respuesta.
+- Realimentación de estado: <Eq>{`\\dot{\\mathbf x} = A\\mathbf x + B\\mathbf u`}</Eq>, <Eq>{`\\mathbf u = -K\\mathbf x`}</Eq>.
+- Criterio de Routh-Hurwitz: estabilidad sin resolver la ecuación.
+
+### Flujo de trabajo profesional
+
+1. **Modele** de la física (balances).
+2. **Adimensionalice** — identifique Bi, Re, <Eq>{`\\zeta`}</Eq>, <Eq>{`\\omega_0 T`}</Eq>.
+3. **Linealice** si <Eq>{`\\Delta`}</Eq> pequeño; analítico se vuelve accesible.
+4. **Resuelva** analíticamente o numéricamente.
+5. **Valide** con experimento o simulación de alta fidelidad.
+6. **Optimice** parámetros (control, dimensionamiento).
+
+</Porta>
+
+<Porta nivel="40" titulo="Sistemas dinámicos, adjuntos y fronteras modernas">
+
+### Geometría y flujos
+
+Toda EDO autónoma <Eq>{`\\dot x = f(x)`}</Eq> define un **flujo** <Eq>{`\\phi_t`}</Eq> en variedad. Conceptos centrales:
+
+- **Equilibrios**: <Eq>{`f(x^*) = 0`}</Eq>. Hartman-Grobman: <Eq>{`\\phi_t`}</Eq> es localmente topológicamente conjugado a la linealización si <Eq>{`Df(x^*)`}</Eq> no tiene autovalor puramente imaginario.
+- **Variedades estable/inestable**: invariantes; estructuran el retrato de fase.
+- **Bifurcaciones**: silla-nodo, Hopf, período-duplicación. Diagramas de bifurcación paramétrica.
+- **Caos**: exponentes de Lyapunov positivos. Atractor de Lorenz.
+
+### Adjunto de EDO
+
+Para optimizar funcional <Eq>{`J = \\int_0^T g(x,u)\\,dt`}</Eq> sujeto a <Eq>{`\\dot x = f(x,u)`}</Eq>, el gradiente respecto a <Eq>{`u`}</Eq> se calcula mediante **ecuación adjunta** retroactiva. Costo: una integración forward + una backward, independiente de la dimensión de <Eq>{`u`}</Eq>. Fundamento del backpropagation moderno en Neural ODEs (Chen et al., NeurIPS 2018).
+
+### Métodos modernos
+
+- **SINDy** (Brunton et al., 2016): identifica EDO a partir de datos mediante regresión dispersa.
+- **Neural ODE**: red residual en el límite continuo; entrena con adjunto.
+- **PINN** (Raissi et al., 2019): minimiza residuo de la EDO + datos.
+- **Integración geométrica**: simplécticos (Störmer-Verlet) conservan energía; Lie-group preservan estructura.
+
+### Premio Nobel relacionado
+
+James Peebles recibió el [Premio Nobel de Física 2019](https://www.nobelprize.org/prizes/physics/2019/summary/) por contribuciones teóricas a la cosmología física. Las ecuaciones de Friedmann — que gobiernan la expansión del universo — son EDOs autónomas de 1ª orden para el factor de escala <Eq>{`a(t)`}</Eq>.
+
+### EDEs
+
+EDOs estocásticas: <Eq>{`dX = f(X)\\,dt + g(X)\\,dW`}</Eq> (Itô). Finanzas (Black-Scholes), biología molecular (ruido genético), control robusto.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicaciones integradoras con datos reales">
+
+### Selección de modelo: regla práctica
+
+Antes de cualquier cuenta, clasifique el problema en el flujograma. Ejemplos con contexto brasileño:
+
+**Epidemia simple (COVID-19, Brasil):** <Eq>{`\\dot I = (\\beta - \\gamma)I`}</Eq> al inicio. Separable → exponencial. Cuando <Eq>{`S`}</Eq> cae: <Eq>{`\\dot I = (\\beta S/N - \\gamma)I`}</Eq>, sistema SIR, resuelve numéricamente.
+
+**Reactores industriales (Petrobras, refinería):** Temperatura de salida de un intercambiador: <Eq>{`mc_p \\dot T = UA(T_s - T)`}</Eq> — lineal de 1ª orden, factor integrante.
+
+**Estructura (edificio Paulista bajo viento):** Modo fundamental de vibración: <Eq>{`m\\ddot x + c\\dot x + kx = F_0\\cos(\\omega t)`}</Eq>. Resonancia preocupa si <Eq>{`\\omega \\approx \\omega_0`}</Eq>.
+
+**Filtro de audio (amplificador, São Paulo):** Pasa-bajos RLC, <Eq>{`f_c = \\omega_0/(2\\pi) = 1/(2\\pi\\sqrt{LC})`}</Eq>. Elija <Eq>{`L`}</Eq> y <Eq>{`C`}</Eq> para <Eq>{`f_c = 1`}</Eq> kHz.
+
+**Farmacocinética (ANVISA):** Droga desaparece: <Eq>{`\\dot C = -k_e C`}</Eq>. Vida media <Eq>{`t_{1/2} = \\ln 2/k_e`}</Eq>. Para paracetamol, <Eq>{`t_{1/2} \\approx 2`}</Eq> h.
+
+### Hoja de trucos del trimestre
+
+```
+Separable:  ∫ dy/h(y) = ∫ g(x) dx
+Lineal 1ª:  μ = exp(∫ p dx), y = (1/μ)∫ μq dx + C
+Logística:  P = K / (1 + A e^{−rt})
+Enfriamiento: T = T_a + (T_0 − T_a) e^{−kt}
+Caract. 2ª:   a λ² + b λ + c = 0
+Vibración:   ω_0 = √(k/m), ζ = c/(2√(mk))
+RLC:        ω_0 = 1/√(LC), ζ = (R/2)√(C/L)
+Euler:      y_{n+1} = y_n + h f(t_n, y_n)
+```
+
+</Porta>
+
+</DuasPortas>
+
+## Ejemplos resueltos
+
+<Ejemplo titulo="Clasificar y resolver una EDO de 1ª orden separable">
+
+**Problema.** Resuelva el PVI <Eq>{`y' = 2xy`}</Eq>, <Eq>{`y(0) = 3`}</Eq>.
+
+**Estrategia.** Verificar si es separable: reescribir como <Eq>{`dy/y = 2x\\,dx`}</Eq> e integrar cada lado. Aplica Condición Inicial para determinar la constante.
+
+**Resolución.**
+
+<Equation latex="\frac{dy}{y} = 2x\,dx \;\Longrightarrow\; \ln|y| = x^2 + C_1 \;\Longrightarrow\; y = Ce^{x^2}." />
+
+CI: <Eq>{`y(0) = C = 3`}</Eq>. Solución: <Eq>{`y = 3e^{x^2}`}</Eq>.
+
+**Verificación.** <Eq>{`y' = 6xe^{x^2} = 2x\\cdot 3e^{x^2} = 2xy`}</Eq>. <Eq>{`y(0) = 3`}</Eq>. Correcto.
+
+**Fuente.** [Lebl, *Notes on Diffy Qs* §1.3](https://www.jirka.org/diffyqs/html/separable_section.html), Exercise 1.3.2.
+
+</Ejemplo>
+
+<Ejemplo titulo="Factor integrante: EDO lineal de 1ª orden con q(x) no trivial">
+
+**Problema.** Resuelva <Eq>{`y' + (2/x)y = x^2`}</Eq>.
+
+**Estrategia.** Identificar <Eq>{`p(x) = 2/x`}</Eq> y calcular <Eq>{`\\mu = e^{\\int 2/x\\,dx} = x^2`}</Eq>. Multiplicar la EDO por <Eq>{`\\mu`}</Eq> y reconocer el lado izquierdo como derivada de producto.
+
+**Resolución.**
+
+<Equation latex="\frac{d}{dx}(x^2 y) = x^4 \;\Longrightarrow\; x^2 y = \frac{x^5}{5} + C \;\Longrightarrow\; y = \frac{x^3}{5} + \frac{C}{x^2}." />
+
+**Verificación.** <Eq>{`y' = 3x^2/5 - 2C/x^3`}</Eq>. Sustituye: <Eq>{`y' + 2y/x = 3x^2/5 - 2C/x^3 + 2x^2/5 + 2C/x^3 = x^2`}</Eq>. Confiere.
+
+**Fuente.** [OpenStax *Calculus Vol. 2* §4.5](https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations), Example 4.14.
+
+</Ejemplo>
+
+<Ejemplo titulo="Ecuación característica con raíces complejas y condiciones iniciales">
+
+**Problema.** Resuelva el PVI <Eq>{`y'' + 2y' + 5y = 0`}</Eq>, <Eq>{`y(0) = 1`}</Eq>, <Eq>{`y'(0) = -1`}</Eq>.
+
+**Estrategia.** Calcular la ecuación característica <Eq>{`\\lambda^2 + 2\\lambda + 5 = 0`}</Eq>. Raíces complejas <Eq>{`\\alpha \\pm i\\beta`}</Eq> dan solución con exponencial y funciones trigonométricas. Usar las CIs para determinar <Eq>{`C_1, C_2`}</Eq>.
+
+**Resolución.**
+
+<Equation latex="\lambda = \frac{-2 \pm \sqrt{4-20}}{2} = -1 \pm 2i." />
+
+<Equation latex="y = e^{-x}(C_1\cos 2x + C_2 \sin 2x)." />
+
+CI en <Eq>{`x=0`}</Eq>: <Eq>{`y(0) = C_1 = 1`}</Eq>.
+
+<Equation latex="y' = -e^{-x}(C_1\cos 2x + C_2\sin 2x) + e^{-x}(-2C_1\sin 2x + 2C_2\cos 2x)." />
+
+<Eq>{`y'(0) = -C_1 + 2C_2 = -1 + 2C_2 = -1`}</Eq>, luego <Eq>{`C_2 = 0`}</Eq>.
+
+Solución: <Eq>{`y = e^{-x}\\cos 2x`}</Eq>.
+
+**Verificación.** <Eq>{`y' = -e^{-x}\\cos 2x - 2e^{-x}\\sin 2x`}</Eq>; <Eq>{`y'' = e^{-x}\\cos 2x + 4e^{-x}\\sin 2x - 2e^{-x}\\sin 2x + ..`}</Eq> — tras álgebra, <Eq>{`y'' + 2y' + 5y = 0`}</Eq>. Confiere.
+
+**Fuente.** [Lebl, *Notes on Diffy Qs* §2.2](https://www.jirka.org/diffyqs/html/secondlc_section.html), Example 2.2.4.
+
+</Ejemplo>
+
+<Ejemplo titulo="Modelo logístico con datos poblacionales reales">
+
+**Problema.** Población de una ciudad: 50 mil en 2000, 80 mil en 2010. Capacidad de suporte estimada en 200 mil. Modelo logístico <Eq>{`\\dot P = rP(1-P/K)`}</Eq>. Halle <Eq>{`r`}</Eq> y prediga la población en 2030.
+
+**Estrategia.** La solución logística es <Eq>{`P(t) = K/(1+Ae^{-rt})`}</Eq>. Usar <Eq>{`P(0) = 50`}</Eq> para hallar <Eq>{`A`}</Eq>; usar <Eq>{`P(10) = 80`}</Eq> para hallar <Eq>{`r`}</Eq>; calcular <Eq>{`P(30)`}</Eq>.
+
+**Resolución.** <Eq>{`K = 200`}</Eq>, <Eq>{`P(0) = 200/(1+A) = 50 \\Rightarrow A = 3`}</Eq>.
+
+<Equation latex="P(t) = \frac{200}{1 + 3e^{-rt}}." />
+
+<Eq>{`P(10) = 200/(1+3e^{-10r}) = 80 \\Rightarrow 1 + 3e^{-10r} = 2{,}5 \\Rightarrow e^{-10r} = 0{,}5`}</Eq>.
+
+<Eq>{`r = \\ln 2/10 \\approx 0{,}0693`}</Eq> año⁻¹.
+
+<Eq>{`P(30) = 200/(1 + 3e^{-30 \\times 0{,}0693}) = 200/(1 + 3 \\times 0{,}125) = 200/1{,}375 \\approx 145`}</Eq> mil.
+
+**Verificación.** <Eq>{`P(0) = 200/4 = 50`}</Eq>. <Eq>{`P(10) = 200/(1+3/2) = 200/2{,}5 = 80`}</Eq>. Confiere.
+
+**Fuente.** [OpenStax *Calculus Vol. 2* §4.4](https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation), Example 4.11.
+
+</Ejemplo>
+
+<Ejemplo titulo="Método de Euler aplicado a enfriamiento de Newton: error vs. paso">
+
+**Problema.** Café a 90 °C, <Eq>{`T_a = 22`}</Eq> °C, <Eq>{`k = 0{,}1`}</Eq> min⁻¹. Use Euler con <Eq>{`h = 2`}</Eq> min para calcular <Eq>{`T(4)`}</Eq>. Compare con el valor exacto.
+
+**Estrategia.** EDO: <Eq>{`T' = -0{,}1(T - 22)`}</Eq>, <Eq>{`T(0) = 90`}</Eq>. Dos pasos de Euler. Solución exacta: <Eq>{`T(t) = 22 + 68e^{-0{,}1t}`}</Eq>.
+
+**Resolución.**
+
+Paso 1 (<Eq>{`t=0 \\to 2`}</Eq>): <Eq>{`f(0, 90) = -0{,}1(90-22) = -6{,}8`}</Eq>. <Eq>{`T(2) \\approx 90 + 2\\times(-6{,}8) = 76{,}4`}</Eq> °C.
+
+Paso 2 (<Eq>{`t=2 \\to 4`}</Eq>): <Eq>{`f(2, 76{,}4) = -0{,}1(76{,}4-22) = -5{,}44`}</Eq>. <Eq>{`T(4) \\approx 76{,}4 + 2\\times(-5{,}44) = 65{,}52`}</Eq> °C.
+
+Exacto: <Eq>{`T(4) = 22 + 68e^{-0{,}4} = 22 + 68\\times 0{,}6703 \\approx 67{,}6`}</Eq> °C.
+
+Error: <Eq>{`67{,}6 - 65{,}5 = 2{,}1`}</Eq> °C (alrededor de 3%). Con <Eq>{`h = 0{,}5`}</Eq> min el error cae a 0,13%.
+
+**Verificación.** Fórmula de error local de Euler: <Eq>{`O(h^2) = O(4) = 0{,}1^2 \\times 68 \\times (e^{-0{,}1 \\times 0}/2) \\approx 0{,}34`}</Eq> °C por paso, acumulando a ~0,68 °C — orden correcto.
+
+**Fuente.** [REAMAT UFRGS, *Cálculo Numérico* Cap. 8](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html), Sección 8.2, Ejemplo 8.3.
+
+</Ejemplo>
+
+<ListaExercicios seed="licao-100-consolidacao-trim-10">
+
+<Exercicio
+  numero="100.1"
+  dificuldade="aplicacao"
+  solucao={<>Separable. <Eq>{`dy/y = 3x\\,dx`}</Eq>. <Eq>{`\\ln|y| = 3x^2/2 + C_1`}</Eq>. <Eq>{`y = Ce^{3x^2/2}`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "20", exercicio: "Exercise 1.3.1", licenca: "CC-BY-SA" }}
+>
+Clasifique y resuelva: <Eq>{`y' = 3xy`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.2"
+  dificuldade="aplicacao"
+  solucao={<>Lineal de 1ª orden. <Eq>{`p = 1/x`}</Eq>, <Eq>{`\\mu = x`}</Eq>. <Eq>{`(xy)' = x^3`}</Eq>. <Eq>{`xy = x^4/4 + C`}</Eq>. <Eq>{`y = x^3/4 + C/x`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations", secao: "§4.5", pagina: "392", exercicio: "Exercise 4.5.101", licenca: "CC-BY-NC-SA" }}
+>
+Clasifique y resuelva: <Eq>{`y' + y/x = x^2`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.3"
+  dificuldade="aplicacao"
+  solucao={<>Característica: <Eq>{`\\lambda^2 + 4\\lambda + 4 = (\\lambda+2)^2 = 0`}</Eq>. Raíz dupla <Eq>{`\\lambda = -2`}</Eq>. <Eq>{`y = (C_1 + C_2 x)e^{-2x}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Escriba la ecuación característica: <Eq>{`\\lambda^2 + 4\\lambda + 4 = 0`}</Eq>.</li>
+      <li>Factorice: <Eq>{`(\\lambda + 2)^2 = 0`}</Eq>, raíz dupla <Eq>{`\\lambda = -2`}</Eq>.</li>
+      <li>Raíz dupla exige dos términos: <Eq>{`y = (C_1 + C_2 x)e^{-2x}`}</Eq>.</li>
+      <li>Verifique: <Eq>{`y'' + 4y' + 4y = 0`}</Eq>. Confiere tras álgebra.</li>
+      <em>Truco:</em> raíz dupla siempre genera el factor extra x; sin él tendrías apenas una solución, pero la EDO de 2ª orden necesita dos parámetros libres.
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "82", exercicio: "Exercise 2.2.3", licenca: "CC-BY-SA" }}
+>
+Clasifique y resuelva: <Eq>{`y'' + 4y' + 4y = 0`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.4"
+  dificuldade="aplicacao"
+  solucao={<>Homogénea: <Eq>{`y_h = C_1\\cos 3x + C_2\\sin 3x`}</Eq>. Resonancia: forzamiento en la frecuencia natural. <Eq>{`y_p = x(A\\cos 3x + B\\sin 3x)`}</Eq>. Sustituyendo: <Eq>{`A = 0`}</Eq>, <Eq>{`B = 1/6`}</Eq>. <Eq>{`y = C_1\\cos 3x + C_2\\sin 3x + (x/6)\\sin 3x`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/forcedosc_section.html", secao: "§2.6", pagina: "108", exercicio: "Exercise 2.6.3", licenca: "CC-BY-SA" }}
+>
+Clasifique y resuelva: <Eq>{`y'' + 9y = \\cos 3x`}</Eq> (atención a la resonancia).
+</Exercicio>
+
+<Exercicio
+  numero="100.5"
+  dificuldade="aplicacao"
+  solucao={<>Logística: <Eq>{`K=100`}</Eq>, <Eq>{`r=0{,}1`}</Eq>, <Eq>{`P_0=5`}</Eq>. <Eq>{`A = (100-5)/5 = 19`}</Eq>. <Eq>{`P(t) = 100/(1+19e^{-0{,}1t})`}</Eq>. Equilibrio estable en <Eq>{`P=100`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "380", exercicio: "Exercise 4.4.201", licenca: "CC-BY-NC-SA" }}
+>
+Resuelva <Eq>{`\\dot P = 0{,}1P(1 - P/100)`}</Eq>, <Eq>{`P(0) = 5`}</Eq>. ¿Cuál es el valor de equilibrio estable?
+</Exercicio>
+
+<Exercicio
+  numero="100.6"
+  dificuldade="aplicacao"
+  solucao={<>Enfriamiento de Newton. <Eq>{`T(t) = 22 + 58e^{-0{,}05t}`}</Eq>. Equilibrio: <Eq>{`T_a = 22`}</Eq> °C. Para <Eq>{`T = 40`}</Eq>: <Eq>{`t = \\ln(58/18)/0{,}05 \\approx 23{,}5`}</Eq> min.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/auteq_section.html", secao: "§1.6", pagina: "38", exercicio: "Exercise 1.6.1", licenca: "CC-BY-SA" }}
+>
+Resuelva <Eq>{`\\dot T = -0{,}05(T - 22)`}</Eq>, <Eq>{`T(0) = 80`}</Eq>. ¿En cuánto tiempo la temperatura alcanza 40 °C?
+</Exercicio>
+
+<Exercicio
+  numero="100.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`L=0{,}1`}</Eq>, <Eq>{`R=1`}</Eq>, <Eq>{`C=0{,}1`}</Eq>. Caract.: <Eq>{`0{,}1\\lambda^2 + \\lambda + 10 = 0`}</Eq>, <Eq>{`\\lambda = -5 \\pm 9{,}747i`}</Eq>. Subamortiguado. <Eq>{`Q(t) = e^{-5t}(\\cos(9{,}747t) + 0{,}513\\sin(9{,}747t))`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "107", exercicio: "Exercise 2.6.1", licenca: "CC-BY-SA" }}
+>
+Resuelva <Eq>{`0{,}1\\ddot Q + \\dot Q + 10Q = 0`}</Eq>, <Eq>{`Q(0) = 1`}</Eq>, <Eq>{`\\dot Q(0) = 0`}</Eq>. Clasifique el amortiguamiento.
+</Exercicio>
+
+<Exercicio
+  numero="100.8"
+  dificuldade="aplicacao"
+  solucao={<>Exacto: <Eq>{`e^{-1} \\approx 0{,}3679`}</Eq>. Euler con <Eq>{`h=0{,}1`}</Eq>: <Eq>{`y_1 = 1 - 0{,}1 = 0{,}9`}</Eq>; tras 10 pasos, <Eq>{`y_{10} = (0{,}9)^{10} \\approx 0{,}3487`}</Eq>. Error relativo: ~5,2%. RK4 da error menor que 0,001%.</>}
+  passos={<>
+    <ol>
+      <li>Euler: <Eq>{`y_{n+1} = y_n + h(-y_n) = y_n(1-h) = y_n \\times 0{,}9`}</Eq>.</li>
+      <li>Diez pasos: <Eq>{`y_{10} = (0{,}9)^{10} \\approx 0{,}3487`}</Eq>.</li>
+      <li>Exacto: <Eq>{`e^{-1} \\approx 0{,}3679`}</Eq>. Error: 0,0192.</li>
+      <li>Error de Euler es <Eq>{`O(h) = O(0{,}1)`}</Eq> — proporcional al paso.</li>
+      <em>Curiosidad:</em> Para <Eq>{`y' = -y`}</Eq>, Euler explícito es estable si y solo si <Eq>{`|1-h\\lambda| \\leq 1`}</Eq>, o sea <Eq>{`h \\leq 2`}</Eq>. Aquí <Eq>{`h = 0{,}1`}</Eq> está bien dentro de la región de estabilidad.
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT UFRGS — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "Cap. 8", pagina: "148", exercicio: "Ejercicio 8.1", licenca: "CC-BY-SA" }}
+>
+Aplique el método de Euler con <Eq>{`h = 0{,}1`}</Eq> a <Eq>{`y' = -y`}</Eq>, <Eq>{`y(0) = 1`}</Eq>, de <Eq>{`t=0`}</Eq> a <Eq>{`t=1`}</Eq>. Compare con <Eq>{`e^{-1}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.9"
+  dificuldade="aplicacao"
+  solucao={<>Reescriba: <Eq>{`y' = e^x \\cdot e^y`}</Eq>. Separable: <Eq>{`e^{-y}dy = e^x dx`}</Eq>. <Eq>{`-e^{-y} = e^x + C`}</Eq>. <Eq>{`y = -\\ln(-e^x - C)`}</Eq> (definida donde <Eq>{`e^x + C < 0`}</Eq>).</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "21", exercicio: "Exercise 1.3.5", licenca: "CC-BY-SA" }}
+>
+Resuelva <Eq>{`y' = e^{x+y}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.10"
+  dificuldade="aplicacao"
+  solucao={<>Homogénea: <Eq>{`y_h = C_1 e^{2x} + C_2 e^{3x}`}</Eq>. Particular por coef. a det.: <Eq>{`y_p = Ae^{4x}`}</Eq>. <Eq>{`16A - 20A + 6A = 1 \\Rightarrow 2A = 1 \\Rightarrow A = 1/2`}</Eq>. <Eq>{`y = C_1 e^{2x} + C_2 e^{3x} + e^{4x}/2`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nthorderle_section.html", secao: "§2.5", pagina: "98", exercicio: "Exercise 2.5.4", licenca: "CC-BY-SA" }}
+>
+Resuelva <Eq>{`y'' - 5y' + 6y = e^{4x}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.11"
+  dificuldade="aplicacao"
+  solucao={<>Masa-muelle no-amortiguado: <Eq>{`\\omega_0 = \\sqrt{k/m} = \\sqrt{4} = 2`}</Eq> rad/s. <Eq>{`x(t) = \\cos 2t`}</Eq>. Período <Eq>{`T = \\pi`}</Eq> s, amplitud <Eq>{`A = 1`}</Eq>, fase <Eq>{`\\phi = 0`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "91", exercicio: "Exercise 2.4.1", licenca: "CC-BY-SA" }}
+>
+Masa-muelle no-amortiguado: <Eq>{`m = 1`}</Eq> kg, <Eq>{`k = 4`}</Eq> N/m, <Eq>{`x(0) = 1`}</Eq>, <Eq>{`\\dot x(0) = 0`}</Eq>. Halle período, amplitud y fase.
+</Exercicio>
+
+<Exercicio
+  numero="100.12"
+  dificuldade="aplicacao"
+  solucao={<>Sustituya <Eq>{`y = e^{2x}\\cos 3x`}</Eq>: <Eq>{`y' = 2e^{2x}\\cos 3x - 3e^{2x}\\sin 3x`}</Eq>; <Eq>{`y'' = e^{2x}(4\\cos 3x - 12\\sin 3x - 9\\cos 3x) = e^{2x}(-5\\cos 3x - 12\\sin 3x)`}</Eq>. Entonces <Eq>{`y'' - 4y' + 13y = e^{2x}(-5-4\\times 2+13)\\cos 3x + e^{2x}(-12-4\\times(-3))\\sin 3x = 0`}</Eq>. Confiere.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "83", exercicio: "Exercise 2.2.6", licenca: "CC-BY-SA" }}
+>
+Verifique por sustitución directa que <Eq>{`y = e^{2x}\\cos 3x`}</Eq> resuelve <Eq>{`y'' - 4y' + 13y = 0`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.13"
+  dificuldade="aplicacao"
+  solucao={<>Logística con <Eq>{`K=1`}</Eq>, <Eq>{`r=1`}</Eq>: <Eq>{`y(t) = 1/(1+9e^{-t})`}</Eq>. <Eq>{`y \\to 1`}</Eq> cuando <Eq>{`t \\to \\infty`}</Eq>. Para <Eq>{`y = 0{,}5`}</Eq>: <Eq>{`1 + 9e^{-t} = 2 \\Rightarrow e^{-t} = 1/9 \\Rightarrow t = \\ln 9 \\approx 2{,}2`}</Eq> unidades de tiempo.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "382", exercicio: "Exercise 4.4.202", licenca: "CC-BY-NC-SA" }}
+>
+<Eq>{`\\dot y = y(1-y)`}</Eq>, <Eq>{`y(0) = 0{,}1`}</Eq>. ¿Cuál es el valor límite <Eq>{`y(\\infty)`}</Eq>? ¿En qué tiempo <Eq>{`y = 0{,}5`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="100.14"
+  dificuldade="aplicacao"
+  solucao={<>Lineal de 1ª orden con "resonancia": <Eq>{`p = 2`}</Eq>, pero forzamiento <Eq>{`q = 3e^{-2x}`}</Eq> también tiene exponente <Eq>{`-2`}</Eq>. Factor integrante: <Eq>{`\\mu = e^{2x}`}</Eq>. <Eq>{`(e^{2x}y)' = 3`}</Eq>. <Eq>{`e^{2x}y = 3x + C`}</Eq>. <Eq>{`y = (3x+C)e^{-2x}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Identifique: <Eq>{`p = 2`}</Eq>, <Eq>{`q = 3e^{-2x}`}</Eq>. Factor integrante: <Eq>{`\\mu = e^{\\int 2\\,dx} = e^{2x}`}</Eq>.</li>
+      <li>Multiplique: <Eq>{`(e^{2x}y)' = e^{2x} \\cdot 3e^{-2x} = 3`}</Eq>.</li>
+      <li>Integre: <Eq>{`e^{2x}y = 3x + C`}</Eq>.</li>
+      <li>Solución: <Eq>{`y = (3x + C)e^{-2x}`}</Eq>.</li>
+      <em>Truco:</em> "resonancia de 1ª orden" ocurre cuando <Eq>{`q = Ae^{-px}`}</Eq> (exponente igual a <Eq>{`-p`}</Eq>). Después de multiplicar por <Eq>{`\\mu = e^{px}`}</Eq>, el lado derecho se vuelve constante y la integral da un factor <Eq>{`x`}</Eq> — análogo al caso de raíz dupla en la 2ª orden.
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "27", exercicio: "Exercise 1.4.4", licenca: "CC-BY-SA" }}
+>
+Resuelva <Eq>{`y' + 2y = 3e^{-2x}`}</Eq>. Explique por qué aparece un factor <Eq>{`x`}</Eq> en la solución.
+</Exercicio>
+
+<Exercicio
+  numero="100.15"
+  dificuldade="aplicacao"
+  solucao={<>Bernoulli con <Eq>{`n=2`}</Eq>: sustitución <Eq>{`u = y^{-1}`}</Eq>, <Eq>{`u' = -y^{-2}y'`}</Eq>. EDO en <Eq>{`u`}</Eq>: <Eq>{`u' - u = -x`}</Eq>. Lineal: <Eq>{`\\mu = e^{-x}`}</Eq>. <Eq>{`(e^{-x}u)' = -xe^{-x}`}</Eq>. <Eq>{`u = x + 1 + Ce^x`}</Eq>. <Eq>{`y = 1/(x+1+Ce^x)`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "30", exercicio: "Exercise 1.4.8", licenca: "CC-BY-SA" }}
+>
+Bernoulli: resuelva <Eq>{`y' + y = xy^2`}</Eq> vía sustitución <Eq>{`u = 1/y`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.16"
+  dificuldade="aplicacao"
+  solucao={<>Sea <Eq>{`v = y'`}</Eq>. Entonces <Eq>{`v' = -v`}</Eq>. Lineal separable: <Eq>{`v = Ce^{-x}`}</Eq>. Integrando: <Eq>{`y = -Ce^{-x} + D`}</Eq>, o <Eq>{`y = Ae^{-x} + B`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "85", exercicio: "Exercise 2.2.8", licenca: "CC-BY-SA" }}
+>
+Resuelva <Eq>{`y'' = -y'`}</Eq>. (Pista: reduzca a 1ª orden haciendo <Eq>{`v = y'`}</Eq>.)
+</Exercicio>
+
+<Exercicio
+  numero="100.17"
+  dificuldade="aplicacao"
+  solucao={<>Caract.: <Eq>{`\\lambda^2 - 6\\lambda + 9 = (\\lambda-3)^2 = 0`}</Eq>. Raíz dupla <Eq>{`\\lambda = 3`}</Eq>. <Eq>{`y_h = (C_1 + C_2 x)e^{3x}`}</Eq>. Particular (prueba <Eq>{`y_p = Ae^{5x}`}</Eq>): <Eq>{`25A - 30A + 9A = 4 \\Rightarrow 4A = 4 \\Rightarrow A = 1`}</Eq>. <Eq>{`y = (C_1+C_2 x)e^{3x} + e^{5x}`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nthorderle_section.html", secao: "§2.5", pagina: "99", exercicio: "Exercise 2.5.6", licenca: "CC-BY-SA" }}
+>
+Resuelva <Eq>{`y'' - 6y' + 9y = 4e^{5x}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.18"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Separable — integrar dy/y(1−y) de los dos lados", correta: true },
+    { texto: "Lineal con factor integrante" },
+    { texto: "Ecuación característica de 2ª orden" },
+    { texto: "Método de Euler, pues no tiene solución analítica" }
+  ]}
+  solucao={<>La logística <Eq>{`\\dot P = rP(1-P/K)`}</Eq> es separable: <Eq>{`dP/(P(1-P/K)) = r\\,dt`}</Eq>. Fracciones parciales resuelven la integral a la izquierda. No es lineal (el producto <Eq>{`P^2/K`}</Eq> es no-lineal). Tiene solución analítica cerrada.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "377", exercicio: "Exercise 4.4.1", licenca: "CC-BY-NC-SA" }}
+>
+¿Cuál es la técnica correcta para resolver la ecuación logística <Eq>{`\\dot P = rP(1 - P/K)`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="100.19"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Raíces reales y negativas: amortiguamiento supercrítico, sin oscilación", correta: true },
+    { texto: "Raíces imaginarias puras: resonancia constante" },
+    { texto: "Raíces con parte real positiva: sistema estable" },
+    { texto: "Raíz dupla: sistema inestable" }
+  ]}
+  solucao={<>Si <Eq>{`\\Delta = b^2 - 4ac > 0`}</Eq> y ambas raíces negativas (<Eq>{`\\lambda_1, \\lambda_2 < 0`}</Eq>), la solución <Eq>{`y = C_1 e^{\\lambda_1 x} + C_2 e^{\\lambda_2 x}`}</Eq> decae a cero sin oscilar — amortiguamiento supercrítico. Parte real negativa garantiza estabilidad; raíces reales (sin parte imaginaria) garantizan ausencia de oscilación.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "92", exercicio: "Exercise 2.4.4", licenca: "CC-BY-SA" }}
+>
+El discriminante <Eq>{`\\Delta = b^2 - 4ac > 0`}</Eq> con ambas las raíces negativas. ¿Cuál es el comportamiento de la solución de <Eq>{`ay'' + by' + cy = 0`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="100.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Euler tiene orden 1 (error O(h)); RK4 tiene orden 4 (error O(h^4))", correta: true },
+    { texto: "Euler es más preciso pero más lento" },
+    { texto: "Ambos tienen el mismo orden de convergencia" },
+    { texto: "RK4 es inestable para problemas stiff" }
+  ]}
+  solucao={<>Euler avanza con la derivada en un único punto (tangente); error local <Eq>{`O(h^2)`}</Eq>, global <Eq>{`O(h)`}</Eq>. RK4 usa media ponderada de cuatro evaluaciones (Simpson-like); error global <Eq>{`O(h^4)`}</Eq>. Para reducir el error a la mitad: Euler necesita doblar el número de pasos; RK4 necesita apenas <Eq>{`2^{1/4} \\approx 1{,}19`}</Eq> veces más pasos.</>}
+  fonte={{ livro: "REAMAT UFRGS — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "Cap. 8", pagina: "152", exercicio: "Ejercicio 8.3", licenca: "CC-BY-SA" }}
+>
+Compare el orden de convergencia del método de Euler y del RK4.
+</Exercicio>
+
+<Exercicio
+  numero="100.21"
+  dificuldade="aplicacao"
+  solucao={<>Enfriamiento forense: <Eq>{`T_0 = 37`}</Eq> °C, <Eq>{`T_a = 20`}</Eq> °C, <Eq>{`k = 0{,}3`}</Eq> h⁻¹. Cuerpo encontrado a las 10h con <Eq>{`T = 33`}</Eq> °C. <Eq>{`33 = 20 + 17e^{-0{,}3t} \\Rightarrow e^{-0{,}3t} = 13/17 \\Rightarrow t = \\ln(17/13)/0{,}3 \\approx 0{,}8939`}</Eq> h. Muerte a las <Eq>{`10 - 0{,}9 \\approx 9{,}1`}</Eq>h, alrededor de las 09h06.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/auteq_section.html", secao: "§1.6", pagina: "40", exercicio: "Exercise 1.6.5", licenca: "CC-BY-SA" }}
+>
+Cuerpo encontrado a las 10h con temperatura de 33 °C. Sala a 20 °C, <Eq>{`k = 0{,}3`}</Eq> h⁻¹. Estime la hora de la muerte.
+</Exercicio>
+
+<Exercicio
+  numero="100.22"
+  dificuldade="modelagem"
+  solucao={<>Moto con suspensión: <Eq>{`m = 200`}</Eq> kg, <Eq>{`k_s = 30000`}</Eq> N/m, <Eq>{`\\zeta = 0{,}5`}</Eq>. <Eq>{`\\omega_0 = \\sqrt{30000/200} = \\sqrt{150} \\approx 12{,}25`}</Eq> rad/s (1,95 Hz). <Eq>{`c = 2\\zeta\\sqrt{mk} = 2 \\times 0{,}5 \\times \\sqrt{6 \\times 10^6} \\approx 2449`}</Eq> N·s/m. Subamortiguado: <Eq>{`\\omega_d = \\omega_0\\sqrt{1-0{,}25} \\approx 10{,}61`}</Eq> rad/s. Sin sobressinal.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "94", exercicio: "Exercise 2.4.7", licenca: "CC-BY-SA" }}
+>
+Suspensión de moto: <Eq>{`m = 200`}</Eq> kg, <Eq>{`k = 30`}</Eq> kN/m, <Eq>{`\\zeta = 0{,}5`}</Eq>. Calcule frecuencia natural, coeficiente de amortiguamiento y clasifique el régimen.
+</Exercicio>
+
+<Exercicio
+  numero="100.23"
+  dificuldade="modelagem"
+  solucao={<>Carga RC: <Eq>{`V_C(t) = 5(1 - e^{-t/\\tau})`}</Eq> con <Eq>{`\\tau = 5`}</Eq> ms. Para <Eq>{`V_C = 4`}</Eq> V: <Eq>{`1 - e^{-t/\\tau} = 0{,}8 \\Rightarrow e^{-t/\\tau} = 0{,}2 \\Rightarrow t = 5\\ln 5 \\approx 8{,}05`}</Eq> ms.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "106", exercicio: "Exercise 2.6.4", licenca: "CC-BY-SA" }}
+>
+Circuito RC con <Eq>{`\\tau = RC = 5`}</Eq> ms, fuente de 5 V en escalón. ¿En qué instante <Eq>{`V_C = 4`}</Eq> V?
+</Exercicio>
+
+<Exercicio
+  numero="100.24"
+  dificuldade="modelagem"
+  solucao={<>Filtro RC pasa-bajos: <Eq>{`f_c = 1/(2\\pi RC) = 1`}</Eq> kHz. Atenuación en 10 kHz: <Eq>{`|H| = 1/\\sqrt{1+(f/f_c)^2} = 1/\\sqrt{101} \\approx 0{,}0995`}</Eq>. En dB: <Eq>{`20\\log_{10}(0{,}0995) \\approx -20{,}0`}</Eq> dB (próximo a 20 dB/dec × 1 década).</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "110", exercicio: "Exercise 2.6.5", licenca: "CC-BY-SA" }}
+>
+Filtro RC pasa-bajos, <Eq>{`f_c = 1`}</Eq> kHz. Calcule la atenuación (en dB) en <Eq>{`f = 10`}</Eq> kHz.
+</Exercicio>
+
+<Exercicio
+  numero="100.25"
+  dificuldade="modelagem"
+  solucao={<>Malthus: <Eq>{`P(t) = 1{,}4e^{0{,}004t}`}</Eq> billones, con <Eq>{`t`}</Eq> en años a partir de 2020. En 2050 (<Eq>{`t=30`}</Eq>): <Eq>{`P = 1{,}4e^{0{,}12} \\approx 1{,}4 \\times 1{,}1275 = 1{,}579`}</Eq> bi.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-3-separable-equations", secao: "§4.3", pagina: "367", exercicio: "Exercise 4.3.203", licenca: "CC-BY-NC-SA" }}
+>
+China: 1,4 billones en 2020, tasa de crecimiento 0,4%/año. Modelo de Malthus predice la población en 2050.
+</Exercicio>
+
+<Exercicio
+  numero="100.26"
+  dificuldade="modelagem"
+  solucao={<>Logística: <Eq>{`K=1{,}6`}</Eq> bi, <Eq>{`r=0{,}004`}</Eq>, <Eq>{`P_0=1{,}4`}</Eq>. <Eq>{`A = (1{,}6-1{,}4)/1{,}4 \\approx 0{,}143`}</Eq>. <Eq>{`P(30) = 1{,}6/(1+0{,}143e^{-0{,}12}) \\approx 1{,}6/1{,}126 \\approx 1{,}422`}</Eq> bi. Diferencia vs. Malthus: <Eq>{`1{,}579 - 1{,}422 = 0{,}157`}</Eq> bi (157 millones menos). La capacidad de suporte frena el crecimiento.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "381", exercicio: "Exercise 4.4.203", licenca: "CC-BY-NC-SA" }}
+>
+Mismos datos del ejercicio anterior, pero usando el modelo logístico con <Eq>{`K = 1{,}6`}</Eq> billones. Compare con Malthus en 2050.
+</Exercicio>
+
+<Exercicio
+  numero="100.27"
+  dificuldade="modelagem"
+  solucao={<>Decaimiento de droga: <Eq>{`C(t) = 100e^{-0{,}2t}`}</Eq> mg/L. Para <Eq>{`C = 5`}</Eq>: <Eq>{`e^{-0{,}2t} = 0{,}05 \\Rightarrow t = \\ln(20)/0{,}2 = 5\\ln 20 \\approx 14{,}98`}</Eq> h. Tras ~15 horas.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-3-separable-equations", secao: "§4.3", pagina: "368", exercicio: "Exercise 4.3.204", licenca: "CC-BY-NC-SA" }}
+>
+Droga: <Eq>{`C(0) = 100`}</Eq> mg/L, <Eq>{`k_e = 0{,}2`}</Eq> h⁻¹. ¿En cuánto tiempo la concentración cae a 5 mg/L?
+</Exercicio>
+
+<Exercicio
+  numero="100.28"
+  dificuldade="modelagem"
+  solucao={<>Tanque: volumen constante 100 L. <Eq>{`\\dot s = 5\\times 2 - 5\\times(s/100) = 10 - s/20`}</Eq>. Lineal: <Eq>{`s(t) = 200(1 - e^{-t/20})`}</Eq>. En 30 min: <Eq>{`s = 200(1-e^{-1{,}5}) \\approx 200\\times 0{,}7769 = 155{,}4`}</Eq> g.</>}
+  passos={<>
+    <ol>
+      <li>Tasa de entrada de sal: <Eq>{`5 \\times 2 = 10`}</Eq> g/min.</li>
+      <li>Concentración en el tanque: <Eq>{`s/100`}</Eq> g/L. Tasa de salida: <Eq>{`5 \\times s/100 = s/20`}</Eq> g/min.</li>
+      <li>EDO: <Eq>{`\\dot s = 10 - s/20`}</Eq>. Lineal con <Eq>{`p = 1/20`}</Eq>.</li>
+      <li>Solución con <Eq>{`s(0) = 0`}</Eq>: <Eq>{`s(t) = 200(1 - e^{-t/20})`}</Eq>.</li>
+      <li><Eq>{`s(30) = 200(1 - e^{-1{,}5}) \\approx 155`}</Eq> g.</li>
+      <em>Curiosidad:</em> La concentración en el equilibrio (<Eq>{`t \\to \\infty`}</Eq>) es <Eq>{`200/100 = 2`}</Eq> g/L — igual a la concentración de entrada. El tanque siempre alcanzará la concentración de la fuente de entrada.
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "29", exercicio: "Exercise 1.4.6", licenca: "CC-BY-SA" }}
+>
+Tanque con 100 L de agua pura recibe 5 L/min de salmuera a 2 g/L; mezcla perfecta sale a 5 L/min. ¿Cuál es la cantidad de sal en 30 min?
+</Exercicio>
+
+<Exercicio
+  numero="100.29"
+  dificuldade="modelagem"
+  solucao={<>Inversión continua: <Eq>{`\\dot S = rS + d`}</Eq> con <Eq>{`r=0{,}05`}</Eq>, <Eq>{`d=12000`}</Eq>/año. Equilibrio inestable en <Eq>{`S^* = -d/r = -240000`}</Eq>. Solución: <Eq>{`S(t) = (S_0 + d/r)e^{rt} - d/r`}</Eq>. Con <Eq>{`S_0 = 0`}</Eq>: <Eq>{`S(30) = 240000(e^{1{,}5} - 1) \\approx 240000 \\times 3{,}4817 = 835603`}</Eq>. Patrimonio: R$ 835 mil.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "28", exercicio: "Exercise 1.4.5", licenca: "CC-BY-SA" }}
+>
+Inversión con aporte continuo: <Eq>{`\\dot S = 0{,}05 S + 12000`}</Eq>, <Eq>{`S(0) = 0`}</Eq>. ¿Cuál es el patrimonio en 30 años?
+</Exercicio>
+
+<Exercicio
+  numero="100.30"
+  dificuldade="modelagem"
+  solucao={<>Reactor nuclear: <Eq>{`\\dot N = (k-1)N/\\tau`}</Eq> con <Eq>{`k=1{,}001`}</Eq>, <Eq>{`\\tau = 10^{-3}`}</Eq> s. <Eq>{`\\dot N = N`}</Eq> (tasa de crecimiento efectiva: 1 s⁻¹). Separable: <Eq>{`N = N_0 e^{t}`}</Eq>. Dobla cuando <Eq>{`e^t = 2 \\Rightarrow t = \\ln 2 \\approx 0{,}693`}</Eq> s. Menos de 1 segundo — por eso reactores nucleares necesitan barras de control.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "22", exercicio: "Exercise 1.3.9", licenca: "CC-BY-SA" }}
+>
+Reactor nuclear: <Eq>{`\\dot N = (k-1)N/\\tau`}</Eq>, <Eq>{`\\tau = 10^{-3}`}</Eq> s, <Eq>{`k = 1{,}001`}</Eq>. ¿En cuánto tiempo la potencia dobla?
+</Exercicio>
+
+<Exercicio
+  numero="100.31"
+  dificuldade="demonstracao"
+  solucao={<>Muestre por cálculo directo. La solución general de <Eq>{`y' + py = q`}</Eq> con <Eq>{`\\mu = e^{\\int p}`}</Eq> es <Eq>{`y = \\frac{1}{\\mu}\\int \\mu q\\,dx + C/\\mu`}</Eq>. Derivando: <Eq>{`y' = -p\\mu/(\\mu)\\int\\mu q + q = -py + q`}</Eq>. Por lo tanto <Eq>{`y' + py = q`}</Eq>. Unicidad: si <Eq>{`z`}</Eq> es otra solución, <Eq>{`(y-z)' + p(y-z) = 0`}</Eq>; solución: <Eq>{`y - z = C e^{-\\int p}`}</Eq>; unicidad sigue de CI determinando <Eq>{`C`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "25", exercicio: "Exercise 1.4.1", licenca: "CC-BY-SA" }}
+>
+Demuestre que la fórmula del factor integrante realmente resuelve <Eq>{`y' + p(x)y = q(x)`}</Eq>. Muestre también la unicidad de la solución dado un valor inicial.
+</Exercicio>
+
+<Exercicio
+  numero="100.32"
+  dificuldade="demonstracao"
+  solucao={<>Wronskiano de <Eq>{`e^{\\alpha x}\\cos\\beta x`}</Eq> y <Eq>{`e^{\\alpha x}\\sin\\beta x`}</Eq>: calculado por determinante <Eq>{`2\\times 2`}</Eq>. <Eq>{`W = e^{\\alpha x}\\cos\\beta x \\cdot e^{\\alpha x}(\\alpha\\sin\\beta x + \\beta\\cos\\beta x) - e^{\\alpha x}\\sin\\beta x \\cdot e^{\\alpha x}(\\alpha\\cos\\beta x - \\beta\\sin\\beta x)`}</Eq>. Simplificando: <Eq>{`W = \\beta e^{2\\alpha x}(\\cos^2\\beta x + \\sin^2\\beta x) = \\beta e^{2\\alpha x} \\neq 0`}</Eq> para <Eq>{`\\beta \\neq 0`}</Eq>. Luego linealmente independientes.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "84", exercicio: "Exercise 2.2.9", licenca: "CC-BY-SA" }}
+>
+Demuestre que <Eq>{`e^{\\alpha x}\\cos\\beta x`}</Eq> y <Eq>{`e^{\\alpha x}\\sin\\beta x`}</Eq> son linealmente independientes para <Eq>{`\\beta \\neq 0`}</Eq>, calculando el Wronskiano.
+</Exercicio>
+
+<Exercicio
+  numero="100.33"
+  dificuldade="demonstracao"
+  solucao={<>Error local de Euler en <Eq>{`[t_n, t_{n+1}]`}</Eq>: por Taylor, <Eq>{`y(t_{n+1}) = y(t_n) + h y'(t_n) + h^2 y''(\\xi)/2`}</Eq>. Euler calcula <Eq>{`y_{n+1} = y_n + h f(t_n, y_n)`}</Eq>. Error local: <Eq>{`O(h^2)`}</Eq>. Sumando sobre <Eq>{`N = T/h`}</Eq> pasos: error global <Eq>{`\\leq N \\cdot O(h^2) = (T/h) O(h^2) = O(h)`}</Eq>. Euler es globalmente de 1ª orden.</>}
+  fonte={{ livro: "REAMAT UFRGS — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "Cap. 8", pagina: "150", exercicio: "Ejercicio 8.2", licenca: "CC-BY-SA" }}
+>
+Demuestre que el método de Euler tiene orden de convergencia global 1.
+</Exercicio>
+
+<Exercicio
+  numero="100.34"
+  dificuldade="desafio"
+  solucao={<>Lotka-Volterra: <Eq>{`\\dot x = x - 0{,}5xy`}</Eq>, <Eq>{`\\dot y = -0{,}5y + 0{,}25xy`}</Eq>. Equilibrios: (0,0) y <Eq>{`(2, 2)`}</Eq>. En (2,2), jacobiana tiene autovalores imaginarios puros → órbitas cerradas. Integral primera: <Eq>{`0{,}5\\ln y - 0{,}25 y + 0{,}5\\ln x - x = C`}</Eq>. No tiene fórmula cerrada para el período; Euler o RK4 numérico muestra <Eq>{`T \\approx 2\\pi/\\sqrt{(r_x)(r_y)} = 2\\pi/\\sqrt{0{,}5 \\times 0{,}25} \\approx 17{,}8`}</Eq> unidades para condiciones próximas al equilibrio.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nlstability_section.html", secao: "§8.2", pagina: "310", exercicio: "Exercise 8.2.3", licenca: "CC-BY-SA" }}
+>
+**Lotka-Volterra.** <Eq>{`\\dot x = x - 0{,}5xy`}</Eq>, <Eq>{`\\dot y = -0{,}5y + 0{,}25xy`}</Eq>. Halle los equilibrios, analice estabilidad vía jacobiana, y estime el período de oscilación cerca del equilibrio no-trivial.
+</Exercicio>
+
+<Exercicio
+  numero="100.35"
+  dificuldade="desafio"
+  solucao={<>Péndulo grande: <Eq>{`\\ddot\\theta + \\sin\\theta = 0`}</Eq>. Integral de energía: <Eq>{`\\dot\\theta^2/2 - \\cos\\theta = -\\cos\\theta_0`}</Eq> (con <Eq>{`\\dot\\theta(0)=0`}</Eq>). Período: <Eq>{`T = 4\\int_0^{\\theta_0} d\\theta/\\sqrt{2(\\cos\\theta - \\cos\\theta_0)}`}</Eq>. Esta es la integral elíptica <Eq>{`T = 4K(\\sin(\\theta_0/2))`}</Eq> donde <Eq>{`K`}</Eq> es la integral elíptica completa de 1ª especie. Para <Eq>{`\\theta_0 = \\pi/2`}</Eq>: <Eq>{`T = 4K(\\sin\\pi/4) = 4K(1/\\sqrt{2}) \\approx 4 \\times 1{,}8541 = 7{,}416`}</Eq> (s si <Eq>{`g/l=1`}</Eq>), vs. <Eq>{`2\\pi \\approx 6{,}28`}</Eq> de la aproximación pequeño ángulo.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nlstability_section.html", secao: "§8.2", pagina: "312", exercicio: "Exercise 8.2.6", licenca: "CC-BY-SA" }}
+>
+**Péndulo grande.** <Eq>{`\\ddot\\theta + \\sin\\theta = 0`}</Eq>, <Eq>{`\\theta(0) = \\pi/2`}</Eq>, <Eq>{`\\dot\\theta(0) = 0`}</Eq>. Exprese el período exacto como integral elíptica y compare con la aproximación de pequeño ángulo.
+</Exercicio>
+
+</ListaExercicios>
+
+## Fuentes
+
+- **Lebl, Jiří.** *Notes on Diffy Qs: Differential Equations for Engineers.* Versión 6.4. CC-BY-SA. [jirka.org/diffyqs](https://www.jirka.org/diffyqs/) — §1.2–2.6, §8.2: fuente primaria para EDOs analíticas de 1ª y 2ª orden con ejemplos de revisión integrada.
+- **OpenStax.** *Calculus Volume 2.* CC-BY-NC-SA. [openstax.org/details/books/calculus-volume-2](https://openstax.org/details/books/calculus-volume-2) — §4.3–4.5: separables, lineales, logística y enfriamiento con ejercicios de síntesis.
+- **REAMAT UFRGS.** *Cálculo Numérico (Python).* CC-BY-SA. [ufrgs.br/reamat/CalculoNumerico/livro-py/main.html](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — Cap. 8: Euler, orden de convergencia, RK4 y estabilidad.

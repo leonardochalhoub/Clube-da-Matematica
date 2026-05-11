@@ -1,0 +1,849 @@
+---
+titulo: "Lekcja 8 — Wzrost wykładniczy, wielomianowy i logarytmiczny"
+slug: "licao-08-crescimento"
+categoria: "aulas"
+subcategoria: "ano-1-trim-1"
+descricao: "Porównanie tempa wzrostu: wykładniczy dominuje wielomian, który dominuje logarytm. Modele: liniowy, wykładniczy, logistyczny (sigmoid). Zastosowania: bakterie, procent składany vs prosty, Prawo Moore'a, okres półtrwania, model SIR."
+ordem: 8
+publicado: true
+tags: ["wzrost", "rozpadu", "modelowanie", "logistyczny", "SIR", "Prawo Moore'a", "ano-1", "trim-1"]
+prerrequisitos: ["licao-07-logaritmo"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["1. rok szkoły średniej (15 lat)", "Equiv. Math I japoński rozdz. 4", "Equiv. Klasse 10 niemiecki — Funkcje"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="N(t) = N_0 \cdot e^{kt}"
+  legenda={<>Podstawowy <strong>model wykładniczy</strong>: tempo zmian jest proporcjonalne do obecnej ilości. Dla <Eq>{`k > 0`}</Eq> rośnie; dla <Eq>{`k < 0`}</Eq> maleje. Spośród wszystkich modeli wzrostu, <Eq>{`e^{kt}`}</Eq> ostatecznie przekracza każdy wielomian — a <Eq>{`\\ln t`}</Eq> rośnie wolniej niż każda potęga dodatnia.</>}
+  audioTexto="Podstawowy model wykładniczy. N od t równa się N zero razy e do potęgi k t. Gdy k jest dodatnie, ilość rośnie; gdy k jest ujemne, maleje. Wykładnicza rośnie szybciej niż każdy wielomian, i logarytm rośnie wolniej niż każda potęga dodatnia."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Książki, które obejmują tę lekcję
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Yoshiwara — Modeling, Functions, and Graphs
+      </a>
+      <span className="text-clube-mist"> · rozdz. 5–6 (modele wykładnicze i logarytmiczne) · licencja otwarta · </span>
+      <em className="text-clube-mist">Wzrost populacji, procent składany, okres półtrwania, porównanie linearne vs wykładnicze z rzeczywistymi zastosowaniami. Główne źródło dla zadań modelowania.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — College Algebra 2e
+      </a>
+      <span className="text-clube-mist"> · §6.1–6.2, §6.7 (modele wykładnicze i logarytmiczne) · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Kanoniczne ujęcie modelu wykładniczego, rozpadu radioaktywnego, datowania węglem-14, chłodzenia Newtona i jakościowego porównania tempa wzrostu.</em>
+    </li>
+    <li>
+      <a href="https://www.jirka.org/diffyqs/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Lebl — Notes on Diffy Qs
+      </a>
+      <span className="text-clube-mist"> · §1.4 (modele wykładnicze jako rozwiązanie <Eq>{`\\dot N = kN`}</Eq>; model logistyczny) · CC-BY-SA · </span>
+      <em className="text-clube-mist">Uzasadnienie poprzez równanie różniczkowe rozdzielające zmienne — łączy model algebraiczny z rachunkiem różniczkowym z Kwartału 10.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definicja rygorystyczna">
+
+### Porównanie tempa wzrostu
+
+<Definicao titulo="Hierarchia wzrostu">
+
+Dla $a > 1$ i $p > 0$ stałych, gdy $x \to +\infty$:
+
+$$\ln x \;\ll\; x^p \;\ll\; a^x$$
+
+Symbol $f \ll g$ oznacza $f(x)/g(x) \to 0$.
+
+- **Logarytmiczny** $\ln x$: rośnie bez granic, ale wolniej niż każda potęga $x^p$ z $p > 0$.
+- **Wielomianowy** $x^p$: rośnie bez granic, ale wolniej niż każda funkcja wykładnicza $a^x$ z $a > 1$.
+- **Wykładniczy** $a^x$ ($a > 1$): dominuje wszystkie wielomiany i logarytmy.
+
+</Definicao>
+
+> "Istnieje hierarchia funkcji oparta na szybkości wzrostu. Funkcje wykładnicze rosną szybciej niż potęgi, które rosną szybciej niż logarytmy." — [OpenStax College Algebra 2e §6.2](https://openstax.org/books/college-algebra-2e/pages/6-2-graphs-of-exponential-functions)
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 500 280" className="w-full">
+<defs>
+  <marker id="arr8" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<line x1="40" y1="240" x2="480" y2="240" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr8)"/>
+<line x1="40" y1="240" x2="40" y2="10" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr8)"/>
+<text x="485" y="244" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor">x</text>
+<text x="44" y="10" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor">y</text>
+<g>
+  <polyline points="40,240 100,220 160,202 220,186 280,172 340,160 400,149 460,139" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+  <text x="465" y="135" fontSize="11" fontFamily="serif" fontStyle="italic" fill="rgb(26 77 92)">ln x</text>
+</g>
+<g>
+  <polyline points="40,240 100,213 160,190 220,163 280,133 340,100 400,63 460,22" fill="none" stroke="rgb(61 122 95)" strokeWidth="2.5"/>
+  <text x="465" y="18" fontSize="11" fontFamily="serif" fontStyle="italic" fill="rgb(61 122 95)">x</text>
+</g>
+<g>
+  <polyline points="40,240 80,230 110,218 140,204 165,188 190,168 210,148 228,128 244,105 258,82 270,59 280,37 290,16" fill="none" stroke="rgb(232 199 122)" strokeWidth="2.5"/>
+  <text x="292" y="12" fontSize="11" fontFamily="serif" fontStyle="italic" fill="rgb(199 163 95)">2x</text>
+</g>
+<text x="42" y="255" fontSize="9" fill="currentColor" fillOpacity="0.5">0</text>
+<g>
+  <line x1="100" y1="238" x2="100" y2="242" stroke="currentColor"/>
+  <text x="100" y="253" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.5">2</text>
+  <line x1="160" y1="238" x2="160" y2="242" stroke="currentColor"/>
+  <text x="160" y="253" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.5">4</text>
+  <line x1="220" y1="238" x2="220" y2="242" stroke="currentColor"/>
+  <text x="220" y="253" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.5">6</text>
+  <line x1="280" y1="238" x2="280" y2="242" stroke="currentColor"/>
+  <text x="280" y="253" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.5">8</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Porównanie wzrostu: $\ln x$ (niebieski) vs $x$ (zielony) vs $2^x$ (złoty). Dla dużych $x$, $2^x$ wystrzeluje powyżej wszystkich.
+</figcaption>
+</figure>
+
+### Podstawowy model wykładniczy
+
+<Definicao titulo="Model wykładniczy">
+
+$$N(t) = N_0 \cdot e^{kt}$$
+
+- $N_0 = N(0)$: wartość początkowa.
+- $k > 0$: wzrost. $k < 0$: rozpad.
+- **Właściwość charakterystyczna**: względne tempo zmian jest stałe — $N'(t)/N(t) = k$.
+
+</Definicao>
+
+<Equation latex="\frac{dN}{dt} = kN" explicacao="Równanie różniczkowe o zmiennych rozdzielonych: tempo zmian N jest proporcjonalne do samego N. To równanie jest centralne w Kwartale 10 — rygorystyczne uzasadnienie modelu pojawia się, gdy nauczysz się pochodnych i równań różniczkowych." />
+
+| Zjawisko | Równanie | Parametr |
+|---|---|---|
+| Wzrost populacji | $P(t) = P_0 e^{rt}$ | $r > 0$ tempo wewnętrzne |
+| Procent składany ciągły | $S(t) = S_0 e^{it}$ | $i$ stopa nominalna |
+| Rozpadu radioaktywny | $N(t) = N_0 e^{-\lambda t}$ | $\lambda > 0$ stała rozpadu |
+| Chłodzenie (Newton) | $T(t) - T_a = (T_0 - T_a) e^{-kt}$ | $k > 0$ zależy od materiału |
+
+### Okres półtrwania i czas podwojenia
+
+<Equation latex="\tau_{1/2} = \frac{\ln 2}{|k|} \approx \frac{0{,}693}{|k|}" explicacao="Okres półtrwania: czas na zmniejszenie do połowy (gdy k ujemne). Czas podwojenia: czas na podwojenie (gdy k dodatnie). Relacja jest symetryczna." />
+
+### Model logistyczny
+
+Czysty wzrost wykładniczy jest fizycznie niezrównoważony: oznacza $N \to \infty$. Model logistyczny uwzględnia nasycenie w zdolności $K$:
+
+<Equation latex="\dot N = r N \!\left(1 - \frac{N}{K}\right), \qquad N(t) = \frac{K}{1 + A e^{-rt}}" explicacao="Gdy N jest małe w porównaniu do K, współczynnik (1 - N/K) ≈ 1 i wzrost jest prawie wykładniczy. Gdy N zbliża się do K, wzrost spowalnia i nasycony w K. Wynikowa krzywa ma kształt S (sigmoid)." />
+
+> "Model logistyczny jest powszechnie używany do modelowania wzrostu populacji. Wzrost rozpoczyna się powoli, osiąga maksimum, a następnie spowalnia, gdy populacja zbliża się do granicy środowiskowej." — [OpenStax College Algebra 2e §6.7](https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models)
+
+### Linearyzacja poprzez logarytm
+
+Wykreślenie $N(t)$ vs $t$ w **skali log-y** przekształca funkcję wykładniczą w linię prostą:
+
+$$\ln N = \ln N_0 + kt$$
+
+Nachylenie linii wynosi $k$. Jest to podstawa regresji liniowej na danych wykładniczych.
+
+<Insight>
+
+**Dlaczego $e^x$, a nie $2^x$?** Każde $a^x$ można napisać jako $e^{x \ln a}$. Podstawa $e \approx 2{,}718$ jest jedyną taką, że pochodna $e^x$ równa się sobie: $\frac{d}{dx}e^x = e^x$. To zmniejsza algebrę pochodnych i całek do minimum — brak współczynników korekcyjnych. To czysta wygoda, nie magia.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Dla 5-latka">
+
+Wyobraź sobie, że składasz kartkę papieru na pół. Teraz masz 2 części. Składasz jeszcze raz: 4 części. Jeszcze jeden fold: 8 części. Każdy fold **podwaja** całość.
+
+W 10 foldach byłoby **1024 części**. W 20 foldach ponad **1 milion**.
+
+Rzeczy, które rosną w ten sposób, to jak bakterie, wirusy, plotki w szkole.
+
+Ale są rzeczy, które rosną **znacznie wolniej**. Policz, ile stron przeczytałeś ze swojej ulubionej kolekcji. Przeczytałeś 1 książkę (300 stron). 10 książek. 100 książek. 1000 książek. Liczba książek rośnie znacznie szybciej niż satysfakcja z przeczytania dużo — zawsze chcesz więcej. To jest trochę jak logarytm: wznosi się, ale znacznie wolniej.
+
+</Porta>
+
+<Porta nivel="10" titulo="Dla 10-latka">
+
+**Trzy różne sposoby wzrostu:**
+
+| Typ | Reguła | Przykład |
+|---|---|---|
+| Liniowy | Dodaje się równo w każdym okresie | Oszczędności bez odsetek (100 zł na miesiąc) |
+| Wykładniczy | Mnoży się równo w każdym okresie | Procent składany, bakteria podwajająca się |
+| Logarytmiczny | Rośnie, ale coraz wolniej | Decybele dźwięku, skala Richtera |
+
+**Przykład liczbowy — bakterie podwajające się co godzinę:**
+
+| Godzina | Liniowy (+ 100/h) | Wykładniczy (× 2/h) |
+|---:|---:|---:|
+| 0 | 100 | 100 |
+| 6 | 700 | 6.400 |
+| 12 | 1.300 | 409.600 |
+| 24 | 2.500 | ~1,7 miliarda |
+
+W 24 godziny: wzrost liniowy idzie z 100 do 2500 (25×). Wzrost wykładniczy idzie z 100 do **1,7 miliarda** (17 milionów ×).
+
+**Okres półtrwania** to czas na spadek o połowę. Węgiel-14 ma okres półtrwania 5730 lat — dlatego można datować skamieniałości sprzed ~50 000 lat.
+
+</Porta>
+
+<Porta nivel="15" titulo="Dla 15-letniego nastolatka">
+
+**Wzrost wykładniczy jest przerażający.** Idzie powoli na początku, potem eksploduje.
+
+Król, który przegrał w szachach: nagroda = 1 ziarno na polu 1, 2 na polu 2, 4 na polu 3, $\ldots$, $2^{63}$ na polu 64. Razem: $2^{64} - 1 \approx 1{,}8 \times 10^{19}$ ziaren. **Więcej ryżu niż cała światowa produkcja gromadzona przez wieki.**
+
+**Trzy tempa wzrostu — porównaj wizualnie dla $x = 10$:**
+
+- $\ln 10 \approx 2{,}3$ (logarytmiczny)
+- $10^1 = 10$ (liniowy)
+- $10^2 = 100$ (kwadratowy)
+- $2^{10} = 1024$ (wykładniczy)
+- $10^{10} = 10$ miliardów (wykładniczy znacznie silniejszy)
+
+**Reguła centralna:** jeśli tempo wzrostu jest proporcjonalne do ilości ($\dot N = kN$), funkcja jest wykładnicza. Jeśli rośnie ze stałym tempem bezwzględnym ($\dot N = k$), to liniowe. Jeśli rośnie z malejącym tempem, może być logarytmiczne.
+
+**Prawo Moore'a (Gordon Moore, 1965):** liczba tranzystorów na chipie podwaja się mniej więcej co 2 lata. Od 1971 (Intel 4004: 2300 tranzystorów) do 2023 (Apple M2 Ultra: $\sim 134$ miliardów). W 52 latach, 26 podwojenia: $2300 \times 2^{26} \approx 154$ miliardów. Potwierdzone.
+
+**Model logistyczny:** czysty wzrost wykładniczy nie może trwać wiecznie. Krzywa S (sigmoid) modeluje wzrost, który rozpoczyna się wykładniczo i nasycony na pułapie $K$: przyjęcie smartfonów, rozpowszechnianie szczepionek, wzrost dojrzałych startupów.
+
+</Porta>
+
+<Porta nivel="25" titulo="Dla studenta inżynierii">
+
+Model $\dot N = kN$ jest wszechobecny. W **inżynierii chemicznej** (kinetyka reakcji 1. rzędu), **inżynierii elektrotechnicznej** (obwody RC, RL), **biomedycznej** (farmakokinetyka kompartmentowa), **finansowej** (ciągła wycena).
+
+### Dominacja asymptotyczna
+
+Wynik $e^x / x^n \to \infty$ dla każdej stałej $n$ jest udowodniony przez zastosowanie Reguły L'Hôpitala $n$ razy:
+
+$$\lim_{x \to \infty} \frac{e^x}{x^n} = \lim_{x \to \infty} \frac{e^x}{n!} = \infty$$
+
+A dla logarytmu:
+
+$$\lim_{x \to \infty} \frac{\ln x}{x^p} = \lim_{x \to \infty} \frac{1/x}{p x^{p-1}} = \lim_{x \to \infty} \frac{1}{p x^p} = 0 \quad (p > 0)$$
+
+### Model logistyczny — analiza jakościowa
+
+$\dot N = rN(1 - N/K)$: niestabilny punkt równowagi w $N = 0$, stabilny punkt równowagi w $N = K$. Punkt przegięcia w $N = K/2$ — tam tempo wzrostu jest maksymalne ($\dot N = rK/4$). Rozwiązanie w postaci zamkniętej to:
+
+$$N(t) = \frac{K}{1 + A e^{-rt}}, \quad A = \frac{K - N_0}{N_0}$$
+
+### Model SIR (Kermack-McKendrick, 1927)
+
+System równań różniczkowych dla epidemii:
+
+$$\dot S = -\beta SI, \quad \dot I = \beta SI - \gamma I, \quad \dot R = \gamma I$$
+
+- $S$ = podatni, $I$ = zarażeni, $R$ = wyleczeni. $S + I + R = N$ stałe.
+- Podstawowa liczba reprodukcji: $R_0 = \beta N / \gamma$. Jeśli $R_0 > 1$, epidemia się rozpowszechnia.
+- Dla małych $t$ i $I \ll N$: $I(t) \approx I_0 e^{(\beta N - \gamma)t}$ — początkowa faza wykładnicza.
+
+### Linearyzacja poprzez logarytm
+
+Wykreśl dane $(t_i, \ln N_i)$. Jeśli spadają na linię prostą, wzrost jest wykładniczy. Nachylenie = $k$ według najmniejszych kwadratów.
+
+</Porta>
+
+<Porta nivel="40" titulo="Dla starszego profesjonalisty">
+
+W praktyce $\dot N = rN$ jest **modelem zerowym** — pierwszym przybliżeniem. Każda poważna analiza zaczyna się od tego i dodaje terminy korekcyjne.
+
+### Prawo Moore'a: funkcja wykładnicza z datą wygaśnięcia
+
+Gordon Moore opublikował w 1965 roku w *Electronics Magazine*. Obserwacja była o gęstości obwodów, a nie o prędkości. **Prawo Dennarda** (skalowanie mocy) było drugim filarem — które upadło ~2005 z problemem rozpraszania ciepła. Dlatego procesory przestały rosnąć w częstotliwości i zaczęły rosnąć w rdzeniach. Prawo Moore'a formalnie trwa, ale z rosnącym oporem: wymiary sub-10nm napotykają efekty kwantowe, wyciek prądu i koszty fabryk na skalę 20 miliardów dolarów. TSMC, Intel, Samsung walczą o 2nm.
+
+### Wzrost logistyczny rynku
+
+Model Bass diffusion ($\dot N = (p + qN/K)(K - N)$) — Frank Bass 1969 — uogólnia logistykę z 2 parametrami (innowacja $p$ + imitacja $q$). Używane w prognozowaniu przyjęcia produktów (smartfon, pojazd elektryczny, szczepionka). Dopasowane do 100+ produktów historycznie.
+
+### Identyfikacja modelu z danych
+
+1. Wykreśl w **skali log-y**. Jeśli zamieniło się w linię → wykładniczy. Nachylenie = $r$.
+2. Jeśli krzywa się wygina — logistyczny. Użyj dopasowania nieliniowego.
+3. Jeśli zamieniło się w linię z **przerwą** (zmiana nachylenia) → zmiana reżimu.
+
+### GBM i Black-Scholes (podgląd Kwartału 12)
+
+Pod względem zmienności implikowanej, czasowa ewolucja aktywów podlega Geometrycznemu Ruchowi Browna: $dS = \mu S\,dt + \sigma S\,dW_t$. Rozwiązanie: $S_t = S_0 \exp((\mu - \sigma^2/2)t + \sigma W_t)$. **Ruch wykładniczy z szumem gaussowskim w wykładniku.** Współczynnik $-\sigma^2/2$ (korekcja Itô) rozróżnia model logarytmiczno-normalny od prostego $\mu t$.
+
+### Zwroty log-zwrotów w finansach
+
+**Zwrot log-zwrotu** $r_t = \log(P_t/P_{t-1}) \approx \Delta P/P$ dla małych zmian. Zwroty sumują się: $\log(P_T/P_0) = \sum r_t$. Suma zmiennych losowych jest łatwa do obsługi przez TCL; iloczyn nie. Podstawa modelu ryzyka Markowitza i Value-at-Risk.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktyka — 4 rzeczywiste scenariusze z danymi polskimi">
+
+### Scenariusz 1: Inflacja i siła nabywcza (2019–2025)
+
+Inflacja skumulowana 2019–2025: ~36% (średnia ~5,3% rocznie). Dla pensji 5000 zł w 2019:
+
+$$\text{rzeczywista siła nabywcza}(t) = 5000 \cdot e^{-0{,}053\,t}$$
+
+W 2026 ($t = 7$): siła nabywcza $\approx$ 3450 zł. **Rzeczywista strata 31% w 7 latach bez waloryzacji.** Aby utrzymać 5000 zł realnych, pensja nominalna musiałaby wynieść $5000 \cdot e^{0{,}053 \cdot 7} \approx$ 7246 zł.
+
+### Scenariusz 2: COVID-19 w Polsce — model SIR-like
+
+Przypadki w Polsce od marca/2020 do maja/2020 rosły z $r \approx 0{,}28$/dzień. Czas podwojenia: $\ln 2/0{,}28 \approx 2{,}5$ dnia.
+
+Projekcja liniowa (nieprawidłowa): 1 przypadek → 1 + 0,28×60 ≈ 18 w 60 dni.
+Projekcja wykładnicza: $e^{0{,}28 \times 60} \approx 18$ milionów — wyraźnie niemożliwe, sygnalizując, że czysty model wykładniczy się nasycił. Po maju/2020 wzrost stał się logistyczny, potem oscylacyjny.
+
+**Lekcja**: model wykładniczy **obowiązuje tylko gdy $N \ll K$**. Dla COVID, $K$ to populacja podatna, która spada wraz z immunizacją i wyleczeniem (model SIR).
+
+### Scenariusz 3: Amortyzacja aktywów (pojazd nowy)
+
+Reguła "malejącego salda" z $r = 20\%$/rok:
+
+$$V(t) = 80000 \cdot (0{,}80)^t$$
+
+W 1 roku: 64 000 zł. W 5 latach: $80000 \cdot (0{,}80)^5 \approx$ 26 214 zł. W 10 latach: $\approx$ 8 590 zł. Strata ~89% w 10 latach. Porównaj z amortyzacją liniową (16 000/rok): w 5 latach pozostaje 0 zł — malejące saldo jest bardziej wiernie rzeczywistości rynkowej.
+
+### Scenariusz 4: Prawo Moore'a w kontekście polskim (ENEM TIC)
+
+W 2010 roku najlepszy GPU konsumencki miał ~3 miliardy tranzystorów. W 2024 ~90 miliardów. Roczne tempo wzrostu: $90/3 = 30$ razy w 14 latach.
+
+$$30 = e^{14r} \Rightarrow r = \ln 30/14 \approx 0{,}24 \text{ (24\% rocznie)}$$
+
+Czas podwojenia: $\ln 2/0{,}24 \approx 2{,}9$ roku — nieznacznie poniżej "2 lat" klasycznych Moore'a, zgodnie z spowolnieniem w latach 2010.
+
+</Porta>
+
+</DuasPortas>
+
+## Przykłady rozwiązane
+
+<Exemplo titulo="Bakterie podwajające się — model podstawy 2 (zastosowanie)" numero="1">
+
+**Problem:** Kolonia bakterii zaczyna 500 osobnikami i podwaja się co godzinę. Ile będzie bakterii po 6 godzinach?
+
+**Strategia:** Rozpoznaj model "podwaja się co $T$ godzin" jako $N(t) = N_0 \cdot 2^{t/T}$. Tu $N_0 = 500$, $T = 1$.
+
+**Rozwiązanie:**
+
+1. Napisz model: $N(t) = 500 \cdot 2^{t}$, z $t$ w godzinach.
+2. Podstaw $t = 6$: $N(6) = 500 \cdot 2^6 = 500 \cdot 64 = 32\,000$.
+3. Odpowiedź: **32 000 bakterii**.
+
+**Weryfikacja:** $N(1) = 1\,000$; $N(2) = 2\,000$; $N(3) = 4\,000$. Każda godzina podwaja, spójny wzorzec. $500 \times 64 = 32\,000$ ✓.
+
+**Źródło.** [OpenStax College Algebra 2e §6.7](https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models) — licencja CC-BY 4.0.
+</Exemplo>
+
+<Exemplo titulo="Procent składany ciągły vs prosty (pośredni)" numero="2">
+
+**Problem:** 5000 zł inwestuje się na 8% rocznie w dwóch trybach: (a) oprocentowanie proste; (b) oprocentowanie ciągłe. Oblicz saldo po 10 latach w każdym przypadku i porównaj.
+
+**Strategia:** (a) Procent prosty: $S = S_0(1 + rt)$. (b) Procent ciągły: $S = S_0 e^{rt}$, z $r = 0{,}08$, $t = 10$.
+
+**Rozwiązanie:**
+
+(a) Prosty: $S = 5\,000 \cdot (1 + 0{,}08 \cdot 10) = 5\,000 \cdot 1{,}8 = 9\,000$.
+
+(b) Ciągły: $S = 5\,000 \cdot e^{0{,}08 \times 10} = 5\,000 \cdot e^{0{,}8} \approx 5\,000 \cdot 2{,}2255 = 11\,127{,}70$.
+
+Różnica: 2127,70 zł na korzyść oprocentowania ciągłego — 24% więcej.
+
+**Weryfikacja:** Reguła 70: $T_\text{dupl} \approx 70/8 = 8{,}75$ lat. W 10 latach oczekujemy nieco więcej niż podwojenie w ciągłym ($11\,127/5\,000 = 2{,}23\times$) ✓. W prostym, $1{,}8\times$ bez efektu odsetek od odsetek ✓.
+
+**Źródło.** [OpenStax College Algebra 2e §6.7](https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models) — licencja CC-BY 4.0.
+</Exemplo>
+
+<Exemplo titulo="Datowanie węglem-14 (pośredni)" numero="3">
+
+**Problem:** Skamieniała kość zawiera 25% oryginalnego węgla-14. Okres półtrwania C-14: 5730 lat. Jaki przybliżony wiek?
+
+**Strategia:** $N(t)/N_0 = (1/2)^{t/\tau_{1/2}}$. Ponieważ $0{,}25 = 1/4 = (1/2)^2$, upłynęły 2 okresy półtrwania.
+
+**Rozwiązanie:**
+
+1. $(1/2)^{t/5730} = 1/4 = (1/2)^2$.
+2. Porównując wykładniki: $t/5730 = 2 \Rightarrow t = 11\,460$ lat.
+
+**Weryfikacja:** 25% = $(1/2)^2$, 2 okresy półtrwania. $2 \times 5730 = 11 460$ ✓.
+
+**Źródło.** [OpenStax College Algebra 2e §6.7](https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models) — licencja CC-BY 4.0.
+</Exemplo>
+
+<Exemplo titulo="Prawo Moore'a — tempo ciągłe i czas podwojenia (zaawansowane)" numero="4">
+
+**Problem:** Liczba tranzystorów na chipie przechodzi z 2300 (Intel 4004, 1971) na 2,6 miliarda (Intel Core i7, 2011) w 40 latach. (a) Oblicz roczne tempo ciągłe $r$. (b) Sprawdź, czy jest zgodne z "podwaja się co 2 lata".
+
+**Strategia:** $N(t) = N_0 e^{rt}$. Zastosuj $\ln$, aby izolować $r$. Następnie oblicz $T_\text{dupl} = \ln 2/r$.
+
+**Rozwiązanie:**
+
+(a) $N(40)/N_0 = 2{,}6 \times 10^9 / 2300 \approx 1 130 435$. Zatem $e^{40r} = 1 130 435$.
+$$40r = \ln(1 130 435) \approx 13{,}94 \Rightarrow r \approx 0{,}348 \text{ rocznie} \approx 34{,}8\%\text{ rocznie}$$
+
+(b) Czas podwojenia: $T = \ln 2 / 0{,}348 \approx 1{,}99$ roku. Zgodne z Prawem Moore'a. ✓
+
+**Weryfikacja:** W 40 latach, 20 podwojenia: $2300 \times 2^{20} = 2300 \times 1 048 576 \approx 2{,}4 \times 10^9$ — bardzo blisko rzeczywistych $2{,}6 \times 10^9$ ✓.
+
+**Źródło.** [Yoshiwara — Modeling, Functions, and Graphs rozdz. 6](https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/) — licencja otwarta.
+</Exemplo>
+
+<Exemplo titulo="Prawo chłodzenia Newtona — identyfikacja parametrów (modelowanie)" numero="5">
+
+**Problem:** Filiżanka kawy w temperaturze $90\,°C$ jest umieszczana w pokoju $20\,°C$. Po 5 min jest w $70\,°C$. (a) Modeluj $T(t)$. (b) Oblicz $T(15)$. (c) Ile czasu do osiągnięcia $30\,°C$?
+
+**Strategia:** $T(t) - T_a = (T_0 - T_a) e^{-kt}$ z $T_a = 20$, $T_0 = 90$.
+
+**Rozwiązanie:**
+
+(a) $T(t) = 20 + 70\,e^{-kt}$. Użyj $T(5) = 70$: $50 = 70\,e^{-5k} \Rightarrow e^{-5k} = 5/7 \Rightarrow k = \ln(7/5)/5 \approx 0{,}0673$/min.
+
+(b) $T(15) = 20 + 70\,e^{-0{,}0673 \times 15} = 20 + 70 \times 0{,}364 \approx 45{,}5\,°C$.
+
+(c) $30 = 20 + 70\,e^{-kt} \Rightarrow e^{-kt} = 1/7 \Rightarrow t = \ln 7/k \approx 1{,}946/0{,}0673 \approx 28{,}9$ min.
+
+**Weryfikacja:** Różnica $T - T_a$ spada z $70$ do $50$ w 5 min (współczynnik $5/7$). W 15 min ($= 3 \times 5$): $(5/7)^3 = 125/343 \approx 0{,}364$, więc $T - 20 \approx 25{,}5$, $T \approx 45{,}5\,°C$ ✓.
+
+**Źródło.** [OpenStax College Algebra 2e §6.7](https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models) — licencja CC-BY 4.0.
+</Exemplo>
+
+<ListaExercicios seed="licao-08-crescimento">
+
+### Blok A — Podstawowy model wykładniczy (8.1–8.12)
+
+<Exercicio numero="8.1" dificuldade="aplicacao"
+  resposta="32.000"
+  solucao={<>W 6 godzin są 6 okresów 1 godziny. <Eq>{`N(6) = 500 \\cdot 2^{6} = 500 \\cdot 64 = 32\\,000`}</Eq> bakterii.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Kolonia bakterii zaczyna 500 i podwaja się co godzinę. Ile będzie po 6 godzinach?
+</Exercicio>
+
+<Exercicio numero="8.2" dificuldade="aplicacao"
+  solucao={<>W 3 godziny są 6 okresów 30 min. <Eq>{`N(3) = 100 \\cdot 2^{6} = 6\\,400`}</Eq>. Model: <Eq>{`N(t) = 100 \\cdot 2^{2t}`}</Eq> (z <Eq>{`t`}</Eq> w godzinach).</>}
+  passos={<>
+    <ol>
+      <li><strong>Zidentyfikuj okres podwojenia.</strong> Podwaja się co 30 min = 0,5 godziny. Model: <Eq>{`N(t) = 100 \\cdot 2^{t/0{,}5} = 100 \\cdot 2^{2t}`}</Eq>.</li>
+      <li><strong>Podstaw <Eq>{`t = 3`}</Eq> h.</strong> <Eq>{`N(3) = 100 \\cdot 2^{6} = 100 \\cdot 64 = 6\\,400`}</Eq>.</li>
+      <li><strong>Sprawdzenie.</strong> W 3 godziny = 6 półpodwojenia: <Eq>{`100 \\to 200 \\to 400 \\to 800 \\to 1600 \\to 3200 \\to 6400`}</Eq> ✓.</li>
+    </ol>
+    <p><em>Hack: aby podwoić się co każdy <Eq>{`T`}</Eq> jednostek czasu, wykładnik jest zawsze <Eq>{`t/T`}</Eq>. Tu <Eq>{`t/T = 3/0{,}5 = 6`}</Eq> podwojenia.</em></p>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Bakterie podwajają się co 30 minut. Początkowo 100. Ile po 3 godzinach? Napisz model $N(t)$ z $t$ w godzinach.
+</Exercicio>
+
+<Exercicio numero="8.3" dificuldade="aplicacao"
+  resposta="1/32"
+  solucao={<>W 25 latach upływa <Eq>{`25/5 = 5`}</Eq> okresów półtrwania. Pozostała frakcja: <Eq>{`(1/2)^5 = 1/32`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Okres półtrwania izotopu radioaktywnego wynosi 5 lat. Jaka frakcja oryginalnej ilości pozostaje po 25 latach?
+</Exercicio>
+
+<Exercicio numero="8.4" dificuldade="aplicacao"
+  resposta="aprox. 11.127,70"
+  solucao={<>Procent ciągły: <Eq>{`S = 5\\,000 \\cdot e^{0{,}08 \\times 10} = 5\\,000 \\cdot e^{0{,}8} \\approx 5\\,000 \\cdot 2{,}2255 = 11\\,127{,}70`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+5000 zł inwestuje się na 8% rocznie z oprocentowaniem ciągłym. Saldo po 10 latach?
+</Exercicio>
+
+<Exercicio numero="8.5" dificuldade="aplicacao"
+  solucao={<>Procent składany rocznie: <Eq>{`S = 2\\,000 \\cdot (1{,}08)^{10}`}</Eq>. <Eq>{`(1{,}08)^{10} \\approx 2{,}1589`}</Eq>. Zatem <Eq>{`S \\approx 4\\,317{,}85`}</Eq>. Reguła 70: czas podwojenia <Eq>{`\\approx 70/8 = 8{,}75`}</Eq> lat — w 10 latach oczekujemy nieco więcej niż podwojenie (<Eq>{`2{,}16\\times`}</Eq>), spójne.</>}
+  passos={<>
+    <ol>
+      <li><strong>Zidentyfikuj model.</strong> Procent składany rocznie ze stopą <Eq>{`i = 8\\%`}</Eq>: <Eq>{`S(n) = S_0 (1 + i)^n`}</Eq>.</li>
+      <li><strong>Podstaw.</strong> <Eq>{`S(10) = 2\\,000 \\cdot (1{,}08)^{10}`}</Eq>.</li>
+      <li><strong>Oblicz potęgę.</strong> <Eq>{`(1{,}08)^{10} \\approx 2{,}1589`}</Eq>. W 1 roku: <Eq>{`2\\,000 \\cdot 1{,}08 = 2\\,160`}</Eq>. W 2 latach: <Eq>{`2\\,160 \\cdot 1{,}08 = 2\\,332{,}80`}</Eq>. Odsetki w 2. roku (172,80) превышают 1. (160) — podpis procentu składanego.</li>
+      <li><strong>Wynik.</strong> <Eq>{`S \\approx 2\\,000 \\cdot 2{,}1589 \\approx 4\\,317{,}85`}</Eq> zł.</li>
+    </ol>
+    <p><em>Hack: reguła 70. Na 8% rocznie podwaja się w ~8,75 lat. Na 4%, ~17,5 lat. Na 1%, ~70 lat. Wewnętrznie przyswój sobie tę tabelę.</em></p>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+2000 zł inwestuje się na 8% rocznie z oprocentowaniem rocznym. Saldo po 10 latach? Użyj reguły 70 do weryfikacji.
+</Exercicio>
+
+<Exercicio numero="8.6" dificuldade="aplicacao"
+  solucao={<>Datowanie: <Eq>{`N(t)/N_0 = (1/2)^{t/5730} = 0{,}30`}</Eq>. Stosując <Eq>{`\\ln`}</Eq>: <Eq>{`(t/5730)\\ln(1/2) = \\ln 0{,}30`}</Eq>. <Eq>{`t = 5730 \\cdot \\ln 0{,}30 / \\ln(1/2) \\approx 5730 \\cdot 1{,}737 \\approx 9\\,953`}</Eq> lat.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", exercicio: "ex. 35", licenca: "CC-BY 4.0" }}
+>
+Węgiel-14 ($\tau_{1/2} = 5.730$ lat). Kość zawiera 30% oryginalnego C-14. Jaki jest wiek kości?
+</Exercicio>
+
+<Exercicio numero="8.7" dificuldade="aplicacao"
+  resposta="aprox. 0,099 rocznie"
+  solucao={<>Aby podwoić się w <Eq>{`T = 7`}</Eq> lat: <Eq>{`e^{k \\cdot 7} = 2 \\Rightarrow k = \\ln 2/7 \\approx 0{,}693/7 \\approx 0{,}099`}</Eq>/rok.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+Ilość podwaja się co 7 lat. Jakie jest tempo wzrostu ciągłego $k$?
+</Exercicio>
+
+<Exercicio numero="8.8" dificuldade="aplicacao"
+  solucao={<>Wzrost złożony rocznie: <Eq>{`P(t) = P_0 (1{,}02)^t`}</Eq>. Potroić: <Eq>{`(1{,}02)^t = 3 \\Rightarrow t = \\ln 3/\\ln 1{,}02 \\approx 1{,}099/0{,}0198 \\approx 55{,}5`}</Eq> lat. Reguła 110: <Eq>{`110/2 \\approx 55`}</Eq> — zgadza się.</>}
+  passos={<>
+    <ol>
+      <li><strong>Model.</strong> <Eq>{`P(t) = P_0 (1{,}02)^t`}</Eq>. "Potroić" oznacza <Eq>{`P(t)/P_0 = 3`}</Eq>.</li>
+      <li><strong>Zastosuj <Eq>{`\\ln`}</Eq>.</strong> <Eq>{`t \\ln 1{,}02 = \\ln 3 \\Rightarrow t = \\ln 3/\\ln 1{,}02`}</Eq>.</li>
+      <li><strong>Oblicz.</strong> <Eq>{`\\ln 3 \\approx 1{,}099`}</Eq>, <Eq>{`\\ln 1{,}02 \\approx 0{,}0198`}</Eq>. <Eq>{`t \\approx 55{,}5`}</Eq> lat.</li>
+      <li><strong>Sprawdzenie rozsądku.</strong> Mała stopa: <Eq>{`\\ln(1{,}02) \\approx 0{,}02`}</Eq>. <Eq>{`t \\approx \\ln 3/0{,}02 \\approx 55`}</Eq> lat. Blisko 55,5.</li>
+    </ol>
+    <p><em>Hack demograficzny: aby potroić stopę <Eq>{`r\\%`}</Eq> rocznie, użyj <Eq>{`T \\approx 110/r`}</Eq>. Aby podwoić: <Eq>{`70/r`}</Eq>. Aby pięciokrotnie: <Eq>{`160/r`}</Eq>.</em></p>
+  </>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Miasto rośnie 2% rocznie (składane rocznie). W ile lat populacja potraja?
+</Exercicio>
+
+<Exercicio numero="8.9" dificuldade="aplicacao"
+  resposta="aprox. 8,1 roku"
+  solucao={<><Eq>{`e^{0{,}05 t} = 1{,}5 \\Rightarrow t = \\ln 1{,}5/0{,}05 \\approx 0{,}405/0{,}05 \\approx 8{,}1`}</Eq> roku.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+Stała wzrostu ciągłego $r = 0{,}05$/rok. W ile lat populacja rośnie o 50%?
+</Exercicio>
+
+<Exercicio numero="8.10" dificuldade="aplicacao"
+  solucao={<>Okres półtrwania <Eq>{`\\tau_{1/2} = 6`}</Eq> h, dawka początkowa <Eq>{`C_0 = 200`}</Eq> mg. (a) W 12 h = 2 okresy półtrwania: <Eq>{`200 \\cdot (1/2)^2 = 50`}</Eq> mg. (b) W 24 h = 4 okresy półtrwania: <Eq>{`200 \\cdot (1/2)^4 = 12{,}5`}</Eq> mg. (c) <Eq>{`200 \\cdot (1/2)^{t/6} = 10 \\Rightarrow (1/2)^{t/6} = 1/20 \\Rightarrow t = 6 \\log_2 20 \\approx 25{,}9`}</Eq> h.</>}
+  passos={<>
+    <ol>
+      <li><strong>Model.</strong> <Eq>{`C(t) = 200 \\cdot (1/2)^{t/6}`}</Eq>.</li>
+      <li><strong>(a) <Eq>{`t = 12`}</Eq>:</strong> <Eq>{`12/6 = 2`}</Eq> okresy półtrwania. <Eq>{`C(12) = 200/4 = 50`}</Eq> mg.</li>
+      <li><strong>(b) <Eq>{`t = 24`}</Eq>:</strong> <Eq>{`24/6 = 4`}</Eq> okresy półtrwania. <Eq>{`C(24) = 200/16 = 12{,}5`}</Eq> mg.</li>
+      <li><strong>(c) Rozwiąż <Eq>{`C(t) = 10`}</Eq>.</strong> <Eq>{`(1/2)^{t/6} = 1/20 \\Rightarrow -t/6 = \\log_2(1/20) = -\\log_2 20`}</Eq>. Zatem <Eq>{`t = 6 \\cdot \\ln 20/\\ln 2 \\approx 25{,}9`}</Eq> h.</li>
+      <li><strong>Sprawdzenie.</strong> Po 24 h wciąż jest 12,5 mg; wkrótce potem spada poniżej 10 — spójne z 25,9 h.</li>
+    </ol>
+    <p><em>Reguła 5 okresów półtrwania: po <Eq>{`5 \\tau_{1/2}`}</Eq> zostaje mniej niż 4% dawki — lek uważany za "wyeliminowany" klinicznie. Dla paracetamolu (<Eq>{`\\tau_{1/2} \\approx 2{,}5`}</Eq> h): eliminowany w <Eq>{`\\approx 12{,}5`}</Eq> h.</em></p>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Lek z okresem półtrwania 6 godzin; dawka początkowa 200 mg. (a) Ile pozostaje po 12 h? (b) Po 24 h? (c) Kiedy spada poniżej 10 mg?
+</Exercicio>
+
+<Exercicio numero="8.11" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Logarytmiczny: rośnie bez granic ale wolniej niż każda potęga", correta: true },
+    { texto: "Wielomianowy: rośnie szybciej niż każda funkcja wykładnicza" },
+    { texto: "Wykładniczy: rośnie wolniej niż funkcje liniowe" },
+    { texto: "Logarytmiczny: maleje do zera" },
+  ]}
+  solucao={<>Logarytm rośnie do <Eq>{`+\\infty`}</Eq>, ale <Eq>{`\\ln x / x^p \\to 0`}</Eq> dla każdego <Eq>{`p > 0`}</Eq>. To oznacza, że <Eq>{`\\ln x`}</Eq> rośnie wolniej niż <Eq>{`x^p`}</Eq> nawet dla <Eq>{`p = 0{,}001`}</Eq>. Nie maleje — tylko wznosi się bardzo powoli.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-2-graphs-of-exponential-functions", secao: "§6.2", licenca: "CC-BY 4.0" }}
+>
+**Dyskryminacja koncepcyjna.** Która z poniższych stwierdzeń prawidłowo opisuje funkcję $f(x) = \ln x$?
+</Exercicio>
+
+<Exercicio numero="8.12" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Wykładniczy: względne tempo zmian stałe ($N'/N = k$)", correta: true },
+    { texto: "Liniowy: bezwzględne tempo zmian stałe ($N' = k$)" },
+    { texto: "Logistyczny: tempo zmian rośnie bez granic" },
+    { texto: "Logarytmiczny: tempo zmian jest proporcjonalne do $\ln N$" },
+  ]}
+  solucao={<>Model <Eq>{`\\dot N = kN`}</Eq> implikuje <Eq>{`N'/N = k`}</Eq> (stałą) — stały wzrost procentowy na jednostkę czasu. To jest wykładnicza. W modelu liniowym, <Eq>{`N' = k`}</Eq> (stała bezwzględna). W logistycznym, <Eq>{`N'/N = r(1 - N/K)`}</Eq> maleje gdy <Eq>{`N`}</Eq> rośnie.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+**Dyskryminacja koncepcyjna.** Który model charakteryzuje się właściwością "względne tempo zmian $N'(t)/N(t)$ jest stałe"?
+</Exercicio>
+
+### Blok B — Wzrost porównawczy i stopy (8.13–8.24)
+
+<Exercicio numero="8.13" dificuldade="modelagem"
+  solucao={<>Liniowy: <Eq>{`S_L(10) = 5\\,000 \\cdot (1 + 0{,}08 \\cdot 10) = 9\\,000`}</Eq>. Składany rocznie: <Eq>{`S_C(10) = 5\\,000 \\cdot (1{,}08)^{10} \\approx 10\\,794`}</Eq>. Ciągły: <Eq>{`S_K(10) = 5\\,000 \\cdot e^{0{,}8} \\approx 11\\,128`}</Eq>. Wzrost: prosty &lt; składany &lt; ciągły — zgodnie z oczekiwaniami.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Trzy modalności dla 5000 zł na 8% rocznie w 10 lat: (a) procent prosty; (b) kapitalizacja roczna; (c) kapitalizacja ciągła. Oblicz i porównaj salda. Która modalność przynosi większe zyski?
+</Exercicio>
+
+<Exercicio numero="8.14" dificuldade="modelagem"
+  solucao={<>(a) <Eq>{`8 = 6 \\cdot e^{24r} \\Rightarrow r = \\ln(4/3)/24 \\approx 0{,}012`}</Eq>/rok (~1,2% rocznie). (b) <Eq>{`P(t) = 6 e^{0{,}012 t}`}</Eq>. (c) <Eq>{`10 = 6 e^{0{,}012 t} \\Rightarrow t = \\ln(5/3)/0{,}012 \\approx 42{,}6`}</Eq> lat, czyli około 2043.</>}
+  passos={<>
+    <ol>
+      <li><strong>Przyjmij <Eq>{`t = 0`}</Eq> w 2000.</strong> <Eq>{`P_0 = 6`}</Eq> miliardów. Model: <Eq>{`P(t) = 6 e^{rt}`}</Eq>.</li>
+      <li><strong>(a) Oszacuj <Eq>{`r`}</Eq>.</strong> W 2024 (<Eq>{`t = 24`}</Eq>): <Eq>{`P(24) = 8`}</Eq>. Zatem <Eq>{`e^{24r} = 4/3 \\Rightarrow r = \\ln(4/3)/24 \\approx 0{,}012`}</Eq>/rok.</li>
+      <li><strong>(b) Napisz model.</strong> <Eq>{`P(t) = 6 e^{0{,}012 t}`}</Eq> (w miliardach, <Eq>{`t`}</Eq> w latach od 2000).</li>
+      <li><strong>(c) Rozwiąż <Eq>{`P(t) = 10`}</Eq>.</strong> <Eq>{`10/6 = e^{0{,}012 t} \\Rightarrow t = \\ln(5/3)/0{,}012 \\approx 0{,}511/0{,}012 \\approx 42{,}6`}</Eq> lat.</li>
+      <li><strong>Kontekst rzeczywisty.</strong> ONZ projektuje 10 miliardów około 2058. Czysty model wykładniczy nie bierze pod uwagę spowolnienia demograficznego (przejście demograficzne: zmniejszająca się płodność globalnie).</li>
+    </ol>
+    <p><em>Uwaga: model wykładniczy ze stałym <Eq>{`r`}</Eq> jest przydatny jako punkt wyjścia, ale rzeczywistość jest logistyczna. Żaden kraj nie rósł wykładniczo przez więcej niż kilka dekad bez zmiany reżimu demograficznego.</em></p>
+  </>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Populacja światowa wynosiła 6 miliardów w 2000 i 8 miliardów w 2024. (a) Oszacuj roczne tempo ciągłe $r$. (b) Napisz model. (c) W którym roku osiąga 10 miliardów (przy zachowaniu tempa)?
+</Exercicio>
+
+<Exercicio numero="8.15" dificuldade="modelagem"
+  solucao={<><Eq>{`P(2050) = 7{,}8 \\cdot (1{,}011)^{30} \\approx 7{,}8 \\cdot 1{,}388 \\approx 10{,}8`}</Eq> miliardów.</>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Populacja światowa wynosiła 7,8 miliardów w 2020 i rośnie 1,1% rocznie. Oszacuj populację w 2050.
+</Exercicio>
+
+<Exercicio numero="8.16" dificuldade="modelagem"
+  solucao={<>W 25 latach: 5 okresów półtrwania po 5 lat. Pozostała frakcja: <Eq>{`(1/2)^5 = 1/32`}</Eq>. Uległa rozpadu: <Eq>{`1 - 1/32 = 31/32 \\approx 96{,}9\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Izotop z okresem półtrwania 5 lat. Ile procent uległo rozpadu po 25 latach? Ile pozostaje?
+</Exercicio>
+
+<Exercicio numero="8.17" dificuldade="modelagem"
+  solucao={<>"Upaść 90%" oznacza pozostać 10%. <Eq>{`(1/2)^{t/5730} = 0{,}10 \\Rightarrow t = 5730 \\cdot \\ln 10/\\ln 2 \\approx 5730 \\cdot 3{,}322 \\approx 19\\,035`}</Eq> lat.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Węgiel-14 ($\tau_{1/2} = 5.730$ lat). W tkance organicznej, ile czasu do rozpadu 90% oryginalnego C-14?
+</Exercicio>
+
+<Exercicio numero="8.18" dificuldade="modelagem"
+  solucao={<>(a) <Eq>{`(0{,}85)^5 \\approx 0{,}4437`}</Eq>. <Eq>{`V(5) = 50\\,000 \\cdot 0{,}4437 \\approx 22\\,185`}</Eq> zł. (b) <Eq>{`V(10) \\approx 50\\,000 \\cdot (0{,}4437)^2 \\approx 9\\,848`}</Eq> zł. Całkowita amortyzacja: <Eq>{`50\\,000 - 9\\,848 \\approx 40\\,152`}</Eq> zł (około 80% oryginalnej wartości).</>}
+  passos={<>
+    <ol>
+      <li><strong>Model amortyzacji malejącym saldem.</strong> <Eq>{`V(t) = 50\\,000 \\cdot (0{,}85)^t`}</Eq>.</li>
+      <li><strong>(a) <Eq>{`t = 5`}</Eq>:</strong> <Eq>{`(0{,}85)^2 = 0{,}7225`}</Eq>; <Eq>{`(0{,}85)^4 \\approx 0{,}5220`}</Eq>; <Eq>{`(0{,}85)^5 \\approx 0{,}4437`}</Eq>. <Eq>{`V(5) \\approx 22\\,185`}</Eq> zł.</li>
+      <li><strong>(b) <Eq>{`t = 10`}</Eq>:</strong> <Eq>{`(0{,}85)^{10} \\approx (0{,}4437)^2 \\approx 0{,}1969`}</Eq>. <Eq>{`V(10) \\approx 9\\,848`}</Eq> zł.</li>
+      <li><strong>Amortyzacja.</strong> <Eq>{`50\\,000 - 9\\,848 \\approx 40\\,152`}</Eq> zł.</li>
+      <li><strong>Porównaj z liniową.</strong> Amortyzacja liniowa: <Eq>{`50\\,000 \\cdot 0{,}15 = 7\\,500`}</Eq>/rok. W 10 latach: <Eq>{`75\\,000`}</Eq> zł — więcej niż oryginalnie! Malejące saldo jest fizycznie bardziej koherentne.</li>
+    </ol>
+    <p><em>W rachunkowości malejące saldo odzwierciedla rzeczywistość: aktywa tracą więcej wartości w pierwszych latach. Samochód traci ~20% w pierwszym roku, ~10% w piątym roku. Model wykładniczy to przechwytuje; liniowy nie.</em></p>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Amortyzacja malejącym saldem: $V(t) = 50.000 \cdot (0{,}85)^t$. (a) Wartość po 5 latach? (b) Całkowita amortyzacja w 10 latach?
+</Exercicio>
+
+<Exercicio numero="8.19" dificuldade="aplicacao"
+  solucao={<><Eq>{`od 1\\,000 do 8\\,000`}</Eq> to 3 podwojenia (<Eq>{`8 = 2^3`}</Eq>). W 6 godzin, zatem <Eq>{`T_{\\text{dupl}} = 6/3 = 2`}</Eq> godziny.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Kultura bakteryjna rośnie z 1000 do 8000 w 6 godzin. Określ czas podwojenia.
+</Exercicio>
+
+<Exercicio numero="8.20" dificuldade="aplicacao"
+  resposta="aprox. 0,89% rocznie"
+  solucao={<><Eq>{`215 = 190 \\cdot e^{14r} \\Rightarrow r = \\ln(215/190)/14 \\approx 0{,}1238/14 \\approx 0{,}0088`}</Eq> czyli ~0,89% rocznie.</>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Polska rosła z 190 milionów (2010) na 215 milionów (2024). Oszacuj roczne tempo wzrostu ciągłego.
+</Exercicio>
+
+<Exercicio numero="8.21" dificuldade="aplicacao"
+  solucao={<>Reguła 72: <Eq>{`T \\approx 72/r\\%`}</Eq>. Dokładna: <Eq>{`T = \\ln 2/\\ln(1+r)`}</Eq>. Dla <Eq>{`r = 5\\%`}</Eq>: aprox. 14,4 vs 14,21. Dla <Eq>{`r = 10\\%`}</Eq>: 7,2 vs 7,27. Dla <Eq>{`r = 20\\%`}</Eq>: 3,6 vs 3,80. Dobra aproksymacja do ~15%; pogorsza się dla wyższych stawek, bo <Eq>{`\\ln(1+r) \\approx r`}</Eq> traci precyzję.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Reguła 72: $T_\text{dupl} \approx 72/r\%$. Porównaj z dokładną formułą $T = \ln 2/\ln(1+r)$ dla $r = 5\%$, $10\%$, $20\%$. Czy reguła jest dobra?
+</Exercicio>
+
+<Exercicio numero="8.22" dificuldade="aplicacao"
+  resposta="aprox. 9 miesięcy"
+  solucao={<><Eq>{`(1{,}08)^t = 2 \\Rightarrow t = \\ln 2/\\ln 1{,}08 \\approx 0{,}693/0{,}077 \\approx 9{,}0`}</Eq> miesięcy.</>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Nowy produkt rośnie 8% na miesiąc. W ile miesięcy podwaja się?
+</Exercicio>
+
+<Exercicio numero="8.23" dificuldade="aplicacao"
+  resposta="aprox. 17,7 roku"
+  solucao={<><Eq>{`T = \\ln 2/\\ln 1{,}04 \\approx 0{,}693/0{,}0392 \\approx 17{,}7`}</Eq> roku. Reguła 72: <Eq>{`72/4 = 18`}</Eq> lat — blisko.</>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Inflacja roczna 4% (złożona). W ile lat ceny podwajają się?
+</Exercicio>
+
+<Exercicio numero="8.24" dificuldade="aplicacao"
+  solucao={<>Ciągły: <Eq>{`S = 1\\,000 \\cdot e^{0{,}06 \\times 10} = e^{0{,}6} \\approx 1\\,822`}</Eq>. Roczny: <Eq>{`S = 1\\,000 \\cdot (1{,}06)^{10} \\approx 1\\,791`}</Eq>. Ciągły &gt; roczny: "nieskończona" kapitalizacja gromadzi <Eq>{`e^{0{,}06} - 1 \\approx 6{,}18\\%`}</Eq> efektywny vs <Eq>{`6{,}00\\%`}</Eq> nominalny.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-1-exponential-functions", secao: "§6.1", licenca: "CC-BY 4.0" }}
+>
+1000 zł na 6% rocznie: (a) kapitalizacja ciągła; (b) kapitalizacja roczna. Co przynosi więcej w 10 latach? Dlaczego?
+</Exercicio>
+
+### Blok C — Modele porównawcze i strukturalne (8.25–8.35)
+
+<Exercicio numero="8.25" dificuldade="compreensao"
+  solucao={<>Stosując <Eq>{`\\ln`}</Eq> do <Eq>{`N(t) = N_0 e^{kt}`}</Eq>: <Eq>{`\\ln N = \\ln N_0 + kt`}</Eq>. To jest linia prosta na płaszczyźnie <Eq>{`(t, \\ln N)`}</Eq> z nachyleniem <Eq>{`k`}</Eq> i przesunięciem <Eq>{`\\ln N_0`}</Eq>. Jeśli dane <Eq>{`(t_i, \\ln N_i)`}</Eq> spadają na linię prostą, wzrost jest wykładniczy. Jeśli się wyginają w dół, jest logistyczny.</>}
+  passos={<>
+    <ol>
+      <li><strong>Zastosuj <Eq>{`\\ln`}</Eq> obu stron.</strong> <Eq>{`\\ln N(t) = \\ln N_0 + \\ln e^{kt} = \\ln N_0 + kt`}</Eq>.</li>
+      <li><strong>Zidentyfikuj formę linii.</strong> Umieść <Eq>{`y = \\ln N`}</Eq>, <Eq>{`x = t`}</Eq>: równanie <Eq>{`y = \\ln N_0 + k x`}</Eq>. Przesunięcie <Eq>{`\\ln N_0`}</Eq>, nachylenie <Eq>{`k`}</Eq>.</li>
+      <li><strong>Interpretacja wizualna.</strong> Na wykresie z osią <Eq>{`y`}</Eq> w skali log (wykres log-y), wykładniczy zmienia się w linię prostą. Logistyczny wygina się w dół, gdy <Eq>{`N`}</Eq> zbliża się do <Eq>{`K`}</Eq>.</li>
+    </ol>
+    <p><em>Ciekawostka: ten trik (log-y przekształca wykładniczy w linię) jest podstawą wykresów ewolucji epidemii, wzrostu startupów, datowania radiometrycznego. Kiedy widzisz "wykres w skali logarytmicznej", to jest to.</em></p>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/", secao: "§3.1", licenca: "CC-BY-NC-SA" }}
+>
+Pokaż, że jeśli $N(t) = N_0 e^{kt}$, to $\ln N$ vs $t$ jest linią prostą z nachyleniem $k$. Dlaczego to jest przydatne do identyfikacji wzrostu wykładniczego w danych?
+</Exercicio>
+
+<Exercicio numero="8.26" dificuldade="compreensao"
+  solucao={<>Każde podwojenie dodaje warstwę tranzystorów: z 2300 (1971) do ~$2 \\times 10^{10}$ (2023) = ~$10^7$ razy. <Eq>{`\\log_2(10^7) \\approx 23{,}3`}</Eq> podwojenia w ~52 latach → jedno podwojenie co <Eq>{`52/23{,}3 \\approx 2{,}2`}</Eq> roku. Spójne z Prawem Moore'a (2 lata).</>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 5", licenca: "aberta" }}
+>
+Prawo Moore'a: Intel 4004 (1971) — 2300 tranzystorów; Apple M2 Ultra (2023) — $\sim 2 \times 10^{10}$ tranzystorów. Ile podwojenia miało miejsce? W ile lat na jedno podwojenie?
+</Exercicio>
+
+<Exercicio numero="8.27" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Logistyczny nasycony w K; wykładniczy idzie do nieskończoności", correta: true },
+    { texto: "Logistyczny rośnie szybciej niż wykładniczy" },
+    { texto: "Logistyczny to wykładniczy z ujemnym K" },
+    { texto: "Oba się nasycają — różnica to tylko skala" },
+  ]}
+  solucao={<>Dla <Eq>{`N \\ll K`}</Eq>: współczynnik <Eq>{`(1 - N/K) \\approx 1`}</Eq> i logistyczny zachowuje się jak wykładniczy. Dla <Eq>{`N \\to K`}</Eq>: współczynnik <Eq>{`\\to 0`}</Eq> i wzrost się zatrzymuje. Czysta wykładnicza nigdy się nie nasycą. Logistyczna jest biologicznie realistyczna dla populacji z limitem zasobów.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+**Dyskryminacja koncepcyjna.** Jaka jest fundamentalna różnica między wzrostem logistycznym $\dot N = rN(1-N/K)$ a wykładniczym $\dot N = rN$?
+</Exercicio>
+
+<Exercicio numero="8.28" dificuldade="compreensao"
+  solucao={<>Okres półtrwania: czas <Eq>{`\\tau_{1/2}`}</Eq> taki, że <Eq>{`N(\\tau_{1/2}) = N_0/2`}</Eq>. Dla rozpadu (<Eq>{`k < 0`}</Eq>): <Eq>{`e^{k \\tau_{1/2}} = 1/2 \\Rightarrow \\tau_{1/2} = \\ln 2 / |k|`}</Eq>. Czas podwojenia (<Eq>{`k > 0`}</Eq>): <Eq>{`e^{k T} = 2 \\Rightarrow T = \\ln 2/k`}</Eq>. Są dokładnie analogiczne — ta sama formuła, różny znak <Eq>{`k`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+Pokaż, że okres półtrwania $\tau_{1/2} = \ln 2/|k|$ i czas podwojenia $T_\text{dupl} = \ln 2/k$ są analogiczne — ta sama formuła, przeciwny kierunek.
+</Exercicio>
+
+<Exercicio numero="8.29" dificuldade="demonstracao"
+  solucao={<>Z równania różniczkowego <Eq>{`\\dot N = kN`}</Eq>, rozdziel zmienne: <Eq>{`dN/N = k\\,dt`}</Eq>. Integrując: <Eq>{`\\ln |N| = kt + C`}</Eq>. Exponentiating: <Eq>{`N = A e^{kt}`}</Eq> z <Eq>{`A = e^C`}</Eq>. W <Eq>{`t = 0`}</Eq>: <Eq>{`N(0) = A`}</Eq>. Zatem <Eq>{`N(t) = N(0) e^{kt}`}</Eq>. ∎</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+**Dowód.** Pokaż, że jeśli $N(t)$ spełnia $\dot N = kN$ z stałym $k$ i $N > 0$, to $N(t) = N(0)\,e^{kt}$. (Użyj rozdzielenia zmiennych; będzie to sformalizowane w Kwartale 10.)
+</Exercicio>
+
+<Exercicio numero="8.30" dificuldade="modelagem"
+  solucao={<>Model logistyczny: <Eq>{`N(t) = 1\\,000/(1 + 9 e^{-0{,}1 t})`}</Eq>. W <Eq>{`t = 20`}</Eq>: <Eq>{`N(20) = 1\\,000/(1 + 9 e^{-2}) = 1\\,000/(1 + 9 \\cdot 0{,}1353) = 1\\,000/2{,}218 \\approx 451`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+Wzrost logistyczny: $N(t) = K/(1 + A e^{-rt})$ z $K = 1.000$, $A = 9$, $r = 0{,}1$/rok. Oblicz $N(20)$.
+</Exercicio>
+
+<Exercicio numero="8.31" dificuldade="modelagem"
+  solucao={<>Model Newtona: <Eq>{`T(t) = 20 + 70 e^{-kt}`}</Eq>. Użyj <Eq>{`T(5) = 70`}</Eq>: <Eq>{`50 = 70 e^{-5k} \\Rightarrow k = \\ln(7/5)/5 \\approx 0{,}0673`}</Eq>/min. <Eq>{`T(15) = 20 + 70 e^{-0{,}0673 \\cdot 15} \\approx 45{,}5`}</Eq> °C.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Kawa w $90\,°C$ chłodzi się w pokoju $20\,°C$. Po 5 min jest w $70\,°C$. Modeluj $T(t)$. Oblicz $T(15)$.
+</Exercicio>
+
+<Exercicio numero="8.32" dificuldade="modelagem"
+  solucao={<>Definiuj <Eq>{`D(t) = T(t) - T_a`}</Eq>. Wtedy <Eq>{`D(t) = D_0 e^{-kt}`}</Eq>. "Okres półtrwania różnicy": <Eq>{`D(\\tau)/D_0 = 1/2 \\Rightarrow \\tau = \\ln 2/k`}</Eq>. Dla kawy z 8.31: <Eq>{`\\tau = \\ln 2/0{,}0673 \\approx 10{,}3`}</Eq> min.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Prawo Newtona: $T(t) - T_a = (T_0 - T_a) e^{-kt}$. Pokaż, że "okres półtrwania różnicy" $D(t) = T - T_a$ to $\ln 2/k$. Oblicz dla kawy z ćwiczenia 8.31.
+</Exercicio>
+
+<Exercicio numero="8.33" dificuldade="modelagem"
+  solucao={<>Faza początkowa (przed szczytem, <Eq>{`I \\ll S \\approx N`}</Eq>): <Eq>{`I(t) \\approx I_0 e^{(\\beta N - \\gamma) t}`}</Eq>. Czas podwojenia: <Eq>{`T = \\ln 2 / (\\beta N - \\gamma)`}</Eq>. Jeśli <Eq>{`R_0 = \\beta N/\\gamma = 2{,}5`}</Eq> i <Eq>{`\\gamma = 1/5`}</Eq> dzień<Eq>{`^{-1}`}</Eq>: <Eq>{`\\beta N = 2{,}5 \\cdot 0{,}2 = 0{,}5`}</Eq>/dzień. Tempo wzrostu: <Eq>{`0{,}5 - 0{,}2 = 0{,}3`}</Eq>/dzień. <Eq>{`T = \\ln 2/0{,}3 \\approx 2{,}3`}</Eq> dnia.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+Model SIR w fazie początkowej ($I \ll N$): $I(t) \approx I_0 e^{(\beta N - \gamma)t}$. Dla $R_0 = \beta N/\gamma = 2{,}5$ i $\gamma = 1/5$ dzień, oblicz czas podwojenia zarażonych.
+</Exercicio>
+
+<Exercicio numero="8.34" dificuldade="desafio"
+  solucao={<>Aby porównać <Eq>{`e^x`}</Eq> i <Eq>{`x^{100}`}</Eq> dla dużych <Eq>{`x`}</Eq>: weź <Eq>{`x = 1\\,000`}</Eq>. <Eq>{`x^{100} = 10^{300}`}</Eq>. <Eq>{`e^x = e^{1000} \\approx 10^{434}`}</Eq>. Zatem <Eq>{`e^x / x^{100} \\approx 10^{134} \\to \\infty`}</Eq>. Formalny dowód przez L'Hôpital 100 razy: <Eq>{`(d^{100}/dx^{100}) e^x / (100!) = e^x/100! \\to \\infty`}</Eq>. ∎</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-2-graphs-of-exponential-functions", secao: "§6.2", licenca: "CC-BY 4.0" }}
+>
+**Wyzwanie.** Pokaż, że $e^x / x^{100} \to \infty$ gdy $x \to \infty$. (Zastosuj L'Hôpital 100 razy lub oceń numerycznie dla $x = 1.000$.)
+</Exercicio>
+
+<Exercicio numero="8.35" dificuldade="desafio"
+  solucao={<>Bank A w 5 latach: <Eq>{`(1{,}12)^5 \\approx 1{,}7623`}</Eq>. Bank B: <Eq>{`e^{0{,}115 \\times 5} = e^{0{,}575} \\approx 1{,}7771`}</Eq>. Bank B przynosi więcej: na 10 000 zł, różnica <Eq>{`(1{,}7771 - 1{,}7623) \\times 10\\,000 \\approx`}</Eq> 148 zł. Mała różnica bezwzględna, ale ważna dla dużych kapitałów.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-1-exponential-functions", secao: "§6.1", licenca: "CC-BY 4.0" }}
+>
+**Porównanie finansowe.** Bank A: 12% rocznie kapitalizacja roczna. Bank B: 11,5% rocznie kapitalizacja ciągła. Co przynosi więcej w 5 latach? Oblicz dla 10 000 zł.
+</Exercicio>
+
+### Blok D — Zaawansowane modelowanie (8.36–8.45)
+
+<Exercicio numero="8.36" dificuldade="modelagem"
+  solucao={<>Kondensator: <Eq>{`\\tau = RC = 1\\,000 \\cdot 100 \\times 10^{-6} = 0{,}1`}</Eq> s. <Eq>{`V(0{,}1) = 12 e^{-1} \\approx 4{,}41`}</Eq> V. Dla <Eq>{`V = 1`}</Eq> V: <Eq>{`t = 0{,}1 \\ln 12 \\approx 0{,}248`}</Eq> s.</>}
+  passos={<>
+    <ol>
+      <li><strong>Stała czasu.</strong> <Eq>{`\\tau = RC`}</Eq>. Jednostki: ohmy × farady = sekundy. <Eq>{`\\tau = 1\\,000 \\cdot 10^{-4} = 0{,}1`}</Eq> s.</li>
+      <li><strong>(b) <Eq>{`V(0{,}1)`}</Eq>.</strong> <Eq>{`t/\\tau = 1`}</Eq>. <Eq>{`V = 12 e^{-1} \\approx 12 \\cdot 0{,}368 = 4{,}41`}</Eq> V. "1 tau" = 37% napięcia początkowego.</li>
+      <li><strong>(c) <Eq>{`V = 1`}</Eq>.</strong> <Eq>{`12 e^{-t/0{,}1} = 1 \\Rightarrow t = 0{,}1 \\ln 12 \\approx 0{,}248`}</Eq> s.</li>
+      <li><strong>Sprawdzenie.</strong> W <Eq>{`5\\tau = 0{,}5`}</Eq> s: <Eq>{`12 e^{-5} \\approx 0{,}08`}</Eq> V — prawie zero. 0,248 s jest przed 0,5 s, spójne.</li>
+    </ol>
+    <p><em>Hack elektroniczny: "reguła 5 tau". Po <Eq>{`5\\tau`}</Eq>, zostaje mniej niż 1% ładunku. Wymiarowanie timerów RC, debouncerów i filtrów dolnoprzepustowych opiera się na <Eq>{`5\\tau`}</Eq>.</em></p>
+  </>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Kondensator: $V(t) = V_0 e^{-t/\tau}$, $\tau = RC$. Dla $R = 1\,\text{k}\Omega$, $C = 100\,\mu$F, $V_0 = 12$ V: (a) $\tau$? (b) $V(0{,}1\,\text{s})$? (c) Kiedy $V = 1$ V?
+</Exercicio>
+
+<Exercicio numero="8.37" dificuldade="modelagem"
+  solucao={<>(a) <Eq>{`\\tau = L/R = 2/4 = 0{,}5`}</Eq> s. (b) <Eq>{`I(0{,}5) = 3(1 - e^{-1}) \\approx 3 \\cdot 0{,}632 = 1{,}90`}</Eq> A. (c) <Eq>{`1 - e^{-t/0{,}5} = 0{,}9 \\Rightarrow t = 0{,}5 \\ln 10 \\approx 1{,}15`}</Eq> s.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.5", licenca: "CC-BY-SA" }}
+>
+Obwód RL: $I(t) = (V/R)(1 - e^{-Rt/L})$. Dla $V = 12$ V, $R = 4\,\Omega$, $L = 2$ H: (a) stała czasu? (b) $I(0{,}5)$? (c) Kiedy $I = 90\%$ maksimum?
+</Exercicio>
+
+<Exercicio numero="8.38" dificuldade="modelagem"
+  solucao={<>Rozpad: <Eq>{`N(t)/N_0 = e^{-0{,}05 t} = 0{,}01 \\Rightarrow t = \\ln 100/0{,}05 = 4{,}605/0{,}05 \\approx 92`}</Eq> h.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+Reaktor jądrowy: pozostała moc $P(t) = P_0 e^{-\lambda t}$, $\lambda = 0{,}05$/h. Ile czasu do upadku mocy do 1%?
+</Exercicio>
+
+<Exercicio numero="8.39" dificuldade="modelagem"
+  solucao={<>C-14: <Eq>{`(1/2)^{t/5730} = 0{,}80 \\Rightarrow t = 5730 \\cdot \\log_2(1/0{,}80) = 5730 \\cdot \\ln(1{,}25)/\\ln 2 \\approx 5730 \\cdot 0{,}322 \\approx 1\\,845`}</Eq> lat.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Próbka organiczna zawiera 80% oryginalnego węgla-14. Jaki jest wiek? ($\tau_{1/2} = 5.730$ lat.)
+</Exercicio>
+
+<Exercicio numero="8.40" dificuldade="modelagem"
+  solucao={<>Izotop Tc-99m, <Eq>{`\\tau_{1/2} = 6`}</Eq> h. Dawka początkowa 25 mCi. W 24 h = 4 okresy półtrwania: <Eq>{`25 \\cdot (1/2)^4 = 25/16 = 1{,}5625`}</Eq> mCi.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-7-exponential-and-logarithmic-models", secao: "§6.7", licenca: "CC-BY 4.0" }}
+>
+Tc-99m: okres półtrwania 6 godzin, dawka początkowa 25 mCi. Ile pozostaje po 24 godzinach?
+</Exercicio>
+
+<Exercicio numero="8.41" dificuldade="modelagem"
+  solucao={<>Uran-238, <Eq>{`\\tau_{1/2} = 4{,}5`}</Eq> mld lat. Pozostać 80% oznacza upaść 20%. <Eq>{`(1/2)^{t/4{,}5} = 0{,}80 \\Rightarrow t = 4{,}5 \\cdot \\ln(1{,}25)/\\ln 2 \\approx 4{,}5 \\cdot 0{,}322 \\approx 1{,}45`}</Eq> mld lat.</>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Datowanie uranem-238 ($\tau_{1/2} = 4{,}5$ miliarda lat). Skała cyrkonowa z 80% oryginalnego U-238. Jaki jest przybliżony wiek?
+</Exercicio>
+
+<Exercicio numero="8.42" dificuldade="modelagem"
+  solucao={<>"Upaść 90%" oznacza pozostać 10%. <Eq>{`I/I_0 = e^{-0{,}1 t} = 0{,}1 \\Rightarrow t = \\ln 10/0{,}1 \\approx 23`}</Eq> dni. To jest faza rozpadu SIR po szczycie — zarażeni spadają wykładniczo, gdy <Eq>{`S`}</Eq> się wyczerpuje.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+Po szczycie epidemii, zarażeni maleją: $I(t) = I_0 e^{-\gamma t}$, $\gamma = 0{,}1$/dzień. Ile czasu do upadku o 90%?
+</Exercicio>
+
+<Exercicio numero="8.43" dificuldade="desafio"
+  solucao={<>Stosunek Ar/K = 0,3 oznacza, że z każdych 1,3 oryginalnych atomów K, 0,3 zamieniło się w Ar i 1 pozostał K. Zatem frakcja pozostałego K = <Eq>{`1/1{,}3 \\approx 0{,}769`}</Eq>. <Eq>{`(1/2)^{t/1{,}25} = 0{,}769 \\Rightarrow t = 1{,}25 \\cdot \\log_2(1/0{,}769) \\approx 1{,}25 \\cdot 0{,}379 \\approx 0{,}474`}</Eq> mld lat (474 Ma).</>}
+  fonte={{ livro: "Yoshiwara — Modeling, Functions, and Graphs", url: "https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/", secao: "Cap. 6", licenca: "aberta" }}
+>
+Datowanie potas-argonowe: okres półtrwania K-40 = 1,25 miliarda lat. Skała ze stosunkiem Ar/K = 0,3. Jaki przybliżony wiek?
+</Exercicio>
+
+<Exercicio numero="8.44" dificuldade="desafio"
+  solucao={<>Model logistyczny: <Eq>{`N(t) = K/(1 + Ae^{-rt})`}</Eq>. W <Eq>{`t = 0`}</Eq>: <Eq>{`N_0 = K/(1 + A)`}</Eq>. Punkt przegięcia w <Eq>{`N = K/2`}</Eq>. Maksymalne tempo w <Eq>{`N = K/2`}</Eq>: <Eq>{`\\dot N_\\max = rK/4`}</Eq>. Dla <Eq>{`K = 1\\,000, r = 0{,}1`}</Eq>: maksymalne tempo <Eq>{`= 0{,}1 \\cdot 1000/4 = 25`}</Eq> osobników/rok. Występuje gdy <Eq>{`N = 500`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/", secao: "§1.4", licenca: "CC-BY-SA" }}
+>
+**Wyzwanie.** Dla modelu logistycznego $\dot N = rN(1-N/K)$ z $K = 1.000$, $r = 0{,}1$/rok: (a) Jaki punkt przegięcia $N^*$ gdzie wzrost jest maksymalny? (b) Jakie maksymalne tempo wzrostu $\dot N_\max$?
+</Exercicio>
+
+<Exercicio numero="8.45" dificuldade="demonstracao"
+  solucao={<>Dla <Eq>{`p > 0`}</Eq>: <Eq>{`\\lim_{x \\to \\infty} \\frac{\\ln x}{x^p}`}</Eq>. Przez L'Hôpital (lub podstawienie <Eq>{`u = x^p`}</Eq>): <Eq>{`= \\lim \\frac{1/x}{p x^{p-1}} = \\lim \\frac{1}{p x^p} = 0`}</Eq>. Dla przypadku <Eq>{`p = 1/2`}</Eq>: <Eq>{`\\ln x / \\sqrt{x} = 2(\\ln\\sqrt{x})/\\sqrt{x}`}</Eq>. Podstawiając <Eq>{`u = \\sqrt{x} \\to \\infty`}</Eq>: <Eq>{`2 \\ln u / u \\to 0`}</Eq>. ∎ Logarytm rośnie wolniej niż każda potęga dodatnia. To jest formalnie "hierarchia wzrostu".</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/6-2-graphs-of-exponential-functions", secao: "§6.2", licenca: "CC-BY 4.0" }}
+>
+**Dowód.** Udowodnij, że $\ln x / x^p \to 0$ gdy $x \to \infty$, dla każdego $p > 0$. (Użyj L'Hôpital lub podstaw $u = x^p$.) Wnioskuj, że $\ln x$ rośnie wolniej niż każda potęga dodatnia.
+</Exercicio>
+
+</ListaExercicios>
+
+## Źródła
+
+> Tylko książki, które **bezpośrednio zasilały** tekst i ćwiczenia. Pełny katalog w [**/livros**](/livros).
+
+- [**Yoshiwara — Modeling, Functions, and Graphs**](https://textbooks.aimath.org/textbooks/approved-textbooks/yoshiwara/) — Katherine Yoshiwara · 2020 · EN · licencja otwarta · rozdz. 5–6. **Główne źródło bloku modelowania i porównania tempa.**
+- [**OpenStax — College Algebra 2e**](https://openstax.org/details/books/college-algebra-2e) — OpenStax · 2022, 2. wyd. · EN · CC-BY 4.0 · §6.1–6.2, §6.7 (procent, rozpadu, datowanie, Newton, hierarchia wzrostu).
+- [**Notes on Diffy Qs**](https://www.jirka.org/diffyqs/) — Jiří Lebl · 2024, v6.6 · EN · CC-BY-SA · §1.4 (modele wykładnicze, logistyczny, SIR), §1.5 (obwody RL).
+- [**Active Calculus**](https://activecalculus.org/single/) — Matt Boelkins · 2024, ed. 2.0 · EN · CC-BY-NC-SA · §3.1 (charakteryzacja wzrostu wykładniczego, linearyzacja poprzez logarytm).

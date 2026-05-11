@@ -1,0 +1,771 @@
+---
+titulo: "Lección 109 — Estadística bayesiana introductoria"
+slug: "licao-109-bayesiana-intro"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Prior, verosimilitud, posterior. Regla de Bayes. Conjugados Beta-Bernoulli. MAP versus MLE. Intervalo creíble. Introducción a la inferencia mediante el paradigma bayesiano."
+ordem: 109
+publicado: true
+tags: ["estatística bayesiana", "prior", "posterior", "verossimilhança", "ano-3", "trim-11"]
+prerrequisitos: ["licao-108-qui-quadrado"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["Stochastik LK (Alemania, Klasse 12)", "H2 Math Statistics (Singapur)", "AP Statistics (EUA)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="P(\theta \mid D) = \frac{P(D \mid \theta)\,P(\theta)}{P(D)}"
+  legenda={<>La <strong>regla de Bayes</strong> actualiza nuestra creencia sobre el parámetro <Eq>{`\\theta`}</Eq> tras observar los datos <Eq>{`D`}</Eq>. El <strong>posterior</strong> <Eq>{`P(\\theta \\mid D)`}</Eq> es proporcional al producto de la <strong>verosimilitud</strong> <Eq>{`P(D \\mid \\theta)`}</Eq> por el <strong>prior</strong> <Eq>{`P(\\theta)`}</Eq>, normalizado por la <strong>evidencia</strong> <Eq>{`P(D)`}</Eq>.</>}
+  audioTexto="La regla de Bayes. Pé de theta dado dé es igual a pé de dé dado theta por pé de theta, dividido por pé de dé. El posterior es la verosimilitud multiplicada por el prior, normalizada. Toda la inferencia bayesiana es una variación de esta ecuación."
+/>
+
+<aside>
+
+**Libros que cubren esta lección**
+
+- [**Think Bayes** — Allen B. Downey](https://greenteapress.com/wp/think-bayes/) · §1–3 · CC-BY-NC-SA · *Introducción computacional con Python; cada concepto (prior, likelihood, posterior) se construye con ejemplos concretos antes de la fórmula.*
+- [**Introduction to Probability** — Grinstead & Snell](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) · §4.1 · GNU FDL · *Derivación clásica del teorema de Bayes a partir de probabilidad condicional; ejemplos con particiones del espacio muestral.*
+- [**OpenIntro Statistics** — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · §3.6–3.7 · CC-BY-SA · *Tratamiento para estudiantes sin cálculo; interpretación frecuentista vs. bayesiana con casos médicos reales.*
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definición rigurosa">
+
+### El teorema de Bayes
+
+<Definicao titulo="Regla de Bayes (forma general)">
+
+Sea $\theta$ un parámetro (o hipótesis) y $D$ los datos observados. Definiciones:
+
+- $P(\theta)$ — **prior**: distribución de probabilidad del parámetro *antes* de observar datos.
+- $P(D \mid \theta)$ — **verosimilitud** (*likelihood*): probabilidad de los datos dado el parámetro.
+- $P(D)$ — **evidencia marginal**: $P(D) = \int P(D \mid \theta) P(\theta)\, d\theta$ (o suma discreta).
+- $P(\theta \mid D)$ — **posterior**: distribución actualizada tras observar $D$.
+
+La regla de Bayes:
+
+<Equation explicacao="El posterior es proporcional a la verosimilitud por el prior. El denominador P(D) es solo una constante de normalización." latex="P(\theta \mid D) = \frac{P(D \mid \theta)\, P(\theta)}{P(D)} \propto P(D \mid \theta)\, P(\theta)" />
+
+</Definicao>
+
+> "El teorema de Bayes es un resultado básico de probabilidad condicional, pero su interpretación lo cambia todo: ofrece una receta formal para actualizar creencias a la luz de evidencias." — [OpenIntro Statistics §3.6](https://www.openintro.org/book/os/)
+
+### Priors conjugados: el caso Beta-Bernoulli
+
+<Definicao titulo="Familia conjugada Beta-Bernoulli">
+
+Cuando $X_1, \ldots, X_n \stackrel{\text{iid}}{\sim} \text{Bernoulli}(\theta)$ y el prior es $\theta \sim \text{Beta}(\alpha, \beta)$, el posterior tiene forma cerrada:
+
+<Equation explicacao="Tras s éxitos en n intentos, el posterior es otra Beta con parámetros actualizados." latex="\theta \mid D \;\sim\; \text{Beta}(\alpha + s,\; \beta + n - s)" />
+
+donde $s = \sum_i X_i$ es el número de éxitos. La Beta es **conjugada** para la Bernoulli: prior y posterior pertenecen a la misma familia.
+
+La distribución Beta tiene densidad:
+
+<Equation explicacao="Densidad de Beta(a,b): definida en [0,1], controlada por los parámetros a y b." latex="f(\theta; a, b) = \frac{\theta^{a-1}(1-\theta)^{b-1}}{B(a,b)}, \quad \theta \in [0, 1]" />
+
+con $B(a, b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$.
+
+</Definicao>
+
+### Estimadores puntuales
+
+<Definicao titulo="MAP y MLE">
+
+Dado el posterior $P(\theta \mid D)$:
+
+- **MAP** (*maximum a posteriori*): $\hat\theta_{\text{MAP}} = \arg\max_\theta P(\theta \mid D)$. Maximiza el posterior — incluye información del prior.
+- **MLE** (*maximum likelihood*): $\hat\theta_{\text{MLE}} = \arg\max_\theta P(D \mid \theta)$. Maximiza la verosimilitud — ignora el prior.
+- **Media posterior** (*estimador de Bayes cuadrático*): $E[\theta \mid D]$.
+
+**Relación:** Con prior uniforme ($P(\theta) = c$), MAP = MLE. Con $n \to \infty$, el posterior se concentra en $\hat\theta_{\text{MLE}}$ — el prior se vuelve irrelevante conforme aumentan los datos.
+
+Para Beta-Bernoulli:
+
+<Equation explicacao="MAP y media posterior para el caso Beta-Bernoulli. Compare con MLE = s/n (proporción empírica)." latex="\hat\theta_{\text{MAP}} = \frac{\alpha + s - 1}{\alpha + \beta + n - 2}, \quad E[\theta \mid D] = \frac{\alpha + s}{\alpha + \beta + n}" />
+
+</Definicao>
+
+### Intervalo creíble
+
+<Definicao titulo="Intervalo creíble HPD">
+
+Un **intervalo creíble de nivel** $1 - \alpha$ es cualquier intervalo $I$ con $P(\theta \in I \mid D) = 1 - \alpha$.
+
+El **HPD** (*highest posterior density*) es el más corto entre todos los intervalos creíbles del mismo nivel.
+
+<Insight>
+El intervalo creíble se interpreta directamente como "la probabilidad de que el parámetro esté en $I$ es $1-\alpha$" — lo que el IC frecuentista no dice. El IC frecuentista solo afirma que el procedimiento cubre el verdadero parámetro en $1-\alpha$ de las muestras repetidas.
+</Insight>
+
+</Definicao>
+
+### Factor de Bayes
+
+<Definicao titulo="Bayes Factor">
+
+Para comparar hipótesis $H_0$ y $H_1$:
+
+<Equation explicacao="Razón de evidencias marginales. Mide cuánto favorecen los datos H1 sobre H0, independientemente de los priors." latex="BF_{10} = \frac{P(D \mid H_1)}{P(D \mid H_0)}" />
+
+Escala de Jeffreys: $BF > 10$ — evidencia fuerte para $H_1$; $BF < 1/10$ — fuerte para $H_0$; $1/3 < BF < 3$ — inconcluyente.
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 180" className="w-full">
+<defs>
+  <marker id="arr109" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <text x="10" y="22" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">Prior P(θ)</text>
+  <rect x="10" y="30" width="120" height="60" rx="6" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="70" y="65" textAnchor="middle" fontSize="12" fontFamily="serif" fontStyle="italic" fill="currentColor">Beta(α, β)</text>
+</g>
+<g>
+  <text x="180" y="22" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">Verosimilitud</text>
+  <rect x="175" y="30" width="130" height="60" rx="6" fill="rgb(199 107 63 / 0.25)" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+  <text x="240" y="57" textAnchor="middle" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor">P(D | θ)</text>
+  <text x="240" y="75" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">s éxitos / n</text>
+</g>
+<g>
+  <line x1="135" x2="170" y1="60" y2="60" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" markerEnd="url(#arr109)"/>
+  <text x="152" y="52" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.5">×</text>
+</g>
+<g>
+  <line x1="310" x2="345" y1="60" y2="60" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" markerEnd="url(#arr109)"/>
+  <text x="327" y="52" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.5">∝</text>
+</g>
+<g>
+  <text x="355" y="22" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">Posterior P(θ|D)</text>
+  <rect x="350" y="30" width="150" height="60" rx="6" fill="rgb(61 122 95 / 0.35)" stroke="rgb(61 122 95)" strokeWidth="1.5"/>
+  <text x="425" y="57" textAnchor="middle" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor">Beta(α+s, β+n−s)</text>
+  <text x="425" y="76" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">creencia actualizada</text>
+</g>
+<g>
+  <text x="260" y="145" textAnchor="middle" fontSize="11" fontFamily="ui-sans-serif,sans-serif" fill="currentColor" fillOpacity="0.6">Ciclo de actualización bayesiana — el posterior se convierte en prior para los próximos datos</text>
+  <line x1="425" x2="425" y1="90" y2="115" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" strokeDasharray="4 3"/>
+  <line x1="425" x2="70" y1="115" y2="115" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" strokeDasharray="4 3" markerEnd="url(#arr109)"/>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Flujo bayesiano: prior × verosimilitud → posterior. El posterior se convierte en el nuevo prior cuando llegan más datos.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Para un niño de 5 años">
+
+Estás con tu mamá buscando tu **juguete favorito**. Crees que está en la habitación — esa es tu **creencia antes de buscar** (el *prior*).
+
+Vas a la sala y encuentras la **caja del juguete abierta** allí. Ahora crees más que está en la sala. **Cambiaste de opinión** basándote en lo que viste (la *evidencia*).
+
+Bayes es exactamente eso:
+
+1. Tienes una creencia antes (prior).
+2. Ves una pista (dato).
+3. Actualizas la creencia (posterior).
+
+Es una forma matemática de **aprender del mundo**.
+
+</Porta>
+
+<Porta nivel="10" titulo="Para un niño de 10 años">
+
+Imagina que sospechas que una moneda está **un poco viciada** — pero no estás seguro. Esa sospecha es tu **prior**.
+
+Lanzas la moneda 10 veces y sale **cara 8 veces**. Eso es extraño para una moneda justa. Actualizas tu sospecha — ahora crees **mucho más probable** que la moneda esté viciada. Ese nuevo palpite es el **posterior**.
+
+La fórmula de Bayes hace esa actualización con precisión:
+
+$$P(\text{viciada} \mid \text{8 caras}) = \frac{P(\text{8 caras} \mid \text{viciada}) \times P(\text{viciada})}{P(\text{8 caras})}$$
+
+Lo que verás en esta lección: cómo hacer esa cuenta para cualquier situación.
+
+</Porta>
+
+<Porta nivel="15" titulo="Para un adolescente de 15 años">
+
+La estadística frecuentista (trimestre 10 e inicio del 11) trata el parámetro $\theta$ como **fijo y desconocido** — puedes estimarlo, pero no puedes hablar de "probabilidad de $\theta$". El IC frecuentista no dice "la media poblacional está entre $a$ y $b$ con 95% de chance" — dice que el *procedimiento* de construcción del IC captura el verdadero $\theta$ en 95% de las muestras repetidas.
+
+La **estadística bayesiana** cambia el punto de partida: $\theta$ se trata como **variable aleatoria** con distribución de probabilidad. Esto permite preguntas directas como "¿cuál es la probabilidad de $\theta > 0{,}5$?" — la respuesta es la integral del posterior.
+
+**La ecuación central:**
+
+$$P(\theta \mid D) \propto \underbrace{P(D \mid \theta)}_{\text{verosimilitud}} \times \underbrace{P(\theta)}_{\text{prior}}$$
+
+**¿Cómo elegir el prior?**
+
+- *Prior informativo*: tienes información previa (ensayos anteriores, experto). Ej: $\text{Beta}(3, 3)$ — moneda ligeramente justa.
+- *Prior vago (diffuse)*: sabes poco. Ej: $\text{Beta}(1, 1) = \text{Uniforme}[0,1]$.
+- *Prior conjugado*: familia elegida para que el posterior tenga forma cerrada.
+
+**El caso Beta-Bernoulli:** Para lanzamientos de moneda o ensayos sí/no, si $\theta \sim \text{Beta}(\alpha, \beta)$ y se observan $s$ éxitos en $n$ intentos:
+
+$$\theta \mid D \sim \text{Beta}(\alpha + s, \,\beta + n - s)$$
+
+La media posterior es $E[\theta \mid D] = \dfrac{\alpha + s}{\alpha + \beta + n}$ — ponderación entre el prior y la proporción muestral $s/n$.
+
+</Porta>
+
+<Porta nivel="25" titulo="Para un estudiante de ingeniería">
+
+**El problema de inferencia paramétrica:** dado el modelo $X_i \mid \theta \stackrel{\text{iid}}{\sim} p(x \mid \theta)$, queremos aprender $\theta$ a partir de $x_1, \ldots, x_n$.
+
+**Paradigma frecuentista:** $\theta$ es fijo — estimador puntual $\hat\theta$ y distribución muestral.
+
+**Paradigma bayesiano:** $\theta \sim \pi(\theta)$ (prior). Tras los datos, el posterior es:
+
+$$\pi(\theta \mid \mathbf{x}) = \frac{\prod_{i=1}^n p(x_i \mid \theta) \cdot \pi(\theta)}{\int \prod_{i=1}^n p(x_i \mid \theta) \cdot \pi(\theta)\, d\theta}$$
+
+La integral en el denominador — la evidencia marginal $p(\mathbf{x})$ — es frecuentemente intratable en dimensiones altas, motivando métodos computacionales (MCMC, VI).
+
+**Propiedades asintóticas (Bernstein–von Mises):** bajo condiciones de regularidad, cuando $n \to \infty$:
+
+$$\pi(\theta \mid \mathbf{x}) \xrightarrow{d} \mathcal{N}\!\left(\hat\theta_{\text{MLE}},\; \frac{1}{n\,\mathcal{I}(\hat\theta)}\right)$$
+
+donde $\mathcal{I}(\theta)$ es la información de Fisher. El posterior converge al MLE — el prior se disuelve con datos suficientes.
+
+**Familias conjugadas comunes:**
+
+| Likelihood | Prior conjugado | Posterior |
+|---|---|---|
+| Bernoulli/Binomial | Beta($\alpha$, $\beta$) | Beta($\alpha$+$s$, $\beta$+$n$−$s$) |
+| Poisson | Gama($\alpha$, $\beta$) | Gama($\alpha$+$\sum x_i$, $\beta$+$n$) |
+| Normal (var. conocida) | Normal($\mu_0$, $\sigma_0^2$) | Normal ponderada |
+| Multinomial | Dirichlet | Dirichlet |
+
+**Estimación puntual:** La pérdida esperada (riesgo de Bayes) se minimiza por:
+- Pérdida cuadrática → media posterior.
+- Pérdida absoluta → mediana posterior.
+- Pérdida 0-1 → MAP (moda posterior).
+
+</Porta>
+
+<Porta nivel="40" titulo="Para un profesional sénior">
+
+**Contexto histórico:** Thomas Bayes (1701–1761) publicó post mortem en 1763 el ensayo "An Essay towards solving a Problem in the Doctrine of Chances". Laplace independientemente redescubrió y generalizó a la forma moderna en *Théorie analytique des probabilités* (1812). La interpretación probabilística subjetiva fue formalizada por Bruno de Finetti (1930s) y Leonard Jimmie Savage (1954).
+
+Durante el siglo XX, la escuela frecuentista (Fisher, Neyman, Pearson) dominó la estadística aplicada — el paradigma bayesiano era visto como "no científico" por tratar parámetros como aleatorios. La reversión comenzó en la segunda mitad del siglo con Harold Jeffreys, I.J. Good, y especialmente con la popularización de los métodos MCMC (Gelfand & Smith, 1990; Geman & Geman, 1984 para el *Gibbs sampler*).
+
+**Fundamentos filosóficos:** La interpretación subjetiva (Savage-de Finetti) trata la probabilidad como grado de creencia personal coherente — un agente racional debe tener creencias representables por una medida de probabilidad (teorema de representación de Savage). La interpretación objetiva (Jeffreys, Bernardo) busca priors "no-informativos" que reflejen ignorancia genuina — pero la noción de ignorancia depende de la parametrización (problema de Borel-Kolmogorov).
+
+**En la práctica moderna:** La inferencia bayesiana es el estándar en modelos jerárquicos (shrinkage, multilevel), Machine Learning probabilístico (Gaussian Processes, Bayesian Neural Networks), investigación clínica (FDA permite enfoques bayesianos para trials adaptativos), y rastreo (filtro de Kalman como caso especial bayesiano gaussiano). El *Stan* (Carpenter et al., 2017) y el *PyMC* hicieron la inferencia bayesiana computacionalmente viable para modelos arbitrarios vía NUTS (No-U-Turn Sampler).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicaciones brasileñas">
+
+**Escenario 1 — Diagnóstico médico**
+
+Prevalencia de enfermedad X en la población brasileña: 1 en 1.000 ($P(D) = 0{,}001$). Prueba tiene sensibilidad 99% ($P(\text{pos} \mid D) = 0{,}99$) y especificidad 95% ($P(\text{neg} \mid \neg D) = 0{,}95$).
+
+¿Cuál es $P(D \mid \text{pos})$?
+
+$$P(D \mid \text{pos}) = \frac{0{,}99 \times 0{,}001}{0{,}99 \times 0{,}001 + 0{,}05 \times 0{,}999} \approx 1{,}94\%$$
+
+Resultado contraintuitivo: incluso con prueba positiva, la probabilidad de tener la enfermedad es menor al 2% — porque la prevalencia es muy baja. Bayes formaliza por qué los rastreos en poblaciones de bajo riesgo generan muchos falsos positivos.
+
+**Escenario 2 — ENEM: estimación de acierto**
+
+Una pregunta de ENEM tiene 5 opciones. Sin estudiar, $P(\text{acierto}) = 0{,}2$. Si el estudiante estudió bien, $P(\text{acierto}) = 0{,}8$. Prior sobre "estudió bien": 60% de los candidatos. Tras observar 40 aciertos en 50 preguntas, ¿cuál es el posterior sobre "estudió bien"?
+
+El modelo Beta-Binomial permite calcular esto iterativamente o vía Bayes directo con dos estados.
+
+**Escenario 3 — Tasa de insolvencia (crédito)**
+
+Un banco tiene datos históricos que indican insolvencia del 8% en crédito personal. Para nuevo cliente, prior: $\text{Beta}(8, 92)$ (esperanza 8%). Tras 10 cuotas pagadas: posterior $\text{Beta}(8, 102)$, con media $\approx 7{,}3\%$. El riesgo se actualiza con cada pago.
+
+</Porta>
+
+</DuasPortas>
+
+## Ejemplos resueltos
+
+<Exemplo numero="1" titulo="Regla de Bayes discreta — diagnóstico (básico)">
+
+**Problema.** Una enfermedad afecta el 2% de la población. Una prueba tiene sensibilidad 90% y especificidad 85%. Un paciente prueba positivo. ¿Cuál es la probabilidad de que tenga la enfermedad?
+
+**Estrategia.** Aplicar la fórmula de Bayes con partición $\{D, \neg D\}$ y calcular $P(D \mid +)$.
+
+**Resolución.**
+
+$P(D) = 0{,}02$, $P(\neg D) = 0{,}98$, $P(+ \mid D) = 0{,}90$, $P(+ \mid \neg D) = 0{,}15$.
+
+Evidencia total:
+$$P(+) = P(+ \mid D)\,P(D) + P(+ \mid \neg D)\,P(\neg D)$$
+$$= 0{,}90 \times 0{,}02 + 0{,}15 \times 0{,}98 = 0{,}018 + 0{,}147 = 0{,}165$$
+
+Posterior:
+$$P(D \mid +) = \frac{0{,}90 \times 0{,}02}{0{,}165} = \frac{0{,}018}{0{,}165} \approx 0{,}109 = 10{,}9\%$$
+
+**Verificación.** Con solo 2% de prevalencia, incluso una prueba relativamente buena genera muchos falsos positivos. La respuesta $\approx 11\%$ tiene sentido: la mayoría de los positivos proviene de la enorme población sana.
+
+**Fuente.** [OpenIntro Statistics §3.6, ejemplo de diagnóstico médico](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="2" titulo="Actualización secuencial Beta-Bernoulli (intermedio)">
+
+**Problema.** Una urna tiene proporción desconocida $\theta$ de bolas rojas. Prior: $\theta \sim \text{Beta}(2, 2)$. Se retira con reposición: 1ª muestra — 3 rojas en 5 retiradas; 2ª muestra — 4 rojas en 6 retiradas. Calcule el posterior tras cada muestra y la media posterior final.
+
+**Estrategia.** Beta-Bernoulli: tras $s$ éxitos en $n$ intentos, $\text{Beta}(\alpha, \beta) \to \text{Beta}(\alpha+s, \beta+n-s)$. Aplicar iterativamente.
+
+**Resolución.**
+
+Prior: $\text{Beta}(2, 2)$, media $= 2/4 = 0{,}50$.
+
+Tras 1ª muestra ($s = 3$, $n = 5$):
+$$\text{Beta}(2+3,\; 2+5-3) = \text{Beta}(5, 4), \quad E[\theta] = \frac{5}{9} \approx 0{,}556$$
+
+Tras 2ª muestra ($s = 4$, $n = 6$):
+$$\text{Beta}(5+4,\; 4+6-4) = \text{Beta}(9, 6), \quad E[\theta] = \frac{9}{15} = 0{,}600$$
+
+**Verificación.** Total de datos: 7 rojas en 11 retiradas, proporción muestral = $7/11 \approx 0{,}636$. Media posterior 0,60 está entre el prior (0,50) y la proporción muestral — tiene sentido. Con prior débil, el posterior converge al MLE conforme $n$ crece.
+
+**Fuente.** [Think Bayes §3 — Allen Downey](https://greenteapress.com/wp/think-bayes/) — CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo numero="3" titulo="MAP vs MLE vs media posterior (intermedio)">
+
+**Problema.** Para el modelo Beta-Bernoulli con $\alpha = 3$, $\beta = 3$, tras 6 éxitos en 10 intentos, calcule el MLE, el MAP y la media posterior. Interprete la diferencia.
+
+**Estrategia.** MLE maximiza la verosimilitud; MAP maximiza el posterior; media posterior es $E[\theta \mid D]$.
+
+**Resolución.**
+
+MLE: $\hat\theta_{\text{MLE}} = s/n = 6/10 = 0{,}600$.
+
+Posterior: $\text{Beta}(3+6, 3+4) = \text{Beta}(9, 7)$.
+
+MAP (moda de Beta$(a, b)$ con $a, b > 1$ es $(a-1)/(a+b-2)$):
+$$\hat\theta_{\text{MAP}} = \frac{9 - 1}{9 + 7 - 2} = \frac{8}{14} \approx 0{,}571$$
+
+Media posterior:
+$$E[\theta \mid D] = \frac{9}{9 + 7} = \frac{9}{16} = 0{,}5625$$
+
+**Verificación.** Ordenación: media $(0{,}5625)$ entre MAP $(0{,}571)$ y la moda de Beta(9,7). MLE $(0{,}60)$ es el mayor — el prior "tira" hacia 0,5 (prior simétrico alrededor de 0,5). Con $n$ grande, los tres convergen al MLE.
+
+**Fuente.** [Think Bayes §4, §6 — Allen Downey](https://greenteapress.com/wp/think-bayes/) — CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo numero="4" titulo="Intervalo creíble 95% Beta (avanzado)">
+
+**Problema.** Tras 12 éxitos en 20 intentos con prior $\text{Beta}(1, 1)$ (uniforme), calcule el intervalo creíble central de 95% para $\theta$.
+
+**Estrategia.** Posterior $\text{Beta}(13, 9)$. El intervalo central de 95% está dado por los percentiles 2,5% y 97,5% de la distribución Beta.
+
+**Resolución.**
+
+Posterior: $\text{Beta}(1+12, 1+8) = \text{Beta}(13, 9)$.
+
+Media posterior: $13/(13+9) = 13/22 \approx 0{,}591$.
+
+Por tabla o software (R: `qbeta(c(0.025, 0.975), 13, 9)`):
+
+Percentil 2,5%: $\approx 0{,}376$. Percentil 97,5%: $\approx 0{,}779$.
+
+**Intervalo creíble 95%: $(0{,}376;\; 0{,}779)$.**
+
+**Verificación.** Interpretación directa: "dado el prior uniforme y los datos, la probabilidad de $\theta$ estar entre 0,376 y 0,779 es 95%". Note que el intervalo no está centrado en 0,6 — es asimétrico porque la Beta es asimétrica en este caso.
+
+**Fuente.** [Introduction to Probability §4.1 — Grinstead & Snell](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL.
+
+</Exemplo>
+
+<Exemplo numero="5" titulo="Bayes factor — comparación de hipótesis (demostración)">
+
+**Problema.** Para probar si $\theta = 0{,}5$ (moneda justa) versus $\theta = 0{,}7$ (moneda viciada), con prior equiprobable ($P(H_0) = P(H_1) = 0{,}5$), calcule el factor de Bayes y la probabilidad posterior de $H_1$ tras 8 caras en 10 lanzamientos.
+
+**Estrategia.** Calcular $P(D \mid H_i)$ para cada hipótesis, luego aplicar Bayes.
+
+**Resolución.**
+
+$$P(D \mid H_0) = \binom{10}{8}(0{,}5)^{10} = 45 \times \frac{1}{1024} \approx 0{,}0439$$
+
+$$P(D \mid H_1) = \binom{10}{8}(0{,}7)^8(0{,}3)^2 = 45 \times 0{,}05765 \times 0{,}09 \approx 0{,}2335$$
+
+Factor de Bayes:
+$$BF_{10} = \frac{0{,}2335}{0{,}0439} \approx 5{,}32$$
+
+Con prior $P(H_0) = P(H_1) = 0{,}5$:
+
+$$P(H_1 \mid D) = \frac{BF_{10}}{1 + BF_{10}} = \frac{5{,}32}{6{,}32} \approx 0{,}842$$
+
+**Verificación.** $BF_{10} \approx 5{,}32$ — evidencia moderada a favor de $H_1$ (escala de Jeffreys: entre 3 y 10 es "moderada"). La probabilidad posterior de moneda viciada pasó de 50% a 84%. Coherente con los datos (8 de 10 favorece $\theta = 0{,}7$).
+
+**Fuente.** [OpenIntro Statistics §3.7 — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-109-bayesiana-intro">
+
+<Exercicio
+  numero="109.1"
+  dificuldade="aplicacao"
+  solucao={<>Usando Bayes: <Eq>{`P(\\text{enfermedad} \\mid +) = \\frac{0{,}95 \\times 0{,}01}{0{,}95 \\times 0{,}01 + 0{,}10 \\times 0{,}99} = \\frac{0{,}0095}{0{,}1085} \\approx 8{,}76\\%`}</Eq>. El prior bajo (1%) genera muchos falsos positivos incluso con prueba razonable.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.6", pagina: "97", exercicio: "3.38", licenca: "CC-BY-SA" }}
+>
+Prevalencia de una enfermedad: 1%. Sensibilidad de la prueba: 95%. Tasa de falso-positivo: 10%. Un paciente prueba positivo. Calcule la probabilidad de tener la enfermedad.
+</Exercicio>
+
+<Exercicio
+  numero="109.2"
+  dificuldade="aplicacao"
+  solucao={<>Posterior: <Eq>{`\\text{Beta}(1+4, 1+6) = \\text{Beta}(5, 7)`}</Eq>. Media posterior: <Eq>{`5/12 \\approx 0{,}417`}</Eq>. MLE: <Eq>{`4/10 = 0{,}40`}</Eq>. El prior uniforme "empuja" ligeramente la estimación.</>}
+  passos={<>
+    <ol>
+      <li>Prior uniforme = Beta(1,1). No sabemos nada antes.</li>
+      <li>Datos: 4 éxitos en 10 intentos, luego <Eq>{`s=4, n=10`}</Eq>.</li>
+      <li>Posterior: <Eq>{`\\text{Beta}(1+4, 1+10-4) = \\text{Beta}(5,7)`}</Eq>.</li>
+      <li>Media posterior: <Eq>{`\\alpha/(\\alpha+\\beta) = 5/12 \\approx 0{,}417`}</Eq>.</li>
+      <li>MLE: proporción muestral <Eq>{`s/n = 0{,}40`}</Eq>. El prior uniforme tira muy poco porque los datos dominan.</li>
+    </ol>
+    <em>Truco:</em> Con prior Beta(1,1), la media posterior es siempre (s+1)/(n+2) — llamada estimación de Laplace.
+  </>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "35", exercicio: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+Una moneda lanzada 10 veces da 4 caras. Prior: Beta(1,1) (uniforme). Calcule el posterior, la media posterior y compare con el MLE.
+</Exercicio>
+
+<Exercicio
+  numero="109.3"
+  dificuldade="aplicacao"
+  solucao={<>Posterior: <Eq>{`\\text{Beta}(4+7, 6+3) = \\text{Beta}(11, 9)`}</Eq>. Media: <Eq>{`11/20 = 0{,}55`}</Eq>. MAP: <Eq>{`(11-1)/(11+9-2) = 10/18 \\approx 0{,}556`}</Eq>.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "37", exercicio: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+Prior: Beta(4, 6). Muestra: 7 éxitos en 10. Calcule el posterior, la media posterior y el MAP.
+</Exercicio>
+
+<Exercicio
+  numero="109.4"
+  dificuldade="aplicacao"
+  solucao={<>Posterior final: <Eq>{`\\text{Beta}(2+5+8, 2+5-5+10-8) = \\text{Beta}(15, 4)`}</Eq>. Media: <Eq>{`15/19 \\approx 0{,}789`}</Eq>.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "40", exercicio: "3.5", licenca: "CC-BY-NC-SA" }}
+>
+Prior: Beta(2, 2). Lote 1: 5 éxitos en 10. Lote 2: 8 éxitos en 10. Haga la actualización secuencial y calcule la media posterior final.
+</Exercicio>
+
+<Exercicio
+  numero="109.5"
+  dificuldade="aplicacao"
+  solucao={<>Evidencia: <Eq>{`P(+) = 0{,}99 \\times 0{,}005 + 0{,}02 \\times 0{,}995 = 0{,}00495 + 0{,}01990 = 0{,}02485`}</Eq>. Posterior: <Eq>{`0{,}00495/0{,}02485 \\approx 19{,}9\\%`}</Eq>. Menos del 20% incluso con prueba muy buena.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.6", pagina: "99", exercicio: "3.42", licenca: "CC-BY-SA" }}
+>
+Prevalencia: 0,5%. Sensibilidad: 99%. Tasa de falso-positivo: 2%. El paciente prueba positivo. ¿Cuál es la probabilidad de tener la enfermedad?
+</Exercicio>
+
+<Exercicio
+  numero="109.6"
+  dificuldade="aplicacao"
+  solucao={<>MLE: <Eq>{`s/n = 3/10 = 0{,}30`}</Eq>. Con Beta(1,1): media posterior = 4/12 = 0,333. Con Beta(5,5): media posterior = 8/20 = 0,40. Prior más fuerte tira más hacia 0,5.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "38", exercicio: "3.4", licenca: "CC-BY-NC-SA" }}
+>
+3 éxitos en 10 intentos. Compare la media posterior con priors Beta(1,1) y Beta(5,5). ¿Cuál prior tiene mayor influencia sobre el posterior?
+</Exercicio>
+
+<Exercicio
+  numero="109.7"
+  dificuldade="aplicacao"
+  solucao={<>Tabla de Bayes: <Eq>{`P(E_1 \\mid B) = 0{,}6 \\times 0{,}3 / (0{,}6 \\times 0{,}3 + 0{,}3 \\times 0{,}5 + 0{,}1 \\times 0{,}1) = 0{,}18/0{,}34 \\approx 52{,}9\\%`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "108", exercicio: "4.1.4", licenca: "GNU FDL" }}
+>
+Tres fábricas producen tornillos: E1 (60% de la producción, 30% defectuosos), E2 (30%, 50% defectuosos), E3 (10%, 10% defectuosos). Se retira un tornillo defectuoso. ¿Cuál es la probabilidad de venir de E1?
+</Exercicio>
+
+<Exercicio
+  numero="109.8"
+  dificuldade="aplicacao"
+  solucao={<>Posterior tras 0 éxitos en 5: <Eq>{`\\text{Beta}(3+0, 3+5) = \\text{Beta}(3,8)`}</Eq>. Media: <Eq>{`3/11 \\approx 0{,}273`}</Eq>. Antes: 0,50. La ausencia de éxitos reduce la creencia en moneda justa.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "36", exercicio: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+Prior: Beta(3, 3) (leve creencia en moneda justa, media 0,5). Se lanzan 5 veces y no salen caras. Calcule el posterior y la nueva media.
+</Exercicio>
+
+<Exercicio
+  numero="109.9"
+  dificuldade="aplicacao"
+  solucao={<>MAP de Beta(a,b) con a,b mayor que 1 es <Eq>{`(a-1)/(a+b-2)`}</Eq>. Posterior: Beta(1+15, 1+5) = Beta(16,6). MAP: <Eq>{`15/20 = 0{,}75`}</Eq>. MLE: <Eq>{`15/20 = 0{,}75`}</Eq>. Con prior uniforme, MAP = MLE.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "68", exercicio: "6.1", licenca: "CC-BY-NC-SA" }}
+>
+Prior: Beta(1,1). Datos: 15 éxitos en 20. Calcule MAP y MLE. ¿Son iguales? ¿Por qué?
+</Exercicio>
+
+<Exercicio
+  numero="109.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(H \\mid 2C) = \\frac{P(2C \\mid H)P(H)}{P(2C \\mid H)P(H) + P(2C \\mid J)P(J)} = \\frac{(1)^2 \\times 0{,}5}{(1)^2 \\times 0{,}5 + (0{,}5)^2 \\times 0{,}5} = \\frac{0{,}5}{0{,}625} = 0{,}8`}</Eq>. Hay 80% de probabilidad de que sea la moneda honesta (que siempre da cara).</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "110", exercicio: "4.1.6", licenca: "GNU FDL" }}
+>
+Bolsa con dos monedas: una siempre da cara (H), otra es justa (J). Se elige una al azar. Se lanza dos veces, ambas caras. ¿Cuál es la probabilidad de que sea la moneda H?
+</Exercicio>
+
+<Exercicio
+  numero="109.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "La probabilidad de que θ esté en el intervalo es 95% — interpretación directa.", correta: true },
+    { texto: "El procedimiento captura θ en 95% de las muestras repetidas." },
+    { texto: "El parámetro θ está en el intervalo con 95% de seguridad frecuentista." },
+    { texto: "El intervalo contiene 95% de los datos observados." }
+  ]}
+  solucao={<>El intervalo creíble bayesiano tiene interpretación directa: dado el prior y los datos, la probabilidad de <Eq>{`\\theta`}</Eq> estar en el intervalo es exactamente <Eq>{`1-\\alpha`}</Eq>. Esto es posible porque, en el paradigma bayesiano, <Eq>{`\\theta`}</Eq> es variable aleatoria con distribución. La opción B describe el IC frecuentista.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.7", pagina: "103", exercicio: "3.48", licenca: "CC-BY-SA" }}
+>
+¿Qué significa un intervalo creíble bayesiano de 95%?
+</Exercicio>
+
+<Exercicio
+  numero="109.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "MAP = MLE cuando el prior es uniforme." },
+    { texto: "MAP = MLE siempre, para cualquier prior.", correta: true },
+    { texto: "MAP y MLE siempre son diferentes." },
+    { texto: "MAP = MLE cuando n es grande." }
+  ]}
+  solucao={<>La afirmación correcta es A: MAP = MLE cuando el prior es uniforme, pues maximizar <Eq>{`P(D|\\theta) \\times c`}</Eq> (constante) equivale a maximizar <Eq>{`P(D|\\theta)`}</Eq>. La opción B es incorrecta — con prior no uniforme, MAP y MLE difieren. La opción D describe convergencia asintótica, no igualdad.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "70", exercicio: "6.3", licenca: "CC-BY-NC-SA" }}
+>
+¿Cuál afirmación sobre MAP y MLE es INCORRECTA?
+</Exercicio>
+
+<Exercicio
+  numero="109.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Prior débil → posterior próximo al MLE; prior fuerte → posterior tirado hacia el prior." },
+    { texto: "Prior débil → posterior próximo al prior; prior fuerte → posterior tirado hacia el MLE." },
+    { texto: "El prior no influencia el posterior cuando n es pequeño." },
+    { texto: "Prior fuerte y n grande → posterior próximo al MLE.", correta: true }
+  ]}
+  solucao={<>Con <Eq>{`n`}</Eq> grande, la verosimilitud domina — el posterior converge al MLE independientemente del prior (resultado Bernstein–von Mises). La afirmación D es correcta. La afirmación A tiene la lógica correcta para n pequeño a moderado, pero cuando n es grande incluso el prior fuerte se disuelve.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.7", pagina: "104", exercicio: "3.50", licenca: "CC-BY-SA" }}
+>
+¿Cómo el tamaño muestral n afecta la relación entre prior y posterior?
+</Exercicio>
+
+<Exercicio
+  numero="109.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(A \\mid B_1) = 0{,}8, P(B_1) = 0{,}6, P(A \\mid B_2) = 0{,}2, P(B_2) = 0{,}4`}</Eq>. <Eq>{`P(B_1 \\mid A) = (0{,}8 \\times 0{,}6)/(0{,}8 \\times 0{,}6 + 0{,}2 \\times 0{,}4) = 0{,}48/0{,}56 \\approx 85{,}7\\%`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "112", exercicio: "4.1.10", licenca: "GNU FDL" }}
+>
+Un estudiante aprueba el examen ($A$). Se sabe: $P(A \mid B_1) = 0{,}8$ (estudió mucho, probabilidad 60%), $P(A \mid B_2) = 0{,}2$ (no estudió, probabilidad 40%). Dado que aprobó, ¿cuál es la probabilidad de haber estudiado mucho?
+</Exercicio>
+
+<Exercicio
+  numero="109.15"
+  dificuldade="aplicacao"
+  solucao={<>Beta(10, 2). Media: 10/12 ≈ 0,833. MAP: 9/10 = 0,9. El prior informativo (Beta(4,2)) pesa menos que los datos (6 de 6): el posterior refleja la secuencia perfecta pero con memoria de que fallaron antes.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "41", exercicio: "3.6", licenca: "CC-BY-NC-SA" }}
+>
+Una máquina tiene tasa de acierto desconocida. Prior: Beta(4, 2) (histórico de 4 aciertos y 2 fallos). Prueba nueva: 6 aciertos consecutivos. Calcule el posterior, media y MAP.
+</Exercicio>
+
+<Exercicio
+  numero="109.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`BF_{10} = P(8C, 2K \\mid \\theta=0{,}7)/P(8C, 2K \\mid \\theta=0{,}5)`}</Eq>. Numerador: <Eq>{`\\binom{10}{8}(0{,}7)^8(0{,}3)^2 \\approx 0{,}2335`}</Eq>. Denominador: <Eq>{`\\binom{10}{8}(0{,}5)^{10} \\approx 0{,}0439`}</Eq>. BF ≈ 5,32. Evidencia moderada para moneda viciada.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.7", pagina: "105", exercicio: "3.52", licenca: "CC-BY-SA" }}
+>
+Calcule el Factor de Bayes para $H_1: \theta = 0{,}7$ versus $H_0: \theta = 0{,}5$ tras 8 caras en 10 lanzamientos.
+</Exercicio>
+
+<Exercicio
+  numero="109.17"
+  dificuldade="aplicacao"
+  solucao={<>Posterior acumulado tras 30 intentos (20 éxito): Beta(1+20, 1+10) = Beta(21, 11). Media: 21/32 ≈ 0,656. Con n=30, el prior Beta(1,1) tiene peso mínimo; la media posterior ≈ MLE = 20/30 = 0,667.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "43", exercicio: "3.8", licenca: "CC-BY-NC-SA" }}
+>
+Tres lotes de 10 intentos cada uno: 7 éxito, 6 éxito, 7 éxito. Prior: Beta(1,1). Haga la actualización secuencial y calcule la media posterior final.
+</Exercicio>
+
+<Exercicio
+  numero="109.18"
+  dificuldade="aplicacao"
+  solucao={<>Evidencia: P(+) = 0,95 × 0,30 + 0,20 × 0,70 = 0,285 + 0,14 = 0,425. P(enfermedad | +) = 0,285/0,425 ≈ 67,1%. Alta prevalencia cambia dramáticamente el VPP.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.6", pagina: "98", exercicio: "3.40", licenca: "CC-BY-SA" }}
+>
+Prevalencia: 30%. Sensibilidad: 95%. Tasa de falso-positivo: 20%. El paciente prueba positivo. Calcule la probabilidad de tener la enfermedad y compare con el ejercicio 109.1.
+</Exercicio>
+
+<Exercicio
+  numero="109.19"
+  dificuldade="aplicacao"
+  solucao={<>La media de Beta(a,b) es a/(a+b). Tras n intentos con s éxitos y prior Beta(α,β): media posterior = (α+s)/(α+β+n). Es una ponderación entre el prior (α/(α+β)) y la proporción muestral (s/n), con pesos (α+β) y n.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "66", exercicio: "6.2", licenca: "CC-BY-NC-SA" }}
+>
+Muestre que la media posterior del modelo Beta-Bernoulli es una media ponderada entre el prior y la proporción muestral. Identifique los pesos.
+</Exercicio>
+
+<Exercicio
+  numero="109.20"
+  dificuldade="aplicacao"
+  solucao={<>Beta(2+0, 2+3) = Beta(2,5). Media: 2/7 ≈ 0,286. MAP: (2-1)/(2+5-2) = 1/5 = 0,20. Con 0 de 3, el posterior se concentra en valores bajos de θ.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "39", exercicio: "3.4b", licenca: "CC-BY-NC-SA" }}
+>
+Prior: Beta(2, 2). Datos: 0 éxitos en 3. Calcule el posterior, MAP y media posterior.
+</Exercicio>
+
+<Exercicio
+  numero="109.21"
+  dificuldade="aplicacao"
+  solucao={<>P(lluvia | nube) = P(nube | lluvia) × P(lluvia) / P(nube). P(nube) = 0,85 × 0,4 + 0,3 × 0,6 = 0,34 + 0,18 = 0,52. Posterior = 0,34/0,52 ≈ 65,4%.</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "109", exercicio: "4.1.5", licenca: "GNU FDL" }}
+>
+Probabilidad de lluvia en Fortaleza en determinado día: 40%. Si llueve, hay 85% de chance de tener nubes cargadas. Si no llueve, 30%. Hay nubes cargadas. ¿Cuál es la probabilidad de llover?
+</Exercicio>
+
+<Exercicio
+  numero="109.22"
+  dificuldade="aplicacao"
+  solucao={<>Con prior Beta(10, 90) (esperanza 10%), tras 3 defectuosos en 20: Beta(13, 107). Media: 13/120 ≈ 10,8%. El prior fuerte (100 observaciones anteriores) absorbe la pequeña muestra nueva.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "44", exercicio: "3.9", licenca: "CC-BY-NC-SA" }}
+>
+Histórico de producción: 10% de defectos (equivalente a 10 defectos en 100 piezas = Beta(10,90)). Inspección nueva: 3 defectos en 20. Calcule el posterior y la media posterior.
+</Exercicio>
+
+<Exercicio
+  numero="109.23"
+  dificuldade="aplicacao"
+  solucao={<>P(H) = 1/3, P(J) = 2/3. P(cara | H) = 1, P(cara | J) = 0,5. P(H | cara) = (1 × 1/3) / (1 × 1/3 + 0,5 × 2/3) = (1/3) / (2/3) = 0,5. Tras 1 cara: 50%.</>}
+  passos={<>
+    <ol>
+      <li>Monte la tabla: hipótesis, prior, likelihood, producto.</li>
+      <li>H (siempre cara): prior 1/3, likelihood 1, producto 1/3.</li>
+      <li>J (justa): prior 2/3, likelihood 0,5, producto 1/3.</li>
+      <li>Suma de productos = 2/3. Normalice: P(H|cara) = (1/3)/(2/3) = 0,5.</li>
+      <li>Sorprendente: 1 cara no distingue entre las dos monedas — el prior de J ser más probable equilibra con la likelihood mayor de H.</li>
+    </ol>
+    <em>Observación:</em> Si salen 5 caras seguidas, P(H|CCCCC) = (1)⁵×(1/3) / [(1)⁵×(1/3) + (0,5)⁵×(2/3)] ≈ 0,94.
+  </>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "111", exercicio: "4.1.8", licenca: "GNU FDL" }}
+>
+Bolsa con 3 monedas: 1 siempre da cara (H), 2 son justas (J). Una moneda se retira aleatoriamente y se lanza: sale cara. ¿Cuál es la probabilidad de que sea la moneda H?
+</Exercicio>
+
+<Exercicio
+  numero="109.24"
+  dificuldade="aplicacao"
+  solucao={<>Posterior tras 10 éxitos en 20 con Beta(1,1): Beta(11,11). Intervalo central 95%: percentiles 2,5% y 97,5% de Beta(11,11). Por simetría (a=b), centrado en 0,5. Aprox. (0,31; 0,69).</>}
+  fonte={{ livro: "Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§4.1", pagina: "115", exercicio: "4.1.12", licenca: "GNU FDL" }}
+>
+Prior Beta(1,1). Datos: 10 éxitos en 20. Describa el posterior y el intervalo creíble central de 95% (use que el percentil 2,5% de Beta(11,11) ≈ 0,31).
+</Exercicio>
+
+<Exercicio
+  numero="109.25"
+  dificuldade="modelagem"
+  solucao={<>Prior natural: Beta(α, β) con α/(α+β) = tasa histórica de aprobación (ej: 70%). Si histórico sugiere 70%: Beta(7,3). Tras 15 aprobaciones en 20 estudiantes de nueva turma: Beta(22,8). Media posterior: 22/30 ≈ 73,3%. Intervalo creíble (use software o tabla).</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "45", exercicio: "3.10", licenca: "CC-BY-NC-SA" }}
+>
+Un cursillo histórico aprueba 70% de los estudiantes en el ENEM. Nueva turma, 20 estudiantes: 15 pasaron. Proponga un prior Beta adecuado, calcule el posterior y la media posterior de la tasa de aprobación.
+</Exercicio>
+
+<Exercicio
+  numero="109.26"
+  dificuldade="modelagem"
+  solucao={<>Bayes inverso del médico: P(cáncer) = 0,002 (raros). Biopsia positiva: sensibilidad 92%, falso-positivo 3%. P(cáncer | biopsia+) = (0,92 × 0,002)/(0,92 × 0,002 + 0,03 × 0,998) = 0,00184/0,03178 ≈ 5,8%. Aun así, biopsia se recomienda pues el costo de no tratar es enorme.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.6", pagina: "100", exercicio: "3.44", licenca: "CC-BY-SA" }}
+>
+Prevalencia de cáncer de páncreas: 0,2%. Biopsia: sensibilidad 92%, especificidad 97%. Examen positivo. Calcule P(cáncer | positivo) y discuta la decisión médica.
+</Exercicio>
+
+<Exercicio
+  numero="109.27"
+  dificuldade="modelagem"
+  solucao={<>Con prior Beta(1,1) y 20 atrasos en 50 entregas: Beta(21, 31). Media: 21/52 ≈ 40,4%. IC creíble 90% aprox. (0,29; 0,53). La operación mantiene tasa próxima al 40%. Bayesiano permite decir "hay 90% de chance de que la tasa esté entre 29% y 53%".</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "46", exercicio: "3.11", licenca: "CC-BY-NC-SA" }}
+>
+Una transportista reporta 20 entregas con atraso en 50 entregas monitoreadas. Usando prior Beta(1,1), estime la tasa de atraso con un intervalo creíble de 90%.
+</Exercicio>
+
+<Exercicio
+  numero="109.28"
+  dificuldade="modelagem"
+  solucao={<>Antes: P(fraude) = 0,01. Transacción de R\$ 15.000 fuera del estándar. P(transacción grande | fraude) = 0,85, P(transacción grande | legítima) = 0,02. Posterior: (0,85 × 0,01)/(0,85 × 0,01 + 0,02 × 0,99) = 0,0085/0,0283 ≈ 30,0%. Una señal sospechosa eleva de 1% a 30%.</>}
+  passos={<>
+    <ol>
+      <li>Identifique prior: P(fraude) = 0,01.</li>
+      <li>Likelihood: P(valor alto | fraude) = 0,85; P(valor alto | legítima) = 0,02.</li>
+      <li>Calcule evidencia: P(valor alto) = 0,85 × 0,01 + 0,02 × 0,99 = 0,0085 + 0,0198 = 0,0283.</li>
+      <li>Aplique Bayes: posterior = 0,0085/0,0283 ≈ 30%.</li>
+      <li>Decisión: con 30% de chance de fraude, vale investigar (bloquear temporalmente).</li>
+    </ol>
+    <em>Curiosidad:</em> Sistemas antifraude reales encadenan varios Bayes: cada señal (localización, hora, valor) actualiza el score de riesgo secuencialmente.
+  </>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "48", exercicio: "3.12", licenca: "CC-BY-NC-SA" }}
+>
+Una fintech sabe que 1% de las transacciones son fraudulentas. Un algoritmo detecta que la transacción actual tiene valor fuera del estándar del cliente. P(valor anormal | fraude) = 85%, P(valor anormal | legítima) = 2%. Calcule la probabilidad de fraude.
+</Exercicio>
+
+<Exercicio
+  numero="109.29"
+  dificuldade="demonstracao"
+  solucao={<>Verosimilitud para s éxitos en n Bernoulli(θ): <Eq>{`L(\\theta) = \\binom{n}{s}\\theta^s(1-\\theta)^{n-s}`}</Eq>. Prior Beta(α,β): proporcional a <Eq>{`\\theta^{\\alpha-1}(1-\\theta)^{\\beta-1}`}</Eq>. Posterior: proporcional a <Eq>{`\\theta^{s+\\alpha-1}(1-\\theta)^{n-s+\\beta-1}`}</Eq>, que es exactamente el núcleo de Beta(α+s, β+n-s). La constante de normalización es B(α+s, β+n-s).</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "64", exercicio: "6.4", licenca: "CC-BY-NC-SA" }}
+>
+**Muestre** que, para el modelo Bernoulli con prior Beta, el posterior también es Beta. Identifique los parámetros.
+</Exercicio>
+
+<Exercicio
+  numero="109.30"
+  dificuldade="demonstracao"
+  solucao={<>Prior uniforme: Beta(1,1), densidad constante 1 en [0,1]. Posterior con s éxitos en n: Beta(1+s, 1+n-s), proporcional a <Eq>{`\\theta^s(1-\\theta)^{n-s}`}</Eq>. Esa es exactamente la verosimilitud (Bernoulli). Luego maximizar el posterior = maximizar la verosimilitud = MAP = MLE = s/n.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§6", pagina: "71", exercicio: "6.5", licenca: "CC-BY-NC-SA" }}
+>
+**Demuestre** que, con prior Beta(1,1) (uniforme), el estimador MAP coincide con el MLE para el modelo Bernoulli.
+</Exercicio>
+
+<Exercicio
+  numero="109.31"
+  dificuldade="aplicacao"
+  solucao={<>P(email spam | 3 palabras-clave) aplicando Naive Bayes: P(spam) = 0,2, P(palabras | spam) = 0,6^3 = 0,216, P(palabras | legítimo) = 0,05^3 = 0,000125. Posterior: (0,216 × 0,2)/(0,216 × 0,2 + 0,000125 × 0,8) = 0,0432/0,04321 ≈ 99,97%.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§4", pagina: "52", exercicio: "4.1", licenca: "CC-BY-NC-SA" }}
+>
+Filtro de spam: 20% de los emails son spam. En emails spam, cada palabra-clave sospechosa aparece con probabilidad 60%; en emails legítimos, 5%. Un email tiene 3 palabras-clave. ¿Cuál es la probabilidad de que sea spam?
+</Exercicio>
+
+<Exercicio
+  numero="109.32"
+  dificuldade="aplicacao"
+  solucao={<>Posteriores: H1: Beta(1+8, 1+2) = Beta(9,3); H2: Beta(1+3, 1+7) = Beta(4,8). Medias: H1 = 9/12 = 0,75; H2 = 4/12 = 0,33. La línea 1 tiene probabilidad estimada de transmisión mucho mayor. IC creíble 95% para H1 aprox. (0,46; 0,94).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.7", pagina: "106", exercicio: "3.54", licenca: "CC-BY-SA" }}
+>
+Dos grupos de ratas: línea 1 (10 animales, 8 desarrollaron tumor tras exposición) y línea 2 (10 animales, 3 desarrollaron). Prior Beta(1,1) para ambas tasas. Calcule el posterior y la media posterior para cada línea.
+</Exercicio>
+
+<Exercicio
+  numero="109.33"
+  dificuldade="aplicacao"
+  solucao={<>Tras 50 sorteos de bola naranja en 100: Beta(1+50, 1+50) = Beta(51,51). Media: 0,5. MAP: 50/100 = 0,5. IC 95% aprox. (0,40; 0,60). Con n=100, el IC se estrecha mucho comparado al caso de n=10.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§3", pagina: "47", exercicio: "3.13", licenca: "CC-BY-NC-SA" }}
+>
+Una urna tiene proporción desconocida de bolas naranjas. Tras 100 retiradas con reposición, 50 son naranjas. Prior Beta(1,1). Calcule el posterior, la media y el intervalo creíble 95%.
+</Exercicio>
+
+<Exercicio
+  numero="109.34"
+  dificuldade="desafio"
+  solucao={<>El prior Beta(0,5; 0,5) es el prior de Jeffreys para el modelo Bernoulli. Es invariante por transformaciones — si θ → φ = g(θ), el prior resultante también es de Jeffreys para la nueva parametrización. Es "objetivamente no-informativo" en el sentido de no privilegiar ninguna parametrización. Tras 6 éxitos en 10: Beta(6,5; 4,5). Media ≈ 0,591, diferente de 0,60 del MAP con prior uniforme.</>}
+  fonte={{ livro: "Think Bayes", url: "https://greenteapress.com/wp/think-bayes/", secao: "§9", pagina: "110", exercicio: "9.1", licenca: "CC-BY-NC-SA" }}
+>
+El **prior de Jeffreys** para la Bernoulli es Beta(0,5; 0,5). Tras 6 éxitos en 10, calcule el posterior. Investigue qué significa que este prior sea "invariante por parametrización" y compare la media posterior con el prior Beta(1,1).
+</Exercicio>
+
+</ListaExercicios>
+
+## Fuentes
+
+- [**Think Bayes** — Allen B. Downey](https://greenteapress.com/wp/think-bayes/) · CC-BY-NC-SA · Greenteapress · Capítulos 1–9.
+- [**Introduction to Probability** — Grinstead & Snell](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) · GNU FDL · Dartmouth · §4.1.
+- [**OpenIntro Statistics** — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · CC-BY-SA · OpenIntro · §3.6–3.7.

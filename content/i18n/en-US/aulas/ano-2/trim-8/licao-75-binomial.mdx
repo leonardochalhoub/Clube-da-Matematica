@@ -1,0 +1,850 @@
+---
+titulo: "Lesson 75 — Binomial distribution"
+slug: "licao-75-binomial"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "n independent Bernoulli trials. Binomial PMF, expectation np, variance np(1-p). Applications in quality control, A/B testing, genetics, and elections."
+ordem: 75
+publicado: true
+tags: ["estatística", "probabilidade", "binomial", "bernoulli", "ano-2", "trim-8"]
+prerrequisitos: ["licao-74"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2025-05-14"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math — Singapura", "AP Statistics — EUA", "Math B — Japão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}, \quad E[X] = np, \quad \text{Var}(X) = np(1-p)"
+  legenda={<>The <strong>binomial</strong> distribution <Eq>{`\\text{Bin}(n, p)`}</Eq> counts the number of successes in <Eq>{`n`}</Eq> independent trials, each with a probability <Eq>{`p`}</Eq> of success. The factor <Eq>{`\\binom{n}{k}`}</Eq> counts the ways to arrange the successes; <Eq>{`p^k(1-p)^{n-k}`}</Eq> is the probability of each arrangement.</>}
+  audioTexto="Binomial distribution. The probability of k successes in n trials is n choose k, times p to the power of k, times one minus p to the power of n minus k. The expectation is n times p; the variance is n times p times one minus p."
+/>
+
+<aside>
+
+**Books covering this lesson**
+
+- [**OpenIntro Statistics** (4th ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §3.4 · CC-BY-SA · <em>BInS conditions, PMF, expectation and variance via Bernoulli decomposition; exercises on A/B testing, quality control, and polling.</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §4.4 · CC-BY · <em>Binomial tables, TI-83/84 calculations, Poisson and normal approximations; graded exercises with medical and business contexts.</em>
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §5.1 · GNU FDL · <em>Rigorous derivation of the binomial PMF; MGF; Poisson limit (law of rare events) with proof; demonstrative exercises.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Rigorous definition">
+
+### BInS Conditions
+
+<Definicao titulo="Bernoulli trial and binomial distribution">
+
+A **Bernoulli trial** is an experiment with two outcomes: success (prob. $p$) and failure (prob. $1-p$). The r.v. $Y_i = \mathbf{1}[\text{success in trial }i]$ has a $\text{Bernoulli}(p)$ distribution: $E[Y_i] = p$, $\text{Var}(Y_i) = p(1-p)$.
+
+$X \sim \text{Bin}(n, p)$ if $X = Y_1 + Y_2 + \cdots + Y_n$ with $Y_i$ iid $\text{Bernoulli}(p)$.
+
+**Four conditions (BInS):**
+1. **B**inary: each trial has only 2 outcomes.
+2. **I**ndependent: trials do not influence each other.
+3. **n** fixed: number of trials defined beforehand.
+4. **S**ame: $p$ is constant across all trials.
+
+</Definicao>
+
+> "If each trial in a binomial experiment has $p$ = 0.5, meaning the outcomes are equally likely, the distribution looks bell shaped. As $p$ moves away from 0.5, the graph skews right or left." — [OpenStax Statistics §4.4](https://openstax.org/books/statistics/pages/4-4-binomial-distribution)
+
+<Definicao titulo="Binomial PMF">
+
+For $X \sim \text{Bin}(n, p)$ and $k \in \{0, 1, \ldots, n\}$:
+
+$$P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+
+Justification: $\binom{n}{k}$ distinct sequences with exactly $k$ successes, each with probability $p^k(1-p)^{n-k}$ due to independence.
+
+Normalization: $\sum_{k=0}^n \binom{n}{k} p^k (1-p)^{n-k} = (p + (1-p))^n = 1$ (Newton's binomial theorem).
+
+</Definicao>
+
+<Teorema titulo="Moments via Bernoulli decomposition">
+
+By linearity of expectation and independence:
+
+$$E[X] = \sum_{i=1}^n E[Y_i] = n \cdot p$$
+
+$$\text{Var}(X) = \sum_{i=1}^n \text{Var}(Y_i) = n \cdot p(1-p)$$
+
+Independence is essential for summing variances.
+
+</Teorema>
+
+<Teorema titulo="Binomial additivity">
+
+If $X_1 \sim \text{Bin}(n_1, p)$ and $X_2 \sim \text{Bin}(n_2, p)$ are independent with the **same** $p$:
+
+$$X_1 + X_2 \sim \text{Bin}(n_1 + n_2, p)$$
+
+Proof via MGF: $M_{X_1+X_2}(t) = [(1-p+pe^t)^{n_1}][(1-p+pe^t)^{n_2}] = (1-p+pe^t)^{n_1+n_2}$.
+
+</Teorema>
+
+<Insight>
+
+The mode of $\text{Bin}(n, p)$ is at $\lfloor (n+1)p \rfloor$ (or at two values when $(n+1)p$ is an integer). For $p = 0.5$, the mode is $n/2$ — the peak is exactly in the middle, where the binomial symmetry is most apparent. The distribution tends toward the normal bell curve as $n \to \infty$ (De Moivre-Laplace Theorem, 1733).
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine you flip **5 coins** at once. How many heads will you get?
+
+- You could get 0, 1, 2, 3, 4, or 5 heads.
+- The most common result is **2 or 3** heads.
+- Getting 0 or 5 is very rare.
+
+The **binomial distribution** tells you exactly the chance of each of these results. It's like a probability calendar for counting successes.
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+You flip 10 coins. What is the chance of getting exactly 7 heads?
+
+$$P(X = 7) = \binom{10}{7} \cdot 0.5^7 \cdot 0.5^3 = 120 \cdot \frac{1}{1024} \approx 11.7\%$$
+
+Why three parts?
+
+- $\binom{10}{7} = 120$: how many different ways to get 7 heads out of 10 flips.
+- $0.5^7$: probability of each head appearing.
+- $0.5^3$: probability of the 3 tails.
+
+**On average**: $np = 10 \times 0.5 = 5$ heads. It makes sense: half the time heads, half the time tails.
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old">
+
+The binomial is a "machine": tell it how many trials ($n$) and the chance of success ($p$), and it gives you the complete distribution.
+
+### When to use the binomial?
+
+Check the 4 BInS conditions:
+
+- "In 100 tests, what is the chance of 60+ hits if the hit rate is 55%?" → binomial ✓
+- "Drawing from an urn without replacement" → NO (no independence), use hypergeometric.
+
+### Cumulative by complement
+
+For "at least 3 successes": $P(X \geq 3) = 1 - P(X \leq 2) = 1 - P(0) - P(1) - P(2)$.
+
+Always use the complement when it reduces the number of terms to calculate.
+
+### Useful approximations
+
+| Condition | Approximation | Error |
+|---|---|---|
+| $n$ large, $p$ moderate ($np \geq 10$, $n(1-p) \geq 10$) | $\mathcal N(np, np(1-p))$ | Small |
+| $n$ large, $p$ small ($np = \lambda$ constant) | $\text{Poisson}(\lambda)$ | Excellent |
+
+For $n = 100$, $p = 0.5$: $\mu = 50$, $\sigma = 5$. We expect $X \in [40, 60]$ with $\approx 95\%$ confidence.
+
+### Galton Board
+
+Francis Galton built the "Galton board" (1873) to illustrate the binomial visually: balls fall between pins and accumulate according to the binomial distribution. The bell curve emerges naturally — a physical demonstration of the CLT before modern statistical theory existed.
+
+</Porta>
+
+<Porta nivel="25" titulo="For an engineering student">
+
+The binomial is the standard model in applied statistics: quality control, A/B testing, clinical trials.
+
+### A/B testing (frequentist)
+
+Variant A: 100 visitors, 12 conversions. Variant B: 100, 18.
+
+$\hat p_A = 0.12$, $\hat p_B = 0.18$. Under $H_0: p_A = p_B$, pooled estimator $\hat p = (12+18)/200 = 0.15$.
+
+$$SE = \sqrt{\hat p(1-\hat p)(1/100 + 1/100)} = \sqrt{0.15 \times 0.85/50} \approx 0.0505$$
+
+$$z = (0.18 - 0.12)/0.0505 \approx 1.19 \implies p\text{-value} \approx 0.23$$
+
+Difference not significant (needs more data).
+
+### Minimum sample size
+
+To detect difference $\delta$ with power $1-\beta = 0.80$ and $\alpha = 0.05$:
+
+$$n \approx \frac{(z_{\alpha/2} + z_\beta)^2 \cdot 2p(1-p)}{\delta^2}$$
+
+### Quality control (p-chart)
+
+Batch of $n$ parts, $x$ defective. $\hat p = x/n$. Shewhart control limits:
+
+$$UCL/LCL = \hat p \pm 3\sqrt{\hat p(1-\hat p)/n}$$
+
+If the next batch has $\hat p$ outside the limits, the process is "out of control" — investigate special cause.
+
+### Python implementation
+
+```python
+from scipy.stats import binom
+n, p = 100, 0.3
+print(binom.pmf(30, n, p))       # P(X = 30)
+print(binom.cdf(30, n, p))       # P(X <= 30)
+print(1 - binom.cdf(29, n, p))   # P(X >= 30)
+print(binom.ppf(0.95, n, p))     # 95% quantile
+```
+
+</Porta>
+
+<Porta nivel="40" titulo="For a senior professional">
+
+### Moment generating function
+
+$$M_X(t) = E[e^{tX}] = (1 - p + pe^t)^n$$
+
+Derivative: $M_X'(0) = np = E[X]$; $M_X''(0) = np(1-p) + n^2p^2 = E[X^2]$. The MGF proves additivity trivially.
+
+### Poisson limit (law of rare events, Poisson 1837)
+
+When $n \to \infty$ and $p \to 0$ with $\lambda = np$ fixed:
+
+$$\binom{n}{k} p^k (1-p)^{n-k} \to \frac{\lambda^k e^{-\lambda}}{k!}$$
+
+Proof: $\binom{n}{k} \approx n^k/k!$, $(1-\lambda/n)^n \to e^{-\lambda}$, $(1-\lambda/n)^{-k} \to 1$. This is why rare defects in mass production follow Poisson.
+
+### De Moivre-Laplace limit (1733/1812)
+
+A special version of the CLT: $(X - np)/\sqrt{np(1-p)} \to \mathcal N(0,1)$ in distribution. De Moivre derived the empirical result in 1733; Laplace formalized it. It predates the general CLT formulation by decades.
+
+### Bayesian inference — conjugate Beta prior
+
+$$\text{prior: } p \sim \text{Beta}(\alpha, \beta), \quad X \mid p \sim \text{Bin}(n, p)$$
+
+$$\text{posterior: } p \mid X = k \sim \text{Beta}(\alpha + k, \beta + n - k)$$
+
+Pure incremental updating: each new data point shifts the parameters. Fundamental in bandit problems, Bayesian A/B testing, and churn modeling with sequential data.
+
+### Overdispersion and extensions
+
+Real data often has $\text{Var}(X) > np(1-p)$: trials are not independent, $p$ varies between units. Solutions: **beta-binomial** (mixture of binomials with $p \sim \text{Beta}$), **logistic regression** (binomial GLM), **generalized estimating equations** (GEE) for correlated data.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Practical application">
+
+### 5-step recipe
+
+1. **Check BInS**: binary, independent, $n$ fixed, $p$ constant.
+2. **Identify $n$ and $p$**.
+3. **$P(X = k)$**: formula or software.
+4. **$P(X \leq k)$ or $P(X \geq k)$**: CDF or complement $1 - P(X \leq k-1)$.
+5. **$n$ large**: approximate by $\mathcal N(np, np(1-p))$ (with continuity correction) or Poisson if $p$ is small.
+
+### In spreadsheets
+
+| Function | Result |
+|---|---|
+| `BINOM.DIST(k; n; p; FALSE)` | $P(X = k)$ |
+| `BINOM.DIST(k; n; p; TRUE)` | $P(X \leq k)$ |
+| `BINOM.INV(n; p; alpha)` | Quantile $\alpha$ |
+
+### Common errors
+
+- **Sampling without replacement** → use hypergeometric, not binomial.
+- **$p$ varies between individuals** → use beta-binomial or logistic regression.
+- **Confusing $P(X = k)$ with $P(X \leq k)$**: always check if the problem asks for exact or cumulative.
+- **Approximating by normal without checking $np \geq 10$ and $n(1-p) \geq 10$**.
+
+</Porta>
+
+</DuasPortas>
+
+## Solved examples
+
+<Exemplo numero="75.1" titulo="Direct PMF — coins" dificuldade="basico">
+
+**Problem.** Flip 5 fair coins. Calculate $P(X = 3)$ where $X$ = number of heads.
+
+**Strategy.** $X \sim \text{Bin}(5, 0.5)$. Apply binomial PMF directly.
+
+**Solution.**
+
+$$P(X = 3) = \binom{5}{3} (0.5)^3 (0.5)^2 = 10 \times 0.125 \times 0.25 = 10/32 = 0.3125$$
+
+**Verification.** Complete table for $n=5$, $p=0.5$: P(0) = 1/32, P(1) = 5/32, P(2) = 10/32, P(3) = 10/32, P(4) = 5/32, P(5) = 1/32. Sum = 32/32 = 1 ✓. The binomial is symmetric for $p = 0.5$.
+
+**Source.** [OpenIntro Statistics §3.4](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="75.2" titulo="Expectation and variance by decomposition" dificuldade="basico">
+
+**Problem.** $X \sim \text{Bin}(20, 0.1)$. Calculate $E[X]$, $\text{Var}(X)$, and $P(X = 0)$.
+
+**Strategy.** Use direct formulas for moments; PMF for $P(X=0)$.
+
+**Solution.**
+
+$$E[X] = np = 20 \times 0.1 = 2$$
+
+$$\text{Var}(X) = np(1-p) = 20 \times 0.1 \times 0.9 = 1.8$$
+
+$$P(X = 0) = \binom{20}{0}(0.1)^0(0.9)^{20} = (0.9)^{20} \approx 0.1216$$
+
+**Verification.** $\sigma = \sqrt{1.8} \approx 1.34$. Interval $[E \pm 2\sigma] = [-0.68;\; 4.68]$ — values from 0 to 4 cover about 95% of the distribution. $P(X = 0) \approx 12\%$: reasonable, as 20 trials with $p = 0.1$ leaves a non-trivial probability of zero successes.
+
+**Source.** [OpenStax Statistics §4.4](https://openstax.org/books/statistics/pages/4-4-binomial-distribution) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="75.3" titulo="Cumulative probability and complement" dificuldade="intermediario">
+
+**Problem.** Production line: 3% of parts are defective. Batch of 50. What is $P(\text{at least 3 defective})$?
+
+**Strategy.** $X \sim \text{Bin}(50, 0.03)$. Use complement: $P(X \geq 3) = 1 - P(X \leq 2)$.
+
+**Solution.**
+
+$$P(X = 0) = (0.97)^{50} \approx 0.2181$$
+
+$$P(X = 1) = \binom{50}{1}(0.03)^1(0.97)^{49} = 50 \times 0.03 \times (0.97)^{49} \approx 0.3372$$
+
+$$P(X = 2) = \binom{50}{2}(0.03)^2(0.97)^{48} = 1225 \times 0.0009 \times (0.97)^{48} \approx 0.2555$$
+
+$$P(X \geq 3) = 1 - (0.2181 + 0.3372 + 0.2555) = 1 - 0.8108 \approx 0.189$$
+
+**Verification.** $E[X] = 1.5$, $\sigma \approx 1.21$. With an average of only 1.5 defects, having $\geq 3$ is unlikely — 18.9% is plausible (a bit more than one standard deviation above the mean).
+
+**Source.** [OpenIntro Statistics §3.4](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="75.4" titulo="Normal approximation (A/B test)" dificuldade="intermediario">
+
+**Problem.** Election: candidate has $p = 0.52$ in real intentions. Poll with $n = 1000$ respondents. What is $P(\hat p < 0.50)$ — the chance the poll misidentifies the leader?
+
+**Strategy.** $X \sim \text{Bin}(1000, 0.52)$. Since $np = 520 \geq 10$ and $n(1-p) = 480 \geq 10$, approximate by $\mathcal N(np, np(1-p))$.
+
+**Solution.**
+
+$X \approx \mathcal N(520, 1000 \times 0.52 \times 0.48) = \mathcal N(520, 249.6)$.
+
+We want $P(X < 500)$ (i.e., $\hat p < 0.50$ is equivalent to $X < 500$):
+
+$$z = \frac{500 - 520}{\sqrt{249.6}} = \frac{-20}{15.80} \approx -1.27$$
+
+$$P(X < 500) \approx \Phi(-1.27) \approx 0.102$$
+
+**Verification.** About a 10% chance that the poll indicates a tie or advantage to the opponent when the candidate actually leads with 52%. This justifies the typical margin of error in election polls.
+
+**Source.** [OpenIntro Statistics §3.4](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="75.5" titulo="Mendelian genetics — binomial distribution" dificuldade="avancado">
+
+**Problem.** Cross of heterozygotes $Aa \times Aa$: each offspring has prob. $1/4$ of being homozygous dominant $AA$. In 8 offspring, calculate $P(X = 2)$ and $E[X]$.
+
+**Strategy.** $X \sim \text{Bin}(8, 1/4)$. Apply PMF and expectation formula.
+
+**Solution.**
+
+$$P(X = 2) = \binom{8}{2}\left(\frac{1}{4}\right)^2\left(\frac{3}{4}\right)^6 = 28 \times \frac{1}{16} \times \frac{729}{4096} = \frac{28 \times 729}{65536} = \frac{20412}{65536} \approx 0.3115$$
+
+$$E[X] = np = 8 \times \frac{1}{4} = 2, \quad \text{Var}(X) = 8 \times \frac{1}{4} \times \frac{3}{4} = \frac{3}{2}$$
+
+**Verification.** On average 2 $AA$ offspring per litter of 8 — consistent with the Mendelian law of segregation (25%). $P(X = 2) \approx 31\%$ is the most likely value (mode of the distribution at $\lfloor (8+1)/4 \rfloor = 2$).
+
+**Source.** [OpenIntro Statistics §3.4](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-75-binomial">
+
+### Block A — PMF and direct calculations (75.1 to 75.14)
+
+<Exercicio
+  numero="75.1"
+  dificuldade="aplicacao"
+  resposta="0.3125"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "134", exercicio: "3.28", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`P(X=3) = \\binom{5}{3}(0.5)^3(0.5)^2 = 10/32 = 0.3125`}</Eq>.</>}
+  passos={<><ol><li><Eq>{`X \\sim \\text{Bin}(5, 0.5)`}</Eq>: 5 trials, prob. of success 0.5.</li><li><Eq>{`\\binom{5}{3} = 10`}</Eq> (ways to choose which 3 of 5 are successes).</li><li><Eq>{`(0.5)^3 \\times (0.5)^2 = 0.5^5 = 1/32`}</Eq>.</li><li><Eq>{`P = 10 \\times 1/32 = 10/32 = 5/16 \\approx 0.3125`}</Eq>.</li></ol><em>Mental shortcut:</em> for <Eq>{`p = 0.5`}</Eq>, <Eq>{`P(X=k) = \\binom{n}{k}/2^n`}</Eq>.</>}
+>
+
+$X \sim \text{Bin}(5, 0.5)$. Calculate $P(X = 3)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=0) = (0.7)^{10} \\approx 0.0282`}</Eq>. Use the logarithm: <Eq>{`10 \\ln(0.7) \\approx -3.567`}</Eq>, <Eq>{`e^{-3.567} \\approx 0.0282`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "249", exercicio: "4.4.1", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(10, 0.3)$. Calculate $P(X = 0)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=2) = \\binom{8}{2}(0.25)^2(0.75)^6 = 28 \\times 0.0625 \\times 0.1780 \\approx 0.3115`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "135", exercicio: "3.30", licenca: "CC-BY-SA" }}
+>
+
+$X \sim \text{Bin}(8, 0.25)$. Calculate $P(X = 2)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.4"
+  dificuldade="aplicacao"
+  solucao={<>Complement: <Eq>{`P(X \\geq 1) = 1 - P(X=0) = 1 - (5/6)^6 \\approx 1 - 0.3349 = 0.6651`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "136", exercicio: "3.32", licenca: "CC-BY-SA" }}
+  passos={<><ol><li><Eq>{`X \\sim \\text{Bin}(6, 1/6)`}</Eq>: roll die 6 times, success = rolling a 6.</li><li><Eq>{`P(X = 0) = (5/6)^6`}</Eq> (no 6s in 6 rolls).</li><li><Eq>{`P(X \\geq 1) = 1 - (5/6)^6 \\approx 1 - 0.335 = 0.665`}</Eq>.</li></ol><em>Tip:</em> when the problem says "at least one", use the complement of "none" — it saves calculation.</>}
+>
+
+$X \sim \text{Bin}(6, 1/6)$. Calculate $P(X \geq 1)$ using the complement.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.5"
+  dificuldade="aplicacao"
+  solucao={<>For <Eq>{`X \\sim \\text{Bin}(4, 0.5)`}</Eq>: P(0) = 1/16, P(1) = 4/16, P(2) = 6/16, P(3) = 4/16, P(4) = 1/16. Sum = 16/16 = 1 ✓. Symmetric distribution peaking at 2.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "250", exercicio: "4.4.3", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(4, 0.5)$. Create the complete PMF table for $k = 0, 1, 2, 3, 4$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[X] = np = 20 \\times 0.1 = 2`}</Eq>. <Eq>{`\\text{Var}(X) = np(1-p) = 20 \\times 0.1 \\times 0.9 = 1.8`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "251", exercicio: "4.4.5", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(20, 0.1)$. Calculate $E[X]$ and $\text{Var}(X)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.7"
+  dificuldade="aplicacao"
+  resposta="5"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "137", exercicio: "3.34", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`\\sigma = \\sqrt{np(1-p)} = \\sqrt{100 \\times 0.5 \\times 0.5} = \\sqrt{25} = 5`}</Eq>.</>}
+>
+
+$X \sim \text{Bin}(100, 0.5)$. Calculate $\sigma = \sqrt{\text{Var}(X)}$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=5) = \\binom{10}{5}(0.5)^{10} = 252/1024 \\approx 0.2461`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "252", exercicio: "4.4.7", licenca: "CC-BY" }}
+>
+
+Flip 10 coins. Calculate $P(\text{exactly 5 heads})$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X \\geq 8) = P(8)+P(9)+P(10) = \\left[\\binom{10}{8}+\\binom{10}{9}+\\binom{10}{10}\\right]\\cdot(0.5)^{10} = (45+10+1)/1024 = 56/1024 \\approx 0.0547`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "138", exercicio: "3.36", licenca: "CC-BY-SA" }}
+  passos={<><ol><li><Eq>{`P(X \\geq 8) = P(8) + P(9) + P(10)`}</Eq>.</li><li><Eq>{`P(8) = \\binom{10}{8}(0.5)^{10} = 45/1024`}</Eq>.</li><li><Eq>{`P(9) = 10/1024`}</Eq>, <Eq>{`P(10) = 1/1024`}</Eq>.</li><li>Total: <Eq>{`56/1024 \\approx 0.0547`}</Eq> (5.5%).</li></ol><em>Note:</em> could use complement <Eq>{`1 - P(X \\leq 7)`}</Eq>, but since there are few terms above, direct summation is faster.</>}
+>
+
+Flip 10 coins. Calculate $P(\text{at least 8 heads})$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=2) = \\binom{6}{2}(1/6)^2(5/6)^4 = 15 \\times (1/36) \\times (625/1296) = 15 \\times 625/46656 \\approx 0.2009`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "253", exercicio: "4.4.9", licenca: "CC-BY" }}
+>
+
+Roll a die 6 times. Calculate $P(\text{exactly 2 sixes})$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=0) = (5/6)^6 \\approx 0.3349`}</Eq>. About 33% chance of not rolling any sixes in 6 rolls.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "139", exercicio: "3.38", licenca: "CC-BY-SA" }}
+>
+
+Roll a die 6 times. Calculate $P(\text{no sixes})$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(X=0) = (1-p)^n`}</Eq> and <Eq>{`P(X=n) = p^n`}</Eq>. Thus <Eq>{`P(X=0)+P(X=n) = (1-p)^n + p^n`}</Eq>. For <Eq>{`p=0.5`}</Eq>, this is <Eq>{`2 \\times (0.5)^n = 1/2^{n-1}`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "195", exercicio: "5.1.9", licenca: "GNU FDL" }}
+>
+
+For $X \sim \text{Bin}(n, p)$, calculate $P(X = 0) + P(X = n)$ in terms of $n$ and $p$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.13"
+  dificuldade="aplicacao"
+  solucao={<>Ratio of consecutive PMFs: <Eq>{`P(X=k)/P(X=k-1) = \\frac{(n-k+1)}{k} \\cdot \\frac{p}{1-p}`}</Eq>. Derivation: substitute the PMFs and simplify the binomial coefficients.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "196", exercicio: "5.1.11", licenca: "GNU FDL" }}
+>
+
+For $X \sim \text{Bin}(n, p)$, derive the ratio $P(X = k)/P(X = k-1)$ in terms of $n$, $p$, and $k$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.14"
+  dificuldade="aplicacao"
+  solucao={<>The mode is the value of <Eq>{`k`}</Eq> that maximizes <Eq>{`P(X=k)`}</Eq>. Using the ratio: <Eq>{`P(k)/P(k-1) > 1 \\iff (n-k+1)p > k(1-p) \\iff k < (n+1)p`}</Eq>. Thus the mode is <Eq>{`\\lfloor (n+1)p \\rfloor`}</Eq> (or both integers if <Eq>{`(n+1)p`}</Eq> is an integer). For <Eq>{`n=10`}</Eq>, <Eq>{`p=0.3`}</Eq>: mode = <Eq>{`\\lfloor 3.3 \\rfloor = 3`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "140", exercicio: "3.40", licenca: "CC-BY-SA" }}
+>
+
+Show that the mode of $\text{Bin}(n, p)$ is $\lfloor (n+1)p \rfloor$. Calculate the mode of $\text{Bin}(10, 0.3)$.
+
+</Exercicio>
+
+### Block B — Approximations and cumulative (75.15 to 75.26)
+
+<Exercicio
+  numero="75.15"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bin}(100, 0.3)`}</Eq>, <Eq>{`\\mu = 30`}</Eq>, <Eq>{`\\sigma = \\sqrt{21} \\approx 4.58`}</Eq>. Normal approximation: <Eq>{`P(X \\leq 25) \\approx \\Phi((25.5-30)/4.58) = \\Phi(-0.98) \\approx 0.164`}</Eq> (with continuity correction).</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "254", exercicio: "4.4.11", licenca: "CC-BY" }}
+  passos={<><ol><li>Parameters: <Eq>{`\\mu = 30`}</Eq>, <Eq>{`\\sigma \\approx 4.58`}</Eq>.</li><li>Check conditions: <Eq>{`np = 30 \\geq 10`}</Eq> and <Eq>{`n(1-p) = 70 \\geq 10`}</Eq> ✓.</li><li>Continuity correction: <Eq>{`P(X \\leq 25) \\approx P(Z \\leq (25.5-30)/4.58) = P(Z \\leq -0.98)`}</Eq>.</li><li><Eq>{`\\Phi(-0.98) \\approx 0.164`}</Eq>.</li></ol><em>Tip:</em> continuity correction: <Eq>{`P(X \\leq k) \\approx \\Phi((k+0.5-\\mu)/\\sigma)`}</Eq>.</>}
+>
+
+$X \sim \text{Bin}(100, 0.3)$. Approximate $P(X \leq 25)$ using normal (use continuity correction).
+
+</Exercicio>
+
+<Exercicio
+  numero="75.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bin}(1000, 0.001)`}</Eq>. <Eq>{`np = 1 = \\lambda`}</Eq>. Poisson approximation: <Eq>{`P(X=0) \\approx e^{-1} \\approx 0.368`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "197", exercicio: "5.1.13", licenca: "GNU FDL" }}
+>
+
+$X \sim \text{Bin}(1000, 0.001)$. Use the Poisson approximation for $P(X = 0)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bin}(50, 0.5)`}</Eq>, <Eq>{`\\mu = 25`}</Eq>, <Eq>{`\\sigma = \\sqrt{12.5} \\approx 3.54`}</Eq>. <Eq>{`P(X \\geq 30) \\approx P(Z \\geq (29.5-25)/3.54) = P(Z \\geq 1.27) \\approx 1 - 0.898 = 0.102`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "255", exercicio: "4.4.13", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(50, 0.5)$. Approximate $P(X \geq 30)$ using normal with continuity correction.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.18"
+  dificuldade="aplicacao"
+  solucao={<>Sum of binomials with same <Eq>{`p`}</Eq>: <Eq>{`\\text{Bin}(10, 0.3) + \\text{Bin}(20, 0.3) \\sim \\text{Bin}(30, 0.3)`}</Eq>. <Eq>{`E[X] = 9`}</Eq>, <Eq>{`\\text{Var}(X) = 6.3`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "198", exercicio: "5.1.15", licenca: "GNU FDL" }}
+>
+
+$X_1 \sim \text{Bin}(10, 0.3)$ and $X_2 \sim \text{Bin}(20, 0.3)$ are independent. What is the distribution of $X_1 + X_2$?
+
+</Exercicio>
+
+<Exercicio
+  numero="75.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bin}(50, 0.02)`}</Eq>. <Eq>{`\\lambda = np = 1`}</Eq>. Poisson: <Eq>{`P(X=0) \\approx e^{-1} \\approx 0.368`}</Eq>; <Eq>{`P(X=1) \\approx e^{-1} \\approx 0.368`}</Eq>; <Eq>{`P(X=2) \\approx e^{-1}/2 \\approx 0.184`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "256", exercicio: "4.4.15", licenca: "CC-BY" }}
+>
+
+$X \sim \text{Bin}(50, 0.02)$. Use Poisson approximation for $P(X = 0)$, $P(X = 1)$, and $P(X = 2)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.20"
+  dificuldade="aplicacao"
+  solucao={<>Election poll: <Eq>{`X \\sim \\text{Bin}(1000, 0.52)`}</Eq>. <Eq>{`\\mu = 520`}</Eq>, <Eq>{`\\sigma = \\sqrt{1000 \\times 0.52 \\times 0.48} \\approx 15.8`}</Eq>. <Eq>{`P(X < 500) \\approx \\Phi((499.5-520)/15.8) = \\Phi(-1.30) \\approx 0.097`}</Eq>. About 10% chance the poll indicates the leader is losing.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "141", exercicio: "3.42", licenca: "CC-BY-SA" }}
+>
+
+Election: $p = 0.52$, $n = 1000$. Approximate $P(\hat p < 0.50)$, the chance the poll misidentifies the leader.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.21"
+  dificuldade="aplicacao"
+  solucao={<>For <Eq>{`X \\sim \\text{Bin}(n, 0.5)`}</Eq>, the normal approximation is good when <Eq>{`np \\geq 10`}</Eq> and <Eq>{`n(1-p) \\geq 10`}</Eq>. For <Eq>{`p = 0.5`}</Eq>: <Eq>{`n \\times 0.5 \\geq 10 \\Rightarrow n \\geq 20`}</Eq>. In practice, <Eq>{`n \\geq 30`}</Eq> gives an excellent visual approximation.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "257", exercicio: "4.4.17", licenca: "CC-BY" }}
+>
+
+For $X \sim \text{Bin}(n, 0.5)$, from what $n$ is the normal approximation considered good? Justify.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.22"
+  dificuldade="aplicacao"
+  solucao={<>Variance of <Eq>{`\\text{Bin}(n, p)`}</Eq> is <Eq>{`np(1-p)`}</Eq>. For fixed <Eq>{`n`}</Eq>, maximize in <Eq>{`p`}</Eq>: derivative <Eq>{`n(1-2p) = 0 \\Rightarrow p = 0.5`}</Eq>. Second derivative <Eq>{`-2n < 0`}</Eq> (maximum). Maximum variance = <Eq>{`n/4`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "199", exercicio: "5.1.17", licenca: "GNU FDL" }}
+>
+
+Show that the variance of $\text{Bin}(n, p)$ is maximized at $p = 0.5$ for fixed $n$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.23"
+  dificuldade="aplicacao"
+  solucao={<>Spam filter: 90% recall. <Eq>{`X \\sim \\text{Bin}(500, 0.9)`}</Eq>. <Eq>{`\\mu = 450`}</Eq>, <Eq>{`\\sigma = \\sqrt{45} \\approx 6.71`}</Eq>. <Eq>{`P(X \\geq 470) \\approx P(Z \\geq (469.5-450)/6.71) = P(Z \\geq 2.91) \\approx 0.0018`}</Eq> (less than 0.2%).</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "258", exercicio: "4.4.19", licenca: "CC-BY" }}
+>
+
+Spam filter with 90% recall. In 500 real spam emails, $P(\text{flagged} \geq 470)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.24"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "Because they are the sum of iid Bernoulli variables, which guarantees additivity of variances due to independence", correta: true}, {texto: "Because the binomial always has the same PMF regardless of parameters"}, {texto: "Because the sum of two binomials is always binomial, regardless of the value of p"}, {texto: "Because the variance is zero when p = 0 or p = 1"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "142", exercicio: "3.44", licenca: "CC-BY-SA" }}
+  solucao={<>The formula <Eq>{`\\text{Var}(X) = np(1-p)`}</Eq> follows from writing <Eq>{`X = Y_1 + \\ldots + Y_n`}</Eq> with <Eq>{`Y_i \\sim \\text{Bernoulli}(p)`}</Eq> iid. Independence guarantees that variances sum: <Eq>{`\\text{Var}(X) = n \\cdot \\text{Var}(Y_i) = n \\cdot p(1-p)`}</Eq>.</>}
+>
+
+Why can the formula $\text{Var}(X) = np(1-p)$ be deduced by decomposition into Bernoulli variables?
+
+</Exercicio>
+
+### Block C — Modeling with real-world data (75.25 to 75.36)
+
+<Exercicio
+  numero="75.25"
+  dificuldade="modelagem"
+  solucao={<>Production line: 3% defective, batch of 50. <Eq>{`X \\sim \\text{Bin}(50, 0.03)`}</Eq>. <Eq>{`P(X \\geq 3) = 1 - P(X \\leq 2) \\approx 1 - 0.811 = 0.189`}</Eq> (see Example 3 of this lesson for detailed calculation).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "143", exercicio: "3.46", licenca: "CC-BY-SA" }}
+>
+
+Production line: 3% defective. Batch of 50 parts. Calculate $P(\text{at least 3 defective})$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.26"
+  dificuldade="modelagem"
+  solucao={<>Vaccine with 85% efficacy. In 100 vaccinated, <Eq>{`X \\sim \\text{Bin}(100, 0.85)`}</Eq>. <Eq>{`\\mu = 85`}</Eq>, <Eq>{`\\sigma = \\sqrt{12.75} \\approx 3.57`}</Eq>. <Eq>{`P(X \\geq 90) \\approx P(Z \\geq (89.5-85)/3.57) = P(Z \\geq 1.26) \\approx 0.104`}</Eq>. About 10% chance.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "259", exercicio: "4.4.21", licenca: "CC-BY" }}
+>
+
+Vaccine: 85% efficacy. In 100 vaccinated, $P(\geq 90 \text{ protected})$. Use normal approximation.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.27"
+  dificuldade="modelagem"
+  solucao={<>A/B test: A has 14/100 = 14%, B has 22/100 = 22%. <Eq>{`\\hat p_{\\text{pool}} = 36/200 = 0.18`}</Eq>. <Eq>{`SE = \\sqrt{0.18 \\times 0.82 \\times (1/100+1/100)} = \\sqrt{0.002952} \\approx 0.0543`}</Eq>. <Eq>{`z = (0.22-0.14)/0.0543 \\approx 1.47`}</Eq>. <Eq>{`p\\text{-value} \\approx 0.14`}</Eq>. Difference not significant at 5%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "144", exercicio: "3.48", licenca: "CC-BY-SA" }}
+>
+
+A/B test: variant A, 100 visitors, 14 bought. Variant B, 100 visitors, 22 bought. Calculate the p-value of the z-test for difference of proportions.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.28"
+  dificuldade="modelagem"
+  solucao={<>Election poll: <Eq>{`n = 1500`}</Eq>, margin of error = <Eq>{`1.96 \\times \\sqrt{p(1-p)/n}`}</Eq>. Worst case: <Eq>{`p = 0.5`}</Eq>. <Eq>{`ME = 1.96 \\times \\sqrt{0.25/1500} = 1.96 \\times 0.01291 \\approx 0.025 = 2.5\\%`}</Eq>. Yes, the size is sufficient for a margin of <Eq>{`\\pm 2.5\\%`}</Eq> at 95%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "260", exercicio: "4.4.23", licenca: "CC-BY" }}
+  passos={<><ol><li>Margin of error at 95%: <Eq>{`ME = z_{0.025} \\times \\sqrt{p(1-p)/n}`}</Eq>.</li><li>Worst case: <Eq>{`p = 0.5`}</Eq>, maximizes <Eq>{`p(1-p) = 0.25`}</Eq>.</li><li><Eq>{`ME = 1.96 \\times \\sqrt{0.25/1500} = 1.96/\\sqrt{6000} \\approx 2.53\\%`}</Eq>.</li><li>Since <Eq>{`2.53\\% \\approx 2.5\\%`}</Eq>, the size is adequate (on the margin).</li></ol><em>Fun fact:</em> the "3% margin of error" in most polls comes from <Eq>{`n \\approx 1067`}</Eq>.</>}
+>
+
+Election poll: $n = 1500$, desired margin of error $\pm 2.5\%$ at 95%. Is the size sufficient?
+
+</Exercicio>
+
+<Exercicio
+  numero="75.29"
+  dificuldade="modelagem"
+  solucao={<>Genetics: <Eq>{`X \\sim \\text{Bin}(8, 1/4)`}</Eq>. <Eq>{`P(X=2) = \\binom{8}{2}(1/4)^2(3/4)^6 = 28 \\times (1/16) \\times (729/4096) \\approx 0.311`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "145", exercicio: "3.50", licenca: "CC-BY-SA" }}
+>
+
+Genetics: cross $Aa \times Aa$, each offspring has prob. $1/4$ of being $AA$. In 8 children, $P(\text{exactly 2 are } AA)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.30"
+  dificuldade="modelagem"
+  solucao={<>Call center: 5% failure rate, 200 calls. <Eq>{`X \\sim \\text{Bin}(200, 0.05)`}</Eq>. <Eq>{`E[X] = 10`}</Eq>, <Eq>{`\\text{Var}(X) = 200 \\times 0.05 \\times 0.95 = 9.5`}</Eq>, <Eq>{`\\sigma = \\sqrt{9.5} \\approx 3.08`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "261", exercicio: "4.4.25", licenca: "CC-BY" }}
+>
+
+Call center: 5% of calls fail. In 200 calls, calculate expectation and $\sigma$ of failures.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.31"
+  dificuldade="modelagem"
+  solucao={<>Six Sigma: 3.4 defects per million = <Eq>{`p = 3.4 \\times 10^{-6}`}</Eq>. In 1 million parts: <Eq>{`X \\sim \\text{Bin}(10^6, 3.4 \\times 10^{-6})`}</Eq>, <Eq>{`\\lambda = 3.4`}</Eq>. By Poisson: <Eq>{`P(X=0) = e^{-3.4} \\approx 0.0334`}</Eq> (3.3% chance of zero defects). Expectation = 3.4 defects.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "200", exercicio: "5.1.19", licenca: "GNU FDL" }}
+>
+
+Six Sigma (with 1.5σ adjustment): rate of 3.4 ppm. In 1 million parts, use Poisson approximation for $P(0 \text{ defects})$ and $E[\text{defects}]$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.32"
+  dificuldade="modelagem"
+  solucao={<>Bet: 30% chance of winning R$ 100, costs R$ 25 per play. Profit per play: R$ 75 (prob. 0.3) or R$ -25 (prob. 0.7). <Eq>{`E[\\text{profit/play}] = 75 \\times 0.3 - 25 \\times 0.7 = 22.5 - 17.5 = 5`}</Eq>. In 20 plays: total expected profit = R$ 100.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "262", exercicio: "4.4.27", licenca: "CC-BY" }}
+>
+
+Bet: 30% chance of winning R$ 100. Each play costs R$ 25. In 20 plays, what is the total expected profit?
+
+</Exercicio>
+
+<Exercicio
+  numero="75.33"
+  dificuldade="modelagem"
+  solucao={<>Lead conversion: 1% convert. To close 5 deals on average: <Eq>{`E[X] = np = 5 \\Rightarrow n = 5/0.01 = 500`}</Eq> leads needed.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "146", exercicio: "3.52", licenca: "CC-BY-SA" }}
+>
+
+Lead conversion rate: 1%. To close 5 deals per month on average, how many leads do you need to generate?
+
+</Exercicio>
+
+<Exercicio
+  numero="75.34"
+  dificuldade="modelagem"
+  solucao={<>ENEM: if 60% of candidates pass the essay, in 20 candidates: <Eq>{`X \\sim \\text{Bin}(20, 0.6)`}</Eq>. <Eq>{`P(X \\geq 15) \\approx P(Z \\geq (14.5-12)/2.19) = P(Z \\geq 1.14) \\approx 0.127`}</Eq>. Expectation = 12, standard deviation = 2.19.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "263", exercicio: "4.4.29", licenca: "CC-BY" }}
+>
+
+ENEM: 60% of candidates reach the minimum score on the essay. In a class of 20 students, calculate $E[X]$, $\sigma$, and $P(X \geq 15)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.35"
+  dificuldade="modelagem"
+  solucao={<>Urn with 30% red balls. 50 draws with replacement: binomial valid (independence maintained). <Eq>{`X \\sim \\text{Bin}(50, 0.3)`}</Eq>. <Eq>{`E[X] = 15`}</Eq>, <Eq>{`\\sigma \\approx 3.24`}</Eq>. <Eq>{`P(X = 15) = \\binom{50}{15}(0.3)^{15}(0.7)^{35} \\approx 0.1147`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "147", exercicio: "3.54", licenca: "CC-BY-SA" }}
+>
+
+Urn with 30% red balls. 50 draws **with** replacement. Why does the binomial apply? Calculate $E[X]$ and $P(X = 15)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.36"
+  dificuldade="modelagem"
+  solucao={<>Public exam approval: 8% approval rate, class of 30 students. <Eq>{`X \\sim \\text{Bin}(30, 0.08)`}</Eq>. <Eq>{`E[X] = 2.4`}</Eq>. <Eq>{`P(X \\geq 1) = 1 - P(X=0) = 1 - (0.92)^{30} \\approx 1 - 0.0843 = 0.916`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/4-4-binomial-distribution", secao: "§4.4", pagina: "264", exercicio: "4.4.31", licenca: "CC-BY" }}
+>
+
+Public exam: 8% approval rate. Class of 30 students. $E[\text{passed}]$ and $P(\text{at least 1 passed})$.
+
+</Exercicio>
+
+### Block D — Comprehension and demonstration (75.37 to 75.42)
+
+<Exercicio
+  numero="75.37"
+  dificuldade="compreensao"
+  solucao={<>The binomial requires **independent** trials. Sampling without replacement violates independence: the probability of success changes based on previous draws. Example: urn with 5 red and 5 blue, 3 draws without replacement. After 1 red: prob. of red drops from 5/10 to 4/9. The correct distribution is the **hypergeometric**.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "148", exercicio: "3.56", licenca: "CC-BY-SA" }}
+>
+
+Why does the binomial not apply to sampling without replacement? Give a numerical counterexample where using binomial would give the wrong answer.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.38"
+  dificuldade="compreensao"
+  opcoes={[{texto: "Binomial uses replacement (independent trials); hypergeometric uses without replacement", correta: true}, {texto: "Binomial is discrete; hypergeometric is continuous"}, {texto: "Binomial has variable p; hypergeometric has fixed p"}, {texto: "Binomial counts failures; hypergeometric counts successes"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "149", exercicio: "3.58", licenca: "CC-BY-SA" }}
+  solucao={<>The fundamental difference lies in the independence of trials. Binomial: independent trials (like sampling WITH replacement). Hypergeometric: sampling WITHOUT replacement, dependent trials — the PMF is <Eq>{`\\binom{K}{k}\\binom{N-K}{n-k}/\\binom{N}{n}`}</Eq>.</>}
+>
+
+What is the fundamental difference between binomial and hypergeometric distributions?
+
+</Exercicio>
+
+<Exercicio
+  numero="75.39"
+  dificuldade="demonstracao"
+  solucao={<>Bernoulli decomposition: <Eq>{`X = Y_1 + \\ldots + Y_n`}</Eq>, <Eq>{`Y_i \\sim \\text{Bernoulli}(p)`}</Eq> iid. By linearity: <Eq>{`E[X] = \\sum_{i=1}^n E[Y_i] = n \\cdot p`}</Eq>. For variance, since <Eq>{`Y_i`}</Eq> are independent: <Eq>{`\\text{Var}(X) = \\sum \\text{Var}(Y_i) = n \\cdot p(1-p)`}</Eq>. Independence is essential to sum variances. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.4", pagina: "150", exercicio: "3.60", licenca: "CC-BY-SA" }}
+>
+
+Demonstrate $E[X] = np$ and $\text{Var}(X) = np(1-p)$ via decomposition $X = Y_1 + \cdots + Y_n$ into Bernoulli variables.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.40"
+  dificuldade="demonstracao"
+  solucao={<>Poisson limit: fix <Eq>{`\\lambda = np`}</Eq>. Then <Eq>{`p = \\lambda/n`}</Eq>. <Eq>{`\\binom{n}{k}(\\lambda/n)^k(1-\\lambda/n)^{n-k} = \\frac{n(n-1)\\cdots(n-k+1)}{k!} \\cdot \\frac{\\lambda^k}{n^k} \\cdot (1-\\lambda/n)^n (1-\\lambda/n)^{-k}`}</Eq>. When <Eq>{`n \\to \\infty`}</Eq>: first factor <Eq>{`\\to 1`}</Eq>; <Eq>{`(1-\\lambda/n)^n \\to e^{-\\lambda}`}</Eq>; <Eq>{`(1-\\lambda/n)^{-k} \\to 1`}</Eq>. Thus the product converges to <Eq>{`\\lambda^k e^{-\\lambda}/k!`}</Eq>. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "201", exercicio: "5.1.21", licenca: "GNU FDL" }}
+>
+
+Demonstrate the Poisson limit: $\text{Bin}(n, \lambda/n) \to \text{Poisson}(\lambda)$ when $n \to \infty$ with $\lambda$ fixed.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.41"
+  dificuldade="demonstracao"
+  solucao={<>The binomial PMF is valid: <Eq>{`\\sum_{k=0}^n \\binom{n}{k} p^k (1-p)^{n-k} = (p + (1-p))^n = 1^n = 1`}</Eq> by Newton's Binomial Theorem. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "202", exercicio: "5.1.23", licenca: "GNU FDL" }}
+>
+
+Demonstrate that $\sum_{k=0}^n \binom{n}{k} p^k (1-p)^{n-k} = 1$ using the Binomial Theorem.
+
+</Exercicio>
+
+<Exercicio
+  numero="75.42"
+  dificuldade="demonstracao"
+  solucao={<>To prove additivity, use MGF. <Eq>{`M_X(t) = (1-p+pe^t)^{n_1}`}</Eq> and <Eq>{`M_Y(t) = (1-p+pe^t)^{n_2}`}</Eq>. By independence: <Eq>{`M_{X+Y}(t) = M_X(t) \\cdot M_Y(t) = (1-p+pe^t)^{n_1+n_2}`}</Eq>, which is the MGF of <Eq>{`\\text{Bin}(n_1+n_2, p)`}</Eq>. Since the MGF uniquely determines the distribution: <Eq>{`X+Y \\sim \\text{Bin}(n_1+n_2, p)`}</Eq>. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "203", exercicio: "5.1.25", licenca: "GNU FDL" }}
+>
+
+Demonstrate additivity: if $X \sim \text{Bin}(n_1, p)$ and $Y \sim \text{Bin}(n_2, p)$ are independent (same $p$), then $X + Y \sim \text{Bin}(n_1 + n_2, p)$.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**OpenIntro Statistics** (4th ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · EN · CC-BY-SA. **Primary source — §3.4 (BInS conditions, PMF, expectation, variance, A/B testing).**
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · EN · CC-BY. **§4.4 — binomial tables, approximations, AP-level exercises.**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · 1997 · EN · GNU FDL. **§5.1 — PMF, MGF, Poisson limit with proof; demonstrative exercises.**

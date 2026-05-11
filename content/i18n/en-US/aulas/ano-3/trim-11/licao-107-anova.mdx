@@ -1,0 +1,873 @@
+---
+titulo: "Lesson 107 — One-way ANOVA"
+slug: "licao-107-anova"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Analysis of variance (one-way ANOVA): SST = SSB + SSW decomposition, F-statistic, ANOVA table, assumption checking, Tukey post-hoc, eta² effect size."
+ordem: 107
+publicado: true
+tags: ["estatística inferencial", "ANOVA", "teste F", "ano-3", "trim-11"]
+prerrequisitos: ["licao-106-teste-hipoteses"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2025-05-14"
+usadoEm: ["3.º ano EM — Estatística Inferencial", "Stochastik LK alemão", "H2 Math singapurense (estatística)", "Math B japonês"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="F = \frac{MS_{\text{entre}}}{MS_{\text{dentro}}} = \frac{SSB/(k-1)}{SSW/(N-k)}"
+  legenda={<><strong>One-way ANOVA</strong> compares <Eq>{`k`}</Eq> group means with a single test. The <strong>F-statistic</strong> is the ratio of the variance <em>between</em> groups to the variance <em>within</em> groups. Under <Eq>{`H_0`}</Eq> (all means equal), <Eq>{`F \\approx 1`}</Eq>. When any mean differs, <Eq>{`F`}</Eq> increases — and we reject <Eq>{`H_0`}</Eq>.</>}
+  audioTexto="Analysis of variance. F is equal to the mean square between groups, divided by the mean square within groups. The larger the F, the more evidence that at least one group has a mean different from the others."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books covering this lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://openstax.org/details/books/statistics" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Statistics
+      </a>
+      <span className="text-clube-mist"> · §13.1–13.4 One-Way ANOVA · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Model definition, SS decomposition, ANOVA table, F interpretation — primary source for this lesson.</em>
+    </li>
+    <li>
+      <a href="https://www.openintro.org/book/os/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenIntro Statistics (4th ed.)
+      </a>
+      <span className="text-clube-mist"> · §7.5 Comparing many means with ANOVA · CC-BY-SA 3.0 · </span>
+      <em className="text-clube-mist">Model assumptions (independence, normality, homoscedasticity) and post-hoc with Bonferroni and Tukey correction.</em>
+    </li>
+    <li>
+      <a href="https://learningstatisticswithr.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Navarro — Learning Statistics with R
+      </a>
+      <span className="text-clube-mist"> · ch. 14 Comparing several means (one-way ANOVA) · CC-BY-SA 4.0 · </span>
+      <em className="text-clube-mist">Logic of variance decomposition, eta² effect size, and geometric intuition for the F-test.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Rigorous definition">
+
+### The problem: comparing k means with a single test
+
+Suppose you have $k \geq 2$ independent groups and want to know if the population means $\mu_1, \ldots, \mu_k$ are equal. Performing $\binom{k}{2}$ separate $t$-tests inflates the Type I error rate. ANOVA solves this with a single global test.
+
+<Definicao titulo="One-way ANOVA model (fixed effects)">
+
+Each observation $Y_{ij}$ (subject $j$ in group $i$) follows:
+
+$$Y_{ij} = \mu + \alpha_i + \varepsilon_{ij}, \quad i = 1, \ldots, k;\; j = 1, \ldots, n_i$$
+
+where:
+- $\mu$ is the grand mean
+- $\alpha_i$ is the effect of group $i$, with constraint $\sum_{i=1}^k n_i \alpha_i = 0$
+- $\varepsilon_{ij} \sim \mathcal{N}(0, \sigma^2)$ i.i.d. — normal errors with common variance
+
+The hypotheses are:
+
+$$H_0: \alpha_1 = \alpha_2 = \cdots = \alpha_k = 0 \quad \Leftrightarrow \quad \mu_1 = \mu_2 = \cdots = \mu_k$$
+$$H_1: \text{there exists at least one } i \text{ such that } \alpha_i \neq 0$$
+
+</Definicao>
+
+> "In a one-way analysis of variance problem, we are interested in comparing the means of $k$ populations. If the means are all equal, we say the treatments, or factor levels, are not different from one another. If at least one mean differs, we say the treatments are different." — [OpenStax Statistics §13.1](https://openstax.org/books/statistics/pages/13-1-one-way-anova)
+
+### Total variance decomposition
+
+<Definicao titulo="Sum of squares: SST = SSB + SSW">
+
+Let $\bar{Y} = \frac{1}{N}\sum_{i,j} Y_{ij}$ be the grand mean and $\bar{Y}_i = \frac{1}{n_i}\sum_j Y_{ij}$ be the mean of group $i$. We define:
+
+$$SST = \sum_{i=1}^k \sum_{j=1}^{n_i} (Y_{ij} - \bar{Y})^2 \quad \text{(total sum of squares)}$$
+
+$$SSB = \sum_{i=1}^k n_i (\bar{Y}_i - \bar{Y})^2 \quad \text{(between groups)}$$
+
+$$SSW = \sum_{i=1}^k \sum_{j=1}^{n_i} (Y_{ij} - \bar{Y}_i)^2 \quad \text{(within groups)}$$
+
+**Theorem (decomposition):** $SST = SSB + SSW$. The proof follows from the algebraic identity
+
+$$Y_{ij} - \bar{Y} = \underbrace{(\bar{Y}_i - \bar{Y})}_{\text{group effect}} + \underbrace{(Y_{ij} - \bar{Y}_i)}_{\text{within-group error}}$$
+
+by squaring and summing — the cross terms cancel because $\sum_j (Y_{ij} - \bar{Y}_i) = 0$.
+
+</Definicao>
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 200" className="w-full">
+<defs>
+  <marker id="arr107" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="10" width="160" height="180" rx="8" fill="rgb(26 77 92 / 0.10)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="90" y="32" textAnchor="middle" fontSize="11" fontWeight="bold" fill="rgb(26 77 92)" fontFamily="ui-monospace,monospace">Group 1</text>
+  <circle cx="60" cy="60" r="5" fill="rgb(26 77 92)"/>
+  <circle cx="80" cy="90" r="5" fill="rgb(26 77 92)"/>
+  <circle cx="70" cy="75" r="5" fill="rgb(26 77 92)"/>
+  <circle cx="110" cy="80" r="5" fill="rgb(26 77 92)"/>
+  <circle cx="130" cy="65" r="5" fill="rgb(26 77 92)"/>
+  <line x1="30" x2="155" y1="75" y2="75" stroke="rgb(26 77 92)" strokeWidth="2" strokeDasharray="4 2"/>
+  <text x="90" y="145" textAnchor="middle" fontSize="9" fill="rgb(26 77 92)" fontFamily="serif" fontStyle="italic">Ȳ₁ = 75</text>
+</g>
+<g>
+  <rect x="200" y="10" width="160" height="180" rx="8" fill="rgb(232 199 122 / 0.15)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="280" y="32" textAnchor="middle" fontSize="11" fontWeight="bold" fill="rgb(201 163 95)" fontFamily="ui-monospace,monospace">Group 2</text>
+  <circle cx="230" cy="100" r="5" fill="rgb(201 163 95)"/>
+  <circle cx="250" cy="115" r="5" fill="rgb(201 163 95)"/>
+  <circle cx="280" cy="110" r="5" fill="rgb(201 163 95)"/>
+  <circle cx="310" cy="120" r="5" fill="rgb(201 163 95)"/>
+  <circle cx="330" cy="105" r="5" fill="rgb(201 163 95)"/>
+  <line x1="215" x2="345" y1="110" y2="110" stroke="rgb(201 163 95)" strokeWidth="2" strokeDasharray="4 2"/>
+  <text x="280" y="145" textAnchor="middle" fontSize="9" fill="rgb(201 163 95)" fontFamily="serif" fontStyle="italic">Ȳ₂ = 110</text>
+</g>
+<g>
+  <rect x="390" y="10" width="160" height="180" rx="8" fill="rgb(199 107 63 / 0.12)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="470" y="32" textAnchor="middle" fontSize="11" fontWeight="bold" fill="rgb(199 107 63)" fontFamily="ui-monospace,monospace">Group 3</text>
+  <circle cx="420" cy="130" r="5" fill="rgb(199 107 63)"/>
+  <circle cx="440" cy="145" r="5" fill="rgb(199 107 63)"/>
+  <circle cx="470" cy="138" r="5" fill="rgb(199 107 63)"/>
+  <circle cx="500" cy="150" r="5" fill="rgb(199 107 63)"/>
+  <circle cx="520" cy="135" r="5" fill="rgb(199 107 63)"/>
+  <line x1="405" x2="535" y1="140" y2="140" stroke="rgb(199 107 63)" strokeWidth="2" strokeDasharray="4 2"/>
+  <text x="470" y="175" textAnchor="middle" fontSize="9" fill="rgb(199 107 63)" fontFamily="serif" fontStyle="italic">Ȳ₃ = 140</text>
+</g>
+<line x1="10" x2="550" y1="105" y2="105" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1.5" strokeDasharray="6 3"/>
+<text x="555" y="109" fontSize="9" fill="currentColor" fillOpacity="0.6" fontFamily="serif" fontStyle="italic">Ȳ</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Three groups with distinct means. Colored dashed lines = group mean (<Eq>{`\\bar Y_i`}</Eq>). Gray dotted line = grand mean (<Eq>{`\\bar Y`}</Eq>). SSB measures how far colored means deviate from the gray one; SSW measures the dispersion of points around their own group means.
+</figcaption>
+</figure>
+
+### F-statistic and ANOVA table
+
+<Definicao titulo="Mean squares and F-statistic">
+
+Dividing each SS by its respective degrees of freedom gives the <strong>mean squares</strong>:
+
+$$MS_B = \frac{SSB}{k-1}, \qquad MS_W = \frac{SSW}{N-k}$$
+
+where $N = \sum_{i=1}^k n_i$ and $k - 1$ and $N - k$ are the between and within degrees of freedom.
+
+The test statistic is:
+
+$$F = \frac{MS_B}{MS_W}$$
+
+Under $H_0$, $F \sim F_{k-1,\, N-k}$ (Snedecor's F-distribution). We reject $H_0$ if $F > F_{\alpha;\, k-1,\, N-k}$.
+
+| Source | SS | df | MS | F |
+|---|---|---|---|---|
+| Between groups | $SSB$ | $k-1$ | $MS_B = SSB/(k-1)$ | $MS_B / MS_W$ |
+| Within groups | $SSW$ | $N-k$ | $MS_W = SSW/(N-k)$ | — |
+| Total | $SST$ | $N-1$ | — | — |
+
+</Definicao>
+
+> "The one-way ANOVA test statistic $F$ is the ratio of two independent chi-square variables divided by their respective degrees of freedom... Under the null hypothesis, $F$ follows an $F$ distribution with $k-1$ and $N-k$ degrees of freedom." — [OpenStax Statistics §13.2](https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio)
+
+### Model assumptions
+
+<Definicao titulo="Three assumptions of one-way ANOVA">
+
+1. **Independence:** observations are independent between groups and within each group.
+2. **Normality:** within each group, $Y_{ij} \sim \mathcal{N}(\mu_i, \sigma^2)$. For $n_i \geq 30$, the Central Limit Theorem makes the test robust.
+3. **Homoscedasticity (equal variances):** $\sigma_1^2 = \sigma_2^2 = \cdots = \sigma_k^2 = \sigma^2$. Verified with Levene's or Bartlett's test.
+
+If assumption 3 fails severely, use <strong>Welch's ANOVA</strong> (adjusts degrees of freedom). If normality fails for small $n$, use <strong>Kruskal-Wallis</strong> (non-parametric alternative).
+
+</Definicao>
+
+### Effect size
+
+<Definicao titulo="Eta squared">
+
+$$\eta^2 = \frac{SSB}{SST}$$
+
+Cohen's conventions: $\eta^2 \approx 0.01$ (small), $0.06$ (medium), $0.14$ (large). The less biased version is $\omega^2 = (SSB - (k-1) MS_W)/(SST + MS_W)$.
+
+</Definicao>
+
+<Teorema titulo="Why F and not multiple t-tests?">
+
+With $k$ groups, $\binom{k}{2}$ pairwise comparisons would be needed. For $k = 5$, that's 10 $t$-tests. If each test has level $\alpha = 0.05$, the probability of at least one Type I error is:
+
+$$P(\text{at least 1 false positive}) = 1 - (1 - 0.05)^{10} \approx 0.40$$
+
+ANOVA keeps the $\alpha$ level controlled globally with a single test. This is why the F-test precedes any post-hoc analysis.
+
+</Teorema>
+
+<Insight>
+
+$E[MS_W] = \sigma^2$ <strong>always</strong> (under $H_0$ and $H_1$) — $MS_W$ is an unbiased estimator of error variance. However, $E[MS_B] = \sigma^2 + \frac{\sum n_i \alpha_i^2}{k-1}$, which is $\sigma^2$ only when $H_0$ is true. Therefore, $F > 1$ on average when $H_1$ holds, and $F \approx 1$ when $H_0$ holds.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine you have <strong>three school classes</strong>. You want to know if one class is much faster at solving math problems than the others.
+
+You measure the time for each child. Then you look at two things:
+
+- Do the three classes have <strong>very different average times</strong>? (distance between groups)
+- Inside each class, are the children's times similar or very spread out? (mess inside)
+
+If the class averages are very different AND each class is consistent inside, you can say with confidence: "Class A is indeed faster, it wasn't just luck."
+
+ANOVA is exactly this comparison: "difference between classes" versus "mess inside the classes." If the first is much larger than the second, the classes are truly different.
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+You want to know if <strong>three fertilizers</strong> make plants grow differently.
+
+With each fertilizer, you plant 10 flowers. After a month, you measure the height of each.
+
+<strong>Why not compare two by two?</strong> With 3 groups, there would be 3 comparisons. With 5 groups, there would be 10. Each comparison has a chance of giving a wrong result by luck. If you do many comparisons, you will "find" a difference where none exists.
+
+<strong>The solution:</strong> ask <strong>one single question</strong>: "does any fertilizer make a difference?" This is ANOVA.
+
+The idea:
+
+- Calculate the average of each group.
+- See how much the averages differ from each other — this is the <strong>variance between groups</strong> (SSB).
+- See how much the plants in each group differ from each other — this is the <strong>variance within groups</strong> (SSW).
+- The $F$ statistic is the ratio: $F = SSB/SSW$ (simplified).
+- If $F$ is large, the fertilizers make a difference. If it is small, they probably don't.
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old">
+
+### The decomposition that makes it work
+
+For each observation $Y_{ij}$ (value $j$ of group $i$), write:
+
+$$Y_{ij} - \bar{Y} = (\bar{Y}_i - \bar{Y}) + (Y_{ij} - \bar{Y}_i)$$
+
+The first term is the "group effect" — how far the group mean is from the grand mean. The second is the "noise" within the group.
+
+Squaring and summing over all $i, j$, the cross products cancel (because $\sum_j(Y_{ij} - \bar{Y}_i) = 0$ for each $i$), leaving:
+
+$$SST = SSB + SSW$$
+
+This is the <strong>orthogonal decomposition</strong> of total variance.
+
+### When to reject $H_0$?
+
+Under $H_0$, $MS_B$ and $MS_W$ estimate the same thing ($\sigma^2$), so $F \approx 1$. If any group mean is different, $MS_B$ becomes inflated and $F$ grows. Reject $H_0$ when $F > F_{\alpha;\, k-1,\, N-k}$ (critical value from the F-table).
+
+### After rejecting: post-hoc
+
+ANOVA says "at least one group differs." To know which one, use:
+
+- <strong>Tukey HSD</strong>: pairwise comparisons with FWER control. Most powerful for planned comparisons.
+- <strong>Bonferroni</strong>: divide $\alpha$ by the number of comparisons. Simple, conservative.
+- <strong>Scheffé</strong>: for any linear contrast, not just pairs.
+
+### Assumptions — how to check
+
+1. Independence: by experimental design.
+2. Normality: histogram or Q-Q plot of each group; Shapiro-Wilk for small $n$.
+3. Homoscedasticity: boxplots of groups; Levene's test ($p > 0.05$ = variances reasonably equal).
+
+<Insight>
+
+<strong>Rule of thumb.</strong> If the ratio between the largest and smallest group variance is less than 4:1, ANOVA is robust to homoscedasticity. For larger ratios, use Welch.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="For an engineering student">
+
+### ANOVA as a linear model
+
+One-way ANOVA is equivalent to linear regression with $k-1$ dummy variables (group indicators). The global F-test of the regression coincides with the ANOVA $F$. This unifies the entire analysis within the GLM framework.
+
+Matrix-wise, the model is $\mathbf{Y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}$, where $\mathbf{X}$ is the design matrix with group indicators. The OLS estimator results in group means as predictions.
+
+### Distributions under H₀
+
+Under $H_0$:
+- $SSB/\sigma^2 \sim \chi^2_{k-1}$
+- $SSW/\sigma^2 \sim \chi^2_{N-k}$
+- Both sums are <strong>independent</strong> (due to projection orthogonality)
+
+Thus $F = (SSB/\sigma^2)/(k-1) \div (SSW/\sigma^2)/(N-k)$ follows $F_{k-1,\, N-k}$ exactly under normality. For $k=2$, $F = T^2$ where $T$ is the two-sample $t$-statistic with pooled variance.
+
+### Power and sample size calculation
+
+The non-centrality parameter of the $F$ distribution under $H_1$ is $\lambda = \sum_i n_i \alpha_i^2 / \sigma^2$. Power increases with effect size $f = \sqrt{\eta^2/(1-\eta^2)}$ (Cohen's $f$) and with $n$ per group.
+
+To detect medium effect ($f = 0.25$), $k = 4$ groups, 80% power, $\alpha = 0.05$: approximately 45 subjects per group are needed (180 total). Use `statsmodels.stats.power.FTestAnovaPower` or `pwr::pwr.anova.test()` in R.
+
+### Computational assumption checking
+
+```python
+from scipy import stats
+import numpy as np
+
+# Levene's test (homoscedasticity)
+stat, p = stats.levene(group1, group2, group3)
+
+# ANOVA (scipy)
+F, p_anova = stats.f_oneway(group1, group2, group3)
+
+# Tukey post-hoc
+import statsmodels.stats.multicomp as mc
+tukey = mc.pairwise_tukeyhsd(np.concatenate([group1, group2, group3]),
+                              np.repeat(['A','B','C'], [len(group1), len(group2), len(group3)]),
+                              alpha=0.05)
+```
+
+### Welch's ANOVA (unequal variances)
+
+When Levene's test rejects homoscedasticity, use:
+
+$$F^* = \frac{\sum_i w_i (\bar{Y}_i - \bar{Y}^*)^2 / (k-1)}{1 + \frac{2(k-2)}{k^2-1} \sum_i \frac{(1 - w_i/W)^2}{n_i - 1}}$$
+
+where $w_i = n_i/s_i^2$, $W = \sum w_i$, and $\bar{Y}^* = \sum w_i \bar{Y}_i / W$. The denominator degrees of freedom are adjusted by Welch's formula.
+
+</Porta>
+
+<Porta nivel="40" titulo="For a senior professional">
+
+### Historical context: Fisher and agriculture
+
+Ronald A. Fisher developed ANOVA in the 1920s while working at the Rothamsted Experimental Station (England). The original problem was comparing wheat yields of different varieties in field plots — exactly the type of one-way experiment with replications. The book <em>Statistical Methods for Research Workers</em> (1925) introduced the technique; <em>The Design of Experiments</em> (1935) formalized the theory of balanced experiments.
+
+The notation $F$ for the statistic honors Fisher, proposed by George Snedecor.
+
+### ANOVA as a special case of the General Linear Model (GLM)
+
+Every ANOVA — one-way, two-way, with interactions, repeated measures — is a special case of the equation $\mathbf{Y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}$ with hypotheses of the form $\mathbf{L}\boldsymbol{\beta} = \mathbf{0}$ (linear contrasts). The F-test is the likelihood ratio test for the restriction $\mathbf{L}\boldsymbol{\beta} = \mathbf{0}$.
+
+Direct extensions:
+- <strong>ANCOVA</strong>: continuous covariates added to the model to reduce $SSW$.
+- <strong>MANOVA</strong>: multiple dependent variables — Wilks' $\Lambda$, Pillai's trace statistics.
+- <strong>Mixed effects ANOVA</strong>: random effects for subjects or sample groups (`lme4` package in R, `statsmodels.MixedLM` in Python).
+
+### Bayesian critique and effect size
+
+A significant $p$-value does not imply practical relevance. With $N = 10,000$, ANOVA detects $\eta^2 = 0.001$ (negligible effect). Modern practice requires reporting $F$, df, $p$, $\eta^2$ (or $\omega^2$, less biased), and confidence intervals for post-hoc differences.
+
+<strong>Bayesian ANOVA</strong> (Rouder et al., 2012) computes the Bayes factor $BF_{10}$ for the model with effect vs. null model. `BayesFactor` package in R. For psychology and behavioral sciences, $BF > 10$ is considered strong evidence for $H_1$.
+
+### DOE and fractional experiments
+
+For $k$ factors with $l$ levels each, a full factorial experiment requires $l^k$ units — exponential. In quality engineering (and pharmaceutical industry), one uses:
+- <strong>Fractional factorial</strong> $2^{k-p}$: half, quarter, eighth of combinations, losing estimability of high-order interactions.
+- <strong>Latin squares</strong>: two-dimensional blocking, controls two sources of variation with $l^2$ units.
+- <strong>Response surface methodology</strong>: curvature effects (Box-Wilson, Box-Behnken).
+
+Fisher invented all these designs as well. One-way ANOVA is just the gateway.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Practice — real data examples">
+
+### Context: comparing corporate health insurance plans
+
+A medium-sized company (1,200 employees) wants to evaluate if average monthly costs per beneficiary differ among three health insurance providers it is considering. It obtained cost data from a pilot sample for each provider.
+
+| Provider | $n$ | Mean cost | Std. dev |
+|---|---|---|---|
+| Provider A | 30 | R$ 420.00 | R$ 45.00 |
+| Provider B | 30 | R$ 460.00 | R$ 50.00 |
+| Provider C | 30 | R$ 395.00 | R$ 42.00 |
+
+Step-by-step decision:
+
+1. <strong>Formulate hypotheses.</strong> $H_0: \mu_A = \mu_B = \mu_C$ (average costs equal). $H_1:$ at least one differs.
+2. <strong>Check assumptions.</strong> Independence: each employee appears in only one provider (independent samples). Normality: $n = 30$ per group — CLT ensures robustness. Homoscedasticity: ratio of max/min std dev = 50/42 $\approx$ 1.2 — acceptable (less than 2:1).
+3. <strong>Calculate.</strong> Using spreadsheet or R/Python, we get (hypothetical values consistent with data): $SSB \approx 50,220$, $SSW \approx 175,400$, $F(2, 87) \approx 12.47$. Critical value $F_{0.05;\, 2,\, 87} \approx 3.10$.
+4. <strong>Decide.</strong> $F = 12.47 > 3.10$ — reject $H_0$.
+5. <strong>Tukey post-hoc.</strong> Provider B differs from A and C; A and C do not differ from each other.
+6. <strong>Effect size.</strong> $\eta^2 = 50,220 / (50,220 + 175,400) \approx 0.22$ — large effect.
+7. <strong>Management decision.</strong> Providers A and C have similar and lower costs. HR recommends hiring A or C, also considering coverage and network.
+
+### Most common errors
+
+- <strong>Multiple t-tests without correction</strong>: inflates Type I error.
+- <strong>Skipping post-hoc</strong>: rejected ANOVA does not identify which groups differ.
+- <strong>Not checking homoscedasticity</strong>: if variances are very unequal, use Welch.
+- <strong>Reporting only p-value</strong>: always include $F$, df, $\eta^2$, and post-hoc.
+
+### Reporting format (APA)
+
+"Monthly costs differed significantly among the three providers, $F(2, 87) = 12.47$, $p < 0.001$, $\eta^2 = 0.22$. Tukey post-hoc comparisons indicated that Provider B had significantly higher costs than the others ($p < 0.01$), while A and C did not differ from each other ($p = 0.74$)."
+
+</Porta>
+
+</DuasPortas>
+
+## Solved examples
+
+<Exemplo titulo="Degrees of freedom and ANOVA table (application)" numero="1">
+
+<strong>Problem:</strong> A researcher compares 4 diets. Each group has 15 participants. Fill in the degrees of freedom in the ANOVA table.
+
+<strong>Strategy:</strong> Degrees of freedom follow directly from the formulas: $df_B = k - 1$, $df_W = N - k$, $df_T = N - 1$.
+
+<strong>Solution:</strong>
+
+$k = 4$ groups, $n_i = 15$ each, $N = 4 \times 15 = 60$.
+
+| Source | SS | df | MS | F |
+|---|---|---|---|---|
+| Between | $SSB$ | $4 - 1 = 3$ | $SSB/3$ | $MS_B/MS_W$ |
+| Within | $SSW$ | $60 - 4 = 56$ | $SSW/56$ | — |
+| Total | $SST$ | $60 - 1 = 59$ | — | — |
+
+Check: $3 + 56 = 59$ ✓
+
+<strong>Verification:</strong> $df_T = df_B + df_W$. Always check $3 + 56 = 59$. If it doesn't close, there is a calculation error.
+
+<strong>Source.</strong> [OpenStax — Statistics §13.2](https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio) — CC-BY 4.0.
+</Exemplo>
+
+<Exemplo titulo="Calculating F and deciding (application)" numero="2">
+
+<strong>Problem:</strong> Three groups with $n_1 = n_2 = n_3 = 10$. $SSB = 60$ and $SSW = 135$. Calculate $F$ and decide at $\alpha = 0.05$ (critical $F_{2,\, 27} \approx 3.35$).
+
+<strong>Strategy:</strong> Calculate $MS_B = SSB/df_B$ and $MS_W = SSW/df_W$, then $F = MS_B/MS_W$.
+
+<strong>Solution:</strong>
+
+1. $k = 3$, $N = 30$. $df_B = 2$, $df_W = 27$.
+2. $MS_B = 60/2 = 30$.
+3. $MS_W = 135/27 = 5$.
+4. $F = 30/5 = 6.0$.
+5. $6.0 > 3.35$ — <strong>reject $H_0$</strong>. Evidence that at least one mean differs.
+
+<strong>Verification:</strong> $SST = 60 + 135 = 195$. $\eta^2 = 60/195 \approx 0.31$ — large effect. Makes sense with high $F$.
+
+<strong>Source.</strong> [OpenStax — Statistics §13.3](https://openstax.org/books/statistics/pages/13-3-facts-about-the-f-distribution) — CC-BY 4.0.
+</Exemplo>
+
+<Exemplo titulo="Calculating SSB from group means (intermediate)" numero="3">
+
+<strong>Problem:</strong> Four groups with $n = 20$ each. Means: $\bar{Y}_1 = 8$, $\bar{Y}_2 = 10$, $\bar{Y}_3 = 12$, $\bar{Y}_4 = 10$. Calculate $SSB$.
+
+<strong>Strategy:</strong> Calculate the grand mean $\bar{Y}$ and use $SSB = \sum_i n_i(\bar{Y}_i - \bar{Y})^2$.
+
+<strong>Solution:</strong>
+
+1. Grand mean: $\bar{Y} = (8 + 10 + 12 + 10)/4 = 40/4 = 10$ (balanced groups: mean of means).
+2. Weighted squared deviations:
+   - Group 1: $20 \cdot (8 - 10)^2 = 20 \cdot 4 = 80$
+   - Group 2: $20 \cdot (10 - 10)^2 = 0$
+   - Group 3: $20 \cdot (12 - 10)^2 = 20 \cdot 4 = 80$
+   - Group 4: $20 \cdot (10 - 10)^2 = 0$
+3. $SSB = 80 + 0 + 80 + 0 = 160$.
+
+<strong>Verification:</strong> Groups 2 and 4 have means equal to the grand mean, contributing zero to SSB. Groups 1 and 3, symmetric, contribute equally. Makes structural sense.
+
+<strong>Source.</strong> [OpenIntro Statistics §7.5](https://www.openintro.org/book/os/) — CC-BY-SA 3.0.
+</Exemplo>
+
+<Exemplo titulo="Checking assumptions and deciding on alternative test (intermediate)" numero="4">
+
+<strong>Problem:</strong> A researcher has 3 groups with $n = 8$ each. Standard deviations are $s_1 = 3$, $s_2 = 3.2$, $s_3 = 9.5$. Shapiro-Wilk in one group gives $p = 0.012$. What test to use?
+
+<strong>Strategy:</strong> Check the two critical assumptions: normality and homoscedasticity. If both or one fails seriously with small $n$, choose alternative.
+
+<strong>Solution:</strong>
+
+1. <strong>Normality:</strong> Shapiro-Wilk $p = 0.012 < 0.05$ — evidence of non-normality. With $n = 8$, CLT doesn't help.
+2. <strong>Homoscedasticity:</strong> ratio of variances $s_3^2/s_1^2 = 9.5^2/3^2 = 90.25/9 \approx 10$ — far above the tolerable 4:1 limit.
+3. <strong>Decision:</strong> Two assumptions violated with small $n$. Parametric ANOVA is not appropriate.
+4. <strong>Alternative:</strong> <strong>Kruskal-Wallis</strong> — non-parametric test analogous to one-way ANOVA, based on ranks. Does not assume normality or homoscedasticity.
+
+<strong>Verification:</strong> If only homoscedasticity failed (normality ok), Welch's ANOVA would suffice. With additional non-normality and small $n$, non-parametric is the correct choice.
+
+<strong>Source.</strong> [OpenIntro Statistics §7.5](https://www.openintro.org/book/os/) — CC-BY-SA 3.0.
+</Exemplo>
+
+<Exemplo titulo="Complete analysis: three battery brands (real modeling)" numero="5">
+
+<strong>Problem:</strong> A quality engineer tests the duration (in hours) of three AA battery brands. Each brand is tested on 12 identical devices. Means: brand P = 18.5 h, brand Q = 22.0 h, brand R = 19.8 h. $SSB = 183.6$ and $SSW = 396.0$. Conduct the complete ANOVA at $\alpha = 0.05$ and interpret.
+
+<strong>Strategy:</strong> Calculate df, MS, F; compare with critical; if reject, identify which brand differs using means.
+
+<strong>Solution:</strong>
+
+1. $k = 3$, $n_i = 12$, $N = 36$. $df_B = 2$, $df_W = 33$.
+2. $MS_B = 183.6 / 2 = 91.8$.
+3. $MS_W = 396.0 / 33 = 12.0$.
+4. $F = 91.8 / 12.0 = 7.65$.
+5. $F_{0.05;\, 2,\, 33} \approx 3.28$ (table interpolation). $7.65 > 3.28$ — <strong>reject $H_0$</strong>.
+6. $\eta^2 = 183.6 / (183.6 + 396.0) = 183.6 / 579.6 \approx 0.317$ — large effect.
+7. <strong>Post-hoc (inspection of means):</strong> Brand Q has mean 22.0 h, clearly above the others. A formal Tukey HSD analysis would confirm which differences are significant.
+
+<strong>Verification:</strong> Formal report: $F(2, 33) = 7.65$, $p < 0.01$, $\eta^2 = 0.32$. Brand Q has significantly longer duration than P; the difference between Q and R requires formal post-hoc.
+
+<strong>Source.</strong> [Navarro — Learning Statistics with R ch. 14](https://learningstatisticswithr.com/) — CC-BY-SA 4.0.
+</Exemplo>
+
+<ListaExercicios seed="licao-107-anova">
+
+> <strong>Notebook list.</strong> There are 42 exercises in 5 increasing difficulty blocks. Solve on paper. Compiled from OpenStax Statistics (§13.1–13.4), OpenIntro Statistics (§7.5), and Navarro Learning Statistics with R (ch. 14). All sources are open (CC-BY / CC-BY-SA).
+
+### Block A — Degrees of freedom and ANOVA table structure (107.1 to 107.10)
+
+<Exercicio numero="107.1" dificuldade="aplicacao" resposta="$df_B = 2,\; df_W = 27$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "718", exercicio: "ex. 13.1", licenca: "CC-BY 4.0" }}
+  solucao={<>With <Eq>{`k = 3`}</Eq> groups and <Eq>{`N = 30`}</Eq> total observations: <Eq>{`df_B = k - 1 = 2`}</Eq> and <Eq>{`df_W = N - k = 30 - 3 = 27`}</Eq>. Check: <Eq>{`2 + 27 = 29 = N - 1`}</Eq> ✓</>}
+  passos={<>
+    <ol>
+      <li>Identify <Eq>{`k`}</Eq> (number of groups) and <Eq>{`N`}</Eq> (total observations). <em>Why:</em> degrees of freedom derive directly from these two quantities.</li>
+      <li>Calculate <Eq>{`df_B = k - 1 = 3 - 1 = 2`}</Eq>. <em>Why:</em> between <Eq>{`k`}</Eq> groups, you "lose" 1 degree when estimating the grand mean.</li>
+      <li>Calculate <Eq>{`df_W = N - k = 30 - 3 = 27`}</Eq>. <em>Why:</em> within each group, the local mean is estimated, losing 1 df per group.</li>
+      <li>Check: <Eq>{`df_B + df_W = N - 1`}</Eq>. If it doesn't close, there is an error.</li>
+    </ol>
+    <p><em>Tip:</em> "Between = groups minus 1; Within = total minus groups."</p>
+  </>}
+>
+An experiment compares 3 groups with 10 observations each. Determine $df_B$ and $df_W$.
+</Exercicio>
+
+<Exercicio numero="107.2" dificuldade="aplicacao" resposta="$df_B = 4,\; df_W = 45$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "718", exercicio: "ex. 13.2", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`k = 5`}</Eq>, <Eq>{`N = 50`}</Eq>. <Eq>{`df_B = 5 - 1 = 4`}</Eq>. <Eq>{`df_W = 50 - 5 = 45`}</Eq>. Check: <Eq>{`4 + 45 = 49`}</Eq> ✓</>}
+>
+A researcher uses 5 groups with 10 participants each. Determine $df_B$ and $df_W$.
+</Exercicio>
+
+<Exercicio numero="107.3" dificuldade="aplicacao" resposta="$MS_B = 20,\; MS_W = 5$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "719", exercicio: "ex. 13.3", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`MS_B = SSB / df_B = 40 / 2 = 20`}</Eq>. <Eq>{`MS_W = SSW / df_W = 150 / 30 = 5`}</Eq>.</>}
+>
+In an experiment with 3 groups, $SSB = 40$ ($df_B = 2$) and $SSW = 150$ ($df_W = 30$). Calculate $MS_B$ and $MS_W$.
+</Exercicio>
+
+<Exercicio numero="107.4" dificuldade="aplicacao" resposta="$F = 4.0$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-facts-about-the-f-distribution", secao: "§13.3", pagina: "721", exercicio: "ex. 13.5", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`F = MS_B / MS_W = 20 / 5 = 4.0`}</Eq>. Using values from the previous exercise.</>}
+>
+From the values in exercise 107.3, calculate the $F$ statistic.
+</Exercicio>
+
+<Exercicio numero="107.5" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Reject $H_0$ — evidence of difference between groups", correta: true },
+    { texto: "Do not reject $H_0$ — F below critical" },
+    { texto: "Inconclusive result — F equal to critical" },
+    { texto: "Cannot decide without SST value" },
+  ]}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-facts-about-the-f-distribution", secao: "§13.3", pagina: "722", exercicio: "ex. 13.6", licenca: "CC-BY 4.0" }}
+  solucao={<>With <Eq>{`F = 4.0`}</Eq> and critical <Eq>{`F_{0.05;\\,2,\\,30} \\approx 3.32`}</Eq>, we have <Eq>{`4.0 > 3.32`}</Eq> — reject <Eq>{`H_0`}</Eq>. Option B gets the comparison direction wrong; C confuses with the limit value; D is irrelevant as F does not depend on SST directly.</>}
+>
+The value $F = 4.0$ with $df = (2, 30)$ and $\alpha = 0.05$ (critical $\approx 3.32$). What is the correct conclusion?
+</Exercicio>
+
+<Exercicio numero="107.6" dificuldade="aplicacao" resposta="$\eta^2 = 0.40$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "290", exercicio: "ex. 7.35", licenca: "CC-BY-SA 3.0" }}
+  solucao={<><Eq>{`\\eta^2 = SSB / SST = 80 / 200 = 0.40`}</Eq>. Large effect (Cohen's convention: <Eq>{`\\eta^2 \\geq 0.14`}</Eq>).</>}
+>
+$SST = 200$ and $SSB = 80$. Calculate $\eta^2$ and classify the effect size.
+</Exercicio>
+
+<Exercicio numero="107.7" dificuldade="aplicacao" resposta="$SSW = 120$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "288", exercicio: "ex. 7.33", licenca: "CC-BY-SA 3.0" }}
+  solucao={<><Eq>{`SSW = SST - SSB = 200 - 80 = 120`}</Eq>. The decomposition <Eq>{`SST = SSB + SSW`}</Eq> is exact (no remainder).</>}
+>
+Using the data from exercise 107.6 ($SST = 200$, $SSB = 80$), determine $SSW$.
+</Exercicio>
+
+<Exercicio numero="107.8" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "719", exercicio: "ex. 13.4", licenca: "CC-BY 4.0" }}
+  solucao={<>Under <Eq>{`H_0`}</Eq>, <Eq>{`MS_B`}</Eq> and <Eq>{`MS_W`}</Eq> estimate the same variance <Eq>{`\\sigma^2`}</Eq>, therefore <Eq>{`E[F] = (N-k)/(N-k-2) \\approx 1`}</Eq> for large <Eq>{`df_W`}</Eq>. If <Eq>{`H_1`}</Eq> holds, <Eq>{`E[MS_B] > \\sigma^2`}</Eq>, so <Eq>{`E[F] > 1`}</Eq>.</>}
+>
+Why, under $H_0$, is it expected that $F \approx 1$? Explain in terms of what $MS_B$ and $MS_W$ estimate.
+</Exercicio>
+
+<Exercicio numero="107.9" dificuldade="aplicacao" resposta="$\bar{Y} = 11$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "287", exercicio: "ex. 7.30", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>For balanced groups (<Eq>{`n_i`}</Eq> equal), the grand mean is the mean of the group means: <Eq>{`\\bar Y = (9 + 11 + 13)/3 = 33/3 = 11`}</Eq>.</>}
+>
+Three groups with $n = 15$ each. Group means: 9, 11, and 13. Calculate the grand mean $\bar{Y}$.
+</Exercicio>
+
+<Exercicio numero="107.10" dificuldade="aplicacao" resposta="$SSB = 120$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "287", exercicio: "ex. 7.31", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>With <Eq>{`\\bar Y = 11`}</Eq> (previous exercise): <Eq>{`SSB = 15(9-11)^2 + 15(11-11)^2 + 15(13-11)^2 = 15 \\cdot 4 + 0 + 15 \\cdot 4 = 60 + 0 + 60 = 120`}</Eq>.</>}
+>
+Using the data from exercise 107.9, calculate $SSB$.
+</Exercicio>
+
+### Block B — Reasoning and assumptions (107.11 to 107.20)
+
+<Exercicio numero="107.11" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "289", exercicio: "ex. 7.37", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>With <Eq>{`k = 4`}</Eq> groups, there would be <Eq>{`\\binom{4}{2} = 6`}</Eq> t-tests. If each has <Eq>{`\\alpha = 0.05`}</Eq>, the probability of at least one Type I error is <Eq>{`1 - (1-0.05)^6 \\approx 0.26`}</Eq>. ANOVA maintains <Eq>{`\\alpha = 0.05`}</Eq> globally.</>}
+  passos={<>
+    <ol>
+      <li>Count the number of pairs: <Eq>{`\\binom{4}{2} = 6`}</Eq> comparisons.</li>
+      <li>Compute the probability of at least 1 error: <Eq>{`1 - (0.95)^6 \\approx 0.26`}</Eq>.</li>
+      <li>Conclude: 26% chance of false positive even without real difference — unacceptable for scientific decision.</li>
+    </ol>
+    <p><em>Observation:</em> This problem is called "family-wise error rate" (FWER) inflation. ANOVA solves it at the root.</p>
+  </>}
+>
+Why not perform multiple $t$-tests to compare 4 groups? Calculate the probability of at least one false positive with $\alpha = 0.05$.
+</Exercicio>
+
+<Exercicio numero="107.12" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "291", exercicio: "ex. 7.40", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>Normality assumption: distribution approximately normal within each group. Homoscedasticity assumption: equal variances between groups. Independence: observations independent between and within groups. With <Eq>{`n = 8`}</Eq>, normality is critical (CLT doesn't help much); variance ratio of 9 indicates serious heteroscedasticity.</>}
+>
+List the three assumptions of one-way ANOVA. With $n = 8$ per group and standard deviations $s_1 = 3$, $s_2 = 3$, $s_3 = 9$, which assumption is most suspect?
+</Exercicio>
+
+<Exercicio numero="107.13" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Kruskal-Wallis — very unequal variances and small n make ANOVA inappropriate", correta: true },
+    { texto: "Welch's ANOVA — just adjust degrees of freedom" },
+    { texto: "Classical ANOVA — is robust to everything" },
+    { texto: "Repeated Student's t-test — simpler" },
+  ]}
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "423", exercicio: "ex. 14.7", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>With severe heteroscedasticity (<Eq>{`s_3/s_1 = 3`}</Eq>, variance ratio 9) AND non-normality in small <Eq>{`n`}</Eq>, no parametric version is safe. Kruskal-Wallis (rank-based) is the correct alternative. Welch helps only for heteroscedasticity when normality is ok.</>}
+>
+A study has $k = 3$ groups with $n = 8$. Shapiro-Wilk rejects normality in one group ($p = 0.008$). Variance ratio: 9:1. What test to use?
+</Exercicio>
+
+<Exercicio numero="107.14" dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-4-test-of-two-variances", secao: "§13.4", pagina: "725", exercicio: "ex. 13.9", licenca: "CC-BY 4.0" }}
+  solucao={<>Levene's test verifies the hypothesis <Eq>{`H_0: \\sigma_1^2 = \\sigma_2^2 = \\cdots = \\sigma_k^2`}</Eq>. If <Eq>{`p > 0.05`}</Eq>, there is no evidence against homoscedasticity and classical ANOVA is indicated. If <Eq>{`p \\leq 0.05`}</Eq>, use Welch's ANOVA.</>}
+>
+What is Levene's test for before ANOVA? What conclusion to draw from $p = 0.38$?
+</Exercicio>
+
+<Exercicio numero="107.15" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "293", exercicio: "ex. 7.43", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>Rejected ANOVA says only "at least one group differs." To identify which pairs of groups differ, apply post-hoc with error family correction: Tukey HSD for pairwise comparisons, Bonferroni for any contrast, Scheffé for general linear contrasts.</>}
+>
+ANOVA rejects $H_0$ in an experiment with 5 groups. What does this mean? What to do next?
+</Exercicio>
+
+<Exercicio numero="107.16" dificuldade="compreensao"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "410", exercicio: "ex. 14.3", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>Tukey HSD controls FWER only for pairwise comparisons and is more powerful than Bonferroni in that case. Bonferroni is more general (works for any set of tests) but more conservative. For <Eq>{`m`}</Eq> planned pairwise comparisons, Tukey is preferable; for ad hoc contrasts, Bonferroni is the safe choice.</>}
+>
+Compare Tukey HSD and Bonferroni: which is more conservative? When to use each?
+</Exercicio>
+
+<Exercicio numero="107.17" dificuldade="compreensao"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "418", exercicio: "ex. 14.5", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>For <Eq>{`k = 2`}</Eq>: <Eq>{`F = T^2`}</Eq> where <Eq>{`T`}</Eq> is the pooled two-sample t-statistic. Both tests are equivalent: <Eq>{`F_{1, N-2} = T^2_{N-2}`}</Eq>. The p-value is identical (two-tailed test).</>}
+>
+For $k = 2$ groups, how do ANOVA $F$ and two-sample $t$ relate? Do p-values coincide?
+</Exercicio>
+
+<Exercicio numero="107.18" dificuldade="compreensao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-facts-about-the-f-distribution", secao: "§13.3", pagina: "722", exercicio: "ex. 13.7", licenca: "CC-BY 4.0" }}
+  solucao={<>The F-distribution is right-skewed and assumes only non-negative values (it's a ratio of variances). For small df, the right tail is very heavy. When <Eq>{`df_1`}</Eq> and <Eq>{`df_2`}</Eq> grow, the F-distribution approaches normal. Always <Eq>{`F \\geq 0`}</Eq>.</>}
+>
+Describe the shape of the $F$ distribution with small degrees of freedom. Why is $F$ never negative?
+</Exercicio>
+
+<Exercicio numero="107.19" dificuldade="compreensao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "290", exercicio: "ex. 7.38", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>Cohen's <Eq>{`f = \\sqrt{\\eta^2/(1-\\eta^2)}`}</Eq>. For <Eq>{`\\eta^2 = 0.09`}</Eq>: <Eq>{`f = \\sqrt{0.09/0.91} \\approx 0.315`}</Eq>. By Cohen's convention (<Eq>{`f = 0.10`}</Eq> small; <Eq>{`0.25`}</Eq> medium; <Eq>{`0.40`}</Eq> large), this is an effect close to large.</>}
+>
+Convert $\eta^2 = 0.09$ to Cohen's $f$ and classify the effect size.
+</Exercicio>
+
+<Exercicio numero="107.20" dificuldade="compreensao"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "420", exercicio: "ex. 14.6", licenca: "CC-BY-SA 4.0" }}
+  solucao={<><Eq>{`E[MS_W] = \\sigma^2`}</Eq> always — <Eq>{`MS_W`}</Eq> is an unbiased estimator of <Eq>{`\\sigma^2`}</Eq> under both <Eq>{`H_0`}</Eq> and <Eq>{`H_1`}</Eq>. However, <Eq>{`E[MS_B] = \\sigma^2 + \\sum n_i \\alpha_i^2/(k-1)`}</Eq>, which is <Eq>{`\\sigma^2`}</Eq> only when all <Eq>{`\\alpha_i = 0`}</Eq> (i.e., under <Eq>{`H_0`}</Eq>). This asymmetry is what makes F sensitive to treatment effect.</>}
+>
+Why does $E[MS_W] = \sigma^2$ even under $H_1$, but $E[MS_B] > \sigma^2$ under $H_1$?
+</Exercicio>
+
+### Block C — Complete calculation and modeling (107.21 to 107.32)
+
+<Exercicio numero="107.21" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "718", exercicio: "ex. 13.12", licenca: "CC-BY 4.0" }}
+  solucao={<>Grand mean: <Eq>{`\\bar Y = (12 + 15 + 18)/3 = 15`}</Eq>. <Eq>{`SSB = 8(12-15)^2 + 8(15-15)^2 + 8(18-15)^2 = 8 \\cdot 9 + 0 + 8 \\cdot 9 = 144`}</Eq>. <Eq>{`df_B = 2`}</Eq>. <Eq>{`MS_B = 72`}</Eq>.</>}
+>
+Three groups with $n = 8$ each. Means: 12, 15, and 18. Calculate $SSB$ and $MS_B$.
+</Exercicio>
+
+<Exercicio numero="107.22" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "719", exercicio: "ex. 13.13", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`MS_W = SSW / df_W = 336 / 21 = 16`}</Eq>. <Eq>{`F = MS_B / MS_W = 72 / 16 = 4.5`}</Eq>. With <Eq>{`df = (2, 21)`}</Eq> and critical <Eq>{`F_{0.05;\\,2,\\,21} \\approx 3.47`}</Eq>: <Eq>{`4.5 > 3.47`}</Eq> — reject <Eq>{`H_0`}</Eq>.</>}
+>
+Continuation of exercise 107.21: $SSW = 336$ and $df_W = 21$. Calculate $F$ and decide at $\alpha = 0.05$ (critical $\approx 3.47$).
+</Exercicio>
+
+<Exercicio numero="107.23" dificuldade="aplicacao" resposta="$\eta^2 \approx 0.30$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "290", exercicio: "ex. 7.36", licenca: "CC-BY-SA 3.0" }}
+  solucao={<><Eq>{`SST = SSB + SSW = 144 + 336 = 480`}</Eq>. <Eq>{`\\eta^2 = 144/480 = 0.30`}</Eq>. Large effect (above 0.14).</>}
+>
+Using the data from exercises 107.21–107.22 ($SSB = 144$, $SSW = 336$), calculate $\eta^2$.
+</Exercicio>
+
+<Exercicio numero="107.24" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-facts-about-the-f-distribution", secao: "§13.3", pagina: "723", exercicio: "ex. 13.14", licenca: "CC-BY 4.0" }}
+  solucao={<>4 balanced groups: <Eq>{`N = 4 \\times 12 = 48`}</Eq>. <Eq>{`df_B = 3`}</Eq>, <Eq>{`df_W = 44`}</Eq>. <Eq>{`MS_B = 120/3 = 40`}</Eq>. <Eq>{`MS_W = 440/44 = 10`}</Eq>. <Eq>{`F = 40/10 = 4.0`}</Eq>. Critical <Eq>{`F_{0.05;\\,3,\\,44} \\approx 2.82`}</Eq>: reject <Eq>{`H_0`}</Eq>. <Eq>{`\\eta^2 = 120/560 \\approx 0.214`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Calculate <Eq>{`N = 4 \\times 12 = 48`}</Eq> and df: <Eq>{`df_B = 3`}</Eq>, <Eq>{`df_W = 44`}</Eq>.</li>
+      <li>Mean squares: <Eq>{`MS_B = 120/3 = 40`}</Eq>; <Eq>{`MS_W = 440/44 = 10`}</Eq>.</li>
+      <li>Statistic: <Eq>{`F = 40/10 = 4.0`}</Eq>.</li>
+      <li>Decision: <Eq>{`4.0 > 2.82`}</Eq> — reject <Eq>{`H_0`}</Eq>.</li>
+      <li>Effect size: <Eq>{`\\eta^2 = 120/560 \\approx 0.21`}</Eq> — large.</li>
+    </ol>
+    <p><em>Tip:</em> Always sum SS and check df before calculating F. Error in df contaminates everything.</p>
+  </>}
+>
+4 groups with $n = 12$ each. $SSB = 120$ and $SSW = 440$. Conduct the complete ANOVA at $\alpha = 0.05$ (critical $F_{3,44} \approx 2.82$) and calculate $\eta^2$.
+</Exercicio>
+
+<Exercicio numero="107.25" dificuldade="aplicacao" resposta="$F = 6.0$"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "720", exercicio: "ex. 13.15", licenca: "CC-BY 4.0" }}
+  solucao={<><Eq>{`F = MS_B/MS_W = 12/2 = 6.0`}</Eq>.</>}
+>
+Complete the ANOVA table: $MS_B = 12$, $MS_W = 2$. Calculate $F$.
+</Exercicio>
+
+<Exercicio numero="107.26" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-1-one-way-anova", secao: "§13.1", pagina: "712", exercicio: "ex. 13.20", licenca: "CC-BY 4.0" }}
+  solucao={<>Model: <Eq>{`Y_{ij} = \\mu + \\alpha_i + \\varepsilon_{ij}`}</Eq> with <Eq>{`i \\in \\{A, B, C\\}`}</Eq>, <Eq>{`j = 1, \\ldots, 20`}</Eq>. <Eq>{`H_0: \\alpha_A = \\alpha_B = \\alpha_C = 0`}</Eq>. Response variable: test result (0–100). Assumptions: test scores approximately normal in each method, similar variances, independent groups.</>}
+>
+A teacher wants to compare three teaching methods (A, B, C) with 20 students each, evaluated by test. Formalize the ANOVA model, hypotheses, and necessary assumptions.
+</Exercicio>
+
+<Exercicio numero="107.27" dificuldade="modelagem"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "294", exercicio: "ex. 7.45", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>Independence: each patient appears in a single diet (separate groups — ok). Normality: with <Eq>{`n = 40`}</Eq>, CLT ensures robustness. Homoscedasticity: boxplots of weight loss by diet — if amplitudes are similar, assumption is plausible. Verify with Levene or sample variance ratio.</>}
+>
+A clinical study compares 4 weight loss diets with 40 participants each. Describe how to verify ANOVA assumptions before conducting the test.
+</Exercicio>
+
+<Exercicio numero="107.28" dificuldade="modelagem"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "428", exercicio: "ex. 14.9", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>It is not directly appropriate. Algorithms tested on the same 30 datasets are not independent of each other — performance on one dataset might be correlated. The correct structure is repeated measures ANOVA (or mixed models) with dataset as a block. Classical one-way ANOVA would assume independence, which violates the design.</>}
+>
+A researcher compares 3 ML algorithms tested on the same 30 datasets. Is it appropriate to use one-way ANOVA? Justify.
+</Exercicio>
+
+<Exercicio numero="107.29" dificuldade="modelagem"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-1-one-way-anova", secao: "§13.1", pagina: "714", exercicio: "ex. 13.22", licenca: "CC-BY 4.0" }}
+  solucao={<>5 groups, <Eq>{`n = 30`}</Eq> each, <Eq>{`N = 150`}</Eq>. <Eq>{`df_B = 4`}</Eq>, <Eq>{`df_W = 145`}</Eq>. To detect <Eq>{`f = 0.25`}</Eq> (medium), 80% power, <Eq>{`\\alpha = 0.05`}</Eq>, <Eq>{`k = 5`}</Eq>: approx 52 per group are needed — so 30 might be insufficient. Consult power tables or software.</>}
+>
+Five stores have weekly sales monitored for 30 weeks. You want to use ANOVA. Outline: $df_B$, $df_W$, and if $n = 30$ is sufficient to detect medium effect (Cohen's $f = 0.25$, 80% power).
+</Exercicio>
+
+<Exercicio numero="107.30" dificuldade="modelagem"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "412", exercicio: "ex. 14.2", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>The trial compares four catalyst concentrations — k = 4 groups. Response variable: yield (%). If groups are independent (each reaction uses only one catalyst), normality is plausible for chemical yield, homoscedasticity to be checked with Levene: one-way ANOVA is the appropriate test.</>}
+>
+A chemistry lab compares four catalyst concentrations (0, 5, 10, 20 g/L) on reaction yield, with 10 replications each. Justify the use of one-way ANOVA and list assumptions to verify.
+</Exercicio>
+
+<Exercicio numero="107.31" dificuldade="aplicacao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "719", exercicio: "ex. 13.16", licenca: "CC-BY 4.0" }}
+  solucao={<>Balanced groups: <Eq>{`\\bar Y = (3 + 4 + 5 + 4.5)/4 = 4.125`}</Eq>. <Eq>{`SSB = 25[(3-4.125)^2 + (4-4.125)^2 + (5-4.125)^2 + (4.5-4.125)^2]`}</Eq> <Eq>{`= 25[1.266 + 0.016 + 0.766 + 0.141] = 25 \\times 2.188 = 54.7`}</Eq>.</>}
+>
+4 diets, 25 people each. Weight loss (kg) — means per diet: 3, 4, 5, and 4.5. Calculate $SSB$.
+</Exercicio>
+
+<Exercicio numero="107.32" dificuldade="aplicacao" resposta="$\eta^2 = 0.5$; $SSB = 150$"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "290", exercicio: "ex. 7.34", licenca: "CC-BY-SA 3.0" }}
+  solucao={<><Eq>{`\\eta^2 = SSB/SST \\Rightarrow SSB = 0.5 \\times 300 = 150`}</Eq>. <Eq>{`SSW = 300 - 150 = 150`}</Eq>.</>}
+>
+$SST = 300$ and $\eta^2 = 0.5$. Determine $SSB$ and $SSW$.
+</Exercicio>
+
+### Block D — Challenge: derivations and connections (107.33 to 107.38)
+
+<Exercicio numero="107.33" dificuldade="desafio"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "716", exercicio: "ex. 13.25", licenca: "CC-BY 4.0" }}
+  solucao={<>Starting from <Eq>{`Y_{ij} - \\bar Y = (\\bar Y_i - \\bar Y) + (Y_{ij} - \\bar Y_i)`}</Eq>, square and sum over <Eq>{`i, j`}</Eq>. The cross term is <Eq>{`2\\sum_i (\\bar Y_i - \\bar Y) \\sum_j (Y_{ij} - \\bar Y_i)`}</Eq>. Since <Eq>{`\\sum_j (Y_{ij} - \\bar Y_i) = 0`}</Eq> for each <Eq>{`i`}</Eq>, the cross terms cancel, leaving <Eq>{`SST = SSB + SSW`}</Eq>.</>}
+>
+Algebraically derive the decomposition $SST = SSB + SSW$. Show explicitly why the cross terms cancel when summing over $j$ for each fixed $i$.
+</Exercicio>
+
+<Exercicio numero="107.34" dificuldade="desafio"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "415", exercicio: "ex. 14.10", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>For <Eq>{`k = 2`}</Eq> groups with <Eq>{`n_1 = n_2 = n`}</Eq>, <Eq>{`\\bar Y_1 - \\bar Y_2 = d`}</Eq>. <Eq>{`\\bar Y = (\\bar Y_1 + \\bar Y_2)/2`}</Eq>. <Eq>{`SSB = n(\\bar Y_1 - \\bar Y)^2 + n(\\bar Y_2 - \\bar Y)^2 = n(d/2)^2 + n(d/2)^2 = nd^2/2`}</Eq>. The pooled t-test has <Eq>{`T^2 = (\\bar Y_1 - \\bar Y_2)^2 / (s_p^2(1/n + 1/n)) = d^2 n / (2 MS_W)`}</Eq>. Since <Eq>{`MS_B = SSB/1 = nd^2/2`}</Eq>, we have <Eq>{`F = MS_B/MS_W = T^2`}</Eq>.</>}
+>
+Show that, for $k = 2$ balanced groups, the ANOVA $F$ statistic is equal to the square of the two-sample $t$ statistic with pooled variance.
+</Exercicio>
+
+<Exercicio numero="107.35" dificuldade="desafio"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "295", exercicio: "ex. 7.47", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>Under <Eq>{`H_0`}</Eq>, <Eq>{`SSB/\\sigma^2 \\sim \\chi^2_{k-1}`}</Eq> (quadratic combination of <Eq>{`k-1`}</Eq> independent normal deviations from the grand mean) and <Eq>{`SSW/\\sigma^2 \\sim \\chi^2_{N-k}`}</Eq> (combination within <Eq>{`k`}</Eq> groups, each with <Eq>{`n_i - 1`}</Eq> df). Independence by orthogonality of orthogonal projection in complementary subspaces. Thus <Eq>{`F = (SSB/(k-1))/(SSW/(N-k)) \\sim F_{k-1, N-k}`}</Eq>.</>}
+>
+Argue (without full proof) why, under $H_0$, $SSB/\sigma^2 \sim \chi^2_{k-1}$ and $SSW/\sigma^2 \sim \chi^2_{N-k}$ are independent. How does this imply $F \sim F_{k-1, N-k}$?
+</Exercicio>
+
+<Exercicio numero="107.36" dificuldade="desafio"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "424", exercicio: "ex. 14.11", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>Imbalance does not invalidate ANOVA (the general formula <Eq>{`SSB = \\sum_i n_i (\\bar Y_i - \\bar Y)^2`}</Eq> remains valid). The problem is interpretive and power-related: large groups have more weight in the grand mean, and the pooled estimate of <Eq>{`\\sigma^2`}</Eq> can be dominated by groups with many observations. In extreme imbalance (<Eq>{`n_i/n_j > 10`}</Eq>), robustness to heteroscedasticity decreases. Prefer Welch in that case.</>}
+>
+What happens to ANOVA when groups have very different sizes (extreme imbalance)? Is the test still valid?
+</Exercicio>
+
+<Exercicio numero="107.37" dificuldade="desafio"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-1-one-way-anova", secao: "§13.1", pagina: "715", exercicio: "ex. 13.27", licenca: "CC-BY 4.0" }}
+  solucao={<>4 groups, <Eq>{`n = 25`}</Eq> each, <Eq>{`N = 100`}</Eq>. To detect <Eq>{`f = 0.25`}</Eq>, 80% power, <Eq>{`\\alpha = 0.05`}</Eq>, <Eq>{`k = 4`}</Eq>: approx 45 per group are needed (power tables or `pwr` in R). With <Eq>{`n = 25`}</Eq> the power is approx 55–60% — insufficient. It is recommended to increase to <Eq>{`n \\geq 45`}</Eq> per group.</>}
+>
+To detect medium effect ($f = 0.25$) between 4 groups at $\alpha = 0.05$ with 80% power, how many subjects per group are needed (approximately)? With $n = 25$ per group, is the study adequately powered?
+</Exercicio>
+
+<Exercicio numero="107.38" dificuldade="desafio"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "430", exercicio: "ex. 14.12", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>Bayesian ANOVA computes the Bayes factor <Eq>{`BF_{10}`}</Eq> = ratio of marginal likelihoods between the model with group effect and the null model. <Eq>{`BF_{10} > 10`}</Eq> is strong evidence for <Eq>{`H_1`}</Eq>; <Eq>{`BF_{10} < 1/10`}</Eq> is strong evidence for <Eq>{`H_0`}</Eq>. Advantage: quantifies evidence in both directions, unlike p-value which only rejects or fails to reject <Eq>{`H_0`}</Eq>.</>}
+>
+What is the Bayes factor $BF_{10}$ in Bayesian ANOVA? How to interpret $BF_{10} = 15$ versus $BF_{10} = 0.08$?
+</Exercicio>
+
+### Block E — Proofs (107.39 to 107.42)
+
+<Exercicio numero="107.39" dificuldade="demonstracao"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-2-the-f-distribution-and-the-f-ratio", secao: "§13.2", pagina: "716", exercicio: "ex. 13.28", licenca: "CC-BY 4.0" }}
+  solucao={<>Write <Eq>{`Y_{ij} - \\bar Y = (\\bar Y_i - \\bar Y) + (Y_{ij} - \\bar Y_i)`}</Eq>. Square it: <Eq>{`(Y_{ij}-\\bar Y)^2 = (\\bar Y_i - \\bar Y)^2 + (Y_{ij}-\\bar Y_i)^2 + 2(\\bar Y_i - \\bar Y)(Y_{ij}-\\bar Y_i)`}</Eq>. Summing over <Eq>{`j`}</Eq> for fixed <Eq>{`i`}</Eq>: the third term becomes <Eq>{`2(\\bar Y_i - \\bar Y) \\cdot 0 = 0`}</Eq>. Summing over <Eq>{`i`}</Eq>: <Eq>{`SST = SSB + SSW`}</Eq>. ∎</>}
+>
+Demonstrate that $SST = SSB + SSW$, showing that cross terms cancel when summing over $j$ for each fixed $i$.
+</Exercicio>
+
+<Exercicio numero="107.40" dificuldade="demonstracao"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "408", exercicio: "ex. 14.1", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>Under <Eq>{`H_0`}</Eq>, <Eq>{`\\bar Y_i - \\bar Y \\sim \\mathcal N(0, \\sigma^2(1/n_i - 1/N))`}</Eq> approximately. <Eq>{`E[SSB] = E[\\sum n_i (\\bar Y_i - \\bar Y)^2]`}</Eq>. Calculating via <Eq>{`E[X^2] = \\text{Var}(X) + (E[X])^2`}</Eq> with <Eq>{`E[\\bar Y_i - \\bar Y] = 0`}</Eq> under <Eq>{`H_0`}</Eq>: <Eq>{`E[SSB] = (k-1)\\sigma^2`}</Eq>, therefore <Eq>{`E[MS_B] = \\sigma^2`}</Eq>. ∎</>}
+>
+Show that $E[MS_B] = \sigma^2$ under $H_0$ (for balanced groups, $n_i = n$).
+</Exercicio>
+
+<Exercicio numero="107.41" dificuldade="demonstracao"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.5", pagina: "296", exercicio: "ex. 7.49", licenca: "CC-BY-SA 3.0" }}
+  solucao={<>Kruskal-Wallis: ranks all <Eq>{`N`}</Eq> observations jointly, calculates sum of ranks per group <Eq>{`R_i`}</Eq>, and computes <Eq>{`H = \\frac{12}{N(N+1)} \\sum_i \\frac{R_i^2}{n_i} - 3(N+1)`}</Eq>. Under <Eq>{`H_0`}</Eq>, <Eq>{`H \\sim \\chi^2_{k-1}`}</Eq>. Does not assume normality — suitable when the assumption fails. Loses power if normality actually holds (compared to ANOVA).</>}
+>
+Derive the Kruskal-Wallis test statistic and explain why it is the non-parametric analog of one-way ANOVA.
+</Exercicio>
+
+<Exercicio numero="107.42" dificuldade="demonstracao"
+  fonte={{ livro: "Navarro — Learning Statistics with R", url: "https://learningstatisticswithr.com/", secao: "ch. 14", pagina: "416", exercicio: "ex. 14.13", licenca: "CC-BY-SA 4.0" }}
+  solucao={<>Welch's ANOVA does not assume <Eq>{`\\sigma_i^2 = \\sigma^2`}</Eq>. Defines weights <Eq>{`w_i = n_i/s_i^2`}</Eq>, weighted mean <Eq>{`\\bar Y^* = \\sum w_i \\bar Y_i / W`}</Eq>, and statistic <Eq>{`F^* = \\frac{\\sum w_i(\\bar Y_i - \\bar Y^*)^2/(k-1)}{1 + \\frac{2(k-2)}{k^2-1} \\sum (1 - w_i/W)^2/(n_i-1)}`}</Eq>. The denominator corrects the denominator degrees of freedom (generalized Welch-Satterthwaite formula). Under <Eq>{`H_0`}</Eq>, <Eq>{`F^*`}</Eq> approximates <Eq>{`F_{k-1, df_W^*}`}</Eq> with fractional <Eq>{`df_W^*`}</Eq>.</>}
+>
+Derive the $F^*$ statistic of Welch's ANOVA for unequal variances. Explain how denominator degrees of freedom are adjusted.
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**OpenStax — Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY 4.0 · §13.1–13.4. <strong>Primary source for this lesson.</strong> Model definition, F-statistic, ANOVA table, applied exercises.
+
+- [**OpenIntro Statistics (4th ed.)**](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA 3.0 · §7.5. Model assumptions, homoscedasticity, Tukey and Bonferroni post-hoc.
+
+- [**Learning Statistics with R**](https://learningstatisticswithr.com/) — Navarro · CC-BY-SA 4.0 · ch. 14. Geometric intuition for F, $\eta^2$ effect size, Welch's ANOVA, Bayesian ANOVA.

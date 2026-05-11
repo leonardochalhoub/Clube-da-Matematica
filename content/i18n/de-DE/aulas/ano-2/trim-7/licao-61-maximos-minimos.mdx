@@ -1,0 +1,740 @@
+---
+titulo: "Lektion 61 — Maxima und Minima"
+slug: "licao-61-maximos-minimos"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Kritische Punkte, Fermats Theorem, Tests der 1. und 2. Ableitung, und der Algorithmus für absolute Extrema auf abgeschlossenen Intervallen."
+ordem: 61
+publicado: true
+tags: ["otimizacao", "maximos-minimos", "pontos-criticos", "derivada", "ano-2", "trim-7"]
+prerrequisitos: ["licao-60-consolidacao-trim-6"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["2.º ano EM", "Equiv. Math II/III japonês", "Equiv. Analysis/Kurvendiskussion alemã"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="f'(c) = 0 \;\Longrightarrow\; c \text{ kandidat zu lokalen extremum}"
+  legenda={<><strong>Fermats Theorem</strong>: wenn <em>f</em> ein lokales Extremum in <em>c</em> hat (innerer Punkt des Definitionsbereichs) und in <em>c</em> differenzierbar ist, dann <Eq>{`f'(c) = 0`}</Eq>. Punkte, wo <Eq>{`f'(c) = 0`}</Eq> oder <Eq>{`f'(c)`}</Eq> nicht existiert, werden <strong>kritische Punkte</strong> genannt.</>}
+  audioTexto="Fermats Theorem. Wenn f ein lokales Extremum in einem inneren Punkt c hat, wo es differenzierbar ist, dann ist die Ableitung an diesem Punkt null. Punkte, wo die Ableitung verschwindet oder nicht existiert, sind die Kandidaten für ein Extremum — wir nennen sie kritische Punkte."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Bücher, die diese Lektion abdecken
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-3-1-tests.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §3.1 Using derivatives to identify extreme values · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Fermats Theorem, kritischer Punkt, Test der 1. und 2. Ableitung — pädagogische Grundlage dieser Lektion.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.3 Maxima and Minima · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Extremwert-Theorem (Weierstrass) und Algorithmus für absolute Extrema auf [a, b].</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §3.1 Extreme Values · CC-BY-NC · </span>
+      <em className="text-clube-mist">Gestaffelte Übungen mit offenen und abgeschlossenen Intervallen; Beispiele nicht-differenzierbarer Funktionen.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definitionen, Theoreme und Algorithmen">
+
+### Lokale und absolute Extrema
+
+<Definicao titulo="Lokales Maximum und Minimum">
+
+Sei <Eq>{`f`}</Eq> auf einem Definitionsbereich <Eq>{`D`}</Eq> definiert und <Eq>{`c \\in D`}</Eq>.
+
+- <Eq>{`c`}</Eq> ist **lokales Maximum** von <Eq>{`f`}</Eq>, wenn es ein <Eq>{`\\delta > 0`}</Eq> gibt, so dass <Eq>{`f(c) \\geq f(x)`}</Eq> für alle <Eq>{`x \\in D`}</Eq> mit <Eq>{`|x - c| < \\delta`}</Eq>.
+- <Eq>{`c`}</Eq> ist **lokales Minimum** von <Eq>{`f`}</Eq>, wenn es ein <Eq>{`\\delta > 0`}</Eq> gibt, so dass <Eq>{`f(c) \\leq f(x)`}</Eq> für alle <Eq>{`x \\in D`}</Eq> mit <Eq>{`|x - c| < \\delta`}</Eq>.
+- **Absolutes Extremum** (globales): <Eq>{`f(c) \\geq f(x)`}</Eq> (oder <Eq>{`\\leq`}</Eq>) für **alle** <Eq>{`x \\in D`}</Eq>.
+
+</Definicao>
+
+<Definicao titulo="Kritischer Punkt">
+
+<Eq>{`c`}</Eq> ist **kritischer Punkt** von <Eq>{`f`}</Eq>, wenn:
+1. <Eq>{`c`}</Eq> im Innern des Definitionsbereichs liegt, **und**
+2. <Eq>{`f'(c) = 0`}</Eq> oder <Eq>{`f'(c)`}</Eq> existiert nicht.
+
+</Definicao>
+
+> "Wenn f ein lokales Maximum oder Minimum in c hat, dann ist c ein kritischer Punkt von f." — [Active Calculus §3.1](https://activecalculus.org/single/sec-3-1-tests.html)
+
+<Teorema titulo="Fermats Theorem">
+
+Wenn <Eq>{`f`}</Eq> ein lokales Extremum in <Eq>{`c`}</Eq> hat (innerer Punkt des Definitionsbereichs) und <Eq>{`f`}</Eq> in <Eq>{`c`}</Eq> differenzierbar ist, dann <Eq display>{`f'(c) = 0.`}</Eq>
+
+**Achtung — die Umkehrung ist falsch.** <Eq>{`f'(c) = 0`}</Eq> impliziert nicht Extremum: die Funktion <Eq>{`f(x) = x^3`}</Eq> hat <Eq>{`f'(0) = 0`}</Eq>, aber <Eq>{`c = 0`}</Eq> ist ein Wendepunkt, kein Extremum.
+
+</Teorema>
+
+<Insight>
+
+Fermat sagt: jedes lokale Extremum (innerer Punkt, differenzierbar) ist kritischer Punkt. Aber nicht jeder kritische Punkt ist ein Extremum. Der kritische Punkt ist ein **Kandidat** — die Tests unten entscheiden.
+
+</Insight>
+
+### Test der 1. Ableitung
+
+<Definicao titulo="Kriterium des Vorzeichenwechsels">
+
+Sei <Eq>{`c`}</Eq> kritischer Punkt von stetigem <Eq>{`f`}</Eq>. Für <Eq>{`x`}</Eq> nahe <Eq>{`c`}</Eq>:
+
+- <Eq>{`f'`}</Eq> wechselt von <Eq>{`+`}</Eq> zu <Eq>{`-`}</Eq> bei <Eq>{`c`}</Eq> → **lokales Maximum**.
+- <Eq>{`f'`}</Eq> wechselt von <Eq>{`-`}</Eq> zu <Eq>{`+`}</Eq> bei <Eq>{`c`}</Eq> → **lokales Minimum**.
+- <Eq>{`f'`}</Eq> wechselt das Vorzeichen bei <Eq>{`c`}</Eq> nicht → **weder Maximum noch Minimum** (Wendepunkt).
+
+</Definicao>
+
+### Test der 2. Ableitung
+
+<Definicao titulo="Kriterium der Konkavität">
+
+Sei <Eq>{`c`}</Eq> kritischer Punkt mit <Eq>{`f'(c) = 0`}</Eq> und <Eq>{`f''(c)`}</Eq> existierend:
+
+- <Eq>{`f''(c) > 0`}</Eq> → **lokales Minimum** (Parabel nach oben).
+- <Eq>{`f''(c) < 0`}</Eq> → **lokales Maximum** (Parabel nach unten).
+- <Eq>{`f''(c) = 0`}</Eq> → **unklar** (nutze den Test der 1. Ableitung).
+
+</Definicao>
+
+> "Wenn der Test der 2. Ableitung unklar ist, greifen wir auf den Test der 1. Ableitung zurück." — [OpenStax Calculus Vol. 1, §4.5](https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph)
+
+### Extremwert-Theorem (Weierstrass)
+
+<Teorema titulo="Absolutes Extremum auf abgeschlossenem Intervall">
+
+Wenn <Eq>{`f`}</Eq> stetig auf <Eq>{`[a, b]`}</Eq> ist, dann erreicht <Eq>{`f`}</Eq> seinen absoluten Maximalwert und seinen absoluten Minimalwert an irgendeinem Punkt in <Eq>{`[a, b]`}</Eq>.
+
+</Teorema>
+
+### Algorithmus für absolute Extrema auf [a, b]
+
+<Definicao titulo="Geschlossenes Intervallverfahren">
+
+1. Finde alle kritischen Punkte von <Eq>{`f`}</Eq> im Inneren <Eq>{`(a, b)`}</Eq>.
+2. Evaluiere <Eq>{`f`}</Eq> an jedem kritischen Punkt und an den Endpoints <Eq>{`a`}</Eq> und <Eq>{`b`}</Eq>.
+3. Der **größte Wert** ist das absolute Maximum; der **kleinste Wert** ist das absolute Minimum.
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 500 200" className="w-full">
+  <defs>
+    <marker id="arr61" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g>
+    <line x1="40" y1="160" x2="470" y2="160" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr61)"/>
+    <line x1="60" y1="170" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr61)"/>
+    <path d="M 80,140 C 130,40 160,150 200,100 C 240,50 300,160 360,80 C 400,40 430,130 450,120" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+    <circle cx="200" cy="100" r="4" fill="rgb(232 199 122)"/>
+    <text x="200" y="92" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">lok Min</text>
+    <circle cx="360" cy="80" r="4" fill="rgb(232 199 122)"/>
+    <text x="360" y="72" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">lok Min</text>
+    <circle cx="130" cy="72" r="4" fill="rgb(26 77 92)"/>
+    <text x="130" y="64" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">lok Max</text>
+    <circle cx="300" cy="135" r="4" fill="rgb(26 77 92)"/>
+    <text x="300" y="148" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">lok Max</text>
+    <text x="80" y="175" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">a</text>
+    <text x="450" y="175" textAnchor="middle" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">b</text>
+    <circle cx="80" cy="140" r="3" fill="rgb(26 77 92)"/>
+    <circle cx="450" cy="120" r="3" fill="rgb(26 77 92)"/>
+  </g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Lokale Extrema treten an kritischen Punkten auf (wo <Eq>{`f'=0`}</Eq>). Absolute Extrema können lokale Extrema oder die Endpoints <Eq>{`a`}</Eq> und <Eq>{`b`}</Eq> sein.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein fünfjähriges Kind">
+
+Stellen dir eine **Achterbahn** vor. Es gibt Stellen, die die **Gipfel** sind (Orte, die dort am höchsten sind) und Stellen, die die **Täler** sind (Orte, die dort am niedrigsten sind).
+
+Am Gipfel des Berges, wenn du nach links und rechts schaust, ist alles um dich herum niedriger. In einem Tal ist alles um dich herum höher.
+
+Der spezielle Trick: **genau dann, wenn du am Gipfel oder im Tal bist, ist die Schiene vollkommen eben** — überhaupt keine Neigung. Das hilft uns, diese besonderen Orte zu finden!
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein zehnjähriges Kind">
+
+Wenn du den Graphen einer Funktion zeichnest, geht er rauf und runter. Die höchsten Punkte sind **Maxima** und die niedrigsten sind **Minima**.
+
+**Wie findest du sie?** Oben auf einem Hügel oder unten in einem Tal ist die Steigung des Graphen **null** — die Tangente ist horizontal. Also:
+
+1. Berechne <Eq>{`f'(x)`}</Eq>.
+2. Löse <Eq>{`f'(x) = 0`}</Eq>.
+3. Prüfe, ob die Funktion vorher steigt und nachher fällt (Maximum), oder vorher fällt und nachher steigt (Minimum).
+
+Beispiel: <Eq>{`f(x) = x^2`}</Eq>. Ableitung: <Eq>{`f'(x) = 2x`}</Eq>. Auf Null setzen: <Eq>{`x = 0`}</Eq>. Da <Eq>{`f'`}</Eq> von negativ zu positiv bei <Eq>{`x = 0`}</Eq> wechselt, ist es ein **Minimum** — und tatsächlich hat <Eq>{`x^2`}</Eq> seinen kleinsten Wert bei <Eq>{`x = 0`}</Eq>.
+
+</Porta>
+
+<Porta nivel="15" titulo="Für den Gymnasialschüler">
+
+**Das zentrale Problem:** Wo sind die Gipfel und die Täler auf einem Graphen?
+
+### Schritt für Schritt
+
+1. **Ableiten:** Berechne <Eq>{`f'(x)`}</Eq>.
+2. **Kritische Punkte:** Löse <Eq>{`f'(x) = 0`}</Eq> und markiere, wo <Eq>{`f'`}</Eq> nicht existiert.
+3. **Klassifiziere mit dem 1. Test:** erstelle eine Vorzeichentabelle von <Eq>{`f'`}</Eq>.
+   - <Eq>{`(+)`}</Eq> vorher, <Eq>{`(-)`}</Eq> nachher → lokales Maximum.
+   - <Eq>{`(-)`}</Eq> vorher, <Eq>{`(+)`}</Eq> nachher → lokales Minimum.
+4. (Schnelle Alternative) **2. Test:** Berechne <Eq>{`f''(c)`}</Eq> am kritischen Punkt.
+   - <Eq>{`f''(c) < 0`}</Eq> → Maximum. <Eq>{`f''(c) > 0`}</Eq> → Minimum. <Eq>{`f''(c) = 0`}</Eq> → nutze den 1.
+
+**Absolutes Extremum auf** <Eq>{`[a, b]`}</Eq>**:** Evaluiere <Eq>{`f`}</Eq> an den kritischen Punkten und an den Endpoints. Der größte Wert gewinnt; der kleinste Wert gewinnt.
+
+**Achtung:** <Eq>{`f'(c) = 0`}</Eq> **garantiert nicht** Extremum. Bei <Eq>{`f(x) = x^3`}</Eq> hat man <Eq>{`f'(0) = 0`}</Eq>, aber <Eq>{`x = 0`}</Eq> ist ein Wendepunkt — die Funktion ändert dort die Monotonie nicht.
+
+</Porta>
+
+<Porta nivel="25" titulo="Für den Ingenieurstudenten">
+
+### Formale Grundlagen
+
+Das **Fermat-Theorem** garantiert, dass innere lokale Extrema kritische Punkte sind, wenn <Eq>{`f`}</Eq> differenzierbar ist. Die Umkehrung schlägt fehl: <Eq>{`x^3`}</Eq> zeigt, dass <Eq>{`f'(c) = 0`}</Eq> an einem Wendepunkt ohne Monotonie-Wechsel auftreten kann.
+
+Das **Extremwert-Theorem** (Weierstrass) garantiert Existenz von absoluten Extrema, wenn <Eq>{`f`}</Eq> stetig auf <Eq>{`[a, b]`}</Eq> ist — liefert aber keine Lokalisierung. Der Algorithmus der absoluten Extrema:
+
+1. Innere kritische Punkte (wo <Eq>{`f' = 0`}</Eq> oder nicht existiert).
+2. Endpoints <Eq>{`a, b`}</Eq>.
+3. Evaluiere <Eq>{`f`}</Eq> überall. Absolutes Maximum und Minimum sind die Extremwerte der Menge.
+
+### Tests
+
+**1. Ableitung:** analysiert Vorzeichenwechsel von <Eq>{`f'`}</Eq> um <Eq>{`c`}</Eq>. Allgemeiner — funktioniert auch wenn <Eq>{`f''(c)`}</Eq> nicht existiert oder null ist.
+
+**2. Ableitung:** bei <Eq>{`c`}</Eq> mit <Eq>{`f'(c) = 0`}</Eq>: wenn <Eq>{`f''(c) > 0`}</Eq>, hat die Funktion positive Krümmung (konkav nach oben) → lokales Minimum. Wenn <Eq>{`f''(c) < 0`}</Eq>, konkav nach unten → lokales Maximum. Wenn <Eq>{`f''(c) = 0`}</Eq> ist unklar: kann Wendepunkt sein (<Eq>{`x^3`}</Eq>), oder Minimum (<Eq>{`x^4`}</Eq>), oder Maximum (<Eq>{`-x^4`}</Eq>).
+
+**Verbindung zur Variationsrechnung:** die Euler-Lagrange-Bedingung, Grundpfeiler der analytischen Mechanik und optimalen Kontrolle, ist die funktionale Verallgemeinerung von <Eq>{`f'(c) = 0`}</Eq>.
+
+</Porta>
+
+<Porta nivel="40" titulo="Für den erfahrenen Fachmann">
+
+Das Problem, Extrema zu lokalisieren, ist so alt wie die Infinitesimalrechnung selbst. Fermat, zwei Jahrzehnte vor Newton und Leibniz, formalisierte bereits den Kalkül mit seiner Methode der "Adäquation" (adequality), um Maxima und Minima zu finden — er ersetzte <Eq>{`x`}</Eq> durch <Eq>{`x + e`}</Eq>, setzte es gleich dem ursprünglichen Wert und ließ <Eq>{`e \\to 0`}</Eq>. Das ist die Intuition der Ableitung vor der Ableitung als Konzept.
+
+Das Extremwert-Theorem, formalisiert von Weierstrass im 19. Jahrhundert, erforderte Vollständigkeit der reellen Zahlen — eine Eigenschaft, die Cantor erst Jahrzehnte später axiomatisieren würde. Ohne Vollständigkeit kann ein stetiger Kontinuum mit Lücken eine stetige Funktion haben, die ihr Supremum nie erreicht.
+
+In angewandter Optimierung: Ingenieure, Ökonomen und Data Scientists arbeiten mit Verallgemeinerungen — Lagrange-Multiplikatoren für Restriktionen, KKT-Bedingungen (Karush-Kuhn-Tucker) für nicht-lineare Programmierung, und Gradient null in hohen Dimensionen. Die Intuition dieser Lektion — "Kandidaten sind Punkte, wo der Gradient verschwindet" — ist universell. Die Herausforderung in hohen Dimensionen ist die Unterscheidung zwischen Maximum, Minimum und Sattelpunkt (wo <Eq>{`\\nabla f = 0`}</Eq>, aber weder Maximum noch Minimum).
+
+Im Machine Learning vermeidet Gradient Descent die direkte Berechnung kritischer Punkte: er iteriert in Richtung <Eq>{`-\\nabla f`}</Eq>, konvergiert (hoffentlich) gegen ein lokales Minimum. Die Theorie dahinter — Lernraten, Konvergenz — ist direkte Anwendung dessen, was man in dieser Lektion lernt.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktische Anwendung im deutschen Kontext">
+
+**Maximaler Gewinn einer Bäckerei.** Eine Bäckerei produziert <Eq>{`x`}</Eq> Einheiten Brot pro Tag (in Hundert). Der tägliche Gewinn (in Euro) wird modelliert durch:
+
+<Eq display>{`L(x) = -2x^2 + 12x - 10, \quad x \in [0, 5]`}</Eq>
+
+**Schritt 1 — kritischer Punkt:** <Eq>{`L'(x) = -4x + 12 = 0 \\Rightarrow x = 3`}</Eq>.
+
+**Schritt 2 — vergleichen:** <Eq>{`L(0) = -10`}</Eq>, <Eq>{`L(3) = -18 + 36 - 10 = 8`}</Eq>, <Eq>{`L(5) = -50 + 60 - 10 = 0`}</Eq>.
+
+**Schluss:** maximaler Gewinn von 800 €/Tag bei Produktion von 300 Einheiten. Unter 100 Einheiten (x kleiner als 1) oder über 500 Einheiten (x größer als 5) macht der Betrieb Verlust.
+
+**Verbindung zu Prüfungen:** Optimierungsprobleme erscheinen in der Abiturprüfung mit quadratischen Modellen. Der Algorithmus hier — ableiten, nullsetzen, mit Endpoints des Definitionsbereichs vergleichen — ist genau die verlangte Methode.
+
+</Porta>
+
+</DuasPortas>
+
+## Gelöste Beispiele
+
+<Exemplo titulo="Kritische Punkte eines kubischen Polynoms">
+
+**Aufgabe.** Finde alle kritischen Punkte von <Eq>{`f(x) = x^3 - 3x^2 - 9x + 5`}</Eq> und klassifiziere sie.
+
+**Strategie.** Ableiten, nullsetzen, und den Test der 2. Ableitung nutzen.
+
+**Lösung.**
+
+<Eq display>{`f'(x) = 3x^2 - 6x - 9 = 3(x^2 - 2x - 3) = 3(x-3)(x+1)`}</Eq>
+
+Kritische Punkte: <Eq>{`x = 3`}</Eq> und <Eq>{`x = -1`}</Eq>.
+
+Zweite Ableitung: <Eq>{`f''(x) = 6x - 6`}</Eq>.
+
+- <Eq>{`f''(-1) = -12 < 0`}</Eq> → **lokales Maximum** bei <Eq>{`x = -1`}</Eq>, mit <Eq>{`f(-1) = -1 - 3 + 9 + 5 = 10`}</Eq>.
+- <Eq>{`f''(3) = 12 > 0`}</Eq> → **lokales Minimum** bei <Eq>{`x = 3`}</Eq>, mit <Eq>{`f(3) = 27 - 27 - 27 + 5 = -22`}</Eq>.
+
+**Verifizierung.** Vorzeichentabelle von <Eq>{`f'`}</Eq>: für <Eq>{`x < -1`}</Eq>, <Eq>{`f' > 0`}</Eq> (steigend). Für <Eq>{`-1 < x < 3`}</Eq>, <Eq>{`f' < 0`}</Eq> (fallend). Für <Eq>{`x > 3`}</Eq>, <Eq>{`f' > 0`}</Eq> (steigend). Konsistent mit Maximum bei <Eq>{`-1`}</Eq> und Minimum bei <Eq>{`3`}</Eq>.
+
+**Quelle.** [Active Calculus §3.1, Activity 3.1.2](https://activecalculus.org/single/sec-3-1-tests.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Absolute Extrema auf abgeschlossenem Intervall">
+
+**Aufgabe.** Bestimme die absoluten Extrema von <Eq>{`f(x) = x^3 - 6x^2 + 9x + 2`}</Eq> auf <Eq>{`[0, 4]`}</Eq>.
+
+**Strategie.** Algorithmus der absoluten Extrema: innere kritische Punkte + Endpoints.
+
+**Lösung.**
+
+<Eq display>{`f'(x) = 3x^2 - 12x + 9 = 3(x^2 - 4x + 3) = 3(x-1)(x-3)`}</Eq>
+
+Kritische Punkte in <Eq>{`(0,4)`}</Eq>: <Eq>{`x = 1`}</Eq> und <Eq>{`x = 3`}</Eq>.
+
+Evaluierung:
+
+- <Eq>{`f(0) = 2`}</Eq>
+- <Eq>{`f(1) = 1 - 6 + 9 + 2 = 6`}</Eq>
+- <Eq>{`f(3) = 27 - 54 + 27 + 2 = 2`}</Eq>
+- <Eq>{`f(4) = 64 - 96 + 36 + 2 = 6`}</Eq>
+
+**Absolutes Maximum:** <Eq>{`f = 6`}</Eq>, erreicht bei <Eq>{`x = 1`}</Eq> und <Eq>{`x = 4`}</Eq>. **Absolutes Minimum:** <Eq>{`f = 2`}</Eq>, erreicht bei <Eq>{`x = 0`}</Eq> und <Eq>{`x = 3`}</Eq>.
+
+**Verifizierung.** Extrema an Endpoints sind gültig — der Algorithmus schließt notwendigerweise <Eq>{`a`}</Eq> und <Eq>{`b`}</Eq> ein.
+
+**Quelle.** [OpenStax Calculus Vol. 1, §4.3, Example 4.13](https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Kritischer Punkt ohne Extremum (Wendepunkt)">
+
+**Aufgabe.** Zeige, dass <Eq>{`f(x) = x^3`}</Eq> einen kritischen Punkt bei <Eq>{`x = 0`}</Eq> hat, aber dieser Punkt ist kein lokales Extremum.
+
+**Strategie.** Wende den Test der 1. Ableitung an, um zu verifizieren, dass keine Vorzeichenänderung stattfindet.
+
+**Lösung.**
+
+<Eq display>{`f'(x) = 3x^2`}</Eq>
+
+<Eq>{`f'(0) = 0`}</Eq> → <Eq>{`x = 0`}</Eq> ist kritischer Punkt.
+
+Für <Eq>{`x < 0`}</Eq>: <Eq>{`3x^2 > 0`}</Eq>. Für <Eq>{`x > 0`}</Eq>: <Eq>{`3x^2 > 0`}</Eq>. Das Vorzeichen von <Eq>{`f'`}</Eq> **ändert sich nicht** → kein lokales Extremum.
+
+**Verifizierung.** <Eq>{`f(-1) = -1 < f(0) = 0 < f(1) = 1`}</Eq>: die Funktion ist streng steigend in jeder Umgebung von <Eq>{`0`}</Eq>, was bestätigt, dass es weder Maximum noch Minimum ist.
+
+**Quelle.** [APEX Calculus §3.1, Example 3.1.3](https://www.apexcalculus.com/) · CC-BY-NC
+
+</Exemplo>
+
+<Exemplo titulo="Test der 1. Ableitung mit Wurzel">
+
+**Aufgabe.** Finde die lokalen Extrema von <Eq>{`f(x) = x^{2/3}`}</Eq>.
+
+**Strategie.** Die Ableitung existiert nicht bei <Eq>{`x = 0`}</Eq>; das erzeugt einen kritischen Punkt ohne <Eq>{`f' = 0`}</Eq>.
+
+**Lösung.**
+
+<Eq display>{`f'(x) = \\frac{2}{3}x^{-1/3} = \\frac{2}{3\\sqrt[3]{x}}`}</Eq>
+
+<Eq>{`f'(0)`}</Eq> existiert nicht (Nenner null), und <Eq>{`f(0) = 0`}</Eq> existiert → <Eq>{`x = 0`}</Eq> ist kritischer Punkt.
+
+Vorzeichentabelle: für <Eq>{`x < 0`}</Eq>, <Eq>{`x^{1/3} < 0`}</Eq>, daher <Eq>{`f' < 0`}</Eq>. Für <Eq>{`x > 0`}</Eq>, <Eq>{`f' > 0`}</Eq>. Wechsel <Eq>{`(-) \\to (+)`}</Eq> bei <Eq>{`x = 0`}</Eq> → **lokales Minimum**.
+
+**Verifizierung.** <Eq>{`f(x) = x^{2/3} \\geq 0`}</Eq> für alle <Eq>{`x`}</Eq>, und <Eq>{`f(0) = 0`}</Eq> → auch absolutes Minimum.
+
+**Quelle.** [Active Calculus §3.1, Exercise 3.1.3](https://activecalculus.org/single/sec-3-1-tests.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Extrema trigonometrischer Funktion auf abgeschlossenem Intervall">
+
+**Aufgabe.** Bestimme die absoluten Extrema von <Eq>{`f(x) = 2\\sin x - x`}</Eq> auf <Eq>{`[0, 2\\pi]`}</Eq>.
+
+**Strategie.** Ableite, finde kritische Punkte (Nullstellen von Kosinus), wende den Algorithmus an.
+
+**Lösung.**
+
+<Eq display>{`f'(x) = 2\\cos x - 1 = 0 \\implies \\cos x = \\tfrac{1}{2} \\implies x = \\tfrac{\\pi}{3},\\; x = \\tfrac{5\\pi}{3}`}</Eq>
+
+Evaluierung an kritischen Punkten und Endpoints:
+
+- <Eq>{`f(0) = 0`}</Eq>
+- <Eq>{`f(\\pi/3) = 2 \\cdot (\\sqrt{3}/2) - \\pi/3 = \\sqrt{3} - \\pi/3 \\approx 0{,}685`}</Eq>
+- <Eq>{`f(5\\pi/3) = 2 \\cdot (-\\sqrt{3}/2) - 5\\pi/3 = -\\sqrt{3} - 5\\pi/3 \\approx -6{,}97`}</Eq>
+- <Eq>{`f(2\\pi) = 0 - 2\\pi \\approx -6{,}28`}</Eq>
+
+**Absolutes Maximum:** <Eq>{`f(\\pi/3) = \\sqrt{3} - \\pi/3`}</Eq>. **Absolutes Minimum:** <Eq>{`f(5\\pi/3) = -\\sqrt{3} - 5\\pi/3`}</Eq>.
+
+**Verifizierung.** Vorzeichen von <Eq>{`f'`}</Eq>: positiv auf <Eq>{`(0, \\pi/3)`}</Eq>, negativ auf <Eq>{`(\\pi/3, 5\\pi/3)`}</Eq>, positiv auf <Eq>{`(5\\pi/3, 2\\pi)`}</Eq>. Maximum und Minimum bestätigt.
+
+**Quelle.** [OpenStax Calculus Vol. 1, §4.3, Example 4.14](https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima) · CC-BY-NC-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-61-maximos-minimos">
+
+<Exercicio
+  numero="61.1"
+  dificuldade="aplicacao"
+  solucao={<>Die kritischen Punkte von <Eq>{`f(x) = x^2 - 4x + 3`}</Eq> sind wo <Eq>{`f'(x) = 2x - 4 = 0`}</Eq>, also <Eq>{`x = 2`}</Eq>. Da <Eq>{`f''(x) = 2 > 0`}</Eq>, ist es lokales Minimum. Wert: <Eq>{`f(2) = 4 - 8 + 3 = -1`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimme den kritischen Punkt von <Eq>{`f(x) = x^2 - 4x + 3`}</Eq> und klassifiziere ihn mit dem Test der 2. Ableitung.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 3x^2 - 12 = 0 \\Rightarrow x = \\pm 2`}</Eq>. Bei <Eq>{`x = -2`}</Eq>: <Eq>{`f''(-2) = -12 < 0`}</Eq> → lokales Maximum, <Eq>{`f(-2) = 16`}</Eq>. Bei <Eq>{`x = 2`}</Eq>: <Eq>{`f''(2) = 12 > 0`}</Eq> → lokales Minimum, <Eq>{`f(2) = -16`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Klassifiziere die kritischen Punkte von <Eq>{`f(x) = x^3 - 12x`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`g'(t) = 2t - 6 = 0 \\Rightarrow t = 3`}</Eq>. Auf <Eq>{`[1, 5]`}</Eq>: <Eq>{`g(1) = 1 - 6 + 8 = 3`}</Eq>, <Eq>{`g(3) = 9 - 18 + 8 = -1`}</Eq>, <Eq>{`g(5) = 25 - 30 + 8 = 3`}</Eq>. Absolutes Minimum: <Eq>{`-1`}</Eq> bei <Eq>{`t = 3`}</Eq>. Absolutes Maximum: <Eq>{`3`}</Eq> bei <Eq>{`t = 1`}</Eq> und <Eq>{`t = 5`}</Eq>.</>}
+  passos={<><ol><li>Leite <Eq>{`g(t) = t^2 - 6t + 8`}</Eq> ab: Ergebnis <Eq>{`g'(t) = 2t - 6`}</Eq>.</li><li>Nullstelle der Ableitung: <Eq>{`2t - 6 = 0 \\Rightarrow t = 3`}</Eq>, das liegt im Intervall <Eq>{`(1,5)`}</Eq>.</li><li>Evaluiere <Eq>{`g`}</Eq> in drei Punkten: <Eq>{`t = 1, 3, 5`}</Eq>.</li><li>Vergleiche: der kleinste Wert ist das absolute Minimum, der größte ist das absolute Maximum.</li></ol><em>Tipp:</em> vergiss nicht, die Endpoints zu evaluieren — absolute Extrema treten oft dort auf.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Finde die absoluten Extrema von <Eq>{`g(t) = t^2 - 6t + 8`}</Eq> auf <Eq>{`[1, 5]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`h'(x) = 4x^3 - 4x = 4x(x^2 - 1) = 4x(x-1)(x+1)`}</Eq>. Kritische Punkte: <Eq>{`x = -1, 0, 1`}</Eq>. <Eq>{`h''(x) = 12x^2 - 4`}</Eq>. Bei <Eq>{`x = \\pm 1`}</Eq>: <Eq>{`h'' = 8 > 0`}</Eq> → Minima. Bei <Eq>{`x = 0`}</Eq>: <Eq>{`h'' = -4 < 0`}</Eq> → lokales Maximum.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Klassifiziere alle kritischen Punkte von <Eq>{`h(x) = x^4 - 2x^2 + 1`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\cos x`}</Eq>. Nullstellen auf <Eq>{`[0, 2\\pi]`}</Eq>: <Eq>{`x = \\pi/2`}</Eq> und <Eq>{`x = 3\\pi/2`}</Eq>. <Eq>{`f(0) = 0`}</Eq>, <Eq>{`f(\\pi/2) = 1`}</Eq>, <Eq>{`f(3\\pi/2) = -1`}</Eq>, <Eq>{`f(2\\pi) = 0`}</Eq>. Absolutes Maximum: <Eq>{`1`}</Eq>. Absolutes Minimum: <Eq>{`-1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimme die absoluten Extrema von <Eq>{`f(x) = \\sin x`}</Eq> auf <Eq>{`[0, 2\\pi]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`p'(x) = 6x^2 - 6x - 36 = 6(x^2 - x - 6) = 6(x-3)(x+2)`}</Eq>. Kritische Punkte: <Eq>{`x = 3`}</Eq> und <Eq>{`x = -2`}</Eq>. Bei <Eq>{`x = -2`}</Eq>: <Eq>{`p''(-2) = 12(-2) - 6 = -30 < 0`}</Eq> → lokales Maximum. Bei <Eq>{`x = 3`}</Eq>: <Eq>{`p''(3) = 30 > 0`}</Eq> → lokales Minimum.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Finde und klassifiziere die kritischen Punkte von <Eq>{`p(x) = 2x^3 - 3x^2 - 36x + 1`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{1}{3}x^{-2/3}`}</Eq>. <Eq>{`f'`}</Eq> existiert nicht bei <Eq>{`x = 0`}</Eq>, aber <Eq>{`f(0) = 0`}</Eq> existiert. Da <Eq>{`f' > 0`}</Eq> für alle <Eq>{`x \\neq 0`}</Eq>, gibt es keinen Vorzeichenwechsel: kein lokales Extremum. Nur singulärer kritischer Punkt (Spitze).</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Analysiere die kritischen Punkte von <Eq>{`f(x) = x^{1/3}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{2}{3}x^{-1/3}`}</Eq>. Existiert nicht bei <Eq>{`x = 0`}</Eq>; <Eq>{`f'`}</Eq> wechselt von <Eq>{`-`}</Eq> zu <Eq>{`+`}</Eq> bei <Eq>{`x = 0`}</Eq> → lokales Minimum. <Eq>{`f(0) = 0`}</Eq> ist auch absolutes Minimum, da <Eq>{`f(x) \\geq 0`}</Eq> für alle <Eq>{`x`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Klassifiziere den kritischen Punkt von <Eq>{`f(x) = x^{2/3}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.9"
+  dificuldade="aplicacao"
+  solucao={<>Auf <Eq>{`[-2, 3]`}</Eq>: <Eq>{`f'(x) = 3x^2 - 3 = 0 \\Rightarrow x = \\pm 1`}</Eq>. Evaluierung: <Eq>{`f(-2) = -8 + 6 + 5 = 3`}</Eq>, <Eq>{`f(-1) = -1 + 3 + 5 = 7`}</Eq>, <Eq>{`f(1) = 1 - 3 + 5 = 3`}</Eq>, <Eq>{`f(3) = 27 - 9 + 5 = 23`}</Eq>. Absolutes Maximum: <Eq>{`23`}</Eq> bei <Eq>{`x = 3`}</Eq>. Absolutes Minimum: <Eq>{`3`}</Eq> bei <Eq>{`x = -2`}</Eq> und <Eq>{`x = 1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Finde die absoluten Extrema von <Eq>{`f(x) = x^3 - 3x + 5`}</Eq> auf <Eq>{`[-2, 3]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`r'(\\theta) = -\\sin\\theta + \\cos\\theta = 0 \\Rightarrow \\tan\\theta = 1 \\Rightarrow \\theta = \\pi/4`}</Eq> auf <Eq>{`[0, \\pi]`}</Eq>. Evaluierung: <Eq>{`r(0) = 1`}</Eq>, <Eq>{`r(\\pi/4) = \\sqrt{2}`}</Eq>, <Eq>{`r(\\pi) = -1`}</Eq>. Absolutes Maximum: <Eq>{`\\sqrt{2}`}</Eq>. Absolutes Minimum: <Eq>{`-1`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Bestimme die absoluten Extrema von <Eq>{`r(\\theta) = \\cos\\theta + \\sin\\theta`}</Eq> auf <Eq>{`[0, \\pi]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 4x^3 - 8x = 4x(x^2-2)`}</Eq>. Nullstellen: <Eq>{`x = 0`}</Eq> und <Eq>{`x = \\pm\\sqrt{2}`}</Eq>. Auf <Eq>{`[-2, 2]`}</Eq> gehören alle zum Intervall. Evaluierung: <Eq>{`f(-2) = 16 - 16 + 1 = 1`}</Eq>, <Eq>{`f(-\\sqrt{2}) = 4 - 8 + 1 = -3`}</Eq>, <Eq>{`f(0) = 1`}</Eq>, <Eq>{`f(\\sqrt{2}) = -3`}</Eq>, <Eq>{`f(2) = 1`}</Eq>. Absolutes Maximum: <Eq>{`1`}</Eq>. Absolutes Minimum: <Eq>{`-3`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimme die absoluten Extrema von <Eq>{`f(x) = x^4 - 4x^2 + 1`}</Eq> auf <Eq>{`[-2, 2]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{x \\cdot x - (x^2+1) \\cdot 1}{x^2} = \\frac{-1}{x^2}`}</Eq>. Da <Eq>{`f' < 0`}</Eq> für alle <Eq>{`x \\neq 0`}</Eq>, ist die Funktion streng fallend — ohne kritische Punkte mit <Eq>{`f' = 0`}</Eq>. Aber <Eq>{`f(x) = x + 1/x`}</Eq>, <Eq>{`f'(x) = 1 - 1/x^2 = 0 \\Rightarrow x = 1`}</Eq>. Auf <Eq>{`[1,4]`}</Eq>: <Eq>{`f(1) = 2`}</Eq>, <Eq>{`f(4) = 4{,}25`}</Eq>. Absolutes Minimum: <Eq>{`2`}</Eq>. Absolutes Maximum: <Eq>{`4{,}25`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimme die absoluten Extrema von <Eq>{`f(x) = x + \\dfrac{1}{x}`}</Eq> auf <Eq>{`[1, 4]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Lokales Maximum, weil f'' < 0 nach unten Konkavität angibt", correta: true },
+    { texto: "Lokales Minimum, weil f'' negativ ist" },
+    { texto: "Wendepunkt, weil f'' nicht Null ist" },
+    { texto: "Unklar — der Test der 2. Ableitung trifft nicht zu" }
+  ]}
+  solucao={<>Der Test der 2. Ableitung: wenn <Eq>{`f'(c) = 0`}</Eq> und <Eq>{`f''(c) < 0`}</Eq>, hat die Funktion nach unten Konkavität bei <Eq>{`c`}</Eq>, was lokales Maximum ergibt. Distrak­tor B kehrt die Schlussfolgerung um; C verwechselt mit Wendepunkt; D ist falsch, da <Eq>{`f''(c) \\neq 0`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Wenn <Eq>{`f'(c) = 0`}</Eq> und <Eq>{`f''(c) = -5`}</Eq>, dann ist der Punkt <Eq>{`x = c`}</Eq>:
+
+</Exercicio>
+
+<Exercicio
+  numero="61.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Jedes innere Extremum (wo f differenzierbar ist) ist kritischer Punkt", correta: true },
+    { texto: "Jeder kritische Punkt ist ein Extremum" },
+    { texto: "Lokales Extremum kann wo f'(c) positiv ist auftreten" },
+    { texto: "Fermats Theorem garantiert, dass f'(c) = 0 Extremum impliziert" }
+  ]}
+  solucao={<>Fermat sagt: inneres Extremum differenzierbar → kritischer Punkt (Implikation von A zu B). Die Umkehrung (B → A) ist falsch: <Eq>{`x^3`}</Eq> bei <Eq>{`c = 0`}</Eq> ist das klassische Gegenbeispiel. Option C widerspricht Fermat. Option D kehrt die Implikation um.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Welche Aussage zu Fermats Theorem ist korrekt?
+
+</Exercicio>
+
+<Exercicio
+  numero="61.15"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "f(c) = 0 ist unklar zum Typ des kritischen Punkts; wir müssen den 1. Test nutzen", correta: true },
+    { texto: "c ist lokales Minimum, da die Ableitung verschwindet" },
+    { texto: "c ist immer ein Wendepunkt, wenn f''(c) = 0" },
+    { texto: "Das Extremwert-Theorem garantiert, dass c absolutes Minimum ist" }
+  ]}
+  solucao={<>Wenn <Eq>{`f''(c) = 0`}</Eq>, ist der Test der 2. Ableitung unklar. Beispiele: <Eq>{`x^4`}</Eq> hat Minimum bei <Eq>{`0`}</Eq>; <Eq>{`-x^4`}</Eq> hat Maximum; <Eq>{`x^3`}</Eq> hat Wendepunkt. Der 1. Test oder direkte Analyse von Vorzeichen ist notwendig.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Wenn <Eq>{`f'(c) = 0`}</Eq> und <Eq>{`f''(c) = 0`}</Eq>, was ist die korrekte Schlussfolgerung?
+
+</Exercicio>
+
+<Exercicio
+  numero="61.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 3x^2 - 6x = 3x(x-2)`}</Eq>. Kritische Punkte: <Eq>{`x = 0`}</Eq> und <Eq>{`x = 2`}</Eq>. Evaluierung auf <Eq>{`[-1, 3]`}</Eq>: <Eq>{`f(-1) = -1 - 3 - 1 = -5`}</Eq>, <Eq>{`f(0) = -1`}</Eq>, <Eq>{`f(2) = 8 - 12 - 1 = -5`}</Eq>, <Eq>{`f(3) = 27 - 27 - 1 = -1`}</Eq>. Absolutes Maximum: <Eq>{`-1`}</Eq>. Absolutes Minimum: <Eq>{`-5`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimme die absoluten Extrema von <Eq>{`f(x) = x^3 - 3x^2 - 1`}</Eq> auf <Eq>{`[-1, 3]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = e^x(x+1) = 0 \\Rightarrow x = -1`}</Eq>. Da <Eq>{`e^x > 0`}</Eq> immer. <Eq>{`f''(x) = e^x(x+2)`}</Eq>. <Eq>{`f''(-1) = e^{-1}(1) > 0`}</Eq> → lokales Minimum bei <Eq>{`x = -1`}</Eq>, <Eq>{`f(-1) = -e^{-1}`}</Eq>.</>}
+  passos={<><ol><li>Wende die Produktregel an: <Eq>{`f(x) = xe^x`}</Eq>, daher <Eq>{`f'(x) = e^x + xe^x = e^x(1+x)`}</Eq>.</li><li>Da <Eq>{`e^x > 0`}</Eq> für alle <Eq>{`x`}</Eq>, reduziert sich die Gleichung <Eq>{`f'(x) = 0`}</Eq> zu <Eq>{`1 + x = 0`}</Eq>, d.h. <Eq>{`x = -1`}</Eq>.</li><li>Zweite Ableitung: <Eq>{`f''(x) = e^x(x+2)`}</Eq>. Bei <Eq>{`x = -1`}</Eq>: <Eq>{`f''(-1) = e^{-1} > 0`}</Eq> → lokales Minimum.</li><li>Minimalwert: <Eq>{`f(-1) = -1 \\cdot e^{-1} = -1/e`}</Eq>.</li></ol><em>Interessant:</em> dies ist das globale Minimum von <Eq>{`xe^x`}</Eq>, da die Funktion gegen <Eq>{`+\\infty`}</Eq> tendiert bei beiden Extremen (für <Eq>{`x \\to +\\infty`}</Eq> offensichtlich; für <Eq>{`x \\to -\\infty`}</Eq>, <Eq>{`xe^x \\to 0`}</Eq> und steigt dann zu <Eq>{`-1/e`}</Eq> vor der Anstiege).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimme das lokale Extremum von <Eq>{`f(x) = xe^x`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`g'(x) = \\frac{(x^2+1) - x \\cdot 2x}{(x^2+1)^2} = \\frac{1 - x^2}{(x^2+1)^2}`}</Eq>. Nullstellen: <Eq>{`x = \\pm 1`}</Eq>. Bei <Eq>{`x = 1`}</Eq>: <Eq>{`g' > 0`}</Eq> vorher, <Eq>{`g' < 0`}</Eq> nachher → lokales Maximum <Eq>{`g(1) = 1/2`}</Eq>. Bei <Eq>{`x = -1`}</Eq>: lokales Minimum <Eq>{`g(-1) = -1/2`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Klassifiziere die lokalen Extrema von <Eq>{`g(x) = \\dfrac{x}{x^2 + 1}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.19"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{1}{x}`}</Eq>. Da <Eq>{`f' > 0`}</Eq> für alle <Eq>{`x > 0`}</Eq>, ist die Funktion streng steigend — ohne kritische Punkte, ohne lokale Extrema. Auf <Eq>{`[1, e]`}</Eq>: absolutes Minimum <Eq>{`f(1) = 0`}</Eq>, absolutes Maximum <Eq>{`f(e) = 1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimme die absoluten Extrema von <Eq>{`f(x) = \\ln x`}</Eq> auf <Eq>{`[1, e]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.20"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = -2x e^{-x^2}`}</Eq>. Null bei <Eq>{`x = 0`}</Eq>. <Eq>{`f''(0) = -2 < 0`}</Eq> → lokales Maximum <Eq>{`f(0) = 1`}</Eq>. Da <Eq>{`f(x) \\to 0`}</Eq> wenn <Eq>{`x \\to \\pm\\infty`}</Eq>, ist es auch absolutes Maximum.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimme das Extremum von <Eq>{`f(x) = e^{-x^2}`}</Eq> (Gaußsche Kurve).
+
+</Exercicio>
+
+<Exercicio
+  numero="61.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 3x^2 - 3 = 0 \\Rightarrow x = \\pm 1`}</Eq>. Auf <Eq>{`[0, 2]`}</Eq> nur <Eq>{`x = 1`}</Eq> liegt im Innern. Evaluierung: <Eq>{`f(0) = 2`}</Eq>, <Eq>{`f(1) = 1 - 3 + 2 = 0`}</Eq>, <Eq>{`f(2) = 8 - 6 + 2 = 4`}</Eq>. Absolutes Maximum: <Eq>{`4`}</Eq>. Absolutes Minimum: <Eq>{`0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Finde die absoluten Extrema von <Eq>{`f(x) = x^3 - 3x + 2`}</Eq> auf <Eq>{`[0, 2]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 2\\cos(2x)`}</Eq>. Nullstellen auf <Eq>{`[0, \\pi]`}</Eq>: <Eq>{`2x = \\pi/2`}</Eq> → <Eq>{`x = \\pi/4`}</Eq>; <Eq>{`2x = 3\\pi/2`}</Eq> → <Eq>{`x = 3\\pi/4`}</Eq>. Evaluierung: <Eq>{`f(0) = 0`}</Eq>, <Eq>{`f(\\pi/4) = 1`}</Eq>, <Eq>{`f(3\\pi/4) = -1`}</Eq>, <Eq>{`f(\\pi) = 0`}</Eq>. Absolutes Maximum: <Eq>{`1`}</Eq>. Absolutes Minimum: <Eq>{`-1`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Bestimme die absoluten Extrema von <Eq>{`f(x) = \\sin(2x)`}</Eq> auf <Eq>{`[0, \\pi]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.23"
+  dificuldade="modelagem"
+  solucao={<>Umsatz: <Eq>{`R(p) = p \\cdot q(p)`}</Eq>. Mit Nachfrage <Eq>{`q(p) = 100 - 2p`}</Eq>: <Eq>{`R(p) = p(100 - 2p) = 100p - 2p^2`}</Eq>. <Eq>{`R'(p) = 100 - 4p = 0 \\Rightarrow p = 25`}</Eq>. <Eq>{`R''(25) = -4 < 0`}</Eq> → Maximum. Maximaler Umsatz: <Eq>{`R(25) = 25 \\cdot 50 = 1250`}</Eq> Euro.</>}
+  passos={<><ol><li>Schreibe die Umsatzfunktion: <Eq>{`R(p) = p \\cdot q(p) = p(100-2p)`}</Eq>.</li><li>Vereinfache: <Eq>{`R(p) = 100p - 2p^2`}</Eq>.</li><li>Ableite und nullstelle: <Eq>{`R'(p) = 100 - 4p = 0 \\Rightarrow p^* = 25`}</Eq>.</li><li>Bestätige Maximum: <Eq>{`R''(p) = -4 < 0`}</Eq>.</li><li>Berechne maximalen Umsatz: <Eq>{`R(25) = 2500 - 1250 = 1250`}</Eq>.</li></ol><em>Tipp:</em> Umsatz = Preis mal Menge; Umsatz zu maximieren ist nicht das Gleiche wie Gewinn zu maximieren (Kosten abziehen).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Ein Unternehmen verkauft ein Produkt mit Nachfrage <Eq>{`q(p) = 100 - 2p`}</Eq> Einheiten, wenn der Preis <Eq>{`p`}</Eq> Euro ist. Welcher Preis <Eq>{`p`}</Eq> maximiert den Gesamtumsatz?
+
+</Exercicio>
+
+<Exercicio
+  numero="61.24"
+  dificuldade="modelagem"
+  solucao={<>Gewinn: <Eq>{`L(x) = R(x) - C(x) = 80x - (x^2 + 20x + 300) = -x^2 + 60x - 300`}</Eq>. <Eq>{`L'(x) = -2x + 60 = 0 \\Rightarrow x = 30`}</Eq>. <Eq>{`L''(30) = -2 < 0`}</Eq> → Maximum. Maximaler Gewinn: <Eq>{`L(30) = -900 + 1800 - 300 = 600`}</Eq>. Optimale Produktion: 30 Einheiten.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Eine Fabrik hat Kosten <Eq>{`C(x) = x^2 + 20x + 300`}</Eq> (Euro) und Umsatz <Eq>{`R(x) = 80x`}</Eq> bei Produktion von <Eq>{`x`}</Eq> Einheiten. Wie viele Einheiten maximieren den Gewinn?
+
+</Exercicio>
+
+<Exercicio
+  numero="61.25"
+  dificuldade="modelagem"
+  solucao={<>Höhe: <Eq>{`h(t) = -4{,}9t^2 + 19{,}6t + 2`}</Eq>. <Eq>{`h'(t) = -9{,}8t + 19{,}6 = 0 \\Rightarrow t = 2`}</Eq> s. Maximale Höhe: <Eq>{`h(2) = -19{,}6 + 39{,}2 + 2 = 21{,}6`}</Eq> m. <Eq>{`h''(2) = -9{,}8 < 0`}</Eq> → bestätigt Maximum.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Eine Modellrakete wird vertikal gestartet und ihre Höhe (in Metern) ist <Eq>{`h(t) = -4{,}9t^2 + 19{,}6t + 2`}</Eq>. Bestimme die maximale Höhe.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.26"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 2x - \\frac{2}{x^3}`}</Eq>. Für <Eq>{`x > 0`}</Eq>: <Eq>{`f'(x) = 0 \\Rightarrow 2x^4 = 2 \\Rightarrow x = 1`}</Eq>. <Eq>{`f''(1) = 2 + 6 = 8 > 0`}</Eq> → lokales Minimum. <Eq>{`f(1) = 1 + 1 = 2`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Finde das lokale Minimum von <Eq>{`f(x) = x^2 + \\dfrac{1}{x^2}`}</Eq> für <Eq>{`x > 0`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.27"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\frac{x \\cdot 2x - (x^2-4)}{x^2} = \\frac{x^2 + 4}{x^2} > 0`}</Eq> für alle <Eq>{`x \\neq 0`}</Eq>. Also ist die Funktion streng steigend in jedem Definitionsintervall — ohne lokale Extrema. Extrema auf <Eq>{`[1,4]`}</Eq>: <Eq>{`f(1) = -3`}</Eq> (absolutes Minimum), <Eq>{`f(4) = 3`}</Eq> (absolutes Maximum).</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Bestimme die absoluten Extrema von <Eq>{`f(x) = \\dfrac{x^2 - 4}{x}`}</Eq> auf <Eq>{`[1, 4]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.28"
+  dificuldade="demonstracao"
+  solucao={<>Angenommen, <Eq>{`f`}</Eq> hat lokales Maximum bei <Eq>{`c`}</Eq>, d.h. <Eq>{`f(c) \\geq f(x)`}</Eq> für <Eq>{`x`}</Eq> nahe <Eq>{`c`}</Eq>. Für kleines <Eq>{`h > 0`}</Eq>: <Eq>{`\\frac{f(c+h)-f(c)}{h} \\leq 0`}</Eq>. Grenzwert: <Eq>{`f'(c) \\leq 0`}</Eq>. Für kleines <Eq>{`h < 0`}</Eq>: <Eq>{`\\frac{f(c+h)-f(c)}{h} \\geq 0`}</Eq>. Grenzwert: <Eq>{`f'(c) \\geq 0`}</Eq>. Also <Eq>{`f'(c) = 0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima", secao: "4.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Beweise Fermats Theorem: wenn <Eq>{`f`}</Eq> lokales Maximum bei <Eq>{`c`}</Eq> hat und in <Eq>{`c`}</Eq> differenzierbar ist, dann <Eq>{`f'(c) = 0`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.29"
+  dificuldade="demonstracao"
+  solucao={<>Gegeben <Eq>{`f(x) = x^3`}</Eq>, haben wir <Eq>{`f'(x) = 3x^2`}</Eq> und <Eq>{`f'(0) = 0`}</Eq>, daher ist <Eq>{`x = 0`}</Eq> kritischer Punkt. Für jedes <Eq>{`\\delta > 0`}</Eq>: nimm <Eq>{`x = -\\delta/2 < 0`}</Eq>; dann <Eq>{`f(-\\delta/2) = (-\\delta/2)^3 < 0 = f(0)`}</Eq>. Aber nimm <Eq>{`x = \\delta/2 > 0`}</Eq>; dann <Eq>{`f(\\delta/2) > 0 = f(0)`}</Eq>. Also ist <Eq>{`f(0)`}</Eq> weder lokales Maximum noch Minimum. <Eq>{`x = 0`}</Eq> ist Wendepunkt.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-1-tests.html", secao: "3.1", licenca: "CC-BY-NC-SA" }}
+>
+
+Zeige, dass <Eq>{`f(x) = x^3`}</Eq> einen kritischen Punkt bei <Eq>{`x = 0`}</Eq> hat, aber dieser Punkt ist kein lokales Extremum.
+
+</Exercicio>
+
+<Exercicio
+  numero="61.30"
+  dificuldade="desafio"
+  solucao={<><Eq>{`f'(x) = 4x^3 - 4 = 0 \\Rightarrow x^3 = 1 \\Rightarrow x = 1`}</Eq>. <Eq>{`f(1) = 1 - 4 + 6 = 3`}</Eq>. <Eq>{`f''(1) = 12 > 0`}</Eq> → lokales Minimum und, da <Eq>{`f \\to +\\infty`}</Eq> wenn <Eq>{`x \\to \\pm\\infty`}</Eq>, globales Minimum. Verifiziere: für jede reelle <Eq>{`x`}</Eq>, <Eq>{`f(x) = (x^2-2)^2 + (x-1)^2 + 2 \\geq 3`}</Eq>? Das ist nicht unmittelbar; Bestätigung kommt vom Kriterium des einzigen kritischen Punkts mit <Eq>{`f'' > 0`}</Eq> und Verhalten im Unendlichen.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.1", licenca: "CC-BY-NC" }}
+>
+
+Zeige, dass <Eq>{`f(x) = x^4 - 4x + 6`}</Eq> einen einzigen kritischen Punkt hat und dass dieser das globale Minimum der Funktion ist.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Quellen
+
+- **Boelkins, Matt. Active Calculus 2.0.** Grand Valley State University, 2022. CC-BY-NC-SA. [activecalculus.org/single/sec-3-1-tests.html](https://activecalculus.org/single/sec-3-1-tests.html)
+- **OpenStax. Calculus Volume 1.** Strang, Herman et al., 2023. CC-BY-NC-SA. [openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima](https://openstax.org/books/calculus-volume-1/pages/4-3-maxima-and-minima)
+- **Hartman, G. et al. APEX Calculus.** Virginia Military Institute, 2023. CC-BY-NC. [apexcalculus.com](https://www.apexcalculus.com/)

@@ -1,0 +1,888 @@
+---
+titulo: "Lección 73 — Cuartiles, percentiles y diagrama de caja"
+slug: "licao-73-quartis"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Resumen de 5 números: mín, Q1, mediana, Q3, máx. RIC, diagrama de caja y regla 1,5 RIC para detectar valores atípicos. Medidas robustas en datos asimétricos."
+ordem: 73
+publicado: true
+tags: ["estatística", "quartis", "boxplot", "percentil", "ano-2", "trim-8"]
+prerrequisitos: ["licao-72"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math Statistics — Singapura", "AP Statistics — EUA", "Math B — Japón"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="RIC = Q_3 - Q_1, \quad \text{valor atípico si } x < Q_1 - 1{,}5\,RIC \text{ o } x > Q_3 + 1{,}5\,RIC"
+  legenda={<>El <strong>rango intercuartil</strong> <Eq>{`RIC = Q_3 - Q_1`}</Eq> cubre el 50% central de los datos. La <strong>regla de Tukey</strong> (1977) señala como valor atípico cualquier punto más allá de <Eq>{`1{,}5 \\times RIC`}</Eq> de cada cuartil — criterio robusto, pues no depende de media ni de desviación estándar.</>}
+  audioTexto="El rango intercuartil es Q tres menos Q uno. La regla de Tukey clasifica como valor atípico cualquier valor menor que Q uno menos uno coma cinco veces el RIC, o mayor que Q tres más uno coma cinco veces el RIC."
+/>
+
+<aside>
+
+**Libros que cubren esta lección**
+
+- [**OpenIntro Statistics** (4.ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §2.1–2.2 · CC-BY-SA · <em>Cobertura completa de diagrama de caja, RIC y regla de Tukey con datos reales y ejercicios graduados.</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §2.3–2.4 · CC-BY · <em>Percentiles, cuartiles y representaciones gráficas con tablas de datos reales; cubre cálculo por interpolación lineal.</em>
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §5.1 · GNU FDL · <em>Fundamentación probabilística de estadísticas de orden; cuartiles como casos especiales de percentiles de distribuciones continuas.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definición rigurosa">
+
+### Estadísticas de orden y percentiles
+
+<Definicao titulo="Percentil P_p">
+
+Dado un conjunto de $n$ observaciones ordenadas $x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$, el **percentil $P_p$** ($0 \leq p \leq 100$) es el valor por debajo del cual se encuentran aproximadamente $p\%$ de los datos.
+
+Método de interpolación lineal (Hyndman-Fan tipo 7, predeterminado en NumPy y R):
+
+$$L = \frac{p}{100}(n - 1) + 1$$
+
+Si $L$ es entero, $P_p = x_{(L)}$. Si $L = j + d$ con $d \in (0,1)$:
+
+$$P_p = x_{(j)} + d\,(x_{(j+1)} - x_{(j)})$$
+
+</Definicao>
+
+> "El primer cuartil, $Q_1$, es el valor tal que el 25% de los datos cae por debajo de él, y el tercer cuartil, $Q_3$, es tal que el 75% de los datos cae por debajo de él." — [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/)
+
+<Definicao titulo="Cuartiles y resumen de 5 números">
+
+- $Q_1 = P_{25}$: separa el primer cuarto inferior.
+- $Q_2 = P_{50}$: la **mediana**.
+- $Q_3 = P_{75}$: separa los tres cuartos inferiores.
+
+El **resumen de 5 números** de Tukey (1977):
+
+$$(\min,\; Q_1,\; Q_2,\; Q_3,\; \max)$$
+
+Describe localización y dispersión sin asumir forma de la distribución.
+
+</Definicao>
+
+<Definicao titulo="Rango intercuartil y regla de Tukey">
+
+$$RIC = Q_3 - Q_1$$
+
+**Bigotes** (whiskers) del diagrama de caja se extienden hasta el último dato dentro de:
+
+$$[Q_1 - 1{,}5 \cdot RIC,\quad Q_3 + 1{,}5 \cdot RIC]$$
+
+Puntos más allá de ese intervalo se señalan como **valores atípicos potenciales** (marcados individualmente).
+
+> "Cuando un conjunto de datos incluye valores que parecen mucho más grandes o más pequeños que el resto de los datos, se llaman valores atípicos... Una regla comúnmente utilizada dice que un punto de datos se considera un valor atípico sospechoso si está más de 1,5 × RIC por debajo del primer cuartil o más de 1,5 × RIC por encima del tercer cuartil." — [OpenStax Statistics §2.4](https://openstax.org/books/statistics/pages/2-4-box-plots)
+
+</Definicao>
+
+<Teorema titulo="Robustez del RIC">
+
+El **punto de ruptura** (breakdown point) de un estimador es la fracción de datos corrompidos que lo hace arbitrariamente grande.
+
+- Media: punto de ruptura 0% (un solo valor atípico infinito la destruye).
+- Mediana: punto de ruptura 50% (la más robusta entre estimadores de localización).
+- RIC: punto de ruptura 25% (robusto a contaminación de hasta una cuarta parte de los datos).
+
+Consecuencia: en distribuciones asimétricas o con valores atípicos, mediana e RIC son preferibles a media y desviación estándar.
+
+</Teorema>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 160" className="w-full">
+<defs><marker id="arr73" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+<g>
+  <line x1="60" x2="520" y1="80" y2="80" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr73)"/>
+  <line x1="130" x2="130" y1="60" y2="100" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.6"/>
+  <line x1="480" x2="480" y1="60" y2="100" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.6"/>
+  <rect x="220" y="55" width="170" height="50" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="2"/>
+  <line x1="305" x2="305" y1="55" y2="105" stroke="rgb(232 199 122)" strokeWidth="3"/>
+  <line x1="130" x2="220" y1="80" y2="80" stroke="currentColor" strokeWidth="2"/>
+  <line x1="390" x2="480" y1="80" y2="80" stroke="currentColor" strokeWidth="2"/>
+  <circle cx="95" cy="80" r="4" fill="rgb(199 107 63)" stroke="rgb(199 107 63)"/>
+  <circle cx="510" cy="80" r="4" fill="rgb(199 107 63)" stroke="rgb(199 107 63)"/>
+  <text x="130" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">mín</text>
+  <text x="220" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₁</text>
+  <text x="305" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₂</text>
+  <text x="390" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₃</text>
+  <text x="480" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">máx</text>
+  <text x="95" y="120" textAnchor="middle" fontSize="10" fill="rgb(199 107 63)" fillOpacity="0.9">valor atípico</text>
+  <text x="510" y="120" textAnchor="middle" fontSize="10" fill="rgb(199 107 63)" fillOpacity="0.9">valor atípico</text>
+  <text x="305" y="42" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">RIC</text>
+  <line x1="222" x2="388" y1="42" y2="42" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1"/>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Anatomía del diagrama de caja: caja (Q1 a Q3), línea de mediana, bigotes hasta el extremo no-atípico, puntos aislados para valores atípicos.
+</figcaption>
+</figure>
+
+<Insight>
+
+Para datos normales, la regla 1,5 RIC señala solo $\approx 0{,}7\%$ de las observaciones como valores atípicos — raros, pero plausibles. Tukey eligió 1,5 deliberadamente: suficientemente raro para merecer investigación, no tan raro que nunca aparezca en muestras reales.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Para un niño de 5 años">
+
+Pon a todos los niños de la clase en fila, del más pequeño al más grande.
+
+El niño justo en el **medio** de la fila es la **mediana** — la mitad de la clase es más pequeña, la mitad es más grande.
+
+Ahora divide la fila en dos grupos. El niño en el medio del grupo más pequeño es el **Q1**. El del medio del grupo más grande es el **Q3**.
+
+El **diagrama de caja** dibuja una cajita de Q1 hasta Q3 — donde está la clase "del medio". Los niños muy bajitos o muy altos quedan como **bolitas separadas**: son los valores atípicos, los "fuera de la curva".
+
+</Porta>
+
+<Porta nivel="10" titulo="Para un niño de 10 años">
+
+Imagina 11 estudiantes con calificaciones: 2, 4, 5, 5, 6, **7**, 8, 8, 9, 9, 10.
+
+- **Mediana** ($Q_2$): la calificación del medio, en la 6.ª posición = **7**.
+- **$Q_1$**: mediana de las 5 calificaciones menores (2, 4, 5, 5, 6) = **5**.
+- **$Q_3$**: mediana de las 5 calificaciones mayores (8, 8, 9, 9, 10) = **9**.
+- **RIC** = 9 − 5 = **4**.
+- Límite inferior: $5 - 1{,}5 \times 4 = -1$. Límite superior: $9 + 1{,}5 \times 4 = 15$.
+- Ninguna calificación sale de esos límites → ningún valor atípico.
+
+El **diagrama de caja** dibuja una caja de 5 hasta 9, línea en 7, bigotes hasta 2 y 10. Si un estudiante sacara 0, aparecería como bolita separada.
+
+**¿Por qué el diagrama de caja es útil?** En un solo gráfico minúsculo ves: dónde está el centro, cuán dispersa es la clase, si la distribución es asimétrica, y quién es valor atípico.
+
+</Porta>
+
+<Porta nivel="15" titulo="Para un adolescente de 15 años">
+
+Cuartiles y diagrama de caja son **herramientas robustas** — poco afectadas por valores extremos. Compara:
+
+| Medida | Robustez | Cuándo usar |
+|---|---|---|
+| Media y desviación estándar | Frágil (1 valor atípico puede cambiar todo) | Distribuciones simétricas, sin valores atípicos |
+| Mediana e RIC | Robusta (hasta 25-50% de valores atípicos no destruyen) | Distribuciones asimétricas o con valores atípicos |
+
+### Regla 1,5 RIC — ¿por qué 1,5?
+
+Tukey (1977) eligió 1,5 porque en datos normales eso señala solo el 0,7% de las observaciones. Es lo suficientemente raro como para merecer atención, pero no tan raro que nunca aparezca.
+
+### Ejemplo: salarios en la empresa
+
+Equipo con salarios (R$ miles): 3, 4, 4, 5, 5, 5, 6, 6, 7, 7, 80 (CEO).
+
+- Media: R$ 11,1 mil — engañosa, tirada por el CEO.
+- Mediana: R$ 5 mil — representa el salario típico.
+
+El IBGE divulga mediana de ingresos exactamente por eso: el promedio de ingresos se distorsiona por quienes ganan mucho.
+
+### Cuartiles en variables aleatorias continuas
+
+Para v.a. continua $X$ con FDD $F$, el percentil $p$ es $Q_p = F^{-1}(p/100)$. Para la normal estándar: $Q_1 \approx -0{,}674$, $Q_3 \approx 0{,}674$, $RIC \approx 1{,}349$.
+
+</Porta>
+
+<Porta nivel="25" titulo="Para un estudiante de ingeniería">
+
+### EDA con diagramas de caja lado a lado
+
+La herramienta central en **Exploratory Data Analysis** (Tukey, 1977): comparar distribuciones por categoría. Ejemplo: latencias de 5 servidores, tiempos de atención de 3 médicos, throughput de 4 algoritmos. Una mirada muestra quién es más variable, quién tiene valores atípicos, quién tiene mediana más alta.
+
+### Diferentes definiciones de cuartil
+
+Hay 9 métodos de cálculo de percentil (Hyndman-Fan). Dos comunes:
+
+1. **Tukey (bisagras)**: $Q_1$ es mediana de la mitad inferior, sin incluir la mediana global si $n$ impar.
+2. **Interpolación lineal** (NumPy `np.percentile` con `method='linear'`): posición $L = 1 + (p/100)(n-1)$.
+
+Para $n$ grande ($> 30$), divergencias son despreciables. En exámenes e informes, declara el método.
+
+### Estimador robusto de $\sigma$
+
+Para normal: $RIC \approx 1{,}349\,\sigma$. Luego:
+
+$$\hat\sigma_{\text{robusto}} = \frac{RIC}{1{,}349}$$
+
+Útil cuando sospecha de valores atípicos contaminando la desviación estándar clásica.
+
+### Diagrama de caja vs. diagrama de violín
+
+El diagrama de caja esconde **multimodalidad**: distribución bimodal puede tener el mismo resumen de 5 números que unimodal. El **diagrama de violín** sobrepone estimación de densidad kernel (KDE) — más informativo, más caro computacionalmente.
+
+### Implementación Python
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+data = np.array([...])
+q1, q2, q3 = np.percentile(data, [25, 50, 75])
+iqr = q3 - q1
+lower = q1 - 1.5 * iqr
+upper = q3 + 1.5 * iqr
+outliers = data[(data < lower) | (data > upper)]
+
+# Visualización
+plt.boxplot(data)
+plt.show()
+```
+
+`pandas.DataFrame.describe()` entrega min, 25%, 50%, 75%, max automáticamente.
+
+</Porta>
+
+<Porta nivel="40" titulo="Para un profesional sénior">
+
+### Estadísticas de orden — fundamento teórico
+
+Los cuartiles son casos particulares de **estadísticas de orden** $X_{(k)}$. Para muestra de tamaño $n$ de población con densidad $f$ y FDD $F$, la densidad de $X_{(k)}$ es:
+
+$$f_{X_{(k)}}(x) = \frac{n!}{(k-1)!(n-k)!}\, F(x)^{k-1}\, (1-F(x))^{n-k}\, f(x)$$
+
+Permite derivar varianza asintótica de cuartiles y construir intervalos de confianza no-paramétricos para mediana e RIC.
+
+### Punto de ruptura (Hampel, 1971)
+
+El **breakdown point** formaliza robustez: la menor fracción de datos corrompidos que hace el estimador arbitrariamente distante del valor verdadero.
+
+| Estimador | Punto de ruptura |
+|---|---|
+| Media | 0% |
+| Mediana | 50% |
+| RIC | 25% |
+| Media podada 10% | 10% |
+
+Las medias podadas ($\alpha$-trimmed mean) son compromiso entre eficiencia estadística y robustez.
+
+### Cuartiles de distribuciones teóricas
+
+| Distribución | $Q_1$ | $Q_2$ | $Q_3$ | $RIC$ |
+|---|---|---|---|---|
+| Normal(0,1) | $-0{,}674$ | $0$ | $0{,}674$ | $1{,}349$ |
+| Exponencial(1) | $0{,}288$ | $0{,}693$ | $1{,}386$ | $1{,}099$ |
+| Uniforme(0,1) | $0{,}25$ | $0{,}50$ | $0{,}75$ | $0{,}50$ |
+
+### Valores atípicos en alta dimensión
+
+En $\mathbb{R}^p$ con $p$ grande, el diagrama de caja 1D no funciona: la **maldición de la dimensionalidad** hace que prácticamente toda observación sea valor atípico en alguna proyección. Herramientas modernas: **distancia de Mahalanobis** con covarianza robusta (MCD — Minimum Covariance Determinant), Local Outlier Factor (LOF), Isolation Forest.
+
+### Contexto histórico
+
+John W. Tukey introdujo el diagrama de caja en *Exploratory Data Analysis* (1977) como parte de una filosofía de análisis iterativo y visual, antes de modelos formales. El enfoque EDA influyó en toda la análisis moderna de datos y contraste con la tradición confirmatoria clásica (pruebas de hipótesis).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicación práctica">
+
+### Receta de 6 pasos
+
+1. **Ordena** los datos de menor a mayor.
+2. **Mediana** ($Q_2$): valor central (o promedio de los dos centrales si $n$ par).
+3. **$Q_1$ y $Q_3$**: medianas de las mitades inferior y superior.
+4. **RIC**: $Q_3 - Q_1$.
+5. **Límites de Tukey**: $Q_1 - 1{,}5 \cdot RIC$ y $Q_3 + 1{,}5 \cdot RIC$.
+6. **Valores atípicos**: cualquier dato fuera de esos límites.
+
+### En hojas de cálculo (Excel / LibreOffice)
+
+| Función | Resultado |
+|---|---|
+| `CUARTIL.INC(rango; 1)` | $Q_1$ |
+| `CUARTIL.INC(rango; 3)` | $Q_3$ |
+| `MEDIANA(rango)` | Mediana |
+| `PERCENTIL.INC(rango; 0,9)` | $P_{90}$ |
+
+### Errores comunes a evitar
+
+- **Calcular $Q_1$ sin interpolar**: $n/4$ frecuentemente no es entero — interpola entre los dos vecinos más próximos.
+- **Reportar media en distribución asimétrica**: salarios, ingresos, inmuebles — siempre prefiere mediana.
+- **Descartar valores atípicos sin investigar**: un valor atípico puede ser el dato más valioso del conjunto (fraude, fallo raro, descubrimiento).
+- **Usar el mismo diagrama de caja para datos de escalas muy diferentes**: normaliza antes de comparar.
+
+</Porta>
+
+</DuasPortas>
+
+## Ejemplos resolvidos
+
+<Ejemplo numero="73.1" titulo="Resumen de 5 números (conjunto pequeño)" dificuldade="basico">
+
+**Problema.** Calcula el resumen de 5 números para los datos: 4, 7, 2, 9, 5, 11, 3, 8, 6, 10.
+
+**Estrategia.** Ordenar, localizar posiciones de Q1, Q2, Q3 por interpolación.
+
+**Resolución.** Ordenados: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ($n = 10$).
+
+- Mediana ($Q_2$): promedio de los valores en las posiciones 5 y 6 = $(6 + 7)/2 = 6{,}5$.
+- $Q_1$: mediana de los 5 menores (2, 3, 4, 5, 6) = 4.
+- $Q_3$: mediana de los 5 mayores (7, 8, 9, 10, 11) = 9.
+- $\min = 2$, $\max = 11$.
+
+**Resumen de 5 números**: $(2,\; 4,\; 6{,}5,\; 9,\; 11)$.
+
+**Verificación.** $RIC = 9 - 4 = 5$. Límites: $4 - 7{,}5 = -3{,}5$ y $9 + 7{,}5 = 16{,}5$. Todos los datos dentro — ningún valor atípico. Consistente con datos uniformemente distribuidos en $[2, 11]$.
+
+**Fuente.** [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Ejemplo>
+
+<Ejemplo numero="73.2" titulo="Detección de valor atípico (salarios)" dificuldade="basico">
+
+**Problema.** Salarios mensuales de 9 empleados (R$ miles): 3, 3, 4, 4, 5, 5, 6, 7, 45. ¿Hay valor atípico?
+
+**Estrategia.** Calcular cuartiles y aplicar regla 1,5 RIC.
+
+**Resolución.** $n = 9$, datos ya ordenados.
+
+- $Q_2$: posición 5 = 5.
+- $Q_1$: mediana de (3, 3, 4, 4) = 3,5.
+- $Q_3$: mediana de (5, 6, 7, 45) = 6,5.
+- $RIC = 6{,}5 - 3{,}5 = 3$.
+- Límite superior: $6{,}5 + 1{,}5 \times 3 = 11$.
+- Salario de R$ 45 mil > R$ 11 mil: **valor atípico**.
+
+**Verificación.** La media sería R$ 9,1 mil — tirada por el valor atípico. La mediana = R$ 5 mil representa mejor el salario típico. La distinción es exactamente el punto del IBGE al divulgar ingresos medianos.
+
+**Fuente.** [OpenStax Statistics §2.4](https://openstax.org/books/statistics/pages/2-4-box-plots) — CC-BY.
+
+</Ejemplo>
+
+<Ejemplo numero="73.3" titulo="Cálculo de percentil por interpolación" dificuldade="intermediario">
+
+**Problema.** Calificaciones de 20 estudiantes (ordenadas): 28, 35, 42, 48, 51, 55, 58, 61, 63, 65, 68, 70, 72, 74, 77, 80, 83, 87, 91, 96. Calcula $P_{80}$.
+
+**Estrategia.** Usar fórmula de posición $L = 1 + (p/100)(n-1)$.
+
+**Resolución.** $p = 80$, $n = 20$.
+
+$$L = 1 + 0{,}80 \times 19 = 1 + 15{,}2 = 16{,}2$$
+
+$j = 16$, $d = 0{,}2$. Los datos en la posición 16 y 17 son $x_{(16)} = 80$ y $x_{(17)} = 83$.
+
+$$P_{80} = 80 + 0{,}2 \times (83 - 80) = 80 + 0{,}6 = 80{,}6$$
+
+**Verificación.** El 80% de 20 estudiantes = 16 estudiantes abajo. Los primeros 16 son: 28, 35, ..., 80. El punto $P_{80} = 80{,}6$ está justo arriba de 80, correcto.
+
+**Fuente.** [OpenStax Statistics §2.3](https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data) — CC-BY.
+
+</Ejemplo>
+
+<Ejemplo numero="73.4" titulo="Diagrama de caja comparativo (A/B)" dificuldade="intermediario">
+
+**Problema.** Tiempos de carga (ms) de dos servidores:
+- Servidor A: 120, 125, 128, 130, 132, 135, 138, 140, 142, 500.
+- Servidor B: 200, 210, 215, 220, 222, 225, 228, 230, 235, 240.
+
+Compara usando resumen de 5 números e identifica valores atípicos.
+
+**Estrategia.** Calcular cuartiles de cada servidor, aplicar regla 1,5 RIC, interpretar comparativamente.
+
+**Resolución.**
+
+*Servidor A* ($n = 10$):
+- $Q_1$: promedio posiciones 2–3 = $(125 + 128)/2 = 126{,}5$.
+- $Q_2$: promedio posiciones 5–6 = $(132 + 135)/2 = 133{,}5$.
+- $Q_3$: promedio posiciones 8–9 = $(140 + 142)/2 = 141$.
+- $RIC_A = 141 - 126{,}5 = 14{,}5$. Límite superior: $141 + 21{,}75 = 162{,}75$.
+- **500 ms es valor atípico** en A.
+
+*Servidor B* ($n = 10$):
+- $Q_1 = 212{,}5$, $Q_2 = 223{,}5$, $Q_3 = 231{,}5$.
+- $RIC_B = 19$. Límites: $[184{,}0;\; 260{,}0]$. Sin valor atípico.
+
+**Verificación.** El servidor A tiene mediana más baja (133,5 vs. 223,5 ms) y menor variabilidad ($RIC = 14{,}5$ vs. 19), pero tiene un valor atípico grave (500 ms). El servidor A es preferible si los valores atípicos son raros y aceptables; el servidor B si la consistencia es crítica.
+
+**Fuente.** [OpenIntro Statistics §2.2](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Ejemplo>
+
+<Ejemplo numero="73.5" titulo="RIC de distribución continua" dificuldade="avancado">
+
+**Problema.** Para $X \sim \text{Exponencial}(\lambda = 1)$, calcula $Q_1$, $Q_3$ e $RIC$ analíticamente.
+
+**Estrategia.** Invertir la FDD en los puntos 0,25 y 0,75.
+
+**Resolución.** $F(x) = 1 - e^{-x}$ para $x \geq 0$.
+
+$$Q_1 = F^{-1}(0{,}25): \quad 1 - e^{-Q_1} = 0{,}25 \implies Q_1 = -\ln(0{,}75) \approx 0{,}288$$
+
+$$Q_3 = F^{-1}(0{,}75): \quad 1 - e^{-Q_3} = 0{,}75 \implies Q_3 = -\ln(0{,}25) = \ln 4 \approx 1{,}386$$
+
+$$RIC = \ln 4 - \ln(4/3) = \ln 3 \approx 1{,}099$$
+
+**Verificación.** La mediana es $-\ln(0{,}5) = \ln 2 \approx 0{,}693$. Nota que $Q_2 - Q_1 \approx 0{,}405$ y $Q_3 - Q_2 \approx 0{,}693$: distribución asimétrica a la derecha, confirma que la cola superior es más larga.
+
+**Fuente.** [Introduction to Probability — Grinstead, Snell §5.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL.
+
+</Ejemplo>
+
+<ListaExercicios seed="licao-73-quartis">
+
+### Bloque A — Cálculo directo (73.1 a 73.12)
+
+<Exercicio
+  numero="73.1"
+  dificuldade="aplicacao"
+  solucao={<>Ordenados: 1, 3, 5, 7, 9 (<Eq>{`n = 5`}</Eq>). Mediana: posición 3 = <strong>5</strong>. <Eq>{`Q_1`}</Eq>: mediana de (1, 3) = <strong>2</strong>. <Eq>{`Q_3`}</Eq>: mediana de (7, 9) = <strong>8</strong>. Resumen de 5: (1, 2, 5, 8, 9).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "53", exercicio: "2.1", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>Ordena: 1, 3, 5, 7, 9. Con <Eq>{`n = 5`}</Eq> impar, la mediana es el 3.er valor: 5.</li><li><Eq>{`Q_1`}</Eq> = mediana de la mitad inferior (1, 3) = promedio de 1 y 3 = 2.</li><li><Eq>{`Q_3`}</Eq> = mediana de la mitad superior (7, 9) = promedio de 7 y 9 = 8.</li></ol><em>Truco:</em> para <Eq>{`n`}</Eq> impar, excluye la mediana antes de dividir las mitades.</>}
+>
+
+Datos: 1, 3, 5, 7, 9. Calcula mediana, $Q_1$ y $Q_3$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.2"
+  dificuldade="aplicacao"
+  solucao={<>Ordenados: 2, 4, 6, 8, 10, 12 (<Eq>{`n = 6`}</Eq>). Mediana: <Eq>{`(6+8)/2 = 7`}</Eq>. <Eq>{`Q_1`}</Eq> = mediana de (2, 4, 6) = 4. <Eq>{`Q_3`}</Eq> = mediana de (8, 10, 12) = 10. Resumen: (2, 4, 7, 10, 12).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "54", exercicio: "2.3", licenca: "CC-BY-SA" }}
+>
+
+Datos: 2, 4, 6, 8, 10, 12. Calcula el resumen de 5 números.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.3"
+  dificuldade="aplicacao"
+  solucao={<>Ordenados: 4, 5, 6, 6, 7, 7, 8, 8, 9, 10 (<Eq>{`n = 10`}</Eq>). <Eq>{`Q_2 = (7+7)/2 = 7`}</Eq>. <Eq>{`Q_1`}</Eq>: mediana de (4, 5, 6, 6, 7) = 6. <Eq>{`Q_3`}</Eq>: mediana de (7, 8, 8, 9, 10) = 8.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "72", exercicio: "2.3.1", licenca: "CC-BY" }}
+>
+
+Calificaciones: 4, 5, 6, 6, 7, 7, 8, 8, 9, 10. Calcula $Q_1$, $Q_2$, $Q_3$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.4"
+  dificuldade="aplicacao"
+  resposta="14"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "55", exercicio: "2.5", licenca: "CC-BY-SA" }}
+  solucao={<>Ordenados: 12, 14, 18, 22, 25, 28, 32 (<Eq>{`n = 7`}</Eq>). <Eq>{`Q_1`}</Eq> = 14 (2.º valor). <Eq>{`Q_3`}</Eq> = 28 (6.º valor). <Eq>{`RIC = 28 - 14 = 14`}</Eq>.</>}
+>
+
+Calcula el $RIC$ de los datos: 12, 14, 18, 22, 25, 28, 32.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.5"
+  dificuldade="aplicacao"
+  solucao={<>Datos ordenados: 18, 20, 21, 22, 23, 24, 25, 27, 30, 35, 60 (<Eq>{`n = 11`}</Eq>). <Eq>{`Q_1 = 21`}</Eq>, <Eq>{`Q_3 = 30`}</Eq>, <Eq>{`RIC = 9`}</Eq>. Límite superior: <Eq>{`30 + 13{,}5 = 43{,}5`}</Eq>. Valor 60 está más allá: <strong>valor atípico</strong>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "84", exercicio: "2.4.3", licenca: "CC-BY" }}
+  passos={<><ol><li>Ordena y localiza: <Eq>{`Q_1 = 21`}</Eq> (3.ª posición), mediana = 24, <Eq>{`Q_3 = 30`}</Eq> (9.ª posición).</li><li><Eq>{`RIC = 30 - 21 = 9`}</Eq>.</li><li>Límite superior: <Eq>{`Q_3 + 1{,}5 \\times RIC = 30 + 13{,}5 = 43{,}5`}</Eq>.</li><li>El valor 60 es mayor que 43,5 — clasificado como valor atípico por la regla de Tukey.</li></ol><em>Observación:</em> Límite inferior = <Eq>{`21 - 13{,}5 = 7{,}5`}</Eq>; todos los otros valores son mayores que 7,5, entonces sin valor atípico inferior.</>}
+>
+
+Edades: 18, 20, 21, 22, 23, 24, 25, 27, 30, 35, 60. Aplica la regla 1,5 RIC. ¿Hay valor atípico?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.6"
+  dificuldade="aplicacao"
+  solucao={<>Datos: 2, 3, 3, 4, 4, 5, 5, 6, 8, 50 (<Eq>{`n = 10`}</Eq>). Mediana = <Eq>{`(4+5)/2 = 4{,}5`}</Eq>. <Eq>{`Q_1`}</Eq> = mediana de (2, 3, 3, 4, 4) = 3. <Eq>{`Q_3`}</Eq> = mediana de (5, 5, 6, 8, 50) = 6. <Eq>{`RIC = 3`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "56", exercicio: "2.7", licenca: "CC-BY-SA" }}
+>
+
+Salarios (R$ miles): 2, 3, 3, 4, 4, 5, 5, 6, 8, 50. Calcula mediana e $RIC$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.7"
+  dificuldade="aplicacao"
+  solucao={<>Usando fórmula <Eq>{`L = 1 + (p/100)(n-1)`}</Eq> con <Eq>{`p = 75`}</Eq>, <Eq>{`n = 100`}</Eq>: <Eq>{`L = 1 + 0{,}75 \\times 99 = 1 + 74{,}25 = 75{,}25`}</Eq>. Interpola entre posiciones 75 y 76.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "73", exercicio: "2.3.5", licenca: "CC-BY" }}
+>
+
+Para $n = 100$ datos ordenados, ¿cuál es la posición de $Q_3$ por el método de interpolación lineal?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.8"
+  dificuldade="aplicacao"
+  solucao={<>Datos: 10, 11, 11, 12, 13, 13, 14, 14, 15, 100 (<Eq>{`n = 10`}</Eq>). <Eq>{`Q_1 = 11`}</Eq>, <Eq>{`Q_3 = 14`}</Eq>, <Eq>{`RIC = 3`}</Eq>. Límite superior: <Eq>{`14 + 4{,}5 = 18{,}5`}</Eq>. Valor 100 es valor atípico.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "85", exercicio: "2.4.5", licenca: "CC-BY" }}
+>
+
+Tiempos (s): 10, 11, 11, 12, 13, 13, 14, 14, 15, 100. Calcula límites de Tukey e identifica el/los valor(es) atípico(s).
+
+</Exercicio>
+
+<Exercicio
+  numero="73.9"
+  dificuldade="aplicacao"
+  solucao={<>Pesos ordenados: 60, 62, 64, 65, 65, 67, 70, 72, 75, 80. <Eq>{`Q_1 = 64{,}5`}</Eq>, mediana = 66, <Eq>{`Q_3 = 71`}</Eq>. Caja de 64,5 a 71, línea en 66. Bigotes de 60 a 80 (sin valor atípico). Distribución ligeramente asimétrica a la derecha.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "60", exercicio: "2.11", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>Ordena: 60, 62, 64, 65, 65, 67, 70, 72, 75, 80 (<Eq>{`n = 10`}</Eq>).</li><li>Mediana: promedio de posiciones 5 y 6 = <Eq>{`(65+67)/2 = 66`}</Eq>.</li><li><Eq>{`Q_1`}</Eq>: mediana de (60, 62, 64, 65, 65) = 64; <Eq>{`Q_3`}</Eq>: mediana de (67, 70, 72, 75, 80) = 72. Atención: algunos libros excluyen mediana central — verifica tu método.</li><li><Eq>{`RIC = 72 - 64 = 8`}</Eq>. Límites: <Eq>{`64 - 12 = 52`}</Eq> y <Eq>{`72 + 12 = 84`}</Eq>. Todos los pesos están dentro.</li></ol><em>Curiosidad:</em> la posición de la mediana dentro de la caja indica asimetría: si próxima a <Eq>{`Q_1`}</Eq>, cola larga a la derecha.</>}
+>
+
+Pesos (kg): 60, 62, 64, 65, 65, 67, 70, 72, 75, 80. Describe todos los elementos del diagrama de caja.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.10"
+  dificuldade="aplicacao"
+  resposta="1,349"
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "183", exercicio: "5.1.12", licenca: "GNU FDL" }}
+  solucao={<>Para <Eq>{`Z \\sim \\mathcal N(0,1)`}</Eq>: <Eq>{`Q_1 = \\Phi^{-1}(0{,}25) \\approx -0{,}674`}</Eq> y <Eq>{`Q_3 = \\Phi^{-1}(0{,}75) \\approx 0{,}674`}</Eq>. Por simetría <Eq>{`RIC = 2 \\times 0{,}674 = 1{,}348 \\approx 1{,}349`}</Eq>.</>}
+>
+
+Para $Z \sim \mathcal N(0,1)$, $Q_3 - Q_1 = ?$
+
+</Exercicio>
+
+<Exercicio
+  numero="73.11"
+  dificuldade="aplicacao"
+  solucao={<>Estimador robusto: <Eq>{`\\hat\\sigma = RIC / 1{,}349 = 6{,}7 / 1{,}349 \\approx 4{,}97`}</Eq>. Útil cuando sospecha de valores atípicos contamina la desviación estándar clásica.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "87", exercicio: "2.4.11", licenca: "CC-BY" }}
+>
+
+Datos con $RIC = 6{,}7$. Usando el estimador robusto $\hat\sigma = RIC/1{,}349$, calcula $\hat\sigma$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.12"
+  dificuldade="aplicacao"
+  solucao={<>La regla <Eq>{`Q_3 + 3 \\cdot RIC`}</Eq> equivale a <Eq>{`\\approx Q_3 + 3 \\times 1{,}349\\sigma = \\mu + 0{,}674\\sigma + 4{,}047\\sigma = \\mu + 4{,}721\\sigma`}</Eq>. <Eq>{`P(Z > 4{,}72) \\approx 0{,}00001`}</Eq>. En 1000 observaciones normales, esperamos <Eq>{`\\approx 0{,}01`}</Eq> — esencialmente cero.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "184", exercicio: "5.1.14", licenca: "GNU FDL" }}
+>
+
+¿Cuántos puntos por encima de $Q_3 + 3 \cdot RIC$ esperaríamos en una muestra de 1000 observaciones normales?
+
+</Exercicio>
+
+### Bloque B — Interpretación y comparación (73.13 a 73.22)
+
+<Exercicio
+  numero="73.13"
+  dificuldade="aplicacao"
+  solucao={<>Diagrama A: caja estrecha (<Eq>{`RIC`}</Eq> pequeño) con mediana centrada → baja dispersión y simetría. Diagrama B: caja ancha (<Eq>{`RIC`}</Eq> grande) con mediana próxima a <Eq>{`Q_1`}</Eq> → alta dispersión y asimetría a la derecha (cola larga superior).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "61", exercicio: "2.13", licenca: "CC-BY-SA" }}
+>
+
+Diagrama A: caja estrecha, mediana centrada. Diagrama B: caja ancha, mediana próxima a $Q_1$. Compara dispersión y simetría de los dos conjuntos.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.14"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "Por encima de la mediana", correta: true}, {texto: "Por debajo de la mediana"}, {texto: "Igual a la mediana"}, {texto: "No es posible determinar"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "57", exercicio: "2.9", licenca: "CC-BY-SA" }}
+  solucao={<>En distribución con cola larga a la derecha, la cola tira la media hacia arriba. La mediana, siendo posicional, no es afectada por la cola. Luego media está <strong>por encima</strong> de la mediana.</>}
+>
+
+Distribución con cola larga a la derecha. ¿Dónde está la media en relación a la mediana?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.15"
+  dificuldade="aplicacao"
+  resposta="B"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "86", exercicio: "2.4.7", licenca: "CC-BY" }}
+  solucao={<><Eq>{`RIC`}</Eq> mide la dispersión del 50% central. <Eq>{`RIC = 20`}</Eq> en B es 4 veces mayor que <Eq>{`RIC = 5`}</Eq> en A — conjunto B tiene mucha más dispersión.</>}
+>
+
+Conjunto A tiene $RIC = 5$, conjunto B tiene $RIC = 20$. ¿En cuál hay más dispersión en los datos centrales?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.16"
+  dificuldade="aplicacao"
+  solucao={<>Ambos tienen mediana 50. En A, <Eq>{`Q_3 - Q_2 = 55 - 50 = 5`}</Eq> (mitad superior estrecha). En B, <Eq>{`Q_3 - Q_2 = 80 - 50 = 30`}</Eq> (mitad superior ancha). Conjunto B es mucho más asimétrico a la derecha.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "62", exercicio: "2.15", licenca: "CC-BY-SA" }}
+>
+
+Mediana de $A = B = 50$. $Q_3$ de $A = 55$, de $B = 80$. ¿Cuál de los dos tiene distribución más asimétrica a la derecha?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P_{90}`}</Eq> de salarios = R$ 30 mil significa: el 90% de los empleados ganan hasta R$ 30 mil por mes, y el 10% gana más que eso.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "74", exercicio: "2.3.7", licenca: "CC-BY" }}
+>
+
+$P_{90}$ de salarios de la empresa = R$ 30 mil. Interpreta esta información.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.18"
+  dificuldade="aplicacao"
+  solucao={<>Estudiante en el <Eq>{`P_{85}`}</Eq> del ENEM significa: él sacó nota mayor o igual a la del 85% de los candidatos que hicieron el examen ese año.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "75", exercicio: "2.3.9", licenca: "CC-BY" }}
+>
+
+Un estudiante está en el $P_{85}$ del ENEM. ¿Qué significa eso?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.19"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "Todos los datos son iguales o están muy concentrados", correta: true}, {texto: "Los datos tienen muchos valores atípicos"}, {texto: "La distribución es bimodal"}, {texto: "La media es cero"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "58", exercicio: "2.8", licenca: "CC-BY-SA" }}
+  solucao={<>Si <Eq>{`Q_1 = Q_2 = Q_3`}</Eq>, entonces <Eq>{`RIC = 0`}</Eq>. Eso significa que al menos la mitad de los datos tiene exactamente el mismo valor — máxima concentración en el 50% central. Puede indicar que todos los datos son iguales o que hay gran masa de valores repetidos.</>}
+>
+
+Si $Q_1 = Q_2 = Q_3$, ¿qué se puede concluir sobre los datos?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.20"
+  dificuldade="compreensao"
+  solucao={<>No. En datos normales, la regla 1,5 RIC señala solo <Eq>{`\\approx 0{,}7\\%`}</Eq> de las observaciones como valores atípicos — no el 5%. El criterio "5% como valores atípicos" usaría aproximadamente <Eq>{`Q_1 - 0{,}69 \\cdot RIC`}</Eq>, no 1,5 RIC. La regla de Tukey fue calibrada propositalmente para que los valores atípicos sean raros, no rutinarios.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "63", exercicio: "2.17", licenca: "CC-BY-SA" }}
+>
+
+¿La afirmación "la regla 1,5 RIC señala el 5% de los datos como valores atípicos" es correcta para datos normales?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.21"
+  dificuldade="aplicacao"
+  solucao={<>Resumen de 5 números para conjunto de 7 valores: mín = 40, <Eq>{`Q_1 = 52`}</Eq>, mediana = 58, <Eq>{`Q_3 = 64`}</Eq>, máx = 72. <Eq>{`RIC = 12`}</Eq>. Límite superior: <Eq>{`64 + 18 = 82`}</Eq>. Sin valor atípico.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "89", exercicio: "2.4.15", licenca: "CC-BY" }}
+>
+
+Edades (años): 40, 52, 55, 58, 62, 66, 72. Calcula el resumen de 5 números y verifica si hay valores atípicos.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.22"
+  dificuldade="aplicacao"
+  solucao={<>Calificaciones: 3, 5, 6, 7, 7, 8, 8, 9, 10, 10. Mediana = <Eq>{`(7+8)/2 = 7{,}5`}</Eq>. <Eq>{`Q_1 = 6`}</Eq>, <Eq>{`Q_3 = 9`}</Eq>. <Eq>{`RIC = 3`}</Eq>. Límites: <Eq>{`[6 - 4{,}5;\\; 9 + 4{,}5] = [1{,}5;\\; 13{,}5]`}</Eq>. Sin valor atípico.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "64", exercicio: "2.19", licenca: "CC-BY-SA" }}
+>
+
+Calificaciones de 10 estudiantes: 3, 5, 6, 7, 7, 8, 8, 9, 10, 10. Diagrama de caja completo (con verificación de valores atípicos).
+
+</Exercicio>
+
+### Bloque C — Modelado con datos brasileños (73.23 a 73.32)
+
+<Exercicio
+  numero="73.23"
+  dificuldade="modelagem"
+  solucao={<>Con <Eq>{`Q_1 = 5`}</Eq> y <Eq>{`Q_3 = 8`}</Eq>, la calificación 9,5 está por encima de <Eq>{`Q_3`}</Eq>. Eso significa que el estudiante está en el top 25% de la clase — sí, top 25%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "90", exercicio: "2.4.17", licenca: "CC-BY" }}
+>
+
+Clase de 100 estudiantes: $Q_1 = 5$, $Q_3 = 8$. Un estudiante sacó 9,5 — ¿está en el top 25%?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.24"
+  dificuldade="modelagem"
+  solucao={<>El ingreso en Brasil tiene distribución fuertemente asimétrica a la derecha: pocos millonarios tiran la media hacia arriba, distorsionándola como medida del salario "típico". La mediana no es afectada por valores extremos y representa mejor lo que el trabajador mediano gana. Ejemplo: en 2023, el ingreso medio domiciliar en Brasil era R$ 3.459 y la mediana era R$ 1.850 — diferencia de 87%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "56", exercicio: "2.6", licenca: "CC-BY-SA" }}
+>
+
+¿Por qué el IBGE divulga mediana de ingresos, y no solo la media, en los reportes sobre desigualdad en Brasil?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.25"
+  dificuldade="modelagem"
+  solucao={<>Piezas con <Eq>{`Q_1 = 9{,}98`}</Eq> mm y <Eq>{`Q_3 = 10{,}02`}</Eq> mm: el 50% de las piezas están entre 9,98 y 10,02 mm. La especificación es <Eq>{`10{,}00 \\pm 0{,}05`}</Eq>, o sea, 9,95 a 10,05 mm. Como los cuartiles están bien dentro de los límites, el proceso parece centrado y la mayoría de las piezas debe estar conforme. Para decisión completa, calcular <Eq>{`C_p`}</Eq> y <Eq>{`C_{pk}`}</Eq> requiere <Eq>{`\\sigma`}</Eq> o asumir normalidad.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "91", exercicio: "2.4.19", licenca: "CC-BY" }}
+>
+
+Piezas producidas con diámetro: $Q_1 = 9{,}98$ mm, $Q_3 = 10{,}02$ mm. Especificación: $10{,}00 \pm 0{,}05$ mm. ¿El proceso está centrado? ¿Hay riesgo de rechazo significativo?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.26"
+  dificuldade="modelagem"
+  solucao={<>Variante A: mediana 1,2 s, <Eq>{`RIC = 0{,}3`}</Eq> (consistente, pero un poco más lenta). Variante B: mediana 1,1 s, <Eq>{`RIC = 1{,}5`}</Eq> (más rápida en mediana, pero muy variable — probablemente tiene valores atípicos pesados). Para UX, prefiere A: el usuario prefiere carga consistentemente rápida a una que a veces es rápida y a veces tarda mucho.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "65", exercicio: "2.21", licenca: "CC-BY-SA" }}
+>
+
+Test A/B de sitio: variante A tiene mediana 1,2 s e $IQR = 0{,}3$; variante B tiene mediana 1,1 s e $IQR = 1{,}5$. ¿Cuál preferirías para lanzar en producción? Justifica usando las estadísticas de dispersión.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.27"
+  dificuldade="modelagem"
+  solucao={<>No se debe remover el valor atípico sin investigación. Un valor atípico en transacciones financieras puede ser: (a) error de entrada (remueve, con justificación documentada); (b) transacción fraudulenta real (preserva — es el punto más informativo); (c) cliente de alto valor. Remover valores atípicos de fraude del training set de un modelo de detección es especialmente perjudicial: el modelo no aprenderá a detectar exactamente los casos de mayor riesgo.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "92", exercicio: "2.4.21", licenca: "CC-BY" }}
+>
+
+Detectas un valor atípico en transacciones financieras que parece ser fraude. ¿Debes removerlo antes de analizar los datos? Justifica con argumentos estadísticos.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.28"
+  dificuldade="modelagem"
+  solucao={<>Tiempo de respuesta de sistema: 120, 130, 135, 140, 142, 145, 148, 150, 155, 380 ms. <Eq>{`Q_1 = 134`}</Eq>, <Eq>{`Q_3 = 149`}</Eq>, <Eq>{`RIC = 15`}</Eq>. Límite: <Eq>{`149 + 22{,}5 = 171{,}5`}</Eq>. El valor 380 ms es valor atípico — probablemente timeout o fallo de red. Para SLA de 200 ms, el sistema está bien, excepto por el valor atípico.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "66", exercicio: "2.23", licenca: "CC-BY-SA" }}
+>
+
+Tiempos de respuesta (ms): 120, 130, 135, 140, 142, 145, 148, 150, 155, 380. Calcula el resumen de 5 números y evalúa si el sistema cumple SLA de 200 ms basado en los cuartiles.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.29"
+  dificuldade="modelagem"
+  solucao={<>Hospital con 4 alas. Tiempos medios de internación (días) por ala: A(5,8,9,10,12), B(3,4,4,5,20), C(7,8,8,9,10), D(2,3,15,18,25). Ala B y D tienen valores atípicos (casos complejos). Ala A tiene distribución más uniforme (<Eq>{`RIC = 3`}</Eq>), ala C tiene menor variabilidad (<Eq>{`RIC = 1`}</Eq>). Decisión de asignación de camas debe priorizar <Eq>{`RIC`}</Eq> bajo (más predecible) sobre mediana aislada.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "93", exercicio: "2.4.23", licenca: "CC-BY" }}
+>
+
+Hospital con 4 alas. Tiempos de internación (días): Ala A: 5, 8, 9, 10, 12; Ala B: 3, 4, 4, 5, 20; Ala C: 7, 8, 8, 9, 10; Ala D: 2, 3, 15, 18, 25. Construye los resúmenes de 5 números e identifica cuál ala es más predecible en gestión de camas.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.30"
+  dificuldade="modelagem"
+  solucao={<>Datos de nota del ENEM por escuela. Escuela A: mediana 650, <Eq>{`RIC = 80`}</Eq>. Escuela B: mediana 620, <Eq>{`RIC = 200`}</Eq>. Escuela A tiene desempeño más homogéneo (menor <Eq>{`RIC`}</Eq>) y mediana mayor. Escuela B tiene mayor desigualdad interna — posiblemente estudiantes muy buenos y muy malos. Para políticas públicas, escuela B necesita nivelación; escuela A de profundización para estudiantes medianos.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "67", exercicio: "2.25", licenca: "CC-BY-SA" }}
+>
+
+Notas del ENEM por escuela. Escuela A: mediana 650, $RIC = 80$. Escuela B: mediana 620, $RIC = 200$. ¿Cuál escuela tiene desempeño más uniforme? ¿Qué patrón sugiere cada uno para la política pedagógica?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.31"
+  dificuldade="modelagem"
+  solucao={<>Precipitación mensual (mm) en São Paulo: 234, 181, 130, 83, 68, 52, 44, 47, 82, 122, 145, 201. Ordenados: 44, 47, 52, 68, 82, 83, 122, 130, 145, 181, 201, 234. <Eq>{`Q_1 = 60`}</Eq>, mediana = <Eq>{`(83+122)/2 = 102{,}5`}</Eq>, <Eq>{`Q_3 = 163`}</Eq>. <Eq>{`RIC = 103`}</Eq>. Sin valor atípico (límites: [-94,5 y 317,5]). Distribución asimétrica a la derecha: lluvias concentradas en los meses de verano.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "94", exercicio: "2.4.25", licenca: "CC-BY" }}
+>
+
+Precipitación mensual media en São Paulo (mm): 234, 181, 130, 83, 68, 52, 44, 47, 82, 122, 145, 201. Calcula el resumen de 5 números e interpreta la estacionalidad.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.32"
+  dificuldade="modelagem"
+  solucao={<>Precios de inmuebles: R$ 250 mil, 280 mil, 310 mil, 320 mil, 340 mil, 350 mil, 380 mil, 390 mil, 420 mil, 1,8 millones. Mediana = R$ 345 mil, media = R$ 484 mil — diferencia enorme tirada por el inmueble de lujo. Para fijación de precio de inmueble típico en el barrio, la mediana es la referencia correcta. El inmueble de R$ 1,8 millones es valor atípico (<Eq>{`Q_3 + 1{,}5 \\cdot RIC`}</Eq> = R$ 550 mil).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "59", exercicio: "2.10", licenca: "CC-BY-SA" }}
+>
+
+Precios de inmuebles en un barrio (R$ miles): 250, 280, 310, 320, 340, 350, 380, 390, 420, 1800. Calcula mediana y media. ¿Por qué un comprador debe usar la mediana como referencia de precio típico?
+
+</Exercicio>
+
+### Bloque D — Comprensión y demostración (73.33 a 73.40)
+
+<Exercicio
+  numero="73.33"
+  dificuldade="compreensao"
+  solucao={<>Mediana e RIC son robustos porque dependen solo del orden de los datos, no de sus valores absolutos. Una observación se hace infinitamente grande: mediana no cambia (continúa en el valor central), RIC no cambia (continúa midiendo el 50% central). Media y desviación estándar, al contrario, suman los valores directamente — un valor atípico infinito los hace infinitos.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "68", exercicio: "2.27", licenca: "CC-BY-SA" }}
+>
+
+Explica, en tus propias palabras, por qué mediana e RIC son "robustos" mientras que media y desviación estándar no lo son. Usa un ejemplo concreto.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.34"
+  dificuldade="compreensao"
+  solucao={<>Sí. Ejemplo: distribución bimodal con picos en 10 y 90, y valores intermedios raros. Si cada pico tiene el 25% de los datos, el cuartil <Eq>{`Q_1 \\approx 10`}</Eq>, <Eq>{`Q_2 \\approx 50`}</Eq>, <Eq>{`Q_3 \\approx 90`}</Eq> — idéntico a una distribución uniforme en [10, 90]. El diagrama de caja "ve" la caja ancha pero no distingue los dos modos. Por eso, histograma y diagrama de violín complementan el diagrama de caja.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "69", exercicio: "2.29", licenca: "CC-BY-SA" }}
+>
+
+¿Un diagrama de caja puede esconder una distribución bimodal? Construye un ejemplo concreto de distribución bimodal que tiene el mismo diagrama de caja que una distribución unimodal.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.35"
+  dificuldade="compreensao"
+  opcoes={[{texto: "RIC = 0,5", correta: true}, {texto: "RIC = 1,0"}, {texto: "RIC = 0,25"}, {texto: "RIC = 2,0"}]}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "185", exercicio: "5.1.15", licenca: "GNU FDL" }}
+  solucao={<>Para <Eq>{`X \\sim \\text{Uniforme}(0, 1)`}</Eq>, la FDD es <Eq>{`F(x) = x`}</Eq>. Luego <Eq>{`Q_1 = F^{-1}(0{,}25) = 0{,}25`}</Eq> y <Eq>{`Q_3 = 0{,}75`}</Eq>. Por tanto <Eq>{`RIC = 0{,}75 - 0{,}25 = 0{,}5`}</Eq>.</>}
+>
+
+Para $X \sim \text{Uniforme}(0, 1)$, el $RIC$ es:
+
+</Exercicio>
+
+<Exercicio
+  numero="73.36"
+  dificuldade="desafio"
+  solucao={<>Para <Eq>{`X \\sim \\text{Exponencial}(\\lambda)`}</Eq>: FDD <Eq>{`F(x) = 1 - e^{-\\lambda x}`}</Eq>. <Eq>{`Q_1 = -\\ln(0{,}75)/\\lambda`}</Eq>, <Eq>{`Q_3 = -\\ln(0{,}25)/\\lambda = \\ln(4)/\\lambda`}</Eq>. <Eq>{`RIC = (\\ln 4 - \\ln(4/3))/\\lambda = \\ln 3/\\lambda \\approx 1{,}099/\\lambda`}</Eq>. Para <Eq>{`\\lambda = 1`}</Eq>: <Eq>{`RIC = \\ln 3 \\approx 1{,}099`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "186", exercicio: "5.1.17", licenca: "GNU FDL" }}
+>
+
+Calcula analíticamente el $RIC$ de $X \sim \text{Exponencial}(\lambda)$. Expresa en función de $\lambda$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.37"
+  dificuldade="desafio"
+  solucao={<>Punto de ruptura del RIC: considera muestras de tamaño <Eq>{`n`}</Eq>. Para "destruir" <Eq>{`Q_1`}</Eq>, precisamos mover al menos <Eq>{`n/4`}</Eq> puntos más allá de cualquier límite. Luego el punto de ruptura es <Eq>{`1/4 = 25\\%`}</Eq>. Para la mediana, argumento análogo da 50%. Para la media, basta 1 punto (0%).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "70", exercicio: "2.31", licenca: "CC-BY-SA" }}
+>
+
+Argumenta por qué el punto de ruptura del $RIC$ es 25%, el de la mediana es 50% y el de la media es 0%.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.38"
+  dificuldade="demonstracao"
+  solucao={<>Para <Eq>{`X`}</Eq> continua simétrica en torno a <Eq>{`\\mu`}</Eq>: la simetría implica <Eq>{`f(\\mu + t) = f(\\mu - t)`}</Eq> para todo <Eq>{`t`}</Eq>. Entonces <Eq>{`P(X \\leq \\mu) = \\int_{-\\infty}^\\mu f(x)\\,dx`}</Eq>. Por cambio de variable <Eq>{`u = 2\\mu - x`}</Eq>: la integral queda <Eq>{`\\int_\\mu^\\infty f(u)\\,du = P(X \\geq \\mu)`}</Eq>. Luego <Eq>{`P(X \\leq \\mu) = P(X \\geq \\mu) = 1/2`}</Eq>, por tanto <Eq>{`\\mu`}</Eq> es la mediana.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "187", exercicio: "5.1.19", licenca: "GNU FDL" }}
+>
+
+Demuestra: si $X$ es v.a. continua con densidad simétrica en torno a $\mu$, entonces $\mu$ es la mediana de $X$.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.39"
+  dificuldade="demonstracao"
+  solucao={<>Para <Eq>{`X \\sim \\text{Uniforme}(0,1)`}</Eq>, las estadísticas de orden tienen distribución <Eq>{`X_{(k)} \\sim \\text{Beta}(k, n-k+1)`}</Eq>. En particular, <Eq>{`X_{(\\lceil n/4 \\rceil)} \\to Q_1 = 0{,}25`}</Eq> casi seguramente cuando <Eq>{`n \\to \\infty`}</Eq> por la ley de los grandes números. La varianza de <Eq>{`X_{(k)}`}</Eq> es <Eq>{`k(n-k+1)/[(n+1)^2(n+2)]`}</Eq>, que va a cero cuando <Eq>{`n \\to \\infty`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "188", exercicio: "5.1.21", licenca: "GNU FDL" }}
+>
+
+Muestra que para $n \to \infty$ y muestras iid de Uniforme(0,1), el estimador muestral de $Q_1$ converge a 0,25. Usa propiedades de estadísticas de orden.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.40"
+  dificuldade="demonstracao"
+  solucao={<>La mediana minimiza <Eq>{`E[|X - c|]`}</Eq>. Prueba: sea <Eq>{`g(c) = E[|X - c|] = \\int_{-\\infty}^c (c-x)f(x)\\,dx + \\int_c^\\infty (x-c)f(x)\\,dx`}</Eq>. Derivando: <Eq>{`g'(c) = \\int_{-\\infty}^c f(x)\\,dx - \\int_c^\\infty f(x)\\,dx = F(c) - (1 - F(c)) = 2F(c) - 1`}</Eq>. Igualando a cero: <Eq>{`F(c) = 1/2`}</Eq>, o sea, <Eq>{`c = \\text{mediana}`}</Eq>. Como <Eq>{`g''(c) = 2f(c) > 0`}</Eq>, es mínimo.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "189", exercicio: "5.1.23", licenca: "GNU FDL" }}
+>
+
+Demuestra que la mediana minimiza $E[|X - c|]$ sobre todos los valores $c \in \mathbb{R}$.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Fuentes
+
+- [**OpenIntro Statistics** (4.ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · EN · CC-BY-SA. **Fuente primaria — §2.1 (cuartiles, percentiles) y §2.2 (diagrama de caja, valores atípicos).**
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · EN · CC-BY. **§2.3 (percentiles por interpolación) y §2.4 (diagrama de caja y regla 1,5 RIC).**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · 1997 · EN · GNU FDL. **§5.1 — cuartiles de distribuciones continuas, estadísticas de orden.**

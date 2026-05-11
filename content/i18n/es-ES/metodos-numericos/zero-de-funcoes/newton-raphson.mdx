@@ -1,0 +1,149 @@
+---
+titulo: "Método de Newton-Raphson"
+slug: "newton-raphson"
+categoria: "metodos-numericos"
+subcategoria: "zero-de-funcoes"
+descricao: "El hermano más rápido de la bisección — usa la derivada para 'acortar camino'. Convergencia cuadrática cuando funciona, divergencia espectacular cuando no."
+ordem: 2
+publicado: true
+tags: ["raízes", "derivada", "convergência quadrática", "tangente"]
+prerrequisitos: ["bisseção", "derivada"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["Cálculo Numérico", "Optimización", "Vol implícita en Black-Scholes"]
+---
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definición rigurosa">
+
+Dado $f \in C^2([a,b])$ y una aproximación inicial $x_0$ cercana a la raíz $\xi$ con $f'(\xi) \neq 0$, la iteración de Newton-Raphson es:
+
+<Equation numero="1" explicacao={<>Cada iteración toma la tangente a la curva en el punto actual y sigue hasta cruzar el eje <Eq>{`x`}</Eq>. Ese cruzamiento es la siguiente aproximación.</>}>
+{`x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}`}
+</Equation>
+
+<Teorema titulo="Convergencia cuadrática">
+
+Bajo las hipótesis anteriores, la sucesión $(x_n)$ converge a $\xi$ y existe $C > 0$ tal que:
+
+<Equation numero="2" explicacao={<>El error <strong>se eleva al cuadrado</strong> en cada iteración — el número de decimales correctos <strong>se duplica</strong>. 4 cifras → 8 cifras → 16 cifras. Razonable e impresionante.</>}>
+{`|x_{n+1} - \\xi| \\leq C \\cdot |x_n - \\xi|^2`}
+</Equation>
+
+</Teorema>
+
+</Porta>
+
+<Porta nivel="5" titulo="Para un niño de 5 años">
+
+Imagina un tobogán largo en el parque.
+
+Estás en lo alto del tobogán y quieres saber **dónde toca el suelo**.
+
+En vez de deslizarte lentamente, **miras la punta del tobogán bien recta** e imaginas dónde va a parar — dónde la línea toca el suelo.
+
+Entonces caminas hacia ese punto, subes un poco en el tobogán que continúa desde allí, y miras de nuevo. Solo que ahora estás mucho más cerca del final.
+
+Newton es así: mira la inclinación, hace una línea en el suelo, va a ese punto. Muy rápido.
+
+</Porta>
+
+<Porta nivel="10" titulo="Para un niño de 10 años">
+
+La bisección del otro tema buscaba raíz **dividiendo el intervalo en dos**. Lento, pero garantizado.
+
+Newton-Raphson tiene otra estrategia: **usa la inclinación de la función** para dar un salto grande hacia la raíz.
+
+Imagina la función dibujada en una gráfica. Estás en un punto. Dibujas **la tangente** (la línea que toca la curva en ese punto sin cruzarla). ¿Dónde esa línea cruza el eje horizontal? Esa es tu siguiente aproximación.
+
+Cada salto te acerca mucho más que la bisección. Como un cohete versus una bicicleta. Pero si apuntas mal, el cohete puede dispararte **hacia el lado incorrecto**.
+
+</Porta>
+
+<Porta nivel="15" titulo="Para un adolescente de 15 años">
+
+Quieres encontrar la raíz de:
+
+$$ f(x) = x^3 - 2x - 5 $$
+
+Tomando $x_0 = 2$:
+
+- $f(2) = 8 - 4 - 5 = -1$
+- $f'(x) = 3x^2 - 2$, entonces $f'(2) = 10$
+- $x_1 = 2 - (-1)/10 = 2{,}1$
+
+Iteración 2:
+- $f(2{,}1) = 9{,}261 - 4{,}2 - 5 = 0{,}061$
+- $f'(2{,}1) = 13{,}23$
+- $x_2 = 2{,}1 - 0{,}061/13{,}23 = 2{,}0954$
+
+Iteración 3:
+- $f(2{,}0954) \approx 0{,}00018$
+- $x_3 \approx 2{,}09455148$
+
+En **3 iteraciones**, tienes 8 decimales correctos. La bisección necesitaría más de 25 iteraciones para la misma precisión.
+
+<Insight>
+
+**¿Por qué Newton es mucho más rápido?** Porque usa **más información**: además del valor de $f$, usa la derivada $f'$. La derivada dice "hacia dónde se está dirigiendo la función". La bisección solo sabe "todavía hay raíz aquí dentro". Quien sabe más, avanza más rápido — mientras no confíe demasiado.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="Para un estudiante de ingeniería">
+
+Newton-Raphson es el método de raíz más usado en ingeniería, **dentro del rango de aplicación**. Tiene tres trampas clásicas:
+
+### Trampa 1: derivada cero
+
+Si $f'(x_n) = 0$, la iteración se quiebra (división por cero). Sucede en mínimos/máximos de la función. Solución práctica: usar **regla de protección** — si $|f'(x_n)| < \delta$, caer a bisección.
+
+### Trampa 2: ciclo
+
+Considera $f(x) = x^3 - 2x + 2$. Con $x_0 = 0$, se genera $x_1 = 1$, $x_2 = 0$, $x_3 = 1$, ... — ciclo eterno entre 0 y 1.
+
+### Trampa 3: divergencia
+
+Para $f(x) = \arctan(x)$ con $x_0$ lejos de la raíz $\xi = 0$, Newton diverge. Cada paso se aleja más.
+
+### El método de Brent (en la vida real)
+
+Por eso, código de producción (`scipy.optimize.brentq`, MATLAB `fzero`) usa **híbrido**: Newton o interpolación inversa cuando el paso cae dentro del intervalo; bisección cuando sale. Garantía + velocidad.
+
+### Aplicación real: vol implícita
+
+La vol implícita del mercado de opciones se resuelve por Newton-Raphson sobre Black-Scholes. Como $\partial C/\partial \sigma > 0$ siempre (vega positivo), la función es monótona y Newton converge en ~3-5 iteraciones con tolerancia de $10^{-8}$.
+
+</Porta>
+
+<Porta nivel="40" titulo="Para un profesional">
+
+En mesa de derivados, Newton-Raphson sobre $\sigma \mapsto \text{BS}(S, K, r, \sigma, T) - C_{\text{mkt}}$ es el motor que extrae vol implícita del libro de ofertas en **microsegundos**. Cada cotización actualiza, recalcula vol, actualiza superficie.
+
+Pero la versión pura de Newton no es la que está en producción. Está:
+
+- **Halley method** (orden 3) — aún más rápido si tienes segunda derivada (y BS la tiene)
+- **Brent** — cuando necesitas robustez (ej: opción casi deep-OTM, vega tendiendo a cero)
+- **Bisección** — fallback cuando todo lo demás falla
+
+En equipos quant, "qué root finder usar" es decisión por **clase de instrumento**:
+
+- Listed equity options: Brent (precio bid-ask crea ruido)
+- OTC swaps complejos: Newton con warm-start de la iteración anterior
+- Exotics con pricing por simulación Monte Carlo: bisección (pricing no es diferenciable)
+
+La elección incorrecta no derriba el sistema pero degrada latencia — y en high-frequency, la latencia es P&L.
+
+</Porta>
+
+</DuasPortas>
+
+<Leituras>
+
+- **Burden, R.; Faires, D.** *Numerical Analysis*. Cap. 2.
+- **NPS Naval Postgraduate** — [Newton's method PDF](https://cs.nyu.edu/~overton/NumericalComputing/newton.pdf). Convergencia cuadrática probada cuidadosamente.
+- **Wikipedia** — [Newton's method](https://en.wikipedia.org/wiki/Newton's_method).
+
+</Leituras>

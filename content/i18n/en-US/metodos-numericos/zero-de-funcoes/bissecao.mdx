@@ -1,0 +1,269 @@
+---
+titulo: "Bisection Method"
+slug: "bissecao"
+categoria: "metodos-numericos"
+subcategoria: "zero-de-funcoes"
+descricao: "The most intuitive algorithm for finding roots — cuts the interval in half repeatedly. Convergence guaranteed by Bolzano's Theorem."
+ordem: 1
+publicado: true
+tags: ["raízes", "bolzano", "iterativo", "convergência linear"]
+prerrequisitos: ["funções contínuas", "intervalos"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["Cálculo Numérico (USP/PMR2300)", "EDO (raízes de polinômios característicos)", "Engenharia de Controle (estabilidade)"]
+---
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Rigorous definition">
+
+### The problem
+
+Given a continuous function $f: [a, b] \to \R$ such that $f(a) \cdot f(b) < 0$, find $\xi \in (a, b)$ such that $f(\xi) = 0$.
+
+<Equation explicacao={<>The condition <Eq>{`f(a) \\cdot f(b) < 0`}</Eq> guarantees that <Eq>{`f`}</Eq> changes sign between <Eq>{`a`}</Eq> and <Eq>{`b`}</Eq>. By the <strong>Intermediate Value Theorem</strong> (Bolzano), there exists at least one <Eq>{`\\xi`}</Eq> in the interior where <Eq>{`f(\\xi) = 0`}</Eq>.</>}>
+{`f(a) \\cdot f(b) < 0 \\;\\Longrightarrow\\; \\exists\\, \\xi \\in (a, b) : f(\\xi) = 0`}
+</Equation>
+
+### The algorithm
+
+At iteration $k$, we produce three points: $a_k$, $b_k$, and the midpoint $m_k$.
+
+<Equation numero="1" explicacao={<>The midpoint of the current interval. Always our candidate for the root at iteration <Eq>{`k`}</Eq>.</>}>
+{`m_k = \\frac{a_k + b_k}{2}`}
+</Equation>
+
+The update rule is:
+
+<Equation numero="2" explicacao={<>Replace the endpoint whose sign of <Eq>{`f`}</Eq> matches the sign of <Eq>{`f(m_k)`}</Eq>. This way, the new interval continues to satisfy Bolzano's hypothesis and has half the length of the previous one.</>}>
+{`(a_{k+1}, b_{k+1}) = \\begin{cases} (m_k, b_k) & \\text{if } f(a_k) \\cdot f(m_k) > 0 \\\\ (a_k, m_k) & \\text{if } f(a_k) \\cdot f(m_k) < 0 \\end{cases}`}
+</Equation>
+
+### Convergence
+
+<Teorema titulo="Bisection convergence">
+
+If $f$ is continuous on $[a, b]$ and $f(a) \cdot f(b) < 0$, then the sequence $(m_k)$ produced by the bisection method converges to a root $\xi \in (a, b)$, and the absolute error at iteration $k$ satisfies:
+
+<Equation numero="3" explicacao={<>The error <strong>halves at each iteration</strong> — linear convergence with ratio <Eq>{`1/2`}</Eq>. No matter how wild the function is, as long as it is continuous and changes sign.</>}>
+{`|m_k - \\xi| \\leq \\frac{b - a}{2^{k+1}}`}
+</Equation>
+
+</Teorema>
+
+<Teorema titulo="Minimum number of iterations">
+
+To guarantee absolute error less than a tolerance $\eps > 0$, it suffices:
+
+<Equation numero="4" explicacao={<>To reduce an interval of size 1 to a tolerance of <Eq>{`10^{-6}`}</Eq>, one needs at least <Eq>{`\\lceil \\log_2(10^6) \\rceil = 20`}</Eq> iterations. <strong>It is predictable</strong> — unlike Newton, which can diverge or cycle.</>}>
+{`n \\geq \\left\\lceil \\log_2 \\frac{b - a}{\\eps} \\right\\rceil`}
+</Equation>
+
+</Teorema>
+
+### Essential hypotheses
+
+1. $f$ continuous on $[a, b]$
+2. $f(a) \cdot f(b) < 0$
+3. (Implicit) There exists at least one $\xi$ in the interval, and we want any one of them
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine you lost your favorite toy somewhere on a really long street.
+
+You know the toy is somewhere **between your house gate and the corner**. But the street is long and you don't want to wander around aimlessly.
+
+What do you do?
+
+You go **to the middle of the street** and look both ways.
+
+- If the toy is closer to your house, you forget about the part of the street from the middle to the corner. Now your search area is smaller: only from the house to the middle.
+- If the toy is closer to the corner, you forget about the part from the house to the middle.
+
+And then you do it again: you go to the **middle of the new part**. And again. And again.
+
+Every time you walk to the middle, the place where the toy might be gets **half the size**. With a few trips, you're practically on top of it.
+
+Bisection is exactly that. Except instead of looking for a toy, you're looking for **a number** where something special happens.
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+Let's play a game: I thought of a number between **1 and 100**. You need to figure out what it is.
+
+You can guess a number and I only answer "**higher**" or "**lower**".
+
+What's the best strategy?
+
+It's not to guess 1, then 2, then 3 — that could take 100 guesses!
+
+The smart strategy is:
+
+- First guess: **50** (in the middle).
+- I say "higher". Now you know it's between 50 and 100.
+- Second guess: **75** (in the middle of the new part).
+- I say "lower". Now it's between 50 and 75.
+- Third guess: **62** (roughly in the middle).
+- And so on.
+
+In **at most 7 guesses**, you can get any number from 1 to 100. Why 7?
+
+Because each guess cuts the space in half. After 7 cuts, what's left is tiny: $\frac{100}{2^7} = \frac{100}{128} \approx 0{,}78$ — less than 1.
+
+**Bisection** is the mathematician's version of this game. Instead of looking for a number between 1 and 100, you look for **where an equation equals zero**. And the rule of "higher or lower" becomes **the sign of a function**.
+
+Each iteration cuts the interval in half. After 30 iterations, the remaining piece is smaller than $10^{-9}$ — smaller than an atom, if the original interval were 1 meter.
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old teen">
+
+You're in **Calculus 1** or **Pre-calculus** and your teacher asks you to solve:
+
+$$ x^2 - 4 = 0 $$
+
+You know: $x = \pm 2$. Nice and clean.
+
+But what about this one:
+
+$$ \e^x - 3x - 5 = 0 $$
+
+You can't isolate $x$. There's no formula. Your calculator has no button for it.
+
+Now what?
+
+**Bisection** is the simplest way to find the answer. The idea:
+
+1. Calculate $f(0) = \e^0 - 0 - 5 = -4$ (negative)
+2. Calculate $f(3) = \e^3 - 9 - 5 \approx 6{,}09$ (positive)
+3. Since $f$ changed sign, **there's a root between 0 and 3** (Intermediate Value Theorem — you'll learn it formally).
+4. Go to the middle: $f(1{,}5) = \e^{1{,}5} - 4{,}5 - 5 \approx -5{,}02$ (negative). The root is between **1.5 and 3**.
+5. Go to the middle of the new part: $f(2{,}25) \approx -0{,}26$ (negative). The root is between **2.25 and 3**.
+6. Keep going... after about 20 cuts, you have 6 decimal places of accuracy.
+
+The root is approximately $x \approx 2{,}258$.
+
+<Insight>
+
+**Why does this matter?** Almost no interesting equation in real life has a pretty formula for its solution. The ones that do (quadratic, cubic) are the exception. In engineering, physics, economics — **solving is almost always numerical**. And bisection is the first tool every computer implements.
+
+The function $\e^x - 3x - 5$ appears, for example, when you're calculating the time it takes a Formula 1 car to reach a certain speed, with air resistance. Or in the decay of a drug in the bloodstream. **The math that seems theoretical is the real math**.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="For an engineering student">
+
+Bisection is the first tool in the Numerical Calculus cookbook (at USP/PMR2300, Ruggiero & Lopes book; at ITA/MAT-32; at MIT/18.330).
+
+### Why it matters
+
+Consider the root-finding problem where you don't have an analytical solution:
+
+- **Colebrook equation** (fluid mechanics): $\frac{1}{\sqrt{f}} = -2 \log_{10}\!\left(\frac{\eps/D}{3{,}7} + \frac{2{,}51}{\text{Re}\sqrt{f}}\right)$
+- **van der Waals equation of state** (thermodynamics): cubic in volume, but with experimental parameters
+- **Modal analysis of vibrating beam**: $\cosh(\beta L)\cos(\beta L) + 1 = 0$
+
+In all these cases, **bisection always works if you have an interval with a sign change**. You don't need the derivative (unlike Newton), you don't need a good initial guess (unlike fixed-point).
+
+### Error analysis
+
+The iteration produces a sequence $(m_k)$ with error $|m_k - \xi| \leq \frac{b - a}{2^{k+1}}$. On a $\log_2$ scale, the error decays linearly with rate $1/2$. That's why we say the **order of convergence is 1** — methods of higher order (Newton: 2; Steffensen: 2; Halley: 3) gain more decimal places per iteration.
+
+<Equation numero="5" explicacao={<>The ratio of errors between consecutive iterations tends to a constant <Eq>{`C = 1/2`}</Eq>. It is the operational definition of <strong>linear convergence</strong>.</>}>
+{`\\lim_{k \\to \\infty} \\frac{|e_{k+1}|}{|e_k|} = \\frac{1}{2}`}
+</Equation>
+
+### Comparison with Newton-Raphson
+
+| Criterion | Bisection | Newton |
+|---|---|---|
+| Convergence | Linear (always) | Quadratic (if $f'(\xi) \neq 0$) |
+| Guarantee of convergence | **Always**, if $f(a)f(b) < 0$ | **No** — can diverge, cycle |
+| Need derivative? | No | Yes |
+| Number of $f$ evaluations per iter | 1 | 2 ($f$ and $f'$) |
+| Iterations for 6 decimals | ~20 | ~5 |
+
+**Hybrid strategy used in practice**: bisection to locate the root with moderate precision (5–10 iter), then Newton to refine (3–5 iter). That's what `scipy.optimize.brentq` does.
+
+### Lean implementation (TypeScript)
+
+```typescript
+export function bissecao(f: (x: number) => number, a: number, b: number, eps: number) {
+  if (f(a) * f(b) >= 0) throw new Error('No sign change')
+  while ((b - a) / 2 > eps) {
+    const m = (a + b) / 2
+    if (f(a) * f(m) < 0) b = m
+    else a = m
+  }
+  return (a + b) / 2
+}
+```
+
+</Porta>
+
+<Porta nivel="40" titulo="For a senior professional">
+
+Bisection is the slowest and most robust method. **It's what you use when you need guarantee, not speed.**
+
+### Where pure bisection is still the right choice
+
+- **Embedded / safety-critical**: avionics, automotive, medical. You need **deterministic convergence** with a known bound on iterations. Newton can diverge on an edge case — bisection doesn't.
+- **Trading systems** (root of monotonic functions with noise): implicit volatility price by bisection is standard practice because you know it will converge even if the price comes in displaced.
+- **Initial localization** before Brent or Newton refines.
+
+### Brent's method — what people actually use
+
+To price an implied volatility or find the IRR of a cash flow, nobody uses pure bisection. They use **Brent's method** (1973), implemented in `scipy.optimize.brentq`, MATLAB `fzero`, Excel `Goal Seek`. It's a hybrid:
+
+1. Try **inverse quadratic interpolation** (3 points)
+2. If the proposed step goes outside the bracketing interval, **fall back to bisection**
+3. Repeat
+
+Result: **superlinear convergence** (~1.84) with **bracketing guarantee** preserved. Best of both worlds.
+
+### Real costs and pitfalls
+
+- **Functions with nearby roots**: bisection converges to some, but you don't control which. If f has roots at 1.001 and 1.002 within an interval [0, 2], which one the method finds depends on iteration parity. In production code, **subdivide the interval first**.
+
+- **Ill-conditioned problems**: if $f$ is "nearly flat" near the root (small derivative), the error in $x$ might be small but $f(x)$ can be far from zero numerically. Use **two stopping criteria**: $|b - a|/2 < \eps_x$ AND $|f(m)| < \eps_y$. Use **both**, not OR.
+
+- **Machine precision**: $|b - a|/2$ goes down to `eps * max(|a|,|b|)` in float64. Asking for tolerance smaller than that is **a bug**.
+
+### Real case: implied vol in PETR4 option
+
+On B3, in mid-2025, with PETR4 quoted at R\$38.40, a call option PETRJ41 (strike R\$41, expiration ~30 days) closed at **R\$0.42**. Computing the implied vol by bisection over Black-Scholes:
+
+- Initial interval: $\sigma \in [0{,}05, 1{,}50]$
+- Bracketing: $C(\sigma=0{,}05) \approx 0$ (OTM call with low vol is worth almost nothing), $C(\sigma=1{,}50) \approx 5$ (absurdly high vol overvalues it)
+- After 20 iterations: $\sigma_{\text{impl}} \approx 0{,}347$ (34.7% per annum)
+
+That 34.7% is the **market's expectation** for PETR4 volatility over the next month. If you think the actual vol will be lower, **you sell the option**; if higher, **you buy**. Bisection is the engine that extracts this expectation from the observed price.
+
+### Libraries you actually use
+
+- **Python**: `scipy.optimize.brentq` (Brent), `scipy.optimize.bisect` (pure bisection)
+- **MATLAB**: `fzero` (Brent's method)
+- **C/C++**: GSL `gsl_root_fsolver_brent`
+- **R**: `uniroot()` (Brent)
+- **Excel**: Goal Seek (proprietary algorithm, similar to bisection + secant)
+
+Pure bisection is rarely what you wire up in production. But it's what you **explain first** in a code review — because if the sophisticated method fails, you fall back to it.
+
+</Porta>
+
+</DuasPortas>
+
+<Leituras>
+
+- **Ruggiero, M.; Lopes, V.** *Numerical Calculus — Theoretical and Computational Aspects*. Pearson. (Ch. 2 — Zeros of functions)
+- **Burden, R.; Faires, D.** *Numerical Analysis*. Cengage. Standard reference for Numerical Methods courses in universities in the USA.
+- **Brent, R.P.** (1973). *Algorithms for Minimization without Derivatives*. Dover.
+- **REAMAT UFRGS** — [Numerical Calculus — Bisection Method](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/sdeduv-metodo_da_bissecao.html). Open resource.
+- **scipy.optimize** — [scipy.optimize.brentq](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brentq.html). Brent's method in practice.
+
+</Leituras>

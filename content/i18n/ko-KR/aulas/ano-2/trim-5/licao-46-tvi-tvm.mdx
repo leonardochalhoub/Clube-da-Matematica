@@ -1,0 +1,994 @@
+---
+titulo: "46강 — TVI와 평균 변화율"
+slug: "licao-46-tvi-tvm"
+categoria: "aulas"
+subcategoria: "ano-2-trim-5"
+descricao: "중간값 정리(근의 존재성, 이분법)와 평균 변화율(할선의 기울기, 미분으로 가는 다리)."
+ordem: 46
+publicado: true
+tags: ["TVI", "평균-변화율", "연속성", "할선", "미분", "ano-2", "trim-5"]
+prerrequisitos: ["licao-43-continuidade"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["고등학교 2학년(미분 입문)", "일본 수학II 동등과정 §5", "독일 분석/11학년 동등과정"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{TVM}_{[a,b]} = \frac{f(b) - f(a)}{b - a}"
+  legenda={<><strong>평균 변화율</strong> of <Eq>{`f`}</Eq> on interval <Eq>{`[a, b]`}</Eq> is the slope of the secant line passing through points <Eq>{`(a,\\, f(a))`}</Eq> and <Eq>{`(b,\\, f(b))`}</Eq>. When <Eq>{`b \\to a`}</Eq>, this rate approaches the <em>instantaneous rate of change</em> — the derivative.</>}
+  audioTexto="f의 a부터 b까지 구간에서의 평균 변화율은 f(b) 빼기 f(a), 나누기 b 빼기 a와 같습니다. 기하학적으로, 그래프의 두 점을 잇는 직선의 기울기입니다. b가 a에 가까워질 때, 이 기울기는 a에서의 미분으로 수렴합니다."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    이 강을 다루는 교과서
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §1.1–1.3 속도, 평균 변화율, 미분으로의 전환 · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">1차 자료: 평균 속도와 미분을 생성하는 극한으로의 전이에 대한 발견 활동.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/calculus-volume-1" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §2.4 연속성과 TVI · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">TVI의 공식적 진술과 따름정리, 초월방정식 예제, 근의 위치 결정 문제.</em>
+    </li>
+    <li>
+      <a href="https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        REAMAT — 수치 미분(UFRGS)
+      </a>
+      <span className="text-clube-mist"> · §3.1 이분법 · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Python 구현, 오차 분석, 내부수익률과 공학 방정식의 근 예제.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="정의와 정리">
+
+### 중간값 정리(TVI)
+
+<Definicao titulo="중간값 정리">
+
+$f : [a, b] \to \mathbb{R}$이 연속이고, $k$가 $f(a)$와 $f(b)$ 사이의 임의의 값이라고 하자. 즉, $\min\{f(a), f(b)\} \leq k \leq \max\{f(a), f(b)\}$이면, $f(c) = k$인 $c \in (a, b)$가 존재한다.
+
+</Definicao>
+
+> "$f$가 $[a, b]$에서 연속이고 $k$가 $f(a)$와 $f(b)$ 사이의 임의의 값이면, $(a, b)$에 $f(c) = k$인 수 $c$가 적어도 하나 존재한다." — [OpenStax Calculus Volume 1, §2.4, Theorem 2.13](https://openstax.org/books/calculus-volume-1/pages/2-4-continuity)
+
+**따름정리(근의 존재성).** $f \in C([a, b])$이고 $f(a) \cdot f(b) < 0$이면, $f(c) = 0$인 $c \in (a, b)$가 존재한다.
+
+<Equation explicacao="음의 곱은 반대 부호를 의미한다: f(a)와 f(b)는 0의 반대쪽에 있으므로, f는 어떤 내부점에서 0을 지나야 한다." latex="f(a) \cdot f(b) < 0 \implies \exists\, c \in (a,b) : f(c) = 0" />
+
+**증명(완비성을 통한 스케치).** $f(a) < 0 < f(b)$라고 가정하자. $S = \{x \in [a, b] : f(x) < 0\}$이라 정의하면, $S$는 공집합이 아니고($a \in S$) $b$로 위로 유계된다. $\mathbb{R}$의 완비성에 의해, $c = \sup S \in [a, b]$가 존재한다. $f$의 연속성에 의해, $f(c) \neq 0$이면 모순이 발생한다. 따라서 $f(c) = 0$이다. $\square$
+
+**연속성이 필수인 이유.** Heaviside 함수 $H(x) = 0$ (if $x < 0$) 그리고 $H(x) = 1$ (if $x \geq 0$)는 $H(-1) = 0$이고 $H(1) = 1$을 만족하지만, 절대 $1/2$를 택하지 않는다 — $x = 0$에서 뛰어넘음이 있고 거기서 연속이 아니기 때문이다.
+
+<Insight>
+
+TVI는 근의 존재에 충분하지만 필요하지는 않다. $f(a)$와 $f(b)$가 같은 부호를 가지면, TVI가 적용되지 않는다 — 그러나 내부에 근이 있을 수 있다. 예: $f(x) = (x-1)^2$는 $f(0) = f(2) = 1 > 0$이지만, $x = 1$은 중근이다. TVI는 보장하며, 배제하지 않는다.
+
+</Insight>
+
+### 이분법
+
+주어진 $f \in C([a, b])$ with $f(a)f(b) < 0$, 이분법은 반복적으로 근을 찾는다. 각 단계에서, 중점을 계산하고 $f$가 부호를 바꾸는 반을 유지한다:
+
+<Equation explicacao="각 반복에서, 중점 m_n이 현재 구간을 나눈다. 오차는 각 단계마다 절반으로 감소한다 — 수렴이 보장되고 정량화 가능하다." latex="m_n = \frac{a_n + b_n}{2}, \qquad |c - m_n| \leq \frac{b - a}{2^{n+1}}" />
+
+정확도 $\varepsilon$를 위해, $n \geq \lceil \log_2((b-a)/\varepsilon) \rceil - 1$ 반복이 필요하다.
+
+### 평균 변화율(TVM)
+
+<Definicao titulo="평균 변화율">
+
+$f$가 $[a, b]$에서 정의되고 $a \neq b$일 때, 그 구간에서 $f$의 **평균 변화율**은:
+
+$$\text{TVM}_{[a,b]} = \frac{f(b) - f(a)}{b - a}$$
+
+기하학적으로, 이는 $f$ 그래프에서 점 $(a, f(a))$와 $(b, f(b))$를 지나는 **할선의 기울기**이다.
+
+</Definicao>
+
+> "구간 $[a, b]$에 따른 $f$의 평균 변화율은 $\text{AV}_{[a,b]} = \dfrac{f(b)-f(a)}{b-a}$이다. 기하학적으로, 평균 변화율은 점 $(a, f(a))$과 $(b, f(b))$를 지나는 직선의 기울기를 나타낸다." — [Active Calculus, §1.1, Definition 1.1.4](https://activecalculus.org/single/sec-1-1-vel.html)
+
+$h = b - a$를 사용한 표기법은 동등하다:
+
+<Equation explicacao="b = a + h로 대치하면, TVM은 증분 h로 표현된다. h → 0일 때, 이 식이 미분을 정의한다 — 순간 변화율." latex="\text{TVM} = \frac{f(a + h) - f(a)}{h}, \quad h = b - a \neq 0" />
+
+**극한으로의 전환.** $f$가 $a$에서 미분가능하면:
+
+$$f'(a) = \lim_{h \to 0} \frac{f(a+h) - f(a)}{h} = \lim_{b \to a} \frac{f(b) - f(a)}{b - a}$$
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 420 260" className="w-full max-w-[480px] mx-auto block">
+  <defs>
+    <marker id="arr46" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <line x1="30" y1="220" x2="400" y2="220" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr46)"/>
+  <line x1="60" y1="240" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr46)"/>
+  <text x="395" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">x</text>
+  <text x="65" y="18" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">y</text>
+  <path d="M 80,200 Q 180,60 380,100" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+  <circle cx="140" cy="140" r="4" fill="rgb(26 77 92)"/>
+  <circle cx="320" cy="105" r="4" fill="rgb(26 77 92)"/>
+  <line x1="100" y1="172" x2="370" y2="86" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4,3"/>
+  <text x="135" y="158" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">(a, f(a))</text>
+  <text x="325" y="102" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">(b, f(b))</text>
+  <text x="195" y="125" fontSize="9" fontFamily="serif" fill="rgb(201 163 95)">할선: 기울기 = TVM</text>
+  <text x="80" y="250" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.5">a</text>
+  <text x="315" y="250" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.5">b</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+할선은 <em>(a, f(a))</em>에서 <em>(b, f(b))</em>로 이어진다. 그 기울기는 TVM이다. <em>b → a</em>일 때, 할선은 <em>a</em>에서의 접선으로 수렴하고, 그 기울기는 <em>f'(a)</em>이다.
+</figcaption>
+</figure>
+
+<Teorema titulo="TVM — 미분 관계">
+$f$가 $a$에서 미분가능하면:
+$$\lim_{b \to a} \text{TVM}_{[a,b]} = f'(a)$$
+미분은 구간이 한 점으로 축소될 때 평균 변화율의 극한이다. TVM은 전역 버전; 미분은 국소 버전.
+</Teorema>
+
+</Porta>
+
+<Porta nivel="5" titulo="5살 아이에게">
+
+계단을 올라간다고 생각해봐. 처음에는 **아래**에 있고 마지막에는 **위**에 있어. 거기에 가려면, **중간의 모든 계단을 지나가야 해** — 바닥에서 꼭대기로 점프할 수는 없어.
+
+중간값 정리는 연속함수에 대해 정확히 이것을 말해: 함수가 작은 값에서 시작하고 큰 값에서 끝나면, **중간의 모든 값을 지나**가야 한다.
+
+그리고 평균 변화율은 비탈길이의 경사를 계산하는 것 같아. 만약 2발에서 4미터를 올라가면, 평균 경사는 4 나누기 2: 발당 2미터.
+
+</Porta>
+
+<Porta nivel="10" titulo="10살 아이에게">
+
+**중간값 정리:** 온도계가 자정에 -3°를 나타내고 정오에 +12°를 나타낸다고 상상해봐. 어느 순간 그것은 정확히 0°를 표시했어. 이것은 확실해 — 온도는 점프하지 않고, 천천히 변해.
+
+수학적으로: 연속함수가 음수에서 시작하고 양수에서 끝나면, **중간 어딘가에서 0을 지난다**. 이것이 TVI야.
+
+예: $f(x) = x^3 - x - 1$.
+- $f(1) = 1 - 1 - 1 = -1$ (음수)
+- $f(2) = 8 - 2 - 1 = 5$ (양수)
+
+TVI는 1과 2 사이에 근이 있음을 보장한다.
+
+**평균 변화율:** 자동차가 2시간에 120 km를 간다면, 평균 속도는:
+
+$$\text{평균 속도} = \frac{120}{2} = 60 \text{ km/h}$$
+
+이것이 시간에 따른 위치의 TVM이다: 위치가 얼마나 변했는지를 시간으로 나눈 것. 위치가 함수 $s(t)$라면, 구간 $[0, 2]$에서의 TVM은 $(s(2) - s(0))/(2 - 0)$일 것이다.
+
+</Porta>
+
+<Porta nivel="15" titulo="15살 청소년에게">
+
+이 강은 미분으로 향하는 두 가지 아이디어를 다룬다.
+
+### TVI — 근의 존재 보장
+
+방정식 $g(x) = h(x)$가 $[a, b]$에서 해를 가지는지 보이려면:
+1. $f(x) = g(x) - h(x)$로 정의한다.
+2. $f$가 $[a, b]$에서 연속인지 확인한다 (다항식, 사인, 코사인, 지수는 항상 연속).
+3. $f(a)$와 $f(b)$를 계산한다.
+4. 부호가 반대면, TVI는 $f(c) = 0$인 $c \in (a, b)$의 존재를 보장한다.
+
+**예: $\cos x = x$ on $[0, \pi/2]$.**
+
+$f(x) = \cos x - x$로 정의하자.
+- $f(0) = \cos 0 - 0 = 1 > 0$
+- $f(\pi/2) = \cos(\pi/2) - \pi/2 = 0 - 1{,}57 \approx -1{,}57 < 0$
+
+부호 변화. 따라서 $\cos c = c$인 $c \in (0, \pi/2)$가 존재한다 (수치적으로, $c \approx 0{,}739$).
+
+### TVM — 평균 변화율
+
+$$\text{TVM} = \frac{f(b) - f(a)}{b - a}$$
+
+**기하학:** 점 $(a, f(a))$와 $(b, f(b))$를 지나는 직선의 기울기이다 — **할선**.
+
+**물리:** $s(t)$가 물체의 위치면, 구간 $[t_1, t_2]$에서의 평균 속도는 정확히 $s$의 TVM이다.
+
+**미분으로의 다리:** 구간 $[a, b]$가 축소될 때($b \to a$), 할선은 **접선**에 접근한다. 접선의 기울기는 **미분** — 순간 변화율이다. 미분은 정확히 여기서 시작한다.
+
+<Insight>
+
+TVM은 미분 없이 계산할 수 있는 것이다. 미분은 구간이 0으로 갈 때의 TVM의 극한이다. 미분 이론 전체가 이 문장에 압축되어 있다.
+
+</Insight>
+
+### 이분법
+
+$f(a)$와 $f(b)$가 반대 부호를 가지면, 이분법이 근을 찾는다:
+
+| 반복 | $a$ | $b$ | $m = (a+b)/2$ | $f(m)$ | 다음 검색 |
+|---|---|---|---|---|---|
+| 0 | 1 | 2 | $1{,}5$ | $+0{,}875$ | $[1;\; 1{,}5]$ |
+| 1 | 1 | $1{,}5$ | $1{,}25$ | $-0{,}297$ | $[1{,}25;\; 1{,}5]$ |
+| 2 | $1{,}25$ | $1{,}5$ | $1{,}375$ | $+0{,}225$ | $[1{,}25;\; 1{,}375]$ |
+| 3 | $1{,}25$ | $1{,}375$ | $1{,}3125$ | $-0{,}051$ | $[1{,}3125;\; 1{,}375]$ |
+
+각 반복이 오차를 2로 나눈다. 10번 반복 후, 오차는 $(b - a)/1024$보다 작다.
+
+</Porta>
+
+<Porta nivel="25" titulo="공학 학생에게">
+
+### TVI — 결과와 계산 응용
+
+**왜 TVI가 $\mathbb{Q}$에서 실패하는가.** 함수 $f(x) = x^2 - 2$는 $\mathbb{Q}$에서 연속이고 ($\mathbb{Q}$로 제한된 함수로서), $f(1) = -1 < 0$이고 $f(2) = 2 > 0$이다. 고전 TVI는 근을 요구할 것인데, 그것은 $\sqrt{2}$일 것이다 — 그런데 $\sqrt{2} \notin \mathbb{Q}$이다. 이것은 TVI에 $\mathbb{R}$의 완비성이 필수임을 보여준다.
+
+**이분법: 오차 분석.** $n$번 반복 후: $|c - m_n| \leq (b - a)/2^{n+1}$. 정확도 $\varepsilon$: $n \geq \log_2\!\left(\frac{b-a}{\varepsilon}\right) - 1$. $[1, 2]$에 $\varepsilon = 10^{-9}$: $n \geq \log_2(10^9) - 1 \approx 29$ 반복.
+
+**공학 응용:**
+- 옵션의 암묵적 변동성: $C(\sigma) = C_{\text{mkt}}$, Newton이 진동할 때 이분법으로 해결.
+- 내부수익률(IRR): $\text{NPV}(r) = 0$, 이분법 over $r \in [0, 1]$.
+- 동적 시스템 안정성 분석을 위한 특성 다항식의 근.
+
+**TVI를 통한 고정점.** $g \in C([a, b])$ with $g([a, b]) \subseteq [a, b]$, $f(x) = g(x) - x$로 정의하면, $f(a) = g(a) - a \geq 0$이고 $f(b) = g(b) - b \leq 0$이다. TVI에 의해, $g(c) = c$인 $c \in [a, b]$가 존재한다. $\square$
+
+### TVM — 정량적 분석
+
+**국소 선형화.** $b = a + h$이고 $h$가 작을 때:
+
+$$f(b) \approx f(a) + f'(a) \cdot h$$
+
+이것이 1차 선형화이다(절단된 Taylor). 오차는 $O(h^2)$이다.
+
+**금융에서의 TVM.** $P(t)$가 자산의 가격일 때:
+
+$$\text{평균 절대 수익} = \frac{P(t_2) - P(t_1)}{t_2 - t_1}, \qquad \text{백분율 수익} = \frac{P(t_2) - P(t_1)}{P(t_1)}$$
+
+대수 미분 $(\ln P)'$은 순간 연속 수익이다 — Black-Scholes 모델의 기초(강 119).
+
+**속도와 가속도.**
+
+$$\text{평균 속도} = \frac{s(b) - s(a)}{b - a} \xrightarrow{b \to a} s'(a) = \text{순간 속도}$$
+
+$$\text{평균 가속도} = \frac{v(b) - v(a)}{b - a} \xrightarrow{b \to a} v'(a) = s''(a)$$
+
+</Porta>
+
+<Porta nivel="40" titulo="고위직 전문가에게">
+
+### TVI로 위상 성질
+
+TVI는 일반적 사실의 한 사례이다: **연결된 공간의 연속상의 상은 연결되어 있다**. $\mathbb{R}$에서, 연결된 집합은 정확히 구간이다. 따라서 $f([a, b])$는 $f(a)$와 $f(b)$를 포함하는 구간이고, 그 사이의 모든 값을 포함한다. $\sup$를 통한 증명이 이 위상 사실의 분석적 버전이다.
+
+**일반화(Brouwer, 1912).** 모든 연속함수 $g : B^n \to B^n$(단위 폐 공 $\mathbb{R}^n$에서)는 고정점을 가진다. 1차원에서, 이것이 TVI에서 유도된 고정점 따름정리이다. 고차원에서, 증명은 호모로지를 사용한다.
+
+Nash 균형은 Kakutani(Brouwer의 다가 일반화)를 통해 유한 게임에서 존재한다. 이 선이 TVI → 고정점 → Nash 균형을 연결한다 — [1994년 경제학상을 받은](https://www.nobelprize.org/prizes/economic-sciences/1994/summary/) 결과.
+
+### TVM — 계산 및 금융 관점
+
+**유한 차분.** 과학 계산에서, 미분은 항상 TVM으로 근사한다:
+
+$$f'(a) \approx \frac{f(a+h) - f(a)}{h} \quad \text{(전진 차분, } O(h)\text{)}$$
+$$f'(a) \approx \frac{f(a+h) - f(a-h)}{2h} \quad \text{(중심 차분, } O(h^2)\text{)}$$
+
+최적 $h$는 절단 오차($O(h)$ 또는 $O(h^2)$)를 반올림 오차($O(\varepsilon_{\text{maq}}/h)$)와 균형잡는다: $h^* = O(\sqrt{\varepsilon_{\text{maq}}})$ 전진 차분, $h^* = O(\varepsilon_{\text{maq}}^{1/3})$ 중심 차분.
+
+**시계열.** 계량경제학에서, $\Delta y_t = y_t - y_{t-1}$는 차분 연산자(이산 TVM with $h = 1$)이다. 한 차분 후 정상이 되는 비정상 시계열을 I(1)이라 한다 — 공적분과 ARIMA 모델의 기초.
+
+**이분법을 넘어:**
+- 이분법: $O(\log 1/\varepsilon)$ — 견고함, 연속성 이외 조건 없음.
+- Newton-Raphson: 2차 수렴, $f'(c) \neq 0$과 좋은 초기값 필요.
+- Brent (1973): 이분법 + 보간 결합; 실용적 표준.
+- ITP (Oliveira-Takahashi, 2020): 최악의 경우 $O(\log 1/\varepsilon)$ 보증, Newton에 가까운 실증적 속도.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="실습 — 안내와 실제 데이터 예제">
+
+### 안내: TVI — 근의 존재 증명
+
+1. **$f$ 식별**: 방정식이 $g(x) = h(x)$이면, $f(x) = g(x) - h(x)$로 정의한다.
+2. **연속성 확인**: $f$가 $[a, b]$에서 연속인가? (다항식, 사인, 코사인, $e^x$, $\ln x$ 적절한 영역: 그렇다.)
+3. **$f(a)$와 $f(b)$ 계산**: 부호가 반대인가?
+4. **결론**: "TVI에 의해, $f(c) = 0$인 $c \in (a, b)$가 존재하므로, $g(c) = h(c)$이다."
+
+### 안내: TVM — 변화율 계산
+
+1. **$f$, $a$, $b$ 식별**: 뭐가 변하는가? 어느 구간에서?
+2. **공식 적용**: $\text{TVM} = \dfrac{f(b) - f(a)}{b - a}$.
+3. **단위 해석**: $f$가 위치(m)이고 인자가 시간(s)이면, TVM은 m/s 단위를 가진다.
+4. **미분과 비교**: 작은 구간의 경우, TVM $\approx f'(a)$.
+
+### 실제 예: 인터넷 계정
+
+São Paulo의 두 거주용 인터넷 요금제(예시적 값, 2026):
+- 계획 A: R\$ 89,90/월 (광섬유 100 Mbps).
+- 계획 B: R\$ 129,90/월 (광섬유 500 Mbps).
+
+$C(v) = $ 속도 $v$(Mbps에서)에 대한 월 비용으로 정의하자. 두 계획 사이의 TVM은:
+
+$$\text{TVM} = \frac{129{,}90 - 89{,}90}{500 - 100} = \frac{40{,}00}{400} = 0{,}10 \text{ R\$/Mbps}$$
+
+해석: 이 범위에서 각 추가 Mbps 속도는 월 평균 R\$ 0,10의 비용이 든다.
+
+### 흔한 함정
+
+- **TVI는 존재를 보장하지, 유일성을 보장하지 않는다.** $f(x) = x^3 - x$는 $[-2, 2]$에 세 근을 가진다.
+- **$f(a)f(b) > 0$이 근의 부재를 증명하지 않는다.** $f(x) = (x-1)^2$는 1에 중근을 가지지만, $f(0) = f(2) = 1 > 0$.
+- **TVM은 구간에 의존한다.** 같은 $f$도 $[0, 1]$과 $[0, 10]$에서 매우 다른 TVM을 가질 수 있다.
+
+</Porta>
+
+</DuasPortas>
+
+## 풀이된 예제
+
+<Exemplo titulo="TVI — 다항식 근의 존재" numero="1">
+
+**문제.** $f(x) = x^3 - x - 1$이 구간 $(1, 2)$에서 적어도 하나의 근을 가짐을 보이시오.
+
+**전략.** $f$가 연속임을 확인하고 $f(1)$과 $f(2)$가 부호가 반대임을 확인한다. 그렇다면 TVI가 존재를 보장한다.
+
+**풀이.**
+
+1. **연속성:** $f(x) = x^3 - x - 1$은 다항식이므로 $\mathbb{R}$에서 연속이고, 특히 $[1, 2]$에서 연속이다.
+
+2. **끝점 계산:**
+
+$$f(1) = 1^3 - 1 - 1 = -1 < 0$$
+$$f(2) = 2^3 - 2 - 1 = 5 > 0$$
+
+3. **TVI 적용:** $f(1) < 0 < f(2)$이고 $f$가 $[1, 2]$에서 연속이므로, TVI에 의해 $f(c) = 0$인 $c \in (1, 2)$가 존재한다.
+
+**검증.** $f(1{,}3) = 2{,}197 - 1{,}3 - 1 = -0{,}103 < 0$이고 $f(1{,}4) = 2{,}744 - 1{,}4 - 1 = 0{,}344 > 0$이다. 근이 $(1{,}3;\; 1{,}4)$에서 확인되었다. 수치적으로, $c \approx 1{,}3247$.
+
+**출처.** [Active Calculus §1.1, Example 1.1.2](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA. 조정됨.
+
+</Exemplo>
+
+<Exemplo titulo="이분법 — 4 반복과 오차 분석" numero="2">
+
+**문제.** 이분법을 사용하여 $(1, 2)$에서 $f(x) = x^3 - x - 1$의 근을 4번 반복으로 근사하시오. 이 반복 후 최대 오차는 얼마인가?
+
+**전략.** 각 단계에서 중점 $m$을 계산하고, $f(m)$을 평가하며, 부호가 바뀌는 반을 유지한다.
+
+**풀이.**
+
+초기 데이터: $a_0 = 1$, $b_0 = 2$, $f(1) = -1 < 0$, $f(2) = 5 > 0$.
+
+**반복 1:** $m_1 = (1 + 2)/2 = 1{,}5$. $f(1{,}5) = 3{,}375 - 1{,}5 - 1 = 0{,}875 > 0$. 새 구간: $[1;\; 1{,}5]$.
+
+**반복 2:** $m_2 = (1 + 1{,}5)/2 = 1{,}25$. $f(1{,}25) = 1{,}953 - 1{,}25 - 1 = -0{,}297 < 0$. 새 구간: $[1{,}25;\; 1{,}5]$.
+
+**반복 3:** $m_3 = (1{,}25 + 1{,}5)/2 = 1{,}375$. $f(1{,}375) = 2{,}600 - 1{,}375 - 1 = 0{,}225 > 0$. 새 구간: $[1{,}25;\; 1{,}375]$.
+
+**반복 4:** $m_4 = (1{,}25 + 1{,}375)/2 = 1{,}3125$. $f(1{,}3125) = 2{,}259 - 1{,}3125 - 1 = -0{,}053 < 0$. 새 구간: $[1{,}3125;\; 1{,}375]$.
+
+**4번 반복 후 최대 오차:**
+
+$$|c - m_4| \leq \frac{b - a}{2^4} = \frac{1}{16} = 0{,}0625$$
+
+**검증.** $[1{,}3125;\; 1{,}375]$의 중점은 $1{,}34375 \approx 1{,}34$이고, $f(1{,}34375) \approx -0{,}0059 < 0$이다. 실제 근 $c \approx 1{,}3247$이 구간에 있다 — 확인됨.
+
+**출처.** [REAMAT — 수치 미분 §3.1, Example 3.1](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · CC-BY 4.0.
+
+</Exemplo>
+
+<Exemplo titulo="TVM — 운동학과 평균 속도" numero="3">
+
+**문제.** 입자의 위치(미터 단위)가 초 단위로 $s(t) = t^2 + 3t$이다. 구간 $[1, 4]$에서 $s$의 TVM을 계산하고 해석하시오.
+
+**전략.** 직접 $\text{TVM} = (s(4) - s(1))/(4 - 1)$을 적용한다. 그 다음 $s'(t) = 2t + 3$과 비교하여 TVM과 같은 순간 속도를 가지는 순간을 찾는다.
+
+**풀이.**
+
+1. **$s(1)$과 $s(4)$ 계산:**
+
+$$s(1) = 1 + 3 = 4 \text{ m}, \qquad s(4) = 16 + 12 = 28 \text{ m}$$
+
+2. **TVM 계산:**
+
+$$\text{TVM} = \frac{28 - 4}{4 - 1} = \frac{24}{3} = 8 \text{ m/s}$$
+
+3. **해석:** 입자는 3초 동안 24미터를 이동했고, 평균 속도는 8 m/s이다.
+
+4. **미분과의 연결:** $s'(t) = 2t + 3$. $s'(c) = 8$을 원한다: $2c + 3 = 8 \Rightarrow c = 2{,}5 \in (1, 4)$. 미분 중간값 정리(강 56)가 이 $c$의 존재를 공식적으로 보장할 것이다.
+
+**검증.** $s'(1) = 5$ m/s, $s'(4) = 11$ m/s. TVM의 8 m/s는 끝점에서의 순간 속도 사이에 있다 — 맞다.
+
+**출처.** [Active Calculus §1.1, Preview Activity 1.1.1](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="TVM 대수와 극한으로의 전이" numero="4">
+
+**문제.** $f(x) = x^2$에 대해, 구간 $[2, 2+h]$($h \neq 0$)에서 TVM을 계산하고 $h \to 0$일 때 일어나는 일을 보이시오.
+
+**전략.** $h$로 함수로서 TVM을 계산하고, 대수적으로 단순화한 후, 극한을 취한다 — 이것이 $f'(2)$를 드러낸다.
+
+**풀이.**
+
+1. **$[2, 2+h]$에서의 TVM:**
+
+$$\text{TVM} = \frac{f(2+h) - f(2)}{h} = \frac{(2+h)^2 - 4}{h}$$
+
+2. **$(2+h)^2 = 4 + 4h + h^2$ 전개:**
+
+$$\text{TVM} = \frac{4 + 4h + h^2 - 4}{h} = \frac{4h + h^2}{h} = 4 + h \quad (h \neq 0)$$
+
+3. **극한 취하기:**
+
+$$\lim_{h \to 0}(4 + h) = 4 = f'(2)$$
+
+**검증.** $h = 1$의 경우: TVM $= 5$. $h = 0{,}1$: TVM $= 4{,}1$. $h = 0{,}01$: TVM $= 4{,}01$. 할선은 기울기 4를 가진 $(2, 4)$에서 접선으로 수렴한다.
+
+**출처.** [Active Calculus §1.3, Example 1.3.1](https://activecalculus.org/single/sec-1-3-derivative-pt.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="TVM과 TVI 결합 — 표 형식 데이터" numero="5">
+
+**문제.** 차량의 위치(km에서)와 시간(시간에서)의 관계는:
+
+| $t$ (h) | 0 | 0,5 | 1 | 1,5 | 2 |
+|---|---|---|---|---|---|
+| $s(t)$ (km) | 0 | 20 | 50 | 90 | 140 |
+
+(a) 각 0.5시간 부분 구간에서 TVM을 계산하시오. (b) $[0, 2]$에서 전체 TVM을 계산하시오. (c) 순간 속도가 여행 중 어느 시점에 80 km/h에 도달했는가?
+
+**전략.** 각 구간에 TVM 공식을 적용; (c)에 대해, 속도 함수에 TVI를 적용한다.
+
+**풀이.**
+
+(a) **부분 구간별 TVM:**
+
+$$\text{TVM}_{[0;\, 0{,}5]} = \frac{20}{0{,}5} = 40 \text{ km/h}, \quad \text{TVM}_{[0{,}5;\, 1]} = \frac{30}{0{,}5} = 60 \text{ km/h}$$
+$$\text{TVM}_{[1;\, 1{,}5]} = \frac{40}{0{,}5} = 80 \text{ km/h}, \quad \text{TVM}_{[1{,}5;\, 2]} = \frac{50}{0{,}5} = 100 \text{ km/h}$$
+
+(b) **전체 TVM:**
+
+$$\text{TVM}_{[0;\, 2]} = \frac{140 - 0}{2} = 70 \text{ km/h}$$
+
+(c) **80 km/h의 속도.** $s$가 미분가능하다고 가정하면, 속도 $v(t) = s'(t)$는 연속이다. TVM에 의해: $v$는 $[0{,}5;\; 1]$에서 평균 60 km/h이고 $[1;\; 1{,}5]$에서 80 km/h이다. TVI를 $v$에 적용하면, $[0{,}5;\; 1{,}5]$의 어느 순간에 $v(t) = 80$ km/h가 존재한다. 답: **그렇다**.
+
+**검증.** $[0{,}5;\; 1{,}5]$에서의 평균 속도는 $(90 - 20)/1 = 70$ km/h $< 80$ km/h이지만, 속도는 반의 60에서 100으로 증가했다 — 내부에서 80 km/h를 통과해야 한다.
+
+**출처.** [Active Calculus §1.1, Example 1.1.3 and Exercises 1.1.3–1.1.5](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-46-tvi-tvm">
+
+### Bloco A — TVI: 근의 존재(46.1 to 46.10)
+
+<Exercicio
+  numero="46.1"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^3 - x - 1$은 다항식이므로 연속이다. <Eq>{`f(1) = -1 < 0`}</Eq> and <Eq>{`f(2) = 5 > 0`}</Eq>. $f$가 $[1, 2]$에서 부호를 바꾸므로, TVI는 $f(c) = 0$인 $c \in (1, 2)$의 존재를 보장한다.</>}
+  passos={<>
+    <ol>
+      <li>$f$ 식별: <Eq>{`f(x) = x^3 - x - 1`}</Eq>. <em>왜:</em> 방정식이 이미 $f(x) = 0$ 형태.
+</li>
+      <li>연속성: $f$는 다항식이므로 모든 <Eq>{`\\mathbb{R}`}</Eq>에서 연속. <em>왜:</em> 다항식은 연속 — 뛰어넘음, 구멍 없음.</li>
+      <li><Eq>{`f(1) = 1 - 1 - 1 = -1 < 0`}</Eq> and <Eq>{`f(2) = 8 - 2 - 1 = 5 > 0`}</Eq>을 계산. <em>왜:</em> 끝점에서의 부호 필요.</li>
+      <li>결론: <Eq>{`f(1) \\cdot f(2) = -5 < 0`}</Eq> — 반대 부호. TVI는 <Eq>{`c \\in (1, 2)`}</Eq> with <Eq>{`f(c) = 0`}</Eq>을 보장. <em>팁:</em> 음의 곱 = 부호 변화 = 근 보증.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "178", exercicio: "Example 2.38", licenca: "CC-BY-NC-SA" }}
+>
+TVI를 사용하여 $f(x) = x^3 - x - 1$이 구간 $(1, 2)$에서 적어도 하나의 실근을 가짐을 보이시오. $f$의 어떤 성질이 필요한가? 단계별로 정당화하시오.
+</Exercicio>
+
+<Exercicio
+  numero="46.2"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) $(-2, -1)$" },
+    { texto: "B) $(0, 1)$" },
+    { texto: "C) $(1, 2)$" },
+    { texto: "D) $(2, 3)$", correta: true },
+  ]}
+  solucao={<><Eq>{`f(x) = x^3 - 2x - 5`}</Eq>. Test <Eq>{`f(2) = 8 - 4 - 5 = -1 < 0`}</Eq> and <Eq>{`f(3) = 27 - 6 - 5 = 16 > 0`}</Eq>. 부호 변화 in <Eq>{`(2, 3)`}</Eq>. Resp: D.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "178", exercicio: "Example 2.38 variant", licenca: "CC-BY-NC-SA" }}
+>
+함수 $f(x) = x^3 - 2x - 5$이 TVI로 보장되는 근을 가지는 길이 1의 어느 구간에서 가지는가? (답: $(2, 3)$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.3"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) 그렇다, $f(0) > 0$이고 $f(\\pi/2) < 0$이기 때문.", correta: true },
+    { texto: "B) 아니다, $\\cos x > 0$ in $[0, \\pi/2]$이기 때문." },
+    { texto: "C) 그렇다, 하지만 TVI는 $\\cos$이 미분가능하기를 요구한다." },
+    { texto: "D) 수치적 풀이 없이는 결론을 내릴 수 없다." },
+  ]}
+  solucao={<>Define <Eq>{`f(x) = \\cos x - x`}</Eq>. <Eq>{`f(0) = 1 > 0`}</Eq>. <Eq>{`f(\\pi/2) \\approx -1{,}57 < 0`}</Eq>. 부호 변화, $f$ 연속. TVI는 $c \in (0, \pi/2)$ with $\cos c = c$를 보장한다.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "179", exercicio: "Example 2.39", licenca: "CC-BY-NC-SA" }}
+>
+방정식 $\cos x = x$이 $(0, \pi/2)$에서 해를 가지는가? (답: 그렇다.)
+</Exercicio>
+
+<Exercicio
+  numero="46.4"
+  dificuldade="aplicacao"
+  solucao={<>Define <Eq>{`f(x) = e^x + x - 3`}</Eq>. <Eq>{`f(0) = 1 + 0 - 3 = -2 < 0`}</Eq>. <Eq>{`f(1) = e + 1 - 3 \\approx 0{,}72 > 0`}</Eq>. 부호 변화 in <Eq>{`[0, 1]`}</Eq>, <Eq>{`f`}</Eq> 연속. TVI에 의해, $e^c + c = 3$인 $c \in (0, 1)$이 존재한다.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "180", exercicio: "Checkpoint 2.30", licenca: "CC-BY-NC-SA" }}
+>
+방정식 $e^x + x = 3$이 구간 $(0, 1)$에서 해를 가짐을 보이시오. $f$를 적절히 정의하고, 연속성을 확인한 후, TVI를 적용하시오.
+</Exercicio>
+
+<Exercicio
+  numero="46.5"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) 아니다. $f(0)$과 $f(1)$이 같은 부호를 가진다." },
+    { texto: "B) 그렇다. $f(0) < 0$ and $f(1) > 0$.", correta: true },
+    { texto: "C) 그렇다, 하지만 TVI 외 다른 이유로." },
+    { texto: "D) 그래프 없이는 결정할 수 없다." },
+  ]}
+  solucao={<><Eq>{`f(x) = x^5 + x^3 - 1`}</Eq>. <Eq>{`f(0) = -1 < 0`}</Eq>. <Eq>{`f(1) = 1 + 1 - 1 = 1 > 0`}</Eq>. 부호 변화, $f$ 연속. TVI는 $(0, 1)$에서 근을 보장한다.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "2", exercicio: "Exercise 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+TVI가 $f(x) = x^5 + x^3 - 1$의 $(0, 1)$에서의 근을 보장하는가? (답: 그렇다.)
+</Exercicio>
+
+<Exercicio
+  numero="46.6"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 오직 다항식이 음의 지배 계수를 가지지 않으면." },
+    { texto: "B) 항상, 모든 홀수 차 다항식에 대해.", correta: true },
+    { texto: "C) 오직 다항식이 monic(지배 계수 1)이면." },
+    { texto: "D) 오직 차수 1 또는 3에 대해." },
+  ]}
+  solucao={<>$P(x) = a_n x^n + \\ldots$ with $n$ 홀수이고 $a_n > 0$: $P(x) \\to +\\infty$ when $x \\to +\\infty$ and $P(x) \\to -\\infty$ when $x \\to -\\infty$. 따라서 $P$ 부호를 바꾸고, TVI(연속)에 의해, 실근을 가진다. $a_n < 0$이면, 부호가 역전되지만 결론은 같다.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "181", exercicio: "Exercise 2.173", licenca: "CC-BY-NC-SA" }}
+>
+모든 홀수 차 다항식은 적어도 하나의 실근을 가진다. 왜인가?
+</Exercicio>
+
+<Exercicio
+  numero="46.7"
+  dificuldade="aplicacao"
+  solucao={<>Define <Eq>{`f(x) = \\ln x - e^{-x}`}</Eq>. <Eq>{`f(1) = 0 - e^{-1} \\approx -0{,}37 < 0`}</Eq>. <Eq>{`f(e) = 1 - e^{-e} \\approx 0{,}93 > 0`}</Eq>. 부호 변화, <Eq>{`f`}</Eq> 연속 in <Eq>{`[1, e]`}</Eq>. TVI는 $\\ln c = e^{-c}$인 $c \in (1, e)$를 보장한다.</>}
+  passos={<>
+    <ol>
+      <li>재구성: <Eq>{`f(x) = \\ln x - e^{-x}`}</Eq>. <em>왜:</em> 근 문제로 방정식 변환.</li>
+      <li><Eq>{`f(1) = \\ln 1 - e^{-1} = 0 - 0{,}368 = -0{,}368 < 0`}</Eq>. 좌측 끝점 음수.</li>
+      <li><Eq>{`f(e) = \\ln e - e^{-e} = 1 - 0{,}066 = 0{,}934 > 0`}</Eq>. <em>왜:</em> $\ln e = 1$ 자연로그 정의에 의해.</li>
+      <li>부호 변화 + <Eq>{`f`}</Eq> continuity in <Eq>{`[1, e]`}</Eq> → TVI는 <Eq>{`\\ln c = e^{-c}`}</Eq>인 $c$를 보장. <em>팁:</em> <Eq>{`\\ln`}</Eq> and <Eq>{`e^{-x}`}</Eq>는 <Eq>{`x > 0`}</Eq>에서 연속, 따라서 <Eq>{`f`}</Eq>도 그렇다.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "179", exercicio: "Example 2.40", licenca: "CC-BY-NC-SA" }}
+>
+방정식 $\ln x = e^{-x}$이 구간 $(1, e)$에서 해를 가짐을 보이시오.
+</Exercicio>
+
+<Exercicio
+  numero="46.8"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) 아니다: $f(a)$와 $f(b)$가 같은 부호를 가지면, 근이 없다." },
+    { texto: "B) 아니다: $a$와 $b$에서 같은 부호는 내부의 근을 배제하지 않는다.", correta: true },
+    { texto: "C) 그렇다: TVI는 두 방향에서 작동한다(존재와 부재)." },
+    { texto: "D) $f$가 단조이거나 아닌지에 따라 의존한다." },
+  ]}
+  solucao={<>$f(a)f(b) > 0$이면, TVI는 적용되지 않는다 — 하지만 근이 존재할 수 있다. 예: <Eq>{`f(x) = (x-1)^2`}</Eq> in <Eq>{`[0, 2]`}</Eq>. <Eq>{`f(0) = 1 > 0`}</Eq>, <Eq>{`f(2) = 1 > 0`}</Eq> (같은 부호), 하지만 $x = 1$은 중근이다. TVI는 충분, 근의 존재에 필요하지 않다.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "181", exercicio: "Exercise 2.174", licenca: "CC-BY-NC-SA" }}
+>
+$f(a)$와 $f(b)$가 같은 부호를 가지면, $(a, b)$에서 $f$가 근을 가지지 않는다고 결론 내릴 수 있는가?
+</Exercicio>
+
+<Exercicio
+  numero="46.9"
+  dificuldade="desafio"
+  solucao={<>Define $g(x) = f(x) - f(x + 1/2)$ on $[0, 1/2]$. $g(0) = f(0) - f(1/2)$ and $g(1/2) = f(1/2) - f(1)$. 더함: $g(0) + g(1/2) = f(0) - f(1) = 0$, 따라서 $g(0) = -g(1/2)$. $g \not\equiv 0$이면, $g$는 부호를 바꾼다. TVI에 의해($g$ 연속 in $[0, 1/2]$), $f(c) = f(c + 1/2)$인 $c \in [0, 1/2]$가 존재한다.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "4", exercicio: "Exercise 1.1.6 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+$f$는 $[0, 1]$에서 연속이고 $f(0) = f(1)$이다. $f(c) = f(c + 1/2)$인 $c \in [0, 1/2]$가 존재함을 보이시오. 힌트: $g(x) = f(x) - f(x + 1/2)$로 정의하고 TVI를 적용하시오.
+</Exercicio>
+
+<Exercicio
+  numero="46.10"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^4 - 2x - 1$. In $(-1, 0)$: <Eq>{`f(-1) = 1 + 2 - 1 = 2 > 0`}</Eq> and <Eq>{`f(0) = -1 < 0`}</Eq> — root in $(-1, 0)$. In $(1, 2)$: <Eq>{`f(1) = 1 - 2 - 1 = -2 < 0`}</Eq> and <Eq>{`f(2) = 16 - 4 - 1 = 11 > 0`}</Eq> — root in $(1, 2)$도. 총: 최소 2개의 실근.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "180", exercicio: "Checkpoint 2.31", licenca: "CC-BY-NC-SA" }}
+>
+TVI를 적용하여 $f(x) = x^4 - 2x - 1$이 구간 $(-1, 0)$과 $(1, 2)$ 각각에서 적어도 하나의 근을 가짐을 보이시오.
+</Exercicio>
+
+### Bloco B — 이분법: 반복과 오차(46.11 to 46.18)
+
+<Exercicio
+  numero="46.11"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) $[1;\\; 1{,}5]$", correta: true },
+    { texto: "B) $[1{,}5;\\; 2]$" },
+    { texto: "C) 근은 정확히 $1{,}5$이다." },
+    { texto: "D) 1번 반복만으로 이분법을 적용하는 것은 불가능하다." },
+  ]}
+  solucao={<><Eq>{`m = (1 + 2)/2 = 1{,}5`}</Eq>. <Eq>{`f(1{,}5) = 3{,}375 - 1{,}5 - 1 = 0{,}875 > 0`}</Eq>. <Eq>{`f(1) = -1 < 0`}</Eq> and <Eq>{`f(1{,}5) > 0`}</Eq> 이후, 근은 <Eq>{`[1;\\; 1{,}5]`}</Eq>에 있다. Resp: A.</>}
+  passos={<>
+    <ol>
+      <li>계산 <Eq>{`m_1 = (1 + 2)/2 = 1{,}5`}</Eq>. <em>왜:</em> 이분법은 구간을 반으로 나눈다.</li>
+      <li>평가 <Eq>{`f(1{,}5) = (1{,}5)^3 - 1{,}5 - 1 = 3{,}375 - 2{,}5 = 0{,}875 > 0`}</Eq>.</li>
+      <li><Eq>{`f(1) = -1 < 0`}</Eq> and <Eq>{`f(1{,}5) = 0{,}875 > 0`}</Eq> — 좌측 절반에서 부호 변화.</li>
+      <li>새 구간: <Eq>{`[1;\\; 1{,}5]`}</Eq>. <em>팁:</em> 항상 부호가 반대인 절반을 유지한다.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT — 수치 미분", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "45", exercicio: "Exemplo 3.1", licenca: "CC-BY 4.0" }}
+>
+$f(x) = x^3 - x - 1$을 $[1, 2]$에서 이분법의 1 반복을 적용하시오. 새 구간은 무엇인가? (답: $[1;\\; 1{,}5]$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.12"
+  dificuldade="aplicacao"
+  solucao={<>1번 반복 후 $[1;\\; 1{,}5]$를 가진다. 2번 반복: <Eq>{`m_2 = (1 + 1{,}5)/2 = 1{,}25`}</Eq>. <Eq>{`f(1{,}25) = 1{,}953 - 1{,}25 - 1 = -0{,}297 < 0`}</Eq>. <Eq>{`f(1{,}25) < 0 < f(1{,}5)`}</Eq> 이후, 새 구간: <Eq>{`[1{,}25;\\; 1{,}5]`}</Eq>.</>}
+  fonte={{ livro: "REAMAT — 수치 미분", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "45", exercicio: "Exemplo 3.1 continuação", licenca: "CC-BY 4.0" }}
+>
+$f(x) = x^3 - x - 1$의 이분법 2번 반복 후 $[1, 2]$에서, 구간은 무엇인가? (답: $[1{,}25;\\; 1{,}5]$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.13"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) 오차 $\\leq 0{,}5$" },
+    { texto: "B) 오차 $\\leq 0{,}25$" },
+    { texto: "C) 오차 $\\leq 0{,}125$", correta: true },
+    { texto: "D) 오차 $\\leq 0{,}0625$" },
+  ]}
+  solucao={<>$n$번 반복 후 $[a, b]$에서, 최대 오차는 $(b - a)/2^n$이다. $n = 3$과 $[1, 2]$(길이 1): 오차 <Eq>{`\\leq 1/2^3 = 1/8 = 0{,}125`}</Eq>. Resp: C.</>}
+  fonte={{ livro: "REAMAT — 수치 미분", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "47", exercicio: "Proposição 3.1", licenca: "CC-BY 4.0" }}
+>
+이분법 3번 반복 후 $[1, 2]$에서 최대 오차는 얼마인가? (답: $0{,}125$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.14"
+  dificuldade="aplicacao"
+  solucao={<>오차 <Eq>{`\\leq (b-a)/2^n < 10^{-5}`}</Eq>. $b - a = 1$: <Eq>{`2^n > 10^5`}</Eq>. <Eq>{`n > \\log_2(10^5) = 5\\log_2 10 \\approx 5 \\times 3{,}322 = 16{,}6`}</Eq>. 따라서 $n \geq 17$ 반복.</>}
+  passos={<>
+    <ol>
+      <li>조건 쓰기: <Eq>{`(b - a)/2^n < 10^{-5}`}</Eq>. <em>왜:</em> 이분법 오차 공식.</li>
+      <li>$b - a = 1$: <Eq>{`2^n > 10^5`}</Eq>. <em>왜:</em> $2^n$ 고립.</li>
+      <li>$\log_2$ 적용: <Eq>{`n > \\log_2(10^5) = 5 \\log_2 10 \\approx 16{,}6`}</Eq>.</li>
+      <li>올림: $n \geq 17$. <em>팁:</em> 각 소수 자리의 정확도는 <Eq>{`\\log_2 10 \\approx 3{,}32`}</Eq> 반복의 비용.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT — 수치 미분", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "48", exercicio: "Exercício 3.1", licenca: "CC-BY 4.0" }}
+>
+$[1, 2]$에서 이분법의 몇 번 반복이 오차 $10^{-5}$보다 작음을 보장하는가? 계산을 보이시오. (답: 17.)
+</Exercicio>
+
+<Exercicio
+  numero="46.15"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "A) 아니다, TVI는 $f$가 미분가능하기를 요구한다." },
+    { texto: "B) 그렇다, $f(0) < 0 < f(1)$이고 $f$는 연속이기 때문.", correta: true },
+    { texto: "C) 그렇다, 하지만 이분법은 여기 적용되지 않는다." },
+    { texto: "D) 아니다, $f(x) = x \\cdot 2^x - 1$에는 실근이 없다." },
+  ]}
+  solucao={<>$f(x) = x \cdot 2^x - 1$. <Eq>{`f(0) = 0 \\cdot 1 - 1 = -1 < 0`}</Eq>. <Eq>{`f(1) = 1 \\cdot 2 - 1 = 1 > 0`}</Eq>. 부호 변화, $f$ 연속. TVI는 $(0, 1)$에서 근을 보장한다.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "5", exercicio: "Exercise 1.1.3", licenca: "CC-BY-NC-SA" }}
+>
+방정식 $x \cdot 2^x = 1$이 구간 $(0, 1)$에서 해를 가지는가? (답: 그렇다.)
+</Exercicio>
+
+<Exercicio
+  numero="46.16"
+  dificuldade="aplicacao"
+  solucao={<>오차 <Eq>{`\\leq 1/2^n < 10^{-6}`}</Eq>. <Eq>{`2^n > 10^6`}</Eq>. <Eq>{`n > 6\\log_2 10 \\approx 19{,}93`}</Eq>. 따라서 $n \geq 20$ 반복.</>}
+  fonte={{ livro: "REAMAT — 수치 미분", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "48", exercicio: "Exercício 3.2", licenca: "CC-BY 4.0" }}
+>
+$[1, 2]$에서 이분법의 몇 번 반복이 오차 $10^{-6}$보다 작음을 보장하는가? (답: 20.)
+</Exercicio>
+
+<Exercicio
+  numero="46.17"
+  dificuldade="desafio"
+  solucao={<>$f(x) = \cos x - x$ in $[0, \pi/2]$. It. 1: <Eq>{`m = \\pi/4 \\approx 0{,}785`}</Eq>, <Eq>{`f(0{,}785) = \\cos(0{,}785) - 0{,}785 \\approx 0{,}707 - 0{,}785 = -0{,}078 < 0`}</Eq>. 근 in <Eq>{`[0;\\; 0{,}785]`}</Eq>. It. 2: <Eq>{`m = 0{,}393`}</Eq>, <Eq>{`f(0{,}393) = \\cos(0{,}393) - 0{,}393 \\approx 0{,}924 - 0{,}393 = 0{,}531 > 0`}</Eq>. 근 in <Eq>{`[0{,}393;\\; 0{,}785]`}</Eq>. 4번 반복 후 구간이 <Eq>{`c \\approx 0{,}739`}</Eq>를 포함.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "5", exercicio: "Exercise 1.1.4 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = \cos x - x$을 $[0, \pi/2]$에서 이분법 4번 반복을 적용하시오. 종이에 계산을 실행하고 각 반복에서 결과 구간을 쓰시오.
+</Exercicio>
+
+<Exercicio
+  numero="46.18"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "A) 이분법은 $f$가 다항식이 아니므로 적용할 수 없다." },
+    { texto: "B) NPV가 부호를 바꾸는 모든 구간에서 이분법을 적용할 수 있다.", correta: true },
+    { texto: "C) TVI는 금융 함수에 성립하지 않는다." },
+    { texto: "D) Newton-Raphson만 IRR에 대해 작동한다." },
+  ]}
+  solucao={<>IRR는 <Eq>{`\\text{NPV}(r) = 0`}</Eq>의 해이다. <Eq>{`\\text{NPV}(r) = \\sum_{t=0}^{n} C_t/(1+r)^t`}</Eq>는 <Eq>{`r > -1`}</Eq>에서 연속이다. <Eq>{`\\text{NPV}(r_1) > 0`}</Eq>이고 <Eq>{`\\text{NPV}(r_2) < 0`}</Eq> for <Eq>{`r_1 < r_2`}</Eq>이면, TVI는 $(r_1, r_2)$에서 IRR의 존재를 보장하고, 이분법으로 위치 지정할 수 있다.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "3", exercicio: "Exercise 1.1.5 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+프로젝트의 내부수익률(IRR)은 $\text{NPV}(r) = 0$로 정의된다. TVI와 이분법을 이를 위치 지정하는 데 사용할 수 있는가?
+</Exercicio>
+
+### Bloco C — 평균 변화율: 직접 계산(46.19 to 46.28)
+
+<Exercicio
+  numero="46.19"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^2 + 3$. $f(1) = 1 + 3 = 4$. $f(4) = 16 + 3 = 19$. TVM $= (19 - 4)/(4 - 1) = 15/3 = 5$.</>}
+  passos={<>
+    <ol>
+      <li>계산 $f(1) = 1^2 + 3 = 4$ and $f(4) = 4^2 + 3 = 19$. <em>왜:</em> 구간의 끝점에서의 값 필요.</li>
+      <li>공식 적용: TVM $= (f(4) - f(1))/(4 - 1) = (19 - 4)/3 = 15/3 = 5$.</li>
+      <li>해석: $x$가 1에서 4로 가면, $f$는 3단위의 $x$에서 15단위 증가한다 — 단위당 평균 속도 5. <em>팁:</em> TVM = 할선의 기울기.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "6", exercicio: "Exercise 1.1.7", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = x^2 + 3$의 $[1, 4]$에서 TVM을 계산하시오. (답: 5.)
+</Exercicio>
+
+<Exercicio
+  numero="46.20"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = -x^2 + 4x$. $f(2) = -4 + 8 = 4$. $f(4) = -16 + 16 = 0$. TVM $= (0 - 4)/(4 - 2) = -4/2 = -2$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "6", exercicio: "Exercise 1.1.8", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = -x^2 + 4x$의 $[2, 4]$에서 TVM을 계산하시오. (답: $-2$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.21"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = 2x^2 + 1$. $f(2) = 8 + 1 = 9$. $f(4) = 32 + 1 = 33$. TVM $= (33 - 9)/(4 - 2) = 24/2 = 12$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "7", exercicio: "Exercise 1.1.9", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = 2x^2 + 1$의 $[2, 4]$에서 TVM을 계산하시오. (답: 12.)
+</Exercicio>
+
+<Exercicio
+  numero="46.22"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A) $4 + h$", correta: true },
+    { texto: "B) $4$" },
+    { texto: "C) $2h + 4$" },
+    { texto: "D) $h^2 + 4h$" },
+  ]}
+  solucao={<>$f(x) = x^2$. $[2, 2+h]$에서 TVM: <Eq>{`\\dfrac{(2+h)^2 - 4}{h} = \\dfrac{4 + 4h + h^2 - 4}{h} = \\dfrac{4h + h^2}{h} = 4 + h`}</Eq>. Resp: A.</>}
+  passos={<>
+    <ol>
+      <li>$f(2) = 4$, $f(2+h) = (2+h)^2 = 4 + 4h + h^2$. <em>왜:</em> 주목할 곱 $(a+b)^2$로 전개.</li>
+      <li>TVM <Eq>{`= \\dfrac{(4 + 4h + h^2) - 4}{h} = \\dfrac{4h + h^2}{h}`}</Eq>.</li>
+      <li>$h$ 인수분해: <Eq>{`\\dfrac{h(4 + h)}{h} = 4 + h`}</Eq> ($h \neq 0$에 유효). <em>팁:</em> $h \to 0$일 때, TVM $\to 4 = f'(2)$.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "28", exercicio: "Example 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = x^2$의 구간 $[2, 2+h]$($h \neq 0$)에서 TVM을 계산하시오. (답: $4 + h$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.23"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^2 + x$. $f(0) = 0$. $f(h) = h^2 + h$. TVM $= (h^2 + h - 0)/h = h + 1 = 1 + h$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "29", exercicio: "Exercise 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = x^2 + x$의 구간 $[0, h]$($h \neq 0$)에서 TVM을 계산하시오. (답: $1 + h$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.24"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>. $f(1) = 1$, <Eq>{`f(3) = \\sqrt{3}`}</Eq>. TVM <Eq>{`= (\\sqrt{3} - 1)/(3 - 1) = (\\sqrt{3} - 1)/2 \\approx 0{,}366`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "8", exercicio: "Exercise 1.1.10", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = \sqrt{x}$의 $[1, 3]$에서 TVM을 계산하시오. 정확한 형태로 답을 남기시오. (답: $(\sqrt{3}-1)/2$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.25"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = 1/x$. $f(1/2) = 2$, $f(1) = 1$. TVM $= (1 - 2)/(1 - 1/2) = (-1)/(1/2) = -2$.</>}
+  passos={<>
+    <ol>
+      <li>$f(1/2) = 1/(1/2) = 2$ and $f(1) = 1$. <em>왜:</em> 구간 $[1/2, 1]$의 끝점에서 평가.</li>
+      <li>TVM $= (f(1) - f(1/2))/(1 - 1/2) = (1 - 2)/(1/2) = -1 \div (1/2) = -2$.</li>
+      <li>해석: $f(x) = 1/x$는 0 근처에서 빠르게 감소한다; 이 구간에서 평균 속도는 $x$의 단위당 $-2$이다. <em>호기심:</em> $x \to 0^+$일 때, TVM $\to -\infty$, $1/x$의 극을 반영한다.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "8", exercicio: "Exercise 1.1.11", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = 1/x$의 $[1/2, 1]$에서 TVM을 계산하시오. (답: $-2$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.26"
+  dificuldade="aplicacao"
+  solucao={<>$s(t) = 5t^2$. $s(1) = 5$ m. $s(4) = 80$ m. TVM $= (80 - 5)/(4 - 1) = 75/3 = 25$ m/s. 해석: 구간 $[1, 4]$ s에서 평균 속도 25 m/s.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "9", exercicio: "Preview Activity 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+물체의 위치는 $s(t) = 5t^2$ 미터($t$는 초)이다. 구간 $[1, 4]$ s에서의 평균 속도는 무엇인가? (답: 25 m/s.)
+</Exercicio>
+
+<Exercicio
+  numero="46.27"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = x^2$. $[a, a+h]$에서 TVM: <Eq>{`\\dfrac{(a+h)^2 - a^2}{h} = \\dfrac{2ah + h^2}{h} = 2a + h`}</Eq>. $h \to 0$: $2a = f'(a)$.</>}
+  passos={<>
+    <ol>
+      <li>전개: $f(a+h) = (a+h)^2 = a^2 + 2ah + h^2$. <em>왜:</em> 주목할 곱.</li>
+      <li>TVM <Eq>{`= \\dfrac{a^2 + 2ah + h^2 - a^2}{h} = \\dfrac{2ah + h^2}{h}`}</Eq>. 분자: $a^2$ 소거.</li>
+      <li>$h$ 인수분해: TVM $= 2a + h$. <em>왜:</em> $h \neq 0$, 따라서 $h/h = 1$.</li>
+      <li>$h \to 0$: TVM $\to 2a = f'(a)$. <em>통찰:</em> 이것이 $x^2$의 미분을 정의하는 계산.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "30", exercicio: "Example 1.3.2", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = x^2$의 구간 $[a, a+h]$에서 TVM을 $a$와 $h$로 계산하시오. $h \to 0$일 때 무엇이 일어나는가? (답: $2a + h$; 극한은 $f'(a) = 2a$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.28"
+  dificuldade="aplicacao"
+  solucao={<>$f(x) = 1/x$. $f(a+h) - f(a) = 1/(a+h) - 1/a = (a - (a+h))/(a(a+h)) = -h/(a(a+h))$. TVM $= [-h/(a(a+h))]/h = -1/(a(a+h))$. $h \to 0$: TVM $\to -1/a^2 = f'(a)$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "31", exercicio: "Exercise 1.3.2", licenca: "CC-BY-NC-SA" }}
+>
+$f(x) = 1/x$의 구간 $[a, a+h]$에서 TVM을 $a$와 $h$로 계산하시오. (답: $-1/(a(a+h))$; 극한은 $-1/a^2$.)
+</Exercicio>
+
+### Bloco D — TVM: 모델링과 물리(46.29 to 46.37)
+
+<Exercicio
+  numero="46.29"
+  dificuldade="modelagem"
+  solucao={<>$s(t) = t^2 + t$. $s(2) = 4 + 2 = 6$. $s(5) = 25 + 5 = 30$. TVM $= (30 - 6)/(5 - 2) = 24/3 = 8$ m/s. 해석: $t = 2$ s와 $t = 5$ s 사이에 평균 속도 8 m/s.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "12", exercicio: "Activity 1.1.3 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+입자의 위치는 $s(t) = t^2 + t$ 미터($t$는 초)이다. 구간 $[2, 5]$ s에서 평균 속도는 얼마인가? (답: 8 m/s.)
+</Exercicio>
+
+<Exercicio
+  numero="46.30"
+  dificuldade="modelagem"
+  solucao={<>TVM $= (T(6) - T(0))/(6 - 0) = (15 - 27)/6 = -12/6 = -2\,^\circ$C/h. 온도는 6시간에 12도 떨어졌다 — 시간당 평균 2도.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-1-a-preview-of-calculus", secao: "§2.1", pagina: "134", exercicio: "Example 2.1 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+도시의 온도는 자정에 27°C였고 오전 6시에 15°C였다. 이 기간에 온도의 평균 변화율은 얼마인가? (답: $-2\,^\circ$C/h.)
+</Exercicio>
+
+<Exercicio
+  numero="46.31"
+  dificuldade="modelagem"
+  solucao={<>평균 한계 비용 <Eq>{`= (C(200) - C(100))/(200 - 100) = (1{.}500 - 1{.}000)/100 = 500/100 =`}</Eq> R\$ 5.00 per unit.</>}
+  passos={<>
+    <ol>
+      <li>$f = C$ 식별 (비용), $a = 100$, $b = 200$.</li>
+      <li>TVM <Eq>{`= (C(200) - C(100))/(200 - 100) = (1{.}500 - 1{.}000)/100`}</Eq>.</li>
+      <li>$= 500/100 =$ R\<Eq>{` 5,00 per unit. <em>해석:</em> 이 범위에서 생산된 각 추가 단위는 평균 R\\`}</Eq> 5.00 — 이것이 평균 한계 비용.</li>
+      <li><em>연결:</em> 생산 규모가 → 0일 때, 평균 한계 비용은 순간 한계 비용 $C'(q)$로 수렴 — 비용의 미분.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "13", exercicio: "Exercise 1.1.14 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+생산의 비용 함수는 $C(q)$(R\$)이다. $C(100) = 1{.}000$이고 $C(200) = 1{.}500$이다. 100에서 200단위를 생산하는 평균 한계 비용은 얼마인가?
+</Exercicio>
+
+<Exercicio
+  numero="46.32"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`h(t) = -4{,}9t^2 + 20`}</Eq> m. $h(0) = 20$ m. <Eq>{`h(3) = -4{,}9 \\times 9 + 20 = -44{,}1 + 20 = -24{,}1`}</Eq> m. TVM <Eq>{`= (-24{,}1 - 20)/3 = -44{,}1/3 = -14{,}7`}</Eq> m/s. 음의 부호는 떨어짐을 나타낸다.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-1-a-preview-of-calculus", secao: "§2.1", pagina: "135", exercicio: "Example 2.2", licenca: "CC-BY-NC-SA" }}
+>
+자유 낙하 물체의 높이는 $h(t) = -4{,}9t^2 + 20$ 미터이다. 구간 $[0, 3]$ s에서 평균 속도는 얼마인가? (답: $-14{,}7$ m/s.)
+</Exercicio>
+
+<Exercicio
+  numero="46.33"
+  dificuldade="modelagem"
+  solucao={<>TVM <Eq>{`= (P(2030) - P(2020))/(2030 - 2020) = (1{.}030{.}000 - 1{.}000{.}000)/10 = 30{.}000/10 = 3{.}000`}</Eq> hab./year.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "14", exercicio: "Exercise 1.1.15 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+도시의 인구는 2020년에 1,000,000명이었고 2030년에 1,030,000명이었다. 인구의 평균 연간 변화율은 얼마인가? (답: 3,000 hab./year.)
+</Exercicio>
+
+<Exercicio
+  numero="46.34"
+  dificuldade="modelagem"
+  solucao={<>TVM $= (s(t_2) - s(t_1))/(t_2 - t_1)$. In $[1, 1+h]$: $s(1) = 5$, $s(1+h) = 5(1+h)^2 = 5 + 10h + 5h^2$. TVM $= (5 + 10h + 5h^2 - 5)/h = 10 + 5h$. $h \to 0$: TVM $\to 10$ m/s $= s'(1)$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "10", exercicio: "Activity 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = 5t^2$ m에 대해, 구간 $[1, 1+h]$에서 TVM을 $h$로 계산하시오. $h \to 0$일 때 무엇이 일어나는가? (답: $10 + 5h$; 극한은 10 m/s.)
+</Exercicio>
+
+<Exercicio
+  numero="46.35"
+  dificuldade="modelagem"
+  solucao={<>총 백분율 수익 $= (P_f - P_i)/P_i = (115 - 100)/100 = 15\%$. 이것은 2년 기간의 평균 백분율 수익(TVM)이다. 연 수익은 <Eq>{`(1{,}15)^{1/2} - 1 \\approx 7{,}24\\%`}</Eq> per year (복리 이자)로, 이것이 다르다.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "14", exercicio: "Exercise 1.1.16 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+주식이 R\$ 100에 구매되고 2년 후 R\$ 115에 판매되었다. 기간의 총 백분율 수익은 얼마인가? (답: 15%.)
+</Exercicio>
+
+<Exercicio
+  numero="46.36"
+  dificuldade="desafio"
+  solucao={<>$s(t) = t^2 + 3t$에 대해, $[1, 4]$에서 TVM: $s(4) = 28$, $s(1) = 4$. TVM $= (28-4)/3 = 8$ m/s. 미분은 $s'(t) = 2t + 3$. $s'(c) = 8$: <Eq>{`2c + 3 = 8 \\Rightarrow c = 2{,}5 \\in (1, 4)`}</Eq>. 그렇다, 그러한 $c$가 존재한다 — 이것이 미분 중간값 정리이다(강 56).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "15", exercicio: "Activity 1.1.4 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+$s(t) = t^2 + 3t$에 대해, $[1, 4]$에서 TVM은 8 m/s이다. $s'(t)$를 계산하고 $s'(c) = 8$인 $c \in (1, 4)$를 찾으시오. 이 결과는 무엇을 예고하는가?
+</Exercicio>
+
+<Exercicio
+  numero="46.37"
+  dificuldade="modelagem"
+  solucao={<>매출은 6개월에 R\$ 700에서 R\$ 2,800로 증가했다. TVM $= (2.800 - 700)/6 = 2.100/6 = 350$ R\$/month. 해석: 학기에 월 평균 R\$ 350 성장.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "11", exercicio: "Exercise 1.1.12 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+회사의 월 매출은 1월 R\$ 700에서 7월 R\$ 2,800로 증가했다(6개월). 매출의 평균 월 변화율은 얼마인가? (답: R\$ 350/month.)
+</Exercicio>
+
+### Bloco E — 이해와 증명(46.38 to 46.40)
+
+<Exercicio
+  numero="46.38"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) TVM은 $[a, b]$의 모든 점에서 미분과 같다." },
+    { texto: "B) TVM은 점 $(a, f(a))$과 $(b, f(b))$를 지나는 할선의 기울기이다.", correta: true },
+    { texto: "C) TVM은 구간이 감소할 때마다 항상 증가한다." },
+    { texto: "D) TVM은 미분가능 함수에만 정의된다." },
+  ]}
+  solucao={<>TVM $= (f(b) - f(a))/(b - a)$는 점 $(a, f(a))$과 $(b, f(b))$를 지나는 직선의 기울기이다 — 할선. 미분이 아니다(미분은 TVM의 극한). 미분가능성을 요구하지 않고 두 점을 평가할 수 있는 모든 $f$에 대해 정의된다.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "27", exercicio: "Preview Activity 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+평균 변화율 $\dfrac{f(b) - f(a)}{b - a}$의 기하학적 의미는 무엇인가?
+</Exercicio>
+
+<Exercicio
+  numero="46.39"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A) TVI는 $f$가 $f(a)$와 $f(b)$ 사이의 모든 값을 지남을 보장한다.", correta: true },
+    { texto: "B) TVI는 $f$가 구간에서 단조임을 보장한다." },
+    { texto: "C) TVI는 $f$가 모든 점에서 미분을 가짐을 보장한다." },
+    { texto: "D) TVI는 TVM이 어떤 점에서 미분과 같음을 진술한다." },
+  ]}
+  solucao={<>TVI는 진술한다: $f$ 연속 in $[a, b]$이면, $f(a)$와 $f(b)$ 사이의 모든 값을 택한다. 이것은 단조성이나 미분가능성을 함의하지 않는다. 미분에 관한 진술은 미분 중간값 정리이다 — 서로 다른 결과로, 강 56에서 나온다.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "177", exercicio: "Theorem 2.13 (contexto)", licenca: "CC-BY-NC-SA" }}
+>
+TVI는 $[a, b]$에서 연속인 $f$에 대해 무엇을 보장하는가?
+</Exercicio>
+
+<Exercicio
+  numero="46.40"
+  dificuldade="demonstracao"
+  solucao={<>정의에 의해, <Eq>{`f'(a) = \\lim_{h \\to 0} \\dfrac{f(a+h) - f(a)}{h}`}</Eq>, 이는 정확히 <Eq>{`\\lim_{b \\to a} \\text{TVM}_{[a,b]}`}</Eq>이다($b = a + h$ with). 따라서: 미분은 구간이 한 점으로 축소될 때 TVM의 극한이다. TVM은 전역 버전(할선); 미분은 국소 버전(접선). 이것이 미적분학의 기초이다.</>}
+  passos={<>
+    <ol>
+      <li>미분의 정의를 쓰시오: <Eq>{`f'(a) = \\lim_{h \\to 0} \\dfrac{f(a+h) - f(a)}{h}`}</Eq>.</li>
+      <li>몫이 TVM임을 인식하시오: <Eq>{`\\text{TVM}_{[a,\\, a+h]} = \\dfrac{f(a+h) - f(a)}{h}`}</Eq>. <em>왜:</em> $b = a + h$로 식별하면 된다.</li>
+      <li>따라서: <Eq>{`f'(a) = \\lim_{b \\to a} \\text{TVM}_{[a,b]}`}</Eq>. <em>통찰:</em> 미분은 "TVM의 한 종류"가 아니다 — 그것이 TVM의 극한이다.</li>
+      <li><em>팁:</em> 할선(두 점) $\to$ 접선(한 점)이 두 점이 합쳐질 때. 이것이 미분이다.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "28", exercicio: "Definition 1.3.1 (contexto)", licenca: "CC-BY-NC-SA" }}
+>
+구간 $[a, b]$가 점 $a$로 축소될 때, 미분 $f'(a)$가 평균 변화율의 극한임을 공식적으로 증명하시오.
+</Exercicio>
+
+</ListaExercicios>
+
+## 출처
+
+- [**Active Calculus 2.0**](https://activecalculus.org/single/) — Matt Boelkins · Grand Valley State University · 2024 · CC-BY-NC-SA. **1차 자료.** §1.1 (*How Do We Measure Velocity?*) and §1.3 (*The Derivative at a Point*) — Exemplos 3, 4, 5, Blocos C, D 및 E의 기초.
+- [**OpenStax Calculus: Volume 1**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · Rice University · 2016 · CC-BY-NC-SA. §2.4 (*Continuity* and TVI) — Exemplo 1과 Blocos A 및 E의 기초. §2.1 (*A Preview of Calculus*) — Bloco D의 기초.
+- [**REAMAT — 수치 미분(Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · 2024 · CC-BY 4.0. §3.1 (*Método da Bisseção*) — Exemplo 2와 Bloco B의 기초.
+- [**Basic Analysis I**](https://www.jirka.org/ra/) — Jiří Lebl · 2024 · CC-BY-SA. §3.3 — $\mathbb{R}$의 완비성을 통한 TVI의 증명 (공식 Porta).

@@ -1,0 +1,552 @@
+---
+titulo: "Ecuación de Black-Scholes"
+slug: "black-scholes"
+categoria: "financas-quantitativas"
+subcategoria: "opcoes"
+descricao: "¿Cuánto vale el derecho de comprar una acción en el futuro? Premio Nobel de Economía 1997. Conecta cálculo, EDPs y probabilidad en un único objeto."
+ordem: 1
+publicado: true
+tags: ["opções", "derivativos", "EDP", "movimento browniano", "nobel"]
+prerrequisitos: ["derivada", "integral", "logaritmo", "distribuição normal"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["Máster en Finanzas", "Ingeniería Financiera", "Mesa de derivados", "Riesgo de mercado"]
+---
+
+<EquacaoCanonica
+  formula="C = S \cdot N(d_1) - K\,\mathrm{e}^{-rT}\, N(d_2)"
+  legenda={<><strong>Ecuación de Black-Scholes (1973)</strong> — precio de una opción europea de compra. Donde <em>S</em> es el precio actual del activo, <em>K</em> el precio de ejercicio, <em>r</em> la tasa libre de riesgo, <em>T</em> el tiempo hasta el vencimiento, y <em>N(·)</em> la función de distribución acumulada de la normal estándar. <a href="https://www.nobelprize.org/prizes/economic-sciences/1997/summary/" target="_blank" rel="noopener noreferrer"><strong>Premio Nobel de Economía 1997</strong></a>.</>}
+  audioTexto="Ecuación de Black-Scholes. C, igual a, S por N de d uno, menos K por, e elevado a menos r por T, por N de d dos. Donde C es el precio de la opción de compra, S es el precio actual del activo, K es el precio de ejercicio, r es la tasa libre de riesgo, T es el tiempo hasta el vencimiento, e N de ce es la función de distribución acumulada de la normal estándar."
+/>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Modelo de Black-Scholes (1973)">
+
+### Hipótesis
+
+1. El precio $S_t$ del activo subyacente sigue un **movimiento browniano geométrico** bajo la medida $\Q$ neutra al riesgo:
+
+<Equation numero="1" audioTexto="Ecuación uno. d S sub t, igual a, r por S sub t, d t, más sigma por S sub t, d W sub t. En palabras: la variación infinitesimal del precio del activo es igual a la tasa libre de riesgo r por el precio, por d t, más la volatilidad sigma por el precio, por el incremento del movimiento browniano estándar W." explicacao={<>El precio del activo crece con tasa esperada <Eq>{`r`}</Eq> (la tasa libre de riesgo) y fluctúa con volatilidad <Eq>{`\\sigma`}</Eq>. <Eq>{`W_t`}</Eq> es un movimiento browniano estándar — pasos infinitesimales aleatorios que se acumulan en un paseo continuo.</>}>
+{`dS_t = r S_t \\, dt + \\sigma S_t \\, dW_t`}
+</Equation>
+
+2. **Mercado completo, sin fricción**: sin costos de transacción, posición corta ilimitada, divisibilidad infinita.
+3. **$r$ y $\sigma$ constantes** a lo largo de $[0, T]$.
+4. **Sin dividendos** (relajable: sustituye $r$ por $r - q$).
+5. **Ausencia de arbitraje** — principio fundamental.
+
+### La EDP de Black-Scholes
+
+Por el lema de Itô aplicado a $V(S, t)$ y construcción de la cartera replicante (long $\Delta$ acciones, short 1 opción), se elimina el riesgo y la cartera debe rendir $r$. De ahí:
+
+<Equation numero="2" audioTexto="Ecuación dos. Derivada parcial de V con respecto al tiempo, más un medio sigma al cuadrado por S al cuadrado por la derivada parcial segunda de V con respecto a S, más r por S por la derivada parcial de V con respecto a S, menos r por V, igual a cero. Es la ecuación diferencial parcial de Black-Scholes — una ecuación parabólica análoga a la ecuación del calor de la física." explicacao={<>Es una <strong>EDP parabólica</strong> — ¡análoga a la ecuación del calor de la física! El término <Eq>{`\\frac{1}{2}\\sigma^2 S^2 V_{SS}`}</Eq> es el "calor" difundiéndose, <Eq>{`r S V_S`}</Eq> es una deriva (drift), y <Eq>{`-rV`}</Eq> es el descuento. Toda intuición de la física del calor vale aquí.</>}>
+{`\\pdiff{V}{t} + \\frac{1}{2}\\sigma^2 S^2 \\pdiff{^2 V}{S^2} + r S \\pdiff{V}{S} - r V = 0`}
+</Equation>
+
+con condición final $V(S, T) = \max(S - K, 0)$ para una call europea.
+
+### Solución cerrada
+
+<Equation numero="3" audioTexto="Ecuación tres. C de S y t, igual a, S por N de d uno, menos K por, e elevado a menos r por T menos t, por N de d dos. C es el precio de la call europea, S es el precio actual del activo, K es el precio de ejercicio, r es la tasa libre de riesgo, T menos t es el tiempo hasta el vencimiento, e N es la función de distribución acumulada de la normal estándar." explicacao={<>El precio de la call es el <strong>valor presente esperado del payoff</strong>, bajo la medida neutra al riesgo. <Eq>{`N(d_2)`}</Eq> es la probabilidad de que la call termine in-the-money. <Eq>{`S \\cdot N(d_1)`}</Eq> es el valor esperado de <Eq>{`S_T`}</Eq> condicional al ejercicio.</>}>
+{`C(S, t) = S \\cdot N(d_1) - K\\,\\e^{-r(T-t)} N(d_2)`}
+</Equation>
+
+donde
+
+<Equation numero="4" audioTexto="Ecuación cuatro. d uno, igual a, en el numerador, logaritmo natural de S sobre K, más r más un medio sigma al cuadrado, por T menos t, dividido por el denominador sigma por raíz cuadrada de T menos t. Y d dos, igual a, d uno menos sigma por raíz cuadrada de T menos t." explicacao={<>El <Eq>{`d_1`}</Eq> mide cuántas desviaciones estándar el log-precio actual está arriba del log-precio de ejercicio, ajustado por la deriva. <Eq>{`d_2 = d_1 - \\sigma\\sqrt{T-t}`}</Eq>.</>}>
+{`d_1 = \\frac{\\ln(S/K) + (r + \\frac{1}{2}\\sigma^2)(T-t)}{\\sigma\\sqrt{T-t}}, \\quad d_2 = d_1 - \\sigma\\sqrt{T-t}`}
+</Equation>
+
+y $N(\cdot)$ es la función de distribución acumulada de la normal estándar:
+
+<Equation numero="5" audioTexto="Ecuación cinco. N de x, igual a, uno sobre raíz de dos pi, por la integral de menos infinito hasta x, de e elevado a menos u al cuadrado sobre dos, d u. Es la función de distribución acumulada de la normal estándar — el área bajo la curva campana de Gauss hasta el punto x." explicacao={<>La famosa <strong>curva campana</strong> de Gauss, integrada desde menos infinito hasta <Eq>{`x`}</Eq>. No tiene forma cerrada — se calcula por aproximaciones racionales (Abramowitz & Stegun) o por la función error complementaria.</>}>
+{`N(x) = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^{x} \\e^{-u^2/2} \\, du`}
+</Equation>
+
+### Paridad put-call
+
+<Equation numero="6" audioTexto="Ecuación seis, paridad put-call. C menos P, igual a, S menos K por e elevado a menos r por T menos t. C es el precio de la call, P es el precio de la put, mismo precio de ejercicio y mismo vencimiento." explicacao={<>Conexión exacta entre call y put europeas del mismo precio de ejercicio y vencimiento. Si esta identidad falla en el mercado, hay arbitraje puro — en práctica, es violada por fracciones de centavo durante segundos.</>}>
+{`C - P = S - K \\e^{-r(T-t)}`}
+</Equation>
+
+### Los Griegos
+
+Sensibilidades parciales del precio de la opción. Toda mesa de derivados del mundo monitorea estos números.
+
+<Equation numero="7" audioTexto="Ecuación siete, el delta de la call. Delta sub C, igual a, derivada parcial de C con respecto a S, igual a, N de d uno. Es la sensibilidad del precio de la opción con respecto al precio del activo." explicacao={<>Delta — <strong>cuánto cambia el precio de la opción por cada €1 de movimiento en la acción</strong>. Para una call deep-ITM, <Eq>{`\\Delta \\to 1`}</Eq>; deep-OTM, <Eq>{`\\Delta \\to 0`}</Eq>.</>}>
+{`\\Delta_C = \\pdiff{C}{S} = N(d_1)`}
+</Equation>
+
+<Equation numero="8" audioTexto="Ecuación ocho, el gamma. Gamma, igual a, derivada parcial segunda de C con respecto a S, igual a, N línea de d uno, dividido por S por sigma por raíz de T menos t. Es la convexidad — cuánto cambia el delta cuando el precio del activo cambia." explicacao={<>Gamma — <strong>convexidad</strong>: cómo cambia el delta cuando el precio cambia. Es el mismo para call y put. Mayor cerca del precio de ejercicio y cerca del vencimiento.</>}>
+{`\\Gamma = \\pdiff{^2 C}{S^2} = \\frac{N'(d_1)}{S \\sigma \\sqrt{T-t}}`}
+</Equation>
+
+<Equation numero="9" audioTexto="Ecuación nueve, el vega. Nu, igual a, derivada parcial de C con respecto a sigma, igual a, S por raíz de T menos t, por N línea de d uno. Mide la sensibilidad del precio de la opción a la volatilidad." explicacao={<>Vega — sensibilidad a la volatilidad. <strong>Igual para call y put</strong>. En mesa de operaciones, la volatilidad implícita es lo que se opera, no el precio directamente.</>}>
+{`\\nu = \\pdiff{C}{\\sigma} = S \\sqrt{T-t} \\cdot N'(d_1)`}
+</Equation>
+
+<Equation numero="10" audioTexto="Ecuación diez, el theta. Theta sub C, igual a, menos S por sigma por N línea de d uno, dividido por dos por raíz de T menos t, menos r por K por e elevado a menos r por T menos t, por N de d dos. Mide el decaimiento temporal — cuánto pierde la opción por día." explicacao={<>Theta — <strong>decaimiento por tiempo</strong>: cuánto pierde la opción de valor por día, manteniendo todo lo demás constante. <Eq>{`\\Theta < 0`}</Eq> para opciones long — opción es activo que "se derrite".</>}>
+{`\\Theta_C = -\\frac{S \\sigma N'(d_1)}{2\\sqrt{T-t}} - r K \\e^{-r(T-t)} N(d_2)`}
+</Equation>
+
+</Porta>
+
+<Porta nivel="5" titulo="Para un niño de 5 años">
+
+Tienes **un amigo** que tiene una figurita super rara de su colección.
+
+Hoy, él te promete:
+
+> *"Mañana, si quieres, te doy mi figurita rara. Tú solo me das 10 figuritas tuyas a cambio. Pero decides mañana. Si no quieres, está bien."*
+
+Ese **derecho de elegir mañana** vale algo **hoy**, ¿verdad?
+
+- Si la figurita rara suya es **muy especial**, vale más.
+- Si tienes **bastante tiempo** para decidir, vale más — puede llegar a ser más interesante.
+- Si sus figuritas suelen **volverse más raras** rápido, vale mucho más.
+
+Black-Scholes es la **cuenta correcta** para saber cuánto vale ese derecho.
+
+Tiene una fórmula con letras griegas y todo. Pero el corazón es solo esto: **el derecho de elegir después vale dinero hoy**.
+
+</Porta>
+
+<Porta nivel="10" titulo="Para un niño de 10 años">
+
+Juegas un juego en el móvil. Hay una skin legendaria que cuesta **100 monedas**. Solo tienes 80.
+
+Un amigo te ofrece un **cupón mágico**:
+
+> *"Te vendo un cupón que te da el derecho de comprar la skin por 100 monedas en cualquier momento en los próximos 7 días — incluso si el precio sube a 200 o 500."*
+
+¿Cuánto vale ese cupón?
+
+Depende de **5 cosas**:
+
+1. **Precio actual** de la skin (más cerca del objetivo, más vale el cupón).
+2. **Precio objetivo** (100 monedas).
+3. **Cuántos días** dura el cupón (más días, más vale).
+4. **Tasa de interés** (porque el dinero guardado rinde — efecto pequeño aquí).
+5. **Cuánto balancea el precio de la skin** — se llama "**volatilidad**". Si la skin es inestable (sube y baja mucho), el cupón vale **mucho más** — porque hay más chance de explotar hacia arriba y darte ganancia grande.
+
+La fórmula de Black-Scholes toma esos 5 ingredientes y calcula el **precio justo del cupón**.
+
+No es un chute. Es cuenta. Y fue tan importante para la economía que ganó [**Premio Nobel** en 1997](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/).
+
+</Porta>
+
+<Porta nivel="15" titulo="Para un adolescente de 15 años">
+
+Vamos a imaginar algo concreto.
+
+La acción de **Petrobras (PETR4)** vale **R\$ 46,60** hoy (24 de abril de 2026, fuente B3). Crees que va a subir en los próximos 30 días.
+
+Tienes dos opciones:
+
+**Opción A**: Comprar la acción. Cuesta R\$46,60 la unidad. Si sube a R\$55, ganas R\$8,40. Si baja a R\$40, pierdes R\$6,60.
+
+**Opción B**: Comprar una **opción de compra** — el derecho (pero no la obligación) de comprar la acción a R\$47 dentro de 30 días. Esa opción cuesta alrededor de **R\$1,94**. Si la acción sube a R\$55, ejerces: pagas R\$47, vendes a R\$55, ganas R\$8 menos los R\$1,94 pagados = **R\$6,06 de ganancia con inversión de solo R\$1,94** (ganancia de ~312%). Si la acción baja a R\$40, no ejerces — solo pierdes los R\$1,94.
+
+¿Por qué la opción es tan poderosa? **Apalancamiento** — controlas R\$47 de acción con R\$1,94.
+
+¿Por qué nadie usa opción para todo? Porque ella **vence**. Si en 30 días la acción quedó en R\$46,99 (1 centavo abajo del precio de ejercicio), no ejerces y pierdes **100% de lo que pagaste**.
+
+La pregunta de Black-Scholes es: **¿cuánto debería costar esa opción, en teoría justa?**
+
+La fórmula combina:
+
+$$ C = S \cdot N(d_1) - K \cdot \e^{-rT} \cdot N(d_2) $$
+
+No te asusta. Las letras son:
+
+- $S$: precio actual de la acción (R\$46,60)
+- $K$: precio-objetivo del ejercicio, "precio de ejercicio" (R\$47,00)
+- $r$: tasa de interés del CDI (14,65% a.a. en abril/2026)
+- $T$: tiempo hasta el vencimiento, en años (30 días = 30/365 ≈ 0,082)
+- $\sigma$: cuánto balancea la acción normalmente, "volatilidad" (~35% a.a. para PETR4)
+- $N(\cdot)$: la famosa **distribución normal** — la curva campana que verás en estadística
+
+Plugeando los números: la opción justa cuesta alrededor de **R\$1,94**. Es exactamente lo que el mercado precifica.
+
+<Insight>
+
+**¿Por qué es mágico?** Black-Scholes dice: dado precio, intereses, vol y tiempo, el **precio justo de la opción está determinado matemáticamente**. No es opinión. No es chute. Si el mercado vende a R\$2,80, hay "volatilidad implícita" mayor — el mercado está previendo que la acción va a balancear más de 35%. Si vende a R\$1,30, el mercado prevé menos balanceo.
+
+La fórmula extrae del precio lo que el mercado piensa. **Eso es poderoso pacas.**
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="Para estudiante de ingeniería / finanzas">
+
+Estás en un **Máster en Finanzas**, o en **Ingeniería Financiera** en la Poli, o en **Quant** preparando entrevista. Black-Scholes es el pan y la mantequilla.
+
+### Origen: replicación dinámica
+
+La intuición central **no es la fórmula** — es el argumento de no-arbitraje vía **cartera replicante**:
+
+- Long $\Delta$ acciones, short 1 call.
+- Por el lema de Itô, el $dV$ de la cartera es libre de riesgo si $\Delta = \partial C/\partial S$.
+- Cartera sin riesgo → rinde $r$. De ahí la EDP.
+
+Este argumento es **profundamente diferente** de "calcular esperanza de payoff y descontar". Black-Scholes es, fundamentalmente, **un argumento de cobertura dinámica continua**.
+
+### Volatilidad implícita — lo que de hecho se opera
+
+Mesa de derivados no opera "precio de la call". Opera **volatilidad implícita** — el $\sigma$ que, plugeado en Black-Scholes, devuelve el precio observado:
+
+$$ \sigma_{\text{impl}}(C_{\text{mkt}}) = \text{BS}^{-1}(C_{\text{mkt}}, S, K, r, T) $$
+
+Resuelto por **Newton-Raphson** (vega como derivada) o Brent. Usas bisección como fallback si Newton diverge. Es una de las primeras aplicaciones reales que ves de "encontrar cero de función" — exactamente el tema del método de bisección en este sitio.
+
+### Dominio cruzado: la ecuación del calor
+
+La EDP de Black-Scholes (Ec. 2 en la puerta formal) es, **literalmente**, la ecuación del calor disfrazada. Cambio de variables $u(x, \tau) = \e^{\alpha x + \beta \tau} V(S, t)$ con $x = \ln S, \tau = T - t$ lleva a:
+
+$$ \pdiff{u}{\tau} = \pdiff{^2 u}{x^2} $$
+
+Toda intuición que tienes sobre **difusión de calor** vale para opciones — incluyendo soluciones por funciones de Green, transformada de Fourier, separación de variables. Cuando el quant habla de "kernel de Black-Scholes", es la función de Green de la ecuación del calor.
+
+### Conexión con otras áreas
+
+- **Probabilidad**: $N(d_2)$ es la probabilidad neutra al riesgo de que la call termine ITM.
+- **Cálculo estocástico**: Itô, martingalas, cambio de medida (Girsanov).
+- **Métodos numéricos**: solución por diferencias finitas es alternativa a la fórmula cerrada — útil para opciones americanas y exóticas donde no hay fórmula.
+- **Ingeniería de software**: la implementación requiere cuidado con $T \to 0$ (singularidad de $d_1$) y $\sigma \to 0$ (igual). Trampa clásica.
+
+### Ejemplo numérico completo (ver puerta Práctica para más)
+
+PETR4 en 24/04/2026: $S = 46{,}60$, $K = 47{,}00$, $r = 14{,}65\%$, $\sigma = 35\%$, $T = 30/365$.
+
+$$ d_1 = \frac{\ln(46{,}60/47) + (0{,}1465 + 0{,}35^2/2)(0{,}0822)}{0{,}35\sqrt{0{,}0822}} = \frac{0{,}00854}{0{,}1003} \approx 0{,}085 $$
+
+$$ d_2 = 0{,}085 - 0{,}1003 \approx -0{,}015 $$
+
+$$ N(d_1) \approx 0{,}534, \quad N(d_2) \approx 0{,}494 $$
+
+$$ C = 46{,}60 \cdot 0{,}534 - 47 \cdot \e^{-0{,}012} \cdot 0{,}494 \approx 1{,}94 $$
+
+⟹ **R\$ 1,94**
+
+Griegos de la opción:
+
+- $\Delta = N(d_1) \approx 0{,}534$ → cada R\$1 que PETR4 sube, la opción sube R\$0,53
+- $\Gamma \approx 0{,}085$ → el $\Delta$ acelera con el precio
+- $\nu \approx 0{,}053$ por 1pp de vol → cada 1pp de vol implícita = R\$0,053
+- $\Theta \approx -0{,}040$ R\$/día → opción ATM 30d "se derrite" R\$0,04 por día
+
+</Porta>
+
+<Porta nivel="40" titulo="Para profesional sénior">
+
+Black-Scholes no es la verdad. Es la **lengua franca** que hace posible la conversación entre traders de Tokio, Londres, Nueva York y São Paulo.
+
+### Toda hipótesis es falsa en estrés
+
+| Hipótesis BS | Realidad | Cómo el mercado lo maneja |
+|---|---|---|
+| Log-normalidad | **Cola gorda**. Las distribuciones reales tienen curtosis >> 3. Los crashes suceden. | Sonrisa/sesgo de volatilidad implícita; modelos de salto (Merton, Kou). |
+| $\sigma$ constante | La volatilidad es **estocástica**. Sonrisa + término + sesgo forman superficie 3D. | Heston, SABR, rough Bergomi. |
+| $r$ constante | Los intereses son estocásticos. Importante en opciones largas. | Hull-White, HJM, multi-curve. |
+| Mercado completo | Fricción, bid-ask, capital regulatorio, funding. | Pricing ajustado por funding (FVA), capital VA (KVA). |
+| Cobertura continua | La cobertura es discreta. Cada rebalance cuesta. | Delta-hedging discreto + análisis de error de réplica. |
+
+### Cargo-cult versus uso correcto
+
+LTCM cayó en 1998 confiando en modelos. Bear Stearns cayó en 2008 también. Lección operacional:
+
+1. **La calibración importa más que el modelo**. Quien calibra mal el mejor modelo pierde ante quien calibra bien el peor modelo.
+2. **El stress test fuera de la log-normalidad es obligatorio**. La volatilidad histórica subestima la cola. Usa escenarios con volatilidad 3x mayor, salto de 30%, gap en apertura.
+3. **Monitorea los Griegos de todas las posiciones agregadas**, no solo por trade. $\Delta$ neto de la cartera, $\Gamma$, $\nu$, exposición a salto.
+
+### Volatilidad implícita como termómetro
+
+La superficie de volatilidad implícita es el **termómetro del miedo**. En períodos tranquilos, la sonrisa es suave (~25% en el dinero, ~35% en los extremos). En pánico, la volatilidad salta a 80%, 100% (caso 2008, COVID-2020, COVID-2021 lockdown energético).
+
+Los índices VIX (S&P 500), VVIX (volatilidad de la volatilidad), MOVE (volatilidad de Treasuries) son todos derivados de esta idea: extraer la expectativa del mercado a partir de precios de opciones.
+
+### Caso real: sonrisa de PETR4 abril/2026
+
+Snapshot estimado de la B3 (ver puerta Práctica para cálculos detallados):
+
+| Precio de ejercicio (% Spot) | Volatilidad implícita |
+|---|---|
+| 80% | 47% |
+| 90% | 41% |
+| 100% (ATM) | 35% |
+| 110% | 32% |
+| 120% | 33% |
+
+**Sesgo negativo** clásico de acciones: puts OTM (protección) cuestan más volatilidad que calls OTM. El mercado paga prima por protección contra caída — y tiene sentido, porque caída en acciones típicamente viene con volatilidad explotando.
+
+### Costo real de "hacer cobertura"
+
+Una posición vendida en 1.000 calls PETR4 precio de ejercicio R\$47 a 30 días necesita cobertura delta continua. Costos diarios:
+
+- **Costo de funding** de las acciones compradas para delta-hedge: ~CDI × valor de la posición.
+- **Costo de ejecución** (bid-ask + impact): ~0,15% por rebalance.
+- **Slippage** en días de volatilidad alta: puede doblar el costo de ejecución.
+
+En 30 días, con rebalanceo diario, el costo de cobertura consume **2-4% de la prima recibida**. Por eso MM de derivado cobra spread sobre BS — no es avaricia, es **cobertura real cuesta caro**.
+
+### Alternativas modernas
+
+- **Heston** (1993) — volatilidad estocástica con correlación precio-vol. Captura sesgo mejor.
+- **Local Vol (Dupire 1994)** — volatilidad = función determinística de $S$ y $t$. Calibra exactamente la sonrisa.
+- **SABR** (Hagan 2002) — referencia en mesa de FX y tasas de interés.
+- **Rough Bergomi** (Bayer-Friz-Gatheral 2016) — volatilidad de la volatilidad roughly fractional Brownian. Estado del arte en investigación.
+
+Pero todos esos **se reducen a BS** cuando $\sigma$ es constante. BS es el **modelo nulo** sobre el cual todo se construye. Saber BS correctamente es pre-requisito para saber cualquier cosa seria en finanzas cuantitativa.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Práctica — 4 escenarios con datos reales de mercado">
+
+Aquí aplicamos Black-Scholes con **datos reales recopilados el 24 de abril de 2026** y construimos 4 estrategias clásicas con PETR4 como subyacente. Cada escenario tiene inputs, cálculo paso a paso, Griegos, y el **diagrama de payoff** en el vencimiento.
+
+### Snapshot de mercado
+
+| Variable | Valor | Fuente |
+|---|---|---|
+| Spot PETR4 | **R\$ 46,60** | [B3 / Status Invest](https://statusinvest.com.br/acoes/petr4) — cierre 24/04/2026 |
+| CDI anualizado | **14,65%** | [BACEN SGS 4389](https://www.bcb.gov.br/) — abril/2026 |
+| Selic-meta | **14,75%** | BCB Copom — abril/2026 |
+| Volatilidad histórica 90d (estimación) | **35% a.a.** | Cálculo estándar sobre log-retornos diarios × √252 |
+| Volatilidad implícita ATM (sonrisa estimada) | **35%** | [Opções.Net.Br](https://opcoes.net.br/PETR4) |
+
+> **Convenciones**: 1 contrato de opción = 100 acciones. Días hábiles BR/año = 252 (ANBIMA). Tiempo $T$ en fracciones de año (252 o 365 — ver cada escenario). Costos: corretaje fijo R\$5/orden, emolumentos B3 ~0,030%, ISS 5% sobre corretaje (típico Río/SP en corretora premium).
+
+---
+
+### Escenario 1 — Long Call ATM 30d · "apuesto a que sube un poco"
+
+**Tesis:** Esperas alza moderada de PETR4 en los próximos 30 días pero quieres apalancamiento.
+
+**Inputs:**
+
+| Param | Valor |
+|---|---|
+| $S$ | R\$ 46,60 |
+| $K$ | R\$ 47,00 (~ATM) |
+| $r$ | 14,65% a.a. |
+| $\sigma$ | 35% a.a. |
+| $T$ | 30/365 ≈ 0,0822 año |
+
+**Cálculo BS:**
+
+$$ d_1 = \frac{\ln(46{,}60/47) + (0{,}1465 + \tfrac{0{,}35^2}{2})(0{,}0822)}{0{,}35\sqrt{0{,}0822}} = 0{,}085 $$
+
+$$ d_2 = 0{,}085 - 0{,}1003 = -0{,}015 $$
+
+$$ C = 46{,}60 \cdot N(0{,}085) - 47 \cdot \e^{-0{,}012} \cdot N(-0{,}015) \approx 1{,}94 $$
+
+⟹ **R\$ 1,94 por acción**
+
+**Operación real (1 contrato):**
+
+| Item | Valor |
+|---|---|
+| Prima pagada | 100 × R\$1,94 = **R\$ 194,00** |
+| Corretaje + emolumentos + ISS | R\$ 5,00 + R\$0,06 + R\$0,25 = R\$ 5,31 |
+| **Costo total** | **R\$ 199,31** |
+| Punto de equilibrio en vencimiento | R\$ 47,00 + R\$1,94 = **R\$ 48,94** |
+| Ganancia máxima | Ilimitada (sube, ganas) |
+| Pérdida máxima | R\$ 199,31 (pierdes todo si $S_T < 47$) |
+
+**Griegos en el momento de entrada:**
+
+- $\Delta = 0{,}534$ → cada R\$1 que PETR4 sube → opción +R\$0,53
+- $\Gamma = 0{,}085$ → delta acelera 0,085 por R\$1
+- $\nu = 0{,}053$ por 1pp vol → si vol sube a 36%, opción +R\$0,053
+- $\Theta = -0{,}040$ R\$/día → opción se derrite ~R\$0,04/día (en 30d acumula -R\$1,20)
+
+<PayoffChart
+  tipo="long-call"
+  S={46.60}
+  K={47.00}
+  premio={1.94}
+  rangeMin={40}
+  rangeMax={55}
+  titulo="Escenario 1 — Long Call ATM 30d"
+  legenda="Ganancia/pérdida en vencimiento. Pérdida máxima limitada a la prima. Arriba del punto de equilibrio (R$48,94) la ganancia crece 1:1 con el spot."
+/>
+
+**Comentario operacional (ingeniero sénior):** Long call ATM 30d es la **operación clásica de θ-burn**. Necesitas que PETR4 ande **más de R\$2,34 (~5%) para arriba en 30 días** solo para empatar — mucho más para ganar. En mercado lateral, pierdes 100% de la prima. Usa solo si tienes **convicción direccional clara** o si la volatilidad implícita está abajo de tu estimación de volatilidad realizada (compra "barato" en el eje σ, no en el eje S).
+
+---
+
+### Escenario 2 — Long Call OTM 60d · "apalancamiento máximo"
+
+**Tesis:** Crees en movimiento fuerte de alza (~10% o más) en los próximos 60 días.
+
+**Inputs:** $S=46{,}60$, $K=52{,}00$ (~12% OTM), $r=14{,}65\%$, $\sigma=35\%$, $T=60/365=0{,}1644$
+
+**Cálculo:**
+
+$$ d_1 = \frac{\ln(46{,}60/52) + 0{,}20775 \cdot 0{,}1644}{0{,}35\sqrt{0{,}1644}} = \frac{-0{,}076}{0{,}142} = -0{,}53 $$
+
+$$ d_2 = -0{,}53 - 0{,}142 = -0{,}67 $$
+
+$$ C = 46{,}60 \cdot N(-0{,}53) - 52 \cdot \e^{-0{,}024} \cdot N(-0{,}67) \approx 1{,}15 $$
+
+⟹ **R\$ 1,15 por acción**
+
+**Operación real (1 contrato):**
+
+| Item | Valor |
+|---|---|
+| Prima pagada | 100 × R\$1,15 = **R\$ 115,00** |
+| Costos | ~R\$ 5,30 |
+| **Costo total** | **R\$ 120,30** |
+| Punto de equilibrio | R\$ 52,00 + R\$1,15 = **R\$ 53,15** (necesita +14% en el spot) |
+| Ganancia 100% (doblar) | $S_T = $ R\$ 54,30 |
+| Ganancia 500% (5x) | $S_T = $ R\$ 58,90 |
+
+**Griegos:** $\Delta \approx 0{,}30$, $\nu \approx 0{,}075$ por 1pp vol — la opción es **pura apuesta en volatilidad implícita explotando**.
+
+<PayoffChart
+  tipo="long-call"
+  S={46.60}
+  K={52.00}
+  premio={1.15}
+  rangeMin={40}
+  rangeMax={62}
+  titulo="Escenario 2 — Long Call OTM 12% strike R$52, 60d"
+  legenda="Curva comienza a subir solo después de R$52. Punto de equilibrio R$53,15 (+14% sobre spot). Costo de entrada bajísimo, pero probabilidad de ejercicio pequeña."
+/>
+
+**Comentario:** Estrategia de **lottery ticket**. Cuesta poco, retorno potencial enorme, pero probabilidad implícita de ejercicio es solo ~25%. Adecuado para **expresión de tesis asimétrica** (catalizador conocido, ej.: resultado trimestral, decisión CADE, OPA), **NO** como apuesta direccional pura. El "edge" tiene que venir de información, no de chute.
+
+---
+
+### Escenario 3 — Long Put 90d · protección de cartera
+
+**Tesis:** Tienes posición comprada en PETR4 (digamos 1.000 acciones = R\$46.600) y quieres **protegerte contra caída fuerte** en los próximos 90 días manteniendo upside.
+
+**Inputs:** $S=46{,}60$, $K=47{,}00$, $r=14{,}65\%$, $\sigma=35\%$, $T=90/365=0{,}2466$
+
+**Cálculo (put vía paridad):**
+
+$$ d_1 = \frac{\ln(46{,}60/47) + 0{,}20775 \cdot 0{,}2466}{0{,}35\sqrt{0{,}2466}} = 0{,}246 $$
+
+$$ d_2 = 0{,}246 - 0{,}174 = 0{,}072 $$
+
+Call: $C = 46{,}60 \cdot N(0{,}246) - 47 \cdot \e^{-0{,}036} \cdot N(0{,}072) \approx 3{,}83$
+
+Put (paridad): $P = C - S + K \e^{-rT} = 3{,}83 - 46{,}60 + 47 \cdot 0{,}9645 \approx 2{,}57$ → **R\$ 2,57**
+
+**Operación real (10 contratos = protección de 1.000 acciones):**
+
+| Item | Valor |
+|---|---|
+| Prima pagada | 1.000 × R\$2,57 = **R\$ 2.570,00** |
+| Costos | ~R\$ 13,00 |
+| **Costo total de la protección** | **R\$ 2.583,00** (~5,5% del valor de la cartera) |
+| Piso garantizado | $S_T = 47 \Rightarrow $ recibe al menos R\$47.000 + ganancia en acciones |
+| Costo anualizado de la protección | ~22% a.a. |
+
+<PayoffChart
+  tipo="long-put"
+  S={46.60}
+  K={47.00}
+  premio={2.57}
+  rangeMin={35}
+  rangeMax={55}
+  titulo="Escenario 3 — Long Put ATM 90d (protección)"
+  legenda="Payoff de la PUT aislada. En una cartera (long acciones + long put), la put solo gana si PETR4 cae abajo de R$44,43 — abajo de eso, cancela parte de la pérdida de las acciones."
+/>
+
+**Comentario:** **El costo de protección es alto** porque la volatilidad implícita refleja el miedo a la caída (sesgo). Comparativo:
+
+- **Sin put**: caer a R\$35 → -R\$11.600
+- **Con put strike 47**: caer a R\$35 → -R\$11.600 + (47-35)·1.000 - 2.583 = +R\$ -2.183
+- **Costo del "seguro"** si PETR4 queda lateral en R\$46,60: **R\$2.583 tirado**
+
+Alternativas profesionales: **collar cero-costo** (compra put + vende call OTM, la prima se cancela), **put spread** (compra put + vende put más OTM), **stop-loss puro** (sin costo pero sin garantía en gap).
+
+---
+
+### Escenario 4 — Covered Call · generar yield en cartera larga
+
+**Tesis:** Tienes 1.000 acciones PETR4 (no vas a vender) y quieres **generar ingresos mensuales** vendiendo calls OTM.
+
+**Inputs:** $S=46{,}60$, $K=49{,}00$ (~5% OTM), $r=14{,}65\%$, $\sigma=35\%$, $T=30/365=0{,}0822$
+
+**Cálculo:**
+
+$$ d_1 = \frac{\ln(46{,}60/49) + 0{,}20775 \cdot 0{,}0822}{0{,}1003} = -0{,}33 $$
+
+$$ d_2 = -0{,}33 - 0{,}1003 = -0{,}43 $$
+
+$$ C = 46{,}60 \cdot N(-0{,}33) - 49 \cdot \e^{-0{,}012} \cdot N(-0{,}43) \approx 1{,}12 $$
+
+⟹ **R\$ 1,12 por acción**
+
+**Operación real (vende 10 calls = "tapa" 1.000 acciones):**
+
+| Item | Valor |
+|---|---|
+| Posición base | 1.000 acciones × R\$46,60 = R\$ 46.600,00 |
+| Prima recibida | +1.000 × R\$1,12 = **+R\$ 1.120,00** |
+| Costos | ~R\$ 13,00 |
+| **Yield mensual** (si acciones quedan lateral) | R\$ 1.107 / R\$ 46.600 = **2,38% a.m. = ~32,7% a.a.** |
+| Cap (precio máximo de venta forzada) | **R\$ 49,00** (si se ejerce) |
+| Ganancia máxima | (49,00 - 46,60)·1.000 + 1.107 = **R\$ 3.507** (=7,5% en 30d) |
+
+<PayoffChart
+  tipo="covered-call"
+  S={46.60}
+  K={49.00}
+  premio={1.12}
+  rangeMin={40}
+  rangeMax={56}
+  titulo="Escenario 4 — Covered Call (long 1k acciones + short 10 calls K=49, 30d)"
+  legenda="Ganancia crece 1:1 hasta K=49, después queda tapada. Punto de equilibrio jaló hacia abajo (R$45,48 vs spot R$46,60) por la prima recibida — pequeña protección contra caída."
+/>
+
+**Comentario:** Estrategia popular en **cartera de dividendos**. Cambias **upside ilimitado por ingresos determinísticos**:
+
+- **Escenario lateral** ($S_T \in [45{,}48, 49{,}00]$): te quedas con acciones + R\$1.107 limpio. Yield excelente.
+- **Escenario alza fuerte** ($S_T > 49$): acciones se "llaman" a R\$49. Ganancia tapada en R\$3.507.
+- **Escenario caída** ($S_T < 45{,}48$): pierdes dinero en acciones, pero protección de R\$1,12/acción amortigua.
+
+Riesgo oculto: **si PETR4 dispara a R\$60, dejaste R\$11.000 en la mesa**. Quien opera covered call **sistemáticamente** acepta ese trade-off. Quien lo hace una vez en la vida y la acción dispara, queda frustrado y desiste — comportamental.
+
+---
+
+### Comparativo de los 4 escenarios
+
+| Escenario | Inversión | Riesgo máx. | Retorno máx. | Probabilidad ganancia | Tesis |
+|---|---:|---:|---|---|---|
+| 1 — Long Call ATM 30d | R\$ 199 | R\$ 199 | Ilimitado | ~50% | Alza moderada confirmada |
+| 2 — Long Call OTM 60d | R\$ 120 | R\$ 120 | Muy alto | ~25% | Catalizador conocido |
+| 3 — Long Put 90d (hedge) | R\$ 2.583 | R\$ 2.583 | Limita caída | n/a (seguro) | Protección de cartera larga |
+| 4 — Covered Call 30d | 0 (ya tenía acciones) | Upside tapado | R\$ 3.507 | ~70% | Ingresos en cartera larga |
+
+### Lecciones operacionales
+
+1. **Escenario 1** es el "default trader iniciante" — cuesta poco, pero exige acierto direccional Y temporal. Theta come 100% de la prima en mercado lateral.
+2. **Escenario 2** es apalancamiento extremo — solo tiene sentido con edge informacional real.
+3. **Escenario 3** es caro porque sesgo negativo precifica el miedo. Compara con collar cero-costo antes.
+4. **Escenario 4** es overlay clásico en cartera de largo plazo (dividendos). Sostiene yield extra de 1-3% a.m.
+
+**Principio único:** opción es **apuesta en movimiento + tiempo + vol**, no solo en dirección. Quien opera solo dirección pierde ante quien entiende las 3 dimensiones. Black-Scholes es la regla que descompone el precio observado en "cuánto está embutido en dirección, en vol, en tiempo".
+
+</Porta>
+
+</DuasPortas>
+
+<Leituras>
+
+- **Black, F.; Scholes, M.** (1973). *The Pricing of Options and Corporate Liabilities*. Journal of Political Economy 81(3): 637-654. **El artículo original.**
+- **Hull, J.C.** *Options, Futures, and Other Derivatives*. 11ª ed., Pearson. Biblia del área.
+- **Wilmott, P.** *Paul Wilmott on Quantitative Finance*. Wiley. Voz crítica y práctica.
+- **Gatheral, J.** *The Volatility Surface*. Wiley. Tras dominar BS, este libro muestra cómo funciona el mercado real.
+- **Columbia Foundations FE** — [Black-Scholes Notes (PDF oficial)](https://www.columbia.edu/~mh2078/FoundationsFE/BlackScholes.pdf). Notas gratis, derivación cuidadosa.
+- **B3** — [Histórico de cotizaciones de opciones](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/derivativos/).
+- **Status Invest** — [PETR4 cotización en vivo](https://statusinvest.com.br/acoes/petr4).
+- **Opções.Net.Br** — [Volatilidad implícita PETR4](https://opcoes.net.br/PETR4).
+
+</Leituras>

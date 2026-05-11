@@ -3,7 +3,7 @@
 > *"A matemática é a única linguagem em que se pode raciocinar sem ambiguidade sobre o infinito, o aleatório e o invisível."*
 > — adaptado de Bertrand Russell
 
-**Open source · gratuito · UI em 11 idiomas (lições traduzidas: TO-DO)**
+**Open source · gratuito · UI em 11 idiomas · Lições em 3 idiomas (PT-BR · en-US · es-ES) — restantes em andamento**
 
 Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lineares, 12 trimestres, 120 lições, do nível conjunto/intervalo até Black-Scholes. Escrito com **rigor de engenharia** (BR + JP + DE + SG), com cada conceito explicado em **7 níveis progressivos** (criança de 5 anos → profissional sênior).
 
@@ -19,7 +19,7 @@ Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lin
 - ✅ **UI traduzida em 11 idiomas** (botões, navegação, "Ouvir", breadcrumb)
 - ✅ **Acessibilidade — leitor de voz em toda página**: cada lição, exemplo e seção tem uma **caixa de áudio "Ouvir"** que narra o conteúdo via Web Speech API nativa do navegador (zero arquivos MP3, voz no idioma selecionado). Ajuda alunos com dislexia, deficiência visual, ou que aprendem melhor por audição.
 - ✅ **Build estático** em GitHub Pages — custo R$ 0,00
-- ⏳ **Tradução das lições MDX → TO-DO** (por enquanto: PT-BR é a única língua dos corpos; UI já localiza a navegação)
+- 🟡 **Tradução das lições MDX em andamento** — PT-BR (fonte), en-US e es-ES completos (124/124 cada). Restantes 8 idiomas com cobertura parcial (ver tabela abaixo)
 - ⏳ **Provas i18n** — TO-DO (1.800 questões × 10 idiomas)
 - ⏳ **Próximos módulos**: Física Ensino Médio, Engenharia introdutória
 
@@ -35,7 +35,7 @@ Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lin
 | **Provas curadas** | 120 versões (12 trimestres × 10 versões) |
 | **Questões em provas** | 1.800 |
 | **Idiomas (UI + áudio)** | 11 (português, inglês, espanhol, mandarim, japonês, alemão, francês, italiano, russo, coreano, polonês) |
-| **Idiomas (lições MDX)** | 1 (PT-BR) — 10 demais estão na fila TO-DO |
+| **Idiomas (lições MDX)** | 3 completos (PT-BR fonte · en-US · es-ES) + 8 parciais |
 | **Componentes interativos** | 14 (DuasPortas, ListaExercicios, AudioReader, VerificarPasso, etc.) |
 | **Linhas de código** | ~30.000 |
 | **Custo de hospedagem** | R\$ 0,00 (GitHub Pages) |
@@ -111,23 +111,25 @@ Não é Google Translate em runtime. É **tradução pré-compilada**. Hoje, o s
 
 - **UI** (botões, menus, breadcrumb, "Ouvir") → **11 idiomas, 100%**
 - **Áudio TTS** (narrado pelo botão "Ouvir") → **11 idiomas, 100%**, com voz nativa do SO via Web Speech API
-- **Lições MDX (corpos das aulas)** → **TO-DO**: por enquanto só PT-BR. Quando o aluno escolhe outro idioma, a UI muda mas o corpo da lição permanece em português. A pipeline de tradução com Gemini free-tier está pronta (`scripts/translate-parallel.py`); falta executar.
+- **Lições MDX (corpos das aulas)** → **PT-BR fonte + en-US e es-ES completos (100%)**. Demais 8 idiomas com cobertura parcial (24–52%) e crescendo. Quando o aluno escolhe um idioma com cobertura parcial, lições não traduzidas continuam em PT-BR (fallback explícito).
+
+Pipeline de tradução: **baseada em Claude** (agentes via Claude Code) — **Haiku** faz ~95% das lições (padrão para volume), **Sonnet** assume lições > 1050 linhas em idiomas que expandem (de/ru/es/it) por causa do teto de 32k tokens de saída do Haiku, **Opus** é usado raramente para revisão profunda. `scripts/translate-parallel.py` com Gemini free-tier permanece disponível como fallback para tarefas pontuais, mas não é o caminho primário.
 
 Idiomas atualmente removidos: árabe, hebraico e hindi — saíram temporariamente porque o TTS gratuito não rendia bem; voltarão quando tivermos uma solução de voz neural.
 
 | Idioma | UI | TTS | Lições MDX |
 |---|---|---|---|
 | 🇧🇷 Português (Brasil) | 100% | 100% | **100% (fonte)** |
-| 🇺🇸 English | 100% | 100% | TO-DO |
-| 🇪🇸 Español | 100% | 100% | TO-DO |
-| 🇨🇳 中文 (简体) | 100% | 100% | TO-DO |
-| 🇯🇵 日本語 | 100% | 100% | TO-DO |
-| 🇩🇪 Deutsch | 100% | 100% | TO-DO |
-| 🇫🇷 Français | 100% | 100% | TO-DO |
-| 🇮🇹 Italiano | 100% | 100% | TO-DO |
-| 🇷🇺 Русский | 100% | 100% | TO-DO |
-| 🇰🇷 한국어 | 100% | 100% | TO-DO |
-| 🇵🇱 Polski | 100% | 100% | TO-DO |
+| 🇺🇸 English | 100% | 100% | **100%** |
+| 🇪🇸 Español | 100% | 100% | **100%** |
+| 🇩🇪 Deutsch | 100% | 100% | 52% |
+| 🇮🇹 Italiano | 100% | 100% | 47% |
+| 🇨🇳 中文 (简体) | 100% | 100% | 45% |
+| 🇰🇷 한국어 | 100% | 100% | 39% |
+| 🇫🇷 Français | 100% | 100% | 38% |
+| 🇷🇺 Русский | 100% | 100% | 29% |
+| 🇯🇵 日本語 | 100% | 100% | 28% |
+| 🇵🇱 Polski | 100% | 100% | 24% |
 
 ---
 
@@ -199,7 +201,7 @@ Não estamos competindo com Khan Academy ou Brasil Escola. Estamos preenchendo u
 |---|---|---|
 | **Leonardo Chalhoub** | Idealização, arquitetura, conteúdo, Black-Scholes | [LinkedIn](https://www.linkedin.com/in/leonardochalhoub/) · [Mirante dos Dados](https://leonardochalhoub.github.io/mirante-dos-dados-br/) |
 | **Jefferson Korte Junior** | Conteúdo, revisão técnica, exercícios | UTFPR · jeffersonkorte@gmail.com · [LinkedIn](https://www.linkedin.com/in/jefferson-korte-dev/) |
-| **Claude Opus 4.7** (Anthropic) | Co-autoria editorial, traduções, revisão | [anthropic.com](https://www.anthropic.com/) |
+| **Claude (Anthropic)** — Haiku 4.5, Sonnet 4.6, Opus 4.7 | Co-autoria editorial, **traduções em massa** (Haiku + Sonnet), revisão | [anthropic.com](https://www.anthropic.com/) |
 
 ---
 
@@ -237,7 +239,8 @@ Fontes externas mantêm suas próprias licenças (OpenStax CC-BY, Active Calculu
 - [x] **UI traduzida** em 11 idiomas
 - [x] **Áudio TTS / leitor de voz acessível** em 11 idiomas (Web Speech API)
 - [x] **Lições L1-L120 padronizadas no template canônico** (Lição 1 standard)
-- [ ] **MDX das lições traduzido** em 10 idiomas além do PT-BR — **TO-DO** (pipeline Gemini pronta em `scripts/translate-parallel.py`)
+- [x] **MDX das lições traduzido**: en-US ✅ · es-ES ✅
+- [ ] **MDX das lições — 8 idiomas restantes** (zh-CN, ja-JP, de-DE, fr-FR, it-IT, ru-RU, ko-KR, pl-PL) — cobertura parcial 24–52%, em andamento
 - [ ] **Provas i18n** (1.800 questões × 10 idiomas) — TO-DO
 - [ ] **Retorno de árabe / hebraico / hindi** quando houver TTS neural decente
 - [ ] **Próximo módulo: Física Ensino Médio** (mecânica, ondas, eletromagnetismo)

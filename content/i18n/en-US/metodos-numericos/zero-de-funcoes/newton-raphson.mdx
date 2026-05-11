@@ -1,0 +1,149 @@
+---
+titulo: "Newton-Raphson Method"
+slug: "newton-raphson"
+categoria: "metodos-numericos"
+subcategoria: "zero-de-funcoes"
+descricao: "Bisection's faster sibling — uses the derivative to 'cut corners'. Quadratic convergence when it works, spectacular divergence when it doesn't."
+ordem: 2
+publicado: true
+tags: ["raízes", "derivada", "convergência quadrática", "tangente"]
+prerrequisitos: ["bisseção", "derivada"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["Numerical Calculus", "Optimization", "Implicit vol in Black-Scholes"]
+---
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Rigorous definition">
+
+Given $f \in C^2([a,b])$ and an initial guess $x_0$ close to the root $\xi$ with $f'(\xi) \neq 0$, the Newton-Raphson iteration is:
+
+<Equation numero="1" explicacao={<>Each iteration takes the tangent to the curve at the current point and follows it until it crosses the <Eq>{`x`}</Eq>-axis. That crossing is the next guess.</>}>
+{`x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}`}
+</Equation>
+
+<Teorema titulo="Quadratic convergence">
+
+Under the hypotheses above, the sequence $(x_n)$ converges to $\xi$ and there exists $C > 0$ such that:
+
+<Equation numero="2" explicacao={<>The error is <strong>squared</strong> at each iteration — the number of correct decimal places <strong>doubles</strong>. 4 places → 8 places → 16 places. Reasonable and impressive.</>}>
+{`|x_{n+1} - \\xi| \\leq C \\cdot |x_n - \\xi|^2`}
+</Equation>
+
+</Teorema>
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine a long playground slide.
+
+You are at the top of the slide and want to know **where it touches the ground**.
+
+Instead of sliding down slowly, you **look at the slide's tip very straight** and guess where it's going to stop — where its line hits the ground.
+
+Then you walk to that spot, climb up a little on the slide that keeps going from there, and look again. But now you're much closer to the end.
+
+Newton works like that: looks at the slope, draws a line to the ground, goes to that spot. Very fast.
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+Bisection (from the other topic) looked for roots by **dividing the interval in two**. Slow, but guaranteed.
+
+Newton-Raphson has a different strategy: **uses the slope of the function** to take a big jump toward the root.
+
+Imagine the function drawn on a graph. You're at a point. You draw **the tangent** (the line that touches the curve at that point without crossing). Where does that line cross the horizontal axis? That's your next guess.
+
+Each jump gets you much closer than bisection. Like a rocket versus a bicycle. But if you aim badly, the rocket can throw you **the wrong way**.
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old teen">
+
+You want to find the root of:
+
+$$ f(x) = x^3 - 2x - 5 $$
+
+Starting with $x_0 = 2$:
+
+- $f(2) = 8 - 4 - 5 = -1$
+- $f'(x) = 3x^2 - 2$, so $f'(2) = 10$
+- $x_1 = 2 - (-1)/10 = 2.1$
+
+Iteration 2:
+- $f(2.1) = 9.261 - 4.2 - 5 = 0.061$
+- $f'(2.1) = 13.23$
+- $x_2 = 2.1 - 0.061/13.23 = 2.0954$
+
+Iteration 3:
+- $f(2.0954) \approx 0.00018$
+- $x_3 \approx 2.09455148$
+
+In **3 iterations**, you have 8 correct decimal places. Bisection would need more than 25 iterations for the same precision.
+
+<Insight>
+
+**Why is Newton so much faster?** Because it uses **more information**: besides the value of $f$, it uses the derivative $f'$. The derivative says "where is the function going". Bisection only knows "there's still a root in here". Whoever knows more walks faster — as long as they don't trust too much.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="For an engineering student">
+
+Newton-Raphson is the most used root-finding method in engineering, **within its envelope of applicability**. It has three classic pitfalls:
+
+### Pitfall 1: zero derivative
+
+If $f'(x_n) = 0$, the iteration breaks (division by zero). This happens at minima/maxima of the function. Practical solution: use **protection rule** — if $|f'(x_n)| < \delta$, fall back to bisection.
+
+### Pitfall 2: cycle
+
+Consider $f(x) = x^3 - 2x + 2$. With $x_0 = 0$, you get $x_1 = 1$, $x_2 = 0$, $x_3 = 1$, ... — eternal cycle between 0 and 1.
+
+### Pitfall 3: divergence
+
+For $f(x) = \arctan(x)$ with $x_0$ far from the root $\xi = 0$, Newton diverges. Each step pushes further away.
+
+### Brent's method (in the real world)
+
+That's why production code (`scipy.optimize.brentq`, MATLAB `fzero`) uses **hybrid**: Newton or inverse interpolation when the step falls within bracketing; bisection when it doesn't. Guarantee plus speed.
+
+### Real application: implied volatility
+
+The implied volatility of the options market is solved by Newton-Raphson over Black-Scholes. Since $\partial C/\partial \sigma > 0$ always (positive vega), the function is monotonic and Newton converges in ~3-5 iterations with tolerance $10^{-8}$.
+
+</Porta>
+
+<Porta nivel="40" titulo="For a senior professional">
+
+On a derivatives desk, Newton-Raphson over $\sigma \mapsto \text{BS}(S, K, r, \sigma, T) - C_{\text{mkt}}$ is the engine that extracts implied vol from the bid-ask book in **microseconds**. Every quote update recalculates vol, updates the surface.
+
+But the pure version of Newton is not what's in production. What is:
+
+- **Halley method** (order 3) — even faster if you have the second derivative (and BS does)
+- **Brent** — when you need robustness (e.g., option almost deep-OTM, vega tending to zero)
+- **Bisection** — fallback when everything else fails
+
+In quant teams, "which root finder to use" is a decision by **asset class**:
+
+- Listed equity options: Brent (bid-ask spread creates noise)
+- Complex OTC swaps: Newton with warm-start from previous iteration
+- Exotics with Monte Carlo pricing: bisection (pricing is not differentiable)
+
+The wrong choice doesn't crash the system but degrades latency — and in high-frequency, latency is P&L.
+
+</Porta>
+
+</DuasPortas>
+
+<Leituras>
+
+- **Burden, R.; Faires, D.** *Numerical Analysis*. Cap. 2.
+- **NPS Naval Postgraduate** — [Newton's method PDF](https://cs.nyu.edu/~overton/NumericalComputing/newton.pdf). Quadratic convergence proven carefully.
+- **Wikipedia** — [Newton's method](https://en.wikipedia.org/wiki/Newton's_method).
+
+</Leituras>

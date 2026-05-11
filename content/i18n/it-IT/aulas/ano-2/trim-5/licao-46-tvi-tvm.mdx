@@ -1,0 +1,993 @@
+---
+titulo: "Lezione 46 — TVI e Taxa de Variação Média"
+slug: "licao-46-tvi-tvm"
+categoria: "aulas"
+subcategoria: "ano-2-trim-5"
+descricao: "Teorema do Valor Intermediário (existência de raízes, bisseção) e Taxa de Variação Média (inclinação da secante, ponte para a derivata)."
+ordem: 46
+publicado: true
+tags: ["TVI", "taxa-de-variacao-media", "continuidade", "secante", "derivada", "ano-2", "trim-5"]
+prerrequisitos: ["licao-43-continuidade"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["2.º anno della Scuola superiore (cálculo intro)", "Equiv. Math II japonês §5", "Equiv. Analysis/Klasse 11 alemã"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{TVM}_{[a,b]} = \frac{f(b) - f(a)}{b - a}"
+  legenda={<>A <strong>Taxa de Variação Média</strong> de <Eq>{`f`}</Eq> no intervallo <Eq>{`[a, b]`}</Eq> é a inclinação da reta secante que passa pelos pontos <Eq>{`(a,\\, f(a))`}</Eq> e <Eq>{`(b,\\, f(b))`}</Eq>. Quando <Eq>{`b \\to a`}</Eq>, essa taxa se aproxima da <em>tasso di variazione instantânea</em> — a derivata.</>}
+  audioTexto="A tasso di variazione média de f no intervallo de a até b é igual a f de b menos f de a, dividido por b menos a. Geometricamente, é a inclinação da reta que liga dois pontos do gráfico. Quando b se aproxima de a, essa inclinação converge para a derivata no ponto a."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Livros que cobrem esta lição
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §1.1–1.3 Velocidade, TVM e derivata · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Fonte primária: atividades de descoberta sobre velocidade média e a passagem ao limite que gera a derivata.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/calculus-volume-1" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §2.4 Continuità e TVI · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Enunciado formal do TVI com corolários, esempi de equações transcendentes e esercizi de localização de raízes.</em>
+    </li>
+    <li>
+      <a href="https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        REAMAT — Cálculo Numérico (UFRGS)
+      </a>
+      <span className="text-clube-mist"> · §3.1 Método da bisseção · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Implementação em Python, análise de erro e esempi de IRR e raízes de equações de engenharia.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definições e teoremas">
+
+### Teorema do Valor Intermediário (TVI)
+
+<Definicao titulo="Teorema do Valor Intermediário">
+
+Seja $f : [a, b] \to \mathbb{R}$ continua. Se $k$ é qualquer valor entre $f(a)$ e $f(b)$ — isto é, $\min\{f(a), f(b)\} \leq k \leq \max\{f(a), f(b)\}$ — então existe $c \in (a, b)$ tal que $f(c) = k$.
+
+</Definicao>
+
+> "Se $f$ é continua em $[a, b]$ e $k$ é qualquer valor entre $f(a)$ e $f(b)$, então existe pelo menos um número $c$ em $(a, b)$ tal que $f(c) = k$." — [OpenStax Calculus Volume 1, §2.4, Theorem 2.13](https://openstax.org/books/calculus-volume-1/pages/2-4-continuity)
+
+**Corolário (existência de raiz).** Se $f \in C([a, b])$ e $f(a) \cdot f(b) < 0$, então existe $c \in (a, b)$ com $f(c) = 0$.
+
+<Equation explicacao="Produto negativo equivale a sinais opostos: f(a) e f(b) estão em lados opostos de zero, logo f precisa cruzar zero em algum ponto interior." latex="f(a) \cdot f(b) < 0 \implies \exists\, c \in (a,b) : f(c) = 0" />
+
+**Demonstração (esboço via completude).** Suponha $f(a) < 0 < f(b)$. Defina $S = \{x \in [a, b] : f(x) < 0\}$. O insieme $S$ é não-vazio ($a \in S$) e limitado superiormente por $b$. Por completude de $\mathbb{R}$, existe $c = \sup S \in [a, b]$. Por continuità de $f$, se $f(c) \neq 0$ obtém-se contradição. Logo $f(c) = 0$. $\square$
+
+**Por que a continuità é indispensável.** A função de Heaviside $H(x) = 0$ se $x < 0$ e $H(x) = 1$ se $x \geq 0$ satisfaz $H(-1) = 0$ e $H(1) = 1$, mas nunca assume $1/2$ — pois tem um salto em $x = 0$ e não é continua lá.
+
+<Intuizione>
+
+O TVI é suficiente mas não necessário para existência de raízes. Se $f(a)$ e $f(b)$ têm o mesmo sinal, o TVI não se aplica — mas pode haver raízes no interior. Esempio: $f(x) = (x-1)^2$ tem $f(0) = f(2) = 1 > 0$, mas $x = 1$ é raiz dupla. O TVI garante, não exclui.
+
+</Intuizione>
+
+### Método da Bisseção
+
+Dado $f \in C([a, b])$ com $f(a)f(b) < 0$, a bisseção localiza a raiz iterativamente. A cada passo, calcula-se o ponto médio e guarda-se a metade onde $f$ muda de sinal:
+
+<Equation explicacao="A cada iteração, o ponto médio m_n subdivide o intervallo atual. O erro cai pela metade a cada passo — convergência garantida e quantificável." latex="m_n = \frac{a_n + b_n}{2}, \qquad |c - m_n| \leq \frac{b - a}{2^{n+1}}" />
+
+Para precisão $\varepsilon$, são necessárias $n \geq \lceil \log_2((b-a)/\varepsilon) \rceil - 1$ iterações.
+
+### Taxa de Variação Média (TVM)
+
+<Definicao titulo="Taxa de Variação Média">
+
+Para $f$ definida em $[a, b]$ com $a \neq b$, a **tasso di variazione média** de $f$ nesse intervallo é:
+
+$$\text{TVM}_{[a,b]} = \frac{f(b) - f(a)}{b - a}$$
+
+Geometricamente, é a **inclinação da reta secante** que passa pelos pontos $(a, f(a))$ e $(b, f(b))$ no gráfico de $f$.
+
+</Definicao>
+
+> "A tasso di variazione média de $f$ ao longo do intervallo $[a, b]$ é $\text{AV}_{[a,b]} = \dfrac{f(b)-f(a)}{b-a}$. Geometricamente, a tasso di variazione média representa a inclinação da reta que passa pelos pontos $(a, f(a))$ e $(b, f(b))$." — [Active Calculus, §1.1, Definition 1.1.4](https://activecalculus.org/single/sec-1-1-vel.html)
+
+A notazione com $h = b - a$ é equivalente:
+
+<Equation explicacao="Substituindo b = a + h, a TVM fica esprime em termos do incremento h. Quando h → 0, essa expressão define a derivata — a tasso di variazione instantânea." latex="\text{TVM} = \frac{f(a + h) - f(a)}{h}, \quad h = b - a \neq 0" />
+
+**Passagem ao limite.** Se $f$ é diferenciável em $a$:
+
+$$f'(a) = \lim_{h \to 0} \frac{f(a+h) - f(a)}{h} = \lim_{b \to a} \frac{f(b) - f(a)}{b - a}$$
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 420 260" className="w-full max-w-[480px] mx-auto block">
+  <defs>
+    <marker id="arr46" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <line x1="30" y1="220" x2="400" y2="220" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr46)"/>
+  <line x1="60" y1="240" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr46)"/>
+  <text x="395" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">x</text>
+  <text x="65" y="18" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">y</text>
+  <path d="M 80,200 Q 180,60 380,100" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+  <circle cx="140" cy="140" r="4" fill="rgb(26 77 92)"/>
+  <circle cx="320" cy="105" r="4" fill="rgb(26 77 92)"/>
+  <line x1="100" y1="172" x2="370" y2="86" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4,3"/>
+  <text x="135" y="158" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">(a, f(a))</text>
+  <text x="325" y="102" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">(b, f(b))</text>
+  <text x="195" y="125" fontSize="9" fontFamily="serif" fill="rgb(201 163 95)">secante: inclinação = TVM</text>
+  <text x="80" y="250" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.5">a</text>
+  <text x="315" y="250" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.5">b</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+A reta secante liga <em>(a, f(a))</em> a <em>(b, f(b))</em>. Sua inclinação é a TVM. Quando <em>b → a</em>, a secante converge para a reta tangente em <em>a</em>, cuja inclinação é <em>f'(a)</em>.
+</figcaption>
+</figure>
+
+<Teorema titulo="Relação TVM — derivata">
+Se $f$ é diferenciável em $a$, então:
+$$\lim_{b \to a} \text{TVM}_{[a,b]} = f'(a)$$
+A derivata é o limite da tasso di variazione média quando o intervallo encolhe para um ponto. A TVM é a versão global; a derivata, a versão local.
+</Teorema>
+
+</Porta>
+
+<Porta nivel="5" titulo="Pra criança de 5 anos">
+
+Imagina que você está subindo uma escada. No começo você está **embaixo** e no final você está **em cima**. Para chegar lá, você **precisa passar por todos os degraus do meio** — não tem como pular do chão direto para o topo.
+
+O Teorema do Valor Intermediário diz exatamente isso para funções contínuas: se uma função começa num valor pequeno e termina num valor grande, ela **precisa passar por todos os valores do meio**.
+
+E a Taxa de Variação Média é como calcular a inclinação de uma rampa. Se você sobe 4 metros em 2 passi, a inclinação média é 4 dividido por 2: 2 metros por passo.
+
+</Porta>
+
+<Porta nivel="10" titulo="Pra criança de 10 anos">
+
+**Teorema do Valor Intermediário:** imagine um termômetro que marca $-3^\circ$ de madrugada e $+12^\circ$ ao meio-dia. Em algum momento ele marcou exatamente $0^\circ$. Isso é certo — a temperatura não pula, ela muda aos poucos.
+
+Matematicamente: se uma função continua começa negativa e termina positiva, **ela cruza o zero** em algum ponto no meio. Isso é o TVI.
+
+Esempio: $f(x) = x^3 - x - 1$.
+- $f(1) = 1 - 1 - 1 = -1$ (negativo)
+- $f(2) = 8 - 2 - 1 = 5$ (positivo)
+
+O TVI garante que existe uma raiz entre 1 e 2.
+
+**Taxa de Variação Média:** se um carro percorre 120 km em 2 horas, a velocidade média é:
+
+$$\text{velocidade média} = \frac{120}{2} = 60 \text{ km/h}$$
+
+Isso é a TVM da posição no tempo: quanto a posição mudou, dividido pelo tempo. Se a posição fosse uma função $s(t)$, a TVM no intervallo $[0, 2]$ seria $(s(2) - s(0))/(2 - 0)$.
+
+</Porta>
+
+<Porta nivel="15" titulo="Pra adolescente de 15 anos">
+
+Esta lição tem duas ideias que caminham juntas rumo ao cálculo.
+
+### TVI — garantia de existência de raízes
+
+Para mostrar que a equação $g(x) = h(x)$ tem soluzione em $[a, b]$:
+1. Defina $f(x) = g(x) - h(x)$.
+2. Verifique que $f$ é continua em $[a, b]$ (polinômios, seno, cosseno, exponencial são sempre contínuos).
+3. Calcule $f(a)$ e $f(b)$.
+4. Se tiverem sinais opostos, o TVI garante que existe $c \in (a, b)$ com $f(c) = 0$.
+
+**Esempio: $\cos x = x$ em $[0, \pi/2]$.**
+
+Defina $f(x) = \cos x - x$.
+- $f(0) = \cos 0 - 0 = 1 > 0$
+- $f(\pi/2) = \cos(\pi/2) - \pi/2 = 0 - 1{,}57 \approx -1{,}57 < 0$
+
+Mudança de sinal. Logo existe $c \in (0, \pi/2)$ com $\cos c = c$ (numericamente, $c \approx 0{,}739$).
+
+### TVM — Taxa de Variação Média
+
+$$\text{TVM} = \frac{f(b) - f(a)}{b - a}$$
+
+**Geometria:** é a inclinação da reta que passa pelos pontos $(a, f(a))$ e $(b, f(b))$ — a **reta secante**.
+
+**Física:** se $s(t)$ é posição de um objeto, então a velocidade média no intervallo $[t_1, t_2]$ é exatamente a TVM de $s$.
+
+**Ponte para a derivata:** quando o intervallo $[a, b]$ encolhe ($b \to a$), a secante se aproxima da **reta tangente**. A inclinação da tangente é a **derivata** — a tasso di variazione instantânea. Cálculo começa exatamente aqui.
+
+<Intuizione>
+
+A TVM é o que você consegue calcular sem cálculo diferencial. A derivata é o limite da TVM quando o intervallo vai a zero. Toda a teoria da derivata está comprimida nessa frase.
+
+</Intuizione>
+
+### Método da Bisseção
+
+Se $f(a)$ e $f(b)$ têm sinais opostos, a bisseção localiza a raiz:
+
+| Iteração | $a$ | $b$ | $m = (a+b)/2$ | $f(m)$ | Próxima busca |
+|---|---|---|---|---|---|
+| 0 | 1 | 2 | $1{,}5$ | $+0{,}875$ | $[1;\; 1{,}5]$ |
+| 1 | 1 | $1{,}5$ | $1{,}25$ | $-0{,}297$ | $[1{,}25;\; 1{,}5]$ |
+| 2 | $1{,}25$ | $1{,}5$ | $1{,}375$ | $+0{,}225$ | $[1{,}25;\; 1{,}375]$ |
+| 3 | $1{,}25$ | $1{,}375$ | $1{,}3125$ | $-0{,}051$ | $[1{,}3125;\; 1{,}375]$ |
+
+Cada iteração divide o erro por 2. Após 10 iterações, o erro é menor que $(b - a)/1024$.
+
+</Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia">
+
+### TVI — consequências e aplicações computacionais
+
+**Por que TVI falha em $\mathbb{Q}$.** A função $f(x) = x^2 - 2$ é continua em $\mathbb{Q}$ (como função restrita aos racionais), com $f(1) = -1 < 0$ e $f(2) = 2 > 0$. O TVI clássico exigiria uma raiz, que seria $\sqrt{2}$ — mas $\sqrt{2} \notin \mathbb{Q}$. Isso demonstra que a completude de $\mathbb{R}$ é indispensável para o TVI.
+
+**Bisseção: análise de erro.** Após $n$ iterações: $|c - m_n| \leq (b - a)/2^{n+1}$. Para precisão $\varepsilon$: $n \geq \log_2\!\left(\frac{b-a}{\varepsilon}\right) - 1$. Para $[1, 2]$ com $\varepsilon = 10^{-9}$: $n \geq \log_2(10^9) - 1 \approx 29$ iterações.
+
+**Aplicações em engenharia:**
+- Volatilidade implícita em opções financeiras: $C(\sigma) = C_{\text{mkt}}$, resolvida por bisseção quando Newton oscila.
+- Taxa Interna de Retorno (TIR): $\text{NPV}(r) = 0$, bisseção sobre $r \in [0, 1]$.
+- Raízes de polinômios característicos para análise de estabilidade de sistemas dinâmicos.
+
+**Ponto fixo via TVI.** Se $g \in C([a, b])$ com $g([a, b]) \subseteq [a, b]$, defina $f(x) = g(x) - x$. Então $f(a) = g(a) - a \geq 0$ e $f(b) = g(b) - b \leq 0$. Por TVI, existe $c \in [a, b]$ com $g(c) = c$. $\square$
+
+### TVM — análise quantitativa
+
+**Linearização local.** Para $b = a + h$ com $h$ pequeno:
+
+$$f(b) \approx f(a) + f'(a) \cdot h$$
+
+Esta é a linearização de primeira ordem (Taylor truncada). O erro é $O(h^2)$.
+
+**TVM em finanças.** Seja $P(t)$ o preço de um ativo:
+
+$$\text{retorno médio absoluto} = \frac{P(t_2) - P(t_1)}{t_2 - t_1}, \qquad \text{retorno percentual} = \frac{P(t_2) - P(t_1)}{P(t_1)}$$
+
+A derivata logarítmica $(\ln P)'$ é o retorno instantâneo contínuo — base do modelo de Black-Scholes (Lezione 119).
+
+**Velocidade e aceleração.**
+
+$$\text{velocidade média} = \frac{s(b) - s(a)}{b - a} \xrightarrow{b \to a} s'(a) = \text{velocidade instantânea}$$
+
+$$\text{aceleração média} = \frac{v(b) - v(a)}{b - a} \xrightarrow{b \to a} v'(a) = s''(a)$$
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+### TVI como propriedade topológica
+
+O TVI é instância de um fato geral: **imagem de conexo por continua é conexo**. Em $\mathbb{R}$, os insiemi conexos são exatamente os intervalli. Logo $f([a, b])$ é um intervallo contendo $f(a)$ e $f(b)$, e portanto contém todos os valores entre eles. A dimostrazione via $\sup$ é a versão analítica desse fato topológico.
+
+**Generalização (Brouwer, 1912).** Toda função continua $g : B^n \to B^n$ (bola fechada unitária em $\mathbb{R}^n$) tem ponto fixo. Em dimensão 1, isso é o corolário de ponto fixo deduzido do TVI. Em dimensão superior, a prova usa homologia.
+
+O equilíbrio de Nash em jogos finitos existe via Kakutani (generalização multivalorada de Brouwer). Esta linha conecta TVI → ponto fixo → equilíbrio de Nash — resultado [agraciado com o Prêmio Nobel de Economia em 1994](https://www.nobelprize.org/prizes/economic-sciences/1994/summary/).
+
+### TVM — perspectiva computacional e financeira
+
+**Diferenças finitas.** Em computação científica, a derivata é sempre aproximada por TVM:
+
+$$f'(a) \approx \frac{f(a+h) - f(a)}{h} \quad \text{(diferença progressiva, } O(h)\text{)}$$
+$$f'(a) \approx \frac{f(a+h) - f(a-h)}{2h} \quad \text{(diferença central, } O(h^2)\text{)}$$
+
+O $h$ ótimo equilibra erro de truncamento ($O(h)$ ou $O(h^2)$) com erro de arredondamento ($O(\varepsilon_{\text{maq}}/h)$): $h^* = O(\sqrt{\varepsilon_{\text{maq}}})$ para diferença progressiva, $h^* = O(\varepsilon_{\text{maq}}^{1/3})$ para central.
+
+**Séries temporais.** Em econometria, $\Delta y_t = y_t - y_{t-1}$ é o operador diferença (TVM discreta com $h = 1$). Séries não-estacionárias que se tornam estacionárias após uma diferença são ditas I(1) — base de cointegração e modelos ARIMA.
+
+**Métodos além da bisseção:**
+- Bisseção: $O(\log 1/\varepsilon)$ — robusto, sem condições extras além de continuità.
+- Newton-Raphson: convergência quadrática, exige $f'(c) \neq 0$ e boa chute inicial.
+- Brent (1973): combina bisseção + interpolação; o padrão prático.
+- ITP (Oliveira-Takahashi, 2020): garante $O(\log 1/\varepsilon)$ no pior caso com taxa empírica próxima a Newton.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Prática — roteiros e esempi com dados reais">
+
+### Roteiro: TVI — provar existência de raiz
+
+1. **Identificar $f$**: se a equação é $g(x) = h(x)$, defina $f(x) = g(x) - h(x)$.
+2. **Verificar continuità**: $f$ é continua em $[a, b]$? (Polinômios, seno, cosseno, $e^x$, $\ln x$ com domínio adequado: sim.)
+3. **Calcular $f(a)$ e $f(b)$**: os sinais são opostos?
+4. **Concluir**: "Por TVI, existe $c \in (a, b)$ com $f(c) = 0$, logo $g(c) = h(c)$."
+
+### Roteiro: TVM — calcular tasso di variazione
+
+1. **Identificar $f$, $a$, $b$**: o que varia? Em que intervallo?
+2. **Aplicar a fórmula**: $\text{TVM} = \dfrac{f(b) - f(a)}{b - a}$.
+3. **Interpretar unidades**: se $f$ é posição (m) e argumento é tempo (s), TVM tem unidade m/s.
+4. **Comparar com derivata**: para intervallo pequeno, TVM $\approx f'(a)$.
+
+### Esempio prático: conta de internet
+
+Dois planos de internet residencial em São Paulo (valores ilustrativos, 2026):
+- Plano A: R\$ 89,90/mês (fibra 100 Mbps).
+- Plano B: R\$ 129,90/mês (fibra 500 Mbps).
+
+Defina $C(v) = $ custo mensal para velocidade $v$ (em Mbps). A TVM entre os dois planos é:
+
+$$\text{TVM} = \frac{129{,}90 - 89{,}90}{500 - 100} = \frac{40{,}00}{400} = 0{,}10 \text{ R\$/Mbps}$$
+
+Interpretação: cada Mbps adicional de velocidade custa, em média, R\$ 0,10/mês nessa faixa.
+
+### Armadilhas comuns
+
+- **TVI garante existência, não unicidade.** $f(x) = x^3 - x$ tem três raízes em $[-2, 2]$.
+- **$f(a)f(b) > 0$ não prova ausência de raízes.** $f(x) = (x-1)^2$ tem raiz dupla em 1, mas $f(0) = f(2) = 1 > 0$.
+- **TVM depende do intervallo.** O mesmo $f$ pode ter TVMs muito diferentes em $[0, 1]$ e em $[0, 10]$.
+
+</Porta>
+
+</DuasPortas>
+
+## Exemplos resolvidos
+
+<Esempio titulo="TVI — existência de raiz polinomial" numero="1">
+
+**Problema.** Mostre que $f(x) = x^3 - x - 1$ tem pelo menos uma raiz no intervallo $(1, 2)$.
+
+**Estratégia.** Verificar que $f$ é continua (polinômio) e que $f(1)$ e $f(2)$ têm sinais opostos. Se sim, TVI garante a existência.
+
+**Resolução.**
+
+1. **Continuità:** $f(x) = x^3 - x - 1$ é polinômio, logo continua em $\mathbb{R}$, em particular em $[1, 2]$.
+
+2. **Calcular os estremi:**
+
+$$f(1) = 1^3 - 1 - 1 = -1 < 0$$
+$$f(2) = 2^3 - 2 - 1 = 5 > 0$$
+
+3. **Aplicar TVI:** como $f(1) < 0 < f(2)$ e $f$ é continua em $[1, 2]$, pelo TVI existe $c \in (1, 2)$ tal que $f(c) = 0$.
+
+**Verificação.** $f(1{,}3) = 2{,}197 - 1{,}3 - 1 = -0{,}103 < 0$ e $f(1{,}4) = 2{,}744 - 1{,}4 - 1 = 0{,}344 > 0$. Raiz confirmada em $(1{,}3;\; 1{,}4)$. Numericamente, $c \approx 1{,}3247$.
+
+**Fonte.** [Active Calculus §1.1, Example 1.1.2](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA. Adaptado.
+
+</Esempio>
+
+<Esempio titulo="Bisseção — 4 iterações e análise de erro" numero="2">
+
+**Problema.** Use o método da bisseção para aproximar a raiz de $f(x) = x^3 - x - 1$ em $(1, 2)$ com 4 iterações. Qual é o erro máximo após essas iterações?
+
+**Estratégia.** A cada passo calcular o ponto médio $m$, avaliar $f(m)$ e guardar a metade onde o sinal muda.
+
+**Resolução.**
+
+Dados iniciais: $a_0 = 1$, $b_0 = 2$, $f(1) = -1 < 0$, $f(2) = 5 > 0$.
+
+**Iteração 1:** $m_1 = (1 + 2)/2 = 1{,}5$. $f(1{,}5) = 3{,}375 - 1{,}5 - 1 = 0{,}875 > 0$. Novo intervallo: $[1;\; 1{,}5]$.
+
+**Iteração 2:** $m_2 = (1 + 1{,}5)/2 = 1{,}25$. $f(1{,}25) = 1{,}953 - 1{,}25 - 1 = -0{,}297 < 0$. Novo intervallo: $[1{,}25;\; 1{,}5]$.
+
+**Iteração 3:** $m_3 = (1{,}25 + 1{,}5)/2 = 1{,}375$. $f(1{,}375) = 2{,}600 - 1{,}375 - 1 = 0{,}225 > 0$. Novo intervallo: $[1{,}25;\; 1{,}375]$.
+
+**Iteração 4:** $m_4 = (1{,}25 + 1{,}375)/2 = 1{,}3125$. $f(1{,}3125) = 2{,}259 - 1{,}3125 - 1 = -0{,}053 < 0$. Novo intervallo: $[1{,}3125;\; 1{,}375]$.
+
+**Erro máximo após 4 iterações:**
+
+$$|c - m_4| \leq \frac{b - a}{2^4} = \frac{1}{16} = 0{,}0625$$
+
+**Verificação.** O ponto médio de $[1{,}3125;\; 1{,}375]$ é $1{,}34375 \approx 1{,}34$, com $f(1{,}34375) \approx -0{,}0059 < 0$. A raiz real $c \approx 1{,}3247$ está no intervallo — confirmado.
+
+**Fonte.** [REAMAT — Cálculo Numérico §3.1, Exemplo 3.1](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · CC-BY 4.0.
+
+</Esempio>
+
+<Esempio titulo="TVM — cinemática e velocidade média" numero="3">
+
+**Problema.** A posição (em metros) de uma partícula é $s(t) = t^2 + 3t$ para $t$ em segundos. Calcule a TVM de $s$ no intervallo $[1, 4]$ e interprete.
+
+**Estratégia.** Aplicar diretamente $\text{TVM} = (s(4) - s(1))/(4 - 1)$. Depois comparar com $s'(t) = 2t + 3$ para encontrar o instante com velocidade instantânea igual à TVM.
+
+**Resolução.**
+
+1. **Calcular $s(1)$ e $s(4)$:**
+
+$$s(1) = 1 + 3 = 4 \text{ m}, \qquad s(4) = 16 + 12 = 28 \text{ m}$$
+
+2. **Calcular a TVM:**
+
+$$\text{TVM} = \frac{28 - 4}{4 - 1} = \frac{24}{3} = 8 \text{ m/s}$$
+
+3. **Interpretação:** a partícula se deslocou 24 m em 3 s, com velocidade média 8 m/s.
+
+4. **Conexão com derivata:** $s'(t) = 2t + 3$. Queremos $s'(c) = 8$: $2c + 3 = 8 \Rightarrow c = 2{,}5 \in (1, 4)$. O Teorema del Valore Medio do Cálculo (Lezione 56) garantirá formalmente que esse $c$ existe.
+
+**Verificação.** $s'(1) = 5$ m/s, $s'(4) = 11$ m/s. A TVM de 8 m/s está entre as velocidades instantâneas nos estremi — correto.
+
+**Fonte.** [Active Calculus §1.1, Preview Activity 1.1.1](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA.
+
+</Esempio>
+
+<Esempio titulo="TVM algébrica e passagem ao limite" numero="4">
+
+**Problema.** Para $f(x) = x^2$, calcule a TVM no intervallo $[2, 2+h]$ ($h \neq 0$) e mostre o que acontece quando $h \to 0$.
+
+**Estratégia.** Calcular a TVM em função de $h$, simplificar algebricamente e tomar o limite — isso revela $f'(2)$.
+
+**Resolução.**
+
+1. **TVM em $[2, 2+h]$:**
+
+$$\text{TVM} = \frac{f(2+h) - f(2)}{h} = \frac{(2+h)^2 - 4}{h}$$
+
+2. **Expandir $(2+h)^2 = 4 + 4h + h^2$:**
+
+$$\text{TVM} = \frac{4 + 4h + h^2 - 4}{h} = \frac{4h + h^2}{h} = 4 + h \quad (h \neq 0)$$
+
+3. **Passar ao limite:**
+
+$$\lim_{h \to 0}(4 + h) = 4 = f'(2)$$
+
+**Verificação.** Para $h = 1$: TVM $= 5$. Para $h = 0{,}1$: TVM $= 4{,}1$. Para $h = 0{,}01$: TVM $= 4{,}01$. A secante converge para a tangente em $(2, 4)$ com inclinação 4.
+
+**Fonte.** [Active Calculus §1.3, Example 1.3.1](https://activecalculus.org/single/sec-1-3-derivative-pt.html) — Boelkins · CC-BY-NC-SA.
+
+</Esempio>
+
+<Esempio titulo="TVM e TVI combinados — dados tabulares" numero="5">
+
+**Problema.** A posição (em km) de um veículo em função do tempo (em horas) é:
+
+| $t$ (h) | 0 | 0,5 | 1 | 1,5 | 2 |
+|---|---|---|---|---|---|
+| $s(t)$ (km) | 0 | 20 | 50 | 90 | 140 |
+
+(a) Calcule a TVM em cada subintervalo de 0,5 h. (b) Calcule a TVM total em $[0, 2]$. (c) A velocidade instantânea atingiu 80 km/h em algum momento do percurso?
+
+**Estratégia.** Aplicar a fórmula da TVM em cada intervallo; para (c), usar o TVI aplicado à função velocidade.
+
+**Resolução.**
+
+(a) **TVMs por subintervalo:**
+
+$$\text{TVM}_{[0;\, 0{,}5]} = \frac{20}{0{,}5} = 40 \text{ km/h}, \quad \text{TVM}_{[0{,}5;\, 1]} = \frac{30}{0{,}5} = 60 \text{ km/h}$$
+$$\text{TVM}_{[1;\, 1{,}5]} = \frac{40}{0{,}5} = 80 \text{ km/h}, \quad \text{TVM}_{[1{,}5;\, 2]} = \frac{50}{0{,}5} = 100 \text{ km/h}$$
+
+(b) **TVM total:**
+
+$$\text{TVM}_{[0;\, 2]} = \frac{140 - 0}{2} = 70 \text{ km/h}$$
+
+(c) **Velocidade de 80 km/h.** Assumindo $s$ diferenciável, a velocidade $v(t) = s'(t)$ é continua. Pela TVM: $v$ vale em média 60 km/h em $[0{,}5;\; 1]$ e 80 km/h em $[1;\; 1{,}5]$. Pelo TVI aplicado a $v$, existe pelo menos um instante em $[0{,}5;\; 1{,}5]$ onde $v(t) = 80$ km/h. Risposta: **sim**.
+
+**Verificação.** A velocidade média em $[0{,}5;\; 1{,}5]$ é $(90 - 20)/1 = 70$ km/h $< 80$ km/h, mas a velocidade cresceu de 60 para 100 km/h nas metades — deve ter passado por 80 km/h no interior.
+
+**Fonte.** [Active Calculus §1.1, Example 1.1.3 e Exercises 1.1.3–1.1.5](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA.
+
+</Esempio>
+
+<ListaExercicios seed="licao-46-tvi-tvm">
+
+### Bloco A — TVI: existência de raízes (46.1 a 46.10)
+
+<Exercicio
+  numero="46.1"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = x^3 - x - 1$ é polinômio, logo continua. <Eq>{`f(1) = -1 < 0`}</Eq> e <Eq>{`f(2) = 5 > 0`}</Eq>. Como $f$ muda de sinal em $[1, 2]$, o TVI garante existência de $c \in (1, 2)$ com $f(c) = 0$.</>}
+  passi={<>
+    <ol>
+      <li>Identifique $f$: <Eq>{`f(x) = x^3 - x - 1`}</Eq>. <em>Por quê:</em> a equação já está na forma $f(x) = 0$.</li>
+      <li>Continuità: $f$ é polinômio, logo continua em todo <Eq>{`\\mathbb{R}`}</Eq>. <em>Por quê:</em> polinômios são contínuos — sem saltos, sem buracos.</li>
+      <li>Calcule <Eq>{`f(1) = 1 - 1 - 1 = -1 < 0`}</Eq> e <Eq>{`f(2) = 8 - 2 - 1 = 5 > 0`}</Eq>. <em>Por quê:</em> precisamos dos sinais nos estremi.</li>
+      <li>Conclua: <Eq>{`f(1) \\cdot f(2) = -5 < 0`}</Eq> — sinais opostos. TVI garante <Eq>{`c \\in (1, 2)`}</Eq> com <Eq>{`f(c) = 0`}</Eq>. <em>Macete:</em> produto negativo = mudança de sinal = raiz garantida.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "178", exercicio: "Example 2.38", licenca: "CC-BY-NC-SA" }}
+>
+Mostre, usando o TVI, que $f(x) = x^3 - x - 1$ tem pelo menos uma raiz real no intervallo $(1, 2)$. Que propriedade de $f$ é necessária? Justifique nos passi.
+</Exercicio>
+
+<Exercicio
+  numero="46.2"
+  difficoltà="aplicacao"
+  opcoes={[
+    { texto: "A) $(-2, -1)$" },
+    { texto: "B) $(0, 1)$" },
+    { texto: "C) $(1, 2)$" },
+    { texto: "D) $(2, 3)$", correta: true },
+  ]}
+  solucao={<><Eq>{`f(x) = x^3 - 2x - 5`}</Eq>. Testar <Eq>{`f(2) = 8 - 4 - 5 = -1 < 0`}</Eq> e <Eq>{`f(3) = 27 - 6 - 5 = 16 > 0`}</Eq>. Mudança de sinal em <Eq>{`(2, 3)`}</Eq>. Risp: D.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "178", exercicio: "Example 2.38 variant", licenca: "CC-BY-NC-SA" }}
+>
+Em qual intervallo de comprimento 1 a função $f(x) = x^3 - 2x - 5$ tem raiz, garantida pelo TVI? (Risp: $(2, 3)$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.3"
+  difficoltà="aplicacao"
+  opcoes={[
+    { texto: "A) Sim, pois $f(0) > 0$ e $f(\\pi/2) < 0$.", correta: true },
+    { texto: "B) Não, pois $\\cos x > 0$ em $[0, \\pi/2]$." },
+    { texto: "C) Sim, mas o TVI exige que $\\cos$ seja diferenciável." },
+    { texto: "D) Não se pode concluir sem resolver numericamente." },
+  ]}
+  solucao={<>Defina <Eq>{`f(x) = \\cos x - x`}</Eq>. <Eq>{`f(0) = 1 > 0`}</Eq>. <Eq>{`f(\\pi/2) \\approx -1{,}57 < 0`}</Eq>. Mudança de sinal, $f$ continua. TVI garante $c \in (0, \pi/2)$ com $\cos c = c$.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "179", exercicio: "Example 2.39", licenca: "CC-BY-NC-SA" }}
+>
+A equação $\cos x = x$ tem soluzione em $(0, \pi/2)$? (Risp: Sim.)
+</Exercicio>
+
+<Exercicio
+  numero="46.4"
+  difficoltà="aplicacao"
+  solucao={<>Defina <Eq>{`f(x) = e^x + x - 3`}</Eq>. <Eq>{`f(0) = 1 + 0 - 3 = -2 < 0`}</Eq>. <Eq>{`f(1) = e + 1 - 3 \\approx 0{,}72 > 0`}</Eq>. Mudança de sinal em <Eq>{`[0, 1]`}</Eq>, <Eq>{`f`}</Eq> continua. Por TVI, existe <Eq>{`c \\in (0, 1)`}</Eq> com <Eq>{`e^c + c = 3`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "180", exercicio: "Checkpoint 2.30", licenca: "CC-BY-NC-SA" }}
+>
+Mostre que a equação $e^x + x = 3$ tem soluzione no intervallo $(0, 1)$. Defina $f$ adequadamente, verifique a continuità e aplique o TVI.
+</Exercicio>
+
+<Exercicio
+  numero="46.5"
+  difficoltà="aplicacao"
+  opcoes={[
+    { texto: "A) Não. $f(0)$ e $f(1)$ têm o mesmo sinal." },
+    { texto: "B) Sim. $f(0) < 0$ e $f(1) > 0$.", correta: true },
+    { texto: "C) Sim, mas por rapporto diferente do TVI." },
+    { texto: "D) Não se pode decidir sem o gráfico." },
+  ]}
+  solucao={<><Eq>{`f(x) = x^5 + x^3 - 1`}</Eq>. <Eq>{`f(0) = -1 < 0`}</Eq>. <Eq>{`f(1) = 1 + 1 - 1 = 1 > 0`}</Eq>. Mudança de sinal, $f$ continua. TVI garante raiz em $(0, 1)$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "2", exercicio: "Exercise 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+O TVI garante raiz de $f(x) = x^5 + x^3 - 1$ em $(0, 1)$? (Risp: Sim.)
+</Exercicio>
+
+<Exercicio
+  numero="46.6"
+  difficoltà="compreensao"
+  opcoes={[
+    { texto: "A) Somente se o polinômio não tiver coeficiente dominante negativo." },
+    { texto: "B) Sempre, para qualquer polinômio de grau ímpar.", correta: true },
+    { texto: "C) Somente se o polinômio for mônico (coeficiente dominante 1)." },
+    { texto: "D) Apenas para grau 1 ou 3." },
+  ]}
+  solucao={<>Para <Eq>{`P(x) = a_n x^n + \\ldots`}</Eq> com <Eq>{`n`}</Eq> ímpar e <Eq>{`a_n > 0`}</Eq>: <Eq>{`P(x) \\to +\\infty`}</Eq> quando <Eq>{`x \\to +\\infty`}</Eq> e <Eq>{`P(x) \\to -\\infty`}</Eq> quando <Eq>{`x \\to -\\infty`}</Eq>. Logo <Eq>{`P`}</Eq> muda de sinal e, por TVI (continua), tem raiz real. Se <Eq>{`a_n < 0`}</Eq>, os sinais se invertem mas a conclusão é a mesma.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "181", exercicio: "Exercise 2.173", licenca: "CC-BY-NC-SA" }}
+>
+Todo polinômio de grau ímpar tem ao menos uma raiz real. Por quê?
+</Exercicio>
+
+<Exercicio
+  numero="46.7"
+  difficoltà="aplicacao"
+  solucao={<>Defina <Eq>{`f(x) = \\ln x - e^{-x}`}</Eq>. <Eq>{`f(1) = 0 - e^{-1} \\approx -0{,}37 < 0`}</Eq>. <Eq>{`f(e) = 1 - e^{-e} \\approx 0{,}93 > 0`}</Eq>. Mudança de sinal, <Eq>{`f`}</Eq> continua em <Eq>{`[1, e]`}</Eq>. TVI garante <Eq>{`c \\in (1, e)`}</Eq> com <Eq>{`\\ln c = e^{-c}`}</Eq>.</>}
+  passi={<>
+    <ol>
+      <li>Reformule: <Eq>{`f(x) = \\ln x - e^{-x}`}</Eq>. <em>Por quê:</em> converter equação em problema de raiz.</li>
+      <li><Eq>{`f(1) = \\ln 1 - e^{-1} = 0 - 0{,}368 = -0{,}368 < 0`}</Eq>. Extremo esquerdo negativo.</li>
+      <li><Eq>{`f(e) = \\ln e - e^{-e} = 1 - 0{,}066 = 0{,}934 > 0`}</Eq>. <em>Por quê:</em> $\ln e = 1$ por definizione do logaritmo natural.</li>
+      <li>Mudança de sinal + continuità de <Eq>{`f`}</Eq> em <Eq>{`[1, e]`}</Eq> → TVI garante <Eq>{`c`}</Eq> com <Eq>{`\\ln c = e^{-c}`}</Eq>. <em>Macete:</em> <Eq>{`\\ln`}</Eq> e <Eq>{`e^{-x}`}</Eq> são contínuas para <Eq>{`x > 0`}</Eq>, logo <Eq>{`f`}</Eq> também é.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "179", exercicio: "Example 2.40", licenca: "CC-BY-NC-SA" }}
+>
+Mostre que a equação $\ln x = e^{-x}$ tem soluzione no intervallo $(1, e)$.
+</Exercicio>
+
+<Exercicio
+  numero="46.8"
+  difficoltà="compreensao"
+  opcoes={[
+    { texto: "A) Não: se $f(a)$ e $f(b)$ têm o mesmo sinal, não há raiz." },
+    { texto: "B) Não: mesmo sinal em $a$ e $b$ não exclui raízes no interior.", correta: true },
+    { texto: "C) Sim: o TVI funciona nos dois sentidos (existência e ausência)." },
+    { texto: "D) Depende de $f$ ser monótona ou não." },
+  ]}
+  solucao={<>Se <Eq>{`f(a)f(b) > 0`}</Eq>, o TVI não se aplica — mas podem existir raízes. Esempio: <Eq>{`f(x) = (x-1)^2`}</Eq> em <Eq>{`[0, 2]`}</Eq>. <Eq>{`f(0) = 1 > 0`}</Eq>, <Eq>{`f(2) = 1 > 0`}</Eq> (mesmo sinal), mas <Eq>{`x = 1`}</Eq> é raiz dupla. O TVI é condição suficiente, não necessária para existência de raízes.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "181", exercicio: "Exercise 2.174", licenca: "CC-BY-NC-SA" }}
+>
+Se $f(a)$ e $f(b)$ têm o mesmo sinal, podemos concluir que $f$ não tem raiz em $(a, b)$?
+</Exercicio>
+
+<Exercicio
+  numero="46.9"
+  difficoltà="sfida"
+  solucao={<>Defina $g(x) = f(x) - f(x + 1/2)$ em $[0, 1/2]$. $g(0) = f(0) - f(1/2)$ e $g(1/2) = f(1/2) - f(1)$. Somando: $g(0) + g(1/2) = f(0) - f(1) = 0$, logo $g(0) = -g(1/2)$. Se $g \not\equiv 0$, então $g$ muda de sinal. Por TVI (g continua em $[0, 1/2]$), existe $c \in [0, 1/2]$ com $g(c) = 0$, i.e., $f(c) = f(c + 1/2)$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "4", exercicio: "Exercise 1.1.6 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+$f$ é continua em $[0, 1]$ com $f(0) = f(1)$. Mostre que existe $c \in [0, 1/2]$ com $f(c) = f(c + 1/2)$. Dica: defina $g(x) = f(x) - f(x + 1/2)$ e aplique TVI.
+</Exercicio>
+
+<Exercicio
+  numero="46.10"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = x^4 - 2x - 1$. Em $(-1, 0)$: <Eq>{`f(-1) = 1 + 2 - 1 = 2 > 0`}</Eq> e <Eq>{`f(0) = -1 < 0`}</Eq> — raiz em $(-1, 0)$. Em $(1, 2)$: <Eq>{`f(1) = 1 - 2 - 1 = -2 < 0`}</Eq> e <Eq>{`f(2) = 16 - 4 - 1 = 11 > 0`}</Eq> — raiz em $(1, 2)$ também. Total: ao menos 2 raízes reais.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "180", exercicio: "Checkpoint 2.31", licenca: "CC-BY-NC-SA" }}
+>
+Aplique o TVI para mostrar que $f(x) = x^4 - 2x - 1$ tem ao menos uma raiz em cada um dos intervalli $(-1, 0)$ e $(1, 2)$.
+</Exercicio>
+
+### Bloco B — Bisseção: iterações e erro (46.11 a 46.18)
+
+<Exercicio
+  numero="46.11"
+  difficoltà="aplicacao"
+  opcoes={[
+    { texto: "A) $[1;\; 1{,}5]$", correta: true },
+    { texto: "B) $[1{,}5;\; 2]$" },
+    { texto: "C) A raiz é exatamente $1{,}5$." },
+    { texto: "D) Não é possível aplicar a bisseção com apenas 1 iteração." },
+  ]}
+  solucao={<><Eq>{`m = (1 + 2)/2 = 1{,}5`}</Eq>. <Eq>{`f(1{,}5) = 3{,}375 - 1{,}5 - 1 = 0{,}875 > 0`}</Eq>. Como <Eq>{`f(1) = -1 < 0`}</Eq> e <Eq>{`f(1{,}5) > 0`}</Eq>, a raiz está em <Eq>{`[1;\\; 1{,}5]`}</Eq>. Risp: A.</>}
+  passi={<>
+    <ol>
+      <li>Calcule <Eq>{`m_1 = (1 + 2)/2 = 1{,}5`}</Eq>. <em>Por quê:</em> bisseção divide o intervallo ao meio.</li>
+      <li>Avalie <Eq>{`f(1{,}5) = (1{,}5)^3 - 1{,}5 - 1 = 3{,}375 - 2{,}5 = 0{,}875 > 0`}</Eq>.</li>
+      <li><Eq>{`f(1) = -1 < 0`}</Eq> e <Eq>{`f(1{,}5) = 0{,}875 > 0`}</Eq> — mudança de sinal na metade esquerda.</li>
+      <li>Novo intervallo: <Eq>{`[1;\\; 1{,}5]`}</Eq>. <em>Macete:</em> guarda sempre a metade onde os sinais são opostos.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "45", exercicio: "Esempio 3.1", licenca: "CC-BY 4.0" }}
+>
+Aplique 1 iteração da bisseção a $f(x) = x^3 - x - 1$ em $[1, 2]$. Qual é o novo intervallo? (Risp: $[1;\; 1{,}5]$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.12"
+  difficoltà="aplicacao"
+  solucao={<>Após a iteração 1 temos <Eq>{`[1;\\; 1{,}5]`}</Eq>. Iteração 2: <Eq>{`m_2 = (1 + 1{,}5)/2 = 1{,}25`}</Eq>. <Eq>{`f(1{,}25) = 1{,}953 - 1{,}25 - 1 = -0{,}297 < 0`}</Eq>. Como <Eq>{`f(1{,}25) < 0 < f(1{,}5)`}</Eq>, novo intervallo: <Eq>{`[1{,}25;\\; 1{,}5]`}</Eq>.</>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "45", exercicio: "Esempio 3.1 continuação", licenca: "CC-BY 4.0" }}
+>
+Após a 2.ª iteração da bisseção de $f(x) = x^3 - x - 1$ em $[1, 2]$, qual é o intervallo? (Risp: $[1{,}25;\; 1{,}5]$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.13"
+  difficoltà="aplicacao"
+  opcoes={[
+    { texto: "A) Erro $\\leq 0{,}5$" },
+    { texto: "B) Erro $\\leq 0{,}25$" },
+    { texto: "C) Erro $\\leq 0{,}125$", correta: true },
+    { texto: "D) Erro $\\leq 0{,}0625$" },
+  ]}
+  solucao={<>Após $n$ iterações em $[a, b]$, o erro máximo é $(b - a)/2^n$. Para $n = 3$ e $[1, 2]$ (comprimento 1): erro <Eq>{`\\leq 1/2^3 = 1/8 = 0{,}125`}</Eq>. Risp: C.</>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "47", exercicio: "Proposição 3.1", licenca: "CC-BY 4.0" }}
+>
+Qual é o erro máximo após 3 iterações da bisseção em $[1, 2]$? (Risp: $0{,}125$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.14"
+  difficoltà="aplicacao"
+  solucao={<>Erro <Eq>{`\\leq (b-a)/2^n < 10^{-5}`}</Eq>. Com $b - a = 1$: <Eq>{`2^n > 10^5`}</Eq>. <Eq>{`n > \\log_2(10^5) = 5\\log_2 10 \\approx 5 \\times 3{,}322 = 16{,}6`}</Eq>. Logo $n \geq 17$ iterações.</>}
+  passi={<>
+    <ol>
+      <li>Escreva a condição: <Eq>{`(b - a)/2^n < 10^{-5}`}</Eq>. <em>Por quê:</em> fórmula do erro de bisseção.</li>
+      <li>Com $b - a = 1$: <Eq>{`2^n > 10^5`}</Eq>. <em>Por quê:</em> isolar $2^n$.</li>
+      <li>Aplique $\log_2$: <Eq>{`n > \\log_2(10^5) = 5 \\log_2 10 \\approx 16{,}6`}</Eq>.</li>
+      <li>Arredonde para cima: $n \geq 17$. <em>Macete:</em> cada dígito decimal de precisão custa <Eq>{`\\log_2 10 \\approx 3{,}32`}</Eq> iterações.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "48", exercicio: "Esercizio 3.1", licenca: "CC-BY 4.0" }}
+>
+Quantas iterações da bisseção em $[1, 2]$ são necessárias para garantir erro menor que $10^{-5}$? Mostre o cálculo. (Risp: 17.)
+</Exercicio>
+
+<Exercicio
+  numero="46.15"
+  difficoltà="modellazione"
+  opcoes={[
+    { texto: "A) Não, o TVI exige que $f$ seja diferenciável." },
+    { texto: "B) Sim, pois $f(0) < 0 < f(1)$ e $f$ é continua.", correta: true },
+    { texto: "C) Sim, mas o método da bisseção não se aplica aqui." },
+    { texto: "D) Não há raízes reais para $f(x) = x \\cdot 2^x - 1$." },
+  ]}
+  solucao={<>$f(x) = x \cdot 2^x - 1$. <Eq>{`f(0) = 0 \\cdot 1 - 1 = -1 < 0`}</Eq>. <Eq>{`f(1) = 1 \\cdot 2 - 1 = 1 > 0`}</Eq>. Mudança de sinal, $f$ continua. TVI garante raiz em $(0, 1)$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "5", exercicio: "Exercise 1.1.3", licenca: "CC-BY-NC-SA" }}
+>
+A equação $x \cdot 2^x = 1$ tem soluzione no intervallo $(0, 1)$? (Risp: Sim.)
+</Exercicio>
+
+<Exercicio
+  numero="46.16"
+  difficoltà="aplicacao"
+  solucao={<>Erro <Eq>{`\\leq 1/2^n < 10^{-6}`}</Eq>. <Eq>{`2^n > 10^6`}</Eq>. <Eq>{`n > 6\\log_2 10 \\approx 19{,}93`}</Eq>. Logo $n \geq 20$ iterações.</>}
+  fonte={{ livro: "REAMAT — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "§3.1", pagina: "48", exercicio: "Esercizio 3.2", licenca: "CC-BY 4.0" }}
+>
+Quantas iterações de bisseção em $[1, 2]$ garantem erro menor que $10^{-6}$? (Risp: 20.)
+</Exercicio>
+
+<Exercicio
+  numero="46.17"
+  difficoltà="sfida"
+  solucao={<>$f(x) = \cos x - x$ em $[0, \pi/2]$. It. 1: <Eq>{`m = \\pi/4 \\approx 0{,}785`}</Eq>, <Eq>{`f(0{,}785) = \\cos(0{,}785) - 0{,}785 \\approx 0{,}707 - 0{,}785 = -0{,}078 < 0`}</Eq>. Raiz em <Eq>{`[0;\\; 0{,}785]`}</Eq>. It. 2: <Eq>{`m = 0{,}393`}</Eq>, <Eq>{`f(0{,}393) = \\cos(0{,}393) - 0{,}393 \\approx 0{,}924 - 0{,}393 = 0{,}531 > 0`}</Eq>. Raiz em <Eq>{`[0{,}393;\\; 0{,}785]`}</Eq>. Após 4 iterações o intervallo contém <Eq>{`c \\approx 0{,}739`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "5", exercicio: "Exercise 1.1.4 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+Aplique 4 iterações de bisseção a $f(x) = \cos x - x$ em $[0, \pi/2]$. Execute os cálculos no papel e escreva o intervallo resultante em cada iteração.
+</Exercicio>
+
+<Exercicio
+  numero="46.18"
+  difficoltà="modellazione"
+  opcoes={[
+    { texto: "A) A bisseção não pode ser aplicada pois $f$ não é polinômio." },
+    { texto: "B) Aplica-se a bisseção em qualquer intervallo onde $\\text{NPV}$ troca de sinal.", correta: true },
+    { texto: "C) O TVI não vale para funções financeiras." },
+    { texto: "D) Só Newton-Raphson funciona para TIR." },
+  ]}
+  solucao={<>A TIR é a soluzione de <Eq>{`\\text{NPV}(r) = 0`}</Eq>. <Eq>{`\\text{NPV}(r) = \\sum_{t=0}^{n} C_t/(1+r)^t`}</Eq> é continua em <Eq>{`r > -1`}</Eq>. Se <Eq>{`\\text{NPV}(r_1) > 0`}</Eq> e <Eq>{`\\text{NPV}(r_2) < 0`}</Eq> para <Eq>{`r_1 < r_2`}</Eq>, o TVI garante existência de TIR em $(r_1, r_2)$, que pode ser localizada por bisseção.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "3", exercicio: "Exercise 1.1.5 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+A Taxa Interna de Retorno (TIR) de um projeto é definida como $\text{NPV}(r) = 0$. O TVI e a bisseção podem ser usados para localizá-la?
+</Exercicio>
+
+### Bloco C — Taxa de Variação Média: cálculo direto (46.19 a 46.28)
+
+<Exercicio
+  numero="46.19"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = x^2 + 3$. $f(1) = 1 + 3 = 4$. $f(4) = 16 + 3 = 19$. TVM $= (19 - 4)/(4 - 1) = 15/3 = 5$.</>}
+  passi={<>
+    <ol>
+      <li>Calcule $f(1) = 1^2 + 3 = 4$ e $f(4) = 4^2 + 3 = 19$. <em>Por quê:</em> precisamos dos valores nos estremi do intervallo.</li>
+      <li>Aplique a fórmula: TVM $= (f(4) - f(1))/(4 - 1) = (19 - 4)/3 = 15/3 = 5$.</li>
+      <li>Interprete: quando $x$ vai de 1 a 4, $f$ aumenta 15 unidades em 3 unidades de $x$ — taxa média de 5 por unidade. <em>Macete:</em> TVM = inclinação da reta secante.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "6", exercicio: "Exercise 1.1.7", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = x^2 + 3$ em $[1, 4]$. (Risp: 5.)
+</Exercicio>
+
+<Exercicio
+  numero="46.20"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = -x^2 + 4x$. $f(2) = -4 + 8 = 4$. $f(4) = -16 + 16 = 0$. TVM $= (0 - 4)/(4 - 2) = -4/2 = -2$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "6", exercicio: "Exercise 1.1.8", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = -x^2 + 4x$ em $[2, 4]$. (Risp: $-2$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.21"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = 2x^2 + 1$. $f(2) = 8 + 1 = 9$. $f(4) = 32 + 1 = 33$. TVM $= (33 - 9)/(4 - 2) = 24/2 = 12$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "7", exercicio: "Exercise 1.1.9", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = 2x^2 + 1$ em $[2, 4]$. (Risp: 12.)
+</Exercicio>
+
+<Exercicio
+  numero="46.22"
+  difficoltà="aplicacao"
+  opcoes={[
+    { texto: "A) $4 + h$", correta: true },
+    { texto: "B) $4$" },
+    { texto: "C) $2h + 4$" },
+    { texto: "D) $h^2 + 4h$" },
+  ]}
+  solucao={<>$f(x) = x^2$. TVM em $[2, 2+h]$: <Eq>{`\\dfrac{(2+h)^2 - 4}{h} = \\dfrac{4 + 4h + h^2 - 4}{h} = \\dfrac{4h + h^2}{h} = 4 + h`}</Eq>. Risp: A.</>}
+  passi={<>
+    <ol>
+      <li>$f(2) = 4$, $f(2+h) = (2+h)^2 = 4 + 4h + h^2$. <em>Por quê:</em> expandir com produto notável $(a+b)^2$.</li>
+      <li>TVM <Eq>{`= \\dfrac{(4 + 4h + h^2) - 4}{h} = \\dfrac{4h + h^2}{h}`}</Eq>.</li>
+      <li>Fatorar $h$: <Eq>{`\\dfrac{h(4 + h)}{h} = 4 + h`}</Eq> (válido para $h \neq 0$). <em>Macete:</em> quando $h \to 0$, TVM $\to 4 = f'(2)$.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "28", exercicio: "Example 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = x^2$ no intervallo $[2, 2+h]$ (com $h \neq 0$). (Risp: $4 + h$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.23"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = x^2 + x$. $f(0) = 0$. $f(h) = h^2 + h$. TVM $= (h^2 + h - 0)/h = h + 1 = 1 + h$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "29", exercicio: "Exercise 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = x^2 + x$ no intervallo $[0, h]$ com $h \neq 0$. (Risp: $1 + h$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.24"
+  difficoltà="aplicacao"
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>. $f(1) = 1$, <Eq>{`f(3) = \\sqrt{3}`}</Eq>. TVM <Eq>{`= (\\sqrt{3} - 1)/(3 - 1) = (\\sqrt{3} - 1)/2 \\approx 0{,}366`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "8", exercicio: "Exercise 1.1.10", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = \sqrt{x}$ em $[1, 3]$. Deixe a risposta na forma exata. (Risp: $(\sqrt{3}-1)/2$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.25"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = 1/x$. $f(1/2) = 2$, $f(1) = 1$. TVM $= (1 - 2)/(1 - 1/2) = (-1)/(1/2) = -2$.</>}
+  passi={<>
+    <ol>
+      <li>$f(1/2) = 1/(1/2) = 2$ e $f(1) = 1$. <em>Por quê:</em> avaliar nos estremi do intervallo $[1/2, 1]$.</li>
+      <li>TVM $= (f(1) - f(1/2))/(1 - 1/2) = (1 - 2)/(1/2) = -1 \div (1/2) = -2$.</li>
+      <li>Interpretação: $f(x) = 1/x$ decresce rapidamente próximo de zero; a taxa média nesse intervallo é $-2$ por unidade de $x$. <em>Curiosidade:</em> quando $x \to 0^+$, a TVM $\to -\infty$, refletindo o polo de $1/x$.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "8", exercicio: "Exercise 1.1.11", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = 1/x$ em $[1/2, 1]$. (Risp: $-2$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.26"
+  difficoltà="aplicacao"
+  solucao={<>$s(t) = 5t^2$. $s(1) = 5$ m. $s(4) = 80$ m. TVM $= (80 - 5)/(4 - 1) = 75/3 = 25$ m/s. Interpretação: velocidade média de 25 m/s no intervallo $[1, 4]$ s.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "9", exercicio: "Preview Activity 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+A posição de um objeto é $s(t) = 5t^2$ metros ($t$ em segundos). Qual é a velocidade média no intervallo $[1, 4]$ s? (Risp: 25 m/s.)
+</Exercicio>
+
+<Exercicio
+  numero="46.27"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = x^2$. TVM em $[a, a+h]$: <Eq>{`\\dfrac{(a+h)^2 - a^2}{h} = \\dfrac{2ah + h^2}{h} = 2a + h`}</Eq>. Quando $h \to 0$: $2a = f'(a)$.</>}
+  passi={<>
+    <ol>
+      <li>Expanda: $f(a+h) = (a+h)^2 = a^2 + 2ah + h^2$. <em>Por quê:</em> produto notável.</li>
+      <li>TVM <Eq>{`= \\dfrac{a^2 + 2ah + h^2 - a^2}{h} = \\dfrac{2ah + h^2}{h}`}</Eq>. Numerador: a diferença cancela $a^2$.</li>
+      <li>Fatore $h$: TVM $= 2a + h$. <em>Por quê:</em> $h \neq 0$, então $h/h = 1$.</li>
+      <li>Quando $h \to 0$: TVM $\to 2a = f'(a)$. <em>Intuizione:</em> este é o cálculo que define a derivata de $x^2$.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "30", exercicio: "Example 1.3.2", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = x^2$ no intervallo $[a, a+h]$ em função de $a$ e $h$. O que acontece quando $h \to 0$? (Risp: $2a + h$; limite é $f'(a) = 2a$.)
+</Exercicio>
+
+<Exercicio
+  numero="46.28"
+  difficoltà="aplicacao"
+  solucao={<>$f(x) = 1/x$. $f(a+h) - f(a) = 1/(a+h) - 1/a = (a - (a+h))/(a(a+h)) = -h/(a(a+h))$. TVM $= [-h/(a(a+h))]/h = -1/(a(a+h))$. Quando $h \to 0$: TVM $\to -1/a^2 = f'(a)$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "31", exercicio: "Exercise 1.3.2", licenca: "CC-BY-NC-SA" }}
+>
+Calcule a TVM de $f(x) = 1/x$ no intervallo $[a, a+h]$ em função de $a$ e $h$. (Risp: $-1/(a(a+h))$; limite é $-1/a^2$.)
+</Exercicio>
+
+### Bloco D — TVM: modellazione e física (46.29 a 46.37)
+
+<Exercicio
+  numero="46.29"
+  difficoltà="modellazione"
+  solucao={<>$s(t) = t^2 + t$. $s(2) = 4 + 2 = 6$. $s(5) = 25 + 5 = 30$. TVM $= (30 - 6)/(5 - 2) = 24/3 = 8$ m/s. Interpretação: velocidade média de 8 m/s entre $t = 2$ s e $t = 5$ s.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "12", exercicio: "Activity 1.1.3 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+A posição de uma partícula é $s(t) = t^2 + t$ metros ($t$ em segundos). Qual a velocidade média no intervallo $[2, 5]$ s? (Risp: 8 m/s.)
+</Exercicio>
+
+<Exercicio
+  numero="46.30"
+  difficoltà="modellazione"
+  solucao={<>TVM $= (T(6) - T(0))/(6 - 0) = (15 - 27)/6 = -12/6 = -2\,^\circ$C/h. A temperatura caiu 12 graus em 6 horas — em média 2 graus por hora.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-1-a-preview-of-calculus", secao: "§2.1", pagina: "134", exercicio: "Example 2.1 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+A temperatura de uma cidade às 0h era $27\,^\circ$C e às 6h era $15\,^\circ$C. Qual foi a tasso di variazione média da temperatura no período? (Risp: $-2\,^\circ$C/h.)
+</Exercicio>
+
+<Exercicio
+  numero="46.31"
+  difficoltà="modellazione"
+  solucao={<>Custo marginal médio <Eq>{`= (C(200) - C(100))/(200 - 100) = (1{.}500 - 1{.}000)/100 = 500/100 =`}</Eq> R\$ 5,00 por unidade.</>}
+  passi={<>
+    <ol>
+      <li>Identifique $f = C$ (custo), $a = 100$, $b = 200$.</li>
+      <li>TVM <Eq>{`= (C(200) - C(100))/(200 - 100) = (1{.}500 - 1{.}000)/100`}</Eq>.</li>
+      <li>$= 500/100 =$ R\<Eq>{` 5,00 por unidade. <em>Interpretação:</em> cada unidade adicional produzida nessa faixa custa em média R\\`}</Eq> 5,00 — é o custo marginal médio.</li>
+      <li><em>Conexão:</em> quando a escala de produção $\to 0$, o custo marginal médio converge para o custo marginal instantâneo $C'(q)$ — a derivata do custo.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "13", exercicio: "Exercise 1.1.14 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+A função de custo de produção é $C(q)$ (em R\$). $C(100) = 1{.}000$ e $C(200) = 1{.}500$. Qual é o custo marginal médio de produzir entre 100 e 200 unidades?
+</Exercicio>
+
+<Exercicio
+  numero="46.32"
+  difficoltà="modellazione"
+  solucao={<><Eq>{`h(t) = -4{,}9t^2 + 20`}</Eq> m. $h(0) = 20$ m. <Eq>{`h(3) = -4{,}9 \\times 9 + 20 = -44{,}1 + 20 = -24{,}1`}</Eq> m. TVM <Eq>{`= (-24{,}1 - 20)/3 = -44{,}1/3 = -14{,}7`}</Eq> m/s. O sinal negativo indica queda.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-1-a-preview-of-calculus", secao: "§2.1", pagina: "135", exercicio: "Example 2.2", licenca: "CC-BY-NC-SA" }}
+>
+A altura de um objeto em queda livre é $h(t) = -4{,}9t^2 + 20$ metros. Qual é a velocidade média no intervallo $[0, 3]$ s? (Risp: $-14{,}7$ m/s.)
+</Exercicio>
+
+<Exercicio
+  numero="46.33"
+  difficoltà="modellazione"
+  solucao={<>TVM <Eq>{`= (P(2030) - P(2020))/(2030 - 2020) = (1{.}030{.}000 - 1{.}000{.}000)/10 = 30{.}000/10 = 3{.}000`}</Eq> hab./ano.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "14", exercicio: "Exercise 1.1.15 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+A população de uma cidade era 1.000.000 em 2020 e 1.030.000 em 2030. Qual foi a tasso di variazione média anual da população? (Risp: 3.000 hab./ano.)
+</Exercicio>
+
+<Exercicio
+  numero="46.34"
+  difficoltà="modellazione"
+  solucao={<>TVM $= (s(t_2) - s(t_1))/(t_2 - t_1)$. Em $[1, 1+h]$: $s(1) = 5$, $s(1+h) = 5(1+h)^2 = 5 + 10h + 5h^2$. TVM $= (5 + 10h + 5h^2 - 5)/h = 10 + 5h$. Quando $h \to 0$: TVM $\to 10$ m/s $= s'(1)$.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "10", exercicio: "Activity 1.1.2", licenca: "CC-BY-NC-SA" }}
+>
+Para $s(t) = 5t^2$ m, calcule a TVM no intervallo $[1, 1+h]$ em função de $h$. O que acontece quando $h \to 0$? (Risp: $10 + 5h$; limite é 10 m/s.)
+</Exercicio>
+
+<Exercicio
+  numero="46.35"
+  difficoltà="modellazione"
+  solucao={<>Retorno percentual total $= (P_f - P_i)/P_i = (115 - 100)/100 = 15\%$. Isso é a TVM percentual no período de 2 anos. Retorno anualizado seria <Eq>{`(1{,}15)^{1/2} - 1 \\approx 7{,}24\\%`}</Eq> ao ano (juros compostos), que é diferente.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "14", exercicio: "Exercise 1.1.16 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+Uma ação foi comprada por R\$ 100 e vendida por R\$ 115 após 2 anos. Qual foi o retorno percentual total no período? (Risp: 15%.)
+</Exercicio>
+
+<Exercicio
+  numero="46.36"
+  difficoltà="sfida"
+  solucao={<>Para $s(t) = t^2 + 3t$, TVM em $[1, 4]$: $s(4) = 28$, $s(1) = 4$. TVM $= (28-4)/3 = 8$ m/s. A derivata é $s'(t) = 2t + 3$. Para $s'(c) = 8$: <Eq>{`2c + 3 = 8 \\Rightarrow c = 2{,}5 \\in (1, 4)`}</Eq>. Sim, existe tal $c$ — isso é o Teorema del Valore Medio do Cálculo (Lezione 56).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "15", exercicio: "Activity 1.1.4 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+Para $s(t) = t^2 + 3t$, a TVM em $[1, 4]$ é 8 m/s. Calcule $s'(t)$ e encontre $c \in (1, 4)$ com $s'(c) = 8$. O que esse resultado antecipa?
+</Exercicio>
+
+<Exercicio
+  numero="46.37"
+  difficoltà="modellazione"
+  solucao={<>A receita cresceu de R\$ 700 para R\$ 2.800 em 6 meses. TVM $= (2.800 - 700)/6 = 2.100/6 = 350$ R\$/mês. Interpretação: crescimento médio de R\$ 350 por mês no semestre.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-1-vel.html", secao: "§1.1", pagina: "11", exercicio: "Exercise 1.1.12 (adapted)", licenca: "CC-BY-NC-SA" }}
+>
+A receita mensal de uma empresa cresceu de R\$ 700 em janeiro para R\$ 2.800 em julho (6 meses). Qual foi a tasso di variazione média mensal da receita? (Risp: R\$ 350/mês.)
+</Exercicio>
+
+### Bloco E — Compreensão e dimostrazione (46.38 a 46.40)
+
+<Exercicio
+  numero="46.38"
+  difficoltà="compreensao"
+  opcoes={[
+    { texto: "A) A TVM é igual à derivata em qualquer ponto de $[a, b]$." },
+    { texto: "B) A TVM é a inclinação da reta secante pelos pontos $(a, f(a))$ e $(b, f(b))$.", correta: true },
+    { texto: "C) A TVM sempre aumenta quando o intervallo diminui." },
+    { texto: "D) A TVM é definida apenas para funções diferenciáveis." },
+  ]}
+  solucao={<>A TVM $= (f(b) - f(a))/(b - a)$ é a inclinação da reta que passa pelos pontos $(a, f(a))$ e $(b, f(b))$ — a reta secante. Não é a derivata (que é o limite da TVM). É definida para qualquer $f$ com os dois pontos avaliáveis — não exige diferenciabilidade.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "27", exercicio: "Preview Activity 1.3.1", licenca: "CC-BY-NC-SA" }}
+>
+Qual é o significado geométrico da Taxa de Variação Média $\dfrac{f(b) - f(a)}{b - a}$?
+</Exercicio>
+
+<Exercicio
+  numero="46.39"
+  difficoltà="compreensao"
+  opcoes={[
+    { texto: "A) TVI garante que $f$ passa por todos os valores entre $f(a)$ e $f(b)$.", correta: true },
+    { texto: "B) TVI garante que $f$ é monótona no intervallo." },
+    { texto: "C) TVI garante que $f$ tem derivata em todos os pontos." },
+    { texto: "D) TVI afirma que a TVM é igual à derivata em algum ponto." },
+  ]}
+  solucao={<>O TVI afirma: $f$ continua em $[a, b]$ assume todo valor entre $f(a)$ e $f(b)$. Isso não implica monotonicidade nem diferenciabilidade. A afirmação sobre derivata é o Teorema del Valore Medio do Cálculo — um resultado diferente, que vem na Lezione 56.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", pagina: "177", exercicio: "Theorem 2.13 (contexto)", licenca: "CC-BY-NC-SA" }}
+>
+O que o TVI garante sobre $f$ continua em $[a, b]$?
+</Exercicio>
+
+<Exercicio
+  numero="46.40"
+  difficoltà="demonstracao"
+  solucao={<>Por definizione, <Eq>{`f'(a) = \\lim_{h \\to 0} \\dfrac{f(a+h) - f(a)}{h}`}</Eq>, que é exatamente <Eq>{`\\lim_{b \\to a} \\text{TVM}_{[a,b]}`}</Eq> (com $b = a + h$). Logo: a derivata É o limite da TVM quando o intervallo encolhe para um ponto. A TVM é a versão global (reta secante); a derivata é a versão local (reta tangente). Este é o fundamento do cálculo diferencial.</>}
+  passi={<>
+    <ol>
+      <li>Escreva a definizione de derivata: <Eq>{`f'(a) = \\lim_{h \\to 0} \\dfrac{f(a+h) - f(a)}{h}`}</Eq>.</li>
+      <li>Reconheça que o quoziente é a TVM: <Eq>{`\\text{TVM}_{[a,\\, a+h]} = \\dfrac{f(a+h) - f(a)}{h}`}</Eq>. <em>Por quê:</em> basta identificar $b = a + h$.</li>
+      <li>Portanto: <Eq>{`f'(a) = \\lim_{b \\to a} \\text{TVM}_{[a,b]}`}</Eq>. <em>Intuizione:</em> a derivata não é "um tipo de TVM" — ela É o limite da TVM.</li>
+      <li><em>Macete:</em> secante (dois pontos) $\to$ tangente (um ponto) quando os dois pontos se fundem. Isso é o cálculo.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-3-derivative-pt.html", secao: "§1.3", pagina: "28", exercicio: "Definition 1.3.1 (contexto)", licenca: "CC-BY-NC-SA" }}
+>
+Demonstre formalmente que a derivata $f'(a)$ é o limite da Taxa de Variação Média quando o intervallo $[a, b]$ encolhe para o ponto $a$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Fonti
+
+- [**Active Calculus 2.0**](https://activecalculus.org/single/) — Matt Boelkins · Grand Valley State University · 2024 · CC-BY-NC-SA. **Fonte primária.** §1.1 (*How Do We Measure Velocity?*) e §1.3 (*The Derivative at a Point*) — base dos Exemplos 3, 4, 5, Blocos C, D e E.
+- [**OpenStax Calculus: Volume 1**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · Rice University · 2016 · CC-BY-NC-SA. §2.4 (*Continuity* e TVI) — base do Esempio 1 e Blocos A e E. §2.1 (*A Preview of Calculus*) — base do Bloco D.
+- [**REAMAT — Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · 2024 · CC-BY 4.0. §3.1 (*Método da Bisseção*) — base do Esempio 2 e Bloco B.
+- [**Basic Analysis I**](https://www.jirka.org/ra/) — Jiří Lebl · 2024 · CC-BY-SA. §3.3 — dimostrazione do TVI via completude de $\mathbb{R}$ (Porta formal).

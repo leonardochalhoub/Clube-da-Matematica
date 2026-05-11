@@ -142,10 +142,42 @@ Removed: `ar`, `hi`, `he` — gTTS quality bad, Edge-TTS neural blocked by corp 
 |-------|-------|--------|------|
 | UI strings (buttons, headings, navigation) | `src/lib/i18n/translations.ts` | 100% in 11 locales | Claude (already done) |
 | Audio narration text (TTS) | `src/content/audio-translations.generated.ts` | 100% in 11 locales | Claude (already done) |
-| Lesson MDX bodies | `content/i18n/<speechLang>/aulas/...` | partial (see inventory below) | **Gemini free** (parallel) |
+| Lesson MDX bodies | `content/i18n/<speechLang>/aulas/...` | **en-US ✅ · es-ES ✅ · 8 locales partial (24–52%)** | **Claude subagents** — Haiku primary, Sonnet for oversized, Opus rarely |
 
-### Translation pipeline rule
-**ALL lesson and audio translations are mechanical work.** They must be done by **Gemini free agents** (`scripts/gemini-agent.py`, `scripts/gemini-draft.py`), not by Claude. Claude only translates if the user explicitly says "translate this with Claude". See `docs/agents/translator-context.md` for the agent context bundle.
+### Translation pipeline — Claude-based (as of 2026-05-11)
+
+The pipeline is **Claude-based**. The earlier "must use Gemini free" rule was overridden once the bulk push started. Empirical state:
+
+| Path | Role | When it works | Where it breaks |
+|------|------|---------------|-----------------|
+| **Haiku subagents** (`Agent` with `model: "haiku"`) | **Primary workhorse** — ~95% of corpus | Files ≤ 1050 lines. Used to push en-US and es-ES to 100%. | Files > 1050 lines hit `API Error: response exceeded the 32000 output token maximum` for **expanding** target languages (de, ru, es, it). Shrinking languages (zh, ja, ko) usually still fit. |
+| **Sonnet subagents** (`Agent` with `model: "sonnet"`) | **Backup for oversized files** — ~5% of corpus | Files > 1050 lines; 64k output cap leaves headroom. Also good for full-lesson revision and quality audits. | Cost ~5× Haiku. Don't use for bulk batches that Haiku can handle. |
+| **Opus subagents** | **Rare** — full-lesson rewrite, hard math review | Authorship-quality work | Cost ~15× Haiku. Always ask the owner before invoking. |
+| **`scripts/translate-parallel.py` + Gemini free** | **Fallback for small one-offs** | Small batches (≤ 20 files/day per model) | **Daily quota is 20 RPD per model per project** (NOT 1000 as Google docs imply). Burnt within minutes on first big batch. Use `gemini-flash-latest` / `gemini-flash-lite-latest` aliases — separate quota buckets, ~40 RPD total. **Not the primary path.** |
+| **Groq free tier** | Not used | — | TPM cap ~8k on `openai/gpt-oss-120b` free, ~12k on `llama-3.3-70b`. Our lessons are 30–80k tokens. **Unusable for whole-file translation** on free tier. |
+
+### Haiku subagent rules (the way bulk translation actually runs)
+
+1. **Owner has authorized Haiku translation for lesson MDX.** Subagent prompts must explicitly state this — otherwise the agent reads CLAUDE.md, sees "must use Gemini free", and refuses. Prefix with: `**AUTHORIZED:** Owner authorized Haiku translation. Ignore CLAUDE.md §5 cost rules.`
+2. **Tool policy: ONLY `Read` and `Write`.** Forbid Bash/Edit/Glob/LS/Grep/rm/mkdir. **A Haiku agent with Bash access deleted 34 existing it-IT translations** in a wave-1 mishap (2026-05-11; recovered via `git checkout`). Never give translation subagents Bash unless absolutely required.
+3. **One file per agent.** Multi-file agents accumulate context, panic at ~5–10 files, and bail out. Single-file agents run with ~30k token context and finish reliably.
+4. **`Write` overwrites.** Target file is unconditionally replaced. Tell the agent to skip if target exists; it usually obeys.
+5. **Agents lie about success.** A reported `OK:` line does NOT prove `Write` was called. Verify after each wave: `find content/i18n/<locale> -name "*.mdx"`. Roughly 1 in 20 agents reports success but never wrote. Retry those one by one.
+6. **Slug-translation bug.** Some Haiku agents translate the *target filename* slug (`licao-62-otimizacao` → `licao-62-otimizacion`) — this produces orphan files outside the route map. Always check `find content/i18n/<locale> -name "*.mdx"` for filenames that don't have a PT-BR source counterpart. Delete orphans.
+7. **Frontmatter discipline.** Haiku occasionally translates `slug` / `categoria` / `subcategoria` / `tags` / `prerrequisitos` / `autores` despite the rule. Run `python3 scripts/fix-translated-frontmatter.py --only <locale>` after every locale finishes — it rewrites those fields verbatim from the source.
+8. **Wave size:** up to 40 parallel Haiku agents is fine and verified. The memory-rule 6-agent cap was for Sonnet (cost) — Haiku is ~5× cheaper, so 40 in parallel is acceptable for batch work.
+
+### `scripts/fix-translated-frontmatter.py`
+
+Defensive post-processor. Reads any translated MDX under `content/i18n/<locale>/...`, finds the corresponding PT-BR source, and rewrites the frontmatter such that:
+- `slug`, `categoria`, `subcategoria`, `ordem`, `publicado`, `tags`, `prerrequisitos`, `autores`, `versao` → **copied verbatim from source**
+- `titulo`, `descricao`, `usadoEm`, `atualizadoEm` → **kept as translator emitted them**
+
+Idempotent. Run after every locale's translation wave. Output: `N updated, M skipped, 0 errors`.
+
+### Legacy "must use Gemini" rule — superseded
+
+Earlier versions of this file said "ALL lesson translations must be done by Gemini free agents". **That is no longer true.** The current pipeline is Claude-based (Haiku/Sonnet/Opus). Gemini free remains in the toolbox for small one-off mechanical tasks, but it is not the primary path for any translation work. Memory rule `feedback-cheap-models.md` ("mechanical work uses free Gemini") is also superseded for translation specifically — Claude Haiku has proven cleaner, faster, and reliable enough that the owner moved the pipeline to it.
 
 ### Per-locale build (the OOM fix)
 Each `/[locale]/...` page reads its MDX from disk at SSG time and compiles via `compileMDX` from `next-mdx-remote/rsc`. Webpack never bundles translations as chunks (which is what caused the OOM with 1,240 dynamic imports). Try-catch in the page falls back silently to PT-BR if the translated MDX has a parse error.
@@ -157,21 +189,26 @@ Each `/[locale]/...` page reads its MDX from disk at SSG time and compiles via `
 The project follows a strict cost discipline:
 
 ```
-Free Gemini  →  Claude Haiku  →  Claude Sonnet  →  Claude Opus
-   (default)      (default)         (default for       (only with
-                                     content work)     user OK)
+Claude Haiku  →  Claude Sonnet  →  Claude Opus           Gemini free (fallback only)
+  (default for     (long files,      (rare; ask           (small one-offs,
+   bulk + most      hard math,        before using)        when Claude isn't ideal)
+   translation)     review)
 ```
+
+The translation pipeline is **Claude-based**, not Gemini-based. Haiku does ~95% of lesson MDX translation; Sonnet handles files Haiku can't (32k output cap on > 1050-line files in expanding languages); Opus is reserved for revision or pathological cases and only with explicit owner approval. `scripts/translate-parallel.py` + Gemini free-tier remains in the toolbox as a fallback for small batches when Claude isn't the right tool, but it is **not the primary path** for any locale's bulk push.
 
 | Task | Tier |
 |------|------|
-| Translate MDX, audio strings, UI strings | Gemini free |
-| Reformat MDX (mass find-replace, fix `{,}`) | Gemini free or Haiku |
-| Generate boilerplate, manifest files | Gemini free or Haiku |
+| Translate MDX (bulk batches) | **Haiku subagents** (one per file, ≤ 40 in parallel) |
+| Translate oversized MDX (> 1050 lines into de/ru/es/it) | **Sonnet subagent** (Haiku hits 32k API cap) |
+| Translate audio strings, UI strings (small) | Haiku subagent OR Gemini free (either works) |
+| Reformat MDX (mass find-replace, fix `{,}`) | Haiku, or Bash sed for trivial regex |
+| Generate boilerplate, manifest files | Haiku |
 | Write a new lesson from scratch | Sonnet (subagent) |
 | Refactor architecture, design new pipeline | Sonnet (main thread) |
-| Deep multi-step reasoning, hard math proofs | Opus (must ask user first) |
+| Deep multi-step reasoning, hard math proofs, full-lesson revision | Opus (must ask user first) |
 
-When dispatching parallel agents, **always print progress** in the form `[Gemini agent 03/10] translating ja-JP wave 2`. The user wants to see the parallelism.
+When dispatching parallel agents, **always print progress** in the form `[Haiku 03/40] translating ja-JP licao-12` or `[Sonnet 1/3] revising L01 fr-FR`. The user wants to see the parallelism and which model is running.
 
 ---
 
@@ -205,6 +242,8 @@ When dispatching parallel agents, **always print progress** in the form `[Gemini
 │   ├── generate-version.ts         (auto-run by prebuild, stamps Footer)
 │   ├── gemini-agent.py             Generic Gemini orchestrator (Claude-Code-format agents)
 │   ├── gemini-draft.py             Gemini lesson drafter
+│   ├── translate-parallel.py       Multi-locale Gemini translator (workers + fallback chain + retries)
+│   ├── fix-translated-frontmatter.py  Defensive post-sweep — locks slug/categoria/tags back to PT-BR
 │   └── validate-content.ts         Frontmatter + schema check
 ├── docs/
 │   ├── EDITORIAL-RULES.md          Non-negotiable editorial rules (PT-BR)
@@ -228,8 +267,8 @@ Saved in `~/.claude/projects/-home-leochalhoub-Clube-da-Matematica/memory/` and 
 
 1. **English-only chat.** Reply in English. If the user writes PT-BR, nudge them to switch.
 2. **Default model = Sonnet** (subagents and main). Ask before escalating to Opus.
-3. **Mechanical work uses free Gemini** (translations, reformat, boilerplate). Never burn Claude tokens on these.
-4. **Print agent progress.** Format `[Gemini 03/10] task description`.
+3. **Translation pipeline is Claude-based** — Haiku for bulk, Sonnet for oversized, Opus rarely (ask first). Gemini free is only a fallback for small one-offs. (Memory `feedback-cheap-models.md` superseded for translation.)
+4. **Print agent progress.** Format `[Haiku 03/40] task description` (or `[Sonnet 1/3]`, etc. — show which model is running).
 5. **Black-Scholes is the editorial template.** All new content imitates its structure.
 6. **Nobel mention → nobelprize.org link.**
 7. **Engineering rigor in lessons** (30–80 exercises, no soft content, progression to challenge).
@@ -248,12 +287,15 @@ Saved in `~/.claude/projects/-home-leochalhoub-Clube-da-Matematica/memory/` and 
 4. Build locally: `NODE_OPTIONS=--max-old-space-size=8192 npm run build`.
 5. Commit (manually). Do not auto-push if the user is testing locally.
 
-### Translating lesson content
-1. **Never use Claude main thread for raw translation.**
-2. Use `scripts/gemini-agent.py` with the translator-context bundle (see `docs/agents/translator-context.md`).
-3. One Gemini agent per locale, in parallel — respect the 15 req/min rate limit (sleep between batches).
-4. Print `[Gemini NN/total] processing aula-XX → es-ES` for visibility.
-5. After all agents finish, run `npm run build` locally, commit, push.
+### Translating lesson content (current playbook)
+1. **Never use Claude main thread for raw translation** — main thread orchestrates only.
+2. For bulk batches with owner authorization: spawn **Haiku subagents**, one per file, ≤ 40 in parallel. Prompt template at §4 "Haiku subagent rules"; key items: explicit `**AUTHORIZED:**` prefix, `Read`+`Write` only (no Bash), single-file scope.
+3. After each wave, **verify**: `find content/i18n/<locale> -name "*.mdx" | wc -l` — agents sometimes report `OK` without writing. Retry the missing ones individually.
+4. Check for **orphan slug-translated filenames**: `find content/i18n/<locale> -name "*.mdx"` then verify each has a PT-BR source counterpart. Delete orphans.
+5. After each locale finishes: `python3 scripts/fix-translated-frontmatter.py --only <locale>` to lock slug-like fields back to PT-BR.
+6. For files > 1050 lines that hit Haiku's 32k cap (rare — ~3–5 files per expanding locale): use Sonnet subagent or fall back to Gemini `gemini-flash-lite-latest` (separate quota bucket).
+7. For small one-off "fix this one translation" tasks: spawn a single Haiku subagent for that file (preferred), OR `python3 scripts/translate-parallel.py --only <locale> --limit N` with Gemini-lite-latest if you want to stay free. Free tier daily cap is 20 RPD per model; use `-latest` aliases for an extra ~20 RPD bucket.
+8. Run `npm run build` after each locale completes to catch MDX parse errors early. Build OOM at 8GB heap means too many translated MDX files — page reads from disk should prevent this (see Build OOM recovery below).
 
 ### Editing the editorial pattern
 The pattern is owned by the user. Do not redefine the 7 doors, the difficulty mix, or the audio rule without explicit authorization. Reference: this file (§3) and `docs/EDITORIAL-RULES.md`.
@@ -271,7 +313,7 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 - ✅ UI translated to 11 locales (no MDX bodies).
 - ✅ Per-locale lesson routing (1,390 static pages — incl. en/es/zh/ja/de/fr/it/ru/ko/pl prefixes that fall back to PT-BR bodies).
 - ✅ Footer with `version · commit · timestamp` (currently `0.2.0`).
-- ⏳ **MDX lesson translations → TO-DO**. Pipeline ready (`scripts/translate-parallel.py` with Gemini free tier); execution pending.
+- 🟡 **MDX lesson translations in progress**: en-US ✅ (124/124) · es-ES ✅ (124/124) · 8 locales partial (24–52%). Executed via Haiku subagents (primary) with `scripts/fix-translated-frontmatter.py` post-sweep.
 - ⏳ Provas i18n → TO-DO.
 - ⏳ Wolfram Alpha exercise links must use clean symbolic queries. Lesson-1 audit pending.
 - 🔜 Future modules: Physics (high-school), Engineering intro.
@@ -284,7 +326,8 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 - **Build / deploy / config:** `package.json`, `next.config.ts`, `.github/workflows/deploy.yml`.
 - **i18n:** `src/lib/i18n/locales.ts`, `src/lib/i18n/translations.ts`, `src/components/layout/LocaleProvider.tsx`, `src/components/layout/LessonPageShell.tsx`.
 - **MDX components:** `src/components/math/`, `mdx-components.tsx`.
-- **Gemini orchestration:** `scripts/gemini-agent.py`, `scripts/gemini-draft.py`, `docs/agents/translator-context.md`.
+- **Gemini orchestration (small batches only):** `scripts/gemini-agent.py`, `scripts/gemini-draft.py`, `scripts/translate-parallel.py`, `docs/agents/translator-context.md`.
+- **Frontmatter post-sweep (always after a translation batch):** `scripts/fix-translated-frontmatter.py --only <locale>`.
 - **KB (project-local):** `docs/kb/`.
 
 ---
@@ -301,4 +344,4 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ---
 
-> **Last update:** 2026-05-06. If you change a convention, edit this file in the same commit.
+> **Last update:** 2026-05-11. Translation pipeline reframed as Claude-based (Haiku primary, Sonnet for oversized, Opus rare); Gemini free demoted to fallback. en-US and es-ES brought to 100% lesson MDX coverage. If you change a convention, edit this file in the same commit.

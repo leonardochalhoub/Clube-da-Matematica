@@ -1,0 +1,718 @@
+---
+titulo: "Lesson 105 — Simple linear regression"
+slug: "licao-105-regressao-simples"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "OLS model, least squares estimators, R², residuals, inference on the slope. Foundation of supervised learning and econometrics."
+ordem: 105
+publicado: true
+tags: ["estatística inferencial", "regressão", "OLS", "ano-3", "trim-11"]
+prerrequisitos: ["licao-104-correlacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2025-05-14"
+usadoEm: ["Stochastik LK alemão (Klasse 12)", "H2 Mathematics Singapura (§14)", "Math B japonês"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\hat{Y} = \hat\beta_0 + \hat\beta_1 X, \qquad \hat\beta_1 = \frac{S_{xy}}{S_{xx}}"
+  legenda={<>The <strong>least squares line</strong> passes through the centroid <Eq>{`(\\bar X, \\bar Y)`}</Eq> and has a slope equal to the sample covariance divided by the variance of <Eq>{`X`}</Eq>. The intercept <Eq>{`\\hat\\beta_0 = \\bar Y - \\hat\\beta_1 \\bar X`}</Eq> is determined from there.</>}
+  audioTexto="Simple linear regression. The fitted line Y-hat equals beta-zero-hat plus beta-one-hat times X. Beta-one-hat is the sample covariance between X and Y divided by the sample variance of X. The line always passes through the centroid of the data."
+/>
+
+<aside>
+
+**Books covering this lesson**
+
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §12.1–12.5 · CC-BY · <em>Primary source for real-data examples, coefficient interpretation, and regression ANOVA tables.</em>
+- [**OpenIntro Statistics** (4th ed.)](https://www.openintro.org/book/os/) · §7.1–7.4 · CC-BY-SA · <em>Rigorous treatment of model conditions, residual analysis, and inference for the slope; exercises with real datasets available online.</em>
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) · Linear regression · CC-BY-SA · <em>Reference in PT-BR with notation compatible with the Brazilian curriculum and national examples.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Rigorous definition">
+
+### Simple linear regression model
+
+<Definicao titulo="Population model and assumptions (LINE)">
+
+The model postulates that the mean response of $Y$ is linear in $X$:
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i = 1, \ldots, n$$
+
+**Assumptions (LINE mnemonic):**
+
+- **L**inearity: $E[Y \mid X] = \beta_0 + \beta_1 X$.
+- **I**ndependence: the errors $\varepsilon_i$ are mutually independent.
+- **N**ormality: $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$.
+- **E**quivariance (homoscedasticity): $\text{Var}(\varepsilon_i) = \sigma^2$ is constant.
+
+</Definicao>
+
+> "The regression equation is written as $\hat{y} = a + bx$, where $b$ is the slope and $a$ is the $y$-intercept." — [OpenStax Statistics, §12.3](https://openstax.org/books/statistics/pages/12-3-the-regression-equation)
+
+<Definicao titulo="Ordinary Least Squares (OLS) estimators">
+
+OLS estimators minimize $SSE = \sum_{i=1}^n (Y_i - \hat Y_i)^2$. The closed-form solution is:
+
+<Equation explicacao="Sample slope: covariance of X and Y divided by the variance of X." latex="\hat\beta_1 = \frac{S_{xy}}{S_{xx}} = \frac{\sum_{i=1}^n (X_i - \bar X)(Y_i - \bar Y)}{\sum_{i=1}^n (X_i - \bar X)^2}" />
+
+<Equation explicacao="Intercept: forces the line to pass through the data centroid." latex="\hat\beta_0 = \bar Y - \hat\beta_1 \bar X" />
+
+The residual $e_i = Y_i - \hat Y_i$ is the vertical distance of each point from the fitted line.
+
+</Definicao>
+
+### Variance decomposition and R²
+
+<Definicao titulo="SST = SSR + SSE and coefficient of determination">
+
+<Equation explicacao="Decomposition: total variance = explained variance + residual variance." latex="SST = SSR + SSE" />
+
+<Equation explicacao="R² measures the fraction of total variability explained by the model." latex="R^2 = \frac{SSR}{SST} = 1 - \frac{SSE}{SST} \in [0, 1]" />
+
+For simple regression, $R^2 = r^2$, where $r$ is the Pearson correlation coefficient.
+
+</Definicao>
+
+> "The coefficient of determination $r^2$ is the square of the correlation coefficient $r$. It tells you the fraction of total variability in the response that is explained by the least-squares line." — [OpenIntro Statistics, §7.2](https://www.openintro.org/book/os/), p. 331
+
+### Inference on the slope
+
+<Definicao titulo="Sigma estimation and t-test for the slope">
+
+Unbiased estimate of $\sigma^2$:
+
+<Equation explicacao="Residual variance with n-2 degrees of freedom (we lose two: one for beta0, one for beta1)." latex="\hat\sigma^2 = MSE = \frac{SSE}{n-2}" />
+
+Standard error of $\hat\beta_1$:
+
+<Equation explicacao="The smaller the dispersion of X and the larger the n, the smaller the SE of the slope." latex="SE(\hat\beta_1) = \frac{\hat\sigma}{\sqrt{S_{xx}}}" />
+
+Test statistic for $H_0: \beta_1 = 0$:
+
+<Equation explicacao="Under H0, the statistic follows a t-distribution with n-2 degrees of freedom." latex="T = \frac{\hat\beta_1}{SE(\hat\beta_1)} \sim t_{n-2}" />
+
+</Definicao>
+
+<Teorema titulo="Gauss-Markov Theorem (BLUE)">
+
+Under the assumptions of linearity, independence, and homoscedasticity (without requiring normality), OLS estimators are the Best Linear Unbiased Estimators (BLUE):
+
+$$E[\hat\beta_j] = \beta_j \quad \text{and} \quad \text{Var}(\hat\beta_j) \leq \text{Var}(\tilde\beta_j)$$
+
+for any other linear unbiased estimator $\tilde\beta_j$.
+
+</Teorema>
+
+<Insight>
+
+The residual plot ($e_i$ vs. $\hat Y_i$) is the most powerful test of the assumptions: a random pattern around zero confirms linearity and homoscedasticity; a "funnel" indicates heteroscedasticity; a curve indicates non-linearity.
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr105" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="50" y1="20" x2="50" y2="175" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.2" markerEnd="url(#arr105)"/>
+  <line x1="40" y1="165" x2="300" y2="165" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.2" markerEnd="url(#arr105)"/>
+  <text x="55" y="18" fontSize="10" fill="currentColor" fillOpacity="0.6">Y</text>
+  <text x="305" y="168" fontSize="10" fill="currentColor" fillOpacity="0.6">X</text>
+  <circle cx="80" cy="140" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="110" cy="128" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="140" cy="115" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="160" cy="105" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="185" cy="95" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="210" cy="82" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="235" cy="74" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="260" cy="60" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <line x1="70" y1="150" x2="275" y2="52" stroke="rgb(232 199 122)" strokeWidth="2.5"/>
+  <line x1="110" y1="128" x2="110" y2="120" stroke="rgb(199 107 63)" strokeWidth="1.5" strokeDasharray="3,2"/>
+  <line x1="185" y1="95" x2="185" y2="103" stroke="rgb(199 107 63)" strokeWidth="1.5" strokeDasharray="3,2"/>
+  <text x="113" y="118" fontSize="9" fill="rgb(199 107 63)">e</text>
+  <text x="305" y="100" fontSize="10" fill="currentColor" fillOpacity="0.7">Fitted line</text>
+  <line x1="300" y1="96" x2="284" y2="88" stroke="rgb(232 199 122)" strokeWidth="1.5"/>
+  <text x="305" y="130" fontSize="10" fill="rgb(26 77 92)" fillOpacity="0.8">Data</text>
+  <circle cx="300" cy="126" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <text x="305" y="155" fontSize="10" fill="rgb(199 107 63)">Residual e&#7522;</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Least squares line (gold) minimizing the sum of squared residuals (orange). Each residual <em>e</em> is the vertical distance from the point to the line.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+You have several dots scattered on a sheet of paper. You want to draw **a straight line** that passes "in the middle" of all of them — not too high, not too low.
+
+The rule is: add up the size of the "gaps" between each dot and the line. We want this sum to be the **smallest possible**. This special line is called the **least squares line**.
+
+The closer the dots are to the line, the better it is. If all dots were exactly on the line, the $R^2$ would be 1 — perfect!
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+You measured the height and weight of 15 classmates and wrote it down on a graph. The dots form a pattern: taller people tend to weigh more. You want a **formula** that, given the height, predicts the weight.
+
+**Linear regression** finds the line $\hat Y = \hat\beta_0 + \hat\beta_1 X$ that minimizes the errors. It has two parts:
+
+- $\hat\beta_1$ (slope): how much weight changes for every extra centimeter of height.
+- $\hat\beta_0$ (intercept): where the line crosses the vertical axis (predicted weight when height = 0, which might not make sense outside the data range).
+
+The $R^2$ says "how much of the variation in weight is explained by height". If $R^2 = 0.85$, height explains 85% of the variation in weight — very good!
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old">
+
+Simple linear regression models the relationship between two quantitative variables. The goal is to find the line $\hat Y = \hat\beta_0 + \hat\beta_1 X$ that minimizes the **sum of squared residuals** (SSE).
+
+**Why squared?** Because it penalizes large deviations more than small ones, and eliminates the sign (positive and negative residuals do not cancel each other out).
+
+The estimators are:
+
+$$\hat\beta_1 = \frac{\sum (X_i - \bar X)(Y_i - \bar Y)}{\sum (X_i - \bar X)^2}, \qquad \hat\beta_0 = \bar Y - \hat\beta_1 \bar X$$
+
+The $R^2$ between 0 and 1 measures the fit: 0 = horizontal line (variable $X$ does not help predict $Y$); 1 = perfect fit.
+
+**Cautions:** extrapolation beyond the data is risky; correlation does not imply causation; an outlier can distort the entire line.
+
+</Porta>
+
+<Porta nivel="25" titulo="For an engineering student">
+
+**Matrix formulation (1 predictor)**
+
+For $n$ observations: $\mathbf{Y} = X\boldsymbol\beta + \boldsymbol\varepsilon$, where $X \in \mathbb{R}^{n\times 2}$ has a first column of 1s. The OLS estimator is $\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{Y}$.
+
+**Residual properties**
+
+$\sum e_i = 0$, $\sum X_i e_i = 0$, $\sum \hat Y_i e_i = 0$. Residuals are orthogonal to the predictor and the fitted response.
+
+**Regression ANOVA table**
+
+| Source | SS | df | MS | F |
+|---|---|---|---|---|
+| Regression | $SSR$ | 1 | $SSR/1$ | $MSR/MSE$ |
+| Error | $SSE$ | $n-2$ | $SSE/(n-2)$ | — |
+| Total | $SST$ | $n-1$ | — | — |
+
+$F = T^2$ for simple regression; both test $H_0: \beta_1 = 0$.
+
+**CI for $\beta_1$:**
+
+$$\hat\beta_1 \pm t_{n-2;\alpha/2} \cdot SE(\hat\beta_1)$$
+
+**Mandatory diagnostics**: residual vs. fitted values plot; Q-Q plot of residuals; residual vs. each predictor plot.
+
+</Porta>
+
+<Porta nivel="40" titulo="For a senior professional">
+
+Least squares regression was systematized by Legendre (1805) and Gauss (1809), who competed for priority — Gauss claimed to have had the method since 1795. Francis Galton used the technique in the 1880s to study biological inheritance, coining the term *regression to the mean* upon observing that children of very tall parents tended to be less tall than their parents.
+
+The Gauss-Markov Theorem establishes that OLS produces the linear unbiased estimators with the smallest variance under homoscedasticity — without requiring normality. Normality of errors is only necessary for exact inference with the $t$-distribution.
+
+In econometrics, the most common violation is **endogeneity** ($\text{Cov}(X_i, \varepsilon_i) \neq 0$), which makes OLS biased and inconsistent. The solution is instrumental variables (IV/2SLS). In time series, autocorrelation of errors requires Newey-West correction for standard errors.
+
+In the context of machine learning, OLS is a special case of a linear neural network with MSE loss function and no regularization. $L_2$ regularization (ridge) shrinks $\hat{\boldsymbol\beta}$ toward zero; $L_1$ (lasso) produces sparsity — both generalize better when $p$ is large relative to $n$.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Practical application">
+
+**ENEM 2023: scores by family income bracket**
+
+A survey of 200 ENEM candidates recorded monthly family income $X$ (in thousand BRL) and total score $Y$. The regression analysis produced:
+
+- $\bar X = 3.2$; $\bar Y = 612$; $S_{xx} = 187.4$; $S_{xy} = 2,248.8$.
+- $\hat\beta_1 = 2248.8 / 187.4 \approx 12.0$ points per thousand BRL of income.
+- $\hat\beta_0 = 612 - 12.0 \times 3.2 = 573.6$ points.
+- $R^2 = 0.61$: income explains 61% of the variability in scores.
+
+**Careful interpretation**: the line predicts that a candidate from a family with an income of 5,000 BRL/month will have, on average, a score of $573.6 + 12.0 \times 5 = 633.6$. But this does not imply causation — income is correlated with access to better schools, prep courses, nutrition, etc.
+
+**Salary prediction with schooling (IBGE PNAD 2023)**
+
+Regression with $X$ = years of schooling and $Y$ = monthly salary (BRL): $\hat Y = 820 + 215X$. Each additional year of schooling is associated with 215 BRL more in the average salary. With $R^2 = 0.54$, schooling explains 54% of salary variation — also consider sector, region, and gender.
+
+</Porta>
+
+</DuasPortas>
+
+## Solved examples
+
+<Exemplo numero="105.1" titulo="Calculate the regression line with small data">
+
+**Problem.** Five municipalities in the interior of São Paulo recorded GDP per capita $X$ (in thousand BRL/year) and HDI $Y$:
+
+| $X$ | 18 | 24 | 30 | 36 | 42 |
+|---|---|---|---|---|---|
+| $Y$ | 0.62 | 0.68 | 0.72 | 0.78 | 0.84 |
+
+Find the least squares line and interpret the coefficients.
+
+**Strategy.** Calculate $\bar X$, $\bar Y$, $S_{xx}$, $S_{xy}$, then apply the estimator formulas.
+
+**Resolution.**
+
+$\bar X = (18+24+30+36+42)/5 = 30$; $\bar Y = (0.62+0.68+0.72+0.78+0.84)/5 = 0.728$.
+
+$S_{xx} = (18-30)^2+(24-30)^2+(30-30)^2+(36-30)^2+(42-30)^2 = 144+36+0+36+144 = 360$.
+
+$S_{xy} = (18-30)(0.62-0.728)+\ldots = (-12)(-0.108)+(-6)(-0.048)+0+(6)(0.052)+(12)(0.112)$
+$= 1.296+0.288+0+0.312+1.344 = 3.24$.
+
+$\hat\beta_1 = 3.24/360 = 0.009$ (HDI point per thousand BRL of GDP per capita).
+
+$\hat\beta_0 = 0.728 - 0.009 \times 30 = 0.458$.
+
+Line: $\hat Y = 0.458 + 0.009 X$.
+
+**Verification.** For $X=30$: $\hat Y = 0.458+0.009\times30 = 0.728 = \bar Y$. Correct — the line passes through the centroid.
+
+**Source.** [OpenStax Statistics, §12.3, Example 12.5](https://openstax.org/books/statistics/pages/12-3-the-regression-equation) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="105.2" titulo="Calculate and interpret R²">
+
+**Problem.** With the data from the previous example, calculate $SST$, $SSE$, $SSR$ and $R^2$.
+
+**Strategy.** Calculate $\hat Y_i$ for each point, then the three sums of squares.
+
+**Resolution.**
+
+| $X$ | $Y$ | $\hat Y$ | $e = Y-\hat Y$ | $e^2$ | $(Y-\bar Y)^2$ |
+|---|---|---|---|---|---|
+| 18 | 0.62 | 0.620 | 0 | 0 | 0.01166 |
+| 24 | 0.68 | 0.674 | 0.006 | 0.000036 | 0.00230 |
+| 30 | 0.72 | 0.728 | -0.008 | 0.000064 | 0.000064 |
+| 36 | 0.78 | 0.782 | -0.002 | 0.000004 | 0.00274 |
+| 42 | 0.84 | 0.836 | 0.004 | 0.000016 | 0.01254 |
+
+$SSE = 0.000120$; $SST = 0.02930$; $SSR = 0.02918$.
+
+$R^2 = 0.02918/0.02930 \approx 0.996$.
+
+**Verification.** $R^2$ very close to 1 — makes sense: the points are almost perfectly aligned.
+
+**Source.** [OpenIntro Statistics, §7.2, Exercise 7.9](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="105.3" titulo="t-test for the slope">
+
+**Problem.** With $n=25$ pairs of observations, we obtained $\hat\beta_1 = 3.42$ and $SE(\hat\beta_1) = 1.14$. Test $H_0: \beta_1 = 0$ at the 5% level (two-tailed).
+
+**Strategy.** Calculate the $T$ statistic and compare with the critical value $t_{23;\,0.025}$.
+
+**Resolution.**
+
+$T = \hat\beta_1 / SE(\hat\beta_1) = 3.42/1.14 = 3.00$.
+
+Degrees of freedom: $n-2 = 23$. Critical value $t_{23;\,0.025} \approx 2.069$.
+
+Since $|T| = 3.00 > 2.069$, we reject $H_0$ at the 5% level.
+
+**Verification.** p-value: $P(|t_{23}| > 3.00) \approx 0.006 < 0.05$. Consistent with rejection.
+
+**Source.** [OpenStax Statistics, §12.4, Example 12.8](https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="105.4" titulo="Point prediction and confidence interval">
+
+**Problem.** The fitted line is $\hat Y = 42.6 + 1.8 X$ with $n=20$, $MSE = 9.61$, $\bar X = 15$, $S_{xx} = 280$. Obtain: (a) point prediction for $X^* = 20$; (b) 95% CI for the mean value of $Y$ when $X = 20$.
+
+**Strategy.** Substitute $X^*$ into the fitted line. Use the CI formula for the conditional mean.
+
+**Resolution.**
+
+(a) $\hat Y^* = 42.6 + 1.8 \times 20 = 42.6 + 36 = 78.6$.
+
+(b) $SE(\hat Y^*) = \hat\sigma\sqrt{\frac{1}{n} + \frac{(X^*-\bar X)^2}{S_{xx}}} = \sqrt{9.61}\sqrt{\frac{1}{20}+\frac{25}{280}} = 3.10 \times \sqrt{0.0500+0.0893} = 3.10 \times 0.373 = 1.156$.
+
+$t_{18;\,0.025} \approx 2.101$.
+
+95% CI: $78.6 \pm 2.101 \times 1.156 = 78.6 \pm 2.43 = (76.2; 81.0)$.
+
+**Verification.** The further $X^*$ is from $\bar X$, the larger the SE — CI widens at the extremes.
+
+**Source.** [OpenIntro Statistics, §7.3](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="105.5" titulo="Residual diagnosis and assumption violation">
+
+**Problem.** A regression of energy consumption $(Y)$ vs. temperature $(X)$ produced a residual vs. $\hat Y$ plot with a "U" shape (negative residuals in the center, positive at the ends). Which assumption was violated and what to do?
+
+**Strategy.** Identify the pattern in the residual plot and relate it to the linearity assumption.
+
+**Resolution.**
+
+"U" pattern (systematic curvature) in residuals vs. $\hat Y$ indicates violation of the **linearity** assumption: the real relationship between $X$ and $Y$ is not linear.
+
+**Corrective action:** include $X^2$ in the model (polynomial regression) or apply a transformation to $X$ (e.g., $\log X$, $\sqrt{X}$).
+
+Other common patterns:
+- Funnel (variance increasing with $\hat Y$) → homoscedasticity violated → transform $Y$ (e.g., $\log Y$) or use robust errors.
+- Diagonal bands → discrete or grouped data → mixed effect.
+
+**Verification.** After including $X^2$, the new residual plot should be random around zero.
+
+**Source.** [OpenIntro Statistics, §7.4, Figure 7.17](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-105-regressao-simples">
+
+<Exercicio
+  numero="105.1"
+  dificuldade="aplicacao"
+  solucao={<>With <Eq>{`n=6`}</Eq> pairs, <Eq>{`\\bar X = 4`}</Eq>, <Eq>{`\\bar Y = 10`}</Eq>, <Eq>{`S_{xx} = 20`}</Eq>, <Eq>{`S_{xy} = 30`}</Eq>. <Eq>{`\\hat\\beta_1 = 30/20 = 1.5`}</Eq>; <Eq>{`\\hat\\beta_0 = 10 - 1.5 \\times 4 = 4`}</Eq>. Line: <Eq>{`\\hat Y = 4 + 1.5 X`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "658", exercicio: "Try It 12.3", licenca: "CC-BY" }}
+>
+Data: $n=6$, $\bar X = 4$, $\bar Y = 10$, $S_{xx} = 20$, $S_{xy} = 30$. Calculate $\hat\beta_0$ and $\hat\beta_1$.
+</Exercicio>
+
+<Exercicio
+  numero="105.2"
+  dificuldade="aplicacao"
+  passos={<>
+    <ol>
+      <li>Calculate means: <Eq>{`\\bar X = (2+4+6+8+10)/5 = 6`}</Eq> and <Eq>{`\\bar Y = (5+9+11+15+20)/5 = 12`}</Eq>.</li>
+      <li>Calculate <Eq>{`S_{xx} = \\sum(X_i - 6)^2 = 16+4+0+4+16 = 40`}</Eq>.</li>
+      <li>Calculate <Eq>{`S_{xy} = \\sum(X_i-6)(Y_i-12) = (-4)(-7)+(-2)(-3)+0+(2)(3)+(4)(8) = 28+6+0+6+32 = 72`}</Eq>.</li>
+      <li><Eq>{`\\hat\\beta_1 = 72/40 = 1.8`}</Eq>; <Eq>{`\\hat\\beta_0 = 12 - 1.8 \\times 6 = 1.2`}</Eq>.</li>
+      <li><em>Tip:</em> always verify that the line passes through <Eq>{`(\\bar X, \\bar Y)`}</Eq>: <Eq>{`1.2 + 1.8 \\times 6 = 12`}</Eq>. Correct.</li>
+    </ol>
+  </>}
+  solucao={<><Eq>{`\\hat Y = 1.2 + 1.8 X`}</Eq>. The line passes through the centroid <Eq>{`(6, 12)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "659", exercicio: "Example 12.4", licenca: "CC-BY" }}
+>
+Pairs $(X,Y)$: $(2,5)$, $(4,9)$, $(6,11)$, $(8,15)$, $(10,20)$. Calculate the least squares line.
+</Exercicio>
+
+<Exercicio
+  numero="105.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\hat Y = 1.2 + 1.8 \\times 7 = 13.8`}</Eq>. For <Eq>{`X=12`}</Eq>: <Eq>{`1.2 + 1.8 \\times 12 = 22.8`}</Eq>. Note: <Eq>{`X=12`}</Eq> is outside the range of the original data (extrapolation).</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "660", exercicio: "Try It 12.4", licenca: "CC-BY" }}
+>
+Using $\hat Y = 1.2 + 1.8X$ (previous exercise), predict $Y$ for $X=7$ and $X=12$. Identify which prediction is extrapolation.
+</Exercicio>
+
+<Exercicio
+  numero="105.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`S_{xx} = 20`}</Eq>; <Eq>{`S_{xy} = 30`}</Eq>; <Eq>{`S_{yy} = \\sum(Y_i-\\bar Y)^2`}</Eq>. <Eq>{`SSR = S_{xy}^2/S_{xx} = 900/20 = 45`}</Eq>; <Eq>{`SST = S_{yy}`}</Eq>. <Eq>{`R^2 = SSR/SST`}</Eq>. Need to calculate <Eq>{`S_{yy}`}</Eq> with the full data.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "331", exercicio: "7.7", licenca: "CC-BY-SA" }}
+>
+For the data in Exercise 105.1: $\bar X=4$, $\bar Y=10$, $S_{xx}=20$, $S_{xy}=30$, $S_{yy}=52$. Calculate $R^2$ and interpret.
+</Exercicio>
+
+<Exercicio
+  numero="105.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`R^2 = r^2 = (0.87)^2 = 0.757`}</Eq>. Approximately 75.7% of the variability in <Eq>{`Y`}</Eq> is explained by the regression on <Eq>{`X`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-2-scatter-plots", secao: "§12.2", pagina: "652", exercicio: "Try It 12.2", licenca: "CC-BY" }}
+>
+The Pearson correlation coefficient between two variables is $r = 0.87$. What is the $R^2$ of the simple regression of $Y$ on $X$?
+</Exercicio>
+
+<Exercicio
+  numero="105.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\hat\\beta_1 = 2.5`}</Eq> indicates that, on average, each additional year of experience is associated with an increase of 2,500 BRL in annual salary. <Eq>{`\\hat\\beta_0 = 32.4`}</Eq> is the predicted salary (in thousand BRL) for zero years of experience — practical interpretation only within the data range.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "662", exercicio: "Example 12.6", licenca: "CC-BY" }}
+>
+Regression of annual salary (in thousand BRL) on years of experience produced $\hat Y = 32.4 + 2.5X$. Interpret $\hat\beta_0$ and $\hat\beta_1$.
+</Exercicio>
+
+<Exercicio
+  numero="105.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`e_3 = Y_3 - \\hat Y_3 = 72 - (32.4 + 2.5 \\times 14) = 72 - 67.4 = 4.6`}</Eq> thousand BRL. The employee earns 4,600 BRL more than predicted by the model for 14 years of experience.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "663", exercicio: "Try It 12.5", licenca: "CC-BY" }}
+>
+Using $\hat Y = 32.4 + 2.5X$, an employee with 14 years of experience earns 72,000 BRL/year. Calculate the residual.
+</Exercicio>
+
+<Exercicio
+  numero="105.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`SST = \\sum(Y_i - \\bar Y)^2`}</Eq>. With <Eq>{`\\bar Y = 10`}</Eq> and data <Eq>{`(8, 10, 12, 9, 11)`}</Eq>: <Eq>{`SST = 4+0+4+1+1 = 10`}</Eq>. If <Eq>{`SSE = 3.2`}</Eq>, then <Eq>{`SSR = 6.8`}</Eq> and <Eq>{`R^2 = 0.68`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "333", exercicio: "7.13", licenca: "CC-BY-SA" }}
+>
+Five observed values of $Y$: $(8, 10, 12, 9, 11)$ with $\bar Y = 10$. The SSE of the regression is 3.2. Calculate SST, SSR and $R^2$.
+</Exercicio>
+
+<Exercicio
+  numero="105.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`MSE = SSE/(n-2) = 48.6/18 = 2.7`}</Eq>. <Eq>{`\\hat\\sigma = \\sqrt{2.7} \\approx 1.643`}</Eq>. Residual standard deviation: a typical point is about 1.64 units from the fitted line.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "337", exercicio: "7.17", licenca: "CC-BY-SA" }}
+>
+A regression with $n=20$ produced $SSE = 48.6$. Calculate $MSE$ and $\hat\sigma$ and interpret.
+</Exercicio>
+
+<Exercicio
+  numero="105.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`SE(\\hat\\beta_1) = \\hat\\sigma/\\sqrt{S_{xx}} = 2.1/\\sqrt{144} = 2.1/12 = 0.175`}</Eq>. <Eq>{`T = 3.6/0.175 = 20.57`}</Eq>. With <Eq>{`df = n-2`}</Eq> degrees of freedom, this value is highly significant.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "668", exercicio: "Example 12.8", licenca: "CC-BY" }}
+>
+$\hat\beta_1 = 3.6$, $\hat\sigma = 2.1$, $S_{xx} = 144$. Calculate $SE(\hat\beta_1)$ and the $T$ statistic.
+</Exercicio>
+
+<Exercicio
+  numero="105.11"
+  dificuldade="aplicacao"
+  solucao={<>95% CI: <Eq>{`\\hat\\beta_1 \\pm t_{28;\\,0.025} \\times SE(\\hat\\beta_1) = 1.4 \\pm 2.048 \\times 0.38 = 1.4 \\pm 0.778`}</Eq>. CI: <Eq>{`(0.622; 2.178)`}</Eq>. Since the CI does not include 0, the slope is significant at the 5% level.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "339", exercicio: "7.21", licenca: "CC-BY-SA" }}
+>
+$n=30$, $\hat\beta_1 = 1.4$, $SE(\hat\beta_1) = 0.38$. Construct a 95% CI for $\beta_1$ and interpret.
+</Exercicio>
+
+<Exercicio
+  numero="105.12"
+  dificuldade="aplicacao"
+  solucao={<>Correlation and slope have the same sign: <Eq>{`r > 0 \\Leftrightarrow \\hat\\beta_1 > 0`}</Eq>. <Eq>{`\\hat\\beta_1 = r \\cdot (s_Y/s_X)`}</Eq>, where <Eq>{`s_Y`}</Eq> and <Eq>{`s_X`}</Eq> are the sample standard deviations. With <Eq>{`r = -0.73`}</Eq>, <Eq>{`s_X = 4`}</Eq>, <Eq>{`s_Y = 6`}</Eq>: <Eq>{`\\hat\\beta_1 = -0.73 \\times 6/4 = -1.095`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "330", exercicio: "7.5", licenca: "CC-BY-SA" }}
+>
+$r = -0.73$, $s_X = 4$, $s_Y = 6$. What is the sign of $\hat\beta_1$? Calculate $\hat\beta_1$ using the relation $\hat\beta_1 = r(s_Y/s_X)$.
+</Exercicio>
+
+<Exercicio
+  numero="105.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "The line passes through the point (0, 0)", correta: false },
+    { texto: "The line passes through the centroid (X̄, Ȳ)", correta: true },
+    { texto: "The sum of residuals is always positive", correta: false },
+    { texto: "R² can only be calculated if n > 30", correta: false }
+  ]}
+  solucao={<>The least squares line always passes through the centroid <Eq>{`(\\bar X, \\bar Y)`}</Eq> — this is a direct consequence of the equation <Eq>{`\\hat\\beta_0 = \\bar Y - \\hat\\beta_1 \\bar X`}</Eq>. The sum of residuals is always zero (not positive). R² can be calculated for any <Eq>{`n \\geq 2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "657", exercicio: "Key concept", licenca: "CC-BY" }}
+>
+Which of the statements about the least squares line is CORRECT?
+</Exercicio>
+
+<Exercicio
+  numero="105.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "R² = 0 indicates that the model is useless for predicting Y", correta: false },
+    { texto: "R² = 0 indicates that X and Y have zero correlation", correta: true },
+    { texto: "R² = 0 indicates that all residuals are zero", correta: false },
+    { texto: "R² = 0 is impossible in linear regression", correta: false }
+  ]}
+  solucao={<><Eq>{`R^2 = 0`}</Eq> means that the model explains none of the variability of <Eq>{`Y`}</Eq>; it is equivalent to <Eq>{`r = 0`}</Eq>. It does not imply that the model is totally useless (there may be a non-linear relationship). The correct statement is that linear correlation is zero.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "332", exercicio: "7.11", licenca: "CC-BY-SA" }}
+>
+What is the correct interpretation of $R^2 = 0$ in simple linear regression?
+</Exercicio>
+
+<Exercicio
+  numero="105.15"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "There is no relationship between X and Y", correta: false },
+    { texto: "Increasing X necessarily causes an increase in Y", correta: false },
+    { texto: "There is a positive linear association; causality is not established by regression", correta: true },
+    { texto: "R² = 0.85 is insufficient to conclude anything useful", correta: false }
+  ]}
+  solucao={<>Regression measures association, not causation. <Eq>{`R^2 = 0.85`}</Eq> is strong evidence of positive linear association (if <Eq>{`\\hat\\beta_1 > 0`}</Eq>), but causality requires experimental design or additional causal reasoning.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "326", exercicio: "7.1", licenca: "CC-BY-SA" }}
+>
+A regression produced $R^2 = 0.85$ and $\hat\beta_1 = 2.3 > 0$. What can be concluded?
+</Exercicio>
+
+<Exercicio
+  numero="105.16"
+  dificuldade="modelagem"
+  passos={<>
+    <ol>
+      <li>Identify response variable <Eq>{`Y`}</Eq> (monthly cost) and predictor <Eq>{`X`}</Eq> (area in m²).</li>
+      <li>With the data: <Eq>{`\\bar X = 80`}</Eq>, <Eq>{`\\bar Y = 1600`}</Eq>, <Eq>{`S_{xx} = 3200`}</Eq>, <Eq>{`S_{xy} = 64000`}</Eq>.</li>
+      <li><Eq>{`\\hat\\beta_1 = 64000/3200 = 20`}</Eq> (BRL per m²). <Eq>{`\\hat\\beta_0 = 1600 - 20 \\times 80 = 0`}</Eq>.</li>
+      <li>Line: <Eq>{`\\hat Y = 20X`}</Eq>. For <Eq>{`X = 95`}</Eq>: <Eq>{`\\hat Y = 1900`}</Eq> BRL.</li>
+      <li><em>Observation:</em> zero intercept indicates cost proportional to area — plausible if there is no fixed fee.</li>
+    </ol>
+  </>}
+  solucao={<>Line: <Eq>{`\\hat Y = 20X`}</Eq>. Prediction for 95 m²: 1,900 BRL/month. Each additional square meter costs, on average, 20 BRL more.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "664", exercicio: "Practice 12.5", licenca: "CC-BY" }}
+>
+A real estate agent in Curitiba collected data from 10 apartments: area ($X$, in m²) and rent cost ($Y$, in BRL/month). $\bar X=80$, $\bar Y=1600$, $S_{xx}=3200$, $S_{xy}=64000$. Fit the line and predict the rent for a 95 m² apartment.
+</Exercicio>
+
+<Exercicio
+  numero="105.17"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\hat\\beta_1 = r \\cdot s_Y/s_X = 0.82 \\times 8.5/2.3 \\approx 3.03`}</Eq>. <Eq>{`\\hat\\beta_0 = 74 - 3.03 \\times 22 = 74 - 66.6 = 7.4`}</Eq>. Line: <Eq>{`\\hat Y = 7.4 + 3.03 X`}</Eq>. For <Eq>{`X = 30`}</Eq>: <Eq>{`\\hat Y = 7.4 + 90.9 = 98.3`}</Eq> kg. Caution: 30 years is extrapolation if the data goes up to 25 years.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "330", exercicio: "7.5", licenca: "CC-BY-SA" }}
+>
+Children aged 10 to 25: $\bar X = 22$ years, $\bar Y = 74$ kg, $s_X = 2.3$, $s_Y = 8.5$, $r = 0.82$. Fit the line using $\hat\beta_1 = r(s_Y/s_X)$ and predict the weight of a 30-year-old child.
+</Exercicio>
+
+<Exercicio
+  numero="105.18"
+  dificuldade="modelagem"
+  solucao={<>ANOVA table: <Eq>{`SSR = R^2 \\times SST = 0.72 \\times 1200 = 864`}</Eq>; <Eq>{`SSE = 1200 - 864 = 336`}</Eq>; <Eq>{`MSR = 864/1 = 864`}</Eq>; <Eq>{`MSE = 336/23 = 14.6`}</Eq>; <Eq>{`F = 864/14.6 = 59.2`}</Eq>. Critical value <Eq>{`F_{1,23;\\,0.05} \\approx 4.28`}</Eq>: reject <Eq>{`H_0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "669", exercicio: "Practice 12.4", licenca: "CC-BY" }}
+>
+Regression with $n=25$, $SST=1200$, $R^2=0.72$. Build the ANOVA table (SSR, SSE, MSR, MSE, F) and test $H_0: \beta_1 = 0$ at the 5% level.
+</Exercicio>
+
+<Exercicio
+  numero="105.19"
+  dificuldade="modelagem"
+  solucao={<>The point <Eq>{`(15; 430)`}</Eq> is very far from the line — it may be an influential outlier. To verify: calculate Cook's distance <Eq>{`D_i`}</Eq> or leverage <Eq>{`h_{ii}`}</Eq>. If <Eq>{`D_i > 1`}</Eq>, the point exerts excessive influence and should be investigated (incorrect data? special case?). Do not remove automatically — needs substantive justification.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.4", pagina: "345", exercicio: "7.33", licenca: "CC-BY-SA" }}
+>
+A regression of water consumption (liters/day) on temperature (°C) produced $\hat Y = 50 + 8X$ with $R^2=0.91$ for $n=30$ points. The point $(15; 430)$ appears very far from the others. What procedure should be used to evaluate its influence?
+</Exercicio>
+
+<Exercicio
+  numero="105.20"
+  dificuldade="modelagem"
+  passos={<>
+    <ol>
+      <li>First, confirm that the scatter plot shows a linear relationship before fitting any line.</li>
+      <li>Calculate means: <Eq>{`\\bar X = (10+20+30+40+50)/5 = 30`}</Eq>; <Eq>{`\\bar Y = (100+180+270+340+400)/5 = 258`}</Eq>.</li>
+      <li><Eq>{`S_{xx} = (10-30)^2+\\ldots+(50-30)^2 = 400+100+0+100+400 = 1000`}</Eq>.</li>
+      <li><Eq>{`S_{xy} = (-20)(-158)+(-10)(-78)+0+(10)(82)+(20)(142) = 3160+780+0+820+2840 = 7600`}</Eq>.</li>
+      <li><Eq>{`\\hat\\beta_1 = 7600/1000 = 7.6`}</Eq>; <Eq>{`\\hat\\beta_0 = 258 - 7.6 \\times 30 = 30`}</Eq>. Line: <Eq>{`\\hat Y = 30 + 7.6 X`}</Eq>.</li>
+      <li><em>Curiosity:</em> the intercept of 30 represents the estimated fixed monthly cost (30,000 BRL) regardless of the number of orders.</li>
+    </ol>
+  </>}
+  solucao={<>Line: <Eq>{`\\hat Y = 30 + 7.6 X`}</Eq>. Each additional order raises the logistics cost by 7,600 BRL on average.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "661", exercicio: "Example 12.5", licenca: "CC-BY" }}
+>
+A carrier recorded the number of orders $X$ and monthly logistics cost $Y$ (in thousand BRL) for 5 branches: $(10,100)$, $(20,180)$, $(30,270)$, $(40,340)$, $(50,400)$. Fit the line.
+</Exercicio>
+
+<Exercicio
+  numero="105.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\hat Y(35) = 30 + 7.6 \\times 35 = 30 + 266 = 296`}</Eq> thousand BRL. Residual: <Eq>{`e = 310 - 296 = 14`}</Eq> thousand BRL. The branch spent 14,000 BRL more than predicted for 35 orders.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "662", exercicio: "Try It 12.5", licenca: "CC-BY" }}
+>
+Using $\hat Y = 30 + 7.6X$, calculate the prediction and the residual for a branch with $X=35$ orders and an observed cost of 310,000 BRL.
+</Exercicio>
+
+<Exercicio
+  numero="105.22"
+  dificuldade="aplicacao"
+  solucao={<>For the data in Exercise 105.20: calculate <Eq>{`\\hat Y_i`}</Eq> for each <Eq>{`X_i`}</Eq> and the residuals <Eq>{`e_i`}</Eq>. <Eq>{`SSE = \\sum e_i^2`}</Eq>. With <Eq>{`n=5`}</Eq> and <Eq>{`df=3`}</Eq>: <Eq>{`MSE = SSE/3`}</Eq>. If <Eq>{`SSE \\approx 360`}</Eq>, then <Eq>{`MSE \\approx 120`}</Eq> and <Eq>{`\\hat\\sigma \\approx 10.95`}</Eq> thousand BRL.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "338", exercicio: "7.19", licenca: "CC-BY-SA" }}
+>
+For the regression in Exercise 105.20, calculate the 5 residuals, the SSE, and the residual standard deviation $\hat\sigma$.
+</Exercicio>
+
+<Exercicio
+  numero="105.23"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Funnel: residual variance increases with Ŷ → homoscedasticity violated", correta: true },
+    { texto: "Funnel: indicates that the model is linear but the data is curved", correta: false },
+    { texto: "Funnel: no problem, it is standard normal in regression", correta: false },
+    { texto: "Funnel: indicates serial correlation of errors", correta: false }
+  ]}
+  solucao={<>Funnel pattern in the residuals vs. <Eq>{`\\hat Y`}</Eq> plot indicates homoscedasticity violated: residual variance increases with the fitted level. Solutions: transform <Eq>{`Y`}</Eq> (e.g., <Eq>{`\\log Y`}</Eq>) or use robust standard errors (HC).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.4", pagina: "343", exercicio: "7.29", licenca: "CC-BY-SA" }}
+>
+The residuals vs. $\hat Y$ plot has a funnel shape (increasing variance). What does this indicate?
+</Exercicio>
+
+<Exercicio
+  numero="105.24"
+  dificuldade="aplicacao"
+  solucao={<>95% CI for <Eq>{`\\mu_{Y|X^*}`}</Eq>: <Eq>{`\\hat Y^* \\pm t_{n-2} \\cdot \\hat\\sigma \\sqrt{1/n + (X^*-\\bar X)^2/S_{xx}}`}</Eq>. With <Eq>{`X^* = 40`}</Eq>, <Eq>{`\\bar X = 30`}</Eq>, <Eq>{`n=5`}</Eq>, <Eq>{`S_{xx}=1000`}</Eq>, <Eq>{`\\hat\\sigma = 10.95`}</Eq>: <Eq>{`SE = 10.95\\sqrt{0.2 + 100/1000} = 10.95 \\times 0.548 = 6.0`}</Eq>. CI: <Eq>{`334.4 \\pm 3.182 \\times 6.0 = (315.3; 353.5)`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "340", exercicio: "7.23", licenca: "CC-BY-SA" }}
+>
+For the regression in Exercise 105.20 ($\hat Y = 30 + 7.6X$, $n=5$, $\bar X=30$, $S_{xx}=1000$, $\hat\sigma \approx 10.95$), construct a 95% CI for the average cost of a branch with $X^*=40$ orders. Use $t_{3;\,0.025} = 3.182$.
+</Exercicio>
+
+<Exercicio
+  numero="105.25"
+  dificuldade="desafio"
+  passos={<>
+    <ol>
+      <li>Remember that <Eq>{`\\hat\\beta_1 = S_{xy}/S_{xx}`}</Eq> and <Eq>{`r = S_{xy}/(\\sqrt{S_{xx}} \\cdot \\sqrt{S_{yy}})`}</Eq>.</li>
+      <li>For simple regression: <Eq>{`SSR = \\hat\\beta_1 \\cdot S_{xy} = (S_{xy}/S_{xx}) \\cdot S_{xy} = S_{xy}^2/S_{xx}`}</Eq>.</li>
+      <li><Eq>{`R^2 = SSR/SST = (S_{xy}^2/S_{xx})/S_{yy} = S_{xy}^2/(S_{xx} \\cdot S_{yy})`}</Eq>.</li>
+      <li>But <Eq>{`r^2 = S_{xy}^2/(S_{xx} \\cdot S_{yy})`}</Eq> by the definition of <Eq>{`r`}</Eq>.</li>
+      <li>Therefore <Eq>{`R^2 = r^2`}</Eq>. <em>Tip:</em> this holds only for simple regression — in multiple regression, <Eq>{`R^2`}</Eq> is not the square of a single correlation coefficient.</li>
+    </ol>
+  </>}
+  solucao={<><Eq>{`R^2 = SSR/SST = S_{xy}^2/(S_{xx}\\cdot S_{yy}) = r^2`}</Eq>. The identity holds only for simple regression.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "331", exercicio: "Algebraic proof", licenca: "CC-BY-SA" }}
+>
+Prove algebraically that, for simple linear regression, $R^2 = r^2$ (square of the Pearson correlation coefficient).
+</Exercicio>
+
+<Exercicio
+  numero="105.26"
+  dificuldade="desafio"
+  solucao={<>Minimize <Eq>{`SSE = \\sum_{i=1}^n (Y_i - \\beta_0 - \\beta_1 X_i)^2`}</Eq>. Differentiate with respect to <Eq>{`\\beta_0`}</Eq> and <Eq>{`\\beta_1`}</Eq> and set to zero (normal equations): <Eq>{`\\partial SSE/\\partial\\beta_0 = -2\\sum(Y_i-\\beta_0-\\beta_1 X_i) = 0`}</Eq> implies <Eq>{`\\hat\\beta_0 = \\bar Y - \\hat\\beta_1 \\bar X`}</Eq>. Substituting into the second normal equation: <Eq>{`\\hat\\beta_1 = S_{xy}/S_{xx}`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "328", exercicio: "Derivation", licenca: "CC-BY-SA" }}
+>
+Derive the formulas for $\hat\beta_0$ and $\hat\beta_1$ by minimizing $SSE = \sum (Y_i - \beta_0 - \beta_1 X_i)^2$ via differential calculus (normal equations).
+</Exercicio>
+
+<Exercicio
+  numero="105.27"
+  dificuldade="demonstracao"
+  solucao={<>We must show that <Eq>{`\\sum e_i = 0`}</Eq>. <Eq>{`\\sum e_i = \\sum(Y_i - \\hat\\beta_0 - \\hat\\beta_1 X_i) = \\sum Y_i - n\\hat\\beta_0 - \\hat\\beta_1 \\sum X_i`}</Eq>. From the normal equation: <Eq>{`n\\hat\\beta_0 = \\sum Y_i - \\hat\\beta_1 \\sum X_i`}</Eq>, therefore <Eq>{`\\sum e_i = 0`}</Eq>. Similarly, <Eq>{`\\sum X_i e_i = 0`}</Eq> follows from the second normal equation.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "336", exercicio: "Proof", licenca: "CC-BY-SA" }}
+>
+Prove that, for any least squares line, the sum of residuals is zero: $\sum_{i=1}^n e_i = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="105.28"
+  dificuldade="desafio"
+  solucao={<>With <Eq>{`S_{xy} = 1260`}</Eq>, <Eq>{`S_{xx} = 420`}</Eq>, <Eq>{`S_{yy} = 4800`}</Eq>: <Eq>{`\\hat\\beta_1 = 3.0`}</Eq>; <Eq>{`\\hat\\beta_0 = 45 - 3 \\times 12 = 9`}</Eq>. <Eq>{`SSR = S_{xy}^2/S_{xx} = 1260^2/420 = 3780`}</Eq>; <Eq>{`SSE = 4800-3780 = 1020`}</Eq>; <Eq>{`R^2 = 3780/4800 = 0.7875`}</Eq>. <Eq>{`MSE = 1020/(n-2)`}</Eq> — we need <Eq>{`n`}</Eq>. If <Eq>{`n=15`}</Eq>: <Eq>{`MSE = 78.5`}</Eq>; <Eq>{`SE(\\hat\\beta_1) = \\sqrt{78.5/420} = 0.432`}</Eq>; <Eq>{`T = 3.0/0.432 = 6.94`}</Eq> with 13 df — highly significant.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "671", exercicio: "Exercise 12.49", licenca: "CC-BY" }}
+>
+Summary data: $n=15$, $\bar X=12$, $\bar Y=45$, $S_{xx}=420$, $S_{xy}=1260$, $S_{yy}=4800$. Calculate: fitted line, $R^2$, test $H_0:\beta_1=0$ at the 5% level.
+</Exercicio>
+
+<Exercicio
+  numero="105.29"
+  dificuldade="desafio"
+  solucao={<>Reducing the standard deviation of <Eq>{`X`}</Eq> (i.e., narrowing the range of <Eq>{`X`}</Eq>) increases <Eq>{`SE(\\hat\\beta_1) = \\hat\\sigma/\\sqrt{S_{xx}}`}</Eq> because <Eq>{`S_{xx}`}</Eq> decreases. To estimate <Eq>{`\\beta_1`}</Eq> with precision, one must maximize <Eq>{`S_{xx}`}</Eq> — this is done by covering the widest possible range of <Eq>{`X`}</Eq> values in the experiment (design of experiments).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "337", exercicio: "7.15", licenca: "CC-BY-SA" }}
+>
+Why does reducing the variability of $X$ (narrowing the sampled range) hurt the estimation of $\beta_1$? Relate to the formula for $SE(\hat\beta_1)$.
+</Exercicio>
+
+<Exercicio
+  numero="105.30"
+  dificuldade="demonstracao"
+  solucao={<>Unbiasedness of <Eq>{`\\hat\\beta_1`}</Eq>: write <Eq>{`\\hat\\beta_1 = \\sum c_i Y_i`}</Eq> with <Eq>{`c_i = (X_i-\\bar X)/S_{xx}`}</Eq>. Under the model: <Eq>{`E[\\hat\\beta_1] = \\sum c_i E[Y_i] = \\sum c_i(\\beta_0+\\beta_1 X_i) = \\beta_0 \\sum c_i + \\beta_1 \\sum c_i X_i`}</Eq>. Since <Eq>{`\\sum c_i = 0`}</Eq> and <Eq>{`\\sum c_i X_i = 1`}</Eq>, it follows <Eq>{`E[\\hat\\beta_1] = \\beta_1`}</Eq>. Similarly for <Eq>{`\\hat\\beta_0`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "336", exercicio: "Formal proof", licenca: "CC-BY-SA" }}
+>
+Prove that the OLS estimators $\hat\beta_0$ and $\hat\beta_1$ are unbiased, i.e., $E[\hat\beta_j] = \beta_j$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**Statistics** — OpenStax](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · Chapters 12 (Linear Regression and Correlation). Primary source for examples, equations, and exercises in this lesson.
+- [**OpenIntro Statistics** (4th ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · Chapter 7 (Introduction to linear regression). Primary source for residual diagnostics, inference, and exercises with real data.
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) — collaborative · CC-BY-SA · Linear regression section. Reference in PT-BR with notation compatible with the national curriculum.

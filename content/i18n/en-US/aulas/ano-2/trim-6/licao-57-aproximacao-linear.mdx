@@ -1,0 +1,1007 @@
+---
+titulo: "Lesson 57 — Linear Approximation and Differentials"
+slug: "licao-57-aproximacao-linear"
+categoria: "aulas"
+subcategoria: "ano-2-trim-6"
+descricao: "Tangent line as local approximation. Differential dy. Error estimation via second derivative. Newton-Raphson as iterated linearization."
+ordem: 57
+publicado: true
+tags: ["aproximacao linear", "diferencial", "linearizacao", "taylor", "ano-2", "trim-6"]
+prerrequisitos: ["licao-52-regras-derivacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2024-05-15"
+usadoEm: ["2nd Year of Program (Calculus I)", "Equivalent Japanese Math III §4", "Equivalent German Leistungskurs Differentialrechnung", "Singapore H2 Math §4.3"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="L(x) = f(a) + f'(a)(x - a)"
+  legenda={<><strong>Linearization</strong> of <em>f</em> at point <em>a</em>: the tangent line to the graph at <Eq>{`(a,\\,f(a))`}</Eq> is the best linear approximation of <em>f</em> near <em>a</em>. The error is <Eq>{`O((x-a)^2)`}</Eq> — it shrinks much faster than the distance to the base point.</>}
+  audioTexto="L of x equals f of a, plus f prime of a, times parenthesis x minus a, close parenthesis. Read as: linearization of f at a. It is the tangent line used as a local approximation of the function."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books Covering This Lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-1-8-tan-line-approx.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §1.8 "The tangent line approximation" · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Primary source with guided activities, error theory, and Newton-Raphson as iterated linearization.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.2 "Linear Approximations and Differentials" · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Comprehensive treatment of differential dy, error propagation, and examples of physical application.</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman et al. — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §4.4 "Differentials" · CC-BY-NC · </span>
+      <em className="text-clube-mist">Exercises of increasing difficulty; total differential for functions of several variables.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Rigorous Definition and Error Theory">
+
+### Linearization
+
+<Definicao titulo="Linearization of f at a">
+
+Let $f$ be differentiable at $a$. The **linearization** (or **linear approximation**) of $f$ at $a$ is the affine function
+
+$$L(x) = f(a) + f'(a)(x - a).$$
+
+It is the unique affine function satisfying $L(a) = f(a)$ and $L'(a) = f'(a)$: it has the same value and the same derivative as $f$ at the base point.
+
+</Definicao>
+
+> "If $f$ is differentiable at $a$, then $L(x) = f(a) + f'(a)(x - a)$ is called the *linearization* of $f$ at $a$. The approximation $f(x) \approx L(x)$ is called the *linear approximation* or *tangent line approximation* of $f$ at $a$." — [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials)
+
+### Differential
+
+<Definicao titulo="Differential dy">
+
+For $y = f(x)$, the **differential** of $y$ is
+
+$$dy = f'(x)\,dx,$$
+
+where $dx$ is an arbitrary (not necessarily infinitesimal) change in $x$. The differential represents the **linear change** in $f$: it is how much the tangent line rises or falls when $x$ changes by $dx$.
+
+The actual change is $\Delta y = f(x + dx) - f(x)$. As $dx \to 0$:
+
+$$\Delta y - dy = O(dx^2), \quad \text{so} \quad \Delta y \approx dy.$$
+
+</Definicao>
+
+> "We define $dx$ and $dy$ as real variables so that the following equation holds: $dy = f'(x)\,dx$. The differential $dy$ is a linear approximation of the actual change $\Delta y$." — [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials)
+
+### Error Estimation via Taylor
+
+<Teorema titulo="Linearization Error (Taylor with Remainder)">
+
+If $f$ is twice differentiable on an interval containing $a$ and $x$, then there exists $\xi$ between $a$ and $x$ such that
+
+$$f(x) = f(a) + f'(a)(x - a) + \frac{f''(\xi)}{2}(x - a)^2.$$
+
+The **error** of the linearization is therefore $f(x) - L(x) = \dfrac{f''(\xi)}{2}(x-a)^2$. If $|f''(t)| \leq M_2$ for all $t$ between $a$ and $x$, then
+
+$$|f(x) - L(x)| \leq \frac{M_2}{2}(x - a)^2.$$
+
+The error is **quadratic** in the distance to the base point — it shrinks much faster than the distance.
+
+</Teorema>
+
+### Figure: Tangent Line as Local Approximation
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 460 240" className="w-full">
+<defs>
+  <marker id="arrla" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<line x1="30" y1="200" x2="430" y2="200" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrla)"/>
+<line x1="80" y1="220" x2="80" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrla)"/>
+<text x="435" y="205" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">x</text>
+<text x="84" y="17" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">y</text>
+<path d="M 100,185 Q 160,140 220,105 Q 280,72 360,50" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+<text x="365" y="47" fontSize="10" fontFamily="serif" fontStyle="italic" fill="rgb(26 77 92)">y = f(x)</text>
+<line x1="140" y1="170" x2="340" y2="70" stroke="rgb(232 199 122)" strokeWidth="2"/>
+<text x="342" y="67" fontSize="10" fontFamily="serif" fontStyle="italic" fill="rgb(232 199 122)">L(x)</text>
+<circle cx="220" cy="105" r="4" fill="rgb(26 77 92)"/>
+<line x1="220" y1="105" x2="220" y2="200" stroke="currentColor" strokeOpacity="0.4" strokeDasharray="4,3" strokeWidth="1"/>
+<text x="216" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">a</text>
+<circle cx="300" cy="80" r="3" fill="rgb(26 77 92)"/>
+<circle cx="300" cy="95" r="3" fill="rgb(232 199 122)"/>
+<line x1="300" y1="80" x2="300" y2="95" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+<text x="305" y="90" fontSize="9" fontFamily="sans-serif" fill="rgb(199 107 63)">error</text>
+<line x1="300" y1="200" x2="300" y2="205" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1"/>
+<text x="296" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.7">x</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+The tangent line <Eq>{`L(x)`}</Eq> touches the graph of <Eq>{`f`}</Eq> at <Eq>{`(a, f(a))`}</Eq>. The error (orange segment) between the curve and the line grows with the square of the distance <Eq>{`|x-a|`}</Eq>.
+</figcaption>
+</figure>
+
+### Classic Approximations at $a = 0$ (Linear Maclaurin Series)
+
+| $f(x)$ | $L(x)$ at $a = 0$ | Valid for |
+|---|---|---|
+| $e^x$ | $1 + x$ | small $x$ |
+| $\sin x$ | $x$ | $x$ in radians, small |
+| $\cos x$ | $1$ | small $x$ |
+| $\ln(1 + x)$ | $x$ | small $x$ |
+| $(1 + x)^n$ | $1 + nx$ | small $x$ |
+| $\sqrt{1 + x}$ | $1 + x/2$ | small $x$ |
+| $\tan x$ | $x$ | small $x$ |
+| $\arctan x$ | $x$ | small $x$ |
+
+### Error Propagation
+
+For $y = f(x)$ with uncertainty $\sigma_x$ in $x$:
+
+$$\sigma_y \approx |f'(x)|\,\sigma_x.$$
+
+For functions of several variables $y = f(x_1, \ldots, x_n)$ with independent errors $\sigma_i$:
+
+$$\sigma_y^2 \approx \sum_{i=1}^{n} \left(\frac{\partial f}{\partial x_i}\right)^2 \sigma_i^2.$$
+
+<Insight>
+
+**Why is the error quadratic?** Any function differentiable at $a$ "looks locally like a straight line" — this is the essence of differential calculus. Linearization captures exactly that line. The remainder starts with the 2nd-order Taylor term, so halving $|x-a|$ reduces the error by a factor of 4.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine you want to know how much a 4.5-centimeter radius apple weighs. You only have a scale calibrated for exactly 4 centimeters.
+
+The idea: "a slightly bigger apple weighs slightly more." How much more? If it grows in a straight line, it's easy to calculate.
+
+This is linear approximation: when something changes a **little bit**, we pretend it changes in a straight line. It works very well for small changes.
+
+A line is the simplest way to describe a change. And near any point, the curve looks very much like the line that touches it.
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+You want to calculate $\sqrt{4.1}$ without a calculator. You know $\sqrt{4} = 2$.
+
+The function $f(x) = \sqrt{x}$ has a **slope** at $x = 4$. This slope is the derivative:
+
+$$f'(x) = \frac{1}{2\sqrt{x}}, \quad f'(4) = \frac{1}{4}.$$
+
+Starting from $x = 4$ and moving $0.1$ to the right, the function increases by $0.1 \times \frac{1}{4} = 0.025$.
+
+$$\sqrt{4.1} \approx 2 + 0.025 = 2.025.$$
+
+Actual value: $2.02485\ldots$ — an error of only $0.00015$. Excellent for a mental calculation.
+
+### The General Recipe
+
+1. Find $a$ close to $x$ where $f(a)$ is easy to calculate.
+2. Calculate $f'(a)$.
+3. Use $f(x) \approx f(a) + f'(a)(x - a)$.
+
+### Why Does It Work?
+
+The **tangent line** to the graph of $f$ at $(a, f(a))$ is the best straight line passing through that point that follows the curve. For short distances, the curve and the line are practically identical.
+
+| Want to approximate | Chosen $a$ | Mental Calculation |
+|---|---|---|
+| $\sqrt{25.1}$ | $25$ | $5 + 0.1/10 = 5.01$ |
+| $e^{0.1}$ | $0$ | $1.1$ |
+| $\sin(0.2)$ | $0$ | $0.2$ |
+| $\ln(0.95)$ | $1$ | $0.95 - 1 = -0.05$ |
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old">
+
+The linearization $L(x) = f(a) + f'(a)(x - a)$ is the most used tool in all of applied science. Every time someone builds a "small perturbation" model, they are using linearization.
+
+### Recipe with Error Check
+
+1. Identify $a$ close to $x$ where $f(a)$ and $f'(a)$ are known.
+2. $L(x) = f(a) + f'(a)(x - a)$.
+3. Estimate the error: $|f(x) - L(x)| \leq \frac{M_2}{2}(x - a)^2$ where $M_2 = \max|f''|$ on the interval.
+
+### Differential
+
+$dy = f'(x)\,dx$ is the linear change in $y$ when $x$ changes by $dx$.
+
+**Engineering Rule of Thumb**: If you measure $x$ with error $\Delta x$, the error in $y = f(x)$ is approximately $|f'(x)| \cdot |\Delta x|$.
+
+### Example: Measurement Error
+
+You measure the radius of a sphere as $r = 5.0 \pm 0.1$ cm. Volume: $V = \frac{4}{3}\pi r^3$.
+
+$$dV = 4\pi r^2\,dr = 4\pi(25)(0.1) = 10\pi \approx 31.4 \text{ cm}^3.$$
+
+Nominal volume: $\approx 524$ cm³. Relative error: $31.4/524 \approx 6\%$.
+
+### Limit of Validity
+
+The larger $|x - a|$, the more the tangent line deviates from the curve. For functions with large $|f''|$ (high curvature), the error grows quickly. Always compare $|f''|/2 \cdot (x-a)^2$ with the required precision before using the approximation.
+
+<Insight>
+
+**1% Rule of Thumb:** Linearization has less than 1% error if the function doesn't curve much over the interval. For $\sin x$ around zero, this holds up to $x \approx 0.24$ radians (about 14°). For $e^x$ around zero, up to $x \approx 0.14$. For $\sqrt{x}$ around $a$, the relative error is $\approx (x-a)^2/(8a^2)$ — it decreases for large $a$.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="For an Engineering Student">
+
+Linearization is the **engineering of local approximation**: 1st order (linear), 2nd order (parabolic), etc. The complete toolkit is Taylor.
+
+### Taylor with Remainder and Error Control
+
+$$f(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k + R_n(x),$$
+
+with $R_n(x) = \dfrac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$ (Lagrange). Linearization corresponds to $n = 1$.
+
+**Engineer's Strategy**: Choose $n$ such that $|R_n| <$ specified tolerance. For $\sqrt{4.1}$ with tolerance $10^{-3}$:
+
+$$|R_1| = \frac{|f''(\xi)|}{2}(0.1)^2 = \frac{1}{8 \xi^{3/2} \cdot 2}(0.01) \leq \frac{0.01}{8 \cdot 8} = 1.56 \times 10^{-4} < 10^{-3}. \quad \checkmark$$
+
+### Cross-Domain Applications
+
+- **Physics**: Simple pendulum. $\ddot{\theta} = -(g/L)\sin\theta$. For small $\theta$, $\sin\theta \approx \theta$: harmonic oscillator $\ddot{\theta} = -(g/L)\theta$. Period $T = 2\pi\sqrt{L/g}$, independent of $\theta$. Valid for $|\theta| \lesssim 10°$.
+- **Control**: Linearization of a nonlinear system $\dot{x} = F(x)$ at an operating point $x^*$ yields $\dot{\xi} = J_F(x^*)\xi$ — the state-space matrix.
+- **Finance**: Delta-hedge $\Delta V \approx \Delta_{\text{greek}} \cdot \Delta S$. The error is Gamma (2nd order, $\Gamma \cdot (\Delta S)^2/2$).
+- **Optimization**: Gradient descent $\theta \leftarrow \theta - \eta \nabla L(\theta)$ minimizes the linear approximation of $L$ in the direction of steepest descent.
+- **Numerical**: Newton-Raphson solves $f(x) = 0$ by iterating $x_{n+1} = x_n - f(x_n)/f'(x_n)$ — each step is local linearization + finding the zero of the tangent line. Quadratic convergence: $|e_{n+1}| \leq C\,|e_n|^2$.
+
+### Delta Method (Statistics)
+
+For $Y = g(X)$ with $X$ concentrated around $\mu$ and variance $\sigma^2$:
+
+$$\text{Var}(g(X)) \approx \bigl(g'(\mu)\bigr)^2 \sigma^2.$$
+
+Error propagation = linearization + variances. Basis of all sensitivity analysis.
+
+### When Linearization Fails
+
+- $f$ is not differentiable at $a$ (e.g., $f(x) = |x|$ at $a = 0$).
+- $|x - a|$ is not small and $f''$ is not negligible.
+- $f'(a) = 0$ and $f''(a) \neq 0$ (minimum/maximum point): $L(x) = f(a)$ is constant; use 2nd-order Taylor.
+
+</Porta>
+
+<Porta nivel="40" titulo="For a Senior Professional">
+
+Linearization is the **universal paradigm of local analysis**. In any domain where a quantity depends smoothly on parameters, the first step is always: linearize.
+
+### Qualitative Analysis of Dynamical Systems
+
+For $\dot{x} = F(x)$ with a fixed point $x^*$ ($F(x^*) = 0$), the **Hartman–Grobman theorem** guarantees: if the Jacobian $J = DF(x^*)$ has no eigenvalue with a zero real part, then the phase portrait of the nonlinear system is **topologically conjugate** to that of the linear system $\dot{\xi} = J\xi$ in a neighborhood of $x^*$. Local stability of the nonlinear system equals the stability of the linearized system.
+
+### Greeks as Multivariate Taylor Coefficients
+
+$$dV \approx \Delta\,dS + \tfrac{1}{2}\Gamma\,dS^2 + \Theta\,dt + \mathcal{V}\,d\sigma + \rho\,dr + \cdots$$
+
+Each Greek is a partial derivative of $V(S, \sigma, r, t)$. Hedging by Greeks is a truncated Taylor approximation of the exposure. The Delta hedging error is of order $\Gamma \cdot (\Delta S)^2$.
+
+### Adjoint Analysis in PDEs
+
+For $J(\theta) = \int \phi(u_\theta)\,dx$ where $u_\theta$ is the solution to a PDE parameterized by $\theta$, the gradient $dJ/d\theta$ can be computed via the **adjoint method**: 1 forward PDE + 1 linearized adjoint PDE — cost independent of $\dim(\theta)$. Foundation for optimization in CFD and neural field learning.
+
+### Machine Learning: Linearization as Theoretical Basis
+
+- **Influence Functions** (Koh–Liang, ICML 2017): Effect of removing training point $i$ on the minimizer $\theta^*$ via linearization of the KKT conditions at $\theta^*$.
+- **Neural Tangent Kernel**: Networks with infinite width behave like **linear regressors** on the kernel induced by parametrization at initialization — linearization around $\theta_0$.
+- **Adversarial Examples**: Linearization of $f_\theta(x)$ explains vulnerability $\sim \epsilon \|\nabla_x f_\theta(x)\|_\infty$ (Goodfellow et al.'s FGSM attack).
+
+### Beyond Taylor: Padé and Asymptotic Expansions
+
+When Taylor converges slowly or diverges, **Padé approximation** $f(x) \approx P_m(x)/Q_n(x)$ offers an extended radius of convergence. **Asymptotic expansions** (Watson, stationary phase method) handle $x \to \infty$ where Taylor fails — useful in optics, quantum physics, and algorithm analysis.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Practice — Real Brazilian Scenarios">
+
+### Scenario 1: Production Cost and Marginal Analysis
+
+A metalworking plant in São Bernardo do Campo models its production cost as $C(q) = \sqrt{50q + 100}$ thousand reais, where $q$ is the quantity in tons. To estimate the additional cost of moving from $q = 30$ to $q = 31$ tons without running the full system:
+
+$C'(q) = \dfrac{50}{2\sqrt{50q+100}} = \dfrac{25}{\sqrt{50q+100}}$.
+
+At $q = 30$: $C(30) = \sqrt{1600} = 40$ and $C'(30) = 25/40 = 0.625$.
+
+Estimate: $\Delta C \approx 0.625$ thousand reais (R$625). Actual value: $C(31) = \sqrt{1650} \approx 40.620$ — an error of only R$5.
+
+### Scenario 2: Measurement Error in Topography
+
+A civil engineer measures the area of a square plot of land with side $s = 20.0 \pm 0.05$ m. Area: $A = s^2$.
+
+$$dA = 2s\,ds = 2(20)(0.05) = 2.0 \text{ m}^2.$$
+
+Nominal area: 400 m². Relative error: $2.0/400 = 0.5\%$. The INCRA (National Institute of Colonization and Agrarian Reform) requires a 1% tolerance in georeferencing — this measurement is within the limit.
+
+### Scenario 3: Savings Yield with Variable Rate
+
+Savings yield $(1 + r/12)^{12}$ annually, where $r$ is the monthly rate. For $r = 0.5\%$ per month, the annual yield factor is $(1.005)^{12}$. Using linearization at $x = 0$ with $f(x) = (1+x)^{12}$:
+
+$f'(0) = 12$, $L(0.005) = 1 + 12(0.005) = 1.06$.
+
+Result: approximately 6% annually. Exact value: $(1.005)^{12} = 1.0617$ — the approximation misses by 0.2 percentage points.
+
+### Standard Workflow
+
+1. Choose $a$ close to $x$ where $f(a)$ and $f'(a)$ are easily calculable.
+2. Compute $L(x) = f(a) + f'(a)(x - a)$.
+3. Estimate maximum error: $M_2 = \max_{t \in [a,x]}|f''(t)|$, then $|\text{error}| \leq M_2(x-a)^2/2$.
+4. If the error is acceptable, use $L(x)$. If not, move to 2nd-order Taylor.
+
+</Porta>
+
+</DuasPortas>
+
+## Solved Examples
+
+<Exemplo titulo="Linear Approximation of a Square Root (Direct Application)" numero="1">
+
+**Problem:** Using linearization, approximate $\sqrt{9.2}$ without a calculator. Estimate the maximum error.
+
+**Strategy:** We identify $f(x) = \sqrt{x}$ and choose $a = 9$ because $\sqrt{9} = 3$ is exact and $9.2$ is close to $9$.
+
+**Solution:**
+
+1. $f(x) = \sqrt{x}$, $f(9) = 3$.
+2. $f'(x) = \dfrac{1}{2\sqrt{x}}$, $f'(9) = \dfrac{1}{6}$.
+3. Linearization: $L(x) = 3 + \dfrac{1}{6}(x - 9)$.
+4. At $x = 9.2$: $L(9.2) = 3 + \dfrac{0.2}{6} = 3 + 0.0\overline{3} \approx 3.0333$.
+
+**Error Estimation:**
+
+$f''(x) = -\dfrac{1}{4x^{3/2}}$. On $[9, 9.2]$: $|f''(t)| \leq \dfrac{1}{4 \cdot 9^{3/2}} = \dfrac{1}{108}$.
+
+$$|\text{error}| \leq \frac{1/108}{2}(0.2)^2 = \frac{0.04}{216} \approx 0.000185.$$
+
+**Verification:** $\sqrt{9.2} \approx 3.03315$. Actual error: $|3.0333 - 3.03315| \approx 0.00015 < 0.000185$. Estimate confirmed.
+
+**Source.** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Differential and Error Propagation in Sphere Volume (Intermediate)" numero="2">
+
+**Problem:** The radius of a sphere is measured as $r = 6.0$ cm with a maximum error of $0.05$ cm. Estimate the maximum error in the volume $V = \frac{4}{3}\pi r^3$.
+
+**Strategy:** We use the differential $dV = V'(r)\,dr$ to linearize the error. The differential is the linear approximation of the change in $V$.
+
+**Solution:**
+
+1. $V(r) = \dfrac{4}{3}\pi r^3$, $V'(r) = 4\pi r^2$.
+2. With $r = 6$ and $dr = 0.05$:
+
+$$dV = 4\pi(6)^2 (0.05) = 4\pi \cdot 36 \cdot 0.05 = 7.2\pi \approx 22.62 \text{ cm}^3.$$
+
+3. Nominal volume: $V(6) = \dfrac{4}{3}\pi(216) = 288\pi \approx 904.8$ cm³.
+
+4. Relative error: $\dfrac{dV}{V} = \dfrac{7.2\pi}{288\pi} = \dfrac{7.2}{288} = 0.025 = 2.5\%$.
+
+**Verification:** An uncertainty of $0.8\%$ in the radius propagates to $2.5\%$ in the volume — a factor of 3, because $V \propto r^3$ (exponent 3). General rule: for $f(x) = x^n$, the relative error in $f$ is $n$ times the relative error in $x$.
+
+**Source.** [OpenStax Calculus Vol.1 §4.2](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials) — CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Trigonometric Function Approximation and Error Estimation (Intermediate)" numero="3">
+
+**Problem:** Use linearization to approximate $\sin(32°)$ in terms of $\sin(30°)$ and $\cos(30°)$. Compare with the exact value.
+
+**Strategy:** We convert to radians (required in differential calculus) and linearize $\sin$ at $a = \pi/6$.
+
+**Solution:**
+
+1. $f(x) = \sin x$, $a = \pi/6$ (corresponding to $30°$).
+2. $f(a) = \sin(\pi/6) = 1/2$, $f'(a) = \cos(\pi/6) = \sqrt{3}/2$.
+3. $x = 32° = 32\pi/180$ radians. $x - a = 2\pi/180 = \pi/90$.
+
+$$L(x) = \frac{1}{2} + \frac{\sqrt{3}}{2} \cdot \frac{\pi}{90} = 0.5 + 0.866 \cdot 0.03491 \approx 0.5 + 0.03023 = 0.53023.$$
+
+**Comparison:** $\sin(32°) = 0.52992$. Error: $|0.53023 - 0.52992| = 0.00031$.
+
+**Verification:** $|f''(t)| = |\sin(t)| \leq \sin(32°) < 0.530$. Bound: $\dfrac{0.530}{2}\left(\dfrac{\pi}{90}\right)^2 \approx 0.265 \cdot 0.001218 \approx 0.000323 > 0.000310$. The bound is met.
+
+**Source.** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Newton-Raphson as Iterated Linearization (Advanced)" numero="4">
+
+**Problem:** Use Newton-Raphson to find $\sqrt[3]{2}$ to three decimal places, starting with $x_0 = 1.5$.
+
+**Strategy:** We reformulate as $f(x) = x^3 - 2 = 0$ and apply $x_{n+1} = x_n - f(x_n)/f'(x_n)$, which comes from setting the tangent line to $f$ at $x_n$ to zero.
+
+**Solution:**
+
+$f(x) = x^3 - 2$, $f'(x) = 3x^2$.
+
+| Iteration | $x_n$ | $f(x_n)$ | $f'(x_n)$ | $x_{n+1}$ |
+|---|---|---|---|---|
+| 0 | $1.5$ | $1.375$ | $6.75$ | $1.2963$ |
+| 1 | $1.2963$ | $0.1786$ | $5.040$ | $1.2609$ |
+| 2 | $1.2609$ | $0.00595$ | $4.771$ | $1.2599$ |
+| 3 | $1.2599$ | $0.0000064$ | $4.763$ | $1.25992$ |
+
+**Verification:** After 3 iterations: $x_3 = 1.25992$, matching $\sqrt[3]{2} = 1.25992105\ldots$ to six decimal places. Convergence is **quadratic**: the number of correct digits roughly doubles with each iteration.
+
+**Source.** [Active Calculus §1.8](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · CC-BY-NC-SA.
+</Exemplo>
+
+<Exemplo titulo="Multivariable Linearization — Ohm's Law with Two Uncertainties (Challenge)" numero="5">
+
+**Problem:** Electrical resistance is calculated by $R = V/I$. Measurements yield $V = 12.0 \pm 0.3$ V and $I = 2.00 \pm 0.05$ A. Estimate the uncertainty in $R$ using linear error propagation.
+
+**Strategy:** We use the error propagation formula based on the total differential for functions of two variables: $\sigma_R^2 \approx (\partial R/\partial V)^2 \sigma_V^2 + (\partial R/\partial I)^2 \sigma_I^2$.
+
+**Solution:**
+
+1. $R(V, I) = V/I$. Partial derivatives:
+
+$$\frac{\partial R}{\partial V} = \frac{1}{I} = \frac{1}{2.00} = 0.5 \text{ Ω/V}, \quad \frac{\partial R}{\partial I} = -\frac{V}{I^2} = -\frac{12.0}{4.00} = -3.0 \text{ Ω/A}.$$
+
+2. Propagated variance:
+
+$$\sigma_R^2 \approx (0.5)^2(0.3)^2 + (-3.0)^2(0.05)^2 = 0.0225 + 0.0225 = 0.045 \text{ Ω}^2.$$
+
+$$\sigma_R \approx \sqrt{0.045} \approx 0.212 \text{ Ω}.$$
+
+3. Result: $R = 6.00 \pm 0.21$ Ω.
+
+**Verification:** The uncertainties in $V$ and $I$ contribute equally to the total uncertainty in $R$ — a characteristic of this specific combination of values.
+
+**Source.** [APEX Calculus §4.4](https://www.apexcalculus.com/) — Hartman et al. · CC-BY-NC.
+</Exemplo>
+
+<ListaExercicios seed="lesson-57-linear-approximation">
+
+> **Notebook List.** There are 40 exercises in 4 blocks of increasing difficulty. Solve them on paper. Sources: Active Calculus §1.8 (CC-BY-NC-SA), OpenStax Calculus Vol.1 §4.2 (CC-BY-NC-SA), and APEX Calculus §4.4 (CC-BY-NC).
+
+### Block A — Direct Linearization (57.1 to 57.12)
+
+<Exercicio
+  numero="57.1"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.1", exercicio: "1.8.1", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$2.025$", correta: true },
+    { texto: "$2.050$" },
+    { texto: "$2.010$" },
+    { texto: "$2.000$" },
+  ]}
+  solucao={<>For <Eq>{`f(x) = \\sqrt{x}`}</Eq> at <Eq>{`a = 4`}</Eq>: <Eq>{`f(4) = 2`}</Eq>, <Eq>{`f'(4) = 1/4`}</Eq>. Thus <Eq>{`L(4.1) = 2 + (1/4)(0.1) = 2.025`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Identify the function and base point.</strong> <Eq>{`f(x) = \\sqrt{x}`}</Eq>, <Eq>{`a = 4`}</Eq>. We choose <Eq>{`a = 4`}</Eq> because <Eq>{`\\sqrt{4} = 2`}</Eq> is exact.</li>
+      <li><strong>Calculate the derivative at a.</strong> <Eq>{`f'(x) = 1/(2\\sqrt{x})`}</Eq>, so <Eq>{`f'(4) = 1/(2 \\cdot 2) = 1/4`}</Eq>.</li>
+      <li><strong>Write the linearization.</strong> <Eq>{`L(x) = 2 + \\frac{1}{4}(x - 4)`}</Eq>.</li>
+      <li><strong>Evaluate at x = 4.1.</strong> <Eq>{`L(4.1) = 2 + \\frac{1}{4}(0.1) = 2 + 0.025 = 2.025`}</Eq>.</li>
+    </ol>
+    <p><em>Rule of thumb: the actual error is <Eq>{`\\sqrt{4.1} = 2.02485`}</Eq>; the linearization error is only 0.00015 — less than 0.01%.</em></p>
+  </>}
+>
+Approximate $\sqrt{4.1}$ using linearization at $a = 4$.
+</Exercicio>
+
+<Exercicio
+  numero="57.2"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.2", exercicio: "1.8.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>, <Eq>{`a = 9`}</Eq>. <Eq>{`f'(9) = 1/6`}</Eq>. <Eq>{`L(9.06) = 3 + (1/6)(0.06) = 3.01`}</Eq>. Actual value: <Eq>{`\\sqrt{9.06} \\approx 3.0100`}</Eq>.</>}
+>
+Approximate $\sqrt{9.06}$ using linearization at $a = 9$. Compare with the actual value.
+</Exercicio>
+
+<Exercicio
+  numero="57.3"
+  dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.1", exercicio: "4.2.1", licenca: "CC-BY-NC-SA" }}
+  resposta="$0.05$"
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f'(0) = \\cos 0 = 1`}</Eq>. <Eq>{`L(x) = x`}</Eq>. Then <Eq>{`\\sin(0.05) \\approx 0.05`}</Eq>. Actual value: <Eq>{`0.04998`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Base point.</strong> <Eq>{`a = 0`}</Eq> because <Eq>{`\\sin(0) = 0`}</Eq> and <Eq>{`\\cos(0) = 1`}</Eq> are trivial.</li>
+      <li><strong>Derivative at a.</strong> <Eq>{`f'(x) = \\cos x`}</Eq>, <Eq>{`f'(0) = 1`}</Eq>.</li>
+      <li><strong>Linearization.</strong> <Eq>{`L(x) = 0 + 1 \\cdot x = x`}</Eq>. The approximation <Eq>{`\\sin x \\approx x`}</Eq> is fundamental in physics (small oscillations).</li>
+      <li><strong>Evaluation.</strong> <Eq>{`L(0.05) = 0.05`}</Eq>. Error: <Eq>{`|0.05 - 0.04998| = 0.00002`}</Eq>.</li>
+    </ol>
+    <p><em>Rule of thumb: <Eq>{`\\sin x \\approx x`}</Eq> is valid for <Eq>{`|x|`}</Eq> up to about 0.17 rad (10°) with less than 0.5% error.</em></p>
+  </>}
+>
+Approximate $\sin(0.05)$ using linearization at $a = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="57.4"
+  dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.2", exercicio: "4.2.2", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\cos x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f'(0) = -\\sin 0 = 0`}</Eq>. <Eq>{`L(x) = 1`}</Eq>. Then <Eq>{`\\cos(0.1) \\approx 1`}</Eq>. Actual value: <Eq>{`0.9950`}</Eq>. The 1st-order error is zero here: <Eq>{`f'(0) = 0`}</Eq>, so the linearization is constant and we need 2nd-order Taylor to improve.</>}
+>
+Approximate $\cos(0.1)$ using linearization at $a = 0$. Explain why the result is surprisingly inaccurate.
+</Exercicio>
+
+<Exercicio
+  numero="57.5"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.3", exercicio: "1.8.3", licenca: "CC-BY-NC-SA" }}
+  resposta="$1.03$"
+  solucao={<><Eq>{`f(x) = e^x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f(0) = 1`}</Eq>, <Eq>{`f'(0) = 1`}</Eq>. <Eq>{`L(x) = 1 + x`}</Eq>. <Eq>{`L(0.03) = 1.03`}</Eq>. Actual value: <Eq>{`e^{0.03} = 1.03045`}</Eq>.</>}
+>
+Approximate $e^{0.03}$ using linearization at $a = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="57.6"
+  dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.3", exercicio: "4.2.3", licenca: "CC-BY-NC-SA" }}
+  resposta="$0.05$"
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq>, <Eq>{`a = 1`}</Eq>. <Eq>{`f(1) = 0`}</Eq>, <Eq>{`f'(1) = 1`}</Eq>. <Eq>{`L(x) = x - 1`}</Eq>. <Eq>{`L(1.05) = 0.05`}</Eq>. Actual value: <Eq>{`\\ln(1.05) = 0.04879`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Base point.</strong> <Eq>{`a = 1`}</Eq> because <Eq>{`\\ln(1) = 0`}</Eq> is exact and simple.</li>
+      <li><strong>Derivative at a.</strong> <Eq>{`f'(x) = 1/x`}</Eq>, <Eq>{`f'(1) = 1`}</Eq>.</li>
+      <li><strong>Linearization.</strong> <Eq>{`L(x) = 0 + 1 \\cdot (x - 1) = x - 1`}</Eq>. Equivalently: <Eq>{`\\ln(1 + u) \\approx u`}</Eq> for small <Eq>{`u`}</Eq>.</li>
+      <li><strong>Evaluation.</strong> <Eq>{`L(1.05) = 1.05 - 1 = 0.05`}</Eq>. Error: <Eq>{`|0.05 - 0.04879| = 0.00121`}</Eq>, or 2.5% error.</li>
+    </ol>
+    <p><em>Rule of thumb: the formula <Eq>{`\\ln(1+u) \\approx u`}</Eq> is widely used in finance to convert compound rates to simple rates when <Eq>{`u`}</Eq> is small.</em></p>
+  </>}
+>
+Approximate $\ln(1.05)$ using linearization at $a = 1$.
+</Exercicio>
+
+<Exercicio
+  numero="57.7"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.4", exercicio: "1.8.4", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = (1+x)^{10}`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f'(0) = 10`}</Eq>. <Eq>{`L(x) = 1 + 10x`}</Eq>. <Eq>{`L(0.02) = 1.2`}</Eq>. Actual value: <Eq>{`1.02^{10} = 1.2190`}</Eq> — 1.6% error.</>}
+>
+Approximate $(1.02)^{10}$ using the linearization of $(1+x)^{10}$ at $x = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="57.8"
+  dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.1", exercicio: "4.4.1", licenca: "CC-BY-NC" }}
+  resposta="$3.019$"
+  solucao={<><Eq>{`f(x) = x^{1/3}`}</Eq>, <Eq>{`a = 27`}</Eq>. <Eq>{`f(27) = 3`}</Eq>, <Eq>{`f'(27) = (1/3)(27)^{-2/3} = 1/27`}</Eq>. <Eq>{`L(27.5) = 3 + (1/27)(0.5) = 3 + 0.0185 \\approx 3.019`}</Eq>. Actual value: <Eq>{`27.5^{1/3} \\approx 3.0185`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Base point.</strong> <Eq>{`a = 27`}</Eq> because <Eq>{`27^{1/3} = 3`}</Eq> is an exact perfect cube.</li>
+      <li><strong>Derivative at a.</strong> <Eq>{`f'(x) = \\frac{1}{3}x^{-2/3}`}</Eq>, <Eq>{`f'(27) = \\frac{1}{3} \\cdot 27^{-2/3} = \\frac{1}{3} \\cdot \\frac{1}{9} = \\frac{1}{27}`}</Eq>.</li>
+      <li><strong>Linearization.</strong> <Eq>{`L(x) = 3 + \\frac{1}{27}(x - 27)`}</Eq>.</li>
+      <li><strong>Evaluation.</strong> <Eq>{`L(27.5) = 3 + \\frac{0.5}{27} \\approx 3.0185`}</Eq>.</li>
+    </ol>
+    <p><em>Curiosity: Newton used this type of calculation to compute roots without a calculator. The method was published in Arithmetica Universalis (1707).</em></p>
+  </>}
+>
+Approximate $\sqrt[3]{27.5}$ using linearization at $a = 27$.
+</Exercicio>
+
+<Exercicio
+  numero="57.9"
+  dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.5", exercicio: "4.2.5", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\tan x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f(0) = 0`}</Eq>, <Eq>{`f'(x) = \\sec^2 x`}</Eq>, <Eq>{`f'(0) = 1`}</Eq>. Linearization: <Eq>{`L(x) = x`}</Eq>.</>}
+>
+Write the linearization of $f(x) = \tan x$ at $a = 0$. This linearization is identical to that of $\sin x$ at $a = 0$ — why?
+</Exercicio>
+
+<Exercicio
+  numero="57.10"
+  dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.2", exercicio: "4.4.2", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = \\arctan x`}</Eq>, <Eq>{`a = 1`}</Eq>. <Eq>{`f(1) = \\pi/4`}</Eq>, <Eq>{`f'(x) = 1/(1+x^2)`}</Eq>, <Eq>{`f'(1) = 1/2`}</Eq>. Linearization: <Eq>{`L(x) = \\pi/4 + (1/2)(x-1)`}</Eq>.</>}
+>
+Write the linearization of $f(x) = \arctan x$ at $a = 1$.
+</Exercicio>
+
+<Exercicio
+  numero="57.11"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.6", exercicio: "1.8.6", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = e^x \\sin x`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f(0) = 0`}</Eq>. Product rule: <Eq>{`f'(x) = e^x \\sin x + e^x \\cos x`}</Eq>. <Eq>{`f'(0) = 0 + 1 = 1`}</Eq>. Linearization: <Eq>{`L(x) = x`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Evaluate f at a = 0.</strong> <Eq>{`f(0) = e^0 \\sin 0 = 1 \\cdot 0 = 0`}</Eq>.</li>
+      <li><strong>Calculate f'(x) using the product rule.</strong> <Eq>{`f'(x) = (e^x)' \\sin x + e^x (\\sin x)' = e^x \\sin x + e^x \\cos x`}</Eq>.</li>
+      <li><strong>Evaluate f'(0).</strong> <Eq>{`f'(0) = e^0 \\sin 0 + e^0 \\cos 0 = 0 + 1 = 1`}</Eq>.</li>
+      <li><strong>Write L(x).</strong> <Eq>{`L(x) = 0 + 1 \\cdot (x - 0) = x`}</Eq>.</li>
+    </ol>
+    <p><em>Note: even though it's a complex product, the linearization is simple — <Eq>{`e^x \\sin x \\approx x`}</Eq> near zero — because both factors have simple linearizations that multiply like <Eq>{`(1+x) \\cdot x \\approx x`}</Eq> for small <Eq>{`x`}</Eq>.</em></p>
+  </>}
+>
+Write the linearization of $f(x) = e^x \sin x$ at $a = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="57.12"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.7", exercicio: "1.8.7", licenca: "CC-BY-NC-SA" }}
+  resposta="$7.0714$"
+  solucao={<><Eq>{`f(x) = \\sqrt{x}`}</Eq>, <Eq>{`a = 49`}</Eq>. <Eq>{`f(49) = 7`}</Eq>, <Eq>{`f'(49) = 1/14`}</Eq>. <Eq>{`L(50) = 7 + (1/14)(1) = 7.0714`}</Eq>. Actual value: <Eq>{`\\sqrt{50} = 7.0711`}</Eq>.</>}
+>
+Approximate $\sqrt{50}$ using linearization at $a = 49$.
+</Exercicio>
+
+### Block B — Differential, Error, and Physical Applications (57.13 to 57.26)
+
+<Exercicio
+  numero="57.13"
+  dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.6", exercicio: "4.2.6", licenca: "CC-BY-NC-SA" }}
+  resposta="$dy = 0.12$"
+  solucao={<><Eq>{`y = x^3`}</Eq>. <Eq>{`dy = 3x^2\\,dx`}</Eq>. At <Eq>{`x = 2`}</Eq>, <Eq>{`dx = 0.01`}</Eq>: <Eq>{`dy = 3(4)(0.01) = 0.12`}</Eq>. Actual change: <Eq>{`\\Delta y = (2.01)^3 - 8 = 0.120601`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Write the differential.</strong> <Eq>{`dy = \\frac{d}{dx}(x^3)\\,dx = 3x^2\\,dx`}</Eq>. The differential is the derivative times the change in x.</li>
+      <li><strong>Substitute the values.</strong> <Eq>{`x = 2`}</Eq>, <Eq>{`dx = 0.01`}</Eq>: <Eq>{`dy = 3(2)^2(0.01) = 3 \\cdot 4 \\cdot 0.01 = 0.12`}</Eq>.</li>
+      <li><strong>Confirm with the actual change.</strong> <Eq>{`\\Delta y = (2.01)^3 - 2^3 = 8.120601 - 8 = 0.120601`}</Eq>. Difference: <Eq>{`0.120601 - 0.12 = 0.000601`}</Eq>. Less than 0.5%.</li>
+    </ol>
+    <p><em>Rule of thumb: the differential is always a first-order approximation — it ignores all terms of order 2 in <Eq>{`dx`}</Eq>. The difference between <Eq>{`\\Delta y`}</Eq> and <Eq>{`dy`}</Eq> is precisely these higher-order terms.</em></p>
+  </>}
+>
+Calculate the differential $dy$ for $y = x^3$ at $x = 2$, $dx = 0.01$. Compare with the actual change $\Delta y$.
+</Exercicio>
+
+<Exercicio
+  numero="57.14"
+  dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.7", exercicio: "4.2.7", licenca: "CC-BY-NC-SA" }}
+  resposta="$dy = 0.1$"
+  solucao={<><Eq>{`y = e^x`}</Eq>. <Eq>{`dy = e^x\\,dx`}</Eq>. At <Eq>{`x = 0`}</Eq>, <Eq>{`dx = 0.1`}</Eq>: <Eq>{`dy = e^0 \\cdot 0.1 = 0.1`}</Eq>. Actual value: <Eq>{`e^{0.1} - 1 = 0.1052`}</Eq>.</>}
+>
+Calculate the differential $dy$ for $y = e^x$ at $x = 0$, $dx = 0.1$.
+</Exercicio>
+
+<Exercicio
+  numero="57.15"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.8", exercicio: "1.8.8", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>, <Eq>{`a = \\pi/6`}</Eq> (30°). <Eq>{`f'(\\pi/6) = \\cos(\\pi/6) = \\sqrt{3}/2 \\approx 0.866`}</Eq>. Difference: <Eq>{`1° = \\pi/180 \\approx 0.01745`}</Eq> rad. <Eq>{`L = 0.5 + 0.866 \\times 0.01745 \\approx 0.5151`}</Eq>. Actual value: <Eq>{`\\sin(31°) = 0.5150`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Convert angles to radians.</strong> <Eq>{`a = 30° = \\pi/6`}</Eq>, <Eq>{`x = 31° = 31\\pi/180`}</Eq>.</li>
+      <li><strong>Calculate x - a.</strong> <Eq>{`x - a = 1° = \\pi/180 \\approx 0.01745`}</Eq> rad.</li>
+      <li><strong>Derivative at a.</strong> <Eq>{`f'(\\pi/6) = \\cos(\\pi/6) = \\sqrt{3}/2 \\approx 0.866`}</Eq>.</li>
+      <li><strong>Linearization.</strong> <Eq>{`L = 0.5 + 0.866 \\times 0.01745 \\approx 0.5151`}</Eq>.</li>
+    </ol>
+    <p><em>Rule of thumb: when linearizing trigonometric functions at angles given in degrees, ALWAYS convert to radians before applying the derivative. Degrees do not work with the standard derivatives.</em></p>
+  </>}
+>
+Approximate $\sin(31°)$ using the linearization of $\sin$ at $a = 30°$. Use $\sin(30°) = 0.5$ and $\cos(30°) = \sqrt{3}/2$.
+</Exercicio>
+
+<Exercicio
+  numero="57.16"
+  dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.3", exercicio: "4.4.3", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = \\cos x`}</Eq>, <Eq>{`a = \\pi/3`}</Eq> (60°). <Eq>{`f(\\pi/3) = 0.5`}</Eq>, <Eq>{`f'(\\pi/3) = -\\sin(\\pi/3) = -\\sqrt{3}/2`}</Eq>. Difference: <Eq>{`59° - 60° = -\\pi/180`}</Eq>. <Eq>{`L = 0.5 + (-0.866)(-\\pi/180) \\approx 0.5151`}</Eq>.</>}
+>
+Approximate $\cos(59°)$ using the linearization of $\cos$ at $a = 60°$.
+</Exercicio>
+
+<Exercicio
+  numero="57.17"
+  dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.8", exercicio: "4.2.8", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$L(x) = 1 + x/2$", correta: true },
+    { texto: "$L(x) = 1 + x$" },
+    { texto: "$L(x) = 1 - x/2$" },
+    { texto: "$L(x) = x/2$" },
+  ]}
+  solucao={<><Eq>{`f(x) = \\sqrt{1+x}`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f(0) = 1`}</Eq>, <Eq>{`f'(x) = 1/(2\\sqrt{1+x})`}</Eq>, <Eq>{`f'(0) = 1/2`}</Eq>. <Eq>{`L(x) = 1 + x/2`}</Eq>. Distractor B ignores the 1/2 factor in the derivative. Distractor C gets the sign wrong. Distractor D forgets the value at a = 0.</>}
+>
+What is the linearization of $f(x) = \sqrt{1 + x}$ at $a = 0$?
+</Exercicio>
+
+<Exercicio
+  numero="57.18"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.9", exercicio: "1.8.9", licenca: "CC-BY-NC-SA" }}
+  resposta="$0.4938$"
+  solucao={<><Eq>{`g(x) = x^{-1/2}`}</Eq>, <Eq>{`a = 4`}</Eq>. <Eq>{`g(4) = 1/2`}</Eq>, <Eq>{`g'(x) = -1/(2x^{3/2})`}</Eq>, <Eq>{`g'(4) = -1/16`}</Eq>. <Eq>{`L(4.1) = 0.5 - (1/16)(0.1) = 0.5 - 0.00625 = 0.4938`}</Eq>.</>}
+>
+Approximate $1/\sqrt{4.1}$ using linearization at $a = 4$.
+</Exercicio>
+
+<Exercicio
+  numero="57.19"
+  dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.9", exercicio: "4.2.9", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\ln x`}</Eq>, <Eq>{`a = e`}</Eq>. <Eq>{`f(e) = 1`}</Eq>, <Eq>{`f'(e) = 1/e`}</Eq>. <Eq>{`L(x) = 1 + (x-e)/e`}</Eq>.</>}
+>
+Write the linearization of $f(x) = \ln x$ at $a = e$.
+</Exercicio>
+
+<Exercicio
+  numero="57.20"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.10", exercicio: "1.8.10", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Absolute error of the linearization of <Eq>{`\\sqrt{4.1}`}</Eq>: <Eq>{`|L(4.1) - \\sqrt{4.1}| = |2.025 - 2.024846| \\approx 0.000154`}</Eq>. Theoretical bound: <Eq>{`M_2(0.1)^2/2`}</Eq> where <Eq>{`M_2 = 1/(4 \\cdot 4^{3/2}) = 1/32`}</Eq>. Bound: <Eq>{`(1/32)(0.01)/2 = 0.000156`}</Eq>. Actual error is within the bound.</>}
+>
+Calculate the absolute error of the linearization of $\sqrt{4.1}$ at $a = 4$ by comparing with $\sqrt{4.1} \approx 2.024846$. Verify that the error is within the bound $M_2 h^2/2$.
+</Exercicio>
+
+<Exercicio
+  numero="57.21"
+  dificuldade="application"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.11", exercicio: "1.8.11", licenca: "CC-BY-NC-SA" }}
+  resposta="$x_1 = 2.25$"
+  solucao={<><Eq>{`f(x) = x^2 - 5`}</Eq>, <Eq>{`f'(x) = 2x`}</Eq>. With <Eq>{`x_0 = 2`}</Eq>: <Eq>{`x_1 = 2 - (4-5)/4 = 2 + 1/4 = 2.25`}</Eq>. Actual value: <Eq>{`\\sqrt{5} = 2.2361`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Rephrase the problem.</strong> Finding <Eq>{`\\sqrt{5}`}</Eq> is equivalent to solving <Eq>{`x^2 - 5 = 0`}</Eq>. Define <Eq>{`f(x) = x^2 - 5`}</Eq>, <Eq>{`f'(x) = 2x`}</Eq>.</li>
+      <li><strong>Apply Newton-Raphson.</strong> <Eq>{`x_1 = x_0 - f(x_0)/f'(x_0) = 2 - (4 - 5)/(2 \\cdot 2) = 2 - (-1)/4 = 2 + 0.25 = 2.25`}</Eq>.</li>
+      <li><strong>Evaluate the error.</strong> <Eq>{`|\\sqrt{5} - 2.25| = |2.2361 - 2.25| = 0.0139`}</Eq>. Starting from 0, we already have 2 correct digits in 1 iteration.</li>
+    </ol>
+    <p><em>Rule of thumb: convergence is quadratic — in the next iteration the error would be <Eq>{`\\approx C(0.014)^2 \\approx 0.0001`}</Eq>, giving another 2 decimal places for free.</em></p>
+  </>}
+>
+Perform one iteration of Newton-Raphson to find $\sqrt{5}$, starting from $x_0 = 2$.
+</Exercicio>
+
+<Exercicio
+  numero="57.22"
+  dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.4", exercicio: "4.4.4", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`f(x) = x^3 - 2`}</Eq>, <Eq>{`f'(x) = 3x^2`}</Eq>. <Eq>{`x_1 = 1 - (-1)/3 = 4/3 \\approx 1.333`}</Eq>. <Eq>{`f(4/3) = 64/27 - 2 = 10/27`}</Eq>. <Eq>{`x_2 = 4/3 - (10/27)/(3 \\cdot 16/9) = 4/3 - 10/144 \\approx 1.2637`}</Eq>. Actual: <Eq>{`2^{1/3} = 1.2599`}</Eq>.</>}
+>
+Perform two iterations of Newton-Raphson to solve $x^3 - 2 = 0$ with $x_0 = 1$.
+</Exercicio>
+
+<Exercicio
+  numero="57.23"
+  dificuldade="modeling"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.11", exercicio: "4.2.11", licenca: "CC-BY-NC-SA" }}
+  resposta="$dV \\approx 10\\pi \\approx 31.4$ cm³"
+  solucao={<><Eq>{`V = (4/3)\\pi r^3`}</Eq>. <Eq>{`dV = 4\\pi r^2\\,dr`}</Eq>. With <Eq>{`r = 5`}</Eq>, <Eq>{`dr = 0.1`}</Eq>: <Eq>{`dV = 4\\pi(25)(0.1) = 10\\pi \\approx 31.4`}</Eq> cm³. Relative error: <Eq>{`10\\pi/(500\\pi/3) \\approx 6\\%`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Differential of volume.</strong> <Eq>{`V = \\frac{4}{3}\\pi r^3 \\Rightarrow dV = 4\\pi r^2\\,dr`}</Eq>. Note that <Eq>{`4\\pi r^2`}</Eq> is the surface area of the sphere — it makes geometric sense.</li>
+      <li><strong>Substitute values.</strong> <Eq>{`r = 5`}</Eq> cm, <Eq>{`dr = 0.1`}</Eq> cm: <Eq>{`dV = 4\\pi(25)(0.1) = 10\\pi \\approx 31.4`}</Eq> cm³.</li>
+      <li><strong>Calculate relative error.</strong> <Eq>{`V(5) = (4/3)\\pi(125) = 500\\pi/3 \\approx 524`}</Eq> cm³. Relative error: <Eq>{`31.4/524 \\approx 6\\%`}</Eq>.</li>
+    </ol>
+    <p><em>Curiosity: the relative error in volume is 3 times the relative error in radius — a direct consequence of <Eq>{`V \\propto r^3`}</Eq>. General rule: for <Eq>{`f(x) = x^n`}</Eq>, the relative error in <Eq>{`f`}</Eq> is <Eq>{`n`}</Eq> times the relative error in <Eq>{`x`}</Eq>.</em></p>
+  </>}
+>
+A sphere has radius $r = 5.0 \pm 0.1$ cm. Estimate the maximum error in the volume $V = \frac{4}{3}\pi r^3$ using the differential.
+</Exercicio>
+
+<Exercicio
+  numero="57.24"
+  dificuldade="modeling"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.6", exercicio: "4.4.6", licenca: "CC-BY-NC" }}
+  resposta="$0.5\%$"
+  solucao={<><Eq>{`T = 2\\pi\\sqrt{L/g}`}</Eq>. <Eq>{`dT/T = (1/2)\\,dL/L`}</Eq>. A relative error in <Eq>{`L`}</Eq> of 1% results in <Eq>{`dT/T = 0.5\\%`}</Eq>. The error in the period is half the error in the length.</>}
+  passos={<>
+    <ol>
+      <li><strong>Write T as a power of L.</strong> <Eq>{`T = 2\\pi g^{-1/2} L^{1/2}`}</Eq>. The exponent of <Eq>{`L`}</Eq> is <Eq>{`1/2`}</Eq>.</li>
+      <li><strong>Relative error rule.</strong> For <Eq>{`T \\propto L^{1/2}`}</Eq>, the relative error in <Eq>{`T`}</Eq> is <Eq>{`1/2`}</Eq> times the relative error in <Eq>{`L`}</Eq>.</li>
+      <li><strong>Apply.</strong> <Eq>{`dT/T = (1/2) \\cdot 1\\% = 0.5\\%`}</Eq>.</li>
+    </ol>
+    <p><em>Rule of thumb: the exponent appears as a multiplicative factor for relative errors. For a square root (exponent 1/2), the relative error is halved. For squaring (exponent 2), the relative error doubles.</em></p>
+  </>}
+>
+The period of a pendulum is $T = 2\pi\sqrt{L/g}$. If the length $L$ has a relative error of $1\%$, what is the relative error in $T$?
+</Exercicio>
+
+<Exercicio
+  numero="57.25"
+  dificuldade="modeling"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.13", exercicio: "4.2.13", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`R = V/I`}</Eq>. <Eq>{`\\partial R/\\partial V = 1/I`}</Eq>, <Eq>{`\\partial R/\\partial I = -V/I^2`}</Eq>. <Eq>{`\\sigma_R^2 \\approx (\\sigma_V/I)^2 + (V\\sigma_I/I^2)^2`}</Eq>, so <Eq>{`\\sigma_R = \\sqrt{(\\sigma_V/I)^2 + (V\\sigma_I/I^2)^2}`}</Eq>. The formula propagates errors quadratically for independent errors.</>}
+>
+For $R = V/I$ with independent errors $\sigma_V$ and $\sigma_I$, write the error propagation formula for $\sigma_R$ using partial derivatives.
+</Exercicio>
+
+<Exercicio
+  numero="57.26"
+  dificuldade="modeling"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.7", exercicio: "4.4.7", licenca: "CC-BY-NC" }}
+  resposta="$dA \\approx 1.2$ cm²"
+  solucao={<><Eq>{`A = \\pi r^2`}</Eq>. <Eq>{`dA = 2\\pi r\\,dr`}</Eq>. With <Eq>{`r = 3`}</Eq>, <Eq>{`dr = 0.064`}</Eq> (since <Eq>{`dA = 1.2 \\Rightarrow dr = 1.2/(2\\pi \\cdot 3) = 0.0637`}</Eq>): <Eq>{`dA = 2\\pi(3)(0.0637) \\approx 1.2`}</Eq> cm².</>}
+>
+The area of a circle is $A = \pi r^2$ with $r = 3.0 \pm 0.064$ cm. Estimate the maximum error in $A$ using the differential.
+</Exercicio>
+
+### Block C — Conceptual Understanding (57.27 to 57.34)
+
+<Exercicio
+  numero="57.27"
+  dificuldade="comprehension"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.12", exercicio: "1.8.12", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "Quadratic: $O((x-a)^2)$", correta: true },
+    { texto: "Linear: $O(x-a)$" },
+    { texto: "Logarithmic: $O(\\ln(x-a))$" },
+    { texto: "Exponential: $O(e^{x-a})$" },
+  ]}
+  solucao={<>From Taylor's theorem with remainder: <Eq>{`f(x) - L(x) = f''(\\xi)(x-a)^2/2`}</Eq>. The error grows with the square of the distance to the base point. Distractor B confuses it with the growth of the linearization itself. Distractors C and D have no basis in Taylor's theorem.</>}
+  passos={<>
+    <ol>
+      <li><strong>Write Taylor with remainder.</strong> <Eq>{`f(x) = f(a) + f'(a)(x-a) + \\frac{f''(\\xi)}{2}(x-a)^2`}</Eq> for some <Eq>{`\\xi`}</Eq> between <Eq>{`a`}</Eq> and <Eq>{`x`}</Eq>.</li>
+      <li><strong>Identify the error.</strong> <Eq>{`f(x) - L(x) = \\frac{f''(\\xi)}{2}(x-a)^2`}</Eq>. The term is quadratic in <Eq>{`(x-a)`}</Eq>.</li>
+      <li><strong>Interpret.</strong> If <Eq>{`|x-a|`}</Eq> is halved, the error drops by a factor of 4. If it doubles, the error quadruples.</li>
+    </ol>
+    <p><em>Rule of thumb: "2nd order" means the exponent of <Eq>{`(x-a)`}</Eq> in the error is 2 — this is why linearization is so useful for small distances but fails for large ones.</em></p>
+  </>}
+>
+Why is the linearization error $|f(x) - L(x)|$ said to be $O((x-a)^2)$? What theorem supports this?
+</Exercicio>
+
+<Exercicio
+  numero="57.28"
+  dificuldade="comprehension"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.14", exercicio: "4.2.14", licenca: "CC-BY-NC-SA" }}
+  solucao={<>When <Eq>{`f'(a) = 0`}</Eq>, the linearization <Eq>{`L(x) = f(a)`}</Eq> is constant. The behavior of <Eq>{`f`}</Eq> near <Eq>{`a`}</Eq> is dominated by curvature (<Eq>{`f''`}</Eq>), not slope. Linearization is unnecessarily inaccurate at these points — use 2nd-order Taylor: <Eq>{`f(x) \\approx f(a) + f''(a)(x-a)^2/2`}</Eq>.</>}
+>
+Under what circumstance is the linearization of $f$ at $a$ particularly inaccurate, even for $x$ close to $a$? What should be done in such cases?
+</Exercicio>
+
+<Exercicio
+  numero="57.29"
+  dificuldade="comprehension"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.13", exercicio: "1.8.13", licenca: "CC-BY-NC-SA" }}
+  solucao={<><Eq>{`f(x) = \\sin x`}</Eq>, <Eq>{`a = 0`}</Eq>: <Eq>{`f'(0) = \\cos(0) = 1`}</Eq>. Linearization: <Eq>{`L(x) = x`}</Eq>. The approximation <Eq>{`\\sin x \\approx x`}</Eq> has less than 1% error for <Eq>{`|x| < 0.17`}</Eq> rad (about 10°). The error bound is <Eq>{`|x|^2/2`}</Eq>; for 1% of <Eq>{`\\sin x \\approx x`}</Eq>, solve <Eq>{`x^2/2 < 0.01 x`}</Eq>, i.e., <Eq>{`x < 0.02`}</Eq> — but the practical engineering criterion is up to 14°.</>}
+>
+Show that $\sin x \approx x$ is the linearization of $\sin$ at $a = 0$. For what values of $x$ (in radians) is the error less than 1%?
+</Exercicio>
+
+<Exercicio
+  numero="57.30"
+  dificuldade="comprehension"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.15", exercicio: "4.2.15", licenca: "CC-BY-NC-SA" }}
+  opcoes={[
+    { texto: "$\\Delta y \\to dy$ as $\\Delta x \\to 0$", correta: true },
+    { texto: "$\\Delta y = dy$ always" },
+    { texto: "$dy = \\Delta y$ only when $f$ is linear" },
+    { texto: "$\\Delta y > dy$ always" },
+  ]}
+  solucao={<><Eq>{`\\Delta y = f(x + \\Delta x) - f(x)`}</Eq> is the actual change. <Eq>{`dy = f'(x)\\,\\Delta x`}</Eq> is the linear change. The difference <Eq>{`\\Delta y - dy = O(\\Delta x^2)`}</Eq> tends to zero faster than <Eq>{`\\Delta x`}</Eq>. Distractor B ignores the 2nd-order error. Distractor C is correct for affine functions but the question is about general equality. Distractor D is false: for concave functions <Eq>{`\\Delta y < dy`}</Eq>.</>}
+>
+What is the relationship between $\Delta y$ (actual change) and $dy$ (differential)?
+</Exercicio>
+
+<Exercicio
+  numero="57.31"
+  dificuldade="comprehension"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.8", exercicio: "4.4.8", licenca: "CC-BY-NC" }}
+  solucao={<>Newton-Raphson: <Eq>{`x_{n+1} = x_n - f(x_n)/f'(x_n)`}</Eq>. Origin: we zero the linearization of <Eq>{`f`}</Eq> at <Eq>{`x_n`}</Eq>. The tangent line is <Eq>{`L(x) = f(x_n) + f'(x_n)(x - x_n)`}</Eq>; setting to zero: <Eq>{`x = x_n - f(x_n)/f'(x_n)`}</Eq>. Each iteration is a local linearization whose zero becomes the next estimate.</>}
+>
+Explain where the Newton-Raphson formula $x_{n+1} = x_n - f(x_n)/f'(x_n)$ comes from in terms of linearization.
+</Exercicio>
+
+<Exercicio
+  numero="57.32"
+  dificuldade="comprehension"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.14", exercicio: "1.8.14", licenca: "CC-BY-NC-SA" }}
+  resposta="$\approx 1.06$"
+  solucao={<><Eq>{`f(x) = (1+x)^{30}`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`f'(0) = 30`}</Eq>. <Eq>{`L(0.002) = 1 + 30(0.002) = 1.06`}</Eq>. Actual value: <Eq>{`(1.002)^{30} \\approx 1.0618`}</Eq>.</>}
+>
+Use linearization to approximate $(1.002)^{30}$.
+</Exercicio>
+
+<Exercicio
+  numero="57.33"
+  dificuldade="comprehension"
+  fonte={{ livro: "OpenStax Calculus Vol.1", url: "https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials", secao: "§4.2", pagina: "ex. 4.2.16", exercicio: "4.2.16", licenca: "CC-BY-NC-SA" }}
+  resposta="$3\%$"
+  solucao={<><Eq>{`V = s^3`}</Eq>. <Eq>{`dV = 3s^2\\,ds`}</Eq>. Relative error in <Eq>{`V`}</Eq>: <Eq>{`dV/V = 3\\,ds/s = 3 \\times 1\\% = 3\\%`}</Eq>. The exponent 3 appears as a multiplicative factor.</>}
+  passos={<>
+    <ol>
+      <li><strong>Differential of volume.</strong> <Eq>{`V = s^3 \\Rightarrow dV = 3s^2\\,ds`}</Eq>.</li>
+      <li><strong>Relative error.</strong> Divide <Eq>{`dV`}</Eq> by <Eq>{`V`}</Eq>: <Eq>{`dV/V = 3s^2 ds / s^3 = 3(ds/s)`}</Eq>.</li>
+      <li><strong>Substitute.</strong> <Eq>{`ds/s = 1\\% \\Rightarrow dV/V = 3 \\times 1\\% = 3\\%`}</Eq>.</li>
+    </ol>
+    <p><em>Rule of thumb: for any <Eq>{`f(x) = x^n`}</Eq>, the relative error in <Eq>{`f`}</Eq> is <Eq>{`n`}</Eq> times the relative error in <Eq>{`x`}</Eq>. This follows directly from the power rule applied to the differential.</em></p>
+  </>}
+>
+The side of a cube is measured with a relative error of $1\%$. What is the relative error in the volume $V = s^3$?
+</Exercicio>
+
+<Exercicio
+  numero="57.34"
+  dificuldade="comprehension"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.9", exercicio: "4.4.9", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`g(x) = (1+x)^{-1/2}`}</Eq>, <Eq>{`a = 0`}</Eq>. <Eq>{`g'(x) = -\\frac{1}{2}(1+x)^{-3/2}`}</Eq>, <Eq>{`g'(0) = -1/2`}</Eq>. <Eq>{`L(x) = 1 - x/2`}</Eq>. This is the binomial approximation for exponent <Eq>{`-1/2`}</Eq>.</>}
+>
+Write the linearization of $g(x) = 1/\sqrt{1+x}$ at $a = 0$.
+</Exercicio>
+
+### Block D — Challenge and Proof (57.35 to 57.40)
+
+<Exercicio
+  numero="57.35"
+  dificuldade="challenge"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.15", exercicio: "1.8.15", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Linearization of <Eq>{`e^x`}</Eq> at <Eq>{`a = 0`}</Eq>: <Eq>{`L(1) = 1 + 1 = 2`}</Eq>. Actual value: <Eq>{`e^1 = 2.71828`}</Eq>. Absolute error: <Eq>{`|2.71828 - 2| = 0.71828`}</Eq>. Relative error: <Eq>{`0.71828 / 2.71828 \\approx 26.4\\%`}</Eq>. It's large because <Eq>{`x = 1`}</Eq> is far from <Eq>{`a = 0`}</Eq>: the error bound is <Eq>{`e \\cdot 1^2/2 \\approx 1.36`}</Eq>, much larger than the effective error but not zero.</>}
+  passos={<>
+    <ol>
+      <li><strong>Calculate L(1).</strong> <Eq>{`L(x) = 1 + x`}</Eq>; <Eq>{`L(1) = 2`}</Eq>.</li>
+      <li><strong>Actual value.</strong> <Eq>{`e^1 = e \\approx 2.71828`}</Eq>.</li>
+      <li><strong>Absolute error.</strong> <Eq>{`|e - 2| = 0.71828`}</Eq>.</li>
+      <li><strong>Relative error.</strong> <Eq>{`0.71828/2.71828 \\approx 26.4\\%`}</Eq>. Large: the point <Eq>{`x = 1`}</Eq> is far from <Eq>{`a = 0`}</Eq>.</li>
+    </ol>
+    <p><em>Note: to improve for <Eq>{`x = 1`}</Eq>, use base point <Eq>{`a = 1`}</Eq> and target <Eq>{`e^{0.1}`}</Eq> — or use a higher-degree Taylor expansion.</em></p>
+  </>}
+>
+Calculate the absolute and relative error of the linearization of $e^x$ at $a = 0$ when approximating $e^1 = e$. Is the result surprising? Explain.
+</Exercicio>
+
+<Exercicio
+  numero="57.36"
+  dificuldade="challenge"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.10", exercicio: "4.4.10", licenca: "CC-BY-NC" }}
+  solucao={<>If <Eq>{`f'(x_n) = 0`}</Eq>, the tangent line at <Eq>{`x_n`}</Eq> is horizontal and never crosses the <Eq>{`x`}</Eq>-axis. Newton-Raphson attempts to divide by <Eq>{`f'(x_n) = 0`}</Eq>: undefined. Example: <Eq>{`f(x) = x^2`}</Eq> with root at <Eq>{`x^* = 0`}</Eq> and <Eq>{`f'(0) = 0`}</Eq>. Newton oscillates or diverges in this case — the horizontal tangent provides no directional information.</>}
+>
+Newton-Raphson fails when $f'(x_n) = 0$. Explain geometrically and give an example function where this occurs.
+</Exercicio>
+
+<Exercicio
+  numero="57.37"
+  dificuldade="challenge"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.16", exercicio: "1.8.16", licenca: "CC-BY-NC-SA" }}
+  solucao={<>From Taylor's theorem: <Eq>{`f(x) = L(x) + f''(\\xi)(x-a)^2/2`}</Eq>. Thus <Eq>{`|f(x) - L(x)| = |f''(\\xi)||x-a|^2/2 \\leq M_2(x-a)^2/2`}</Eq> where <Eq>{`M_2 = \\max_{[a,x]}|f''|`}</Eq>. The bound is <Eq>{`M_2 h^2/2`}</Eq> with <Eq>{`h = |x - a|`}</Eq>.</>}
+>
+Derive the error bound $|f(x) - L(x)| \leq \frac{M_2}{2}(x-a)^2$ from Taylor's theorem with the Lagrange remainder.
+</Exercicio>
+
+<Exercicio
+  numero="57.38"
+  dificuldade="challenge"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "ex. 4.4.11", exercicio: "4.4.11", licenca: "CC-BY-NC" }}
+  resposta="$dV = 15\\pi \\approx 47.1$ cm³"
+  solucao={<><Eq>{`V = \\pi r^2 h`}</Eq>. Total differential: <Eq>{`dV = 2\\pi r h\\,dr + \\pi r^2\\,dh`}</Eq>. With <Eq>{`r = 5`}</Eq>, <Eq>{`h = 10`}</Eq>, <Eq>{`dr = 0.1`}</Eq>, <Eq>{`dh = 0.2`}</Eq>: <Eq>{`dV = 2\\pi(5)(10)(0.1) + \\pi(25)(0.2) = 10\\pi + 5\\pi = 15\\pi \\approx 47.1`}</Eq> cm³.</>}
+  passos={<>
+    <ol>
+      <li><strong>Total differential.</strong> For functions of two variables: <Eq>{`dV = \\frac{\\partial V}{\\partial r}\\,dr + \\frac{\\partial V}{\\partial h}\\,dh`}</Eq>.</li>
+      <li><strong>Partial derivatives.</strong> <Eq>{`\\partial V/\\partial r = 2\\pi r h`}</Eq>, <Eq>{`\\partial V/\\partial h = \\pi r^2`}</Eq>.</li>
+      <li><strong>Substitute.</strong> <Eq>{`dV = 2\\pi(5)(10)(0.1) + \\pi(25)(0.2) = 10\\pi + 5\\pi = 15\\pi \\approx 47.1`}</Eq> cm³.</li>
+    </ol>
+    <p><em>Rule of thumb: the total differential generalizes the one-dimensional differential to functions of multiple variables — each variable contributes its partial derivative times its change.</em></p>
+  </>}
+>
+Volume of a cylinder: $V = \pi r^2 h$. With $r = 5.0 \pm 0.1$ cm and $h = 10.0 \pm 0.2$ cm, estimate the maximum error in $V$ using the total differential.
+</Exercicio>
+
+<Exercicio
+  numero="57.39"
+  dificuldade="proof"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.17", exercicio: "1.8.17", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Full Taylor series: <Eq>{`f(x) = \\sum_{k=0}^{\\infty} \\frac{f^{(k)}(a)}{k!}(x-a)^k`}</Eq>. Truncating at <Eq>{`k = 1`}</Eq>: <Eq>{`P_1(x) = f(a) + f'(a)(x-a) = L(x)`}</Eq>. Linearization is the degree 1 Taylor polynomial. The error <Eq>{`f(x) - P_1(x) = \\sum_{k=2}^{\\infty} \\frac{f^{(k)}(a)}{k!}(x-a)^k`}</Eq> has dominant term <Eq>{`O((x-a)^2)`}</Eq>.</>}
+>
+Prove that $L(x) = f(a) + f'(a)(x-a)$ is the degree 1 Taylor polynomial of $f$ at $a$, and that the error is $O((x-a)^2)$.
+</Exercicio>
+
+<Exercicio
+  numero="57.40"
+  dificuldade="proof"
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-1-8-tan-line-approx.html", secao: "§1.8", pagina: "ex. 1.8.18", exercicio: "1.8.18", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Let <Eq>{`x^*`}</Eq> be the exact root (<Eq>{`f(x^*) = 0`}</Eq>), <Eq>{`e_n = x_n - x^*`}</Eq>. Taylor at <Eq>{`x^*`}</Eq>: <Eq>{`f(x_n) = f'(x^*) e_n + f''(\\xi_n) e_n^2/2`}</Eq>. Newton iteration: <Eq>{`e_{n+1} = x_{n+1} - x^* = x_n - f(x_n)/f'(x_n) - x^*`}</Eq>. Expanding and simplifying: <Eq>{`e_{n+1} \\approx -f''(x^*) e_n^2 / (2f'(x^*))`}</Eq>. Thus <Eq>{`|e_{n+1}| \\leq C|e_n|^2`}</Eq> with <Eq>{`C = |f''(x^*)| / (2|f'(x^*)|)`}</Eq>. Quadratic convergence.</>}
+>
+Prove that Newton-Raphson has quadratic convergence: if $e_n = x_n - x^*$ is the error at the $n$-th iteration and $f'(x^*) \neq 0$, then $|e_{n+1}| \leq C\,|e_n|^2$ for some constant $C > 0$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**Active Calculus**](https://activecalculus.org/single/sec-1-8-tan-line-approx.html) — Boelkins · 2024 · §1.8 "The tangent line approximation" · CC-BY-NC-SA. **Primary source.** Exercises 57.1–57.2, 57.5, 57.7, 57.11–57.12, 57.15, 57.20–57.21, 57.27, 57.29, 57.31, 57.35, 57.37, 57.39–57.40.
+- [**Calculus Volume 1**](https://openstax.org/books/calculus-volume-1/pages/4-2-linear-approximations-and-differentials) — OpenStax · 2016 · §4.2 "Linear Approximations and Differentials" · CC-BY-NC-SA. Exercises 57.3–57.4, 57.6, 57.13–57.14, 57.17–57.19, 57.23, 57.25, 57.28, 57.30, 57.33.
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman et al. · 2024 · v5 · §4.4 "Differentials" · CC-BY-NC. Exercises 57.8–57.10, 57.16, 57.22, 57.24, 57.26, 57.31, 57.34, 57.36, 57.38.

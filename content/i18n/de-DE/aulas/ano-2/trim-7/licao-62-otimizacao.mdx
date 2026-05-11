@@ -1,0 +1,689 @@
+---
+titulo: "Lektion 62 — Angewandte Optimierung"
+slug: "licao-62-otimizacao"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Allgemeine Optimierungsmethode mit einer Variablen: modellieren, ableiten, klassifizieren. Klassische Probleme: Schachteln, Dosen, Zäune, Kosten und Gewinne."
+ordem: 62
+publicado: true
+tags: ["otimizacao", "derivada", "modelagem", "ano-2", "trim-7"]
+prerrequisitos: ["licao-61-maximos-minimos"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["2.º ano EM", "Equiv. Math II/III japonês", "Equiv. Analysis Klasse 12 alemã", "Equiv. H2 Maths Singapura"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{Modellieren} \to Q = f(x) \to f'(x^*) = 0 \to \text{klassifizieren}"
+  legenda={<>In der <strong>angewandten Optimierung</strong>: identifizieren Sie die Größe <em>Q</em>, die zu maximieren oder minimieren ist, nutzen Sie die Nebenbedingung, um <em>Q</em> als Funktion einer Variablen auszudrücken, leiten Sie ab, finden Sie den kritischen Punkt <Eq>{`x^*`}</Eq>, und vergleichen Sie <Eq>{`f(x^*)`}</Eq> mit den Extremen des physikalischen Definitionsbereichs.</>}
+  audioTexto="Angewandte Optimierung. Das Vier-Schritte-Verfahren: den zu optimierenden Betrag unter Verwendung der Nebenbedingung als Funktion einer einzigen Variablen modellieren; ableiten und auf Null setzen, um die kritischen Punkte zu finden; nach dem Vorzeichenwechsel der zweiten Ableitung klassifizieren; und mit den Extremen des physikalischen Definitionsbereichs vergleichen, um das globale Optimum zu erhalten."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Bücher zu dieser Lektion
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-3-3-optimization.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §3.3 Global Optimization · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Formales Optimierungsverfahren, Probleme mit Fläche, Volumen und wirtschaftlicher Modellierung.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.7 Applied Optimization Problems · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Klassische Probleme: Schachtel ohne Deckel, Zylinderbüchse, rechteckiger Zaun — Quelle der Übungen dieser Lektion.</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §4.3 Applied Optimization · CC-BY-NC · </span>
+      <em className="text-clube-mist">Variationen mit Trennwänden, mehrere Nebenbedingungen und Probleme der minimalen Entfernung.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Allgemeine Methode und Grundlagen">
+
+### Optimierungsproblem mit Nebenbedingung
+
+<Definicao titulo="Allgemeine Struktur">
+
+Ein **Optimierungsproblem** hat drei Bestandteile:
+
+1. Eine **Zielfunktion** <Eq>{`Q`}</Eq>, die wir maximieren oder minimieren möchten.
+2. Eine oder mehrere **Entscheidungsvariablen** und ein **physikalischer Definitionsbereich** <Eq>{`[a, b]`}</Eq>, der durch den Kontext vorgegeben ist.
+3. Eine oder mehrere **Nebenbedingungen**, die die Variablen verknüpfen — werden verwendet, um auf eine einzelne Variable zu reduzieren.
+
+</Definicao>
+
+### Optimierungsalgorithmus (eine Variable)
+
+<Definicao titulo="Standardverfahren">
+
+1. **Definieren** Sie die zu optimierende Größe und benennen Sie die Variablen mit physikalischer Bedeutung.
+2. **Schreiben** Sie die Gleichung <Eq>{`Q = f(x, y, \\ldots)`}</Eq> für die Zielfunktion.
+3. **Nutzen Sie die Nebenbedingung**, um sekundäre Variablen zu eliminieren und erhalten Sie <Eq>{`Q = f(x)`}</Eq> mit Definitionsbereich <Eq>{`x \\in [a, b]`}</Eq>.
+4. **Wenden Sie den Extrema-Algorithmus an**: kritische Punkte im Inneren + Auswertung an den Grenzen.
+5. **Interpretieren** Sie das Ergebnis im Kontext des Problems (Einheiten, physikalische Viabilität).
+
+</Definicao>
+
+> "Suppose we wish to find the value(s) of x for which a given function Q is maximized or minimized. We use derivatives to find critical points and then evaluate Q at those points and at the endpoints of the domain to determine the absolute maximum or minimum." — [Active Calculus §3.3](https://activecalculus.org/single/sec-3-3-optimization.html)
+
+### Kanonisches Beispiel: Zylinderdose mit festem Volumen
+
+<Definicao titulo="Das Dosenproblem">
+
+Gegeben: Volumen <Eq>{`V`}</Eq> fixiert (Parameter). Minimieren Sie die Gesamtoberfläche <Eq>{`A = 2\\pi r^2 + 2\\pi r h`}</Eq>.
+
+**Nebenbedingung:** <Eq>{`\\pi r^2 h = V \\Rightarrow h = V/(\\pi r^2)`}</Eq>.
+
+**Reduzierte Zielfunktion:**
+<Eq display>{`A(r) = 2\\pi r^2 + \\frac{2V}{r}, \quad r > 0`}</Eq>
+
+**Kritischer Punkt:**
+<Eq display>{`A'(r) = 4\\pi r - \\frac{2V}{r^2} = 0 \\implies r^* = \\sqrt[3]{\\frac{V}{2\\pi}}`}</Eq>
+
+**Optimale Dimension:** durch Einsetzen erhalten wir <Eq>{`h^* = 2r^*`}</Eq>. Die Dose mit minimalem Material hat **Höhe gleich Durchmesser**.
+
+</Definicao>
+
+<Insight>
+
+Die optimale Dose (<Eq>{`h = 2r`}</Eq>) minimiert das Verhältnis Fläche/Volumen. Echte Limonadendosen weichen davon ab, weil es Gründe gibt für Stapelbarkeit und Festigkeit, nicht aus reiner mathematischer Optimierung.
+
+</Insight>
+
+> "The optimal cylinder has height equal to diameter — this is a consequence of the symmetry of the problem and appears frequently in packaging design." — [OpenStax Calculus Vol. 1, §4.7](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems)
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 500 200" className="w-full">
+  <defs>
+    <marker id="arr62" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g>
+    <line x1="40" y1="160" x2="470" y2="160" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr62)"/>
+    <line x1="60" y1="175" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr62)"/>
+    <path d="M 80,20 C 100,150 170,175 240,155 C 310,135 380,145 450,100" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+    <circle cx="240" cy="155" r="5" fill="rgb(232 199 122)"/>
+    <line x1="240" y1="155" x2="240" y2="160" stroke="rgb(232 199 122)" strokeWidth="1" strokeDasharray="3,2"/>
+    <text x="240" y="175" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.8">r*</text>
+    <text x="260" y="152" fontSize="9" fontFamily="ui-monospace,monospace" fill="rgb(232 199 122)">Minimum</text>
+    <text x="140" y="18" fontSize="11" fontFamily="serif" fill="currentColor" fillOpacity="0.7">A(r)</text>
+    <text x="465" y="163" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.6">r</text>
+  </g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Schematischer Graph von <Eq>{`A(r)`}</Eq>: sinkt bis zum optimalen Punkt <Eq>{`r^*`}</Eq>, dann steigt. Das Minimum ist der einzige innere kritische Punkt.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein 5-jähriges Kind">
+
+Stellen Sie sich vor, Sie haben ein Stück Schnur und möchten den **größtmöglichen Zaun** für Ihren Hund zum Spielen machen.
+
+Wenn Sie den Zaun **sehr lang und dünn** machen, passt Ihr Hund kaum von einer Seite zur anderen.
+
+Wenn Sie ihn **quadratisch** machen, kann Ihr Hund viel mehr spielen!
+
+Der Trick ist: mit der gleichen Schnur haben unterschiedliche Formen unterschiedliche Größen. **Die richtige Form spart mehr Platz.** Mathematik hilft uns, die beste Form zu finden!
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein 10-jähriges Kind">
+
+Sie haben 40 Meter Zaun und möchten ein rechteckiges Gehege bauen. Welches ist das größtmögliche Gehege, das Sie bauen können?
+
+Nennen Sie <Eq>{`x`}</Eq> die Breite. Die Länge ist <Eq>{`20 - x`}</Eq> (weil der Umfang 40 m ergeben muss).
+
+Fläche: <Eq>{`A(x) = x \\cdot (20 - x) = 20x - x^2`}</Eq>.
+
+Ableitung: <Eq>{`A'(x) = 20 - 2x = 0 \\Rightarrow x = 10`}</Eq>.
+
+Das größtmögliche Gehege hat <Eq>{`10 \\times 10 = 100`}</Eq> m² — es ist ein **Quadrat**!
+
+</Porta>
+
+<Porta nivel="15" titulo="Für den Gymnasiasten">
+
+Angewandte Optimierung folgt einem Vier-Schritte-Rezept. Üben Sie die Schritte, bis sie automatisch werden.
+
+**Schritt 1 — Modellieren:** lesen Sie das Problem und schreiben Sie die Zielfunktion <Eq>{`Q`}</Eq> auf (was Sie maximieren/minimieren möchten).
+
+**Schritt 2 — Reduzieren:** nutzen Sie die Nebenbedingung, um zusätzliche Variablen zu eliminieren. Sie brauchen <Eq>{`Q = f(x)`}</Eq> mit **einer** Variablen nur.
+
+**Schritt 3 — Ableiten:** berechnen Sie <Eq>{`f'(x)`}</Eq>, setzen Sie gleich Null, finden Sie <Eq>{`x^*`}</Eq>.
+
+**Schritt 4 — Vergleichen:** werten Sie <Eq>{`f`}</Eq> an <Eq>{`x^*`}</Eq> und an den Grenzen des physikalischen Definitionsbereichs aus. Der größte (oder kleinste) Wert gewinnt.
+
+**Tipp für Schritt 2:** wenn das Problem von „festem Umfang", „festem Volumen", „festem Budget" spricht, das ist die Nebenbedingung. Isolieren Sie eine Variable und ersetzen Sie.
+
+**Achtung auf den physikalischen Definitionsbereich:** Längen sind positiv; <Eq>{`0 < x < L`}</Eq>. Ignorieren Sie das niemals.
+
+</Porta>
+
+<Porta nivel="25" titulo="Für den Ingenieurstudenten">
+
+Optimierung mit einer Variablen ist der einfachste Fall eines allgemeinen mathematischen Programmierproblem. Hier ist die Technik direkt: der Extremwertsatz garantiert, dass, wenn der Definitionsbereich kompakt und <Eq>{`f`}</Eq> stetig ist, das Optimum existiert — und der Extrema-Algorithmus findet es.
+
+**Wenn der Definitionsbereich offen oder unbeschränkt ist:** das Optimum könnte der einzige kritische Punkt sein. Das Standardargument ist: wenn <Eq>{`f(x) \\to +\\infty`}</Eq> wenn <Eq>{`x \\to 0^+`}</Eq> und <Eq>{`x \\to +\\infty`}</Eq>, und es gibt einen einzigen inneren kritischen Punkt mit <Eq>{`f'' > 0`}</Eq>, dann ist dieser Punkt das globale Minimum (nicht nur lokal). Dieses Argument tritt explizit im Dosenproblem auf.
+
+**Modellierung zweiter Ordnung:** in der Wirtschaft bestimmen die Grenzkosten <Eq>{`C'(x)`}</Eq> und der Grenzertrag <Eq>{`R'(x)`}</Eq> den Punkt des maximalen Gewinns: <Eq>{`L'(x) = R'(x) - C'(x) = 0`}</Eq>, d.h. Grenzertrag = Grenzkosten. Dies ist das Zentralprinzip der neoklassischen Mikroökonomie.
+
+**Erweiterung:** in zwei Variablen führt <Eq>{`\\nabla f = 0`}</Eq> mit Nebenbedingung <Eq>{`g = 0`}</Eq> zur Methode der Lagrange-Multiplikatoren — nächster natürlicher Schritt nach dieser Lektion.
+
+</Porta>
+
+<Porta nivel="40" titulo="Für den Senior-Profi">
+
+Das Optimierungsproblem mit Nebenbedingung hat Wurzeln in der Variationsrechnung des 17. Jahrhunderts. Euler und Lagrange verallgemeinerten auf Funktionale — „welche Funktion <Eq>{`y(x)`}</Eq> minimiert <Eq>{`\\int F(x,y,y') dx`}</Eq>?" Die Euler-Lagrange-Gleichung ist die Verallgemeinerung von <Eq>{`f'(x^*) = 0`}</Eq> auf unendlich-dimensionale Räume.
+
+In der optimalen Steuerung (Pontryagin, 1950er Jahre) ist die Frage „welche Steuerfunktion <Eq>{`u(t)`}</Eq> minimiert die Kosten über eine Flugbahn?" Das Maximumprinzip von Pontryagin verallgemeinert die Methode dieser Lektion auf dynamische Systeme. Direkte Anwendungen: Raketentrajektorien, Ressourcenverwaltung, algorithmischer Handel.
+
+Im modernen Machine Learning ist das Neuronales-Netz-Trainings-Problem Optimierung in extrem hoher Dimension (Milliarden von Parametern). Die Intuition dieser Lektion — „der Gradient zeigt, wohin die Funktion wächst; Null-Gradient ist Kandidat für Optimum" — ist das Fundament des Gradientenabstiegs (SGD, Adam, etc.).
+
+Die Wirtschaft der Zylinderdose taucht in der Verpackungsgestaltung wieder auf: Aluminium kostet pro Fläche, nicht pro Volumen. Das Verhältnis <Eq>{`h = 2r`}</Eq> (mathematisch optimal) ergibt nach Transportbeschränkungen (Stapeln: niedrigere Dosen) und Verkaufsförderung (größeres Etikett). Echte Ingenieurwissenschaft ist Optimierung mit mehreren Nebenbedingungen und Zielen in Konflikt.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktische brasilianische Anwendung">
+
+**Problem:** Eine kleine Verpackungsfabrik in São Paulo erhält einen Auftrag für Schachteln ohne Deckel aus rechteckigem Karton 12 cm × 8 cm. Um die Schachtel herzustellen, schneiden sie Quadrate mit Seitenlänge <Eq>{`x`}</Eq> cm an den vier Ecken aus und falten die Laschen.
+
+Basisdimensionen: <Eq>{`(12 - 2x) \\times (8 - 2x)`}</Eq>. Höhe: <Eq>{`x`}</Eq>. Definitionsbereich: <Eq>{`0 < x < 4`}</Eq>.
+
+<Eq display>{`V(x) = x(12-2x)(8-2x) = 4x^3 - 40x^2 + 96x`}</Eq>
+
+<Eq display>{`V'(x) = 12x^2 - 80x + 96 = 4(3x^2 - 20x + 24)`}</Eq>
+
+Nullstellen: <Eq>{`x = \\frac{20 \\pm \\sqrt{400 - 288}}{6} = \\frac{20 \\pm \\sqrt{112}}{6}`}</Eq>.
+
+<Eq>{`x_1 \\approx 1{,}57`}</Eq> cm (viabel) und <Eq>{`x_2 \\approx 5{,}10`}</Eq> cm (außerhalb des Definitionsbereichs).
+
+<Eq>{`V(1{,}57) \\approx 67{,}6`}</Eq> cm³. Daher maximiert das Schneiden von Quadraten etwa **1,57 cm** das Schachtelvolumen — direktes, praktisches Ergebnis anwendbar auf der Fabrikhalle.
+
+**In Brasilien:** diese Art von Problem taucht bei der Optimierung von Verpackungen auf, um Materialverschwendung zu reduzieren, relevant für Unternehmen, die eine ISO-14001-Zertifizierung (Umweltmanagementsystem) anstreben.
+
+</Porta>
+
+</DuasPortas>
+
+## Gelöste Beispiele
+
+<Exemplo titulo="Rechteckiger Zaun mit einer festen Seite">
+
+**Problem.** Ein Landwirt hat 120 m Zaun zum Bau eines rechteckigen Weideparcels und nutzt eine bestehende Mauer als eine der langen Seiten. Welche Dimension des Weideparcels maximiert die Fläche?
+
+**Strategie.** Identifizieren Sie die Zielfunktion (Fläche) und die Nebenbedingung (Umfang mit drei freien Seiten = 120 m). Eliminieren Sie eine Variable und maximieren Sie.
+
+**Lösung.**
+
+Seien <Eq>{`x`}</Eq> = Breite (zwei Seiten) und <Eq>{`y`}</Eq> = Länge (der Mauer entgegengesetzte Seite). Nebenbedingung: <Eq>{`2x + y = 120 \\Rightarrow y = 120 - 2x`}</Eq>.
+
+Fläche: <Eq>{`A(x) = xy = x(120 - 2x) = 120x - 2x^2`}</Eq>. Definitionsbereich: <Eq>{`0 < x < 60`}</Eq>.
+
+<Eq display>{`A'(x) = 120 - 4x = 0 \\implies x = 30 \\text{ m}`}</Eq>
+
+<Eq>{`y = 120 - 60 = 60`}</Eq> m. Maximale Fläche: <Eq>{`30 \\times 60 = 1800`}</Eq> m².
+
+**Überprüfung.** <Eq>{`A''(30) = -4 < 0`}</Eq> → Maximum bestätigt. An den Grenzen: <Eq>{`A(0) = A(60) = 0`}</Eq>.
+
+**Quelle.** [OpenStax Calculus Vol. 1, §4.7, Example 4.33](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Schachtel ohne Deckel mit maximalem Volumen">
+
+**Problem.** Aus einem quadratischen Blech mit Seitenlänge 36 cm schneiden Sie gleiche Quadrate an den Ecken aus und falten die Laschen, um eine Schachtel ohne Deckel zu bilden. Welche Schnittgröße maximiert das Volumen?
+
+**Strategie.** Drücken Sie das Volumen als Funktion der Seitenlänge <Eq>{`x`}</Eq> des ausgeschnittenen Quadrats aus, leiten Sie ab, finden Sie den kritischen Punkt.
+
+**Lösung.**
+
+Basis: <Eq>{`(36 - 2x)^2`}</Eq>. Höhe: <Eq>{`x`}</Eq>. Definitionsbereich: <Eq>{`0 < x < 18`}</Eq>.
+
+<Eq display>{`V(x) = x(36-2x)^2 = x(1296 - 144x + 4x^2) = 4x^3 - 144x^2 + 1296x`}</Eq>
+
+<Eq display>{`V'(x) = 12x^2 - 288x + 1296 = 12(x^2 - 24x + 108) = 12(x-6)(x-18)`}</Eq>
+
+Nullstellen: <Eq>{`x = 6`}</Eq> (viabel) und <Eq>{`x = 18`}</Eq> (Grenzpunkt, <Eq>{`V = 0`}</Eq>).
+
+<Eq>{`V(6) = 6 \\cdot 24^2 = 6 \\cdot 576 = 3456`}</Eq> cm³.
+
+**Überprüfung.** <Eq>{`V''(6) = 24 \\cdot 6 - 288 = -144 < 0`}</Eq> → Maximum.
+
+**Quelle.** [OpenStax Calculus Vol. 1, §4.7, Example 4.32](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Zylinderdose mit minimaler Fläche">
+
+**Problem.** Eine Zylinderbüchse muss <Eq>{`V = 1000`}</Eq> cm³ enthalten. Bestimmen Sie den Radius und die Höhe, die die Materialmenge minimieren.
+
+**Strategie.** Drücken Sie die Fläche als Funktion des Radius unter Verwendung von <Eq>{`h = V/(\\pi r^2)`}</Eq> aus, leiten Sie ab.
+
+**Lösung.**
+
+<Eq display>{`A(r) = 2\\pi r^2 + \\frac{2V}{r} = 2\\pi r^2 + \\frac{2000}{r}`}</Eq>
+
+<Eq display>{`A'(r) = 4\\pi r - \\frac{2000}{r^2} = 0 \\implies r^3 = \\frac{2000}{4\\pi} = \\frac{500}{\\pi}`}</Eq>
+
+<Eq display>{`r^* = \\sqrt[3]{\\frac{500}{\\pi}} \\approx 5{,}42 \\text{ cm}`}</Eq>
+
+<Eq>{`h^* = 1000/(\\pi \\cdot r^{*2}) \\approx 10{,}84`}</Eq> cm <Eq>{`= 2r^*`}</Eq> — Höhe gleich Durchmesser.
+
+**Überprüfung.** <Eq>{`A''(r) = 4\\pi + 4000/r^3 > 0`}</Eq> für alle <Eq>{`r > 0`}</Eq> → globales Minimum.
+
+**Quelle.** [Active Calculus §3.3, Activity 3.3.2](https://activecalculus.org/single/sec-3-3-optimization.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Minimale Entfernung von Punkt zu Linie">
+
+**Problem.** Bestimmen Sie den Punkt auf der Geraden <Eq>{`y = 2x + 3`}</Eq>, der dem Ursprung am nächsten liegt.
+
+**Strategie.** Minimieren Sie <Eq>{`d^2 = x^2 + y^2`}</Eq> (äquivalent zu <Eq>{`d`}</Eq> minimieren) durch Einsetzen von <Eq>{`y = 2x + 3`}</Eq>.
+
+**Lösung.**
+
+<Eq display>{`D(x) = x^2 + (2x+3)^2 = 5x^2 + 12x + 9`}</Eq>
+
+<Eq display>{`D'(x) = 10x + 12 = 0 \\implies x^* = -\\tfrac{6}{5}`}</Eq>
+
+<Eq>{`y^* = 2(-6/5) + 3 = 3/5`}</Eq>. Entfernung: <Eq>{`d = \\sqrt{(6/5)^2 + (3/5)^2} = \\sqrt{45/25} = 3\\sqrt{5}/5`}</Eq>.
+
+**Überprüfung.** <Eq>{`D''(x) = 10 > 0`}</Eq> → Minimum. Die Punkt-zu-Linie-Distanzformel gibt das gleiche Ergebnis: <Eq>{`d = |0 - 0 + 3|/\\sqrt{5} = 3/\\sqrt{5} = 3\\sqrt{5}/5`}</Eq>.
+
+**Quelle.** [APEX Calculus §4.3, Example 4.3.2](https://www.apexcalculus.com/) · CC-BY-NC
+
+</Exemplo>
+
+<Exemplo titulo="Maximaler Gewinn mit nichtlinearen Kosten">
+
+**Problem.** Ein Unternehmen hat Umsatz <Eq>{`R(x) = 200x - x^2`}</Eq> und Kosten <Eq>{`C(x) = x^3/3 - 7x^2 + 111x + 50`}</Eq> für <Eq>{`x \\in [0, 14]`}</Eq> Einheiten. Maximieren Sie den Gewinn.
+
+**Strategie.** Gewinn <Eq>{`L = R - C`}</Eq>. Leiten Sie ab, finden Sie kritischen Punkt, vergleichen Sie mit Grenzen.
+
+**Lösung.**
+
+<Eq display>{`L(x) = 200x - x^2 - \\frac{x^3}{3} + 7x^2 - 111x - 50 = -\\frac{x^3}{3} + 6x^2 + 89x - 50`}</Eq>
+
+<Eq display>{`L'(x) = -x^2 + 12x + 89`}</Eq>
+
+Diskriminante: <Eq>{`144 + 356 = 500`}</Eq>. Nullstellen: <Eq>{`x = \\frac{-12 \\pm \\sqrt{500}}{-2}`}</Eq>. Positive Nullstelle in <Eq>{`[0,14]`}</Eq>: <Eq>{`x^* \\approx 14`}</Eq> ... neuberechnen: <Eq>{`x = (12 + \\sqrt{500})/2 \\approx (12 + 22{,}36)/2 \\approx 17{,}18`}</Eq> (außerhalb). Kleinere Nullstelle: <Eq>{`(12 - 22{,}36)/2 \\approx -5{,}18`}</Eq> (außerhalb). Also <Eq>{`L'(x) > 0`}</Eq> in <Eq>{`[0,14]`}</Eq> — <Eq>{`L`}</Eq> wachsend: Maximum an Grenzpunkt <Eq>{`x = 14`}</Eq>.
+
+<Eq>{`L(14) = -2744/3 + 6(196) + 89(14) - 50 = -914{,}67 + 1176 + 1246 - 50 \\approx 1457`}</Eq>.
+
+**Überprüfung.** Überprüfen Sie <Eq>{`L(0) = -50`}</Eq> bestätigt, dass das absolute Maximum am Grenzpunkt <Eq>{`x = 14`}</Eq> liegt.
+
+**Quelle.** [Active Calculus §3.3, Exercise 3.3.4](https://activecalculus.org/single/sec-3-3-optimization.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-62-otimizacao">
+
+<Exercicio
+  numero="62.1"
+  dificuldade="aplicacao"
+  solucao={<>Umfang: <Eq>{`2x + 2y = 100 \\Rightarrow y = 50 - x`}</Eq>. Fläche: <Eq>{`A(x) = x(50-x) = 50x - x^2`}</Eq>. <Eq>{`A'(x) = 50 - 2x = 0 \\Rightarrow x = 25`}</Eq>. Maximale Fläche: <Eq>{`25 \\times 25 = 625`}</Eq> m² (Quadrat).</>}
+  passos={<><ol><li>Benennen Sie die Dimensionen: Breite <Eq>{`x`}</Eq>, Länge <Eq>{`y`}</Eq>.</li><li>Nebenbedingung: <Eq>{`2x + 2y = 100`}</Eq>, also <Eq>{`y = 50 - x`}</Eq>.</li><li>Zielfunktion: <Eq>{`A = xy = x(50-x)`}</Eq>. Definitionsbereich: <Eq>{`0 < x < 50`}</Eq>.</li><li>Leiten Sie ab und setzen Sie auf Null: <Eq>{`A'(x) = 50 - 2x = 0 \\Rightarrow x = 25`}</Eq>.</li><li><Eq>{`A''(25) = -2 < 0`}</Eq> → Maximum. <Eq>{`A_\\max = 625`}</Eq> m².</li></ol><em>Kniff:</em> unter allen Rechtecken mit festem Umfang hat das Quadrat die größte Fläche.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Mit 100 m Zaun, welche ist die größtmögliche rechteckige Fläche, die man einzäunen kann?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.2"
+  dificuldade="aplicacao"
+  solucao={<>Sei <Eq>{`x`}</Eq> die Breite. <Eq>{`3x + 2y = 120 \\Rightarrow y = (120-3x)/2`}</Eq>. Fläche: <Eq>{`A = xy = x(120-3x)/2 = 60x - 3x^2/2`}</Eq>. <Eq>{`A' = 60 - 3x = 0 \\Rightarrow x = 20`}</Eq>. <Eq>{`y = 30`}</Eq>. Maximale Fläche: <Eq>{`20 \\times 30 = 600`}</Eq> m².</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Ein rechteckiges Weideparcel wird durch einen Zaun parallel zur Breite halbiert. Die Gesamtlänge Zaun (Umfang + Trennstrecke) beträgt 120 m. Maximieren Sie die Fläche.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.3"
+  dificuldade="aplicacao"
+  solucao={<>Volumen: <Eq>{`V = \\pi r^2 h`}</Eq>. Seitenfläche: <Eq>{`A = 2\\pi r h + \\pi r^2`}</Eq> (Deckel oben, Boden offen). Für <Eq>{`V = 500`}</Eq> cm³: <Eq>{`h = 500/(\\pi r^2)`}</Eq>. <Eq>{`A(r) = 2\\pi r \\cdot 500/(\\pi r^2) + \\pi r^2 = 1000/r + \\pi r^2`}</Eq>. <Eq>{`A'(r) = -1000/r^2 + 2\\pi r = 0 \\Rightarrow r^3 = 500/\\pi`}</Eq>. <Eq>{`r^* = (500/\\pi)^{1/3} \\approx 5{,}42`}</Eq> cm, <Eq>{`h = 500/(\\pi \\cdot 5{,}42^2) \\approx 5{,}42`}</Eq> cm (halber Durchmesser).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Ein zylindrisches Glas (Boden aber kein Deckel) muss 500 cm³ Volumen haben. Welche Dimensionen minimieren das Materialverbrauch?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.4"
+  dificuldade="aplicacao"
+  solucao={<>Quadratische Basis mit Seitenlänge <Eq>{`x`}</Eq>, Höhe <Eq>{`h`}</Eq>. Volumen: <Eq>{`x^2 h = 32 \\Rightarrow h = 32/x^2`}</Eq>. Kosten: Basis 2 Euro/cm², Seitenflächen 1 Euro/cm². <Eq>{`C = 2 \\cdot 2x^2 + 1 \\cdot 4xh = 4x^2 + 4x \\cdot 32/x^2 = 4x^2 + 128/x`}</Eq>. <Eq>{`C'(x) = 8x - 128/x^2 = 0 \\Rightarrow x^3 = 16 \\Rightarrow x = 2\\sqrt[3]{2} \\approx 2{,}52`}</Eq> cm. <Eq>{`h = 32/(2{,}52)^2 \\approx 5{,}04`}</Eq> cm.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Eine rechteckige Schachtel mit quadratischer Basis und ohne Deckel muss 32 cm³ Volumen haben. Das Basismaterial kostet 2 Euro/cm² und das Seitenmaterial kostet 1 Euro/cm². Minimieren Sie die Gesamtkosten.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.5"
+  dificuldade="aplicacao"
+  solucao={<>Seien <Eq>{`x`}</Eq> und <Eq>{`y`}</Eq> mit <Eq>{`x + y = 20`}</Eq>. Maximieren Sie <Eq>{`P = xy = x(20-x) = 20x - x^2`}</Eq>. <Eq>{`P'(x) = 20 - 2x = 0 \\Rightarrow x = 10`}</Eq>. <Eq>{`P_\\max = 100`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Die Summe zweier positiver Zahlen ist 20. Bestimmen Sie die beiden Zahlen, die ihr Produkt maximieren.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.6"
+  dificuldade="aplicacao"
+  solucao={<>Sei <Eq>{`x`}</Eq> eine positive Zahl. Minimieren Sie <Eq>{`f(x) = x + 4/x`}</Eq>. <Eq>{`f'(x) = 1 - 4/x^2 = 0 \\Rightarrow x = 2`}</Eq>. <Eq>{`f(2) = 2 + 2 = 4`}</Eq>. <Eq>{`f''(2) = 8/8 > 0`}</Eq> → Minimum.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Finden Sie die positive Zahl <Eq>{`x`}</Eq>, so dass die Summe von <Eq>{`x`}</Eq> mit ihrem Kehrwert multipliziert mit 4 minimal ist.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.7"
+  dificuldade="aplicacao"
+  solucao={<>Punkt <Eq>{`(x, 0)`}</Eq> auf der reellen Achse. Entfernung zu <Eq>{`A = (2, 3)`}</Eq>: <Eq>{`D^2 = (x-2)^2 + 9`}</Eq>. <Eq>{`D^2`}</Eq> minimieren: <Eq>{`2(x-2) = 0 \\Rightarrow x = 2`}</Eq>. Nächster Punkt: <Eq>{`(2, 0)`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Bestimmen Sie den Punkt auf der <Eq>{`x`}</Eq>-Achse, der dem Punkt <Eq>{`(2, 3)`}</Eq> am nächsten ist.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.8"
+  dificuldade="aplicacao"
+  solucao={<>Punkt <Eq>{`(x, y)`}</Eq> auf der Linie <Eq>{`y = x`}</Eq>. <Eq>{`D^2 = (x-4)^2 + (x-2)^2 = 2x^2 - 12x + 20`}</Eq>. <Eq>{`4x - 12 = 0 \\Rightarrow x = 3`}</Eq>. Nächster Punkt: <Eq>{`(3, 3)`}</Eq>. Entfernung: <Eq>{`\\sqrt{(3-4)^2 + (3-2)^2} = \\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimmen Sie den Punkt auf der Linie <Eq>{`y = x`}</Eq>, der dem Punkt <Eq>{`(4, 2)`}</Eq> am nächsten ist.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.9"
+  dificuldade="aplicacao"
+  solucao={<>Aus einem Blech von 24 × 9 cm. Sei <Eq>{`x`}</Eq> der Schnitt. Basis: <Eq>{`(24-2x)(9-2x)`}</Eq>, Höhe <Eq>{`x`}</Eq>. <Eq>{`V = x(24-2x)(9-2x) = 4x^3 - 66x^2 + 216x`}</Eq>. <Eq>{`V' = 12x^2 - 132x + 216 = 12(x^2 - 11x + 18) = 12(x-2)(x-9)`}</Eq>. <Eq>{`x = 2`}</Eq> (viabel, da <Eq>{`x < 4{,}5`}</Eq>). <Eq>{`V(2) = 2 \\cdot 20 \\cdot 5 = 200`}</Eq> cm³.</>}
+  passos={<><ol><li>Sei <Eq>{`x`}</Eq> die Seitenlänge des ausgeschnittenen Quadrats. Definitionsbereich: <Eq>{`0 < x < 4{,}5`}</Eq>.</li><li>Basisdimensionen: <Eq>{`(24-2x)`}</Eq> mal <Eq>{`(9-2x)`}</Eq>.</li><li>Volumen: <Eq>{`V = x(24-2x)(9-2x)`}</Eq>. Vereinfachen Sie.</li><li>Leiten Sie ab, faktorisieren Sie, finden Sie Nullstellen. Nur <Eq>{`x = 2`}</Eq> liegt im Definitionsbereich.</li><li>Evaluieren Sie <Eq>{`V(2)`}</Eq> und vergleichen Sie mit <Eq>{`V(0) = 0`}</Eq> und <Eq>{`V(4{,}5) = 0`}</Eq>.</li></ol><em>Kniff:</em> die Grenzpunkte geben <Eq>{`V = 0`}</Eq>; der einzige innere kritische Punkt ist das Maximum.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Aus einem Kartongblech von 24 cm × 9 cm schneiden Sie Quadrate an den Ecken aus und falten die Laschen. Bestimmen Sie den Schnitt, der das Volumen der Schachtel ohne Deckel maximiert.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.10"
+  dificuldade="aplicacao"
+  solucao={<>Umsatz: <Eq>{`R(x) = px = (200 - 2x)x = 200x - 2x^2`}</Eq>. <Eq>{`R'(x) = 200 - 4x = 0 \\Rightarrow x = 50`}</Eq>. Optimaler Preis: <Eq>{`p = 200 - 2(50) = 100`}</Eq>. Maximaler Umsatz: <Eq>{`50 \\times 100 = 5000`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Die Nachfragefunktion eines Produkts ist <Eq>{`p(x) = 200 - 2x`}</Eq> (Preis in Euro pro Einheit, <Eq>{`x`}</Eq> verkaufte Einheiten). Maximieren Sie den Gesamtumsatz <Eq>{`R = px`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.11"
+  dificuldade="aplicacao"
+  solucao={<>Gewinn: <Eq>{`L = R - C = 140x - (x^2 + 40x + 100) = -x^2 + 100x - 100`}</Eq>. <Eq>{`L'(x) = -2x + 100 = 0 \\Rightarrow x = 50`}</Eq>. <Eq>{`L(50) = -2500 + 5000 - 100 = 2400`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Ein Unternehmen hat Umsatz <Eq>{`R(x) = 140x`}</Eq> und Kosten <Eq>{`C(x) = x^2 + 40x + 100`}</Eq>. Bestimmen Sie die Produktion, die den Gewinn maximiert.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.12"
+  dificuldade="aplicacao"
+  solucao={<>Gesamtvolumen: <Eq>{`2x^2 h = 96 \\Rightarrow h = 48/x^2`}</Eq> (Schachtel doppelt gestapelt: zwei Fächer mit Höhe <Eq>{`h/2`}</Eq>... erneut interpretieren: einzelne Schachtel). Für quadratische Schachtel mit Volumen <Eq>{`x^2 h = 96`}</Eq>: <Eq>{`h = 96/x^2`}</Eq>. Fläche: <Eq>{`A = 2x^2 + 4xh = 2x^2 + 384/x`}</Eq>. <Eq>{`A' = 4x - 384/x^2 = 0 \\Rightarrow x^3 = 96 \\Rightarrow x = \\sqrt[3]{96} \\approx 4{,}58`}</Eq> cm. <Eq>{`h \\approx 4{,}58`}</Eq> cm (optimaler Würfel).</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Eine Schachtel mit Deckel und quadratischer Basis muss 96 cm³ Volumen haben. Minimieren Sie die gesamte Oberflächenfläche.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Nutzen Sie die Nebenbedingung, um Variablen zu eliminieren und eine Einfunktion zu erhalten", correta: true },
+    { texto: "Leiten Sie die Nebenbedingung ab und setzen Sie auf Null" },
+    { texto: "Maximieren und minimieren Sie die Nebenbedingung gleichzeitig" },
+    { texto: "Addieren Sie die Nebenbedingung als Term zur Zielfunktion" }
+  ]}
+  solucao={<>In der Optimierung mit Nebenbedingung besteht die Aufgabe der Nebenbedingung darin, die Anzahl der Variablen zu reduzieren. Man ersetzt sie in <Eq>{`Q`}</Eq>, um eine Einfunktion zu erhalten, die dann mit Ableitungen optimiert wird. Die Nebenbedingung abzuleiten und auf Null zu setzen ist die Lagrange-Methode (nächste Lektion, bei mehreren Variablen).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+In einem Optimierungsproblem mit Nebenbedingung, welche ist die richtige Rolle der Nebenbedingungsgleichung?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Evaluieren Sie f an den kritischen Punkten und an den Grenzen des physikalischen Definitionsbereichs", correta: true },
+    { texto: "Nehmen Sie nur den kritischen Punkt, wo f' = 0" },
+    { texto: "Wenden Sie den Zweite-Ableitung-Test an allen Punkten an" },
+    { texto: "Ersetzen Sie die kritischen Punkte in die Nebenbedingung" }
+  ]}
+  solucao={<>Der Extrema-Algorithmus erfordert Auswertung von <Eq>{`f`}</Eq> an ALLEN inneren kritischen Punkten UND an den Grenzpunkten. Grenzpunkte zu ignorieren ist ein häufiger Fehler — das globale Optimum könnte am Rand des physikalischen Definitionsbereichs sein.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Um das absolute Maximum oder Minimum von <Eq>{`f`}</Eq> auf <Eq>{`[a, b]`}</Eq> zu finden, muss man:
+
+</Exercicio>
+
+<Exercicio
+  numero="62.15"
+  dificuldade="aplicacao"
+  solucao={<>Zylinder in einer Kugel mit Radius <Eq>{`R`}</Eq> eingeschrieben. Beziehung: <Eq>{`r^2 + (h/2)^2 = R^2 \\Rightarrow r^2 = R^2 - h^2/4`}</Eq>. Volumen: <Eq>{`V = \\pi r^2 h = \\pi h(R^2 - h^2/4)`}</Eq>. <Eq>{`V'(h) = \\pi(R^2 - 3h^2/4) = 0 \\Rightarrow h = 2R/\\sqrt{3}`}</Eq>. <Eq>{`r = R\\sqrt{2/3}`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Bestimmen Sie die Dimensionen des Zylinders mit dem größten Volumen, der in eine Kugel mit Radius <Eq>{`R`}</Eq> eingeschrieben ist.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.16"
+  dificuldade="aplicacao"
+  solucao={<>Punkt <Eq>{`(x, y)`}</Eq> auf der Parabel <Eq>{`y = x^2`}</Eq>. Entfernung zum Punkt <Eq>{`(0, 3)`}</Eq>: <Eq>{`D^2 = x^2 + (x^2-3)^2 = x^4 - 5x^2 + 9`}</Eq>. <Eq>{`(D^2)' = 4x^3 - 10x = 2x(2x^2-5) = 0`}</Eq>. Nullstellen: <Eq>{`x = 0`}</Eq> und <Eq>{`x = \\pm\\sqrt{5/2}`}</Eq>. Bei <Eq>{`x = 0`}</Eq>: Entfernung <Eq>{`3`}</Eq> (lokales Maximum). Bei <Eq>{`x = \\pm\\sqrt{5/2}`}</Eq>: Entfernung <Eq>{`\\sqrt{9 - 25/4} = \\sqrt{11/4} = \\sqrt{11}/2 \\approx 1{,}66`}</Eq> → nächste Punkte.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimmen Sie die Punkte auf der Parabel <Eq>{`y = x^2`}</Eq>, die dem Punkt <Eq>{`(0, 3)`}</Eq> am nächsten sind.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.17"
+  dificuldade="modelagem"
+  solucao={<>Kosten <Eq>{`C = 2x + 3y`}</Eq> mit Nebenbedingung <Eq>{`xy = 300`}</Eq>, also <Eq>{`y = 300/x`}</Eq>. <Eq>{`C(x) = 2x + 900/x`}</Eq>. <Eq>{`C' = 2 - 900/x^2 = 0 \\Rightarrow x = \\sqrt{450} \\approx 21{,}2`}</Eq> m. <Eq>{`y = 300/21{,}2 \\approx 14{,}1`}</Eq> m. Minimale Kosten: <Eq>{`C \\approx 2(21{,}2) + 900/21{,}2 \\approx 84{,}8`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Eine rechteckige Fläche von 300 m² wird eingezäunt. Die Ostseite (Länge <Eq>{`x`}</Eq>) kostet 2 Euro/m und die anderen Seiten kosten 3 Euro/m. Minimieren Sie die Gesamtkosten.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.18"
+  dificuldade="modelagem"
+  solucao={<>Höhe: <Eq>{`h(t) = -5t^2 + 20t + 3`}</Eq> (Gravitationsbeschleunigung <Eq>{`\\approx 10`}</Eq> m/s²). <Eq>{`h'(t) = -10t + 20 = 0 \\Rightarrow t = 2`}</Eq> s. Maximale Höhe: <Eq>{`h(2) = -20 + 40 + 3 = 23`}</Eq> m.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Ein Objekt wird vertikal mit Anfangsgeschwindigkeit 20 m/s aus einer Höhe von 3 m geworfen. Modell: <Eq>{`h(t) = -5t^2 + 20t + 3`}</Eq>. Bestimmen Sie die maximale Höhe.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.19"
+  dificuldade="modelagem"
+  solucao={<>Gesamtkosten: <Eq>{`C(r) = 10 \\cdot 2\\pi r^2 + 6 \\cdot 2\\pi rh`}</Eq>. Mit <Eq>{`\\pi r^2 h = 200`}</Eq>: <Eq>{`h = 200/(\\pi r^2)`}</Eq>. <Eq>{`C(r) = 20\\pi r^2 + 2400/r`}</Eq>. <Eq>{`C'(r) = 40\\pi r - 2400/r^2 = 0 \\Rightarrow r^3 = 60/\\pi`}</Eq>. <Eq>{`r^* \\approx 2{,}67`}</Eq> cm. <Eq>{`h \\approx 8{,}93`}</Eq> cm.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Eine Zylinderbüchse mit 200 cm³ Volumen hat Material für Boden und Deckel, das 10 Euro/cm² kostet, und Seitenmaterial, das 6 Euro/cm² kostet. Bestimmen Sie die Dimensionen, die die Kosten minimieren.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.20"
+  dificuldade="modelagem"
+  solucao={<>Umfang des Halbkreises + zwei gerade Seiten: <Eq>{`\\pi r + 2l = 20 \\Rightarrow l = (20 - \\pi r)/2`}</Eq>. Fläche: <Eq>{`A = \\pi r^2/2 + 2rl = \\pi r^2/2 + r(20 - \\pi r) = 20r - \\pi r^2/2`}</Eq>. <Eq>{`A' = 20 - \\pi r = 0 \\Rightarrow r = 20/\\pi \\approx 6{,}37`}</Eq> m. <Eq>{`l = 0`}</Eq> — der ideale Laufparcours ist ein reiner Halbkreis.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Ein Fitnesslauf hat die Form eines Rechtecks mit Halbkreisen an den beiden kurzen Seiten (ovale Bahn). Der Gesamtumfang ist 20 m. Bestimmen Sie den Radius <Eq>{`r`}</Eq>, der die innere Fläche maximiert.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.21"
+  dificuldade="aplicacao"
+  solucao={<>Sei <Eq>{`x`}</Eq> eine Zahl. Minimieren Sie <Eq>{`f(x) = x^2 + (10-x)^2 = 2x^2 - 20x + 100`}</Eq>. <Eq>{`f'(x) = 4x - 20 = 0 \\Rightarrow x = 5`}</Eq>. Die beiden Zahlen sind 5 und 5; minimale Summe der Quadrate: <Eq>{`25 + 25 = 50`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Die Summe zweier Zahlen ist 10. Finden Sie die beiden Zahlen, die die Summe ihrer Quadrate minimieren.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.22"
+  dificuldade="aplicacao"
+  solucao={<>Seien <Eq>{`x`}</Eq> und <Eq>{`y`}</Eq> mit <Eq>{`x + y = 1`}</Eq>. Maximieren Sie <Eq>{`P = x^2 y = x^2(1-x)`}</Eq>. <Eq>{`P' = 2x(1-x) - x^2 = x(2 - 3x) = 0`}</Eq>. Nullstellen: <Eq>{`x = 0`}</Eq> (Minimum) und <Eq>{`x = 2/3`}</Eq>. <Eq>{`y = 1/3`}</Eq>. <Eq>{`P_\\max = (4/9)(1/3) = 4/27`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Die Summe zweier nicht-negativer Zahlen ist 1. Maximieren Sie das Produkt des Quadrats der ersten mit der zweiten.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.23"
+  dificuldade="aplicacao"
+  solucao={<>Rechteck, in einen Halbkreis mit Radius 5 eingeschrieben. Eckpunkt bei <Eq>{`(x, y)`}</Eq> mit <Eq>{`x^2 + y^2 = 25`}</Eq>. Fläche: <Eq>{`A = 2x \\cdot y = 2x\\sqrt{25-x^2}`}</Eq>. Maximieren Sie <Eq>{`A^2 = 4x^2(25-x^2)`}</Eq>. <Eq>{`(A^2)' = 4(50x - 4x^3) = 0 \\Rightarrow x = \\sqrt{25/2} = 5/\\sqrt{2}`}</Eq>. <Eq>{`y = 5/\\sqrt{2}`}</Eq>. <Eq>{`A_\\max = 25`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Bestimmen Sie die maximale Fläche eines Rechtecks, das in einen Halbkreis mit Radius 5 eingeschrieben ist.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.24"
+  dificuldade="aplicacao"
+  solucao={<>Entfernung: <Eq>{`D^2 = (x-1)^2 + y^2 = (x-1)^2 + (x^2-2)^2`}</Eq>. <Eq>{`(D^2)' = 2(x-1) + 4x(x^2-2) = 2x - 2 + 4x^3 - 8x = 4x^3 - 6x - 2 = 2(2x^3 - 3x - 1)`}</Eq>. Rationale Nullstelle: <Eq>{`x = -1/2`}</Eq>... Testen: <Eq>{`2(-1/8) - 3(-1/2) - 1 = -1/4 + 3/2 - 1 = 1/4 \\neq 0`}</Eq>. Testen Sie <Eq>{`x = -1`}</Eq>: <Eq>{`-2 + 3 - 1 = 0`}</Eq>. Also <Eq>{`x = -1`}</Eq>. Punkt: <Eq>{`(-1, 1)`}</Eq>. (Teilen: <Eq>{`2x^3-3x-1 = (x+1)(2x^2-2x-1)`}</Eq>. Weitere Nullstellen: <Eq>{`x = (1\\pm\\sqrt{3})/2`}</Eq>. Nächster zu <Eq>{`(1,0)`}</Eq>: <Eq>{`x = (1+\\sqrt{3})/2 \\approx 1{,}37`}</Eq>, Punkt <Eq>{`(1{,}37, -0{,}12)`}</Eq> näher.)</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Bestimmen Sie den Punkt auf der Kurve <Eq>{`y = x^2 - 2`}</Eq>, der dem Punkt <Eq>{`(1, 0)`}</Eq> am nächsten ist.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.25"
+  dificuldade="aplicacao"
+  solucao={<>Empfangen Sie <Eq>{`n`}</Eq> zusätzliche Passagiere über 100 hinaus. Tarif: <Eq>{`80 - 0{,}50n`}</Eq>. Umsatz: <Eq>{`R(n) = (100+n)(80-0{,}5n) = 8000 + 30n - 0{,}5n^2`}</Eq>. <Eq>{`R' = 30 - n = 0 \\Rightarrow n = 30`}</Eq>. Gesamt: 130 Passagiere. Tarif: 65 Euro. Umsatz: <Eq>{`130 \\times 65 = 8450`}</Eq>.</>}
+  passos={<><ol><li>Definieren Sie <Eq>{`n`}</Eq> = zusätzliche Passagiere über die Gruppe von 100.</li><li>Tarif pro Person: <Eq>{`80 - 0{,}50n`}</Eq>.</li><li>Gesamtumsatz: <Eq>{`R = (100+n)(80-0{,}5n)`}</Eq>.</li><li>Vereinfachen und ableiten: <Eq>{`R'(n) = 30 - n`}</Eq>.</li><li>Null: <Eq>{`n = 30`}</Eq>. Bestätigen Sie mit <Eq>{`R'' = -1 < 0`}</Eq>.</li></ol><em>Kniff:</em> bei Tarifproblemen mit Rabatt ist das Optimum selten an den Grenzen — es ist der einzige innere kritische Punkt.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Eine Exkursion verlangt 80 Euro pro Person für Gruppen von 100. Für jeden zusätzlichen Passagier sinkt der Tarif für alle um 0,50 Euro. Wie viele Passagiere maximieren den Umsatz?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.26"
+  dificuldade="modelagem"
+  solucao={<>Sei <Eq>{`x`}</Eq> die Anzahl der Pflanzungen pro Baum. Ertrag pro Baum: <Eq>{`300 + 20(x-25)`}</Eq> Orangen... Neuinterpretation: mit 25 Bäumen pro Hektar gibt jeder Baum 600 Orangen. Für jeden Baum über 25 hinaus gibt jeder Baum 12 weniger. Sei <Eq>{`n`}</Eq> zusätzliche Bäume. Gesamt: <Eq>{`(25+n)(600-12n)`}</Eq>. <Eq>{`T' = 600 - 12n + (25+n)(-12) = 600 - 12n - 300 - 12n = 300 - 24n = 0 \\Rightarrow n = 12{,}5`}</Eq>, also 37 oder 38 Bäume (überprüfen Sie beide). <Eq>{`T(12) = 37 \\cdot 456 = 16872`}</Eq>; <Eq>{`T(13) = 38 \\cdot 444 = 16872`}</Eq>. Beide optimal: 37 oder 38 Bäume.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Ein Orangenhain mit 25 Bäumen pro Hektar produziert 600 Orangen pro Baum. Für jeden zusätzlich gepflanzten Baum sinkt die Produktion pro Baum um 12 Orangen. Wie viele Bäume pro Hektar maximieren die Gesamtproduktion?
+
+</Exercicio>
+
+<Exercicio
+  numero="62.27"
+  dificuldade="aplicacao"
+  solucao={<>Fenster: Halbkreis mit Radius <Eq>{`r`}</Eq> über Rechteck mit Breite <Eq>{`2r`}</Eq> und Höhe <Eq>{`h`}</Eq>. Umfang: <Eq>{`\\pi r + 2h + 2r = 10 \\Rightarrow h = (10 - \\pi r - 2r)/2`}</Eq>. Fläche: <Eq>{`A = \\pi r^2/2 + 2rh = \\pi r^2/2 + r(10 - \\pi r - 2r) = 10r - 2r^2 - \\pi r^2/2`}</Eq>. <Eq>{`A' = 10 - 4r - \\pi r = 0 \\Rightarrow r = 10/(4+\\pi) \\approx 1{,}40`}</Eq> m.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Ein "normannisches" Fenster wird aus einem Rechteck mit aufgesetztem Halbkreis gebildet. Der Gesamtumfang ist 10 m. Bestimmen Sie den Radius des Halbkreises, der die Fensterflche maximiert.
+
+</Exercicio>
+
+<Exercicio
+  numero="62.28"
+  dificuldade="demonstracao"
+  solucao={<>Seien <Eq>{`x, y > 0`}</Eq> mit <Eq>{`x + y = S`}</Eq> (Konstante). Maximieren Sie <Eq>{`P = xy = x(S-x)`}</Eq>. <Eq>{`P'(x) = S - 2x = 0 \\Rightarrow x = S/2`}</Eq>. <Eq>{`y = S/2`}</Eq>. Daher <Eq>{`xy \\leq (S/2)^2 = (x+y)^2/4`}</Eq>, mit Gleichheit genau wenn <Eq>{`x = y`}</Eq>. Dies beweist die AM-GM-Ungleichheit: <Eq>{`\\sqrt{xy} \\leq (x+y)/2`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-3-optimization.html", secao: "3.3", licenca: "CC-BY-NC-SA" }}
+>
+
+Verwenden Sie Kalkül, um zu beweisen, dass unter allen Paaren positiver Zahlen mit fester Summe <Eq>{`S`}</Eq> das Produkt maximal ist, wenn die beiden Zahlen gleich sind. (Dies beweist die AM-GM-Ungleichheit für zwei Begriffe.)
+
+</Exercicio>
+
+<Exercicio
+  numero="62.29"
+  dificuldade="demonstracao"
+  solucao={<>Gesamtflche: <Eq>{`A = 2\\pi r h + 2\\pi r^2`}</Eq>. Mit <Eq>{`\\pi r^2 h = V \\Rightarrow h = V/(\\pi r^2)`}</Eq>: <Eq>{`A(r) = 2V/r + 2\\pi r^2`}</Eq>. Ableiten: <Eq>{`A'(r) = -2V/r^2 + 4\\pi r = 0 \\Rightarrow 4\\pi r^3 = 2V \\Rightarrow r^3 = V/(2\\pi)`}</Eq>. Also <Eq>{`h = V/(\\pi r^2) = (4\\pi r^3 \\cdot 2)/(4\\pi r^2) = 2r`}</Eq>. Daher <Eq>{`h = 2r`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems", secao: "4.7", licenca: "CC-BY-NC-SA" }}
+>
+
+Beweisen Sie, dass der Zylinder mit der kleinsten Oberflächenfläche für ein festes Volumen <Eq>{`V`}</Eq> die Eigenschaft <Eq>{`h = 2r`}</Eq> erfüllt (Höhe gleich Durchmesser).
+
+</Exercicio>
+
+<Exercicio
+  numero="62.30"
+  dificuldade="desafio"
+  solucao={<>Punkt <Eq>{`(a, b)`}</Eq> auf der Ellipse <Eq>{`x^2/A^2 + y^2/B^2 = 1`}</Eq>. Fläche des eingeschriebenen Rechtecks: <Eq>{`R = 4ab`}</Eq>. Parametrisieren Sie: <Eq>{`a = A\\cos\\theta`}</Eq>, <Eq>{`b = B\\sin\\theta`}</Eq>. <Eq>{`R(\\theta) = 4AB\\cos\\theta\\sin\\theta = 2AB\\sin(2\\theta)`}</Eq>. Maximum wenn <Eq>{`\\sin(2\\theta) = 1`}</Eq>, d.h. <Eq>{`\\theta = \\pi/4`}</Eq>. <Eq>{`R_\\max = 2AB`}</Eq>. Dimensionen: <Eq>{`a = A/\\sqrt{2}`}</Eq>, <Eq>{`b = B/\\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "4.3", licenca: "CC-BY-NC" }}
+>
+
+Bestimmen Sie die maximale Fläche eines Rechtecks, das in die Ellipse <Eq>{`x^2/A^2 + y^2/B^2 = 1`}</Eq> eingeschrieben ist, mit Seiten parallel zu den Koordinatenachsen.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Quellen
+
+- **Boelkins, Matt. Active Calculus 2.0.** Grand Valley State University, 2022. CC-BY-NC-SA. [activecalculus.org/single/sec-3-3-optimization.html](https://activecalculus.org/single/sec-3-3-optimization.html)
+- **OpenStax. Calculus Volume 1.** Strang, Herman et al., 2023. CC-BY-NC-SA. [openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems](https://openstax.org/books/calculus-volume-1/pages/4-7-applied-optimization-problems)
+- **Hartman, G. et al. APEX Calculus.** Virginia Military Institute, 2023. CC-BY-NC. [apexcalculus.com](https://www.apexcalculus.com/)

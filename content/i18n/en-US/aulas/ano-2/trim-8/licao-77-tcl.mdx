@@ -1,0 +1,755 @@
+---
+titulo: "Lesson 77 — Central Limit Theorem"
+slug: "licao-77-tcl"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "The mean of n iid random variables converges to a normal distribution regardless of the original distribution — the most important law in statistics. Proof via characteristic function, Berry-Esseen bound, and inference applications."
+ordem: 77
+publicado: true
+tags: ["estatística", "probabilidade", "TCL", "normal", "ano-2", "trim-8"]
+prerrequisitos: ["licao-76-distribuicao-normal"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2025-05-14"
+versao: "v1"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Math B japonês §4.4", "Stochastik LK alemão", "H2 Math singapurense cap. 21"]
+---
+
+<EquacaoCanonica
+  formula="\bar X_n \xrightarrow{d} \mathcal{N}\!\left(\mu,\,\frac{\sigma^2}{n}\right) \quad (n \to \infty)"
+  legenda={<>The <strong>Central Limit Theorem (CLT)</strong> states that the mean of <Eq>{`n`}</Eq> iid random variables with mean <Eq>{`\\mu`}</Eq> and finite variance <Eq>{`\\sigma^2`}</Eq> converges, in distribution, to a normal distribution with parameters <Eq>{`\\mu`}</Eq> and <Eq>{`\\sigma^2/n`}</Eq> — regardless of the original distribution. This explains why the bell curve appears in natural data, measurement errors, and sample means.</>}
+  audioTexto="Central limit theorem. The sample mean X-bar of n converges in distribution to a normal distribution with mean mu and variance sigma squared over n, as n goes to infinity."
+/>
+
+<aside>
+**Books covering this lesson**
+
+- [**OpenIntro Statistics** (4th ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §5.4 · CC-BY-SA · *More accessible treatment of the CLT with simulations and real-world examples; ideal for levels 10 and 15.*
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · §7.1–7.3 · CC-BY · *Comprehensive coverage with the theorem formally stated, guided exercises, z-tables, and sample size applications.*
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §9.1–9.3 · GNU FDL · *Proof via moment-generating functions; discussion of convergence speed and Lindeberg extensions.*
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Formal statement and proof">
+
+### Lindeberg-Lévy version
+
+<Definicao titulo="Central Limit Theorem (classical version)">
+
+Let $X_1, X_2, \ldots$ be **iid** (independent and identically distributed) random variables with $E[X_i] = \mu \in \mathbb{R}$ and $\text{Var}(X_i) = \sigma^2 \in (0, +\infty)$. Define the **standardized statistic**
+
+$$Z_n = \frac{\bar X_n - \mu}{\sigma/\sqrt{n}}, \quad \bar X_n = \frac{1}{n}\sum_{i=1}^n X_i.$$
+
+Then $Z_n \xrightarrow{d} \mathcal{N}(0, 1)$: for every $z \in \mathbb{R}$,
+
+$$\lim_{n \to \infty} P(Z_n \leq z) = \Phi(z) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^z e^{-t^2/2}\,dt.$$
+
+</Definicao>
+
+> "The central limit theorem is the unofficial sovereign of probability theory." — [Grinstead & Snell, *Introduction to Probability*, §9.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf)
+
+### Version for sums
+
+If $S_n = X_1 + \cdots + X_n$, then $S_n \approx \mathcal{N}(n\mu,\, n\sigma^2)$ for large $n$.
+
+<Equation explicacao="Standardization of the sum: same formula, different scale." latex="Z_n = \frac{S_n - n\mu}{\sigma\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1)" />
+
+### Convergence speed: Berry-Esseen inequality
+
+<Teorema titulo="Berry-Esseen">
+
+If additionally $E[|X_i - \mu|^3] = \rho < \infty$, then for every $n$ and every $z$:
+
+$$\sup_{z \in \mathbb{R}} \left|P(Z_n \leq z) - \Phi(z)\right| \leq \frac{C\,\rho}{\sigma^3\,\sqrt{n}},$$
+
+with universal constant $C < 0{,}5$. The error decreases as $1/\sqrt{n}$.
+
+</Teorema>
+
+### Proof sketch via characteristic function
+
+<Definicao titulo="Characteristic function">
+
+The **characteristic function** of $X$ is $\varphi_X(t) = E[e^{itX}]$, $t \in \mathbb{R}$. Key property: if $X_1, \ldots, X_n$ are independent, $\varphi_{X_1 + \cdots + X_n}(t) = \prod_k \varphi_{X_k}(t)$.
+
+</Definicao>
+
+Let $Y_i = (X_i - \mu)/\sigma$ (zero mean, unit variance). Taylor expansion of $\varphi_{Y_i}$:
+
+$$\varphi_{Y_i}(t) = 1 - \frac{t^2}{2} + o(t^2) \quad (t \to 0).$$
+
+For $Z_n = (Y_1 + \cdots + Y_n)/\sqrt{n}$:
+
+$$\varphi_{Z_n}(t) = \left[\varphi_{Y_i}\!\left(\frac{t}{\sqrt{n}}\right)\right]^n = \left[1 - \frac{t^2}{2n} + o\!\left(\frac{1}{n}\right)\right]^n \xrightarrow{n\to\infty} e^{-t^2/2}.$$
+
+But $e^{-t^2/2}$ is the characteristic function of $\mathcal{N}(0, 1)$. The **Lévy's Continuity Theorem** concludes $Z_n \xrightarrow{d} \mathcal{N}(0,1)$. $\blacksquare$
+
+### When the CLT does not hold
+
+<Insight>
+
+The CLT requires **finite variance**. The Cauchy distribution has infinite variance; the mean of $n$ Cauchy variables is still Cauchy — the classical CLT does not apply. For distributions with tail $|x|^{-\alpha-1}$, $0 < \alpha < 2$, the limit is a Lévy stable distribution of index $\alpha$.
+
+</Insight>
+
+### Essential hypotheses
+
+- **Independence** (minimum sufficient; relaxable to $\alpha$-mixing).
+- **Finite variance** $\sigma^2 < \infty$.
+- **n sufficiently large** — rule of thumb: $n \geq 30$ for not-too-skewed distributions; $n \geq 100$ for high skewness.
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine rolling **one** die: you can get any number from 1 to 6, all with the same chance. No bell shape here.
+
+Now roll **ten** dice and take the average. You will almost never get 1 (you would need to roll a 1 on all ten dice at the same time). The average will almost always be close to 3.5.
+
+When you do this **many, many times**, the results form a **mound** — a little round hill in the middle, and less at the ends. That is the **bell**.
+
+The miracle is: it doesn't matter if you rolled dice, flipped coins, or measured anything else. If you take **the average of many**, the bell always appears.
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+A person's height depends on hundreds of genes, diet, sleep, and many other factors — each with a tiny effect. No single gene follows a bell curve. But when you **add up** hundreds of small, independent effects, the total sum follows the bell curve almost perfectly.
+
+The **Central Limit Theorem** says exactly this:
+
+> Adding (or taking the average of) many independent random things produces a bell curve, regardless of the original shape of each one.
+
+**Rule of thumb**: $n \geq 30$ is enough for most distributions. For very skewed distributions, use $n \geq 100$.
+
+**Example**: roll a die 30 times and calculate the average. Repeat 10,000 times. The histogram of averages will be a bell centered at 3.5 — even though each individual roll is uniform (equally flat from 1 to 6).
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old">
+
+The CLT is the most important result in statistics. It justifies **why** the normal distribution dominates science.
+
+### Three immediate consequences
+
+**1. Confidence intervals for any distribution**
+
+If $n$ is large, $\bar X \pm 1{,}96\,\sigma/\sqrt{n}$ is a 95% CI for $\mu$ even without knowing the distribution of $X$.
+
+**2. Standardization is universal**
+
+$Z = (\bar X - \mu)/(\sigma/\sqrt{n})$ has an approximately $\mathcal{N}(0, 1)$ distribution. A single z-table works for any population.
+
+**3. Measurement error is normal**
+
+Measurement = sum of many tiny disturbances (air vibration, instrument limitations, etc.). By the CLT, the total error is normal. That is why measurement error models are almost always Gaussian.
+
+### Visual demonstration
+
+Build a histogram of the averages of $n$ rolls of a uniform die:
+
+- $n = 1$: flat uniform.
+- $n = 5$: trapezoid.
+- $n = 30$: indistinguishable from normal.
+
+### Galton board (1889)
+
+Balls falling between pins, bouncing randomly left or right at each level. The pile at the bottom is binomial — and converges to normal. A physical demonstration of the CLT with real objects.
+
+</Porta>
+
+<Porta nivel="25" titulo="For an engineering student">
+
+### Direct applications
+
+**Sample size for CI**: margin $\epsilon$ at 95% requires
+
+$$n = \left\lceil \left(\frac{1{,}96\,\sigma}{\epsilon}\right)^2 \right\rceil.$$
+
+**z-test**: statistic $Z = (\bar X - \mu_0)/(\sigma/\sqrt{n})$; reject $H_0$ if $|Z| > z_{\alpha/2}$.
+
+**Monte Carlo**: standard error of the estimated mean $\approx \sigma/\sqrt{n}$; to halve the error, quadruple $n$.
+
+**X-bar chart** (quality control): limits at $\bar X \pm 3\sigma/\sqrt{n}$ — any point outside indicates an out-of-control process.
+
+### CLT versions
+
+| Version | Key hypotheses | Practical use |
+|---|---|---|
+| Lindeberg-Lévy | iid, $\sigma^2 < \infty$ | Standard |
+| Lyapunov | independent, non-iid, finite 3rd moment | Heterogeneous populations |
+| General Lindeberg | independent, Lindeberg condition | More general than Lyapunov |
+| Martingale CLT | martingale differences | Time series |
+
+### When $n = 30$ is not enough
+
+- Highly skewed distributions (skewness $> 2$): use $n \geq 100$.
+- Heavy-tailed distributions with finite variance: convergence is slower — Berry-Esseen helps quantify.
+- **Unknown variance**: replace $\sigma$ with sample $s$ → Student's $t$-distribution (converges to normal as $n \to \infty$).
+
+### Donsker's invariance principle
+
+Functional generalization: the process $W_n(t) = S_{\lfloor nt \rfloor}/(\sigma\sqrt{n})$ converges to standard **Brownian motion**. Theoretical basis for option pricing and SDEs.
+
+</Porta>
+
+<Porta nivel="40" titulo="For a senior professional">
+
+### Théorie asymptotique and Edgeworth expansion
+
+Refinement of the CLT with $1/\sqrt{n}$ order corrections:
+
+$$P(Z_n \leq z) = \Phi(z) - \frac{\gamma_1}{6\sqrt{n}}(z^2 - 1)\phi(z) + O(1/n),$$
+
+where $\gamma_1 = E[(X-\mu)^3]/\sigma^3$ is the skewness. Useful in parametric bootstrap and $p$-value approximations for small samples.
+
+### Stable distributions (Lévy, Khintchine)
+
+For r.v. with tail $P(|X| > x) \sim L(x)/x^\alpha$, $0 < \alpha < 2$:
+
+$$\frac{S_n - b_n}{a_n} \xrightarrow{d} \text{Stable}(\alpha, \beta, \gamma, \delta).$$
+
+In financial data, $\hat\alpha \approx 1{,}7$ in extreme stock returns — Gaussian CLT underestimates tail risk.
+
+### Non-asymptotic concentration
+
+Concentration inequalities provide **finite** bounds (without $n \to \infty$):
+
+- **Hoeffding**: $P(\bar X - \mu \geq t) \leq e^{-2n t^2/(b-a)^2}$ (variables bounded in $[a, b]$).
+- **Bernstein**: sum of exponentials better than Hoeffding when variance is small.
+- **Azuma-Hoeffding**: for martingales with bounded differences.
+
+In machine learning, concentration inequalities dominate over CLT because they provide guarantees for any fixed $n$.
+
+### CLT for dependent processes
+
+For ergodic Markov chains:
+
+$$\sqrt{n}(\bar f_n - E_\pi[f]) \xrightarrow{d} \mathcal{N}\!\left(0,\, \sigma_\infty^2\right),$$
+
+where $\sigma_\infty^2 = \text{Var}_\pi(f) + 2\sum_{k=1}^\infty \text{Cov}(f(X_0), f(X_k))$ is the **long-run variance**. In MCMC, this value calibrates estimation error; estimated by batch means or spectral methods.
+
+### Multivariate CLT
+
+$$\sqrt{n}(\bar{\mathbf{X}}_n - \boldsymbol{\mu}) \xrightarrow{d} \mathcal{N}(\mathbf{0}, \Sigma).$$
+
+Basis of the multivariate delta method and inference on maximum likelihood parameters (asymptotic distribution of $\hat\theta_{MLE}$).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Practical application — real data">
+
+### Health insurance satisfaction survey (real data from IDEC/ANS, 2023)
+
+An operator sampled 400 policyholders. Satisfaction score: $\mu = 6{,}8$, $\sigma = 2{,}1$ (scale 0–10). What is the probability that the sample mean is above 7.0?
+
+**By CLT**: $\bar X_{400} \approx \mathcal{N}(6{,}8;\; 2{,}1^2/400) = \mathcal{N}(6{,}8;\; 0{,}011)$.
+
+$$z = \frac{7{,}0 - 6{,}8}{2{,}1/\sqrt{400}} = \frac{0{,}2}{0{,}105} \approx 1{,}90.$$
+
+$P(\bar X > 7{,}0) = P(Z > 1{,}90) = 1 - \Phi(1{,}90) \approx 0{,}029$ — about 3%.
+
+### Election margin of error (Datafolha-style)
+
+$n = 2,000$ respondents, $\hat p = 0{,}38$ (38% voting intention). Margin of error at 95%:
+
+$$\varepsilon = 1{,}96\sqrt{\frac{0{,}38 \times 0{,}62}{2000}} \approx 0{,}021 = \pm 2{,}1\%.$$
+
+### General recipe
+
+1. Confirm iid and finite $\sigma^2$.
+2. Calculate $\mu$ and $\sigma$ of the original distribution.
+3. Use $\bar X_n \approx \mathcal{N}(\mu, \sigma^2/n)$.
+4. Standardize: $z = (\bar X - \mu)/(\sigma/\sqrt{n})$.
+5. Consult z-table or use `scipy.stats.norm.cdf`.
+
+### Frequent pitfalls
+
+- Using $\sigma$ instead of $\sigma/\sqrt{n}$ as the standard deviation of the mean.
+- Applying CLT with $n < 10$ in highly skewed distributions.
+- Applying CLT to variables with infinite variance (Cauchy, Pareto with $\alpha < 2$).
+
+</Porta>
+
+</DuasPortas>
+
+## Solved examples
+
+<Exemplo numero="1" titulo="Average weight of packages posted at the Post Office">
+
+**Problem.** Packages posted at the post office have a mean weight $\mu = 2{,}4$ kg and standard deviation $\sigma = 0{,}8$ kg (unknown distribution). A screening samples 64 packages. What is the probability that the sample mean weight exceeds 2.6 kg?
+
+**Strategy.** By CLT, $\bar X_{64} \approx \mathcal{N}(2{,}4,\; 0{,}8^2/64)$. Standardize and consult z-table.
+
+**Resolution.**
+
+$\sigma_{\bar X} = 0{,}8/\sqrt{64} = 0{,}8/8 = 0{,}1$ kg.
+
+$$z = \frac{2{,}6 - 2{,}4}{0{,}1} = \frac{0{,}2}{0{,}1} = 2{,}0.$$
+
+$P(\bar X > 2{,}6) = P(Z > 2{,}0) = 1 - \Phi(2{,}0) = 1 - 0{,}9772 = 0{,}0228 \approx 2{,}3\%$.
+
+**Verification.** 68-95-99.7 rule: $\pm 2\sigma_{\bar X}$ contains 95%, so 2.5% in each tail. Result of 2.3% is consistent.
+
+**Source.** [OpenStax Statistics, §7.2, Example 7.2](https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="2" titulo="Election: probability of sample proportion">
+
+**Problem.** In an election, 42% of voters support candidate A ($p = 0{,}42$). An exit poll interviews 1,000 voters at random. What is the probability that the sample proportion $\hat p$ is below 0.40?
+
+**Strategy.** $\hat p$ is the mean of iid Bernoullis. By CLT, $\hat p \approx \mathcal{N}(p, p(1-p)/n)$.
+
+**Resolution.**
+
+$\sigma_{\hat p} = \sqrt{0{,}42 \times 0{,}58 / 1000} = \sqrt{0{,}000244} \approx 0{,}01562$.
+
+$$z = \frac{0{,}40 - 0{,}42}{0{,}01562} \approx -1{,}28.$$
+
+$P(\hat p < 0{,}40) = \Phi(-1{,}28) \approx 0{,}1003 \approx 10\%$.
+
+**Verification.** Difference of 2 percentage points with $\sigma \approx 1{,}6\%$ gives $z \approx -1{,}25$; values are consistent.
+
+**Source.** [OpenIntro Statistics, §5.4, Exercise 5.39, p. 224](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="3" titulo="Sample size for margin of error">
+
+**Problem.** An institute wants to estimate the average salary of engineers in SP with a margin of error $\pm$ R\$ 200 at 95% confidence. Pilot survey: $s = 1,800$ reais. What is the minimum $n$?
+
+**Strategy.** By CLT, 95% CI has semi-width $1{,}96\,\sigma/\sqrt{n}$. Isolate $n$.
+
+**Resolution.**
+
+$$1{,}96 \times \frac{1800}{\sqrt{n}} = 200 \implies \sqrt{n} = \frac{1{,}96 \times 1800}{200} = 17{,}64 \implies n = 17{,}64^2 \approx 311{,}2.$$
+
+Round up: $n = 312$.
+
+**Verification.** $1{,}96 \times 1800/\sqrt{312} \approx 199{,}6 < 200$. Correct.
+
+**Source.** [OpenStax Statistics, §7.3, Sample Size Calculation](https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="4" titulo="Sum of insurance losses (actuarial modeling)">
+
+**Problem.** An insurer has 500 car policies. Each claim has a mean cost of R\$ 3,000 and standard deviation of R\$ 1,200 (exponential distribution). What is the probability that the total claims exceed R\$ 1,560,000?
+
+**Strategy.** $S_{500} = \sum X_i \approx \mathcal{N}(500 \times 3000,\; 500 \times 1200^2)$ by CLT (sum version).
+
+**Resolution.**
+
+$E[S] = 500 \times 3000 = 1,500,000$; $\text{Var}(S) = 500 \times 1200^2 = 720,000,000$.
+
+$\sigma_S = \sqrt{720,000,000} \approx 26,833$.
+
+$$z = \frac{1,560,000 - 1,500,000}{26,833} \approx \frac{60,000}{26,833} \approx 2{,}237.$$
+
+$P(S > 1,560,000) = P(Z > 2{,}237) \approx 1 - 0{,}9873 \approx 1{,}3\%$.
+
+**Verification.** $\pm 2\sigma_S$ corresponds to $\pm$ R\$ 53,666; $60,000 > 2\sigma_S$, so less than 2.5% — consistent with 1.3%.
+
+**Source.** [OpenIntro Statistics, §4.4, p. 199–202](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="5" titulo="Berry-Esseen: quantifying approximation error">
+
+**Problem.** $X_i \sim \text{Bernoulli}(0{,}1)$; $\mu = 0{,}1$, $\sigma^2 = 0{,}09$, $E[|X-\mu|^3] = 0{,}9^3 \times 0{,}1 + 0{,}1^3 \times 0{,}9 = 0{,}0738$. For $n = 100$, what is the Berry-Esseen bound on the error $\sup_z |F_{Z_{100}}(z) - \Phi(z)|$?
+
+**Strategy.** Apply the inequality directly with $C = 0{,}5$.
+
+**Resolution.**
+
+$\rho = E[|X - \mu|^3] = 0{,}0738$; $\sigma^3 = 0{,}3^3 = 0{,}027$.
+
+$$\text{Bound} \leq \frac{0{,}5 \times 0{,}0738}{0{,}027 \times \sqrt{100}} = \frac{0{,}0369}{0{,}27} \approx 0{,}137.$$
+
+The maximum approximation error is less than 13.7 percentage points — conservative bound, real error is much smaller.
+
+**Verification.** For Bernoulli(0.1) with $n = 100$, binomial vs. normal table shows real error of 1–2% — Berry-Esseen is loose as expected.
+
+**Source.** [Grinstead & Snell, *Introduction to Probability*, §9.3, p. 346–349](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf) — GNU FDL
+
+</Exemplo>
+
+<ListaExercicios seed="licao-77-tcl">
+
+<Exercicio
+  numero="77.1"
+  dificuldade="aplicacao"
+  solucao={<>By CLT, <Eq>{`\\bar X_{100} \\approx \\mathcal{N}(1,\\; 1/100) = \\mathcal{N}(1,\\; 0{,}01)`}</Eq>. Standard deviation of the mean: <Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{100} = 0{,}1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "382", exercicio: "Example 7.3", licenca: "CC-BY" }}
+>
+$X$ exponential with $\mu = 1$ and $\sigma = 1$. Write the approximate distribution of $\bar X_{100}$ and calculate $\sigma_{\bar X}$.
+</Exercicio>
+
+<Exercicio
+  numero="77.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mu = 1/2`}</Eq>, <Eq>{`\\sigma^2 = 1/12`}</Eq>. By CLT: <Eq>{`\\bar X_{50} \\approx \\mathcal{N}(0{,}5,\\; 1/600)`}</Eq>. Standard deviation: <Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{600} \\approx 0{,}0408`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Identify parameters of uniform on <Eq>{`[0, 1]`}</Eq>: <Eq>{`\\mu = (0+1)/2 = 0{,}5`}</Eq>; <Eq>{`\\sigma^2 = (1-0)^2/12 = 1/12`}</Eq>.</li>
+      <li>Apply CLT: <Eq>{`\\bar X_n \\approx \\mathcal{N}(\\mu, \\sigma^2/n)`}</Eq> with <Eq>{`n = 50`}</Eq>: <Eq>{`\\mathcal{N}(0{,}5, \\frac{1/12}{50}) = \\mathcal{N}(0{,}5, \\frac{1}{600})`}</Eq>.</li>
+      <li>Standard deviation: <Eq>{`\\sqrt{1/600} \\approx 0{,}0408`}</Eq>.</li>
+    </ol>
+    <em>Tip:</em> For uniform <Eq>{`[a,b]`}</Eq>, <Eq>{`\\sigma^2 = (b-a)^2/12`}</Eq> — memorize this formula.
+  </>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "218", exercicio: "5.27", licenca: "CC-BY-SA" }}
+>
+$X$ uniform on $[0, 1]$. Determine $\mu$ and $\sigma^2$, and write the approximate distribution of $\bar X_{50}$ by the CLT.
+</Exercicio>
+
+<Exercicio
+  numero="77.3"
+  dificuldade="aplicacao"
+  solucao={<>Given: <Eq>{`\\mu = 3{,}5`}</Eq>, <Eq>{`\\sigma^2 = 35/12`}</Eq>. Sum of 100 dice: <Eq>{`S_{100} \\approx \\mathcal{N}(350,\\; 100 \\times 35/12) = \\mathcal{N}(350,\\; 291{,}67)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "393", exercicio: "Try It 7.8", licenca: "CC-BY" }}
+>
+Roll 100 fair dice. Determine the approximate distribution of the sum $S_{100}$, stating $E[S]$ and $\text{Var}(S)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bernoulli}(0{,}3)`}</Eq>: <Eq>{`\\mu = 0{,}3`}</Eq>, <Eq>{`\\sigma^2 = 0{,}21`}</Eq>. By CLT: <Eq>{`\\bar X_{200} \\approx \\mathcal{N}(0{,}3,\\; 0{,}21/200) = \\mathcal{N}(0{,}3,\\; 0{,}00105)`}</Eq>. Standard deviation of the proportion: <Eq>{`\\sqrt{0{,}00105} \\approx 0{,}0324`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "219", exercicio: "5.29", licenca: "CC-BY-SA" }}
+>
+$X \sim \text{Bernoulli}(0{,}3)$. Write the approximate distribution of $\bar X_{200}$ by the CLT and calculate the standard deviation of the sample proportion.
+</Exercicio>
+
+<Exercicio
+  numero="77.5"
+  dificuldade="aplicacao"
+  resposta="2"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "384", exercicio: "Try It 7.4", licenca: "CC-BY" }}
+>
+A population has $\mu = 50$ and $\sigma = 10$. For $n = 25$, calculate the standard deviation of $\bar X$ (as an integer).
+</Exercicio>
+
+<Exercicio
+  numero="77.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 10/\\sqrt{25} = 2`}</Eq>. <Eq>{`z = (53 - 50)/2 = 1{,}5`}</Eq>. <Eq>{`P(\\bar X > 53) = P(Z > 1{,}5) = 1 - \\Phi(1{,}5) \\approx 1 - 0{,}9332 = 0{,}0668 \\approx 6{,}7\\%`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Calculate <Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n} = 10/\\sqrt{25} = 2`}</Eq>.</li>
+      <li>Standardize: <Eq>{`z = (53 - 50)/2 = 1{,}5`}</Eq>.</li>
+      <li>Table: <Eq>{`\\Phi(1{,}5) = 0{,}9332`}</Eq>, so <Eq>{`P(Z > 1{,}5) = 0{,}0668`}</Eq>.</li>
+    </ol>
+    <em>Tip:</em> Always remember to use <Eq>{`\\sigma/\\sqrt{n}`}</Eq> (standard deviation of the <strong>mean</strong>), not <Eq>{`\\sigma`}</Eq> alone.
+  </>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "384", exercicio: "Example 7.4", licenca: "CC-BY" }}
+>
+Using the data from 77.5 ($\mu = 50$, $\sigma = 10$, $n = 25$), calculate $P(\bar X > 53)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (47 - 50)/2 = -1{,}5`}</Eq>. <Eq>{`P(\\bar X < 47) = \\Phi(-1{,}5) \\approx 0{,}0668`}</Eq>. Same value as 77.6 due to the symmetry of the normal distribution.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "385", exercicio: "Try It 7.5", licenca: "CC-BY" }}
+>
+With the same parameters ($\mu = 50$, $\sigma = 10$, $n = 25$), calculate $P(\bar X < 47)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 20/\\sqrt{100} = 2`}</Eq>. <Eq>{`z_1 = (98-100)/2 = -1`}</Eq>, <Eq>{`z_2 = (102-100)/2 = 1`}</Eq>. <Eq>{`P(-1 < Z < 1) = \\Phi(1) - \\Phi(-1) \\approx 0{,}8413 - 0{,}1587 = 0{,}6826 \\approx 68\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "218", exercicio: "5.25", licenca: "CC-BY-SA" }}
+>
+$X$ with $\mu = 100$, $\sigma = 20$, $n = 100$. Calculate $P(98 < \bar X < 102)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[S_{50}] = 50 \\times 5 = 250`}</Eq>; <Eq>{`\\sigma_{S} = \\sqrt{50 \\times 4} = \\sqrt{200} \\approx 14{,}14`}</Eq>. <Eq>{`z = (270 - 250)/14{,}14 \\approx 1{,}414`}</Eq>. <Eq>{`P(S > 270) = P(Z > 1{,}41) \\approx 1 - 0{,}9207 = 0{,}0793 \\approx 7{,}9\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Example 7.9", licenca: "CC-BY" }}
+>
+Sum of 50 iid r.v. with $\mu = 5$, $\sigma = 2$. Calculate $P(S_{50} > 270)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n = (1{,}96 \\times 3 / 0{,}5)^2 = (11{,}76)^2 \\approx 138{,}3`}</Eq>, rounding up to <Eq>{`n = 139`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>95% CI has semi-width <Eq>{`1{,}96 \\sigma / \\sqrt{n}`}</Eq>. Set equal to 0.5.</li>
+      <li>Isolate <Eq>{`\\sqrt{n} = 1{,}96 \\times 3 / 0{,}5 = 11{,}76`}</Eq>.</li>
+      <li>Square it: <Eq>{`n = 138{,}3`}</Eq>; round up: <Eq>{`n = 139`}</Eq>.</li>
+    </ol>
+    <em>Tip:</em> To halve the margin of error, quadruple n.
+  </>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "396", exercicio: "Example 7.11", licenca: "CC-BY" }}
+>
+$X$ with $\mu = 10$, $\sigma = 3$. How many observations $n$ for a 95% CI with margin of error $\pm 0{,}5$?
+</Exercicio>
+
+<Exercicio
+  numero="77.11"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "Decreases by half", correta: true }, { texto: "Decreases to a quarter" }, { texto: "Remains the same" }, { texto: "Quadruples" }]}
+  solucao={<><Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n}`}</Eq>. If <Eq>{`n`}</Eq> quadruples, <Eq>{`\\sqrt{n}`}</Eq> doubles, so <Eq>{`\\sigma_{\\bar X}`}</Eq> decreases by half. It never decreases to 1/4 (that would require <Eq>{`n \\times 16`}</Eq>).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "215", exercicio: "5.17", licenca: "CC-BY-SA" }}
+>
+When sample size $n$ is multiplied by 4, the standard deviation of $\bar X$ ($= \sigma/\sqrt{n}$):
+</Exercicio>
+
+<Exercicio
+  numero="77.12"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "n ≥ 30 is sufficient" }, { texto: "n ≥ 100 or more, as high skewness slows convergence", correta: true }, { texto: "CLT does not apply to skewed distributions" }, { texto: "n ≥ 10 is sufficient if μ is large" }]}
+  solucao={<>Berry-Esseen shows that the error is proportional to skewness divided by <Eq>{`\\sqrt{n}`}</Eq>. For skewed distributions, convergence is slower — the rule of thumb <Eq>{`n \\geq 30`}</Eq> is for distributions close to symmetric. With high skewness, use <Eq>{`n \\geq 100`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "378", exercicio: "Try It 7.1", licenca: "CC-BY" }}
+>
+$X$ has a very skewed distribution (skewness = 3). For what size of $n$ is the CLT reasonable?
+</Exercicio>
+
+<Exercicio
+  numero="77.13"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 15/\\sqrt{36} = 2{,}5`}</Eq>. <Eq>{`z = (75 - 70)/2{,}5 = 2{,}0`}</Eq>. <Eq>{`P(\\bar X > 75) = 1 - \\Phi(2) \\approx 0{,}0228`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "387", exercicio: "Practice 7.12", licenca: "CC-BY" }}
+>
+Grades with $\mu = 70$, $\sigma = 15$. Sample $n = 36$. Calculate $P(\bar X > 75)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (65 - 70)/2{,}5 = -2{,}0`}</Eq>. <Eq>{`P(\\bar X < 65) = \\Phi(-2) \\approx 0{,}0228`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "387", exercicio: "Practice 7.13", licenca: "CC-BY" }}
+>
+With the same parameters as 77.13 ($\mu = 70$, $\sigma = 15$, $n = 36$), calculate $P(\bar X < 65)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.15"
+  dificuldade="aplicacao"
+  solucao={<>95% CI for <Eq>{`\\mu`}</Eq>: <Eq>{`\\bar X \\pm 1{,}96 \\times \\sigma_{\\bar X} = 72 \\pm 1{,}96 \\times 2{,}5 = 72 \\pm 4{,}9`}</Eq>. Interval: <Eq>{`(67{,}1;\\; 76{,}9)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "397", exercicio: "Example 7.12", licenca: "CC-BY" }}
+>
+With $\mu = 70$, $\sigma = 15$, $n = 36$ and $\bar X = 72$, construct a 95% CI for $\mu$.
+</Exercicio>
+
+<Exercicio
+  numero="77.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 50/\\sqrt{25} = 10`}</Eq>. <Eq>{`z = (520 - 500)/10 = 2`}</Eq>. <Eq>{`P(\\bar X > 520) = 1 - \\Phi(2) \\approx 0{,}0228`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "220", exercicio: "5.31", licenca: "CC-BY-SA" }}
+>
+Package weight: $\mu = 500$ g, $\sigma = 50$ g. Sample $n = 25$. Calculate $P(\bar X > 520)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z_1 = (485 - 500)/10 = -1{,}5`}</Eq>; <Eq>{`z_2 = (515 - 500)/10 = 1{,}5`}</Eq>. <Eq>{`P(485 < \\bar X < 515) = \\Phi(1{,}5) - \\Phi(-1{,}5) \\approx 0{,}9332 - 0{,}0668 = 0{,}8664 \\approx 86{,}6\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "221", exercicio: "5.33", licenca: "CC-BY-SA" }}
+>
+With the parameters from 77.16 ($\mu = 500$ g, $\sigma = 50$ g, $n = 25$), calculate $P(485 < \bar X < 515)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 10/\\sqrt{100} = 1`}</Eq>. 95% SLA: 95th percentile of <Eq>{`\\mathcal{N}(50, 1)`}</Eq>. <Eq>{`\\bar X_{0{,}95} = 50 + 1{,}645 \\times 1 = 51{,}645`}</Eq> ms.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "395", exercicio: "Try It 7.10", licenca: "CC-BY" }}
+>
+Response time: $\mu = 50$ ms, $\sigma = 10$ ms. Mean of 100 measurements. What is the 95% SLA limit?
+</Exercicio>
+
+<Exercicio
+  numero="77.19"
+  dificuldade="aplicacao"
+  solucao={<>Given: <Eq>{`\\mu = 3{,}5`}</Eq>, <Eq>{`\\sigma^2 = 35/12`}</Eq>. <Eq>{`\\sigma_{\\bar X} = \\sqrt{35/(12 \\times 1000)} \\approx 0{,}054`}</Eq>. <Eq>{`z = (3{,}6 - 3{,}5)/0{,}054 \\approx 1{,}852`}</Eq>. <Eq>{`P(\\bar X > 3{,}6) \\approx 1 - \\Phi(1{,}85) \\approx 0{,}032`}</Eq>.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "325", exercicio: "Exercise 9.1.3", licenca: "GNU FDL" }}
+>
+Roll a die 1,000 times. Calculate $P(\bar X > 3{,}6)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.20"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`S_{1000} \\approx \\mathcal{N}(3500, 1000 \\times 35/12)`}</Eq>. <Eq>{`\\sigma_S = \\sqrt{2916{,}67} \\approx 54{,}0`}</Eq>. <Eq>{`z = (3600 - 3500)/54 \\approx 1{,}852`}</Eq>. <Eq>{`P(S > 3600) \\approx 0{,}032`}</Eq>. Same result as 77.19 — makes sense.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "326", exercicio: "Exercise 9.1.5", licenca: "GNU FDL" }}
+>
+Using the distribution of the sum $S_{1000}$ of 1,000 die rolls, calculate $P(S_{1000} > 3600)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Exp}(1)`}</Eq>: <Eq>{`\\mu = 1`}</Eq>, <Eq>{`\\sigma = 1`}</Eq>. <Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{100} = 0{,}1`}</Eq>. <Eq>{`z = (1{,}1 - 1)/0{,}1 = 1`}</Eq>. <Eq>{`P(\\bar X > 1{,}1) = 1 - \\Phi(1) \\approx 0{,}1587`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "383", exercicio: "Example 7.2", licenca: "CC-BY" }}
+>
+$X \sim \text{Exp}(1)$ ($\mu = 1$, $\sigma = 1$). Calculate $P(\bar X_{100} > 1{,}1)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`p = 0{,}40`}</Eq>. <Eq>{`\\sigma_{\\hat p} = \\sqrt{0{,}40 \\times 0{,}60 / 1000} = \\sqrt{0{,}00024} \\approx 0{,}01549`}</Eq>. <Eq>{`z = (0{,}43 - 0{,}40)/0{,}01549 \\approx 1{,}937`}</Eq>. <Eq>{`P(\\hat p > 0{,}43) \\approx 1 - \\Phi(1{,}94) \\approx 0{,}0262 \\approx 2{,}6\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "222", exercicio: "5.35", licenca: "CC-BY-SA" }}
+>
+Election poll: $p = 0{,}40$, $n = 1000$. Calculate $P(\hat p > 0{,}43)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.23"
+  dificuldade="modelagem"
+  solucao={<>Mean return of 50 stocks: <Eq>{`\\bar R_{50} \\approx \\mathcal{N}(0{,}001,\\; 0{,}0004/50) = \\mathcal{N}(0{,}001,\\; 0{,}000008)`}</Eq>. <Eq>{`\\sigma_{\\bar R} = \\sqrt{0{,}000008} = 0{,}00283`}</Eq> (0.28% per day). Diversification reduces risk by half compared to 1 stock (<Eq>{`\\sigma = 2\\%`}</Eq>).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "223", exercicio: "5.37", licenca: "CC-BY-SA" }}
+>
+You hold 50 independent stocks; daily return of each: $\mu = 0{,}1\%$, $\sigma = 2\%$. What is the distribution of the average daily return of the portfolio?
+</Exercicio>
+
+<Exercicio
+  numero="77.24"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\sigma_{\\bar e} = 0{,}5/\\sqrt{1000} = 0{,}5/31{,}62 \\approx 0{,}01581`}</Eq>. For 95% CI: margin <Eq>{`\\pm 1{,}96 \\times 0{,}01581 \\approx \\pm 0{,}031`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "398", exercicio: "Try It 7.13", licenca: "CC-BY" }}
+>
+ML model: individual error $\sigma = 0{,}5$. Calculate the standard deviation of the mean error over 1,000 predictions.
+</Exercicio>
+
+<Exercicio
+  numero="77.25"
+  dificuldade="modelagem"
+  solucao={<>Formula for difference of proportions: <Eq>{`n = \\frac{(z_\\alpha + z_\\beta)^2 [p_1(1-p_1) + p_2(1-p_2)]}{(p_1 - p_2)^2}`}</Eq>. With <Eq>{`\\alpha = 0{,}05`}</Eq> (<Eq>{`z = 1{,}96`}</Eq>), <Eq>{`\\beta = 0{,}2`}</Eq> (<Eq>{`z = 0{,}84`}</Eq>), 5% difference and assuming <Eq>{`p \\approx 0{,}5`}</Eq>: <Eq>{`n = (1{,}96 + 0{,}84)^2 \\times 2 \\times 0{,}25 / 0{,}0025 \\approx 1570`}</Eq> per group.</>}
+  passos={<>
+    <ol>
+      <li>Identify: <Eq>{`z_{\\alpha/2} = 1{,}96`}</Eq> (two-tailed 5%), <Eq>{`z_\\beta = 0{,}84`}</Eq> (80% power).</li>
+      <li>Assume <Eq>{`p_1 = p_2 = 0{,}5`}</Eq> (worst case for variance): <Eq>{`\\sigma_i^2 = 0{,}25`}</Eq>.</li>
+      <li>Substitute: <Eq>{`n = (2{,}80)^2 \\times 0{,}5 / 0{,}0025 = 7{,}84 / 0{,}0025 = 3136`}</Eq> total, 1568 per group.</li>
+    </ol>
+    <em>Fun fact:</em> This calculation is the basis of all power analysis in clinical trials.
+  </>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "259", exercicio: "6.15", licenca: "CC-BY-SA" }}
+>
+Determine the sample size to detect a 5% difference in proportions with $\alpha = 0{,}05$ and 80% power.
+</Exercicio>
+
+<Exercicio
+  numero="77.26"
+  dificuldade="modelagem"
+  solucao={<>Each point falls inside the circle with probability <Eq>{`p = \\pi/4`}</Eq>. Monte Carlo estimate of <Eq>{`\\pi`}</Eq>: <Eq>{`\\hat\\pi = 4\\hat p`}</Eq>. By CLT, <Eq>{`\\text{Var}(\\hat p) = p(1-p)/n`}</Eq>; <Eq>{`\\text{Var}(\\hat\\pi) = 16p(1-p)/n = \\pi(4-\\pi)/n`}</Eq>. Standard deviation: <Eq>{`\\sqrt{\\pi(4-\\pi)/n}`}</Eq>.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "328", exercicio: "Exercise 9.1.7", licenca: "GNU FDL" }}
+>
+Monte Carlo estimate of $\pi$: $n$ random points in the square $[0,1]^2$, count those falling in the quarter-disk. What is the standard deviation of the estimate of $\pi$ as a function of $n$?
+</Exercicio>
+
+<Exercicio
+  numero="77.27"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`S_{500} \\approx \\mathcal{N}(500 \\times 100,\\; 500 \\times 25) = \\mathcal{N}(50{.}000,\\; 12{.}500)`}</Eq>. <Eq>{`\\sigma_S = \\sqrt{12{.}500} \\approx 111{,}8`}</Eq> g. The expected total mass is 50 kg with a standard deviation of about 112 g.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Try It 7.9", licenca: "CC-BY" }}
+>
+Batch of 500 parts: $\mu = 100$ g, $\sigma = 5$ g. Determine the distribution of the total mass $S_{500}$.
+</Exercicio>
+
+<Exercicio
+  numero="77.28"
+  dificuldade="modelagem"
+  solucao={<>Uniform on <Eq>{`[0, 30]`}</Eq>: <Eq>{`\\mu = 15`}</Eq> min, <Eq>{`\\sigma^2 = 900/12 = 75`}</Eq>. <Eq>{`\\bar T_{50} \\approx \\mathcal{N}(15,\\; 75/50) = \\mathcal{N}(15,\\; 1{,}5)`}</Eq>. <Eq>{`z = (16 - 15)/\\sqrt{1{,}5} \\approx 0{,}816`}</Eq>. <Eq>{`P(\\bar T > 16) \\approx 1 - \\Phi(0{,}82) \\approx 0{,}2061`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "221", exercicio: "5.33", licenca: "CC-BY-SA" }}
+>
+Bus wait time: $\mathcal{U}[0, 30]$ min. Calculate $P(\bar T_{50} > 16)$ for the average wait of 50 passengers.
+</Exercicio>
+
+<Exercicio
+  numero="77.29"
+  dificuldade="modelagem"
+  solucao={<>X-bar chart with <Eq>{`n = 5`}</Eq>: <Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{5}`}</Eq>. Control limits: <Eq>{`\\mu \\pm 3\\sigma/\\sqrt{5} = \\mu \\pm 3\\sigma/2{,}236 = \\mu \\pm 1{,}342\\sigma`}</Eq>. Substitute the specific values of <Eq>{`\\mu`}</Eq> and <Eq>{`\\sigma`}</Eq> of the process.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "399", exercicio: "Practice 7.18", licenca: "CC-BY" }}
+>
+X-bar control chart with $n = 5$. The control limits are $\bar X \pm 3\sigma_{\bar X}$. Calculate the interval width in terms of process $\sigma$.
+</Exercicio>
+
+<Exercicio
+  numero="77.30"
+  dificuldade="modelagem"
+  solucao={<>With <Eq>{`p`}</Eq> unknown, use worst case <Eq>{`p = 0{,}5`}</Eq>: <Eq>{`n = (1{,}96/0{,}03)^2 \\times 0{,}25 = 65{,}33^2 \\times 0{,}25 \\approx 4268 \\times 0{,}25 \\approx 1067`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.1", pagina: "251", exercicio: "6.7", licenca: "CC-BY-SA" }}
+>
+Satisfaction survey: margin of error $\pm 3\%$ at 95% confidence, $p$ unknown. What is the minimum $n$?
+</Exercicio>
+
+<Exercicio
+  numero="77.31"
+  dificuldade="modelagem"
+  solucao={<>100 calls per hour: <Eq>{`S_{100} \\approx \\mathcal{N}(100 \\times 3,\\; 100 \\times 2{,}25) = \\mathcal{N}(300,\\; 225)`}</Eq>. Standard deviation of total: <Eq>{`\\sigma_S = 15`}</Eq> min. P(total greater than 330 min) <Eq>{`= P(Z > 2) \\approx 0{,}023`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Example 7.9", licenca: "CC-BY" }}
+>
+Call time: $\mu = 3$ min, $\sigma = 1{,}5$ min. 100 calls per hour. Determine the distribution of total time and calculate $P(\text{total} > 330\text{ min})$.
+</Exercicio>
+
+<Exercicio
+  numero="77.32"
+  dificuldade="desafio"
+  solucao={<>Variant A: <Eq>{`n = 10000`}</Eq>, <Eq>{`p_A = 0{,}05`}</Eq>; variant B: <Eq>{`p_B = 0{,}06`}</Eq>. <Eq>{`z = (\\hat p_B - \\hat p_A)/\\sqrt{p_A(1-p_A)/n + p_B(1-p_B)/n} \\approx 0{,}01/\\sqrt{2 \\times 0{,}05 \\times 0{,}95/10000} \\approx 0{,}01/0{,}00308 \\approx 3{,}25`}</Eq>. <Eq>{`p\\text{-value} \\approx 0{,}001`}</Eq>: difference significant at 5% level. Power: with this <Eq>{`z`}</Eq>, power is greater than 99%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "261", exercicio: "6.19", licenca: "CC-BY-SA" }}
+>
+A/B test: 10,000 visitors per variant; conversion rate A = 5%, B = 6%. Is the 1 percentage point lift statistically significant? Calculate the $z$-value and $p$-value.
+</Exercicio>
+
+<Exercicio
+  numero="77.33"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "Sum of many iid r.v. with finite variance converges to the normal distribution, regardless of the original distribution", correta: true }, { texto: "Every r.v. with large n has a normal distribution" }, { texto: "The original distribution approaches normal as n grows" }, { texto: "The sample mean always has an exact normal distribution" }]}
+  solucao={<>The CLT talks about the distribution of the <strong>sample mean</strong> (or normalized sum) — not the original distribution. The original distribution remains the same; what converges to normal is the statistic <Eq>{`Z_n`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "214", exercicio: "5.15", licenca: "CC-BY-SA" }}
+>
+Which of the following correctly describes the Central Limit Theorem?
+</Exercicio>
+
+<Exercicio
+  numero="77.34"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "Infinite variance: the proof via characteristic function fails because Taylor expansion requires finite variance", correta: true }, { texto: "Skewed distribution: CLT does not apply to skewed distributions" }, { texto: "Unknown parameter: without knowing σ, it is impossible to standardize" }, { texto: "Heavy tail: CLT requires original normal distribution" }]}
+  solucao={<>The characteristic function of Cauchy is <Eq>{`e^{-|t|}`}</Eq> — it has no second-order derivative at <Eq>{`t = 0`}</Eq> (infinite variance). The expansion <Eq>{`\\varphi(t/\\sqrt{n})^n`}</Eq> does not converge to <Eq>{`e^{-t^2/2}`}</Eq>. The mean of Cauchys is still Cauchy.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.3", pagina: "347", exercicio: "Exercise 9.3.3", licenca: "GNU FDL" }}
+>
+Why does the classical Lindeberg-Lévy CLT not apply to the Cauchy distribution?
+</Exercicio>
+
+<Exercicio
+  numero="77.35"
+  dificuldade="desafio"
+  solucao={<>Simulate in Python with <code>numpy.random.exponential</code> and <code>numpy.mean</code>. For <Eq>{`n = 1`}</Eq>: decreasing exponential. For <Eq>{`n = 5`}</Eq>: skewed but with a peak. For <Eq>{`n = 30`}</Eq>: almost perfect bell centered at <Eq>{`\\mu = 1`}</Eq>. Convergence is visible in the histograms of 10,000 repetitions.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "379", exercicio: "Try It 7.2", licenca: "CC-BY" }}
+>
+Simulate the CLT in Python for an exponential distribution with $\lambda = 1$. Generate histograms of 10,000 sample means for $n \in \lbrace 1, 5, 30 \rbrace$ and compare visually with the theoretical normal curve.
+</Exercicio>
+
+<Exercicio
+  numero="77.36"
+  dificuldade="demonstracao"
+  solucao={<>Step 1: define <Eq>{`Y_i = (X_i - \\mu)/\\sigma`}</Eq> (mean 0, var 1). Step 2: <Eq>{`\\varphi_{Y_i}(t) = 1 - t^2/2 + o(t^2)`}</Eq> by Taylor (uses finite variance). Step 3: <Eq>{`\\varphi_{Z_n}(t) = [\\varphi_{Y_i}(t/\\sqrt{n})]^n = [1 - t^2/(2n) + o(1/n)]^n \\to e^{-t^2/2}`}</Eq>. Step 4: <Eq>{`e^{-t^2/2}`}</Eq> is the characteristic function of <Eq>{`\\mathcal{N}(0,1)`}</Eq>. Step 5: Lévy's Continuity Theorem concludes convergence in distribution. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.3", pagina: "343–346", exercicio: "Theorem 9.3.1", licenca: "GNU FDL" }}
+>
+Sketch the proof of the CLT via characteristic function, indicating where each hypothesis (finite variance, iid) is used.
+</Exercicio>
+
+<Exercicio
+  numero="77.37"
+  dificuldade="demonstracao"
+  solucao={<>Weak Law of Large Numbers: <Eq>{`\\bar X_n \\xrightarrow{P} \\mu`}</Eq>. Derivation from CLT: <Eq>{`\\text{Var}(\\bar X_n) = \\sigma^2/n \\to 0`}</Eq>. By Chebyshev: <Eq>{`P(|\\bar X_n - \\mu| > \\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2) \\to 0`}</Eq>. The CLT is stronger — it states the speed (<Eq>{`1/\\sqrt{n}`}</Eq>) and the shape of the distribution of the deviation. WLLN follows directly.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "329", exercicio: "Exercise 9.1.9", licenca: "GNU FDL" }}
+>
+Show that the CLT implies the Weak Law of Large Numbers: if $Z_n \xrightarrow{d} \mathcal{N}(0,1)$, then $\bar X_n \xrightarrow{P} \mu$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**OpenIntro Statistics** (4th ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · CC-BY-SA. **Primary source for exercises 77.2, 77.4, 77.8, 77.11, 77.14–17, 77.22–23, 77.25–26, 77.28, 77.30, 77.33–34.**
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · CC-BY. **Source for exercises 77.1, 77.3, 77.5–7, 77.9–10, 77.12–13, 77.18–19, 77.21, 77.24, 77.27, 77.29, 77.31, 77.35 and examples 1–3.**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · Dartmouth · GNU FDL. **Source for exercises 77.19–20, 77.26, 77.36–37 and example 5.**

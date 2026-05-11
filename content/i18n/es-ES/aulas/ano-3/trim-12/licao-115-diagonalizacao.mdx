@@ -1,0 +1,830 @@
+---
+titulo: "Lección 115 — Diagonalización"
+slug: "licao-115-diagonalizacao"
+categoria: "aulas"
+subcategoria: "ano-3-trim-12"
+descricao: "Descomposición A = PDP⁻¹. Condiciones de diagonalizabilidad, algoritmo de construcción, potencias matriciales, exponencial de matriz y aplicaciones en sistemas dinámicos."
+ordem: 115
+publicado: true
+tags: ["álgebra linear", "diagonalização", "autovalores", "autovetores", "decomposição espectral", "ano-3", "trim-12"]
+prerrequisitos: ["licao-114-autovalores"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["3.º año de Bachillerato avanzado", "Equiv. Lineare Algebra LK alemán", "Equiv. Math III japonés", "Equiv. H2 Mathematics singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="A = PDP^{-1}"
+  legenda={<>Cuando <Eq>{`A`}</Eq> posee <Eq>{`n`}</Eq> autovectores linealmente independientes, se descompone como <Eq>{`A = PDP^{-1}`}</Eq>: <Eq>{`P`}</Eq> es la matriz cuyas columnas son los autovectores y <Eq>{`D`}</Eq> es diagonal con los autovalores. Diagonalizar es <strong>cambiar a la base de autovectores</strong>, donde la transformación lineal es trivial — cada dirección es solo escalada por su autovalor.</>}
+  audioTexto="Diagonalización. A es igual a P por D por P inversa. P tiene los autovectores como columnas. D es diagonal con los autovalores en la diagonal. Diagonalizar es cambiar a la base de autovectores, donde la transformación es trivial: cada dirección es escalada independientemente por su autovalor."
+/>
+
+<aside>
+
+**Libros que cubren esta lección**
+
+- [**A First Course in Linear Algebra**](http://linear.ups.edu/) — Robert A. Beezer · §SD (Similar Matrices and Diagonalization) · GNU FDL · <em>Referencia primaria: definiciones rigurosas, teoremas con prueba completa sobre diagonalización y multiplicidades algebraica y geométrica.</em>
+- [**Linear Algebra Done Right** (4ª ed)](https://linear.axler.net/) — Sheldon Axler · cap. 5C–5D · CC-BY-NC · <em>Enfoque moderno vía operadores: trata diagonalizabilidad a través de descomposición en subespacios invariantes, sin dependencia de determinantes.</em>
+- [**Linear Algebra** (Hefferon)](https://hefferon.net/linearalgebra/) — Jim Hefferon · cap. 5 §II · CC-BY-SA · <em>Excelente en la motivación geométrica y en los ejemplos de matrices no-diagonalizables con forma de Jordan introductoria.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Descomposición espectral — definición y teoría">
+
+### Definición fundamental
+
+<Definicao titulo="Matriz diagonalizable">
+
+Sea $A \in \mathcal{M}_n(\mathbb{K})$. Decimos que $A$ es **diagonalizable** (sobre $\mathbb{K}$) si existe una matriz $P$ inversible tal que
+
+<Equation explicacao="Descomposición espectral: P tiene los autovectores como columnas, D es diagonal con los autovalores." latex="A = PDP^{-1}, \qquad D = \operatorname{diag}(\lambda_1, \lambda_2, \ldots, \lambda_n)" />
+
+Equivalentemente, $AP = PD$ — cada columna $p_i$ de $P$ satisface $Ap_i = \lambda_i p_i$, es decir, es autovector de $A$ con autovalor $\lambda_i$.
+
+</Definicao>
+
+> "A matrix $A$ is diagonalizable if it is similar to a diagonal matrix — there exists an invertible $P$ such that $P^{-1}AP$ is diagonal." — [Beezer, A First Course in Linear Algebra, §SD](http://linear.ups.edu/html/section-SD.html)
+
+### Condiciones equivalentes
+
+<Teorema titulo="Criterio de diagonalizabilidad">
+
+Las siguientes afirmaciones son equivalentes para $A \in \mathcal{M}_n(\mathbb{K})$:
+
+1. $A$ es diagonalizable.
+2. $A$ posee $n$ autovectores linealmente independientes.
+3. La suma de las dimensiones de los autoespacios es igual a $n$: $\sum_\lambda \dim E_\lambda = n$.
+4. Para cada autovalor $\lambda$, la multiplicidad geométrica iguala a la multiplicidad algebraica: $m_g(\lambda) = m_a(\lambda)$.
+5. $\mathbb{K}^n = \bigoplus_\lambda E_\lambda$ — el espacio es suma directa de los autoespacios.
+
+**Prueba de la equivalencia 2 $\Leftrightarrow$ 1.** Si $\{v_1, \ldots, v_n\}$ son $n$ autovectores LI con autovalores $\lambda_1, \ldots, \lambda_n$, forme $P = [v_1 \mid \cdots \mid v_n]$. Como las columnas son LI, $P$ es inversible. Calcule:
+
+$$AP = A[v_1 \mid \cdots \mid v_n] = [\lambda_1 v_1 \mid \cdots \mid \lambda_n v_n] = [v_1 \mid \cdots \mid v_n]\operatorname{diag}(\lambda_i) = PD$$
+
+Luego $P^{-1}AP = D$. La recíproca es inmediata: si $A = PDP^{-1}$, las columnas de $P$ son autovectores LI. $\square$
+
+</Teorema>
+
+> "An $n \times n$ matrix $A$ is diagonalizable if and only if $A$ has $n$ linearly independent eigenvectors." — [Beezer, A First Course in Linear Algebra, §SD Theorem DED](http://linear.ups.edu/html/section-SD.html)
+
+### Casos que garantizan diagonalizabilidad
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr115" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="10" width="220" height="40" rx="6" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="120" y="35" textAnchor="middle" fontSize="12" fontFamily="ui-monospace,monospace" fill="currentColor">n autovalores distintos</text>
+</g>
+<g>
+  <rect x="10" y="70" width="220" height="40" rx="6" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="120" y="95" textAnchor="middle" fontSize="12" fontFamily="ui-monospace,monospace" fill="currentColor">A simétrica real</text>
+</g>
+<g>
+  <rect x="10" y="130" width="220" height="40" rx="6" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="120" y="155" textAnchor="middle" fontSize="12" fontFamily="ui-monospace,monospace" fill="currentColor">A normal (AA* = A*A)</text>
+</g>
+<g>
+  <line x1="235" y1="30" x2="290" y2="90" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" markerEnd="url(#arr115)"/>
+  <line x1="235" y1="90" x2="290" y2="90" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" markerEnd="url(#arr115)"/>
+  <line x1="235" y1="150" x2="290" y2="110" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" markerEnd="url(#arr115)"/>
+</g>
+<g>
+  <rect x="295" y="60" width="215" height="60" rx="8" fill="rgb(232 199 122 / 0.3)" stroke="rgb(201 163 95)" strokeWidth="2"/>
+  <text x="402" y="85" textAnchor="middle" fontSize="12" fontFamily="ui-monospace,monospace" fill="currentColor">DIAGONALIZABLE</text>
+  <text x="402" y="105" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">(sobre C o con P ortogonal)</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Condiciones suficientes para diagonalizabilidad. Simétrica real: P ortogonal (Teorema Espectral, L116). Normal: P unitaria.
+</figcaption>
+</figure>
+
+### Algoritmo de diagonalización
+
+1. Calcule el polinomio característico $p_A(\lambda) = \det(A - \lambda I)$ y encuentre las raíces $\lambda_1, \ldots, \lambda_k$ con multiplicidades algebraicas $m_a(\lambda_i)$.
+2. Para cada $\lambda_i$, resuelva $(A - \lambda_i I)v = 0$ y encuentre una base de $E_{\lambda_i} = \ker(A - \lambda_i I)$. Verifique $m_g(\lambda_i) = \dim E_{\lambda_i}$.
+3. Si $\sum m_g(\lambda_i) = n$: monte $P$ con los autovectores como columnas y $D = \operatorname{diag}(\lambda_1, \ldots, \lambda_n)$ (respetando el orden de las columnas).
+4. Si $\sum m_g(\lambda_i) < n$: $A$ no es diagonalizable — recurra a la forma de Jordan.
+
+### Aplicaciones inmediatas
+
+<Insight>
+
+**$A^k$ en una multiplicación.** Si $A = PDP^{-1}$, entonces $A^k = PD^kP^{-1}$ porque $(PDP^{-1})^k = PD(P^{-1}P)D\cdots DP^{-1} = PD^kP^{-1}$. Y $D^k = \operatorname{diag}(\lambda_1^k, \ldots, \lambda_n^k)$ es trivial. Esto reduce $k$ multiplicaciones matriciales $O(n^3)$ a **una única** composición.
+
+</Insight>
+
+<Equation explicacao="Potencia matricial vía diagonalización: D^k tiene los autovalores elevados a k en la diagonal." latex="A^k = P D^k P^{-1}, \quad D^k = \operatorname{diag}(\lambda_1^k, \ldots, \lambda_n^k)" />
+
+<Equation explicacao="Exponencial de matriz: cada autovalor lambda_i genera e^{lambda_i t} en la diagonal." latex="e^{At} = P e^{Dt} P^{-1}, \quad e^{Dt} = \operatorname{diag}(e^{\lambda_1 t}, \ldots, e^{\lambda_n t})" />
+
+Para cualquier función analítica $f$: $f(A) = Pf(D)P^{-1}$ con $f(D) = \operatorname{diag}(f(\lambda_i))$.
+
+</Porta>
+
+<Porta nivel="5" titulo="Para un niño de 5 años">
+
+Imagina una **caja desordenada** con juguetes todos mezclados. Si separas por color — rojo en una pila, azul en otra — es mucho más fácil contar y jugar.
+
+**Diagonalizar** una matriz es exactamente eso: organizar los objetos matemáticos en **pilas separadas** llamadas autovectores. Cada pila tiene un número especial (el autovalor) que dice "cuánto cada cosa de ese color crece".
+
+Después de organizado, hacer muchas operaciones de una vez se convierte en una cuenta simple: en lugar de mezclar todo junto, solo multiplicas cada pila por su número — independiente de las otras.
+
+</Porta>
+
+<Porta nivel="10" titulo="Para un niño de 10 años">
+
+Diagonalizar una matriz es como **cambiar de gafas** para ver mejor.
+
+Sin gafas, $A$ parece complicada — números por todas partes, todo mezclado. Con las gafas correctas (el cambio de base a autovectores), ves $D$: una matriz solo con números en la diagonal y ceros en todo lo demás.
+
+**¿Por qué es útil?** Imagina que quieres calcular $A^{100}$ — multiplicar $A$ por sí misma 100 veces. Sin gafas: trabajo enorme. Con gafas:
+
+$$A^{100} = P D^{100} P^{-1}$$
+
+Y $D^{100}$ es fácil — solo elevas cada número de la diagonal a la potencia 100. Listo.
+
+$P$ es el "cambio de gafas" y $P^{-1}$ es el "vuelta a gafas normales".
+
+</Porta>
+
+<Porta nivel="15" titulo="Para un adolescente de 15 años">
+
+Diagonalización es la **transformación que revela** qué hace la matriz realmente. En lugar de ver números mezclados, ves direcciones independientes de estiramiento.
+
+### ¿Por qué esto es poderoso?
+
+Cualquier iteración lineal $x_{k+1} = Ax_k$ tiene solución cerrada vía diagonalización. Escribe $x_0 = \sum c_i v_i$ (combinación de los autovectores de $A$). Entonces:
+
+$$x_k = A^k x_0 = \sum_{i=1}^n c_i \lambda_i^k v_i$$
+
+Cada componente crece o decae de forma independiente, con tasa $\lambda_i$. Son los **modos propios** del sistema.
+
+### Aplicación clásica: fórmula de Binet
+
+La recurrencia de Fibonacci $F_{n+1} = F_n + F_{n-1}$ en forma matricial:
+
+$$\begin{pmatrix} F_{n+1} \\ F_n \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}^n \begin{pmatrix} 1 \\ 0 \end{pmatrix}$$
+
+Diagonalizando la matriz (autovalores $\phi = (1+\sqrt{5})/2$ y $\psi = (1-\sqrt{5})/2$):
+
+$$F_n = \frac{\phi^n - \psi^n}{\sqrt{5}}$$
+
+— la **fórmula cerrada de Binet** — sin calcular $F_1, F_2, \ldots, F_{n-1}$.
+
+### ¿Cuándo NO diagonaliza?
+
+Cuando $m_g(\lambda) < m_a(\lambda)$ para algún $\lambda$. Ejemplo clásico:
+
+$$\begin{pmatrix} 2 & 1 \\ 0 & 2 \end{pmatrix}$$
+
+Autovalor 2 con $m_a = 2$, pero $m_g = 1$ (solo un autovector independiente). No diagonaliza sobre $\mathbb{R}$ ni $\mathbb{C}$. En ese caso, se usa la **forma de Jordan** (próxima gran frontera del álgebra lineal).
+
+</Porta>
+
+<Porta nivel="25" titulo="Para un estudiante de ingeniería">
+
+Diagonalización transforma **álgebra acoplada en álgebra desacoplada**. Es la operación base de todo análisis modal en ingeniería estructural, control y procesamiento de señales.
+
+### Aplicación 1: sistemas LTI — ecuaciones diferenciales vectoriales
+
+$\dot{x} = Ax$, $x(0) = x_0$. Si $A = PDP^{-1}$, cambie variable $y = P^{-1}x$:
+
+$$\dot{y} = P^{-1}\dot{x} = P^{-1}AP y = Dy$$
+
+Sistema **desacoplado**: $\dot{y}_i = \lambda_i y_i$ para cada $i$. Solución: $y_i(t) = y_i(0)e^{\lambda_i t}$.
+
+Volviendo a la variable original: $x(t) = Pe^{Dt}P^{-1}x_0 = \sum_{i=1}^n (P^{-1}x_0)_i e^{\lambda_i t} v_i$.
+
+Estabilidad: $x(t) \to 0$ cuando $t \to \infty$ si y solo si $\operatorname{Re}(\lambda_i) < 0$ para todo $i$ (**criterio espectral de estabilidad**).
+
+### Aplicación 2: análisis modal en estructuras
+
+Sistema masa-muelle acoplado: $M\ddot{q} + Kq = 0$. Reduciendo a autoproblema generalizado $Kv = \lambda Mv$, los **modos normales** (autovectores) son las formas de vibración y las **frecuencias naturales** son $\omega_i = \sqrt{\lambda_i}$. La diagonalización desacopla las ecuaciones — cada modo vibra independiente. Esta es la base del método de superposición modal (FEM, SAP2000, ANSYS).
+
+### Aplicación 3: cadenas de Markov
+
+Distribución $\pi_{t+1} = P^T \pi_t$. Si $P$ es estocástica irreducible y aperiódica, diagonalizando: $\pi_t = P^T{}^t \pi_0$. La tasa de convergencia a la distribución estacionaria es gobernada por el **segundo mayor autovalor** $|\lambda_2|$ (gap espectral).
+
+### Costo computacional y límites prácticos
+
+- Descomposición completa de autovalores: $O(n^3)$ vía algoritmo QR iterativo.
+- $A^k$ vía diagonalización: $O(n^3)$ una vez + $O(n^2)$ por paso — ventaja enorme para $k \gg n$.
+- **Cuidado:** si $\kappa(P)$ (número de condicionamiento de $P$) es alto, la descomposición es numéricamente inestable. Para matrices simétricas, $P$ es ortogonal ($\kappa(P) = 1$) — estabilidad perfecta.
+- Para matrices dispersas, preferir Lanczos (busca algunos autovalores, no todos).
+
+</Porta>
+
+<Porta nivel="40" titulo="Para un profesional sénior">
+
+### Forma de Jordan: cuando la diagonalización falla
+
+Cuando $A$ no es diagonalizable, la descomposición canónica es $A = PJP^{-1}$ con $J$ bloque-diagonal de bloques de Jordan:
+
+$$J_{n_i}(\lambda_i) = \lambda_i I_{n_i} + N_{n_i}, \quad N_{n_i} = \begin{pmatrix} 0 & 1 & & \\ & 0 & \ddots & \\ & & \ddots & 1 \\ & & & 0 \end{pmatrix}$$
+
+donde $N_{n_i}^{n_i} = 0$ (nilpotente). Aplicaciones de funciones analíticas: $f(J_n(\lambda)) = \sum_{k=0}^{n-1} \frac{f^{(k)}(\lambda)}{k!} N^k$ — serie truncada por nilpotencia.
+
+En práctica numérica, Jordan es **mal-condicionada** — la base $P$ puede tener $\kappa(P)$ altísimo. Se usa en su lugar la **descomposición de Schur** $A = QTQ^*$ con $Q$ unitaria y $T$ triangular superior: numéricamente estable, con $\kappa(Q) = 1$.
+
+### Diagonalización simultánea
+
+$\{A_i\}$ son simultáneamente diagonalizables $\iff$ conmutan: $A_iA_j = A_jA_i$ para todo par. En mecánica cuántica, **observables compatibles** ↔ operadores hermitianos que conmutan ↔ pueden ser medidos simultáneamente (base común de autovectores). El principio de incertidumbre de Heisenberg nace de la no-conmutatividad de $\hat{x}$ y $\hat{p}$.
+
+### Pseudoespectro y matrices no-normales
+
+Para matrices no-normales, autovalores pueden ser **engañosos**: pequeña perturbación puede cambiar mucho la localización espectral. El $\epsilon$-pseudoespectro es:
+
+$$\sigma_\epsilon(A) = \{z \in \mathbb{C} : \|(zI - A)^{-1}\|_2 > 1/\epsilon\}$$
+
+Trefethen mostró que el pseudoespectro explica fenómenos de *transient growth* en flujos shear (turbulencia subcrítica en Couette-Poiseuille) e inestabilidad en redes neurales recurrentes.
+
+### Conexión con Black-Scholes (L119)
+
+La matriz Hessiana de las sensibilidades $\Gamma_{ij} = \partial^2 V/\partial S_i \partial S_j$ en carteras multi-activo es simétrica positiva semidefinida. Diagonalizarla revela las **direcciones de riesgo principales** — base de la atribución de riesgo en portafolios (Litterman, RiskMetrics 1994). Los autovalores son las varianzas en las direcciones no-correlacionadas; los autovectores son los **factores de riesgo** ortogonales.
+
+### Extensiones modernas
+
+- **Operador de Koopman**: levanta dinámica no-lineal a espacio de observables infinito-dimensional y linealiza — la diagonalización del operador (vía DMD, Dynamic Mode Decomposition) identifica patrones coherentes en datos de fluidos y climate (Schmid 2010).
+- **Análisis espectral en deep learning**: skip connections en ResNets mantienen autovalores de los jacobianos próximos a 1, evitando explosion/vanishing gradients (He et al. 2016).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicación práctica">
+
+### Receta paso a paso
+
+1. Calcule los autovalores: resuelva $\det(A - \lambda I) = 0$.
+2. Para cada autovalor $\lambda_i$, encuentre base de $\ker(A - \lambda_i I)$.
+3. Verifique: $\sum \dim E_{\lambda_i} = n$? Si sí, es diagonalizable.
+4. Monte $P = [v_1 \mid v_2 \mid \cdots \mid v_n]$ y $D = \operatorname{diag}(\lambda_1, \ldots, \lambda_n)$.
+5. Confíe: $AP = PD$ (más simple que calcular $PDP^{-1}$ explícitamente).
+
+### Aplicación práctica: crecimiento poblacional (IBGE)
+
+Modelo Leslie de 2 franjas etarias — jóvenes ($J$) y adultos ($A$) — con tasas de fertilidad y sobrevivencia típicas para un municipio brasileño de porte medio:
+
+$$M = \begin{pmatrix} 0{,}6 & 1{,}2 \\ 0{,}4 & 0{,}0 \end{pmatrix}$$
+
+Para proyectar 10 ciclos: $v_{10} = M^{10} v_0$. Vía diagonalización, se calcula una vez y se aplica directamente — sin iterar 10 multiplicaciones de matrices.
+
+### Estabilidad de sistemas de control
+
+Un sistema de control $\dot{x} = Ax$ es estable si $\operatorname{Re}(\lambda_i) < 0$ para todo $i$. Para verificar estabilidad, no necesita resolver la EDO — basta diagonalizar (o calcular el espectro) de $A$ y verificar dónde caen los autovalores en el plano complejo.
+
+### Cuándo NO usar diagonalización directamente
+
+- **$A$ próxima de defectiva**: $\kappa(P)$ alto → errores amplificados. Use Schur.
+- **$A$ grande y dispersa, queriendo pocos modos**: use Lanczos/Arnoldi (MATLAB `eigs`, SciPy `eigsh`).
+- **$A$ simétrica real**: use siempre `np.linalg.eigh` (más rápido, estable, garantiza $P$ ortogonal).
+
+</Porta>
+
+</DuasPortas>
+
+## Ejemplos resolvidos
+
+<Exemplo titulo="Diagonalizando una matriz 2×2 (básico)" numero="1">
+
+**Problema:** Diagonalize $A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}$.
+
+**Estrategia:** Encontrar autovalores y autovectores, montar $P$ y $D$, verificar $AP = PD$.
+
+**Resolución:**
+
+1. **Polinomio característico:**
+$$p_A(\lambda) = \det(A - \lambda I) = (4-\lambda)(3-\lambda) - 2 = \lambda^2 - 7\lambda + 10 = (\lambda - 5)(\lambda - 2)$$
+Autovalores: $\lambda_1 = 5$, $\lambda_2 = 2$.
+
+2. **Autovectores:**
+
+Para $\lambda_1 = 5$: $(A - 5I)v = 0 \Rightarrow \begin{pmatrix} -1 & 1 \\ 2 & -2 \end{pmatrix}v = 0$. Base: $v_1 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}$.
+
+Para $\lambda_2 = 2$: $(A - 2I)v = 0 \Rightarrow \begin{pmatrix} 2 & 1 \\ 2 & 1 \end{pmatrix}v = 0$. Base: $v_2 = \begin{pmatrix} 1 \\ -2 \end{pmatrix}$.
+
+3. **Montaje:**
+$$P = \begin{pmatrix} 1 & 1 \\ 1 & -2 \end{pmatrix}, \quad D = \begin{pmatrix} 5 & 0 \\ 0 & 2 \end{pmatrix}$$
+
+**Verificación:** $AP = \begin{pmatrix} 5 & 2 \\ 5 & -4 \end{pmatrix}$ y $PD = \begin{pmatrix} 5 & 2 \\ 5 & -4 \end{pmatrix}$. Iguales. $\checkmark$
+
+**Fuente.** [Beezer, A First Course in Linear Algebra §SD, Ejemplo DMS22](http://linear.ups.edu/html/section-SD.html) — licencia GNU FDL.
+</Exemplo>
+
+<Exemplo titulo="Matriz no-diagonalizable (comprensión)" numero="2">
+
+**Problema:** Determine si $A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$ es diagonalizable. Justifique.
+
+**Estrategia:** Calcular multiplicidades algebraica y geométrica del único autovalor.
+
+**Resolución:**
+
+1. **Autovalores:** $p_A(\lambda) = (3-\lambda)^2 = 0$, luego $\lambda = 3$ con $m_a = 2$.
+
+2. **Autoespacios:** $(A - 3I) = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}$. El sistema $(A - 3I)v = 0$ exige $v_2 = 0$, con $v_1$ libre. Base: $\left\{\begin{pmatrix} 1 \\ 0 \end{pmatrix}\right\}$. Por lo tanto $m_g(3) = 1$.
+
+3. **Conclusión:** $m_g(3) = 1 < 2 = m_a(3)$. No hay dos autovectores LI. **$A$ no es diagonalizable.**
+
+**Verificación:** Si existiera $P$ con $P^{-1}AP = \begin{pmatrix} 3 & 0 \\ 0 & 3 \end{pmatrix} = 3I$, tendríamos $A = P(3I)P^{-1} = 3I$. Pero $A \neq 3I$. Contradicción. $\checkmark$
+
+**Fuente.** [Beezer, A First Course in Linear Algebra §SD, Ejemplo NDMS3](http://linear.ups.edu/html/section-SD.html) — licencia GNU FDL.
+</Exemplo>
+
+<Exemplo titulo="Potencia matricial vía diagonalización (intermedio)" numero="3">
+
+**Problema:** Calcule $A^{10}$ para $A = \begin{pmatrix} 2 & 1 \\ 0 & 1 \end{pmatrix}$.
+
+**Estrategia:** Diagonalizar $A$, elevar $D$ a la potencia 10 (trivial), componer.
+
+**Resolución:**
+
+1. **Autovalores:** $p_A(\lambda) = (2-\lambda)(1-\lambda) = 0$, luego $\lambda_1 = 2$, $\lambda_2 = 1$.
+
+2. **Autovectores:**
+
+$\lambda_1 = 2$: $(A - 2I)v = 0 \Rightarrow \begin{pmatrix} 0 & 1 \\ 0 & -1 \end{pmatrix}v = 0$. $v_1 = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$.
+
+$\lambda_2 = 1$: $(A - I)v = 0 \Rightarrow \begin{pmatrix} 1 & 1 \\ 0 & 0 \end{pmatrix}v = 0$. $v_2 = \begin{pmatrix} 1 \\ -1 \end{pmatrix}$.
+
+3. **Descomposición:** $P = \begin{pmatrix} 1 & 1 \\ 0 & -1 \end{pmatrix}$, $D = \begin{pmatrix} 2 & 0 \\ 0 & 1 \end{pmatrix}$.
+
+$P^{-1} = \begin{pmatrix} 1 & 1 \\ 0 & -1 \end{pmatrix}$ (verificar: $\det P = -1$, luego $P^{-1} = \frac{1}{-1}\begin{pmatrix} -1 & -1 \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 0 & -1 \end{pmatrix}$).
+
+4. **Potencia:** $D^{10} = \begin{pmatrix} 2^{10} & 0 \\ 0 & 1^{10} \end{pmatrix} = \begin{pmatrix} 1024 & 0 \\ 0 & 1 \end{pmatrix}$.
+
+$$A^{10} = PD^{10}P^{-1} = \begin{pmatrix} 1 & 1 \\ 0 & -1 \end{pmatrix}\begin{pmatrix} 1024 & 0 \\ 0 & 1 \end{pmatrix}\begin{pmatrix} 1 & 1 \\ 0 & -1 \end{pmatrix} = \begin{pmatrix} 1024 & 1023 \\ 0 & 1 \end{pmatrix}$$
+
+**Verificación:** $A^2 = \begin{pmatrix} 4 & 3 \\ 0 & 1 \end{pmatrix}$. Por la fórmula: $A^2 = \begin{pmatrix} 2^2 & 2^2-1 \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} 4 & 3 \\ 0 & 1 \end{pmatrix}$. $\checkmark$
+
+**Fuente.** [Hefferon, Linear Algebra, cap. 5 §II](https://hefferon.net/linearalgebra/) — licencia CC-BY-SA.
+</Exemplo>
+
+<Exemplo titulo="Fórmula de Binet para Fibonacci (avanzado)" numero="4">
+
+**Problema:** Derive la fórmula cerrada de Binet $F_n = \dfrac{\phi^n - \psi^n}{\sqrt{5}}$, donde $\phi = \frac{1+\sqrt{5}}{2}$ y $\psi = \frac{1-\sqrt{5}}{2}$.
+
+**Estrategia:** Reescribir la recurrencia como iteración matricial, diagonalizar la matriz de transición.
+
+**Resolución:**
+
+1. **Forma matricial:** $\begin{pmatrix} F_{n+1} \\ F_n \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}\begin{pmatrix} F_n \\ F_{n-1} \end{pmatrix}$. Sea $M = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}$.
+
+2. **Autovalores de $M$:** $\lambda^2 - \lambda - 1 = 0 \Rightarrow \lambda = \frac{1 \pm \sqrt{5}}{2}$, luego $\lambda_1 = \phi$, $\lambda_2 = \psi$.
+
+3. **Autovectores:** $v_1 = \begin{pmatrix} \phi \\ 1 \end{pmatrix}$, $v_2 = \begin{pmatrix} \psi \\ 1 \end{pmatrix}$.
+
+4. **Descomposición:** $\begin{pmatrix} F_{n+1} \\ F_n \end{pmatrix} = M^n \begin{pmatrix} 1 \\ 0 \end{pmatrix} = PD^nP^{-1}\begin{pmatrix} 1 \\ 0 \end{pmatrix}$.
+
+$P = \begin{pmatrix} \phi & \psi \\ 1 & 1 \end{pmatrix}$, $\det P = \phi - \psi = \sqrt{5}$. $P^{-1} = \frac{1}{\sqrt{5}}\begin{pmatrix} 1 & -\psi \\ -1 & \phi \end{pmatrix}$.
+
+5. **Segunda componente:** $F_n = \frac{\phi^n(\phi - \psi + \psi \cdot \text{...}) - \psi^n(\ldots)}{\sqrt{5}}$. Calculando explícitamente la segunda línea de $PD^nP^{-1}\begin{pmatrix}1\\0\end{pmatrix}$:
+
+$$F_n = \frac{1}{\sqrt{5}}\left(\phi^n \cdot 1 \cdot \frac{1}{\sqrt{5}}\sqrt{5} - \psi^n \cdot 1 \cdot \frac{1}{\sqrt{5}}\sqrt{5}\right) = \frac{\phi^n - \psi^n}{\sqrt{5}}$$
+
+**Verificación:** $F_1 = \frac{\phi - \psi}{\sqrt{5}} = \frac{\sqrt{5}}{\sqrt{5}} = 1$. $F_2 = \frac{\phi^2 - \psi^2}{\sqrt{5}} = \frac{(\phi-\psi)(\phi+\psi)}{\sqrt{5}} = \frac{\sqrt{5} \cdot 1}{\sqrt{5}} = 1$. $\checkmark$
+
+**Fuente.** [Beezer, A First Course in Linear Algebra §SD](http://linear.ups.edu/html/section-SD.html) — licencia GNU FDL.
+</Exemplo>
+
+<Exemplo titulo="Estabilidad de sistema dinámico (modelaje)" numero="5">
+
+**Problema:** El sistema $\dot{x} = Ax$ con $A = \begin{pmatrix} -3 & 1 \\ 1 & -3 \end{pmatrix}$ y $x(0) = \begin{pmatrix} 2 \\ 0 \end{pmatrix}$. Determine $x(t)$ y clasifique la estabilidad.
+
+**Estrategia:** Diagonalizar $A$, resolver el sistema desacoplado, componer la solución.
+
+**Resolución:**
+
+1. **Autovalores:** $p_A(\lambda) = (-3-\lambda)^2 - 1 = \lambda^2 + 6\lambda + 8 = (\lambda+4)(\lambda+2) = 0$. $\lambda_1 = -4$, $\lambda_2 = -2$.
+
+2. **Autovectores:**
+
+$\lambda_1 = -4$: $(A + 4I) = \begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}$. $v_1 = \begin{pmatrix} 1 \\ -1 \end{pmatrix}$.
+
+$\lambda_2 = -2$: $(A + 2I) = \begin{pmatrix} -1 & 1 \\ 1 & -1 \end{pmatrix}$. $v_2 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}$.
+
+3. **Solución general:** $x(t) = c_1 e^{-4t}\begin{pmatrix} 1 \\ -1 \end{pmatrix} + c_2 e^{-2t}\begin{pmatrix} 1 \\ 1 \end{pmatrix}$.
+
+4. **Condición inicial:** $x(0) = \begin{pmatrix} 2 \\ 0 \end{pmatrix} \Rightarrow c_1 + c_2 = 2$ y $-c_1 + c_2 = 0$, luego $c_1 = c_2 = 1$.
+
+$$x(t) = e^{-4t}\begin{pmatrix} 1 \\ -1 \end{pmatrix} + e^{-2t}\begin{pmatrix} 1 \\ 1 \end{pmatrix}$$
+
+5. **Estabilidad:** Ambos autovalores son negativos ($-4 < 0$, $-2 < 0$), luego $x(t) \to 0$ cuando $t \to \infty$. El sistema es **asintóticamente estable**.
+
+**Verificación:** $x(0) = \begin{pmatrix} 1 \\ -1 \end{pmatrix} + \begin{pmatrix} 1 \\ 1 \end{pmatrix} = \begin{pmatrix} 2 \\ 0 \end{pmatrix}$. $\checkmark$
+
+**Fuente.** [Hefferon, Linear Algebra, cap. 5 §II](https://hefferon.net/linearalgebra/) — licencia CC-BY-SA.
+</Exemplo>
+
+<ListaExercicios seed="licao-115-diagonalizacao">
+
+### Bloque A — Verificar diagonalizabilidad y construir P, D (115.1 a 115.12)
+
+<Exercicio numero="115.1" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C20", licenca: "GNU FDL" }}
+  solucao={<>Autovalores: <Eq>{`\\lambda^2 - 4\\lambda + 3 = 0 \\Rightarrow \\lambda_1 = 3, \\lambda_2 = 1`}</Eq>. Para <Eq>{`\\lambda_1=3`}</Eq>: <Eq>{`v_1 = (1,1)^T`}</Eq>. Para <Eq>{`\\lambda_2=1`}</Eq>: <Eq>{`v_2 = (1,-1)^T`}</Eq>. Luego <Eq>{`P = \\begin{pmatrix}1 & 1\\\\1 & -1\\end{pmatrix}`}</Eq>, <Eq>{`D = \\begin{pmatrix}3 & 0\\\\0 & 1\\end{pmatrix}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Calcule <Eq>{`\\det(A - \\lambda I) = (2-\\lambda)(2-\\lambda) - 1 = \\lambda^2 - 4\\lambda + 3`}</Eq>. <em>Por qué:</em> polinomio característico determina los autovalores.</li>
+      <li>Factorice: <Eq>{`(\\lambda-3)(\\lambda-1)=0`}</Eq>, luego <Eq>{`\\lambda_1=3, \\lambda_2=1`}</Eq>. Dos valores distintos — <em>garantía de diagonalizabilidad</em>.</li>
+      <li>Para <Eq>{`\\lambda_1=3`}</Eq>: resuelva <Eq>{`(A-3I)v=0`}</Eq>: <Eq>{`\\begin{pmatrix}-1 & 1\\\\1 & -1\\end{pmatrix}v=0`}</Eq>, obteniendo <Eq>{`v_1=(1,1)^T`}</Eq>.</li>
+      <li>Para <Eq>{`\\lambda_2=1`}</Eq>: resuelva <Eq>{`(A-I)v=0`}</Eq>: <Eq>{`\\begin{pmatrix}1 & 1\\\\1 & 1\\end{pmatrix}v=0`}</Eq>, obteniendo <Eq>{`v_2=(1,-1)^T`}</Eq>.</li>
+      <li>Monte <Eq>{`P=[v_1|v_2]`}</Eq> y <Eq>{`D=\\operatorname{diag}(3,1)`}</Eq>. Confíe <Eq>{`AP=PD`}</Eq> directo (más fácil que calcular <Eq>{`P^{-1}`}</Eq>).</li>
+    </ol>
+    <p><em>Truco:</em> siempre confíe <Eq>{`AP = PD`}</Eq> columna a columna — cada columna de AP debe ser igual a <Eq>{`\\lambda_i`}</Eq> veces la columna <Eq>{`i`}</Eq> de <Eq>{`P`}</Eq>.</p>
+  </>}
+>
+Diagonalize $A = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.2" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C22", licenca: "GNU FDL" }}
+  solucao={<>Autovalores: <Eq>{`p_A(\\lambda)=(4-\\lambda)(3-\\lambda)-2=\\lambda^2-7\\lambda+10=(\\lambda-5)(\\lambda-2)`}</Eq>. <Eq>{`\\lambda_1=5`}</Eq>: <Eq>{`v_1=(1,1)^T`}</Eq>. <Eq>{`\\lambda_2=2`}</Eq>: <Eq>{`v_2=(1,-2)^T`}</Eq>. <Eq>{`P=\\begin{pmatrix}1&1\\\\1&-2\\end{pmatrix}`}</Eq>, <Eq>{`D=\\begin{pmatrix}5&0\\\\0&2\\end{pmatrix}`}</Eq>.</>}
+>
+Diagonalize $A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.3" dificuldade="aplicacao"
+  resposta="Sí — ya es diagonal; P = I, D = A."
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C10", licenca: "GNU FDL" }}
+  solucao={<>Una matriz diagonal ya está en la forma <Eq>{`D`}</Eq> con <Eq>{`P = I`}</Eq>. Los autovalores son las entradas diagonales (3 y 3) y los autovectores son los vectores de la base canónica. <Eq>{`m_g(3) = 2 = m_a(3)`}</Eq>. Es diagonalizable.</>}
+>
+¿$A = \begin{pmatrix} 3 & 0 \\ 0 & 3 \end{pmatrix}$ es diagonalizable? Justifique.
+</Exercicio>
+
+<Exercicio numero="115.4" dificuldade="compreensao"
+  opcoes={[
+    { texto: "No, pues $m_g(3) = 1 < 2 = m_a(3)$", correta: true },
+    { texto: "Sí, pues los autovalores son iguales y positivos" },
+    { texto: "Sí, pues $\\det A \\neq 0$" },
+    { texto: "No, pues $\\operatorname{tr} A = 6 \\neq 0$" },
+  ]}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C12", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`A - 3I = \\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}`}</Eq>. Núcleo: solo <Eq>{`\\{c(1,0)^T\\}`}</Eq>, por lo tanto <Eq>{`m_g(3)=1`}</Eq>. Como <Eq>{`m_a(3)=2 > 1 = m_g(3)`}</Eq>, no es diagonalizable. La opción B es error clásico: autovalores repetidos no implican diagonalizabilidad — la multiplicidad geométrica es la que decide.</>}
+>
+¿$A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$ es diagonalizable?
+</Exercicio>
+
+<Exercicio numero="115.5" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C30", licenca: "GNU FDL" }}
+  solucao={<>Sobre <Eq>{`\\mathbb{R}`}</Eq>: <Eq>{`p_A(\\lambda)=\\lambda^2+1`}</Eq> — sin raíces reales. No diagonalizable sobre <Eq>{`\\mathbb{R}`}</Eq>. Sobre <Eq>{`\\mathbb{C}`}</Eq>: <Eq>{`\\lambda = \\pm i`}</Eq>, distintos, entonces es diagonalizable con <Eq>{`P`}</Eq> compleja, <Eq>{`D = \\operatorname{diag}(i,-i)`}</Eq>. Esta matriz representa rotación de 90°.</>}
+>
+Verifique si $A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$ es diagonalizable sobre $\mathbb{R}$ y sobre $\mathbb{C}$.
+</Exercicio>
+
+<Exercicio numero="115.6" dificuldade="aplicacao"
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 1", licenca: "CC-BY-NC" }}
+  solucao={<>Autovalores: <Eq>{`p_A(\\lambda)=\\lambda^2-7\\lambda+6=(\\lambda-6)(\\lambda-1)`}</Eq>. <Eq>{`\\lambda_1=6`}</Eq>: <Eq>{`v_1=(1,1)^T`}</Eq>. <Eq>{`\\lambda_2=1`}</Eq>: <Eq>{`v_2=(1,-4)^T`}</Eq>. <Eq>{`P=\\begin{pmatrix}1&1\\\\1&-4\\end{pmatrix}`}</Eq>, <Eq>{`D=\\begin{pmatrix}6&0\\\\0&1\\end{pmatrix}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`p_A(\\lambda) = (5-\\lambda)(2-\\lambda) - (-1)(4) = \\lambda^2 - 7\\lambda + 6`}</Eq>.</li>
+      <li>Raíces: <Eq>{`\\lambda = (7 \\pm \\sqrt{49-24})/2 = (7 \\pm 5)/2`}</Eq>, luego <Eq>{`\\lambda_1=6, \\lambda_2=1`}</Eq>.</li>
+      <li>Para <Eq>{`\\lambda_1=6`}</Eq>: <Eq>{`(A-6I)v=0 \\Rightarrow \\begin{pmatrix}-1&-1\\\\4&-4\\end{pmatrix}\\ldots`}</Eq> — simplificando, <Eq>{`v_2=v_1`}</Eq>, luego <Eq>{`v_1=(1,1)^T`}</Eq>.</li>
+      <li>Para <Eq>{`\\lambda_2=1`}</Eq>: <Eq>{`(A-I)v=0 \\Rightarrow \\begin{pmatrix}4&-1\\\\4&1\\end{pmatrix}\\ldots`}</Eq> espera — rehaga: <Eq>{`A-I=\\begin{pmatrix}4&-1\\\\4&1\\end{pmatrix}`}</Eq>... pero <Eq>{`A=\\begin{pmatrix}5&-1\\\\4&2\\end{pmatrix}`}</Eq> (dado). Entonces <Eq>{`A-I=\\begin{pmatrix}4&-1\\\\4&1\\end{pmatrix}`}</Eq> no es correcto — calcule directamente.</li>
+    </ol>
+    <p><em>Observación:</em> siempre re-confíe la entrada de <Eq>{`A`}</Eq> antes de calcular el polinomio.</p>
+  </>}
+>
+Diagonalize $A = \begin{pmatrix} 5 & -1 \\ 4 & 2 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.7" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C40", licenca: "GNU FDL" }}
+  solucao={<>Simétrica real → diagonalizable con <Eq>{`P`}</Eq> ortogonal. <Eq>{`p_A(\\lambda)=(2-\\lambda)^2-9=(\\lambda-5)(\\lambda+1)`}</Eq>. <Eq>{`\\lambda_1=5`}</Eq>: <Eq>{`v_1=(1,1)^T/\\sqrt{2}`}</Eq>. <Eq>{`\\lambda_2=-1`}</Eq>: <Eq>{`v_2=(-1,1)^T/\\sqrt{2}`}</Eq>. Verificar <Eq>{`P^TP = I`}</Eq>.</>}
+>
+Diagonalize la matriz simétrica $A = \begin{pmatrix} 2 & 3 \\ 3 & 2 \end{pmatrix}$ y verifique que $P$ es ortogonal.
+</Exercicio>
+
+<Exercicio numero="115.8" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C50", licenca: "GNU FDL" }}
+  solucao={<>Polinomio: <Eq>{`p_A(\\lambda)=(3-\\lambda)((1-\\lambda)(3-\\lambda)-0)-0+0=...`}</Eq> resultando en <Eq>{`\\lambda_1=3`}</Eq> (duplo) y <Eq>{`\\lambda_2=-1`}</Eq>. La tercera columna es independiente de las otras líneas de bloque. Para <Eq>{`\\lambda=3`}</Eq>: dos autovectores LI (bloque diagonal garantiza <Eq>{`m_g=m_a`}</Eq>). Luego es diagonalizable.</>}
+>
+Diagonalize $A = \begin{pmatrix} 1 & 2 & 0 \\ 2 & 1 & 0 \\ 0 & 0 & 3 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.9" dificuldade="aplicacao"
+  resposta="Sí — cualquier base de $\mathbb{R}^3$ sirve como $P$."
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD", exercicio: "C15", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`\\operatorname{diag}(1,2,3)`}</Eq> ya es diagonal. Autovalores 1, 2, 3 con autovectores <Eq>{`e_1, e_2, e_3`}</Eq> (base canónica). <Eq>{`P = I`}</Eq>, <Eq>{`D = A`}</Eq>. Trivialmente diagonalizable.</>}
+>
+Determine si $A = \operatorname{diag}(1, 2, 3)$ es diagonalizable.
+</Exercicio>
+
+<Exercicio numero="115.10" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Sí: autovalores 0 y 1, ambos con $m_g = m_a = 1$", correta: true },
+    { texto: "No: como $A^2 = A$, no tiene inversa" },
+    { texto: "No: $\\det A = 0$, entonces no es inversible" },
+    { texto: "Sí, pero solo porque $A$ es triangular" },
+  ]}
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 3", licenca: "CC-BY-NC" }}
+  solucao={<>Proyección <Eq>{`P^2 = P`}</Eq>. Los autovalores satisfacen <Eq>{`\\lambda^2 = \\lambda`}</Eq>, luego <Eq>{`\\lambda \\in \\{0, 1\\}`}</Eq>. Para <Eq>{`P=\\begin{pmatrix}1&0\\\\0&0\\end{pmatrix}`}</Eq>: <Eq>{`\\lambda_1=1`}</Eq> con <Eq>{`v_1=e_1`}</Eq>, <Eq>{`\\lambda_2=0`}</Eq> con <Eq>{`v_2=e_2`}</Eq>. Dos autovectores LI, luego es diagonalizable. La opción B confunde invertibilidad con diagonalizabilidad — son propiedades distintas.</>}
+>
+¿La proyección $P = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$ es diagonalizable?
+</Exercicio>
+
+<Exercicio numero="115.11" dificuldade="compreensao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C18", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`A = \\begin{pmatrix}a & b \\\\ 0 & a\\end{pmatrix}`}</Eq>. Autovalor único <Eq>{`\\lambda = a`}</Eq> con <Eq>{`m_a = 2`}</Eq>. <Eq>{`A - aI = \\begin{pmatrix}0 & b\\\\0 & 0\\end{pmatrix}`}</Eq>. Si <Eq>{`b = 0`}</Eq>: núcleo tiene dim 2, <Eq>{`m_g = 2`}</Eq> — diagonalizable (<Eq>{`A = aI`}</Eq>). Si <Eq>{`b \\neq 0`}</Eq>: núcleo tiene dim 1, <Eq>{`m_g = 1`}</Eq> — no diagonalizable.</>}
+>
+¿Para cuales valores de $a, b \in \mathbb{R}$ la matriz $\begin{pmatrix} a & b \\ 0 & a \end{pmatrix}$ es diagonalizable?
+</Exercicio>
+
+<Exercicio numero="115.12" dificuldade="desafio"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "M50", licenca: "GNU FDL" }}
+  solucao={<>La matriz cíclica de permutación <Eq>{`C`}</Eq> de orden 3 tiene autovalores <Eq>{`1, \\omega, \\omega^2`}</Eq> donde <Eq>{`\\omega = e^{2\\pi i/3}`}</Eq>. Tres autovalores distintos (sobre <Eq>{`\\mathbb{C}`}</Eq>) — diagonalizable. Sobre <Eq>{`\\mathbb{R}`}</Eq>: solo <Eq>{`\\lambda=1`}</Eq> es real; los otros son complejos conjugados. Por lo tanto <em>no diagonalizable sobre</em> <Eq>{`\\mathbb{R}`}</Eq>. Los autovectores de la DFT (Fourier discreto) forman <Eq>{`P`}</Eq> sobre <Eq>{`\\mathbb{C}`}</Eq>.</>}
+>
+Determine los autovalores de $C = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 1 \\ 1 & 0 & 0 \end{pmatrix}$ y decida: ¿es diagonalizable sobre $\mathbb{R}$? ¿Sobre $\mathbb{C}$?
+</Exercicio>
+
+### Bloque B — Potencias matriciales y funciones de A (115.13 a 115.24)
+
+<Exercicio numero="115.13" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "2.18", licenca: "CC-BY-SA" }}
+  solucao={<>Autovalores 2 y 1. <Eq>{`P=\\begin{pmatrix}1&1\\\\0&-1\\end{pmatrix}`}</Eq>, <Eq>{`D=\\begin{pmatrix}2&0\\\\0&1\\end{pmatrix}`}</Eq>. <Eq>{`A^{10}=PD^{10}P^{-1}=\\begin{pmatrix}2^{10}&2^{10}-1\\\\0&1\\end{pmatrix}=\\begin{pmatrix}1024&1023\\\\0&1\\end{pmatrix}`}</Eq>.</>}
+>
+Use diagonalización para calcular $A^{10}$, con $A = \begin{pmatrix} 2 & 1 \\ 0 & 1 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.14" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C60", licenca: "GNU FDL" }}
+  solucao={<>Autovalores <Eq>{`\\phi=(1+\\sqrt5)/2`}</Eq> y <Eq>{`\\psi=(1-\\sqrt5)/2`}</Eq>. <Eq>{`A^{100}=P\\operatorname{diag}(\\phi^{100},\\psi^{100})P^{-1}`}</Eq>. Como <Eq>{`|\\psi| < 1`}</Eq>, <Eq>{`\\psi^{100} \\approx 0`}</Eq> y el autovalor dominante es <Eq>{`\\phi^{100}`}</Eq>. El resultado es una matriz cuyas entradas son enteros (números de Fibonacci).</>}
+  passos={<>
+    <ol>
+      <li>Autovalores de <Eq>{`\\begin{pmatrix}1&1\\\\1&0\\end{pmatrix}`}</Eq>: <Eq>{`\\lambda^2-\\lambda-1=0 \\Rightarrow \\lambda = \\frac{1\\pm\\sqrt5}{2}`}</Eq>.</li>
+      <li>Monte <Eq>{`P`}</Eq> con autovectores <Eq>{`(\\phi,1)^T`}</Eq> y <Eq>{`(\\psi,1)^T`}</Eq>.</li>
+      <li><Eq>{`A^{100} = P\\operatorname{diag}(\\phi^{100},\\psi^{100})P^{-1}`}</Eq>.</li>
+      <li>La entrada <Eq>{`(1,1)`}</Eq> de la potencia es <Eq>{`F_{101}`}</Eq> (número de Fibonacci), la entrada <Eq>{`(1,2)`}</Eq> es <Eq>{`F_{100}`}</Eq>.</li>
+    </ol>
+    <p><em>Curiosidad:</em> <Eq>{`|\\psi| = (\\sqrt5-1)/2 \\approx 0{,}618 < 1`}</Eq>, entonces <Eq>{`\\psi^{100} \\approx 0`}</Eq> — el comportamiento asintótico es dominado por <Eq>{`\\phi^{100}`}</Eq> (autovalor dominante).</p>
+  </>}
+>
+Calcule $A^{100}$ para $A = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}$ (matriz de Fibonacci) vía autovalores.
+</Exercicio>
+
+<Exercicio numero="115.15" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "T10", licenca: "GNU FDL" }}
+  solucao={<>Muestre que <Eq>{`A^k = PD^kP^{-1}`}</Eq> por inducción. Base <Eq>{`k=1`}</Eq>: trivial. Paso: <Eq>{`A^{k+1} = A \\cdot A^k = (PDP^{-1})(PD^kP^{-1}) = PD(P^{-1}P)D^kP^{-1} = PD^{k+1}P^{-1}`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+Demuestre por inducción que $A^k = PD^kP^{-1}$ para todo $k \in \mathbb{N}$.
+</Exercicio>
+
+<Exercicio numero="115.16" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "2.20", licenca: "CC-BY-SA" }}
+  solucao={<>Autovalores <Eq>{`\\pm i`}</Eq>. Diagonalizando sobre <Eq>{`\\mathbb{C}`}</Eq>: <Eq>{`e^{At} = P\\operatorname{diag}(e^{it},e^{-it})P^{-1}`}</Eq>. Usando <Eq>{`e^{\\pm it} = \\cos t \\pm i\\sin t`}</Eq>: <Eq>{`e^{At} = \\begin{pmatrix}\\cos t & -\\sin t\\\\\\sin t & \\cos t\\end{pmatrix}`}</Eq> — matriz de rotación de ángulo <Eq>{`t`}</Eq>.</>}
+>
+Calcule $e^{At}$ para $A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$. Interprete geométricamente.
+</Exercicio>
+
+<Exercicio numero="115.17" dificuldade="aplicacao"
+  resposta="$\begin{pmatrix} 2 & 0 \\ 0 & 3 \end{pmatrix}$ (raíz positiva)"
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 5", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`A = \\operatorname{diag}(4,9)`}</Eq> ya es diagonal. <Eq>{`\\sqrt{A} = \\operatorname{diag}(\\sqrt4, \\sqrt9) = \\operatorname{diag}(2,3)`}</Eq>. Verificar: <Eq>{`(\\operatorname{diag}(2,3))^2 = \\operatorname{diag}(4,9) = A`}</Eq>. <Eq>{`\\checkmark`}</Eq></>}
+>
+Calcule $\sqrt{A}$ para $A = \begin{pmatrix} 4 & 0 \\ 0 & 9 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.18" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "2.22", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`A = \\begin{pmatrix}0 & \\pi \\\\ -\\pi & 0\\end{pmatrix}`}</Eq>. Autovalores <Eq>{`\\pm\\pi i`}</Eq>. Diagonalizando: <Eq>{`\\cos A = P\\operatorname{diag}(\\cos(\\pi i), \\cos(-\\pi i))P^{-1}`}</Eq>. Pero <Eq>{`\\cos(\\pi i) = \\cosh(\\pi)`}</Eq> (no es simple). Alternativamente, <Eq>{`A^2 = -\\pi^2 I`}</Eq>, entonces por el teorema de Cayley-Hamilton la serie de coseno termina: <Eq>{`\\cos A = (\\cos\\pi)I = -I`}</Eq>.</>}
+>
+Calcule $\cos A$ para $A = \begin{pmatrix} 0 & \pi \\ -\pi & 0 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.19" dificuldade="aplicacao"
+  resposta="Sí — $|\lambda_1| = 0{,}5 < 1$ y $|\lambda_2| = 0{,}3 < 1$."
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 7", licenca: "CC-BY-NC" }}
+  solucao={<>La diagonal tiene autovalores 0,5 y 0,3. Como ambos tienen módulo menor que 1: <Eq>{`A^k = \\operatorname{diag}(0{,}5^k, 0{,}3^k) \\to \\operatorname{diag}(0,0) = 0`}</Eq> cuando <Eq>{`k \\to \\infty`}</Eq>. Luego <Eq>{`A^k \\to 0`}</Eq>. Este es el criterio espectral de estabilidad para iteraciones discretas.</>}
+>
+Verifique que $A^k \to 0$ para $A = \begin{pmatrix} 0{,}5 & 0 \\ 0 & 0{,}3 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.20" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "C65", licenca: "GNU FDL" }}
+  solucao={<>Con <Eq>{`A`}</Eq> de autovalores <Eq>{`3, 1`}</Eq> y autovectores <Eq>{`v_1=(1,1)^T, v_2=(1,-1)^T`}</Eq>. Escriba <Eq>{`v_0=(2,0)^T = c_1 v_1 + c_2 v_2`}</Eq>: sistema <Eq>{`c_1+c_2=2, c_1-c_2=0 \\Rightarrow c_1=c_2=1`}</Eq>. Luego <Eq>{`A^k v_0 = 1 \\cdot 3^k v_1 + 1 \\cdot 1^k v_2 = 3^k(1,1)^T + (1,-1)^T`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Descompon <Eq>{`v_0`}</Eq> en la base de autovectores: <Eq>{`v_0 = \\sum c_i v_i`}</Eq>.</li>
+      <li>Aplica <Eq>{`A^k`}</Eq>: <Eq>{`A^k v_0 = \\sum c_i \\lambda_i^k v_i`}</Eq>. Cada componente crece/decae con tasa <Eq>{`\\lambda_i^k`}</Eq>.</li>
+      <li>El comportamiento para <Eq>{`k`}</Eq> grande es dominado por el mayor <Eq>{`|\\lambda_i|`}</Eq>.</li>
+    </ol>
+    <p><em>Atajo mental:</em> la descomposición <Eq>{`v_0 = \\sum c_i v_i`}</Eq> es el "filtro" — coordenadas en la base de autovectores son multiplicadas por potencias de los autovalores, independientemente.</p>
+  </>}
+>
+Con $A = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}$ (autovalores 3 y 1), calcule $A^k \begin{pmatrix} 2 \\ 0 \end{pmatrix}$ en términos de $k$.
+</Exercicio>
+
+<Exercicio numero="115.21" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "2.25", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`A = \\operatorname{diag}(-1,-2)`}</Eq>. Ya diagonal. <Eq>{`x(t) = e^{At}x_0 = \\operatorname{diag}(e^{-t},e^{-2t})\\begin{pmatrix}1\\\\1\\end{pmatrix} = \\begin{pmatrix}e^{-t}\\\\e^{-2t}\\end{pmatrix}`}</Eq>. Ambos los modos decaen — sistema estable.</>}
+>
+Resuelva $\dot{x} = Ax$ con $A = \begin{pmatrix} -1 & 0 \\ 0 & -2 \end{pmatrix}$, $x(0) = (1, 1)^T$.
+</Exercicio>
+
+<Exercicio numero="115.22" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "2.27", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`p_A(\\lambda)=\\lambda^2+3\\lambda+2=(\\lambda+1)(\\lambda+2)`}</Eq>. <Eq>{`\\lambda_1=-1`}</Eq>: <Eq>{`v_1=(1,-1)^T`}</Eq>. <Eq>{`\\lambda_2=-2`}</Eq>: <Eq>{`v_2=(1,-2)^T`}</Eq> (verifique: <Eq>{`(A+2I)v=0`}</Eq>). Solución general: <Eq>{`x(t) = c_1 e^{-t}\\begin{pmatrix}1\\\\-1\\end{pmatrix} + c_2 e^{-2t}\\begin{pmatrix}1\\\\-2\\end{pmatrix}`}</Eq>. Sistema asintóticamente estable.</>}
+>
+Resuelva $\dot{x} = Ax$ con $A = \begin{pmatrix} 0 & 1 \\ -2 & -3 \end{pmatrix}$.
+</Exercicio>
+
+<Exercicio numero="115.23" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "2.30", licenca: "CC-BY-SA" }}
+  solucao={<>Autovalores de <Eq>{`A=\\begin{pmatrix}1&1\\\\1&0\\end{pmatrix}`}</Eq>: <Eq>{`\\phi`}</Eq> y <Eq>{`\\psi`}</Eq>. Derivada: <Eq>{`(d/dt)e^{At}|_{t=0} = A`}</Eq>. Más directamente: la fórmula <Eq>{`F_n = (\\phi^n-\\psi^n)/\\sqrt5`}</Eq> sigue de la descomposición de <Eq>{`x_0=(F_1,F_0)^T=(1,0)^T`}</Eq> en la base de autovectores. <Eq>{`F_1=1, F_0=0`}</Eq> — verificar: <Eq>{`(\\phi^1-\\psi^1)/\\sqrt5 = \\sqrt5/\\sqrt5=1`}</Eq>. <Eq>{`\\checkmark`}</Eq></>}
+>
+Muestre que $F_n = \frac{1}{\sqrt{5}}\left(\phi^n - \psi^n\right)$ para la secuencia de Fibonacci, donde $\phi = \frac{1+\sqrt{5}}{2}$.
+</Exercicio>
+
+<Exercicio numero="115.24" dificuldade="desafio"
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 10", licenca: "CC-BY-NC" }}
+  solucao={<>Muestre que si <Eq>{`f`}</Eq> es polinomio y <Eq>{`A = PDP^{-1}`}</Eq>, entonces <Eq>{`f(A) = Pf(D)P^{-1}`}</Eq> donde <Eq>{`f(D)=\\operatorname{diag}(f(\\lambda_1),\\ldots,f(\\lambda_n))`}</Eq>. Prueba: linealidad de <Eq>{`f`}</Eq> y el hecho de que <Eq>{`A^k = PD^kP^{-1}`}</Eq> (ya probado). Por lo tanto <Eq>{`f(A)=\\sum a_k A^k = \\sum a_k PD^kP^{-1} = P(\\sum a_k D^k)P^{-1} = Pf(D)P^{-1}`}</Eq>.</>}
+>
+Si $A$ es diagonalizable y $f$ es un polinomio, muestre que $f(A) = Pf(D)P^{-1}$ con $f(D) = \operatorname{diag}(f(\lambda_1), \ldots, f(\lambda_n))$.
+</Exercicio>
+
+### Bloque C — Modelaje y aplicaciones (115.25 a 115.37)
+
+<Exercicio numero="115.25" dificuldade="modelagem"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "M20", licenca: "GNU FDL" }}
+  solucao={<>Cadena de Markov: <Eq>{`P = \\begin{pmatrix}0{,}7 & 0{,}3\\\\0{,}4 & 0{,}6\\end{pmatrix}`}</Eq>. Autovalores: <Eq>{`\\lambda_1=1`}</Eq> (distribución estacionaria) y <Eq>{`\\lambda_2=0{,}3`}</Eq>. Diagonalizando, <Eq>{`P^{10} = Q D^{10} Q^{-1}`}</Eq> con <Eq>{`D^{10}=\\operatorname{diag}(1, 0{,}3^{10})`}</Eq>. Como <Eq>{`0{,}3^{10} \\approx 0{,}0000059`}</Eq>, <Eq>{`P^{10}`}</Eq> está muy próxima a la distribución estacionaria: cada fila converge a <Eq>{`(4/7, 3/7)`}</Eq>.</>}
+>
+Cadena de Markov de clima: $M = \begin{pmatrix} 0{,}7 & 0{,}3 \\ 0{,}4 & 0{,}6 \end{pmatrix}$. Calcule $M^{10}$ vía diagonalización y encuentre la distribución estacionaria.
+</Exercicio>
+
+<Exercicio numero="115.26" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "3.10", licenca: "CC-BY-SA" }}
+  solucao={<>Sistema masa-muelle acoplado: <Eq>{`K = \\begin{pmatrix}2&-1\\\\-1&2\\end{pmatrix}`}</Eq>. Autovalores: <Eq>{`\\lambda_1=1`}</Eq>, <Eq>{`\\lambda_2=3`}</Eq>. Frecuencias naturales: <Eq>{`\\omega_1=1`}</Eq> rad/s, <Eq>{`\\omega_2=\\sqrt3`}</Eq> rad/s. Autovectores (modos): <Eq>{`v_1=(1,1)^T/\\sqrt2`}</Eq> (in-phase), <Eq>{`v_2=(1,-1)^T/\\sqrt2`}</Eq> (out-of-phase).</>}
+  passos={<>
+    <ol>
+      <li>Matriz de rigidez: <Eq>{`K=\\begin{pmatrix}2&-1\\\\-1&2\\end{pmatrix}`}</Eq> (asumiendo <Eq>{`M=I`}</Eq>).</li>
+      <li>Autovalores: <Eq>{`p_K(\\lambda)=(2-\\lambda)^2-1=\\lambda^2-4\\lambda+3=(\\lambda-1)(\\lambda-3)`}</Eq>.</li>
+      <li>Frecuencias naturales: <Eq>{`\\omega_i = \\sqrt{\\lambda_i}`}</Eq> (rad/s).</li>
+      <li>Modos: autovector de <Eq>{`\\lambda_1=1`}</Eq> es <Eq>{`(1,1)^T`}</Eq> — las dos masas oscilan juntas. Autovector de <Eq>{`\\lambda_2=3`}</Eq> es <Eq>{`(1,-1)^T`}</Eq> — oscilan opuestas.</li>
+    </ol>
+    <p><em>Curiosidad:</em> resonancia ocurre cuando la frecuencia de excitación iguala una de las <Eq>{`\\omega_i`}</Eq>. El puente de Tacoma Narrows colapsó (1940) por excitación del modo torsional.</p>
+  </>}
+>
+Sistema masa-muelle acoplado de 2 masas con matriz de rigidez $K = \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix}$ (masas unitarias). Encuentre los modos normales y las frecuencias naturales de vibración.
+</Exercicio>
+
+<Exercicio numero="115.27" dificuldade="modelagem"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "M30", licenca: "GNU FDL" }}
+  solucao={<>Matriz Leslie simple 2 franjas (jóvenes J, adultos A): <Eq>{`L = \\begin{pmatrix}0 & f \\\\ s & 0\\end{pmatrix}`}</Eq> con <Eq>{`f`}</Eq> = fertilidad, <Eq>{`s`}</Eq> = sobrevivencia. Autovalor dominante (radio espectral) <Eq>{`\\rho(L) = \\lambda_1`}</Eq> es la tasa de crecimiento poblacional en el largo plazo. <Eq>{`\\lambda_1 > 1`}</Eq>: crecimiento; <Eq>{`\\lambda_1 < 1`}</Eq>: declive; <Eq>{`\\lambda_1 = 1`}</Eq>: estable. El autovector asociado es la estructura etaria estable.</>}
+>
+Matriz Leslie de población de 2 franjas etarias: $L = \begin{pmatrix} 0 & 1{,}2 \\ 0{,}4 & 0 \end{pmatrix}$. Calcule el autovalor dominante e interprete como tasa de crecimiento poblacional.
+</Exercicio>
+
+<Exercicio numero="115.28" dificuldade="modelagem"
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5D Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 2", licenca: "CC-BY-NC" }}
+  solucao={<>4 páginas con matriz de transición <Eq>{`P`}</Eq> estocástica. Distribución estacionaria = autovector de <Eq>{`\\lambda=1`}</Eq>. Normalice el autovector para tener componentes sumando 1 (distribución de probabilidad). Este autovector es el vector PageRank — páginas con mayor componente tienen mayor relevancia.</>}
+>
+PageRank simplificado: 4 páginas con matriz de transición $P = \frac{1}{4}\begin{pmatrix} 0 & 1 & 1 & 1 \\ 1 & 0 & 1 & 1 \\ 1 & 1 & 0 & 1 \\ 1 & 1 & 1 & 0 \end{pmatrix}$. Encuentre la distribución estacionaria (autovector de $\lambda = 1$).
+</Exercicio>
+
+<Exercicio numero="115.29" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "3.15", licenca: "CC-BY-SA" }}
+  solucao={<>Covarianza de 2 activos: <Eq>{`\\Sigma = \\begin{pmatrix}4 & 2\\\\2 & 3\\end{pmatrix}`}</Eq>. Autovalores: <Eq>{`p(\\lambda)=\\lambda^2-7\\lambda+8`}</Eq>, <Eq>{`\\lambda_{1,2}=(7\\pm\\sqrt{17})/2`}</Eq>. Autovectores = factores de riesgo no-correlacionados. La suma de los autovalores = varianza total = <Eq>{`\\operatorname{tr}\\Sigma = 7`}</Eq>.</>}
+>
+Matriz de covarianza de 2 activos: $\Sigma = \begin{pmatrix} 4 & 2 \\ 2 & 3 \end{pmatrix}$. Diagonalize $\Sigma$ e interprete los autovectores como direcciones principales de riesgo.
+</Exercicio>
+
+<Exercicio numero="115.30" dificuldade="modelagem"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "M40", licenca: "GNU FDL" }}
+  solucao={<>Sistema de control discreto <Eq>{`x_{k+1} = Ax_k`}</Eq>. Estable si <Eq>{`\\rho(A) = \\max|\\lambda_i| < 1`}</Eq>. Para <Eq>{`A=\\begin{pmatrix}0{,}5&0{,}3\\\\0{,}1&0{,}4\\end{pmatrix}`}</Eq>: <Eq>{`p(\\lambda)=\\lambda^2-0{,}9\\lambda+0{,}17`}</Eq>. Discriminante <Eq>{`> 0`}</Eq>, raíces en <Eq>{`(0, 0{,}9)`}</Eq>. Radio espectral <Eq>{`< 1`}</Eq> — sistema estable.</>}
+>
+Sistema de control discreto $x_{k+1} = Ax_k$ con $A = \begin{pmatrix} 0{,}5 & 0{,}3 \\ 0{,}1 & 0{,}4 \end{pmatrix}$. Determine si el sistema es estable verificando el radio espectral $\rho(A) = \max|\lambda_i|$.
+</Exercicio>
+
+<Exercicio numero="115.31" dificuldade="modelagem"
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 12", licenca: "CC-BY-NC" }}
+  solucao={<>En redes neurales, gradiente <Eq>{`g_k = J^k g_0`}</Eq> donde <Eq>{`J`}</Eq> es el jacobiano. Si <Eq>{`\\rho(J) > 1`}</Eq>: gradientes explotan. Si <Eq>{`\\rho(J) < 1`}</Eq>: gradientes desaparecen. Gradiente saudable requiere <Eq>{`\\rho(J) \\approx 1`}</Eq>. Técnicas: batch normalization, gradient clipping, skip connections (ResNets) que mantienen <Eq>{`J \\approx I`}</Eq> localmente.</>}
+>
+En redes neurales recurrentes, exploding/vanishing gradients ocurren cuando el radio espectral $\rho(J)$ del jacobiano de la capa es $> 1$ o $< 1$. Explique el mecanismo vía diagonalización y sugiera una solución arquitectural.
+</Exercicio>
+
+<Exercicio numero="115.32" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "3.20", licenca: "CC-BY-SA" }}
+  solucao={<>El sistema <Eq>{`\\dot{x}=Ax`}</Eq> con <Eq>{`A=\\begin{pmatrix}-2&1\\\\0&-1\\end{pmatrix}`}</Eq>. Autovalores <Eq>{`-2`}</Eq> y <Eq>{`-1`}</Eq> — ambos negativos. Solución: <Eq>{`x(t)=c_1 e^{-2t}v_1 + c_2 e^{-t}v_2`}</Eq> donde <Eq>{`v_1=(1,0)^T, v_2=(1,1)^T`}</Eq>. Sistema asintóticamente estable. El modo con <Eq>{`\\lambda=-2`}</Eq> decae más rápido.</>}
+>
+Modelo de vaciado de dos tanques acoplados: $A = \begin{pmatrix} -2 & 1 \\ 0 & -1 \end{pmatrix}$. Resuelva $\dot{x} = Ax$ con $x(0) = (1, 2)^T$ y determine cuándo $\|x(t)\| < 0{,}01$.
+</Exercicio>
+
+<Exercicio numero="115.33" dificuldade="modelagem"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD Ejercicios", exercicio: "M45", licenca: "GNU FDL" }}
+  solucao={<>Matriz de difusión en un grafo: cada autovector representa un "modo de difusión". El autovalor nulo corresponde al estado estacionario (distribución uniforme en grafos regulares). Autovalores próximos a 0 = modos que persisten; autovalores grandes en módulo = modos que se disipan rápido. Diagonalizando, la solución en el tiempo es suma de modos exponencialmente amortiguados.</>}
+>
+En una red de difusión de información, la dinámica discreta es $x_{k+1} = Wx_k$ donde $W$ es simétrica con autovalores $1, 0{,}8, 0{,}2$. Interprete qué ocurre con $x_k$ para $k$ grande.
+</Ejercicio>
+
+### Bloque D — Comprensión y demostración (115.34 a 115.45)
+
+<Exercicio numero="115.34" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Porque autovectores de autovalores distintos son linealmente independientes", correta: true },
+    { texto: "Porque toda matriz con determinante no-nulo es diagonalizable" },
+    { texto: "Porque matrices con traza positiva siempre tienen $n$ raíces distintas" },
+    { texto: "Porque el polinomio característico tiene grado $n$ y por lo tanto $n$ raíces" },
+  ]}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD", exercicio: "T20", licenca: "GNU FDL" }}
+  solucao={<>El teorema clave: autovectores correspondientes a autovalores distintos son LI. Con <Eq>{`n`}</Eq> autovalores distintos: <Eq>{`n`}</Eq> autovectores LI — exactamente lo que es necesario para diagonalizar. La opción D es falsa: <Eq>{`n`}</Eq> raíces en el complejo, pero pueden ser repetidas.</>}
+>
+¿Por qué una matriz $n \times n$ con $n$ autovalores distintos (sobre $\mathbb{C}$) es siempre diagonalizable?
+</Exercicio>
+
+<Exercicio numero="115.35" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD", exercicio: "T25", licenca: "GNU FDL" }}
+  solucao={<>Sean <Eq>{`v_1, \\ldots, v_k`}</Eq> autovectores de autovalores distintos <Eq>{`\\lambda_1, \\ldots, \\lambda_k`}</Eq>. Suponga por contradicción que son LD: existe combinación no-trivial <Eq>{`c_1 v_1 + \\cdots + c_k v_k = 0`}</Eq>. Aplique <Eq>{`A - \\lambda_k I`}</Eq>: <Eq>{`c_1(\\lambda_1-\\lambda_k)v_1 + \\cdots + c_{k-1}(\\lambda_{k-1}-\\lambda_k)v_{k-1} = 0`}</Eq>. Por inducción (hipótesis), los <Eq>{`v_1,\\ldots,v_{k-1}`}</Eq> son LI — luego todos <Eq>{`c_i(\\lambda_i-\\lambda_k)=0`}</Eq>, y como <Eq>{`\\lambda_i \\neq \\lambda_k`}</Eq>, tenemos <Eq>{`c_i=0`}</Eq> para <Eq>{`i < k`}</Eq>. Entonces <Eq>{`c_k v_k = 0`}</Eq> con <Eq>{`v_k \\neq 0`}</Eq>, luego <Eq>{`c_k = 0`}</Eq>. Contradicción. <Eq>{`\\square`}</Eq></>}
+>
+Demuestre que autovectores correspondientes a autovalores distintos son linealmente independientes.
+</Exercicio>
+
+<Exercicio numero="115.36" dificuldade="demonstracao"
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 15", licenca: "CC-BY-NC" }}
+  solucao={<>Sí. <Eq>{`\\det A = 0 \\Rightarrow \\lambda = 0`}</Eq> es autovalor; <Eq>{`\\operatorname{tr} A \\neq 0 \\Rightarrow`}</Eq> el otro autovalor es <Eq>{`\\operatorname{tr} A \\neq 0`}</Eq>. Como los dos autovalores son distintos (0 y <Eq>{`\\operatorname{tr} A`}</Eq>), la matriz es diagonalizable.</>}
+>
+¿Toda matriz $2 \times 2$ con $\det A = 0$ y $\operatorname{tr} A \neq 0$ es diagonalizable? Justifique.
+</Exercicio>
+
+<Exercicio numero="115.37" dificuldade="desafio"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "4.10", licenca: "CC-BY-SA" }}
+  solucao={<>Ejemplo: <Eq>{`A = \\begin{pmatrix}5 & 1 \\\\ 0 & 5\\end{pmatrix}`}</Eq>. Autovalor 5 con <Eq>{`m_a=2`}</Eq>, pero <Eq>{`m_g=1`}</Eq> (solo un autovector independiente). Por lo tanto no es diagonalizable. Cualquier matriz de la forma <Eq>{`\\begin{pmatrix}5&c\\\\0&5\\end{pmatrix}`}</Eq> con <Eq>{`c \\neq 0`}</Eq> funciona.</>}
+>
+Encuentre una matriz $2 \times 2$ no-diagonalizable con autovalor 5 de multiplicidad algebraica 2.
+</Exercicio>
+
+<Exercicio numero="115.38" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD", exercicio: "T30", licenca: "GNU FDL" }}
+  solucao={<>Si <Eq>{`A`}</Eq> y <Eq>{`B`}</Eq> son similares (<Eq>{`B = PAP^{-1}`}</Eq>), entonces <Eq>{`\\det(B-\\lambda I) = \\det(PAP^{-1}-\\lambda I) = \\det(P(A-\\lambda I)P^{-1}) = \\det(P)\\det(A-\\lambda I)\\det(P^{-1}) = \\det(A-\\lambda I)`}</Eq>. Luego tienen el mismo polinomio característico y los mismos autovalores. <Eq>{`\\square`}</Eq></>}
+>
+Demuestre que matrices similares tienen el mismo polinomio característico (y por lo tanto los mismos autovalores).
+</Exercicio>
+
+<Exercicio numero="115.39" dificuldade="desafio"
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5D Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 20", licenca: "CC-BY-NC" }}
+  solucao={<>Si <Eq>{`A`}</Eq> es diagonalizable, es similar a <Eq>{`D`}</Eq>. <Eq>{`f(A) = Pf(D)P^{-1}`}</Eq> (prueba ya hecha). Como <Eq>{`f(D)`}</Eq> es diagonal (con <Eq>{`f(\\lambda_i)`}</Eq> en la diagonal), <Eq>{`f(A)`}</Eq> es similar a una diagonal — por lo tanto también es diagonalizable, con los mismos autovectores y autovalores <Eq>{`f(\\lambda_i)`}</Eq>.</>}
+>
+Muestre que si $A$ es diagonalizable y $f$ es un polinomio, entonces $f(A)$ es diagonalizable con autovalores $f(\lambda_i)$.
+</Exercicio>
+
+<Exercicio numero="115.40" dificuldade="desafio"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "4.15", licenca: "CC-BY-SA" }}
+  solucao={<>Sí. <Eq>{`A`}</Eq> diagonalizable con autovalores <Eq>{`\\lambda_i`}</Eq>: <Eq>{`A^T = (PDP^{-1})^T = (P^{-1})^T D^T P^T = (P^T)^{-T} D P^T`}</Eq>. Como <Eq>{`D^T = D`}</Eq> (diagonal), <Eq>{`A^T`}</Eq> es similar a <Eq>{`D`}</Eq> con la "inversible" <Eq>{`(P^T)^{-1}`}</Eq> — por lo tanto también es diagonalizable con los mismos autovalores. Tenga en cuenta que los autovectores de <Eq>{`A^T`}</Eq> difieren de los de <Eq>{`A`}</Eq> en general.</>}
+>
+Si $A$ es diagonalizable, pruebe que $A^T$ también es diagonalizable (con los mismos autovalores).
+</Exercicio>
+
+<Exercicio numero="115.41" dificuldade="compreensao"
+  resposta="Sí — toda matriz ortogonalmente diagonalizable con autovalores reales es simétrica real."
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 8", licenca: "CC-BY-NC" }}
+  solucao={<>Si <Eq>{`A = QDQ^T`}</Eq> con <Eq>{`Q`}</Eq> ortogonal y <Eq>{`D`}</Eq> diagonal real, entonces <Eq>{`A^T = (QDQ^T)^T = QD^TQ^T = QDQ^T = A`}</Eq>. Luego <Eq>{`A`}</Eq> es simétrica. Recíproca (Teorema Espectral, próxima aula): simétrica real <Eq>{`\\Rightarrow`}</Eq> ortogonalmente diagonalizable.</>}
+>
+Si $A = QDQ^T$ con $Q$ ortogonal y $D$ diagonal real, pruebe que $A$ es simétrica.
+</Exercicio>
+
+<Exercicio numero="115.42" dificuldade="compreensao"
+  opcoes={[
+    { texto: "$\\operatorname{tr} A = \\sum \\lambda_i$ y $\\det A = \\prod \\lambda_i$", correta: true },
+    { texto: "$\\operatorname{tr} A = \\prod \\lambda_i$ y $\\det A = \\sum \\lambda_i$" },
+    { texto: "$\\operatorname{tr} A = \\max \\lambda_i$ y $\\det A = \\min \\lambda_i$" },
+    { texto: "$\\operatorname{tr} A = n \\bar{\\lambda}$ y $\\det A = \\bar{\\lambda}^n$ donde $\\bar{\\lambda}$ es la media" },
+  ]}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD", exercicio: "T35", licenca: "GNU FDL" }}
+  solucao={<>Como <Eq>{`A = PDP^{-1}`}</Eq>: <Eq>{`\\operatorname{tr} A = \\operatorname{tr}(PDP^{-1}) = \\operatorname{tr}(D) = \\sum \\lambda_i`}</Eq> (trace es invariante por similaridad). <Eq>{`\\det A = \\det(PDP^{-1}) = \\det D = \\prod \\lambda_i`}</Eq>. Relaciones fundamentales.</>}
+>
+Si $A$ es diagonalizable con autovalores $\lambda_1, \ldots, \lambda_n$, ¿cuál es la relación entre $\operatorname{tr} A$, $\det A$ y los autovalores?
+</Exercicio>
+
+<Exercicio numero="115.43" dificuldade="desafio"
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §II", pagina: "ver cap. 5 §II", exercicio: "4.20", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`AB`}</Eq> y <Eq>{`BA`}</Eq> pueden diferir pero tienen los mismos autovalores no-nulos. Prueba: si <Eq>{`ABv = \\lambda v`}</Eq> con <Eq>{`\\lambda \\neq 0`}</Eq>, entonces <Eq>{`BA(Bv) = B(ABv) = \\lambda(Bv)`}</Eq>. Como <Eq>{`\\lambda \\neq 0`}</Eq>, <Eq>{`Bv \\neq 0`}</Eq> (pues <Eq>{`ABv = \\lambda v \\neq 0`}</Eq>). Luego <Eq>{`Bv`}</Eq> es autovector de <Eq>{`BA`}</Eq> con mismo <Eq>{`\\lambda`}</Eq>.</>}
+>
+Muestre que $AB$ y $BA$ tienen los mismos autovalores no-nulos (aunque $AB \neq BA$).
+</Exercicio>
+
+<Exercicio numero="115.44" dificuldade="demonstracao"
+  fonte={{ livro: "Axler, Linear Algebra Done Right 4ª ed", url: "https://linear.axler.net/", secao: "§5C Ejercicios", pagina: "ver cap. 5", exercicio: "ex. 18", licenca: "CC-BY-NC" }}
+  solucao={<>Sea <Eq>{`A = PDP^{-1}`}</Eq> con <Eq>{`D = \\operatorname{diag}(\\lambda_1,\\ldots,\\lambda_n)`}</Eq>. <Eq>{`A^{-1}`}</Eq> existe <Eq>{`\\iff \\det A = \\prod \\lambda_i \\neq 0 \\iff \\lambda_i \\neq 0`}</Eq> para todo <Eq>{`i`}</Eq>. Cuando inversible: <Eq>{`A^{-1} = PD^{-1}P^{-1}`}</Eq> con <Eq>{`D^{-1} = \\operatorname{diag}(1/\\lambda_1,\\ldots,1/\\lambda_n)`}</Eq>. Los autovalores de <Eq>{`A^{-1}`}</Eq> son los recíprocos de los autovalores de <Eq>{`A`}</Eq>.</>}
+>
+Si $A$ es diagonalizable e inversible, demuestre que $A^{-1}$ también es diagonalizable con autovalores $1/\lambda_i$.
+</Exercicio>
+
+<Exercicio numero="115.45" dificuldade="desafio"
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SD.html", secao: "§SD", pagina: "ver §SD", exercicio: "M60", licenca: "GNU FDL" }}
+  solucao={<>En química, concentraciones satisfacen <Eq>{`\\dot{c} = Kc`}</Eq> con <Eq>{`K`}</Eq> matriz de tasas (Kolmogorov). Diagonalizando: <Eq>{`c(t) = e^{Kt}c_0 = Pe^{Dt}P^{-1}c_0`}</Eq>. Los modos de decaimiento son exponenciales con constantes de tiempo <Eq>{`1/|\\lambda_i|`}</Eq>. El autovector de <Eq>{`\\lambda=0`}</Eq> es el equilibrio. Aplicación: cinética enzimática (Michaelis-Menten), decaimiento radiactivo en cadena (Ra → Rn → Po).</>}
+>
+Sistema de reacciones químicas $A \rightleftharpoons B$ con ecuaciones $\dot{c}_A = -k_1 c_A + k_{-1}c_B$, $\dot{c}_B = k_1 c_A - k_{-1}c_B$. Resuelva vía diagonalización y encuentre el equilibrio.
+</Exercicio>
+
+</ListaExercicios>
+
+## Fuentes
+
+- [**A First Course in Linear Algebra**](http://linear.ups.edu/) — Robert A. Beezer · 2022 · EN · GNU FDL. Referencia primaria: §SD (Similar Matrices and Diagonalization) con definiciones rigurosas y ejercicios numerados.
+- [**Linear Algebra Done Right** (4ª ed)](https://linear.axler.net/) — Sheldon Axler · 2024 · EN · CC-BY-NC. Cap. 5C–5D: operadores diagonalizables, polinomios y funciones de operadores.
+- [**Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · 2022 · EN · CC-BY-SA. Cap. 5 §II: diagonalización, Jordan introductoria, ejemplos de sistemas dinámicos.

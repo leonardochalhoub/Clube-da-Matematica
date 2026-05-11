@@ -44,6 +44,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+import concurrent.futures as cf
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Callable
@@ -164,14 +165,46 @@ PROVIDERS: dict[str, dict] = {
     "gemini": {
         "name": "Gemini Flash",
         "model": "gemini-2.5-flash",
-        "rate_per_min": 15,
+        # Free tier: 10 RPM, ~20 RPD on standard plan. The daily cap makes
+        # bulk batch translation impossible on this model. Use 'gemini-lite'
+        # for full-corpus jobs.
+        "rate_per_min": 8,
+        "env": "GEMINI_API_KEY",
+        "call": call_gemini,
+    },
+    "gemini-lite": {
+        "name": "Gemini Flash-Lite",
+        "model": "gemini-2.5-flash-lite",
+        # Free tier: 20 RPD per project (per recent quota audit). Use the
+        # `-latest` alias variants below if this bucket is exhausted.
+        "rate_per_min": 12,
+        "env": "GEMINI_API_KEY",
+        "call": call_gemini,
+    },
+    "gemini-latest": {
+        "name": "Gemini Flash (latest)",
+        # `gemini-flash-latest` is an alias resolving to the current shipped
+        # Flash model. It has its own quota bucket separate from the explicit
+        # `gemini-2.5-flash` ID.
+        "model": "gemini-flash-latest",
+        "rate_per_min": 12,
+        "env": "GEMINI_API_KEY",
+        "call": call_gemini,
+    },
+    "gemini-lite-latest": {
+        "name": "Gemini Flash-Lite (latest)",
+        # Alias bucket — see note on `gemini-latest`. Separate quota.
+        "model": "gemini-flash-lite-latest",
+        "rate_per_min": 12,
         "env": "GEMINI_API_KEY",
         "call": call_gemini,
     },
     "groq": {
         "name": "Groq GPT-OSS",
-        # gpt-oss-120b has ~200k TPM on Groq free tier (vs 12k on llama-3.3-70b),
-        # which fits the ~12k-token translation request in one shot.
+        # NOTE: Groq free tier (on_demand) caps TPM at ~8k, which is far below
+        # the size of a typical 80k-token translation request. This entry is
+        # kept for paid tier users but is useless for full-file translation
+        # on free tier.
         "model": "openai/gpt-oss-120b",
         "rate_per_min": 30,
         "env": "GROQ_API_KEY",
@@ -207,9 +240,40 @@ def missing_for_locale(locale_code: str, source_files: list[Path]) -> list[Path]
     return missing
 
 
-def translate_one(src_path: Path, locale_code: str, provider: dict, key: str,
-                  system_prompt: str) -> tuple[bool, str]:
-    """Translate a single MDX. Returns (success, error_or_message)."""
+def _call_with_retries(provider: dict, key: str, system_prompt: str,
+                       user_prompt: str, max_attempts: int = 3) -> tuple[str, str]:
+    """Try one provider with exponential backoff on transient errors.
+    Returns (output, error_msg). One of them is empty."""
+    last_err = ""
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return provider["call"](system_prompt, user_prompt,
+                                    key=key, model=provider["model"]), ""
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace")[:200]
+            last_err = f"HTTP {e.code}: {body}"
+            if e.code in (429, 500, 502, 503, 504) and attempt < max_attempts:
+                time.sleep(3 * (3 ** (attempt - 1)))
+                continue
+            return "", last_err
+        except (urllib.error.URLError, TimeoutError) as e:
+            last_err = f"{type(e).__name__}: {e}"
+            if attempt < max_attempts:
+                time.sleep(3 * (3 ** (attempt - 1)))
+                continue
+            return "", last_err
+        except Exception as e:
+            return "", f"{type(e).__name__}: {e}"
+    return "", last_err or "empty output"
+
+
+def translate_one(src_path: Path, locale_code: str,
+                  provider_chain: list[tuple[dict, str]],
+                  system_prompt: str,
+                  rate_claim: Callable[[dict], None] | None = None,
+                  ) -> tuple[bool, str, str]:
+    """Translate a single MDX, trying each provider in the chain on failure.
+    Returns (success, provider_used_name, error_or_message)."""
     speech, lang_name = LOCALES[locale_code]
     rel = src_path.relative_to(ROOT / "content")
     target = ROOT / "content" / "i18n" / speech / rel
@@ -223,25 +287,31 @@ def translate_one(src_path: Path, locale_code: str, provider: dict, key: str,
         f"no commentary. Update `atualizadoEm` to today.\n\n"
         f"--- SOURCE FILE ---\n{source_text}"
     )
-    try:
-        out = provider["call"](system_prompt, user_prompt,
-                               key=key, model=provider["model"])
-    except urllib.error.HTTPError as e:
-        return False, f"HTTP {e.code}: {e.read().decode('utf-8', errors='replace')[:200]}"
-    except Exception as e:
-        return False, f"{type(e).__name__}: {e}"
 
-    out = out.strip()
-    # Strip code fences if the model added them
-    if out.startswith("```"):
-        out = re.sub(r"^```(?:mdx|markdown)?\s*\n", "", out)
-        out = re.sub(r"\n```\s*$", "", out)
-    # Sanity: must have frontmatter
-    if not out.startswith("---"):
-        return False, "output missing frontmatter"
+    last_err = "no provider"
+    last_name = ""
+    for provider, key in provider_chain:
+        last_name = provider["name"]
+        if rate_claim is not None:
+            rate_claim(provider)
+        out, err = _call_with_retries(provider, key, system_prompt, user_prompt)
+        if not out:
+            last_err = f"{provider['name']}: {err}"
+            continue
 
-    target.write_text(out + ("\n" if not out.endswith("\n") else ""), encoding="utf-8")
-    return True, "ok"
+        out = out.strip()
+        if out.startswith("```"):
+            out = re.sub(r"^```(?:mdx|markdown)?\s*\n", "", out)
+            out = re.sub(r"\n```\s*$", "", out)
+        if not out.startswith("---"):
+            last_err = f"{provider['name']}: output missing frontmatter"
+            continue
+
+        target.write_text(out + ("\n" if not out.endswith("\n") else ""),
+                          encoding="utf-8")
+        return True, provider["name"], "ok"
+
+    return False, last_name, last_err
 
 
 # ---------------------------------------------------------------------------
@@ -249,31 +319,83 @@ def translate_one(src_path: Path, locale_code: str, provider: dict, key: str,
 # ---------------------------------------------------------------------------
 
 class LocaleWorker:
-    def __init__(self, locale_code: str, provider_name: str, agent_idx: int,
+    def __init__(self, locale_code: str, provider_names: list[str], agent_idx: int,
                  agent_total: int, system_prompt: str, limit: int | None,
-                 print_lock: threading.Lock):
+                 print_lock: threading.Lock, workers: int = 1):
         self.locale = locale_code
-        self.provider_name = provider_name
-        self.provider = PROVIDERS[provider_name]
-        self.api_key = os.environ.get(self.provider["env"])
+        self.provider_names = provider_names
+        self.providers = [PROVIDERS[n] for n in provider_names]
+        self.api_keys = {p["name"]: os.environ.get(p["env"]) for p in self.providers}
         self.agent_idx = agent_idx
         self.agent_total = agent_total
         self.system_prompt = system_prompt
         self.limit = limit
         self.print_lock = print_lock
+        self.workers = max(1, workers)
         self.done = 0
         self.failed = 0
+        self.by_provider: dict[str, int] = {p["name"]: 0 for p in self.providers}
         self.target_total = 0
-        self.min_interval = 60.0 / self.provider["rate_per_min"]
+        # Per-provider rate bucket: name → (lock, next_send_at, min_interval)
+        self._rate: dict[str, dict] = {
+            p["name"]: {
+                "lock": threading.Lock(),
+                "next_send_at": 0.0,
+                "min_interval": 60.0 / p["rate_per_min"],
+            } for p in self.providers
+        }
+        self._progress_lock = threading.Lock()
+        self._progress = 0
 
     def log(self, msg: str) -> None:
-        prefix = f"[{self.provider['name']} · {self.agent_idx:02d}/{self.agent_total:02d} · {self.locale}]"
+        prefix = f"[{'+'.join(p['name'] for p in self.providers)} · {self.agent_idx:02d}/{self.agent_total:02d} · {self.locale}]"
         with self.print_lock:
             print(f"{prefix} {msg}", flush=True)
 
+    def _claim_slot(self, provider: dict) -> None:
+        """Block until next allowed send time for THIS provider's bucket."""
+        bucket = self._rate[provider["name"]]
+        with bucket["lock"]:
+            now = time.monotonic()
+            wait = bucket["next_send_at"] - now
+            if wait > 0:
+                time.sleep(wait)
+            bucket["next_send_at"] = max(now, bucket["next_send_at"]) + bucket["min_interval"]
+
+    def _provider_chain(self) -> list[tuple[dict, str]]:
+        """Return (provider, key) pairs in priority order, skipping any whose
+        env var is unset."""
+        chain: list[tuple[dict, str]] = []
+        for p in self.providers:
+            k = self.api_keys.get(p["name"])
+            if k:
+                chain.append((p, k))
+        return chain
+
+    def _process_one(self, idx_src: tuple[int, Path]) -> None:
+        i, src = idx_src
+        chain = self._provider_chain()
+        t0 = time.monotonic()
+        ok, used, msg = translate_one(src, self.locale, chain,
+                                       self.system_prompt,
+                                       rate_claim=self._claim_slot)
+        elapsed = time.monotonic() - t0
+        with self._progress_lock:
+            self._progress += 1
+            done_now = self._progress
+            if ok:
+                self.done += 1
+                self.by_provider[used] = self.by_provider.get(used, 0) + 1
+            else:
+                self.failed += 1
+        tag = f"ok via {used}" if ok else f"FAIL ({msg})"
+        self.log(f"{src.name} → {tag} ({done_now}/{self.target_total}, "
+                 f"{elapsed:.1f}s)")
+
     def run(self, source_files: list[Path]) -> None:
-        if not self.api_key:
-            self.log(f"SKIP — env var {self.provider['env']} not set")
+        chain = self._provider_chain()
+        if not chain:
+            self.log("SKIP — no API key set for any configured provider")
             return
         missing = missing_for_locale(self.locale, source_files)
         if self.limit is not None:
@@ -282,24 +404,18 @@ class LocaleWorker:
         if self.target_total == 0:
             self.log("nothing to do (locale fully translated)")
             return
-        self.log(f"starting — {self.target_total} files to translate")
-        for i, src in enumerate(missing, start=1):
-            t0 = time.monotonic()
-            ok, msg = translate_one(src, self.locale, self.provider,
-                                    self.api_key, self.system_prompt)
-            elapsed = time.monotonic() - t0
-            tag = "ok" if ok else f"FAIL ({msg})"
-            if ok:
-                self.done += 1
-            else:
-                self.failed += 1
-            self.log(f"{src.name} → {tag} ({i}/{self.target_total}, "
-                     f"{elapsed:.1f}s)")
-            # rate limit
-            wait = self.min_interval - elapsed
-            if wait > 0 and i < self.target_total:
-                time.sleep(wait)
-        self.log(f"done — {self.done} ok / {self.failed} failed")
+        self.log(f"starting — {self.target_total} files, "
+                 f"{self.workers} worker{'s' if self.workers > 1 else ''}, "
+                 f"chain: {' → '.join(p['name'] for p, _ in chain)}")
+        if self.workers <= 1:
+            for i, src in enumerate(missing, start=1):
+                self._process_one((i, src))
+        else:
+            tasks = list(enumerate(missing, start=1))
+            with cf.ThreadPoolExecutor(max_workers=self.workers) as ex:
+                list(ex.map(self._process_one, tasks))
+        breakdown = ", ".join(f"{name}:{n}" for name, n in self.by_provider.items() if n)
+        self.log(f"done — {self.done} ok ({breakdown}) / {self.failed} failed")
 
 
 # ---------------------------------------------------------------------------
@@ -320,6 +436,9 @@ def main() -> int:
                    help="Override Groq model (default: openai/gpt-oss-120b)")
     p.add_argument("--gemini-model", default=None,
                    help="Override Gemini model (default: gemini-2.5-flash)")
+    p.add_argument("--workers", type=int, default=1,
+                   help="Concurrent translation requests per locale (default: 1). "
+                        "Shares one provider-wide rate limit.")
     args = p.parse_args()
     if args.groq_model:
         PROVIDERS["groq"]["model"] = args.groq_model
@@ -342,11 +461,9 @@ def main() -> int:
     else:
         target_locales = list(LOCALES.keys())
 
-    # Round-robin provider per locale
-    plan: list[tuple[str, str]] = []  # (locale, provider)
-    for i, loc in enumerate(target_locales):
-        prov = args.providers[i % len(args.providers)]
-        plan.append((loc, prov))
+    # Each locale gets ALL configured providers as a fallback chain (first = primary).
+    chain_names = list(args.providers)
+    plan: list[tuple[str, list[str]]] = [(loc, chain_names) for loc in target_locales]
 
     print("=" * 72)
     print(f"Translation plan — {len(plan)} agents, {len(sources)} source MDX files")
@@ -354,16 +471,17 @@ def main() -> int:
           f"see {TRANSLATOR_CONTEXT.relative_to(ROOT)}")
     print("=" * 72)
     total_missing = 0
-    for i, (loc, prov) in enumerate(plan, start=1):
+    for i, (loc, prov_list) in enumerate(plan, start=1):
         miss = missing_for_locale(loc, sources)
         if args.limit is not None:
             miss = miss[: args.limit]
         total_missing += len(miss)
         speech, lang_name = LOCALES[loc]
-        prov_meta = PROVIDERS[prov]
-        env_set = "✓" if os.environ.get(prov_meta["env"]) else "✗ (env not set)"
-        print(f"  [{prov_meta['name']:<18s} · {i:02d}/{len(plan):02d} · {loc:<3s} → {speech}] "
-              f"{lang_name:<22s}  {len(miss):3d} missing  {env_set}")
+        chain_label = " → ".join(PROVIDERS[n]["name"] for n in prov_list)
+        env_states = ["✓" if os.environ.get(PROVIDERS[n]["env"]) else "✗"
+                      for n in prov_list]
+        print(f"  [{chain_label:<28s} · {i:02d}/{len(plan):02d} · {loc:<3s} → {speech}] "
+              f"{lang_name:<22s}  {len(miss):3d} missing  envs:{','.join(env_states)}")
     print("=" * 72)
     print(f"Total translations to do: {total_missing}")
     print()
@@ -374,9 +492,9 @@ def main() -> int:
 
     print_lock = threading.Lock()
     workers = [
-        LocaleWorker(loc, prov, idx, len(plan), system_prompt,
-                     args.limit, print_lock)
-        for idx, (loc, prov) in enumerate(plan, start=1)
+        LocaleWorker(loc, prov_list, idx, len(plan), system_prompt,
+                     args.limit, print_lock, workers=args.workers)
+        for idx, (loc, prov_list) in enumerate(plan, start=1)
     ]
 
     with ThreadPoolExecutor(max_workers=len(workers)) as ex:
@@ -395,7 +513,9 @@ def main() -> int:
     for w in workers:
         if w.target_total == 0:
             continue
-        print(f"  [{w.provider_name:<6s} · {w.locale}] {w.done}/{w.target_total} ok, "
+        breakdown = ", ".join(f"{n}:{c}" for n, c in w.by_provider.items() if c)
+        print(f"  [{'+'.join(w.provider_names):<14s} · {w.locale}] "
+              f"{w.done}/{w.target_total} ok ({breakdown}), "
               f"{w.failed} failed")
     print(f"Grand total: {total_ok} translations succeeded, {total_fail} failed")
     return 0

@@ -1,0 +1,854 @@
+---
+titulo: "Lesson 112 — Linear transformations"
+slug: "licao-112-transformacoes-lineares"
+categoria: "aulas"
+subcategoria: "ano-3-trim-12"
+descricao: "Functions between vector spaces that preserve linear combination. Matrix representation in a basis. Change of basis. The fundamental operation that makes ML, 3D graphics, and signal processing possible."
+ordem: 112
+publicado: true
+tags: ["álgebra linear", "transformação linear", "matriz", "ano-3", "trim-12"]
+prerrequisitos: ["licao-111-espacos-vetoriais"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["Leistungskurs alemão (Lineare Algebra)", "Math III Japanese", "H2 Math Singapore", "engineering graduation 1st semester"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="T(au + bv) = a\,T(u) + b\,T(v)"
+  legenda={<>A <strong>linear transformation</strong> is a function <Eq>{`T: V \\to W`}</Eq> between vector spaces that preserves sum and scalar multiplication. In a fixed basis, it is represented by a <strong>matrix</strong>: applying <Eq>{`T`}</Eq> to a vector becomes matrix multiplication <Eq>{`T(v) = Av`}</Eq>.</>}
+  audioTexto="Linear transformation. T of a u plus b v, equals a times T of u, plus b times T of v. The function preserves linear combinations. In a fixed basis, applying T is the same as multiplying by the matrix of T."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books that cover this lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="http://linear.ups.edu/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Beezer — A First Course in Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · §LT–§ILT (Linear Transformations) · GNU FDL · </span>
+      <em className="text-clube-mist">Axiomatic definition, matrix representation, kernel and image — the primary reference for this lesson.</em>
+    </li>
+    <li>
+      <a href="https://hefferon.net/linearalgebra/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hefferon — Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · ch. 3 (Maps Between Spaces) · CC-BY-SA · </span>
+      <em className="text-clube-mist">Geometric focus on transformations of the plane and space; change of basis and similar matrices.</em>
+    </li>
+    <li>
+      <a href="https://linear.axler.net/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Axler — Linear Algebra Done Right (4th ed.)
+      </a>
+      <span className="text-clube-mist"> · ch. 3 (Linear Maps) · CC-BY-NC · </span>
+      <em className="text-clube-mist">Determinant-free approach; linear maps as first-class objects with their own algebra.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Rigorous definition">
+
+### Linear transformations
+
+<Definicao titulo="Linear transformation (linear map)">
+
+Let $V$ and $W$ be vector spaces over a field $K$. A function $T: V \to W$ is called a **linear transformation** (or **linear map**) if it satisfies, for all $u, v \in V$ and all $a \in K$:
+
+<Equation explicacao="Preservation of sum: the image of the sum is the sum of the images." latex="T(u + v) = T(u) + T(v)" />
+
+<Equation explicacao="Preservation of scalar: the image of the multiple is the multiple of the image." latex="T(av) = a\,T(v)" />
+
+The two conditions merge into one: $T(au + bv) = aT(u) + bT(v)$ for all $u, v \in V$ and $a, b \in K$.
+
+</Definicao>
+
+> "A linear transformation is a function that goes from one vector space to another and preserves the vector space operations of vector addition and scalar multiplication." — [Beezer — A First Course in Linear Algebra, §LT](http://linear.ups.edu/fcla/section-LT.html)
+
+<Definicao titulo="Immediate consequences of linearity">
+
+Every linear transformation satisfies:
+
+- **$T(0_V) = 0_W$**: the image of the zero vector is zero. (Proof: $T(0_V) = T(0 \cdot 0_V) = 0\,T(0_V) = 0_W$.)
+- **$T(-v) = -T(v)$**: the image of the opposite is the opposite of the image.
+- **$T\left(\sum_{i=1}^n a_i v_i\right) = \sum_{i=1}^n a_i T(v_i)$**: linearity extends to arbitrary linear combinations.
+
+**Beware:** The affine function $x \mapsto Ax + b$ with $b \neq 0$ **is not linear** — it violates $T(0) = 0$.
+
+</Definicao>
+
+> "If $T$ is a linear transformation, then $T(0) = 0$." — [Beezer — A First Course in Linear Algebra, Theorem LTTZZ, §LT](http://linear.ups.edu/fcla/section-LT.html)
+
+### Matrix representation
+
+<Definicao titulo="Matrix of a linear transformation">
+
+Fix basis $\mathcal{B} = \{v_1, \ldots, v_n\}$ of $V$ and basis $\mathcal{C} = \{w_1, \ldots, w_m\}$ of $W$. The **matrix of $T$ in bases $\mathcal{B}$ and $\mathcal{C}$**, denoted $[T]_{\mathcal{B}}^{\mathcal{C}} \in M_{m \times n}(K)$, is the matrix whose $j$-th column is the vector $T(v_j)$ written in coordinates in basis $\mathcal{C}$:
+
+<Equation explicacao="The j-th column of [T] is T(v_j) in coordinates of C. For any vector v with coordinates x in B, we have T(v) with coordinates [T]x in C." latex="[T]_j = [T(v_j)]_{\mathcal{C}}" />
+
+Result: $T$ is **completely determined** by its values on a basis. Applying $T$ to any $v$ is equivalent to multiplying $[T]$ by the coordinate vector of $v$ in $\mathcal{B}$.
+
+</Definicao>
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr112" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="20" y="60" width="120" height="80" rx="10" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="80" y="95" textAnchor="middle" fontSize="13" fontFamily="serif" fontStyle="italic" fill="currentColor">V</text>
+  <text x="80" y="115" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">base B</text>
+</g>
+<g>
+  <rect x="380" y="60" width="120" height="80" rx="10" fill="rgb(199 107 63 / 0.15)" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+  <text x="440" y="95" textAnchor="middle" fontSize="13" fontFamily="serif" fontStyle="italic" fill="currentColor">W</text>
+  <text x="440" y="115" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">base C</text>
+</g>
+<g>
+  <line x1="145" y1="100" x2="375" y2="100" stroke="rgb(232 199 122)" strokeWidth="2.5" markerEnd="url(#arr112)"/>
+  <text x="260" y="90" textAnchor="middle" fontSize="12" fontFamily="serif" fontStyle="italic" fill="rgb(201 163 95)">T</text>
+</g>
+<g>
+  <text x="80" y="170" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">coord. x em B</text>
+  <text x="440" y="170" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">coord. [T]x em C</text>
+</g>
+<g>
+  <text x="260" y="145" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">[T] ∈ M(m×n)</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Diagram: <em>T</em> takes vectors from <em>V</em> (with basis <em>B</em>) to <em>W</em> (with basis <em>C</em>). In coordinates, the operation is multiplication by matrix <em>[T]</em>.
+</figcaption>
+</figure>
+
+### Change of basis and similar matrices
+
+<Teorema titulo="Similar matrices represent the same transformation">
+
+Let $[T]_{\mathcal{B}}$ and $[T]_{\mathcal{B}'}$ be the matrices of $T: V \to V$ in bases $\mathcal{B}$ and $\mathcal{B}'$ of $V$, and let $P$ be the change-of-basis matrix from $\mathcal{B}'$ to $\mathcal{B}$. Then:
+
+<Equation explicacao="Similar matrices: same transformation, different bases. P is invertible — its columns are the vectors of B' in coordinates of B." latex="[T]_{\mathcal{B}'} = P^{-1}\,[T]_{\mathcal{B}}\,P" />
+
+Two matrices $A$ and $B$ are **similar** ($A \sim B$) if there exists an invertible $P$ such that $B = P^{-1}AP$. Similar matrices have the same determinant, same trace, and the same eigenvalues.
+
+</Teorema>
+
+> "Two matrices that represent the same linear transformation in different bases are called similar matrices, and $B = P^{-1}AP$ for some invertible matrix $P$." — [Hefferon — Linear Algebra, ch. 3 §III.1](https://hefferon.net/linearalgebra/index.html)
+
+### Composition
+
+<Teorema titulo="Composition of linear transformations">
+
+If $S: U \to V$ and $T: V \to W$ are linear transformations, then $T \circ S: U \to W$ is linear, and in fixed bases:
+
+<Equation explicacao="Composition becomes matrix multiplication. Order: [T][S] (S applied first, T second — same order as composition)." latex="[T \circ S] = [T]\,[S]" />
+
+**Consequence**: matrix multiplication has concrete geometric meaning — it is composition of transformations.
+
+</Teorema>
+
+<Insight>
+
+**Why bases?** A linear transformation $T$ is a geometric object: it exists independent of coordinates. The **matrix** is a *photograph* of $T$ in a specific basis. Changing basis is changing the angle of the photo — the object doesn't change, only the representation. This motivates diagonalization (Lesson 115): finding the basis where the photo becomes simplest.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine a **magic mirror** at your house's entrance.
+
+You pass with a backpack and the mirror shows the backpack on the other side. You pass with a hat and it shows the hat. If you enter with both backpack AND hat together, the mirror shows both — just like if you had shown each one separately.
+
+**Linear transformation** is that honest mirror: it doesn't invent or hide anything. If you doubled your backpack (made it become two backpacks), the mirror would also double the image.
+
+What the mirror **doesn't do**: it doesn't push you to the side. If you arrived with nothing, the image would be nothing. (A magic mirror that moves things — that's not linear!)
+
+</Porta>
+
+<Porta nivel="10" titulo="For a 10-year-old">
+
+You know **rotation**: turning a figure in the plane. And **scaling**: stretching or shrinking. These two operations are **linear transformations**.
+
+Their rule is simple:
+
+- If you add two vectors and then rotate — the result is the same as rotating each one separately and then adding.
+- If you double a vector and then rotate — the result is the same as rotating and then doubling.
+
+And here's the magic: **every linear transformation can be written as a matrix**.
+
+Rotation of 90° in the plane:
+
+$$R = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$$
+
+Applying $R$ to the vector $\begin{pmatrix}1 \\ 0\end{pmatrix}$ (pointing right) gives $\begin{pmatrix}0 \\ 1\end{pmatrix}$ (pointing up). The vector rotated exactly 90°!
+
+</Porta>
+
+<Porta nivel="15" titulo="For a 15-year-old teen">
+
+Linear transformations are **the central operation** of linear algebra. All the matrix theory you've learned since Lesson 31 is, at heart, algebra of linear transformations.
+
+### Why the matrix works?
+
+In basis $\{e_1, \ldots, e_n\}$, any vector $v$ can be written as $v = a_1 e_1 + \cdots + a_n e_n$. By linearity:
+
+$$T(v) = a_1 T(e_1) + \cdots + a_n T(e_n)$$
+
+**Conclusion**: to know what $T$ does to any vector, just know what $T$ does to the basis vectors. And these image vectors $T(e_1), \ldots, T(e_n)$ are the **columns** of the matrix of $T$.
+
+### Canonical transformations of the plane
+
+| Transformation | $2 \times 2$ Matrix | What it does |
+|---|---|---|
+| Identity | $\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$ | Changes nothing |
+| Rotation $\theta$ | $\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$ | Rotates by $\theta$ degrees |
+| Reflection on $x$-axis | $\begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}$ | Mirrors vertically |
+| Scaling $k$ | $kI$ | Multiplies size by $k$ |
+| Projection onto $x$ | $\begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$ | Throws onto $x$-axis |
+
+### Composition is multiplication
+
+Applying $S$ and then $T$: $(T \circ S)(v) = T(S(v))$. In matrices: $[T][S]v$. **Beware: order matters.** In general $AB \neq BA$.
+
+<Insight>
+
+**Change of basis** is exactly that: the same transformation viewed from another angle. When Lesson 115 talks about diagonalization, you'll be finding the basis where the matrix becomes diagonal (the simplest possible). Everything starts here.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="For an engineering student">
+
+In engineering, linear algebra is: **data (vectors) + operations (matrices) = system**. Linear transformations are the conceptual level above matrices — and mastering this level separates those who "compute" from those who "understand".
+
+### Important categories of transformations
+
+| Type | Condition | Appears in |
+|---|---|---|
+| Isomorphism | Bijective linear | Change of coordinates |
+| Orthogonal projection | $P^2 = P$, $P = P^T$ | Least squares, PCA |
+| Reflection | $R^2 = I$, $R \neq I$ | Householder QR |
+| Rotation | Orthogonal, $\det = 1$ | Robotics, CG, quantum |
+| Nilpotent | $N^k = 0$ for some $k$ | Jordan form, partial diff. |
+| Idempotent | $A^2 = A$ | Projections, conditional expectation |
+
+### Computational applications
+
+**Computer graphics**: 3D rendering pipeline uses composition of linear transformations (model → view → projection). Homogeneous coordinates $\mathbb{R}^4$ represent translation as a linear transformation in higher dimension.
+
+**Signal processing**: discrete convolution = multiplication by Toeplitz matrix. The FFT (Fast Fourier Transform) is an orthogonal linear transformation — and its efficient implementation is what makes audio compression possible.
+
+**Machine learning**: each **dense layer** of a neural network is $y = W x + b$ — the linear part $Wx$ is a linear transformation, the $b$ is the affine part. All "information compression" between layers is linear; non-linearities come from activations (ReLU, sigmoid, etc.).
+
+**System control**: an LTI (linear time-invariant) system has dynamics $\dot{x} = Ax + Bu$, $y = Cx + Du$. The matrices $A, B, C, D$ are constant linear transformations.
+
+### Computational cost
+
+Matrix-vector multiplication $A \in \mathbb{R}^{m \times n}$, $v \in \mathbb{R}^n$: $O(mn)$ operations. Matrix-matrix multiplication: $O(n^3)$ (Strassen: $O(n^{2.807})$). GPUs are specialized hardware for exactly this — all modern AI scales through massive parallelization of matrix multiplications.
+
+**Rule of thumb**: never compute $A^{-1}$ explicitly to solve $Ax = b$. Use LU or Cholesky decomposition — same $O(n^3)$ cost but without accumulating numerical errors.
+
+</Porta>
+
+<Porta nivel="40" titulo="For a senior professional">
+
+### Category $\mathbf{Vect}_K$
+
+Linear transformations are the **morphisms** of the category of vector spaces over $K$. Composition is matrix multiplication. The identity is $\text{id}_V$. Isomorphisms are invertible. This categorical perspective clarifies the structure:
+
+- $\text{Hom}(V, W)$ (the set of all linear transformations from $V$ to $W$) is itself a vector space of dimension $(\dim V)(\dim W)$.
+- Composition is bilinear: $\text{Hom}(V, W) \times \text{Hom}(U, V) \to \text{Hom}(U, W)$.
+
+### First isomorphism theorem
+
+Every $T: V \to W$ admits canonical factorization:
+
+$$V \twoheadrightarrow V/\ker T \xrightarrow{\bar{T}} \operatorname{Im}(T) \hookrightarrow W$$
+
+where $\bar{T}$ is an isomorphism. The **Kernel-Image Theorem** (rank-nullity) is a consequence: $\dim V = \dim \ker T + \dim \operatorname{Im}(T)$.
+
+### Computational decompositions
+
+For matrices (representations of transformations):
+
+- **LU**: $A = LU$ — Gaussian elimination, $O(n^3)$, foundation of all direct solvers.
+- **QR**: $A = QR$ — Gram-Schmidt or Householder. $O(mn^2)$ for $m \geq n$. Foundation of least squares and QR method for eigenvalues.
+- **Cholesky**: $A = LL^T$ for SPD — $O(n^3/3)$, half the cost of LU.
+- **SVD**: $A = U\Sigma V^T$ — Lesson 117. The most informative decomposition; always exists, even for rectangular matrices.
+- **Jordan**: canonical form over $\mathbb{C}$ — relevant for ODEs and control systems.
+
+### Operators in infinite dimension
+
+In $L^2(\mathbb{R})$, linear transformations include:
+- **Multiplication**: $(M_g f)(x) = g(x)f(x)$ — bounded if $g \in L^\infty$.
+- **Convolution**: $(K_h f)(x) = \int h(x-y)f(y)\,dy$ — Young's inequality determines boundedness.
+- **Differentiation**: $D = d/dx$ — **unbounded**, but closed.
+- **Fourier transform**: unitary on $L^2$ (Plancherel's theorem).
+
+### Spectral theorem
+
+A compact self-adjoint operator on Hilbert space has discrete spectral decomposition — real eigenvalues, orthogonal eigenvectors. **Quantum mechanics** lives here: observables are self-adjoint operators on $L^2$, eigenvalues are the possible measurement outcomes.
+
+**Differentiable programming**: the derivative of $f: \mathbb{R}^n \to \mathbb{R}^m$ at a point is a linear transformation (the Jacobian). Every neural network training via gradient descent iterates over these infinitesimal linearities.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Practice — data and Brazilian context">
+
+### How to check linearity: practical walkthrough
+
+For any candidate $T$:
+
+1. Compute $T(u + v)$ and compare with $T(u) + T(v)$. Are they equal for all $u, v$?
+2. Compute $T(\lambda v)$ and compare with $\lambda T(v)$. Are they equal for all $\lambda$?
+3. Check $T(0) = 0$. If it fails, stop — not linear.
+
+If any condition fails, the function **is not linear**.
+
+### How to construct the matrix: column-by-column algorithm
+
+1. Choose basis $\{e_1, \ldots, e_n\}$ of $V$.
+2. Compute $T(e_1), T(e_2), \ldots, T(e_n)$ (images of basis vectors).
+3. Each $T(e_j)$, written in coordinates of the basis of $W$, becomes the $j$-th column of the matrix.
+
+**Example**: $T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x, y) = (2x + y,\ x - 3y)$.
+
+Canonical basis: $e_1 = (1, 0)$, $e_2 = (0, 1)$.
+
+$T(e_1) = T(1, 0) = (2, 1) \Rightarrow$ column 1: $\begin{pmatrix}2\\1\end{pmatrix}$
+
+$T(e_2) = T(0, 1) = (1, -3) \Rightarrow$ column 2: $\begin{pmatrix}1\\-3\end{pmatrix}$
+
+Matrix: $[T] = \begin{pmatrix}2 & 1 \\ 1 & -3\end{pmatrix}$.
+
+### Application in finance: portfolio return
+
+A portfolio with $n$ assets and weights $w = (w_1, \ldots, w_n)$ has expected return $r_p = w^\top \mu$ where $\mu$ is the vector of expected returns. This is a linear transformation $T: \mathbb{R}^n \to \mathbb{R}$, $T(w) = w^\top \mu$. Portfolio optimization (Markowitz) minimizes $w^\top \Sigma w$ subject to $w^\top \mu = r_\text{target}$ — a quadratic problem with linear constraint.
+
+### For the rest of Term 12
+
+All lessons in term 12 build on linear transformations:
+
+- **Lesson 113**: kernel and image ($\ker T$ and $\operatorname{Im} T$), kernel-image theorem.
+- **Lesson 114**: eigenvalues and eigenvectors (directions that $T$ only scales).
+- **Lesson 115**: diagonalization (basis where $[T]$ becomes diagonal).
+- **Lesson 117**: SVD (most general decomposition, always exists).
+
+Mastering the concept of this lesson is a prerequisite for all that follow.
+
+</Porta>
+
+</DuasPortas>
+
+## Worked examples
+
+<Exemplo titulo="Verify linearity of T(x, y) = (2x, 3y)" numero="1">
+
+**Problem:** Determine if $T: \mathbb{R}^2 \to \mathbb{R}^2$ defined by $T(x, y) = (2x,\, 3y)$ is a linear transformation.
+
+**Strategy:** Check the two conditions of the definition: preservation of sum and preservation of scalar. Use generic vectors.
+
+**Solution:**
+
+Let $u = (x_1, y_1)$ and $v = (x_2, y_2)$ be vectors in $\mathbb{R}^2$, and $a \in \mathbb{R}$ a scalar.
+
+1. **Preservation of sum:**
+$$T(u + v) = T(x_1 + x_2,\; y_1 + y_2) = (2(x_1+x_2),\; 3(y_1+y_2))$$
+$$= (2x_1 + 2x_2,\; 3y_1 + 3y_2) = (2x_1, 3y_1) + (2x_2, 3y_2) = T(u) + T(v). \checkmark$$
+
+2. **Preservation of scalar:**
+$$T(a u) = T(ax_1, ay_1) = (2ax_1,\; 3ay_1) = a(2x_1, 3y_1) = a\,T(u). \checkmark$$
+
+**Verification:** Since both conditions were verified for generic vectors, $T$ is linear. Additionally, $T(0, 0) = (0, 0) = 0$ — consistent with linearity.
+
+**Source.** [Beezer — A First Course in Linear Algebra, §LT Example LTPM](http://linear.ups.edu/fcla/section-LT.html) — GNU FDL license.
+
+</Exemplo>
+
+<Exemplo titulo="Build the matrix of rotation by 60 degrees" numero="2">
+
+**Problem:** Find the $2 \times 2$ matrix representing rotation by $60°$ in the plane $\mathbb{R}^2$.
+
+**Strategy:** Apply the column-by-column algorithm: compute where $T$ takes $e_1 = (1,0)$ and $e_2 = (0,1)$. The images are the columns.
+
+**Solution:**
+
+1. **Image of $e_1$:** The vector $(1, 0)$ points right (angle $0°$). After rotation by $60°$, it points at angle $60°$:
+$$T(e_1) = (\cos 60°,\; \sin 60°) = \left(\frac{1}{2},\; \frac{\sqrt{3}}{2}\right)$$
+
+2. **Image of $e_2$:** The vector $(0, 1)$ points up (angle $90°$). After rotation by $60°$, it points at angle $150°$:
+$$T(e_2) = (\cos 150°,\; \sin 150°) = \left(-\frac{\sqrt{3}}{2},\; \frac{1}{2}\right)$$
+
+3. **Build the matrix** (columns = images):
+$$[T] = \begin{pmatrix} \cos 60° & \cos 150° \\ \sin 60° & \sin 150° \end{pmatrix} = \begin{pmatrix} 1/2 & -\sqrt{3}/2 \\ \sqrt{3}/2 & 1/2 \end{pmatrix}$$
+
+**Verification:** $\det[T] = (1/2)(1/2) - (-\sqrt{3}/2)(\sqrt{3}/2) = 1/4 + 3/4 = 1$. Rotations preserve area — $\det = 1$ is correct. And $[T]^\top [T] = I$ (orthogonal matrix), confirming that norms are preserved.
+
+**Source.** [Hefferon — Linear Algebra, ch. 3 §I Example 1.9](https://hefferon.net/linearalgebra/index.html) — CC-BY-SA license.
+
+</Exemplo>
+
+<Exemplo titulo="Differentiation in P2 — matrix in canonical basis" numero="3">
+
+**Problem:** Define $D: \mathcal{P}_2 \to \mathcal{P}_2$ by $D(p) = p'$ (usual derivative). Show that $D$ is linear and find its matrix in basis $\mathcal{B} = \{1, x, x^2\}$.
+
+**Strategy:** (1) Check linearity using properties of the derivative. (2) Compute $D$ on each basis vector and build the columns.
+
+**Solution:**
+
+1. **Linearity:**
+$$D(p + q) = (p + q)' = p' + q' = D(p) + D(q). \checkmark$$
+$$D(\lambda p) = (\lambda p)' = \lambda p' = \lambda D(p). \checkmark$$
+
+2. **Images of basis vectors:**
+
+$$D(1) = 0 = 0 \cdot 1 + 0 \cdot x + 0 \cdot x^2 \Rightarrow \text{column 1: } \begin{pmatrix}0\\0\\0\end{pmatrix}$$
+
+$$D(x) = 1 = 1 \cdot 1 + 0 \cdot x + 0 \cdot x^2 \Rightarrow \text{column 2: } \begin{pmatrix}1\\0\\0\end{pmatrix}$$
+
+$$D(x^2) = 2x = 0 \cdot 1 + 2 \cdot x + 0 \cdot x^2 \Rightarrow \text{column 3: } \begin{pmatrix}0\\2\\0\end{pmatrix}$$
+
+3. **Matrix:**
+$$[D]_{\mathcal{B}} = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 2 \\ 0 & 0 & 0 \end{pmatrix}$$
+
+**Verification:** Apply $[D]$ to the coordinate vector of $p = 3 + 2x + 5x^2$, which is $(3, 2, 5)^\top$:
+$$[D]\begin{pmatrix}3\\2\\5\end{pmatrix} = \begin{pmatrix}2\\10\\0\end{pmatrix}$$
+This corresponds to the polynomial $2 + 10x$. And indeed $p'(x) = 2 + 10x$. Correct.
+
+**Source.** [Beezer — A First Course in Linear Algebra, §LT Example MLTCV](http://linear.ups.edu/fcla/section-LT.html) — GNU FDL license.
+
+</Exemplo>
+
+<Exemplo titulo="Change of basis — same T, different matrices" numero="4">
+
+**Problem:** Let $T: \mathbb{R}^2 \to \mathbb{R}^2$ be reflection with respect to the $x$-axis: $T(x, y) = (x, -y)$.
+(a) Find $[T]$ in canonical basis $\mathcal{B} = \{e_1, e_2\}$.
+(b) Find $[T]$ in basis $\mathcal{B}' = \{(1,1),\, (1,-1)\}$.
+(c) Confirm that $[T]_{\mathcal{B}'} = P^{-1}[T]_{\mathcal{B}}\,P$.
+
+**Strategy:** (a) Column-by-column algorithm in each basis. (c) Use the change-of-basis formula with $P = $ matrix whose columns are the vectors of $\mathcal{B}'$ in coordinates of $\mathcal{B}$.
+
+**Solution:**
+
+**(a)** Canonical basis:
+$$T(e_1) = T(1, 0) = (1, 0) \Rightarrow \text{col. 1: } (1, 0)^\top$$
+$$T(e_2) = T(0, 1) = (0, -1) \Rightarrow \text{col. 2: } (0, -1)^\top$$
+$$[T]_{\mathcal{B}} = \begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}$$
+
+**(b)** Basis $\mathcal{B}' = \{v_1, v_2\} = \{(1,1),(1,-1)\}$. Compute images in coordinates of $\mathcal{B}'$:
+$$T(v_1) = T(1,1) = (1,-1) = v_2 = 0 \cdot v_1 + 1 \cdot v_2 \Rightarrow \text{col. 1: } (0, 1)^\top$$
+$$T(v_2) = T(1,-1) = (1,1) = v_1 = 1 \cdot v_1 + 0 \cdot v_2 \Rightarrow \text{col. 2: } (1, 0)^\top$$
+$$[T]_{\mathcal{B}'} = \begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix}$$
+
+**(c)** Matrix $P$ (columns are $v_1, v_2$ in canonical coordinates):
+$$P = \begin{pmatrix}1 & 1 \\ 1 & -1\end{pmatrix}, \quad P^{-1} = \frac{1}{-2}\begin{pmatrix}-1 & -1 \\ -1 & 1\end{pmatrix} = \begin{pmatrix}1/2 & 1/2 \\ 1/2 & -1/2\end{pmatrix}$$
+
+$$P^{-1}[T]_{\mathcal{B}}P = \begin{pmatrix}1/2 & 1/2 \\ 1/2 & -1/2\end{pmatrix}\begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}\begin{pmatrix}1 & 1 \\ 1 & -1\end{pmatrix} = \begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix} = [T]_{\mathcal{B}'}. \checkmark$$
+
+**Verification:** In $\mathcal{B}'$, the reflection swaps $v_1 \leftrightarrow v_2$, so the matrix should be exactly the permutation $\begin{pmatrix}0&1\\1&0\end{pmatrix}$ — makes sense geometrically.
+
+**Source.** [Hefferon — Linear Algebra, ch. 3 §V Exercise 1.18](https://hefferon.net/linearalgebra/index.html) — CC-BY-SA license.
+
+</Exemplo>
+
+<Exemplo titulo="Composition of transformations and matrix multiplication" numero="5">
+
+**Problem:** Define $S: \mathbb{R}^2 \to \mathbb{R}^2$ as horizontal shear $S(x, y) = (x + 2y,\, y)$ and $T: \mathbb{R}^2 \to \mathbb{R}^2$ as reflection $T(x, y) = (-x,\, y)$. Compute (a) matrices $[S]$ and $[T]$; (b) matrix of $T \circ S$; (c) verify by computing $(T \circ S)(3, 1)$ directly and via matrix multiplication.
+
+**Strategy:** Column-by-column algorithm for each transformation. Composition = matrix product $[T][S]$.
+
+**Solution:**
+
+**(a)** Matrices via column-by-column:
+$$[S] = \begin{pmatrix}1 & 2 \\ 0 & 1\end{pmatrix}, \quad [T] = \begin{pmatrix}-1 & 0 \\ 0 & 1\end{pmatrix}$$
+
+**(b)** Composition $T \circ S$ (apply $S$ first, then $T$):
+$$[T \circ S] = [T][S] = \begin{pmatrix}-1 & 0 \\ 0 & 1\end{pmatrix}\begin{pmatrix}1 & 2 \\ 0 & 1\end{pmatrix} = \begin{pmatrix}-1 & -2 \\ 0 & 1\end{pmatrix}$$
+
+**(c)** Verification for $(3, 1)$:
+
+**Directly:** $S(3, 1) = (3 + 2\cdot1,\; 1) = (5, 1)$. Then $T(5, 1) = (-5, 1)$.
+
+**Via matrix:** $[T \circ S]\begin{pmatrix}3\\1\end{pmatrix} = \begin{pmatrix}-1 & -2 \\ 0 & 1\end{pmatrix}\begin{pmatrix}3\\1\end{pmatrix} = \begin{pmatrix}-3-2\\0+1\end{pmatrix} = \begin{pmatrix}-5\\1\end{pmatrix}$.
+
+Result: $(-5, 1)$ — identical. Matrix multiplication = composition of transformations.
+
+**Source.** [Axler — Linear Algebra Done Right 4th ed., §3B Exercise 1](https://linear.axler.net/) — CC-BY-NC license.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-112-transformacoes-lineares">
+
+### Block A — Checking linearity (112.1 to 112.12)
+
+<Exercicio numero="112.1" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C20", licenca: "GNU FDL" }}
+  solucao={<>We verify both conditions. Let <Eq>{`u = (x_1,y_1)`}</Eq>, <Eq>{`v = (x_2,y_2)`}</Eq>. Sum: <Eq>{`T(u+v) = (2(x_1+x_2), 3(y_1+y_2)) = T(u)+T(v)`}</Eq>. Scalar: <Eq>{`T(au) = (2ax_1, 3ay_1) = aT(u)`}</Eq>. Therefore <Eq>{`T`}</Eq> is linear. Matrix: <Eq>{`\\begin{pmatrix}2&0\\\\0&3\\end{pmatrix}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Write generic vectors <Eq>{`u = (x_1,y_1)`}</Eq>, <Eq>{`v = (x_2,y_2)`}</Eq> and scalar <Eq>{`a \\in \\mathbb{R}`}</Eq>. We work with generics to prove for <em>every</em> pair, not just one example.</li>
+      <li>Sum condition: compute <Eq>{`T(u+v)`}</Eq> and compare with <Eq>{`T(u)+T(v)`}</Eq>. They must be equal.</li>
+      <li>Scalar condition: compute <Eq>{`T(au)`}</Eq> and compare with <Eq>{`aT(u)`}</Eq>.</li>
+      <li>For the matrix: apply the column-by-column algorithm. <Eq>{`T(e_1) = T(1,0) = (2,0)`}</Eq> → column 1. <Eq>{`T(e_2) = T(0,1) = (0,3)`}</Eq> → column 2.</li>
+    </ol>
+    <em>Tip:</em> <Eq>{`T(x,y) = (2x, 3y)`}</Eq> is non-uniform scaling — stretches the <Eq>{`x`}</Eq>-axis by 2 and <Eq>{`y`}</Eq>-axis by 3. Scaling transformations are always linear.
+  </>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x, y) = (2x,\, 3y)$. Verify that $T$ is linear and find its matrix.
+</Exercicio>
+
+<Exercicio numero="112.2" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Not linear — violates $T(0) = 0$", correta: true },
+    { texto: "Is linear — satisfies $T(u+v)=T(u)+T(v)$" },
+    { texto: "Is linear — it's an affine function" },
+    { texto: "Not linear — not injective" },
+  ]}
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C21", licenca: "GNU FDL" }}
+  solucao={<>Just test zero: <Eq>{`T(0,0) = (0+1, 0) = (1,0) \\neq (0,0)`}</Eq>. Since every linear transformation satisfies <Eq>{`T(0) = 0`}</Eq>, this function is NOT linear. It's a translation, i.e., an affine transformation.</>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x, y) = (x + 1,\, y)$. Why is $T$ not a linear transformation?
+</Exercicio>
+
+<Exercicio numero="112.3" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.1", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T(x) = x^2`}</Eq> is not linear. Example: <Eq>{`T(1+1) = T(2) = 4`}</Eq>, but <Eq>{`T(1)+T(1) = 1+1 = 2 \\neq 4`}</Eq>. The sum condition fails. Additionally, <Eq>{`T(-1) = 1 \\neq -1 = -T(1)`}</Eq>.</>}
+>
+$T: \mathbb{R} \to \mathbb{R}$, $T(x) = x^2$. Give a concrete counterexample to show that $T$ is not linear.
+</Exercicio>
+
+<Exercicio numero="112.4" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C22", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T(x,y) = (y,x)`}</Eq> is linear. Matrix: <Eq>{`T(e_1) = T(1,0) = (0,1)`}</Eq> and <Eq>{`T(e_2) = T(0,1) = (1,0)`}</Eq>. Therefore <Eq>{`[T] = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>. This is the permutation matrix — it swaps the coordinates.</>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x, y) = (y,\, x)$. Show that it is linear and find its $2 \times 2$ matrix.
+</Exercicio>
+
+<Exercicio numero="112.5" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C30", licenca: "GNU FDL" }}
+  solucao={<>Is linear. $2 \times 3$ matrix: <Eq>{`T(e_1)=(1,0)`}</Eq>, <Eq>{`T(e_2)=(1,1)`}</Eq>, <Eq>{`T(e_3)=(0,1)`}</Eq>. Therefore <Eq>{`[T] = \\begin{pmatrix}1&1&0\\\\0&1&1\\end{pmatrix}`}</Eq>.</>}
+>
+$T: \mathbb{R}^3 \to \mathbb{R}^2$, $T(x, y, z) = (x + y,\, y + z)$. Show that it is linear and find the $2 \times 3$ matrix.
+</Exercicio>
+
+<Exercicio numero="112.6" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.5", licenca: "CC-BY-NC" }}
+  solucao={<>Differentiation <Eq>{`D: \\mathcal{P}_3 \\to \\mathcal{P}_3`}</Eq>, <Eq>{`D(p) = p'`}</Eq>. Basis <Eq>{`\\{1, x, x^2, x^3\\}`}</Eq>: <Eq>{`D(1)=0`}</Eq>, <Eq>{`D(x)=1`}</Eq>, <Eq>{`D(x^2)=2x`}</Eq>, <Eq>{`D(x^3)=3x^2`}</Eq>. $4\\times4$ matrix: <Eq>{`[D] = \\begin{pmatrix}0&1&0&0\\\\0&0&2&0\\\\0&0&0&3\\\\0&0&0&0\\end{pmatrix}`}</Eq>. Is nilpotent: <Eq>{`D^4=0`}</Eq>.</>}
+>
+$D: \mathcal{P}_3 \to \mathcal{P}_3$, $D(p) = p'$. Find the $4 \times 4$ matrix in basis $\{1, x, x^2, x^3\}$. What is special about this matrix?
+</Exercicio>
+
+<Exercicio numero="112.7" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C31", licenca: "GNU FDL" }}
+  solucao={<>Integration <Eq>{`I: \\mathcal{P}_2 \\to \\mathcal{P}_3`}</Eq>, <Eq>{`I(p)(x) = \\int_0^x p(t)\\,dt`}</Eq>. Is linear by integral properties. Images: <Eq>{`I(1)=x`}</Eq>, <Eq>{`I(x)=x^2/2`}</Eq>, <Eq>{`I(x^2)=x^3/3`}</Eq>. $4\\times3$ matrix: columns are <Eq>{`(0,1,0,0)^\\top`}</Eq>, <Eq>{`(0,0,1/2,0)^\\top`}</Eq>, <Eq>{`(0,0,0,1/3)^\\top`}</Eq>.</>}
+>
+$I: \mathcal{P}_2 \to \mathcal{P}_3$, $I(p)(x) = \int_0^x p(t)\,dt$. Show that it is linear and find the $4 \times 3$ matrix in canonical bases.
+</Exercicio>
+
+<Exercicio numero="112.8" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.11", licenca: "CC-BY-SA" }}
+  solucao={<>Transpose <Eq>{`T(A) = A^T`}</Eq> on <Eq>{`\\mathcal{M}_2`}</Eq>. Canonical basis: <Eq>{`E_{11}, E_{12}, E_{21}, E_{22}`}</Eq>. <Eq>{`T(E_{11})=E_{11}`}</Eq>, <Eq>{`T(E_{12})=E_{21}`}</Eq>, <Eq>{`T(E_{21})=E_{12}`}</Eq>, <Eq>{`T(E_{22})=E_{22}`}</Eq>. $4\\times4$ matrix: permutes coordinates 2 and 3. Is linear, since <Eq>{`(A+B)^T = A^T+B^T`}</Eq> and <Eq>{`(aA)^T = aA^T`}</Eq>.</>}
+>
+$T: \mathcal{M}_2 \to \mathcal{M}_2$, $T(A) = A^\top$. Show that it is linear and write the $4 \times 4$ matrix in the canonical basis of $\mathcal{M}_2$.
+</Exercicio>
+
+<Exercicio numero="112.9" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.10", licenca: "CC-BY-NC" }}
+  solucao={<>Yes, it is linear. Fixing <Eq>{`B`}</Eq>, for any <Eq>{`A_1, A_2`}</Eq> and scalar <Eq>{`a`}</Eq>: <Eq>{`(A_1+A_2)B = A_1 B + A_2 B`}</Eq> (distribution) and <Eq>{`(aA)B = a(AB)`}</Eq> (associativity). Both properties of matrix multiplication guarantee linearity.</>}
+>
+Fix $B \in \mathcal{M}_n$. Define $T: \mathcal{M}_n \to \mathcal{M}_n$ by $T(A) = AB$. Show that $T$ is linear.
+</Exercicio>
+
+<Exercicio numero="112.10" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "No — $\\det(2A) = 2^n\\det(A) \\neq 2\\det(A)$ in general", correta: true },
+    { texto: "Yes — $\\det(A+B) = \\det A + \\det B$" },
+    { texto: "No — determinant is not defined on vector spaces" },
+    { texto: "Yes — $\\det$ is multilinear, hence linear" },
+  ]}
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.20", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`T(A) = \\det A`}</Eq> is not linear. To see this, take <Eq>{`A = I_2`}</Eq>: <Eq>{`T(2I) = \\det(2I) = 4`}</Eq>, but <Eq>{`2T(I) = 2\\cdot1 = 2`}</Eq>. Clearly <Eq>{`4 \\neq 2`}</Eq>. The determinant is <em>multilinear</em> (linear in each column separately), but not linear as a function of matrices.</>}
+>
+$T: \mathcal{M}_2 \to \mathbb{R}$, $T(A) = \det A$. Is $T$ a linear transformation?
+</Exercicio>
+
+<Exercicio numero="112.11" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C40", licenca: "GNU FDL" }}
+  solucao={<>Every polynomial <Eq>{`p(x) = a_0 + a_1 x + a_2 x^2`}</Eq> satisfies: <Eq>{`T(p)(x) = p(2x) = a_0 + 2a_1 x + 4a_2 x^2`}</Eq>. In basis <Eq>{`\\{1, x, x^2\\}`}</Eq>: <Eq>{`T(1)=1`}</Eq>, <Eq>{`T(x)=2x`}</Eq>, <Eq>{`T(x^2)=4x^2`}</Eq>. Diagonal matrix: <Eq>{`\\mathrm{diag}(1,2,4)`}</Eq>.</>}
+>
+$T: \mathcal{P}_2 \to \mathcal{P}_2$, $T(p)(x) = p(2x)$. Show that it is linear and find the diagonal matrix in basis $\{1, x, x^2\}$.
+</Exercicio>
+
+<Exercicio numero="112.12" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.7", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T(v) = 0`}</Eq> for all <Eq>{`v`}</Eq>. The zero transformation is trivially linear: <Eq>{`T(u+v) = 0 = 0+0 = T(u)+T(v)`}</Eq>. The matrix is the zero matrix <Eq>{`0_{m\\times n}`}</Eq>.</>}
+>
+$T: V \to W$, $T(v) = 0$ for all $v \in V$. Show that $T$ is linear. What is its matrix in any basis?
+</Exercicio>
+
+### Block B — Computing matrices (112.13 to 112.24)
+
+<Exercicio numero="112.13" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.3", licenca: "CC-BY-SA" }}
+  solucao={<>Rotation by 45°: <Eq>{`\\cos 45° = \\sin 45° = \\sqrt{2}/2`}</Eq>. Matrix: <Eq>{`R_{45} = \\begin{pmatrix}\\sqrt{2}/2 & -\\sqrt{2}/2 \\\\ \\sqrt{2}/2 & \\sqrt{2}/2\\end{pmatrix}`}</Eq>. Verification: <Eq>{`\\det = 1`}</Eq> and <Eq>{`R^T R = I`}</Eq>.</>}
+>
+Find the $2 \times 2$ matrix of rotation by 45° in the plane. Verify that its determinant is 1.
+</Exercicio>
+
+<Exercicio numero="112.14" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.5", licenca: "CC-BY-SA" }}
+  solucao={<>Reflection across line <Eq>{`y=x`}</Eq>: <Eq>{`T(e_1) = T(1,0) = (0,1)`}</Eq> and <Eq>{`T(e_2) = T(0,1) = (1,0)`}</Eq>. Therefore <Eq>{`[T] = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>. Note <Eq>{`[T]^2 = I`}</Eq> — reflecting twice returns to original.</>}
+>
+Find the $2 \times 2$ matrix of reflection across line $y = x$. Verify that $[T]^2 = I$.
+</Exercicio>
+
+<Exercicio numero="112.15" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C50", licenca: "GNU FDL" }}
+  solucao={<>Orthogonal projection onto <Eq>{`y`}</Eq>-axis: <Eq>{`T(x,y) = (0,y)`}</Eq>. Matrix: <Eq>{`T(e_1) = (0,0)`}</Eq>, <Eq>{`T(e_2) = (0,1)`}</Eq>. Therefore <Eq>{`P = \\begin{pmatrix}0&0\\\\0&1\\end{pmatrix}`}</Eq>. Idempotent: <Eq>{`P^2 = P`}</Eq>.</>}
+>
+Find the $2 \times 2$ matrix of orthogonal projection onto the $y$-axis. Verify that $P^2 = P$ (idempotence).
+</Exercicio>
+
+<Exercicio numero="112.16" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.8", licenca: "CC-BY-SA" }}
+  solucao={<>Orthogonal projection onto line <Eq>{`y=x`}</Eq>: formula for projection onto direction <Eq>{`u = (1,1)/\\sqrt{2}`}</Eq> is <Eq>{`P = uu^T = \\frac{1}{2}\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix}`}</Eq>. Verification: <Eq>{`P^2 = \\frac{1}{4}\\begin{pmatrix}2&2\\\\2&2\\end{pmatrix} \\cdot \\frac{1}{1} = \\frac{1}{2}\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix} = P`}</Eq>.</>}
+>
+Find the $2 \times 2$ matrix of orthogonal projection onto line $y = x$. Verify idempotence.
+</Exercicio>
+
+<Exercicio numero="112.17" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.14", licenca: "CC-BY-SA" }}
+  solucao={<>Non-uniform scaling: <Eq>{`T(x,y) = (3x, 2y)`}</Eq>. Matrix: <Eq>{`\\begin{pmatrix}3&0\\\\0&2\\end{pmatrix}`}</Eq>. Determinant: <Eq>{`6`}</Eq> — the transformation multiplies areas by 6.</>}
+>
+Find the matrix of non-uniform scaling $(x,y) \mapsto (3x,\, 2y)$. What is the geometric meaning of the determinant?
+</Exercicio>
+
+<Exercicio numero="112.18" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.15", licenca: "CC-BY-SA" }}
+  solucao={<>Horizontal shear with factor 2: <Eq>{`T(x,y)=(x+2y, y)`}</Eq>. Matrix: <Eq>{`\\begin{pmatrix}1&2\\\\0&1\\end{pmatrix}`}</Eq>. Determinant: <Eq>{`1`}</Eq> — preserves areas.</>}
+>
+Find the matrix of horizontal shear with factor 2: $T(x, y) = (x + 2y,\, y)$.
+</Exercicio>
+
+<Exercicio numero="112.19" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C55", licenca: "GNU FDL" }}
+  solucao={<>Composition: rotation 30° and then scaling 2. <Eq>{`R_{30} = \\begin{pmatrix}\\sqrt{3}/2 & -1/2 \\\\ 1/2 & \\sqrt{3}/2\\end{pmatrix}`}</Eq>, <Eq>{`E_2 = 2I`}</Eq>. Product: <Eq>{`E_2 R_{30} = \\begin{pmatrix}\\sqrt{3} & -1 \\\\ 1 & \\sqrt{3}\\end{pmatrix}`}</Eq>. Geometrically: scale by 2 and rotation by 30° (in that order: rotation first, scaling second).</>}
+  passos={<>
+    <ol>
+      <li>Write the rotation matrix for 30° using general formula <Eq>{`R_\\theta = \\begin{pmatrix}\\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta\\end{pmatrix}`}</Eq>. Substituting <Eq>{`\\theta = 30°`}</Eq>: <Eq>{`\\cos30° = \\sqrt{3}/2`}</Eq>, <Eq>{`\\sin30° = 1/2`}</Eq>.</li>
+      <li>The scaling by 2 has matrix <Eq>{`2I = \\begin{pmatrix}2&0\\\\0&2\\end{pmatrix}`}</Eq>. Multiplying a vector by this matrix doubles each coordinate.</li>
+      <li>Composition "rotation then scaling": the transformation applied first goes on the right in the product. We want scaling ∘ rotation = <Eq>{`(2I)(R_{30})`}</Eq>.</li>
+      <li>Execute the product: multiply row by row. The result <Eq>{`\\begin{pmatrix}\\sqrt{3}&-1\\\\1&\\sqrt{3}\\end{pmatrix}`}</Eq> has determinant <Eq>{`3+1=4=2^2`}</Eq> — makes sense, since scaling by 2 multiplies areas by <Eq>{`2^2 = 4`}</Eq>.</li>
+    </ol>
+    <em>Tip:</em> The transformation applied first always goes on the right in matrix product. "Rotation then scaling" = (scaling) × (rotation). This convention creates a classic mistake in computer graphics programming.
+  </>}
+>
+Composition: rotation by 30° followed by scaling by 2. Compute the product matrix $[E_2][R_{30}]$.
+</Exercicio>
+
+<Exercicio numero="112.20" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §II", pagina: "ex. 2.7", licenca: "CC-BY-SA" }}
+  solucao={<>Reflection <Eq>{`y=x`}</Eq> followed by rotation 90°. Reflection: <Eq>{`F = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>. Rotation 90°: <Eq>{`R_{90} = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}`}</Eq>. Product: <Eq>{`R_{90}F = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix} = \\begin{pmatrix}-1&0\\\\0&1\\end{pmatrix}`}</Eq>. This is reflection across <Eq>{`y`}</Eq>-axis!</>}
+>
+Composition: reflection across line $y = x$ and then rotation by 90°. Compute the product matrix and identify the resulting transformation.
+</Exercicio>
+
+<Exercicio numero="112.21" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C60", licenca: "GNU FDL" }}
+  solucao={<>Rotation by 90° in <Eq>{`\\mathbb{R}^3`}</Eq> around <Eq>{`z`}</Eq>-axis: <Eq>{`z`}</Eq>-axis stays fixed, <Eq>{`xy`}</Eq>-plane rotates. <Eq>{`T(e_1) = (0,1,0)`}</Eq>, <Eq>{`T(e_2) = (-1,0,0)`}</Eq>, <Eq>{`T(e_3) = (0,0,1)`}</Eq>. $3\\times3$ matrix: <Eq>{`\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}`}</Eq>.</>}
+>
+In $\mathbb{R}^3$, find the $3 \times 3$ matrix of rotation by 90° around the $z$-axis ($z$-axis stays fixed).
+</Exercicio>
+
+<Exercicio numero="112.22" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.16", licenca: "CC-BY-SA" }}
+  solucao={<>Projection onto <Eq>{`xy`}</Eq>-plane: <Eq>{`T(x,y,z) = (x,y,0)`}</Eq>. Column-by-column: <Eq>{`T(e_1)=(1,0,0)`}</Eq>, <Eq>{`T(e_2)=(0,1,0)`}</Eq>, <Eq>{`T(e_3)=(0,0,0)`}</Eq>. Matrix: <Eq>{`\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&0\\end{pmatrix}`}</Eq>. Idempotent: <Eq>{`P^2=P`}</Eq>.</>}
+>
+In $\mathbb{R}^3$, find the $3 \times 3$ matrix of orthogonal projection onto the $xy$-plane.
+</Exercicio>
+
+<Exercicio numero="112.23" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C65", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T: \\mathcal{P}_2 \\to \\mathcal{P}_2`}</Eq>, <Eq>{`T(p) = p' + p`}</Eq>. Images of basis <Eq>{`\\{1, x, x^2\\}`}</Eq>: <Eq>{`T(1) = 0+1 = 1`}</Eq>, <Eq>{`T(x) = 1+x`}</Eq>, <Eq>{`T(x^2) = 2x+x^2`}</Eq>. Matrix: <Eq>{`[T] = \\begin{pmatrix}1&1&0\\\\0&1&2\\\\0&0&1\\end{pmatrix}`}</Eq>. Upper triangular — all eigenvalues are 1.</>}
+>
+$T: \mathcal{P}_2 \to \mathcal{P}_2$, $T(p) = p' + p$. Find the $3 \times 3$ matrix in canonical basis.
+</Exercicio>
+
+<Exercicio numero="112.24" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.5", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T: \\mathbb{R}^3 \\to \\mathbb{R}^3`}</Eq>, <Eq>{`T(v) = v \\times w`}</Eq> with <Eq>{`w = (1,1,1)`}</Eq>. For <Eq>{`v = (x,y,z)`}</Eq>: <Eq>{`T(v) = (y-z,\\ z-x,\\ x-y)`}</Eq>. Column-by-column: <Eq>{`T(e_1)=(0,-1,1)`}</Eq>, <Eq>{`T(e_2)=(1,0,-1)`}</Eq>, <Eq>{`T(e_3)=(-1,1,0)`}</Eq>. Therefore <Eq>{`[T] = \\begin{pmatrix}0&1&-1\\\\-1&0&1\\\\1&-1&0\\end{pmatrix}`}</Eq>. Skew-symmetric: <Eq>{`[T]^T = -[T]`}</Eq>.</>}
+>
+$T: \mathbb{R}^3 \to \mathbb{R}^3$, $T(v) = v \times (1,1,1)$ (cross product with fixed $(1,1,1)$). Find the $3 \times 3$ matrix.
+</Exercicio>
+
+### Block C — Change of basis and similar matrices (112.25 to 112.34)
+
+<Exercicio numero="112.25" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §V", pagina: "ex. 1.10", licenca: "CC-BY-SA" }}
+  solucao={<>Reflection <Eq>{`T(x,y) = (x,-y)`}</Eq>. Canonical basis: <Eq>{`[T]_{\\mathcal{B}} = \\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}`}</Eq>. New basis <Eq>{`\\mathcal{B}' = \\{(1,1),(1,-1)\\}`}</Eq>: <Eq>{`T(1,1)=(1,-1)=v_2`}</Eq>, <Eq>{`T(1,-1)=(1,1)=v_1`}</Eq>. Therefore <Eq>{`[T]_{\\mathcal{B}'} = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>. Similar matrices, same transformation.</>}
+  passos={<>
+    <ol>
+      <li>Compute <Eq>{`[T]_{\\mathcal{B}}`}</Eq> in canonical basis via column-by-column: <Eq>{`T(e_1)=(1,0)`}</Eq> and <Eq>{`T(e_2)=(0,-1)`}</Eq>.</li>
+      <li>For basis <Eq>{`\\mathcal{B}' = \\{v_1,v_2\\} = \\{(1,1),(1,-1)\\}`}</Eq>, compute <Eq>{`T(v_1)`}</Eq> and <Eq>{`T(v_2)`}</Eq>.</li>
+      <li>Express each image in coordinates of <Eq>{`\\mathcal{B}'`}</Eq>: write <Eq>{`T(v_j) = a\\cdot v_1 + b \\cdot v_2`}</Eq> and solve for <Eq>{`(a,b)`}</Eq>. These coordinates form column <Eq>{`j`}</Eq>.</li>
+      <li>Compare the two matrices. They are different, but represent the same geometric operation.</li>
+    </ol>
+    <em>Remark:</em> In <Eq>{`\\mathcal{B}'`}</Eq>, the reflection swaps the two basis vectors — that's why the matrix becomes the permutation <Eq>{`\\begin{pmatrix}0&1\\1&0\\end{pmatrix}`}</Eq>, which is simpler than the diagonal in canonical basis!
+  </>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x,y) = (x, -y)$ (reflection in $x$-axis). Find $[T]$ in canonical basis and in basis $\mathcal{B}' = \{(1,1),\,(1,-1)\}$. Confirm that they are similar.
+</Exercicio>
+
+<Exercicio numero="112.26" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §V", pagina: "ex. 1.14", licenca: "CC-BY-SA" }}
+  solucao={<>If <Eq>{`A \\sim B`}</Eq>, exists <Eq>{`P`}</Eq> invertible with <Eq>{`B = P^{-1}AP`}</Eq>. Then: <Eq>{`\\det B = \\det(P^{-1})\\det(A)\\det(P) = \\frac{\\det A}{\\det P}\\cdot\\det P = \\det A`}</Eq>. And <Eq>{`\\text{tr}(B) = \\text{tr}(P^{-1}AP) = \\text{tr}(APP^{-1}) = \\text{tr}(A)`}</Eq> (trace cyclicity).</>}
+>
+Show that similar matrices have the same determinant and the same trace.
+</Exercicio>
+
+<Exercicio numero="112.27" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.10", licenca: "CC-BY-NC" }}
+  solucao={<>If <Eq>{`A \\sim B`}</Eq>, exists invertible <Eq>{`P`}</Eq> with <Eq>{`B = P^{-1}AP`}</Eq>. Then <Eq>{`B^k = (P^{-1}AP)^k = P^{-1}A^kP`}</Eq>, hence <Eq>{`A^k \\sim B^k`}</Eq>. If <Eq>{`A`}</Eq> is nilpotent (<Eq>{`A^k=0`}</Eq>), then <Eq>{`B^k = P^{-1}0P = 0`}</Eq>, hence <Eq>{`B`}</Eq> is also nilpotent.</>}
+>
+Show that if $A \sim B$ (similar), then $A^k \sim B^k$ for all $k \geq 1$. Conclude: nilpotence is invariant under similarity.
+</Exercicio>
+
+<Exercicio numero="112.28" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.22", licenca: "CC-BY-SA" }}
+  solucao={<>Homogeneous coordinates: represent point <Eq>{`(x,y) \\in \\mathbb{R}^2`}</Eq> as <Eq>{`(x,y,1) \\in \\mathbb{R}^3`}</Eq>. Translation by <Eq>{`(a,b)`}</Eq>: <Eq>{`\\begin{pmatrix}1&0&a\\\\0&1&b\\\\0&0&1\\end{pmatrix}\\begin{pmatrix}x\\\\y\\\\1\\end{pmatrix} = \\begin{pmatrix}x+a\\\\y+b\\\\1\\end{pmatrix}`}</Eq>. Translation becomes matrix multiplication — linear in <Eq>{`\\mathbb{R}^3`}</Eq> even though not linear in <Eq>{`\\mathbb{R}^2`}</Eq>.</>}
+>
+In computer graphics, translation by $(a, b)$ in $\mathbb{R}^2$ is not a linear transformation. How do homogeneous coordinates allow representing it as a linear transformation in $\mathbb{R}^3$? Write the $3 \times 3$ matrix.
+</Exercicio>
+
+<Exercicio numero="112.29" dificuldade="modelagem"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. M30", licenca: "GNU FDL" }}
+  solucao={<>Portfolio return: <Eq>{`r_p = w^\\top \\mu`}</Eq>. Is linear transformation <Eq>{`T: \\mathbb{R}^n \\to \\mathbb{R}`}</Eq> with <Eq>{`T(w) = \\mu^\\top w`}</Eq>. Linear in <Eq>{`w`}</Eq>: if you double all weights, return doubles. The portfolio variance <Eq>{`\\sigma_p^2 = w^\\top \\Sigma w`}</Eq> is <em>bilinear</em> form (not linear).</>}
+>
+Portfolio with $n$ assets, weights $w \in \mathbb{R}^n$, expected returns $\mu \in \mathbb{R}^n$. Is expected return $r_p = w^\top \mu$ a linear transformation in $w$? What about variance $\sigma_p^2 = w^\top \Sigma w$?
+</Exercicio>
+
+<Exercicio numero="112.30" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §III", pagina: "ex. 3.8", licenca: "CC-BY-SA" }}
+  solucao={<>1D convolution with kernel size 3 on signal size 5: output size 3. Kernel <Eq>{`k = (k_0, k_1, k_2)`}</Eq>, input <Eq>{`x = (x_0,\\ldots,x_4)`}</Eq>. Output <Eq>{`y_i = \\sum_{j=0}^{2} k_j x_{i+j}`}</Eq>. Toeplitz matrix $3\\times5$: each row is kernel shifted one position.</>}
+>
+Write the Toeplitz $3 \times 5$ matrix that performs 1D linear convolution with kernel $k = (1, 2, 1)$ on a signal of length 5 (valid output, length 3).
+</Exercicio>
+
+<Exercicio numero="112.31" dificuldade="modelagem"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.15", licenca: "CC-BY-NC" }}
+  solucao={<>Dense layer: <Eq>{`y = Wx + b`}</Eq>. The part <Eq>{`Wx`}</Eq> is linear transformation <Eq>{`W: \\mathbb{R}^{n_{\\rm in}} \\to \\mathbb{R}^{n_{\\rm out}}`}</Eq>. The <Eq>{`b`}</Eq> (bias) makes the layer <em>affine</em>, not linear. The non-linearity of the network comes from activation functions (ReLU, sigmoid) applied after each affine layer.</>}
+>
+In machine learning, a dense layer is $y = Wx + b$. Which part is a linear transformation? Why adding $b$ does not make the layer linear? Where does the non-linearity of a neural network come from?
+</Exercicio>
+
+<Exercicio numero="112.32" dificuldade="modelagem"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. M35", licenca: "GNU FDL" }}
+  solucao={<>LTI system: <Eq>{`\\dot{x} = Ax`}</Eq>, solution <Eq>{`x(t) = e^{At}x_0`}</Eq>. The map <Eq>{`x_0 \\mapsto x(t)`}</Eq> is linear transformation: <Eq>{`e^{At}(x_0 + y_0) = e^{At}x_0 + e^{At}y_0`}</Eq>. The transition matrix is <Eq>{`\\Phi(t) = e^{At}`}</Eq>. In control engineering, eigenvalues of <Eq>{`A`}</Eq> determine system stability.</>}
+>
+LTI system: $\dot{x} = Ax$, solution $x(t) = e^{At}x_0$. Show that the map $x_0 \mapsto x(t)$ is a linear transformation. What is the matrix $e^{At}$?
+</Exercicio>
+
+<Exercicio numero="112.33" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §III", pagina: "ex. 3.12", licenca: "CC-BY-SA" }}
+  solucao={<>Differentiation <Eq>{`D: \\mathcal{P}_n \\to \\mathcal{P}_n`}</Eq>. Matrix is nilpotent: <Eq>{`D^{n+1} = 0`}</Eq> because differentiating <Eq>{`n+1`}</Eq> times any polynomial of degree <Eq>{`n`}</Eq> gives zero. Geometrically: degree decreases with each differentiation, and after <Eq>{`n+1`}</Eq> applications, all polynomials go to zero.</>}
+>
+The differentiation operator $D: \mathcal{P}_n \to \mathcal{P}_n$ has a nilpotent matrix. Explain why $D^{n+1} = 0$, and what this means in terms of polynomials.
+</Exercicio>
+
+<Exercicio numero="112.34" dificuldade="modelagem"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.14", licenca: "CC-BY-NC" }}
+  solucao={<>Dimension of <Eq>{`\\mathcal{L}(V,W) = \\mathrm{Hom}(V,W)`}</Eq>: every element is determined by values on a basis of <Eq>{`V`}</Eq> (n vectors), and each image lives in <Eq>{`W`}</Eq> (dimension m). So <Eq>{`n \\cdot m`}</Eq> free scalars. Therefore <Eq>{`\\dim \\mathcal{L}(V,W) = mn`}</Eq>. For <Eq>{`V=W=\\mathbb{R}^n`}</Eq>: <Eq>{`n^2`}</Eq> entries = dimension of <Eq>{`\\mathcal{M}_{n}(\\mathbb{R})`}</Eq>.</>}
+>
+Why is $\dim \mathcal{L}(V, W) = (\dim V)(\dim W)$? What does this say about the space of all $m \times n$ matrices?
+</Exercicio>
+
+### Block D — Understanding and proof (112.35 to 112.44)
+
+<Exercicio numero="112.35" dificuldade="compreensao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. T10", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T(0)=0`}</Eq> is necessary but not sufficient. Example: <Eq>{`T: \\mathbb{R} \\to \\mathbb{R}`}</Eq>, <Eq>{`T(x) = x^2`}</Eq>. We have <Eq>{`T(0)=0`}</Eq>, but <Eq>{`T(1+1)=4 \\neq 1+1=T(1)+T(1)`}</Eq>. So <Eq>{`T(0)=0`}</Eq> is necessary (all linear satisfy it) but not sufficient (there exist non-linear that also satisfy it).</>}
+>
+$T(0) = 0$ is a necessary condition for linearity. Give an example of $T$ with $T(0) = 0$ that is not linear. Why is $T(0) = 0$ not sufficient?
+</Exercicio>
+
+<Exercicio numero="112.36" dificuldade="compreensao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §V", pagina: "ex. 1.17", licenca: "CC-BY-SA" }}
+  solucao={<>If <Eq>{`A`}</Eq> represents <Eq>{`T`}</Eq> in <Eq>{`\\mathcal{B}`}</Eq> and we want <Eq>{`[T]_{\\mathcal{B}'}`}</Eq>: let <Eq>{`P`}</Eq> be matrix whose columns are vectors of <Eq>{`\\mathcal{B}'`}</Eq> in coordinates of <Eq>{`\\mathcal{B}`}</Eq>. Then <Eq>{`[T]_{\\mathcal{B}'} = P^{-1}AP`}</Eq>. The formula reads: "convert from <Eq>{`\\mathcal{B}'`}</Eq> to <Eq>{`\\mathcal{B}`}</Eq> via <Eq>{`P`}</Eq>, apply <Eq>{`A`}</Eq>, convert back via <Eq>{`P^{-1}`}</Eq>".</>}
+>
+If $A = [T]_{\mathcal{B}}$ represents $T$ in $\mathcal{B}$, explain the geometric meaning of formula $[T]_{\mathcal{B}'} = P^{-1}AP$. What does each factor do?
+</Exercicio>
+
+<Exercicio numero="112.37" dificuldade="compreensao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.3", licenca: "CC-BY-NC" }}
+  solucao={<>Matrix product <Eq>{`[T][S]`}</Eq> performs composition <Eq>{`T \\circ S`}</Eq>. Proof: for any <Eq>{`v`}</Eq> with coordinates <Eq>{`x`}</Eq> in <Eq>{`\\mathcal{B}`}</Eq>, <Eq>{`(T \\circ S)(v)`}</Eq> has coordinates <Eq>{`[T]([S]x)`}</Eq>. But that's exactly <Eq>{`([T][S])x`}</Eq> by definition of matrix product.</>}
+>
+Explain, without computing, why matrix product $[T][S]$ is exactly composition $T \circ S$. What is the relationship between matrix product definition and composition definition?
+</Exercicio>
+
+<Exercicio numero="112.38" dificuldade="compreensao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. T20", licenca: "GNU FDL" }}
+  solucao={<>Let <Eq>{`T_1, T_2 \\in \\mathcal{L}(V,W)`}</Eq>. Define <Eq>{`(T_1+T_2)(v) = T_1(v)+T_2(v)`}</Eq> and <Eq>{`(aT)(v) = a\\cdot T(v)`}</Eq>. Verification: <Eq>{`(T_1+T_2)(u+v) = T_1(u+v)+T_2(u+v) = T_1(u)+T_1(v)+T_2(u)+T_2(v) = (T_1+T_2)(u)+(T_1+T_2)(v)`}</Eq>. Therefore <Eq>{`\\mathcal{L}(V,W)`}</Eq> is closed under sum and scalar — it's a vector space.</>}
+>
+Show that $\mathcal{L}(V, W)$ (the set of all linear transformations from $V$ to $W$) is itself a vector space, with operations $(T_1 + T_2)(v) = T_1(v) + T_2(v)$ and $(aT)(v) = a\,T(v)$.
+</Exercicio>
+
+<Exercicio numero="112.39" dificuldade="desafio"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "ch. 3 §I", pagina: "ex. 1.28", licenca: "CC-BY-SA" }}
+  solucao={<>We want <Eq>{`T: \\mathbb{R}^2 \\to \\mathbb{R}^2`}</Eq> with <Eq>{`T^2 = -I`}</Eq>. Rotation by 90° works: <Eq>{`R_{90} = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}`}</Eq>. Then <Eq>{`R_{90}^2 = \\begin{pmatrix}-1&0\\\\0&-1\\end{pmatrix} = -I`}</Eq>. This property is analogous to <Eq>{`i^2 = -1`}</Eq> in complex numbers — 90° rotation acts like the imaginary unit <Eq>{`i`}</Eq>!</>}
+>
+Find $T: \mathbb{R}^2 \to \mathbb{R}^2$ with $T^2 = -I$ (negative identity). Try rotation by 90°. What is the connection with complex numbers?
+</Exercicio>
+
+<Exercicio numero="112.40" dificuldade="desafio"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.17", licenca: "CC-BY-NC" }}
+  solucao={<>Every <Eq>{`T: \\mathbb{R} \\to \\mathbb{R}`}</Eq> linear has form <Eq>{`T(x) = T(1)\\cdot x`}</Eq>. Proof: for any <Eq>{`x \\in \\mathbb{R}`}</Eq>, <Eq>{`T(x) = T(x \\cdot 1) = x\\,T(1)`}</Eq> by linearity (scalar preservation). Therefore <Eq>{`a = T(1) \\in \\mathbb{R}`}</Eq> completely determines <Eq>{`T`}</Eq>, and <Eq>{`T(x) = ax`}</Eq>.</>}
+>
+Prove: every linear transformation $T: \mathbb{R} \to \mathbb{R}$ has form $T(x) = ax$ for some $a \in \mathbb{R}$.
+</Exercicio>
+
+<Exercicio numero="112.41" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT Theorem LTLC", pagina: "p. 320", licenca: "GNU FDL" }}
+  solucao={<>Let <Eq>{`S: U \\to V`}</Eq> and <Eq>{`T: V \\to W`}</Eq> be linear. For any <Eq>{`u_1, u_2 \\in U`}</Eq> and <Eq>{`a \\in K`}</Eq>: Sum: <Eq>{`(T\\circ S)(u_1+u_2) = T(S(u_1+u_2)) = T(S(u_1)+S(u_2)) = T(S(u_1))+T(S(u_2)) = (T\\circ S)(u_1)+(T\\circ S)(u_2)`}</Eq>. Scalar: analogous. Therefore <Eq>{`T \\circ S`}</Eq> is linear. <Eq>{`\\square`}</Eq></>}
+>
+**Proof.** Prove that composition of linear transformations is linear. Let $S: U \to V$ and $T: V \to W$ both be linear. Show that $T \circ S: U \to W$ is linear.
+</Exercicio>
+
+<Exercicio numero="112.42" dificuldade="demonstracao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4th ed.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.2", licenca: "CC-BY-NC" }}
+  solucao={<>Let <Eq>{`T: V \\to W`}</Eq> be linear and <Eq>{`c_1, \\ldots, c_n \\in K`}</Eq>, <Eq>{`v_1, \\ldots, v_n \\in V`}</Eq>. Then: <Eq>{`T\\left(\\sum_{i=1}^n c_i v_i\\right) = \\sum_{i=1}^n c_i T(v_i)`}</Eq>. Proof by induction: base <Eq>{`n=1`}</Eq> is scalar preservation; step: <Eq>{`T(c_1v_1 + \\cdots + c_n v_n) = T(c_1v_1 + \\cdots + c_{n-1}v_{n-1}) + T(c_n v_n) = \\sum_{i=1}^{n-1}c_i T(v_i) + c_n T(v_n)`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+**Proof.** Prove by induction that every linear transformation preserves arbitrary linear combinations: $T\!\left(\sum c_i v_i\right) = \sum c_i T(v_i)$.
+</Exercicio>
+
+<Exercicio numero="112.43" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§ILT Theorem KILT", pagina: "p. 338", licenca: "GNU FDL" }}
+  solucao={<>(<Eq>{`\\Rightarrow`}</Eq>) If <Eq>{`T`}</Eq> is injective and <Eq>{`T(v)=0=T(0)`}</Eq>, then <Eq>{`v=0`}</Eq>, so <Eq>{`\\ker T = \\{0\\}`}</Eq>. (<Eq>{`\\Leftarrow`}</Eq>) If <Eq>{`\\ker T = \\{0\\}`}</Eq> and <Eq>{`T(u)=T(v)`}</Eq>, then <Eq>{`T(u-v) = T(u)-T(v) = 0`}</Eq>, so <Eq>{`u-v \\in \\ker T = \\{0\\}`}</Eq>, therefore <Eq>{`u=v`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+**Proof.** Prove: $T$ linear is injective $\iff \ker T = \{0\}$.
+</Exercicio>
+
+<Exercicio numero="112.44" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT Theorem MBLT", pagina: "p. 325", licenca: "GNU FDL" }}
+  solucao={<>Let <Eq>{`\\mathcal{B} = \\{v_1,\\ldots,v_n\\}`}</Eq> be basis of <Eq>{`V`}</Eq>. Every <Eq>{`v \\in V`}</Eq> can be written uniquely as <Eq>{`v = \\sum a_i v_i`}</Eq>. Define <Eq>{`T(v) = \\sum a_i w_i`}</Eq> with arbitrary <Eq>{`w_i \\in W`}</Eq>: (i) <Eq>{`T`}</Eq> is well-defined (uniqueness of representation); (ii) is linear (by construction); (iii) is unique with these values on basis (any other with same values agrees on all linear combinations). This shows basis completely determines linear transformation. <Eq>{`\\square`}</Eq></>}
+>
+**Proof.** Prove the linear extension theorem: given vector spaces $V$ (dim $n$) and $W$, and vectors $w_1, \ldots, w_n \in W$ arbitrary, there exists unique linear transformation $T: V \to W$ with $T(v_i) = w_i$ for $i = 1, \ldots, n$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**Beezer — A First Course in Linear Algebra**](http://linear.ups.edu/) — Rob Beezer · 2022 · EN · GNU FDL. §LT (Linear Transformations) and §ILT (Injective Linear Transformations). **Primary source for this lesson.**
+- [**Hefferon — Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · 4th ed. · EN · CC-BY-SA. Ch. 3 (Maps Between Spaces): geometric focus and examples of transformations of the plane.
+- [**Axler — Linear Algebra Done Right**](https://linear.axler.net/) — Sheldon Axler · 4th ed. · EN · CC-BY-NC. §3A–§3B: linear maps as first-class objects; without determinants as foundation.

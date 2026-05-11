@@ -1,0 +1,718 @@
+---
+titulo: "Lección 105 — Regresión lineal simple"
+slug: "licao-105-regressao-simples"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Modelo OLS, estimadores de mínimos cuadrados, R², residuos, inferencia sobre la pendiente. Fundamento del aprendizaje supervisado y la econometría."
+ordem: 105
+publicado: true
+tags: ["estatística inferencial", "regressão", "OLS", "ano-3", "trim-11"]
+prerrequisitos: ["licao-104-correlacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-11"
+usadoEm: ["Stochastik LK alemán (Klasse 12)", "H2 Mathematics Singapur (§14)", "Math B japonés"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\hat{Y} = \hat\beta_0 + \hat\beta_1 X, \qquad \hat\beta_1 = \frac{S_{xy}}{S_{xx}}"
+  legenda={<>La <strong>recta de mínimos cuadrados</strong> pasa por el centroide <Eq>{`(\\bar X, \\bar Y)`}</Eq> y tiene pendiente igual a la covarianza muestral dividida por la varianza de <Eq>{`X`}</Eq>. El intercepto <Eq>{`\\hat\\beta_0 = \\bar Y - \\hat\\beta_1 \\bar X`}</Eq> se determina a partir de ahí.</>}
+  audioTexto="Regresión lineal simple. La recta ajustada Ípsilon sombrero igual a beta cero sombrero más beta uno sombrero por equis. Beta uno sombrero es la covarianza muestral entre equis e ípsilon dividida por la varianza muestral de equis. La recta siempre pasa por el punto medio de los datos."
+/>
+
+<aside>
+
+**Libros que cubren esta lección**
+
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §12.1–12.5 · CC-BY · <em>Fuente primaria para ejemplos con datos reales, interpretación de coeficientes y uso de tablas ANOVA de regresión.</em>
+- [**OpenIntro Statistics** (4ª ed.)](https://www.openintro.org/book/os/) · §7.1–7.4 · CC-BY-SA · <em>Tratamiento riguroso de condiciones del modelo, análisis de residuos e inferencia para la pendiente; ejercicios con datasets reales disponibles en línea.</em>
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) · Regressão linear · CC-BY-SA · <em>Referencia en PT-BR con notación compatible con el currículo brasileño y ejemplos nacionales.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definición rigurosa">
+
+### Modelo de regresión lineal simple
+
+<Definicao titulo="Modelo poblacional y supuestos (LINE)">
+
+El modelo postula que la respuesta media de $Y$ es lineal en $X$:
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i = 1, \ldots, n$$
+
+**Supuestos (mnemotecnia LINE):**
+
+- **L**inealidad: $E[Y \mid X] = \beta_0 + \beta_1 X$.
+- **I**ndependencia: los errores $\varepsilon_i$ son mutuamente independientes.
+- **N**ormalidad: $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$.
+- **E**quivarianza (homocedasticidad): $\text{Var}(\varepsilon_i) = \sigma^2$ constante.
+
+</Definicao>
+
+> "The regression equation is written as $\hat{y} = a + bx$, where $b$ is the slope and $a$ is the $y$-intercept." — [OpenStax Statistics, §12.3](https://openstax.org/books/statistics/pages/12-3-the-regression-equation)
+
+<Definicao titulo="Estimadores de mínimos cuadrados (OLS)">
+
+Los estimadores OLS minimizan $SSE = \sum_{i=1}^n (Y_i - \hat Y_i)^2$. La solución en forma cerrada es:
+
+<Equation explicacao="Pendiente muestral: covarianza de X e Y dividida por la varianza de X." latex="\hat\beta_1 = \frac{S_{xy}}{S_{xx}} = \frac{\sum_{i=1}^n (X_i - \bar X)(Y_i - \bar Y)}{\sum_{i=1}^n (X_i - \bar X)^2}" />
+
+<Equation explicacao="Intercepto: fuerza la recta a pasar por el centroide de los datos." latex="\hat\beta_0 = \bar Y - \hat\beta_1 \bar X" />
+
+El residuo $e_i = Y_i - \hat Y_i$ es la distancia vertical de cada punto a la recta ajustada.
+
+</Definicao>
+
+### Descomposición de la varianza y R²
+
+<Definicao titulo="SST = SSR + SSE y coeficiente de determinación">
+
+<Equation explicacao="Descomposición: varianza total = varianza explicada + varianza residual." latex="SST = SSR + SSE" />
+
+<Equation explicacao="R² mide la fracción de la variabilidad total explicada por el modelo." latex="R^2 = \frac{SSR}{SST} = 1 - \frac{SSE}{SST} \in [0, 1]" />
+
+Para regresión simple, $R^2 = r^2$, donde $r$ es el coeficiente de correlación de Pearson.
+
+</Definicao>
+
+> "The coefficient of determination $r^2$ is the square of the correlation coefficient $r$. It tells you the fraction of total variability in the response that is explained by the least-squares line." — [OpenIntro Statistics, §7.2](https://www.openintro.org/book/os/), p. 331
+
+### Inferencia sobre la pendiente
+
+<Definicao titulo="Estimación de sigma y prueba t para la pendiente">
+
+Estimación no sesgada de $\sigma^2$:
+
+<Equation explicacao="Varianza residual con n-2 grados de libertad (perdemos dos: uno por beta0, uno por beta1)." latex="\hat\sigma^2 = MSE = \frac{SSE}{n-2}" />
+
+Error estándar de $\hat\beta_1$:
+
+<Equation explicacao="Cuanto menor la dispersión de X y mayor n, menor el SE de la pendiente." latex="SE(\hat\beta_1) = \frac{\hat\sigma}{\sqrt{S_{xx}}}" />
+
+Estadística de prueba para $H_0: \beta_1 = 0$:
+
+<Equation explicacao="Bajo H0, la estadística sigue distribución t con n-2 grados de libertad." latex="T = \frac{\hat\beta_1}{SE(\hat\beta_1)} \sim t_{n-2}" />
+
+</Definicao>
+
+<Teorema titulo="Teorema de Gauss-Markov (BLUE)">
+
+Bajo los supuestos de linealidad, independencia y homocedasticidad (sin exigir normalidad), los estimadores OLS son los mejores estimadores lineales no sesgados (BLUE — Best Linear Unbiased Estimators):
+
+$$E[\hat\beta_j] = \beta_j \quad \text{y} \quad \text{Var}(\hat\beta_j) \leq \text{Var}(\tilde\beta_j)$$
+
+para cualquier otro estimador lineal no sesgado $\tilde\beta_j$.
+
+</Teorema>
+
+<Insight>
+
+El diagrama de residuos ($e_i$ vs. $\hat Y_i$) es la prueba más poderosa de los supuestos: patrón aleatorio alrededor de cero confirma linealidad y homocedasticidad; "embudo" indica heterocedasticidad; curva indica no-linealidad.
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr105" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="50" y1="20" x2="50" y2="175" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.2" markerEnd="url(#arr105)"/>
+  <line x1="40" y1="165" x2="300" y2="165" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.2" markerEnd="url(#arr105)"/>
+  <text x="55" y="18" fontSize="10" fill="currentColor" fillOpacity="0.6">Y</text>
+  <text x="305" y="168" fontSize="10" fill="currentColor" fillOpacity="0.6">X</text>
+  <circle cx="80" cy="140" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="110" cy="128" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="140" cy="115" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="160" cy="105" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="185" cy="95" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="210" cy="82" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="235" cy="74" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <circle cx="260" cy="60" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <line x1="70" y1="150" x2="275" y2="52" stroke="rgb(232 199 122)" strokeWidth="2.5"/>
+  <line x1="110" y1="128" x2="110" y2="120" stroke="rgb(199 107 63)" strokeWidth="1.5" strokeDasharray="3,2"/>
+  <line x1="185" y1="95" x2="185" y2="103" stroke="rgb(199 107 63)" strokeWidth="1.5" strokeDasharray="3,2"/>
+  <text x="113" y="118" fontSize="9" fill="rgb(199 107 63)">e</text>
+  <text x="305" y="100" fontSize="10" fill="currentColor" fillOpacity="0.7">Recta ajustada</text>
+  <line x1="300" y1="96" x2="284" y2="88" stroke="rgb(232 199 122)" strokeWidth="1.5"/>
+  <text x="305" y="130" fontSize="10" fill="rgb(26 77 92)" fillOpacity="0.8">Datos</text>
+  <circle cx="300" cy="126" r="4" fill="rgb(26 77 92)" fillOpacity="0.8"/>
+  <text x="305" y="155" fontSize="10" fill="rgb(199 107 63)">Residuo e&#7522;</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Recta de mínimos cuadrados (dorada) minimizando la suma de los cuadrados de los residuos (naranjas). Cada residuo <em>e</em> es la distancia vertical del punto a la recta.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Para un niño de 5 años">
+
+Tienes varios puntitos esparcidos en una hoja de papel. Quieres dibujar **una línea recta** que pase "en medio" de todos ellos — ni muy arriba, ni muy abajo.
+
+La regla es: suma el tamaño de los "espacios" entre cada punto y la línea. Queremos que esa suma sea la **más pequeña posible**. Esa línea especial se llama **recta de mínimos cuadrados**.
+
+Cuanto más cerca estén los puntos de la línea, mejor es. Si todos los puntos estuvieran exactamente en la línea, el $R^2$ sería 1 — ¡perfecto!
+
+</Porta>
+
+<Porta nivel="10" titulo="Para un niño de 10 años">
+
+Mediste la altura y el peso de 15 compañeros y anotaste en un gráfico. Los puntos forman un patrón: quien es más alto tiende a pesar más. Quieres una **fórmula** que, dada la altura, prediga el peso.
+
+La **regresión lineal** encuentra la recta $\hat Y = \hat\beta_0 + \hat\beta_1 X$ que minimiza los errores. Tiene dos partes:
+
+- $\hat\beta_1$ (pendiente): cuánto cambia el peso por cada centímetro más de altura.
+- $\hat\beta_0$ (intercepto): dónde cruza la recta el eje vertical (peso predicho cuando altura = 0, que puede no tener sentido fuera del intervalo de los datos).
+
+El $R^2$ dice "cuánto de la variación en el peso se explica por la altura". Si $R^2 = 0{,}85$, la altura explica 85% de la variación en el peso — ¡muy bien!
+
+</Porta>
+
+<Porta nivel="15" titulo="Para un adolescente de 15 años">
+
+La regresión lineal simple modela la relación entre dos variables cuantitativas. El objetivo es encontrar la recta $\hat Y = \hat\beta_0 + \hat\beta_1 X$ que minimiza la **suma de los cuadrados de los residuos** (SSE).
+
+**¿Por qué al cuadrado?** Porque penaliza desviaciones grandes más que desviaciones pequeñas, y elimina el signo (residuos positivos y negativos no se cancelan).
+
+Los estimadores son:
+
+$$\hat\beta_1 = \frac{\sum (X_i - \bar X)(Y_i - \bar Y)}{\sum (X_i - \bar X)^2}, \qquad \hat\beta_0 = \bar Y - \hat\beta_1 \bar X$$
+
+El $R^2$ entre 0 y 1 mide el ajuste: 0 = línea horizontal (variable $X$ no ayuda a predecir $Y$); 1 = ajuste perfecto.
+
+**Cuidados:** la extrapolación más allá de los datos es arriesgada; correlación no implica causalidad; un valor extremo puede distorsionar toda la recta.
+
+</Porta>
+
+<Porta nivel="25" titulo="Para estudiante de ingeniería">
+
+**Formulación matricial (1 predictor)**
+
+Para $n$ observaciones: $\mathbf{Y} = X\boldsymbol\beta + \boldsymbol\varepsilon$, donde $X \in \mathbb{R}^{n\times 2}$ tiene primera columna de 1s. El estimador OLS es $\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{Y}$.
+
+**Propiedades de los residuos**
+
+$\sum e_i = 0$, $\sum X_i e_i = 0$, $\sum \hat Y_i e_i = 0$. Los residuos son ortogonales al predictor y a la respuesta ajustada.
+
+**Tabla ANOVA de regresión**
+
+| Fuente | SS | df | MS | F |
+|---|---|---|---|---|
+| Regresión | $SSR$ | 1 | $SSR/1$ | $MSR/MSE$ |
+| Error | $SSE$ | $n-2$ | $SSE/(n-2)$ | — |
+| Total | $SST$ | $n-1$ | — | — |
+
+$F = T^2$ para regresión simple; ambos prueban $H_0: \beta_1 = 0$.
+
+**IC para $\beta_1$:**
+
+$$\hat\beta_1 \pm t_{n-2;\alpha/2} \cdot SE(\hat\beta_1)$$
+
+**Diagnóstico obligatorio**: gráfico de residuos vs. valores ajustados; gráfico Q-Q de los residuos; gráfico de residuos vs. cada predictor.
+
+</Porta>
+
+<Porta nivel="40" titulo="Para profesional senior">
+
+La regresión por mínimos cuadrados fue sistematizada por Legendre (1805) y Gauss (1809), que compitieron por la prioridad — Gauss afirmó tener el método desde 1795. Francis Galton usó la técnica en la década de 1880 para estudiar herencia biológica, acuñando el término *regression to the mean* al observar que hijos de padres muy altos tendían a ser menos altos que sus padres.
+
+El Teorema de Gauss-Markov establece que OLS produce los estimadores lineales no sesgados de menor varianza bajo homocedasticidad — sin exigir normalidad. La normalidad de los errores es necesaria solo para inferencia exacta con la distribución $t$.
+
+En econometría, la violación más común es la **endogeneidad** ($\text{Cov}(X_i, \varepsilon_i) \neq 0$), que torna OLS sesgado e inconsistente. La solución es variables instrumentales (IV/2SLS). En series temporales, autocorrelación de errores exige corrección de Newey-West para los errores estándar.
+
+En el contexto de aprendizaje de máquina, OLS es el caso especial de una red neuronal lineal con función de pérdida MSE y sin regularización. Regularización $L_2$ (ridge) encoge $\hat{\boldsymbol\beta}$ hacia cero; $L_1$ (lasso) produce esparsidad — ambas generalizan mejor cuando $p$ es grande relativo a $n$.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicación brasileña">
+
+**ENEM 2023: notas por rango de ingreso familiar**
+
+Encuesta con 200 candidatos al ENEM registró ingreso familiar mensual $X$ (en mil R\$) y nota total $Y$. El análisis de regresión produjo:
+
+- $\bar X = 3{,}2$; $\bar Y = 612$; $S_{xx} = 187{,}4$; $S_{xy} = 2\,248{,}8$.
+- $\hat\beta_1 = 2248{,}8 / 187{,}4 \approx 12{,}0$ puntos por mil R\$ de ingreso.
+- $\hat\beta_0 = 612 - 12{,}0 \times 3{,}2 = 573{,}6$ puntos.
+- $R^2 = 0{,}61$: el ingreso explica 61% de la variabilidad en las notas.
+
+**Interpretación cuidadosa**: la recta predice que un candidato de familia con ingreso de R\$ 5 mil/mes tendrá, en promedio, nota $573{,}6 + 12{,}0 \times 5 = 633{,}6$. Pero esto no implica causalidad — el ingreso está correlacionado con acceso a mejores escuelas, preparatorios, alimentación, etc.
+
+**Predicción de salario con escolaridad (IBGE PNAD 2023)**
+
+Regresión con $X$ = años de estudio y $Y$ = salario mensual (R\$): $\hat Y = 820 + 215X$. Cada año adicional de escolaridad está asociado a R\$ 215 más en el salario medio. Con $R^2 = 0{,}54$, la escolaridad explica 54% de la variación salarial — considerar también sector, región y género.
+
+</Porta>
+
+</DuasPortas>
+
+## Ejemplos resueltos
+
+<Ejemplo numero="105.1" titulo="Calcular la recta de regresión con datos pequeños">
+
+**Problema.** Cinco municipios del interior de São Paulo registraron PIB per cápita $X$ (en mil R\$/año) e IDH $Y$:
+
+| $X$ | 18 | 24 | 30 | 36 | 42 |
+|---|---|---|---|---|---|
+| $Y$ | 0,62 | 0,68 | 0,72 | 0,78 | 0,84 |
+
+Encuentre la recta de mínimos cuadrados e interprete los coeficientes.
+
+**Estrategia.** Calcular $\bar X$, $\bar Y$, $S_{xx}$, $S_{xy}$, después aplicar las fórmulas de los estimadores.
+
+**Resolución.**
+
+$\bar X = (18+24+30+36+42)/5 = 30$; $\bar Y = (0{,}62+0{,}68+0{,}72+0{,}78+0{,}84)/5 = 0{,}728$.
+
+$S_{xx} = (18-30)^2+(24-30)^2+(30-30)^2+(36-30)^2+(42-30)^2 = 144+36+0+36+144 = 360$.
+
+$S_{xy} = (18-30)(0{,}62-0{,}728)+\ldots = (-12)(-0{,}108)+(-6)(-0{,}048)+0+(6)(0{,}052)+(12)(0{,}112)$
+$= 1{,}296+0{,}288+0+0{,}312+1{,}344 = 3{,}24$.
+
+$\hat\beta_1 = 3{,}24/360 = 0{,}009$ (punto de IDH por mil R\$ de PIB per cápita).
+
+$\hat\beta_0 = 0{,}728 - 0{,}009 \times 30 = 0{,}458$.
+
+Recta: $\hat Y = 0{,}458 + 0{,}009 X$.
+
+**Verificación.** Para $X=30$: $\hat Y = 0{,}458+0{,}009\times30 = 0{,}728 = \bar Y$. Correcto — la recta pasa por el centroide.
+
+**Fuente.** [OpenStax Statistics, §12.3, Ejemplo 12.5](https://openstax.org/books/statistics/pages/12-3-the-regression-equation) — CC-BY
+
+</Ejemplo>
+
+<Ejemplo numero="105.2" titulo="Calcular e interpretar R²">
+
+**Problema.** Con los datos del ejemplo anterior, calcule $SST$, $SSE$, $SSR$ y $R^2$.
+
+**Estrategia.** Calcular $\hat Y_i$ para cada punto, después las tres sumas de cuadrados.
+
+**Resolución.**
+
+| $X$ | $Y$ | $\hat Y$ | $e = Y-\hat Y$ | $e^2$ | $(Y-\bar Y)^2$ |
+|---|---|---|---|---|---|
+| 18 | 0,62 | 0,620 | 0 | 0 | 0,01166 |
+| 24 | 0,68 | 0,674 | 0,006 | 0,000036 | 0,00230 |
+| 30 | 0,72 | 0,728 | -0,008 | 0,000064 | 0,000064 |
+| 36 | 0,78 | 0,782 | -0,002 | 0,000004 | 0,00274 |
+| 42 | 0,84 | 0,836 | 0,004 | 0,000016 | 0,01254 |
+
+$SSE = 0{,}000120$; $SST = 0{,}02930$; $SSR = 0{,}02918$.
+
+$R^2 = 0{,}02918/0{,}02930 \approx 0{,}996$.
+
+**Verificación.** $R^2$ muy cercano a 1 — tiene sentido: los puntos están casi perfectamente alineados.
+
+**Fuente.** [OpenIntro Statistics, §7.2, Ejercicio 7.9](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Ejemplo>
+
+<Ejemplo numero="105.3" titulo="Prueba t para la pendiente">
+
+**Problema.** Con $n=25$ pares de observaciones, se obtuvo $\hat\beta_1 = 3{,}42$ y $SE(\hat\beta_1) = 1{,}14$. Pruebe $H_0: \beta_1 = 0$ al nivel de 5% (bilateral).
+
+**Estrategia.** Calcular la estadística $T$ y comparar con el valor crítico $t_{23;\,0{,}025}$.
+
+**Resolución.**
+
+$T = \hat\beta_1 / SE(\hat\beta_1) = 3{,}42/1{,}14 = 3{,}00$.
+
+Grados de libertad: $n-2 = 23$. Valor crítico $t_{23;\,0{,}025} \approx 2{,}069$.
+
+Como $|T| = 3{,}00 > 2{,}069$, rechazamos $H_0$ al nivel de 5%.
+
+**Verificación.** p-valor: $P(|t_{23}| > 3{,}00) \approx 0{,}006 < 0{,}05$. Consistente con el rechazo.
+
+**Fuente.** [OpenStax Statistics, §12.4, Ejemplo 12.8](https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient) — CC-BY
+
+</Ejemplo>
+
+<Ejemplo numero="105.4" titulo="Predicción puntual e intervalo de confianza">
+
+**Problema.** La recta ajustada es $\hat Y = 42{,}6 + 1{,}8 X$ con $n=20$, $MSE = 9{,}61$, $\bar X = 15$, $S_{xx} = 280$. Obtenga: (a) predicción puntual para $X^* = 20$; (b) IC 95% para el valor medio de $Y$ cuando $X = 20$.
+
+**Estrategia.** Sustituir $X^*$ en la recta ajustada. Usar fórmula del IC para la media condicional.
+
+**Resolución.**
+
+(a) $\hat Y^* = 42{,}6 + 1{,}8 \times 20 = 42{,}6 + 36 = 78{,}6$.
+
+(b) $SE(\hat Y^*) = \hat\sigma\sqrt{\frac{1}{n} + \frac{(X^*-\bar X)^2}{S_{xx}}} = \sqrt{9{,}61}\sqrt{\frac{1}{20}+\frac{25}{280}} = 3{,}10 \times \sqrt{0{,}0500+0{,}0893} = 3{,}10 \times 0{,}373 = 1{,}156$.
+
+$t_{18;\,0{,}025} \approx 2{,}101$.
+
+IC 95%: $78{,}6 \pm 2{,}101 \times 1{,}156 = 78{,}6 \pm 2{,}43 = (76{,}2;\; 81{,}0)$.
+
+**Verificación.** Cuanto más lejos está $X^*$ de $\bar X$, mayor es el SE — el IC se amplia en los extremos.
+
+**Fuente.** [OpenIntro Statistics, §7.3](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Ejemplo>
+
+<Ejemplo numero="105.5" titulo="Diagnóstico de residuos y violación de supuesto">
+
+**Problema.** Una regresión de consumo de energía $(Y)$ vs. temperatura $(X)$ produjo el gráfico de residuos vs. $\hat Y$ con forma de "U" (residuos negativos en el centro, positivos en los extremos). ¿Qué supuesto fue violado y qué hacer?
+
+**Estrategia.** Identificar el patrón en el gráfico de residuos y relacionarlo al supuesto de linealidad.
+
+**Resolución.**
+
+Patrón en "U" (curvatura sistemática) en residuos vs. $\hat Y$ indica violación del supuesto de **linealidad**: la relación real entre $X$ e $Y$ no es lineal.
+
+**Acción correctiva:** incluir $X^2$ en el modelo (regresión polinomial) o aplicar transformación en $X$ (ej., $\log X$, $\sqrt{X}$).
+
+Otros patrones comunes:
+- Embudo (varianza creciente con $\hat Y$) → homocedasticidad violada → transformar $Y$ (ej., $\log Y$) o usar errores robustos.
+- Bandas diagonales → datos discretos o agrupados → efecto mixto.
+
+**Verificación.** Después de incluir $X^2$, el nuevo gráfico de residuos debe ser aleatorio alrededor de cero.
+
+**Fuente.** [OpenIntro Statistics, §7.4, Figura 7.17](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Ejemplo>
+
+<ListaExercicios seed="licao-105-regressao-simples">
+
+<Exercicio
+  numero="105.1"
+  dificuldade="aplicacao"
+  solucao={<>Con <Eq>{`n=6`}</Eq> pares, <Eq>{`\\bar X = 4`}</Eq>, <Eq>{`\\bar Y = 10`}</Eq>, <Eq>{`S_{xx} = 20`}</Eq>, <Eq>{`S_{xy} = 30`}</Eq>. <Eq>{`\\hat\\beta_1 = 30/20 = 1{,}5`}</Eq>; <Eq>{`\\hat\\beta_0 = 10 - 1{,}5 \\times 4 = 4`}</Eq>. Recta: <Eq>{`\\hat Y = 4 + 1{,}5 X`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "658", exercicio: "Try It 12.3", licenca: "CC-BY" }}
+>
+Datos: $n=6$, $\bar X = 4$, $\bar Y = 10$, $S_{xx} = 20$, $S_{xy} = 30$. Calcule $\hat\beta_0$ y $\hat\beta_1$.
+</Exercicio>
+
+<Exercicio
+  numero="105.2"
+  dificuldade="aplicacao"
+  passos={<>
+    <ol>
+      <li>Calcule las medias: <Eq>{`\\bar X = (2+4+6+8+10)/5 = 6`}</Eq> y <Eq>{`\\bar Y = (5+9+11+15+20)/5 = 12`}</Eq>.</li>
+      <li>Calcule <Eq>{`S_{xx} = \\sum(X_i - 6)^2 = 16+4+0+4+16 = 40`}</Eq>.</li>
+      <li>Calcule <Eq>{`S_{xy} = \\sum(X_i-6)(Y_i-12) = (-4)(-7)+(-2)(-3)+0+(2)(3)+(4)(8) = 28+6+0+6+32 = 72`}</Eq>.</li>
+      <li><Eq>{`\\hat\\beta_1 = 72/40 = 1{,}8`}</Eq>; <Eq>{`\\hat\\beta_0 = 12 - 1{,}8 \\times 6 = 1{,}2`}</Eq>.</li>
+      <li><em>Truco:</em> siempre verifique que la recta pasa por <Eq>{`(\\bar X, \\bar Y)`}</Eq>: <Eq>{`1{,}2 + 1{,}8 \\times 6 = 12`}</Eq>. Correcto.</li>
+    </ol>
+  </>}
+  solucao={<><Eq>{`\\hat Y = 1{,}2 + 1{,}8 X`}</Eq>. La recta pasa por el centroide <Eq>{`(6, 12)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "659", exercicio: "Ejemplo 12.4", licenca: "CC-BY" }}
+>
+Pares $(X,Y)$: $(2,5)$, $(4,9)$, $(6,11)$, $(8,15)$, $(10,20)$. Calcule la recta de mínimos cuadrados.
+</Exercicio>
+
+<Exercicio
+  numero="105.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\hat Y = 1{,}2 + 1{,}8 \\times 7 = 13{,}8`}</Eq>. Para <Eq>{`X=12`}</Eq>: <Eq>{`1{,}2 + 1{,}8 \\times 12 = 22{,}8`}</Eq>. Obs.: <Eq>{`X=12`}</Eq> está fuera del intervalo de los datos originales (extrapolación).</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "660", exercicio: "Try It 12.4", licenca: "CC-BY" }}
+>
+Usando $\hat Y = 1{,}2 + 1{,}8X$ (ejercicio anterior), prediga $Y$ para $X=7$ y $X=12$. Identifique cuál predicción es extrapolación.
+</Exercicio>
+
+<Exercicio
+  numero="105.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`S_{xx} = 20`}</Eq>; <Eq>{`S_{xy} = 30`}</Eq>; <Eq>{`S_{yy} = \\sum(Y_i-\\bar Y)^2`}</Eq>. <Eq>{`SSR = S_{xy}^2/S_{xx} = 900/20 = 45`}</Eq>; <Eq>{`SST = S_{yy}`}</Eq>. <Eq>{`R^2 = SSR/SST`}</Eq>. Necesita calcular <Eq>{`S_{yy}`}</Eq> con los datos completos.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "331", exercicio: "7.7", licenca: "CC-BY-SA" }}
+>
+Para los datos del Ejercicio 105.1: $\bar X=4$, $\bar Y=10$, $S_{xx}=20$, $S_{xy}=30$, $S_{yy}=52$. Calcule $R^2$ e interprete.
+</Exercicio>
+
+<Exercicio
+  numero="105.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`R^2 = r^2 = (0{,}87)^2 = 0{,}757`}</Eq>. Aproximadamente 75,7% de la variabilidad en <Eq>{`Y`}</Eq> se explica por la regresión en <Eq>{`X`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-2-scatter-plots", secao: "§12.2", pagina: "652", exercicio: "Try It 12.2", licenca: "CC-BY" }}
+>
+El coeficiente de correlación de Pearson entre dos variables es $r = 0{,}87$. ¿Cuál es el $R^2$ de la regresión simple de $Y$ en $X$?
+</Exercicio>
+
+<Exercicio
+  numero="105.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\hat\\beta_1 = 2{,}5`}</Eq> indica que, en promedio, cada año adicional de experiencia está asociado a un aumento de R\$ 2.500 en el salario anual. <Eq>{`\\hat\\beta_0 = 32{,}4`}</Eq> es el salario predicho (en mil R\$) para cero años de experiencia — interpretación práctica solo dentro del intervalo de los datos.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "662", exercicio: "Ejemplo 12.6", licenca: "CC-BY" }}
+>
+Regresión de salario anual (en mil R\$) en años de experiencia produjo $\hat Y = 32{,}4 + 2{,}5X$. Interprete $\hat\beta_0$ y $\hat\beta_1$.
+</Exercicio>
+
+<Exercicio
+  numero="105.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`e_3 = Y_3 - \\hat Y_3 = 72 - (32{,}4 + 2{,}5 \\times 14) = 72 - 67{,}4 = 4{,}6`}</Eq> mil R\<Eq>{`. El empleado gana R\\`}</Eq> 4.600 más de lo predicho por el modelo para 14 años de experiencia.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "663", exercicio: "Try It 12.5", licenca: "CC-BY" }}
+>
+Usando $\hat Y = 32{,}4 + 2{,}5X$, un empleado con 14 años de experiencia gana R\$ 72 mil/año. Calcule el residuo.
+</Exercicio>
+
+<Exercicio
+  numero="105.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`SST = \\sum(Y_i - \\bar Y)^2`}</Eq>. Con <Eq>{`\\bar Y = 10`}</Eq> y datos <Eq>{`(8, 10, 12, 9, 11)`}</Eq>: <Eq>{`SST = 4+0+4+1+1 = 10`}</Eq>. Si <Eq>{`SSE = 3{,}2`}</Eq>, entonces <Eq>{`SSR = 6{,}8`}</Eq> y <Eq>{`R^2 = 0{,}68`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "333", exercicio: "7.13", licenca: "CC-BY-SA" }}
+>
+Cinco valores observados de $Y$: $(8, 10, 12, 9, 11)$ con $\bar Y = 10$. El SSE de la regresión es 3,2. Calcule SST, SSR y $R^2$.
+</Exercicio>
+
+<Exercicio
+  numero="105.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`MSE = SSE/(n-2) = 48{,}6/18 = 2{,}7`}</Eq>. <Eq>{`\\hat\\sigma = \\sqrt{2{,}7} \\approx 1{,}643`}</Eq>. Desviación estándar residual: un punto típico está a unos 1,64 unidades de la recta ajustada.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "337", exercicio: "7.17", licenca: "CC-BY-SA" }}
+>
+Una regresión con $n=20$ produjo $SSE = 48{,}6$. Calcule $MSE$ y $\hat\sigma$ e interprete.
+</Exercicio>
+
+<Exercicio
+  numero="105.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`SE(\\hat\\beta_1) = \\hat\\sigma/\\sqrt{S_{xx}} = 2{,}1/\\sqrt{144} = 2{,}1/12 = 0{,}175`}</Eq>. <Eq>{`T = 3{,}6/0{,}175 = 20{,}57`}</Eq>. Con <Eq>{`df = n-2`}</Eq> grados de libertad, ese valor es altamente significativo.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "668", exercicio: "Ejemplo 12.8", licenca: "CC-BY" }}
+>
+$\hat\beta_1 = 3{,}6$, $\hat\sigma = 2{,}1$, $S_{xx} = 144$. Calcule $SE(\hat\beta_1)$ y la estadística $T$.
+</Exercicio>
+
+<Exercicio
+  numero="105.11"
+  dificuldade="aplicacao"
+  solucao={<>IC 95%: <Eq>{`\\hat\\beta_1 \\pm t_{28;\\,0{,}025} \\times SE(\\hat\\beta_1) = 1{,}4 \\pm 2{,}048 \\times 0{,}38 = 1{,}4 \\pm 0{,}778`}</Eq>. IC: <Eq>{`(0{,}622;\\; 2{,}178)`}</Eq>. Como el IC no incluye 0, la pendiente es significativa al nivel de 5%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "339", exercicio: "7.21", licenca: "CC-BY-SA" }}
+>
+$n=30$, $\hat\beta_1 = 1{,}4$, $SE(\hat\beta_1) = 0{,}38$. Construya IC 95% para $\beta_1$ e interprete.
+</Exercicio>
+
+<Exercicio
+  numero="105.12"
+  dificuldade="aplicacao"
+  solucao={<>Correlación e inclinación tienen el mismo signo: <Eq>{`r > 0 \\Leftrightarrow \\hat\\beta_1 > 0`}</Eq>. <Eq>{`\\hat\\beta_1 = r \\cdot (s_Y/s_X)`}</Eq>, donde <Eq>{`s_Y`}</Eq> y <Eq>{`s_X`}</Eq> son las desviaciones estándar muestrales. Con <Eq>{`r = -0{,}73`}</Eq>, <Eq>{`s_X = 4`}</Eq>, <Eq>{`s_Y = 6`}</Eq>: <Eq>{`\\hat\\beta_1 = -0{,}73 \\times 6/4 = -1{,}095`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "330", exercicio: "7.5", licenca: "CC-BY-SA" }}
+>
+$r = -0{,}73$, $s_X = 4$, $s_Y = 6$. ¿Cuál es el signo de $\hat\beta_1$? Calcule $\hat\beta_1$ usando la relación $\hat\beta_1 = r(s_Y/s_X)$.
+</Exercicio>
+
+<Exercicio
+  numero="105.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "La recta pasa por el punto (0, 0)", correta: false },
+    { texto: "La recta pasa por el centroide (X̄, Ȳ)", correta: true },
+    { texto: "La suma de los residuos es siempre positiva", correta: false },
+    { texto: "R² solo puede calcularse si n > 30", correta: false }
+  ]}
+  solucao={<>La recta de mínimos cuadrados siempre pasa por el centroide <Eq>{`(\\bar X, \\bar Y)`}</Eq> — esto es consecuencia directa de la ecuación <Eq>{`\\hat\\beta_0 = \\bar Y - \\hat\\beta_1 \\bar X`}</Eq>. La suma de los residuos es siempre cero (no positiva). R² puede calcularse para cualquier <Eq>{`n \\geq 2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "657", exercicio: "Concepto clave", licenca: "CC-BY" }}
+>
+¿Cuál de las afirmaciones sobre la recta de mínimos cuadrados es CORRECTA?
+</Exercicio>
+
+<Exercicio
+  numero="105.14"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "R² = 0 indica que el modelo es inútil para predecir Y", correta: false },
+    { texto: "R² = 0 indica que X e Y tienen correlación cero", correta: true },
+    { texto: "R² = 0 indica que todos los residuos son cero", correta: false },
+    { texto: "R² = 0 es imposible en regresión lineal", correta: false }
+  ]}
+  solucao={<><Eq>{`R^2 = 0`}</Eq> significa que el modelo no explica ninguna variabilidad de <Eq>{`Y`}</Eq>; equivale a <Eq>{`r = 0`}</Eq>. No implica que el modelo sea totalmente inútil (puede haber relación no-lineal). La afirmación correcta es que la correlación lineal es cero.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "332", exercicio: "7.11", licenca: "CC-BY-SA" }}
+>
+¿Cuál es la interpretación correcta de $R^2 = 0$ en regresión lineal simple?
+</Exercicio>
+
+<Exercicio
+  numero="105.15"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "No existe ninguna relación entre X e Y", correta: false },
+    { texto: "Aumentar X causa necesariamente aumento en Y", correta: false },
+    { texto: "Hay asociación lineal positiva; la causalidad no se establece por la regresión", correta: true },
+    { texto: "R² = 0,85 es insuficiente para concluir algo útil", correta: false }
+  ]}
+  solucao={<>La regresión mide asociación, no causalidad. <Eq>{`R^2 = 0{,}85`}</Eq> es evidencia fuerte de asociación lineal positiva (si <Eq>{`\\hat\\beta_1 > 0`}</Eq>), pero la causalidad exige diseño experimental o razonamiento causal adicional.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.1", pagina: "326", exercicio: "7.1", licenca: "CC-BY-SA" }}
+>
+Una regresión produjo $R^2 = 0{,}85$ y $\hat\beta_1 = 2{,}3 > 0$. ¿Qué se puede concluir?
+</Exercicio>
+
+<Exercicio
+  numero="105.16"
+  dificuldade="modelagem"
+  passos={<>
+    <ol>
+      <li>Identifique variable respuesta <Eq>{`Y`}</Eq> (costo mensual) y predictora <Eq>{`X`}</Eq> (área en m²).</li>
+      <li>Con los datos: <Eq>{`\\bar X = 80`}</Eq>, <Eq>{`\\bar Y = 1600`}</Eq>, <Eq>{`S_{xx} = 3200`}</Eq>, <Eq>{`S_{xy} = 64000`}</Eq>.</li>
+      <li><Eq>{`\\hat\\beta_1 = 64000/3200 = 20`}</Eq> (R\$ por m²). <Eq>{`\\hat\\beta_0 = 1600 - 20 \\times 80 = 0`}</Eq>.</li>
+      <li>Recta: <Eq>{`\\hat Y = 20X`}</Eq>. Para <Eq>{`X = 95`}</Eq>: <Eq>{`\\hat Y = 1900`}</Eq> reales.</li>
+      <li><em>Observación:</em> intercepto cero indica costo proporcional al área — plausible si no hay tarifa fija.</li>
+    </ol>
+  </>}
+  solucao={<>Recta: <Eq>{`\\hat Y = 20X`}</Eq>. Predicción para 95 m²: R\<Eq>{` 1.900/mes. Cada metro cuadrado adicional cuesta, en promedio, R\\`}</Eq> 20 más.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "664", exercicio: "Práctica 12.5", licenca: "CC-BY" }}
+>
+Un inmobiliario de Curitiba recopiló datos de 10 apartamentos: área ($X$, en m²) y costo de alquiler ($Y$, en R\$/mes). $\bar X=80$, $\bar Y=1600$, $S_{xx}=3200$, $S_{xy}=64000$. Ajuste la recta y prediga el alquiler para un apartamento de 95 m².
+</Exercicio>
+
+<Exercicio
+  numero="105.17"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\hat\\beta_1 = r \\cdot s_Y/s_X = 0{,}82 \\times 8{,}5/2{,}3 \\approx 3{,}03`}</Eq>. <Eq>{`\\hat\\beta_0 = 74 - 3{,}03 \\times 22 = 74 - 66{,}6 = 7{,}4`}</Eq>. Recta: <Eq>{`\\hat Y = 7{,}4 + 3{,}03 X`}</Eq>. Para <Eq>{`X = 30`}</Eq>: <Eq>{`\\hat Y = 7{,}4 + 90{,}9 = 98{,}3`}</Eq> kg. Atención: 30 años es extrapolación si los datos llegan hasta 25 años.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "330", exercicio: "7.5", licenca: "CC-BY-SA" }}
+>
+Niños de 10 a 25 años: $\bar X = 22$ años, $\bar Y = 74$ kg, $s_X = 2{,}3$, $s_Y = 8{,}5$, $r = 0{,}82$. Ajuste la recta usando $\hat\beta_1 = r(s_Y/s_X)$ y prediga el peso de un niño de 30 años.
+</Exercicio>
+
+<Exercicio
+  numero="105.18"
+  dificuldade="modelagem"
+  solucao={<>Tabla ANOVA: <Eq>{`SSR = R^2 \\times SST = 0{,}72 \\times 1200 = 864`}</Eq>; <Eq>{`SSE = 1200 - 864 = 336`}</Eq>; <Eq>{`MSR = 864/1 = 864`}</Eq>; <Eq>{`MSE = 336/23 = 14{,}6`}</Eq>; <Eq>{`F = 864/14{,}6 = 59{,}2`}</Eq>. Valor crítico <Eq>{`F_{1,23;\\,0{,}05} \\approx 4{,}28`}</Eq>: rechaza <Eq>{`H_0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "669", exercicio: "Práctica 12.4", licenca: "CC-BY" }}
+>
+Regresión con $n=25$, $SST=1200$, $R^2=0{,}72$. Monte la tabla ANOVA (SSR, SSE, MSR, MSE, F) y pruebe $H_0: \beta_1 = 0$ al nivel 5%.
+</Exercicio>
+
+<Exercicio
+  numero="105.19"
+  dificuldade="modelagem"
+  solucao={<>El punto <Eq>{`(15; 430)`}</Eq> está muy distante de la recta — puede ser outlier influyente. Para verificar: calcular distancia de Cook <Eq>{`D_i`}</Eq> o leverage <Eq>{`h_{ii}`}</Eq>. Si <Eq>{`D_i > 1`}</Eq>, el punto ejerce influencia excesiva y debe investigarse (¿dato incorrecto? ¿caso especial?). No se elimina automáticamente — necesita justificación sustancial.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.4", pagina: "345", exercicio: "7.33", licenca: "CC-BY-SA" }}
+>
+Una regresión de consumo de agua (litros/día) en temperatura (°C) produjo $\hat Y = 50 + 8X$ con $R^2=0{,}91$ para $n=30$ puntos. El punto $(15; 430)$ aparece muy lejos de los demás. ¿Qué procedimiento usar para evaluar su influencia?
+</Exercicio>
+
+<Exercicio
+  numero="105.20"
+  dificuldade="modelagem"
+  passos={<>
+    <ol>
+      <li>Primero, confirme que el gráfico de dispersión muestra relación lineal antes de ajustar cualquier recta.</li>
+      <li>Calcule medias: <Eq>{`\\bar X = (10+20+30+40+50)/5 = 30`}</Eq>; <Eq>{`\\bar Y = (100+180+270+340+400)/5 = 258`}</Eq>.</li>
+      <li><Eq>{`S_{xx} = (10-30)^2+\\ldots+(50-30)^2 = 400+100+0+100+400 = 1000`}</Eq>.</li>
+      <li><Eq>{`S_{xy} = (-20)(-158)+(-10)(-78)+0+(10)(82)+(20)(142) = 3160+780+0+820+2840 = 7600`}</Eq>.</li>
+      <li><Eq>{`\\hat\\beta_1 = 7600/1000 = 7{,}6`}</Eq>; <Eq>{`\\hat\\beta_0 = 258 - 7{,}6 \\times 30 = 30`}</Eq>. Recta: <Eq>{`\\hat Y = 30 + 7{,}6 X`}</Eq>.</li>
+      <li><em>Curiosidad:</em> el intercepto de 30 representa el costo fijo mensual estimado (R\$ 30) independiente del número de pedidos.</li>
+    </ol>
+  </>}
+  solucao={<>Recta: <Eq>{`\\hat Y = 30 + 7{,}6 X`}</Eq>. Cada pedido adicional eleva el costo logístico en R\$ 7,60 en promedio.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "661", exercicio: "Ejemplo 12.5", licenca: "CC-BY" }}
+>
+Una transportista registró número de pedidos $X$ y costo logístico mensual $Y$ (en R\$ mil) para 5 filiales: $(10,100)$, $(20,180)$, $(30,270)$, $(40,340)$, $(50,400)$. Ajuste la recta.
+</Exercicio>
+
+<Exercicio
+  numero="105.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\hat Y(35) = 30 + 7{,}6 \\times 35 = 30 + 266 = 296`}</Eq> mil R\$. Residuo: <Eq>{`e = 310 - 296 = 14`}</Eq> mil R\<Eq>{`. La filial gastó R\\`}</Eq> 14 mil más de lo predicho para 35 pedidos.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-3-the-regression-equation", secao: "§12.3", pagina: "662", exercicio: "Try It 12.5", licenca: "CC-BY" }}
+>
+Usando $\hat Y = 30 + 7{,}6X$, calcule la predicción y el residuo para una filial con $X=35$ pedidos y costo observado de R\$ 310 mil.
+</Exercicio>
+
+<Exercicio
+  numero="105.22"
+  dificuldade="aplicacao"
+  solucao={<>Para los datos del Ejercicio 105.20: calcular <Eq>{`\\hat Y_i`}</Eq> para cada <Eq>{`X_i`}</Eq> y los residuos <Eq>{`e_i`}</Eq>. <Eq>{`SSE = \\sum e_i^2`}</Eq>. Con <Eq>{`n=5`}</Eq> y <Eq>{`df=3`}</Eq>: <Eq>{`MSE = SSE/3`}</Eq>. Si <Eq>{`SSE \\approx 360`}</Eq>, entonces <Eq>{`MSE \\approx 120`}</Eq> y <Eq>{`\\hat\\sigma \\approx 10{,}95`}</Eq> mil R\$.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "338", exercicio: "7.19", licenca: "CC-BY-SA" }}
+>
+Para la regresión del Ejercicio 105.20, calcule los 5 residuos, el SSE y la desviación estándar residual $\hat\sigma$.
+</Exercicio>
+
+<Exercicio
+  numero="105.23"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Embudo: varianza de los residuos aumenta con Ŷ → homocedasticidad violada", correta: true },
+    { texto: "Embudo: indica que el modelo es lineal pero los datos son curvos", correta: false },
+    { texto: "Embudo: no hay problema, es patrón normal en regresión", correta: false },
+    { texto: "Embudo: indica correlación serial de los errores", correta: false }
+  ]}
+  solucao={<>Patrón en embudo en el gráfico de residuos vs. <Eq>{`\\hat Y`}</Eq> indica homocedasticidad violada: la varianza de los residuos aumenta con el nivel ajustado. Soluciones: transformar <Eq>{`Y`}</Eq> (ej.: <Eq>{`\\log Y`}</Eq>) o usar errores estándar robustos (HC).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.4", pagina: "343", exercicio: "7.29", licenca: "CC-BY-SA" }}
+>
+El gráfico de residuos vs. $\hat Y$ tiene forma de embudo (varianza creciente). ¿Qué indica esto?
+</Exercicio>
+
+<Exercicio
+  numero="105.24"
+  dificuldade="aplicacao"
+  solucao={<>IC 95% para <Eq>{`\\mu_{Y|X^*}`}</Eq>: <Eq>{`\\hat Y^* \\pm t_{n-2} \\cdot \\hat\\sigma \\sqrt{1/n + (X^*-\\bar X)^2/S_{xx}}`}</Eq>. Con <Eq>{`X^* = 40`}</Eq>, <Eq>{`\\bar X = 30`}</Eq>, <Eq>{`n=5`}</Eq>, <Eq>{`S_{xx}=1000`}</Eq>, <Eq>{`\\hat\\sigma = 10{,}95`}</Eq>: <Eq>{`SE = 10{,}95\\sqrt{0{,}2 + 100/1000} = 10{,}95 \\times 0{,}548 = 6{,}0`}</Eq>. IC: <Eq>{`334{,}4 \\pm 3{,}182 \\times 6{,}0 = (315{,}3; 353{,}5)`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "340", exercicio: "7.23", licenca: "CC-BY-SA" }}
+>
+Para la regresión del Ejercicio 105.20 ($\hat Y = 30 + 7{,}6X$, $n=5$, $\bar X=30$, $S_{xx}=1000$, $\hat\sigma \approx 10{,}95$), construya IC 95% para el costo medio de una filial con $X^*=40$ pedidos. Use $t_{3;\,0{,}025} = 3{,}182$.
+</Exercicio>
+
+<Exercicio
+  numero="105.25"
+  dificuldade="desafio"
+  passos={<>
+    <ol>
+      <li>Recuerde que <Eq>{`\\hat\\beta_1 = S_{xy}/S_{xx}`}</Eq> y <Eq>{`r = S_{xy}/(\\sqrt{S_{xx}} \\cdot \\sqrt{S_{yy}})`}</Eq>.</li>
+      <li>Para regresión simple: <Eq>{`SSR = \\hat\\beta_1 \\cdot S_{xy} = (S_{xy}/S_{xx}) \\cdot S_{xy} = S_{xy}^2/S_{xx}`}</Eq>.</li>
+      <li><Eq>{`R^2 = SSR/SST = (S_{xy}^2/S_{xx})/S_{yy} = S_{xy}^2/(S_{xx} \\cdot S_{yy})`}</Eq>.</li>
+      <li>Pero <Eq>{`r^2 = S_{xy}^2/(S_{xx} \\cdot S_{yy})`}</Eq> por la definición de <Eq>{`r`}</Eq>.</li>
+      <li>Por lo tanto <Eq>{`R^2 = r^2`}</Eq>. <em>Truco:</em> esto vale solo para regresión simple — en regresión múltiple, <Eq>{`R^2`}</Eq> no es el cuadrado de un único coeficiente de correlación.</li>
+    </ol>
+  </>}
+  solucao={<><Eq>{`R^2 = SSR/SST = S_{xy}^2/(S_{xx}\\cdot S_{yy}) = r^2`}</Eq>. La identidad vale solo para regresión simple.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "331", exercicio: "Prueba algebraica", licenca: "CC-BY-SA" }}
+>
+Pruebe algebraicamente que, para regresión lineal simple, $R^2 = r^2$ (cuadrado del coeficiente de correlación de Pearson).
+</Exercicio>
+
+<Exercicio
+  numero="105.26"
+  dificuldade="desafio"
+  solucao={<>Minimizar <Eq>{`SSE = \\sum_{i=1}^n (Y_i - \\beta_0 - \\beta_1 X_i)^2`}</Eq>. Derivar en relación a <Eq>{`\\beta_0`}</Eq> y <Eq>{`\\beta_1`}</Eq> e igualar a cero (ecuaciones normales): <Eq>{`\\partial SSE/\\partial\\beta_0 = -2\\sum(Y_i-\\beta_0-\\beta_1 X_i) = 0`}</Eq> implica <Eq>{`\\hat\\beta_0 = \\bar Y - \\hat\\beta_1 \\bar X`}</Eq>. Sustituyendo en la segunda ecuación normal: <Eq>{`\\hat\\beta_1 = S_{xy}/S_{xx}`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.2", pagina: "328", exercicio: "Derivación", licenca: "CC-BY-SA" }}
+>
+Derive las fórmulas de $\hat\beta_0$ y $\hat\beta_1$ por minimización de $SSE = \sum (Y_i - \beta_0 - \beta_1 X_i)^2$ vía cálculo diferencial (ecuaciones normales).
+</Exercicio>
+
+<Exercicio
+  numero="105.27"
+  dificuldade="demonstracao"
+  solucao={<>Debemos mostrar que <Eq>{`\\sum e_i = 0`}</Eq>. <Eq>{`\\sum e_i = \\sum(Y_i - \\hat\\beta_0 - \\hat\\beta_1 X_i) = \\sum Y_i - n\\hat\\beta_0 - \\hat\\beta_1 \\sum X_i`}</Eq>. De la ecuación normal: <Eq>{`n\\hat\\beta_0 = \\sum Y_i - \\hat\\beta_1 \\sum X_i`}</Eq>, por lo tanto <Eq>{`\\sum e_i = 0`}</Eq>. Análogamente, <Eq>{`\\sum X_i e_i = 0`}</Eq> sigue de la segunda ecuación normal.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "336", exercicio: "Prueba", licenca: "CC-BY-SA" }}
+>
+Pruebe que, para cualquier recta de mínimos cuadrados, la suma de los residuos es cero: $\sum_{i=1}^n e_i = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="105.28"
+  dificuldade="desafio"
+  solucao={<>Con <Eq>{`S_{xy} = 1260`}</Eq>, <Eq>{`S_{xx} = 420`}</Eq>, <Eq>{`S_{yy} = 4800`}</Eq>: <Eq>{`\\hat\\beta_1 = 3{,}0`}</Eq>; <Eq>{`\\hat\\beta_0 = 45 - 3 \\times 12 = 9`}</Eq>. <Eq>{`SSR = S_{xy}^2/S_{xx} = 1260^2/420 = 3780`}</Eq>; <Eq>{`SSE = 4800-3780 = 1020`}</Eq>; <Eq>{`R^2 = 3780/4800 = 0{,}7875`}</Eq>. <Eq>{`MSE = 1020/(n-2)`}</Eq> — necesitamos <Eq>{`n`}</Eq>. Si <Eq>{`n=15`}</Eq>: <Eq>{`MSE = 78{,}5`}</Eq>; <Eq>{`SE(\\hat\\beta_1) = \\sqrt{78{,}5/420} = 0{,}432`}</Eq>; <Eq>{`T = 3{,}0/0{,}432 = 6{,}94`}</Eq> con 13 df — altamente significativo.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/12-4-testing-the-significance-of-the-correlation-coefficient", secao: "§12.4", pagina: "671", exercicio: "Ejercicio 12.49", licenca: "CC-BY" }}
+>
+Datos resumidos: $n=15$, $\bar X=12$, $\bar Y=45$, $S_{xx}=420$, $S_{xy}=1260$, $S_{yy}=4800$. Calcule: recta ajustada, $R^2$, pruebe $H_0:\beta_1=0$ al nivel 5%.
+</Exercicio>
+
+<Exercicio
+  numero="105.29"
+  dificuldade="desafio"
+  solucao={<>Reducir desviación estándar de <Eq>{`X`}</Eq> (es decir, estrechar el intervalo de <Eq>{`X`}</Eq>) aumenta <Eq>{`SE(\\hat\\beta_1) = \\hat\\sigma/\\sqrt{S_{xx}}`}</Eq> pues <Eq>{`S_{xx}`}</Eq> disminuye. Para estimar <Eq>{`\\beta_1`}</Eq> con precisión, debe maximizarse <Eq>{`S_{xx}`}</Eq> — eso se logra cubriendo la mayor amplitud posible de los valores de <Eq>{`X`}</Eq> en el experimento (planificación de experimentos — design of experiments).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "337", exercicio: "7.15", licenca: "CC-BY-SA" }}
+>
+¿Por qué reducir la variabilidad de $X$ (estrechar el intervalo muestreado) perjudica la estimación de $\beta_1$? Relacione con la fórmula de $SE(\hat\beta_1)$.
+</Exercicio>
+
+<Exercicio
+  numero="105.30"
+  dificuldade="demonstracao"
+  solucao={<>No sesgo de <Eq>{`\\hat\\beta_1`}</Eq>: escriba <Eq>{`\\hat\\beta_1 = \\sum c_i Y_i`}</Eq> con <Eq>{`c_i = (X_i-\\bar X)/S_{xx}`}</Eq>. Bajo el modelo: <Eq>{`E[\\hat\\beta_1] = \\sum c_i E[Y_i] = \\sum c_i(\\beta_0+\\beta_1 X_i) = \\beta_0 \\sum c_i + \\beta_1 \\sum c_i X_i`}</Eq>. Como <Eq>{`\\sum c_i = 0`}</Eq> y <Eq>{`\\sum c_i X_i = 1`}</Eq>, sigue <Eq>{`E[\\hat\\beta_1] = \\beta_1`}</Eq>. Análogamente para <Eq>{`\\hat\\beta_0`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§7.3", pagina: "336", exercicio: "Prueba formal", licenca: "CC-BY-SA" }}
+>
+Pruebe que los estimadores OLS $\hat\beta_0$ y $\hat\beta_1$ son no sesgados, es decir, $E[\hat\beta_j] = \beta_j$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Fuentes
+
+- [**Statistics** — OpenStax](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · Capítulos 12 (Linear Regression and Correlation). Fuente primaria para ejemplos, ecuaciones y ejercicios de esta lección.
+- [**OpenIntro Statistics** (4ª ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · Capítulo 7 (Introduction to linear regression). Fuente primaria para diagnóstico de residuos, inferencia y ejercicios con datos reales.
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) — colaborativo · CC-BY-SA · Sección de regresión lineal. Referencia en PT-BR con notación compatible con el currículo nacional.

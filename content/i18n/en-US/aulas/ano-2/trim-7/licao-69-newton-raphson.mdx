@@ -1,0 +1,719 @@
+---
+titulo: "Lesson 69 — Newton-Raphson Method"
+slug: "licao-69-newton-raphson"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "The iteration $x_{n+1} = x_n - f(x_n)/f'(x_n)$ for finding roots. Quadratic convergence, failures, basins of attraction."
+ordem: 69
+publicado: true
+tags: ["Newton-Raphson", "raízes", "numérico", "iteração", "ano-2", "trim-7"]
+prerrequisitos: ["licao-65-taylor", "licao-52-regras-derivacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2024-05-15"
+usadoEm: ["Year 2 of program (age 17)", "Equivalent Japanese Math III (numerical methods)", "Equivalent German Klasse 12 LK (Numerik)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}"
+  legenda={<>The <strong>Newton-Raphson method</strong> approximates a root <Eq>{`r`}</Eq> of <Eq>{`f(x)=0`}</Eq> by iteration: start with <Eq>{`x_0`}</Eq> near <Eq>{`r`}</Eq>, and at each step replace <Eq>{`f`}</Eq> by its tangent line at <Eq>{`x_n`}</Eq>, taking the intersection of that tangent with the <Eq>{`x`}</Eq>-axis. Under smooth hypotheses, convergence is <strong>quadratic</strong>: the number of correct digits doubles with each iteration.</>}
+  audioTexto="Newton-Raphson method. X n plus one equals x n minus f of x n over f prime of x n. At each step, we replace the function with its tangent at the current point and use the zero of the tangent as the next estimate. Quadratic convergence: the number of correct digits doubles with each iteration when we start close to the root."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books Covering This Lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        APEX Calculus — Hartman et al.
+      </a>
+      <span className="text-clube-mist"> · §4.4 Newton's Method · CC-BY-NC · </span>
+      <em className="text-clube-mist">Geometric derivation, iteration tables, failures, and stopping criteria. Primary reference for this lesson's examples.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/calculus-volume-1" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.9 Newton's Method · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Formal presentation with convergence, applied exercises (IRR, polynomial roots), and graphical visualization.</em>
+    </li>
+    <li>
+      <a href="https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        REAMAT — Numerical Calculus (Python)
+      </a>
+      <span className="text-clube-mist"> · chap. 3 Zeros of functions · CC-BY-SA · </span>
+      <em className="text-clube-mist">Python implementation, comparison with bisection and secant methods, numerical error analysis. Source for the practical door.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definition, Derivation, and Convergence">
+
+### The Newton-Raphson Iteration
+
+<Definicao titulo="Newton-Raphson Iteration">
+Let $f: I \to \mathbb{R}$ be differentiable on an interval $I$, and let $x_0 \in I$ be an initial estimate of a root. The **Newton-Raphson iteration** is the sequence defined by:
+
+$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}, \quad n = 0, 1, 2, \ldots$$
+
+Geometrically, $x_{n+1}$ is the intersection of the tangent line to the graph of $f$ at $(x_n, f(x_n))$ with the x-axis.
+</Definicao>
+
+> "Newton's Method is a technique to approximate the solution of $f(x) = 0$. It works when one can perform repeated evaluations of $f$ and $f'$, making it ideal for functions like polynomials, exponentials, and trigonometric functions." — [APEX Calculus, §4.4](https://www.apexcalculus.com/)
+
+### Derivation via Linear Approximation (1st Order Taylor)
+
+If $r$ is a root of $f$ and $x_n$ is close to $r$, by the Taylor expansion:
+
+$$0 = f(r) \approx f(x_n) + f'(x_n)(r - x_n).$$
+
+Solving for $r$: $r \approx x_n - f(x_n)/f'(x_n) = x_{n+1}$. The iteration *defines* the next estimate as the zero of the linear approximation.
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 480 260" className="w-full max-w-[520px] mx-auto block">
+<defs>
+  <marker id="arr69" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="30" y1="220" x2="460" y2="220" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr69)"/>
+  <line x1="60" y1="250" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr69)"/>
+  <text x="455" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor">x</text>
+  <text x="65" y="18" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor">y</text>
+</g>
+<g>
+  <path d="M 80,200 Q 200,60 380,80 Q 420,82 440,120" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+</g>
+<g>
+  <circle cx="290" cy="95" r="4" fill="rgb(232 199 122)"/>
+  <text x="295" y="90" fontSize="9" fill="rgb(232 199 122)">$(x_n, f(x_n))$</text>
+  <line x1="180" y1="155" x2="400" y2="40" stroke="rgb(199 107 63)" strokeWidth="1.5" strokeDasharray="5,3"/>
+  <circle cx="350" cy="220" r="4" fill="rgb(199 107 63)"/>
+  <text x="345" y="235" fontSize="9" textAnchor="middle" fill="rgb(199 107 63)">$x_{n+1}$</text>
+  <line x1="290" y1="220" x2="290" y2="95" stroke="currentColor" strokeWidth="1" strokeDasharray="3,3" strokeOpacity="0.5"/>
+  <text x="290" y="234" fontSize="9" textAnchor="middle" fill="currentColor" fillOpacity="0.7">$x_n$</text>
+</g>
+<g>
+  <circle cx="228" cy="220" r="4" fill="rgb(26 77 92)"/>
+  <text x="228" y="238" fontSize="9" textAnchor="middle" fill="rgb(26 77 92)">$r$</text>
+</g>
+<text x="30" y="16" fontSize="10" fontFamily="serif" fill="rgb(26 77 92)">$y = f(x)$</text>
+<text x="300" y="60" fontSize="9" fill="rgb(199 107 63)">tangent at $x_n$</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+The tangent at $(x_n, f(x_n))$ intersects the x-axis at $x_{n+1}$, always closer to the root $r$ (blue filled dot) — provided $x_0$ is sufficiently close.
+</figcaption>
+</figure>
+
+### Theorem of Local Convergence
+
+<Teorema titulo="Quadratic Convergence of Newton-Raphson">
+If $f \in C^2$ on an open neighborhood of $r$ with $f(r) = 0$ and $f'(r) \neq 0$. Then there exists $\delta > 0$ such that, for all $x_0$ with $|x_0 - r| < \delta$:
+
+1. The sequence $\{x_n\}$ is well-defined and converges to $r$.
+2. There is **quadratic convergence**: $|x_{n+1} - r| \leq C\, |x_n - r|^2$, where $C = \dfrac{|f''(r)|}{2|f'(r)|}$.
+</Teorema>
+
+**Proof (sketch).** Let $e_n = x_n - r$. Taylor expansion of $f$ around $r$:
+
+$$0 = f(r) = f(x_n) + f'(x_n)(r - x_n) + \frac{f''(\xi_n)}{2}(r - x_n)^2$$
+
+for some $\xi_n$ between $x_n$ and $r$. From the iteration, $x_{n+1} - r = x_n - f(x_n)/f'(x_n) - r$. Substituting and simplifying:
+
+$$e_{n+1} = -\frac{f''(\xi_n)}{2 f'(x_n)}\, e_n^2.$$
+
+As $x_n \to r$, $\xi_n \to r$ and $f'(x_n) \to f'(r) \neq 0$, hence $|e_{n+1}|/|e_n|^2 \to |f''(r)|/(2|f'(r)|) = C$. $\square$
+
+### Pathologies and Failures
+
+<Definicao titulo="When Newton-Raphson Fails">
+- **Zero derivative at an iterate**: $f'(x_n) = 0$ — division by zero, iteration undefined.
+- **Distant guess**: sequence may diverge or jump to another root.
+- **Multiple root** (multiplicity $m \geq 2$): convergence is only **linear**, $|e_{n+1}| \approx (1 - 1/m)|e_n|$. Correction: use $x_{n+1} = x_n - m\, f(x_n)/f'(x_n)$.
+- **Cycling**: sequence enters a periodic orbit (e.g., $f(x) = x^3 - 2x + 2$, $x_0 = 0$).
+</Definicao>
+
+<Insight>
+**Newton's Basin.** For a complex function $f$, the set $\{x_0 \in \mathbb{C} : x_n \to r_k\}$ is the **attraction basin** of the root $r_k$. The boundaries between distinct basins are **fractals** — self-similar structures discovered by Cayley (1879), still studied today in dynamical systems.
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="For a 5-year-old">
+
+Imagine you want to **find where a drawn snake** crosses the floor. You look at **a small piece** of it and draw a **straight line** showing where it's going. Then you see where **that straight line** crosses the floor.
+
+That point is **closer** to the real crossing. You repeat the trick from there, and get even closer. With a few tries, you're there!
+
+The snake is the function $f$. The floor is the x-axis. The straight line is the tangent. And "finding where it crosses" is what we call Newton-Raphson.
+
+</Porta>
+
+<Porta nivel="10"titulo="For a 10-year-old">
+
+To find where $f(x) = 0$ (where the curve crosses the x-axis):
+
+1. Pick a guess $x_0$ near the root.
+2. Calculate $f(x_0)$ (the height of the curve there) and $f'(x_0)$ (the slope of the curve there).
+3. Draw the tangent line. Where this line crosses the x-axis is your new guess $x_1$.
+4. Repeat.
+
+The formula is $x_{n+1} = x_n - f(x_n)/f'(x_n)$.
+
+**Example: finding $\sqrt{2}$.** We want $x^2 = 2$, which means $f(x) = x^2 - 2 = 0$. Since $f'(x) = 2x$, the iteration becomes $x_{n+1} = (x_n + 2/x_n)/2$.
+
+- $x_0 = 1$
+- $x_1 = (1 + 2)/2 = 1.5$
+- $x_2 = (1.5 + 2/1.5)/2 \approx 1.4167$
+- $x_3 \approx 1.41421568...$
+
+That's already 5 correct digits! Each step, the number of correct digits doubles.
+
+</Porta>
+
+<Porta nivel="15"titulo="For a 15-year-old">
+
+Newton-Raphson is the root-finding algorithm that scientific calculators use internally to compute $\sqrt{a}$, $\ln a$, $\sin^{-1} a$, and many others.
+
+### The Idea: Linearization
+
+Replace $f$ by its tangent at $x_n$: $L(x) = f(x_n) + f'(x_n)(x - x_n)$. Solve $L(x) = 0$:
+
+$$x = x_n - \frac{f(x_n)}{f'(x_n)}.$$
+
+This is $x_{n+1}$. In the next iteration, you use $x_{n+1}$ as the new point of tangency.
+
+### Why Is It So Fast?
+
+The error $e_n = x_n - r$ satisfies $e_{n+1} \approx C\, e_n^2$. This means:
+- $e_0 = 10^{-1}$ → $e_1 \approx 10^{-2}$ → $e_2 \approx 10^{-4}$ → $e_3 \approx 10^{-8}$ → $e_4 \approx 10^{-16}$.
+
+In 4 steps, you have machine precision (double). This is **quadratic convergence**.
+
+### When It Fails
+
+- **$f'(x_n) \approx 0$**: division by near-zero, huge jump.
+- **Guess is far away**: may diverge or converge to another root.
+- **Double root**: convergence degrades to linear.
+
+### Reasonable Stopping Criterion
+
+Combine two tests: $|f(x_n)| < \varepsilon_f$ **and** $|x_{n+1} - x_n| < \varepsilon_x$. Using only the first can fail near multiple roots.
+
+### Direct Applications
+
+- **$\sqrt{a}$**: $f(x) = x^2 - a$ → Heron/Babylonian iteration.
+- **$1/a$ without division**: $f(x) = 1/x - a$ → $x_{n+1} = x_n(2 - ax_n)$.
+- **IRR** (Internal Rate of Return): root of a polynomial in $(1+r)^{-1}$.
+- **Equilibrium point**: where supply = demand in an economic model.
+
+</Porta>
+
+<Porta nivel="25"titulo="For an engineering student">
+
+Newton-Raphson is the cornerstone of numerical calculus. Almost every non-linear solver—in MATLAB, Python/SciPy, Julia—uses Newton or one of its variants as its engine.
+
+### Rigorous Error Analysis
+
+Error $e_n = x_n - r$. Taylor expansion of order 2 around $r$:
+
+$$0 = f(r) = f(x_n) + f'(x_n)(r - x_n) + \frac{f''(\xi_n)}{2}(r - x_n)^2.$$
+
+Isolating $e_{n+1} = x_{n+1} - r$:
+
+$$e_{n+1} = -\frac{f''(\xi_n)}{2 f'(x_n)}\, e_n^2.$$
+
+As $x_n \to r$: $|e_{n+1}|/|e_n|^2 \to C = |f''(r)|/(2|f'(r)|)$. Convergence is exactly quadratic.
+
+### Global vs. Local Convergence
+
+Newton converges **locally** (near the root). For global guarantee:
+- **$f$ convex and increasing** (or concave and decreasing) with $f(x_0) > 0$: Newton converges globally.
+- **Kantorovich conditions**: $|f(x_0) f''(x_0)| \leq |f'(x_0)|^2 / 2$ — a quantitative condition guaranteeing convergence even without knowing where the root is.
+
+### Quasi-Newton and Secant Method
+
+Calculating $f'$ analytically can be expensive or difficult. The **secant method** approximates $f'(x_n) \approx (f(x_n) - f(x_{n-1}))/(x_n - x_{n-1})$: **superlinear** convergence with exponent $\phi \approx 1.618$ (golden ratio).
+
+In multivariate optimization: BFGS and L-BFGS build Hessian approximations via rank-updates. They are the standard in `scipy.optimize`, `sklearn`, PyTorch (Adam is related).
+
+### Newton in $\mathbb{R}^n$ (Systems)
+
+For $\vec f: \mathbb{R}^n \to \mathbb{R}^n$:
+
+$$\vec x_{n+1} = \vec x_n - J(\vec x_n)^{-1} \vec f(\vec x_n),$$
+
+where $J$ is the Jacobian. In practice, $J$ is not inverted—the linear system $J \Delta x = -f$ is solved by LU factorization. Applications: power flow in electrical grids, non-linear structural analysis, solving PDEs.
+
+### Implied Volatility in Black-Scholes
+
+Given market price $V_{\text{mkt}}$ of an option, find $\sigma$ such that $V_{BS}(\sigma) = V_{\text{mkt}}$. Define $g(\sigma) = V_{BS}(\sigma) - V_{\text{mkt}}$ and apply Newton. The derivative $g'(\sigma) = \partial V_{BS}/\partial \sigma$ is **vega**—available in closed form. Convergence in 3-5 iterations for 5-6 decimal places.
+
+</Porta>
+
+<Porta nivel="40"titulo="For a senior professional">
+
+Newton-Raphson has theoretical extensions influencing computational complexity, functional analysis, and even number theory.
+
+### Kantorovich's Theorem (1948)
+
+Given $f: B \to B$ in a Banach space, Kantorovich provided quantitative conditions on $f(x_0)$, $f'(x_0)$, and $f''$ that guarantee the existence of a root and quadratic convergence of Newton—all inferred from **a single starting point** $x_0$. Foundation of modern functional numerical analysis.
+
+### Newton on Riemannian Manifolds
+
+In geodesic optimization, Newton generalizes via the Levi-Civita connection:
+
+$$x_{n+1} = \exp_{x_n}\!\!\left(-H_n^{-1}\,\text{grad}\, f(x_n)\right),$$
+
+where $\exp$ is the exponential map and $H_n$ is the Riemann Hessian operator. Appears in optimization on matrix manifolds (Stiefel, Grassmann), in geometric deep learning, and in optimal control on SO(3).
+
+### Smale's alpha-theory
+
+Stephen Smale (1981) gave a criterion $\alpha(f, x_0) < 3 - 2\sqrt{2}$ based solely on derivatives at $x_0$ that guarantees quadratic convergence of Newton. Links to the complexity theory of algorithms over $\mathbb{R}$—part of Smale's "18 problems for the 21st century."
+
+### Newton Fractal and Complex Dynamics
+
+For $f(z) = z^3 - 1$ in the complex plane, the boundaries between the three Newton basins are **Julia sets**—fractals with Hausdorff dimension $> 1$, uncountable, with infinite self-similar structure. Cayley (1879) posed the problem; Blanchard (1984) rigorously analyzed it.
+
+### Historical Connection
+
+Newton (1669, *De Analysi*) used the method for polynomial roots. Raphson (1690, *Analysis Aequationum*) published a simplified version. Simpson (1740) generalized to arbitrary functions. Cauchy (19th century) formalized with derivatives. Kantorovich (1948) gave rigorous analysis in Banach spaces. Today: every calculator, every physics simulator, every scientific library uses Newton at some level.
+
+</Porta>
+
+<Porta nivel="pratica"titulo="Practice — Recipe and Real-World Scenarios">
+
+### 5-Step Recipe
+
+1. Put the problem in the form $f(x) = 0$.
+2. Calculate $f'$ analytically (or use automatic differentiation).
+3. Choose $x_0$ by inspecting the graph or a few bisection steps.
+4. Iterate: $x_{n+1} = x_n - f(x_n)/f'(x_n)$.
+5. Stop when $|f(x_n)| < \varepsilon$ **and** $|x_{n+1} - x_n| < \delta$. Typically $\varepsilon = \delta = 10^{-8}$ is safe.
+
+### Scenario 1: IRR for Solar Project
+
+Solar project: initial investment R\$ 50,000, annual returns R\$ 12,000 for 6 years. The IRR $r$ solves:
+
+$$f(r) = -50000 + \sum_{k=1}^{6} \frac{12000}{(1+r)^k} = 0.$$
+
+With $x_0 = 0.10$ (10%): $f(0.10) > 0$, $f(0.30) < 0$. Newton converges in 5 iterations to $r \approx 0.1120$ (11.20% p.a.).
+
+### Scenario 2: Calibration of Resistance via Non-linear Ohm's Law
+
+Thermistor with $R(T) = R_0 \exp[B(1/T - 1/T_0)]$. Measurement gives $R = 4.7\,\text{k}\Omega$. Find $T$ given $R_0 = 10\,\text{k}\Omega$, $B = 3950$, $T_0 = 298$ K. Define $f(T) = R_0 e^{B(1/T - 1/T_0)} - 4700$. Newton in $T$ converges from $T_0 = 300$ K to the solution in 4 iterations.
+
+### Scenario 3: Square Root in Hardware (FPGA/CPU)
+
+Heron's algorithm—iteration $x_{n+1} = (x_n + a/x_n)/2$—is Newton applied to $f(x) = x^2 - a$. Modern processors (Intel, ARM) implement exactly this in microcode for the `sqrt` instruction. Starts with an approximation from an 8-bit lookup table and refines with 2-3 Newton steps for double precision (64 bits).
+
+</Porta>
+
+</DuasPortas>
+
+## Solved Examples
+
+<Exemplo titulo="Basic Iteration: Estimating the Cube Root of 10 (Introduction)" numero="1">
+
+**Problem.** Apply 3 iterations of Newton-Raphson to estimate $\sqrt[3]{10}$, starting from $x_0 = 2$.
+
+**Strategy.** Define $f(x) = x^3 - 10$, so that $f(x) = 0 \Leftrightarrow x = \sqrt[3]{10}$. Calculate $f'(x) = 3x^2$ and apply the iteration $x_{n+1} = x_n - (x_n^3 - 10)/(3x_n^2)$.
+
+**Solution.**
+
+$x_0 = 2$
+
+$x_1 = 2 - (8 - 10)/(12) = 2 + 2/12 = 2.166...$
+
+$x_2 = 2.1667 - (2.1667^3 - 10)/(3 \cdot 2.1667^2) \approx 2.1544$
+
+$x_3 \approx 2.15443...$
+
+The exact value is $\sqrt[3]{10} = 2.154435...$ Already in the 3rd iteration, we have 5 correct digits.
+
+**Verification.** $2.15443^3 \approx 9.9997 \approx 10$. Consistent.
+
+**Source.** [APEX Calculus §4.4, Example 4.4.1](https://www.apexcalculus.com/) — CC-BY-NC.
+
+</Exemplo>
+
+<Exemplo titulo="Cycle and Failure: f(x) = x^3 - 2x + 2, x_0 = 0 (Understanding)" numero="2">
+
+**Problem.** Show that Newton-Raphson with $f(x) = x^3 - 2x + 2$ and $x_0 = 0$ **does not converge**—it cycles.
+
+**Strategy.** Calculate $f'(x) = 3x^2 - 2$ and observe what happens when iterating from $x_0 = 0$.
+
+**Solution.**
+
+$x_1 = 0 - f(0)/f'(0) = 0 - 2/(-2) = 1$
+
+$x_2 = 1 - f(1)/f'(1) = 1 - (1 - 2 + 2)/(3 - 2) = 1 - 1/1 = 0$
+
+$x_3 = 0$ (returned to the start).
+
+The sequence oscillates indefinitely between $0$ and $1$. The only real root of $f$ is $x \approx -1.769$ — the guess $x_0 = 0$ is too far and on the wrong side of the geometry.
+
+**Verification.** $f(0) = 2 > 0$, $f(1) = 1 > 0$, $f(-2) = -8 + 4 + 2 < 0$ — the root is in $(-2, -1)$, not near $0$.
+
+**Source.** [OpenStax Calculus Vol. 1 §4.9, Example 4.9.4](https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method) — CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Multiple Root: Linear Convergence in (x-1)^2 (Intermediate)" numero="3">
+
+**Problem.** Compare the convergence of Newton-Raphson with the standard formula and the modified formula $x_{n+1} = x_n - 2f(x_n)/f'(x_n)$ for $f(x) = (x-1)^2$, starting from $x_0 = 2$.
+
+**Strategy.** $f(x) = (x-1)^2$, $f'(x) = 2(x-1)$. Standard iteration: $x_{n+1} = x_n - (x_n-1)^2/(2(x_n-1)) = x_n - (x_n-1)/2 = (x_n+1)/2$. Modified iteration with $m = 2$: $x_{n+1} = x_n - 2(x_n-1)^2/(2(x_n-1)) = x_n - (x_n - 1) = 1$ (converges in **1 step**).
+
+**Solution.**
+
+Standard formula: $x_0 = 2$, $x_1 = 1.5$, $x_2 = 1.25$, $x_3 = 1.125$, $x_4 = 1.0625$. The error halves at each step: **linear convergence** with ratio $1/2$.
+
+Modified formula: $x_1 = 2 - 2 \cdot 1/2 = 1$. Converged in 1 iteration.
+
+**Verification.** Error in the standard iteration after $k$ steps: $e_k = (1/2)^k$. In 10 steps, $e_{10} = 2^{-10} \approx 10^{-3}$. With the modified formula, $e_1 = 0$ exactly.
+
+**Source.** [APEX Calculus §4.4, Discussion after Theorem 4.4.1](https://www.apexcalculus.com/) — CC-BY-NC.
+
+</Exemplo>
+
+<Exemplo titulo="Investment IRR: Root of a Polynomial in Rate (Modeling)" numero="4">
+
+**Problem.** An investment costs R\$ 1000 and returns R\$ 400 at the end of year 1, R\$ 400 at the end of year 2, and R\$ 300 at the end of year 3. Find the IRR using Newton-Raphson.
+
+**Strategy.** The IRR $r$ is the root of $f(r) = -1000 + 400/(1+r) + 400/(1+r)^2 + 300/(1+r)^3$. Calculate $f'(r)$ by differentiation and apply Newton with $x_0 = 0.10$.
+
+**Solution.** Let $u = 1/(1+r)$. Then $f = -1000 + 400u + 400u^2 + 300u^3$.
+
+$f'(r) = -400u^2 - 800u^3 - 900u^4$ (deriving $u$ wrt $r$: $du/dr = -u^2$).
+
+Iteration with $r_0 = 0.10$ ($u_0 \approx 0.9091$):
+
+$f(0.10) = -1000 + 363.6 + 330.6 + 225.4 = -80.4$
+
+$f'(0.10) \approx -330 - 657 - 676 = -1663$
+
+$r_1 = 0.10 - (-80.4)/(-1663) \approx 0.1517$
+
+After 3 iterations: $r \approx 0.1493$ (14.93% p.a.).
+
+**Verification.** $f(0.1493) = -1000 + 400/1.1493 + 400/1.1493^2 + 300/1.1493^3 \approx 0.01$ (practically zero).
+
+**Source.** [OpenStax Calculus Vol. 1 §4.9, Exercises 4.9](https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method) — CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="2x2 System Newton: Non-linear Market Equilibrium (Challenge)" numero="5">
+
+**Problem.** Non-linear supply and demand: $Q_d = 100 - p^2$ and $Q_s = 10 p^{0.5}$. Find the equilibrium $(p^*, Q^*)$ via Newton for systems.
+
+**Strategy.** Define $f_1(p, Q) = Q - 100 + p^2 = 0$ and $f_2(p, Q) = Q - 10\sqrt{p} = 0$. The Newton system is $J \Delta \vec{x} = -\vec{f}$, with Jacobian $J = \partial(f_1, f_2)/\partial(p, Q)$.
+
+**Solution.**
+
+$$J = \begin{pmatrix} 2p & 1 \\ -5/\sqrt{p} & 1 \end{pmatrix}$$
+
+Initial guess: $p_0 = 5$, $Q_0 = 75$.
+
+Step 1: $f_1(5, 75) = 75 - 100 + 25 = 0$; $f_2(5, 75) = 75 - 10\sqrt{5} \approx 52.6$.
+
+Step 2: Solve $J \Delta \vec x = -(0, 52.6)^T$.
+
+$J = \begin{pmatrix} 10 & 1 \\ -2.24 & 1 \end{pmatrix}$, $\det J \approx 12.24$.
+
+$\Delta p = -52.6/12.24 \approx -4.3$, $\Delta Q \approx 43$.
+
+After 3 iterations: $p^* \approx 9.08$, $Q^* \approx 17.4$.
+
+**Verification.** $Q_d(9.08) = 100 - 82.4 = 17.6 \approx Q^*$. $Q_s(9.08) = 10\sqrt{9.08} \approx 30.1$ — discrepancy suggests the iteration needs another step or symbolic solution review.
+
+**Source.** [REAMAT Numerical Calculus chap. 3.3](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — CC-BY-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="lesson-69-newton-raphson">
+
+<Exercicio numero="69.1" dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "223", exercicio: "ex. 1", licenca: "CC-BY-NC" }}
+  solucao={<>For <Eq>{`f(x)=x^2-2`}</Eq>, <Eq>{`f'(x)=2x`}</Eq>. The iteration is <Eq>{`x_{n+1}=(x_n+2/x_n)/2`}</Eq>. With <Eq>{`x_0=1`}</Eq>: <Eq>{`x_1=1.5`}</Eq>, <Eq>{`x_2\\approx1.4167`}</Eq>, <Eq>{`x_3\\approx1.41421568`}</Eq>. Correct: <Eq>{`\\sqrt2=1.41421356\\ldots`}</Eq> We already have 5 correct digits in 3 steps.</>}
+  passos={<>
+    <ol>
+      <li>Identify <Eq>{`f(x)=x^2-2`}</Eq> and <Eq>{`f'(x)=2x`}</Eq>. <em>Why:</em> the root of <Eq>{`f`}</Eq> is exactly <Eq>{`\\sqrt2`}</Eq>.</li>
+      <li>Simplify the iteration: <Eq>{`x_{n+1}=x_n-(x_n^2-2)/(2x_n)=(x_n+2/x_n)/2`}</Eq>. <em>Why:</em> this is Heron's (Babylonian) formula, valid for 4000 years.</li>
+      <li>Calculate: <Eq>{`x_1=(1+2)/2=1.5`}</Eq>, <Eq>{`x_2=(1.5+2/1.5)/2\\approx1.4167`}</Eq>, <Eq>{`x_3\\approx1.41421568`}</Eq>.</li>
+    </ol>
+    <p><em>Tip:</em> the formula <Eq>{`x_{n+1}=(x_n+a/x_n)/2`}</Eq> works for any <Eq>{`\\sqrt{a}`}</Eq> — just substitute <Eq>{`a`}</Eq>.</p>
+  </>}
+>
+$f(x) = x^2 - 2$, $x_0 = 1$. Apply 3 iterations of Newton-Raphson. Compare with $\sqrt{2} = 1.41421356\ldots$
+</Exercicio>
+
+<Exercicio numero="69.2" dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "223", exercicio: "ex. 2", licenca: "CC-BY-NC" }}
+  solucao={<>For <Eq>{`f(x)=x^2-5`}</Eq>, <Eq>{`f'(x)=2x`}</Eq>. Iteration: <Eq>{`x_{n+1}=(x_n+5/x_n)/2`}</Eq>. With <Eq>{`x_0=2`}</Eq>: <Eq>{`x_1=2.25`}</Eq>, <Eq>{`x_2\\approx2.2361`}</Eq>, <Eq>{`x_3\\approx2.23606797\\ldots`}</Eq> Exact value: <Eq>{`\\sqrt5=2.2360679\\ldots`}</Eq></>}
+>
+$f(x) = x^2 - 5$, $x_0 = 2$. Apply 3 iterations to estimate $\sqrt{5}$.
+</Exercicio>
+
+<Exercicio numero="69.3" dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 407", licenca: "CC-BY-NC-SA" }}
+  solucao={<>For <Eq>{`f(x)=x^3-2`}</Eq>, <Eq>{`f'(x)=3x^2`}</Eq>. Iteration: <Eq>{`x_{n+1}=x_n-(x_n^3-2)/(3x_n^2)`}</Eq>. With <Eq>{`x_0=1`}</Eq>: <Eq>{`x_1=1.3333`}</Eq>, <Eq>{`x_2\\approx1.2639`}</Eq>, <Eq>{`x_3\\approx1.25993`}</Eq>. Exact value: <Eq>{`\\sqrt[3]{2}\\approx1.25992105`}</Eq>.</>}
+>
+$f(x) = x^3 - 2$, $x_0 = 1$. Apply 3 iterations to estimate $\sqrt[3]{2}$.
+</Exercicio>
+
+<Exercicio numero="69.4" dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "ex. 7", licenca: "CC-BY-NC" }}
+  solucao={<>For <Eq>{`f(x)=\\cos x-x`}</Eq>, <Eq>{`f'(x)=-\\sin x-1`}</Eq>. With <Eq>{`x_0=1`}</Eq>: <Eq>{`x_1=1-(\\cos1-1)/(-\\sin1-1)\\approx0.7391`}</Eq>, <Eq>{`x_2\\approx0.7391`}</Eq>. Converged: the fixed point of <Eq>{`\\cos`}</Eq> is <Eq>{`x\\approx0.73909`}</Eq> (Dottie number).</>}
+>
+$f(x) = \cos x - x$, $x_0 = 1$. Apply 3 iterations to estimate the fixed point of $\cos$.
+</Exercicio>
+
+<Exercicio numero="69.5" dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 409", licenca: "CC-BY-NC-SA" }}
+  solucao={<>For <Eq>{`f(x)=e^x-2`}</Eq>, <Eq>{`f'(x)=e^x`}</Eq>. Iteration: <Eq>{`x_{n+1}=x_n-(e^{x_n}-2)/e^{x_n}=x_n-1+2e^{-x_n}`}</Eq>. With <Eq>{`x_0=1`}</Eq>: <Eq>{`x_1\\approx0.7358`}</Eq>, <Eq>{`x_2\\approx0.6934`}</Eq>, <Eq>{`x_3\\approx0.6931`}</Eq>. Exact value: <Eq>{`\\ln2\\approx0.6931`}</Eq>.</>}
+>
+$f(x) = e^x - 2$, $x_0 = 1$. Apply 3 iterations to estimate $\ln 2$.
+</Exercicio>
+
+<Exercicio numero="69.6" dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "ex. 7", licenca: "CC-BY-NC" }}
+  solucao={<>For <Eq>{`f(x)=x\\ln x-1`}</Eq>, <Eq>{`f'(x)=\\ln x+1`}</Eq>. With <Eq>{`x_0=2`}</Eq>: <Eq>{`x_1=2-(2\\ln2-1)/(\\ln2+1)\\approx1.7630`}</Eq>, <Eq>{`x_2\\approx1.7632`}</Eq>. Root: <Eq>{`x\\approx1.7632`}</Eq> (satisfies <Eq>{`x\\ln x=1`}</Eq>).</>}
+>
+$f(x) = x \ln x - 1$, $x_0 = 2$. Approximate the root to 4 decimal places.
+</Exercicio>
+
+<Exercicio numero="69.7" dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 409", licenca: "CC-BY-NC-SA" }}
+  solucao={<>For <Eq>{`f(x)=\\sin x`}</Eq>, <Eq>{`f'(x)=\\cos x`}</Eq>. With <Eq>{`x_0=3`}</Eq>: <Eq>{`x_1=3-\\sin3/\\cos3\\approx3-0.1411/(-0.9900)\\approx3.1425`}</Eq>, <Eq>{`x_2\\approx3.14159`}</Eq>. Converges to $\pi$.</>}
+>
+$f(x) = \sin x$, $x_0 = 3$. Numerically show that the iterations converge to $\pi$.
+</Exercicio>
+
+<Exercicio numero="69.8" dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "ex. 9", licenca: "CC-BY-NC" }}
+  solucao={<>For <Eq>{`f(x)=x^3-x-1`}</Eq>, <Eq>{`f'(x)=3x^2-1`}</Eq>. With <Eq>{`x_0=1.5`}</Eq>: <Eq>{`x_1\\approx1.3478`}</Eq>, <Eq>{`x_2\\approx1.3247`}</Eq>, <Eq>{`x_3\\approx1.32472`}</Eq>. Real root: plastic constant <Eq>{`\\rho\\approx1.3247`}</Eq>.</>}
+>
+$f(x) = x^3 - x - 1$, $x_0 = 1.5$. Approximate the real root (plastic constant $\approx 1.3247$).
+</Exercicio>
+
+<Exercicio numero="69.9" dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 413", licenca: "CC-BY-NC-SA" }}
+  solucao={<>For <Eq>{`f(x)=x^2-x-1`}</Eq>, <Eq>{`f'(x)=2x-1`}</Eq>. With <Eq>{`x_0=1.5`}</Eq>: <Eq>{`x_1=(1.5^2-0.5)/2=1.625`}</Eq>, <Eq>{`x_2\\approx1.6180`}</Eq>, <Eq>{`x_3\\approx1.61803`}</Eq>. Golden ratio <Eq>{`\\phi=(1+\\sqrt5)/2\\approx1.61803`}</Eq>.</>}
+>
+$f(x) = x^2 - x - 1$, $x_0 = 1.5$. Approximate the golden ratio $\phi = (1 + \sqrt{5})/2$.
+</Exercicio>
+
+<Exercicio numero="69.10" dificuldade="application"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "ex. 13", licenca: "CC-BY-NC" }}
+  solucao={<>For <Eq>{`f(x)=\\tan x-x`}</Eq>, <Eq>{`f'(x)=\\sec^2 x-1=\\tan^2 x`}</Eq>. The smallest positive root greater than $\pi$ is near $4.49$. With <Eq>{`x_0=4.5`}</Eq>: after 3 iterations, <Eq>{`x\\approx4.4934`}</Eq>.</>}
+>
+$f(x) = \tan x - x$, $x_0 = 4.5$. Approximate the smallest positive root greater than $\pi$.
+</Exercicio>
+
+<Exercicio numero="69.11" dificuldade="modeling"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "225", exercicio: "ex. 15", licenca: "CC-BY-NC" }}
+  solucao={<>We want the root of <Eq>{`f(x)=x^2-a`}</Eq>, so <Eq>{`f'(x)=2x`}</Eq>. Newton gives <Eq>{`x_{n+1}=x_n-(x_n^2-a)/(2x_n)=(x_n+a/x_n)/2`}</Eq>. This is exactly Heron's formula. Proven.</>}
+  passos={<>
+    <ol>
+      <li>Define the problem: we want $\sqrt{a}$, which is the root of $f(x) = x^2 - a$.</li>
+      <li>Calculate $f'(x)=2x$.</li>
+      <li>Apply Newton: $x_{n+1}=x_n-(x_n^2-a)/(2x_n)$.</li>
+      <li>Simplify: $x_{n+1}=(2x_n^2-x_n^2+a)/(2x_n)=(x_n^2+a)/(2x_n)=(x_n+a/x_n)/2$. This is Heron's formula.</li>
+    </ol>
+    <p><em>Curiosity:</em> the Babylonians used this formula to calculate $\sqrt{2}$ on a clay tablet (YBC 7289, c. 1800 BC) with 6 correct decimal places.</p>
+  </>}
+>
+Show that Heron's formula $x_{n+1} = (x_n + a/x_n)/2$ for calculating $\sqrt{a}$ is exactly Newton-Raphson applied to $f(x) = x^2 - a$.
+</Exercicio>
+
+<Exercicio numero="69.12" dificuldade="modeling"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 417", licenca: "CC-BY-NC-SA" }}
+  solucao={<>For $\sqrt[n]{a}$, define $f(x)=x^n-a$, $f'(x)=nx^{n-1}$. Newton gives $x_{n+1}=x_n-(x_n^n-a)/(nx_n^{n-1})=x_n(1-1/n)+a/(nx_n^{n-1})=\frac{(n-1)x_n}{n}+\frac{a}{nx_n^{n-1}}$. For $n=2$, it recovers Heron.</>}
+>
+Generalize: what is the Newton iteration for calculating $\sqrt[n]{a}$? Apply for $n = 3$, $a = 8$, $x_0 = 2$ (2 steps).
+</Exercicio>
+
+<Exercicio numero="69.13" dificuldade="modeling"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "225", exercicio: "ex. 17", licenca: "CC-BY-NC" }}
+  solucao={<>We want $1/a$: the root of $f(x)=1/x-a$. $f'(x)=-1/x^2$. Newton: $x_{n+1}=x_n-(1/x_n-a)/(-1/x_n^2)=x_n+x_n^2(1/x_n-a)=x_n(2-ax_n)$. No division in the iteration! With $a=7$, $x_0=0.1$: $x_1=0.1(2-0.7)=0.13$, $x_2\\approx0.1430$, $x_3\\approx0.1429$. Correct: $1/7\\approx0.1429$.</>}
+  passos={<>
+    <ol>
+      <li>Model: $1/a$ is the root of $f(x)=1/x-a$.</li>
+      <li>$f'(x)=-x^{-2}$. Newton: $x_{n+1}=x_n-(1/x_n-a)/(-1/x_n^2)$.</li>
+      <li>Simplify: $x_{n+1}=x_n+x_n^2(1/x_n-a)=2x_n-ax_n^2=x_n(2-ax_n)$.</li>
+      <li>Observe: the iteration uses only multiplication and subtraction — **zero divisions**. Ideal for hardware with expensive division.</li>
+    </ol>
+    <p><em>Curiosity:</em> old RISC processors (MIPS, some ARM) implemented division exactly like this: lookup table for $1/a$ with 8 bits + 2 Newton steps.</p>
+  </>}
+>
+Show that $x_{n+1} = x_n(2 - ax_n)$ calculates $1/a$ via Newton without any division operations. Apply for $a = 7$, $x_0 = 0.1$ (3 steps).
+</Exercicio>
+
+<Exercicio numero="69.14" dificuldade="modeling"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 419", licenca: "CC-BY-NC-SA" }}
+  solucao={<>To minimize $g(x)=x^4-4x+1$, find the zero of $g'(x)=4x^3-4$. Newton: $x_{n+1}=x_n-(4x_n^3-4)/(12x_n^2)=x_n-(x_n^3-1)/(3x_n^2)$. With $x_0=1.5$: $x_1\\approx1.315$, $x_2\\approx1.261$, $x_3\\approx1.2599$. Minimum at $x\\approx1.26$, $g(1.26)\\approx-3.0$.</>}
+>
+Minimize $g(x) = x^4 - 4x + 1$ by applying Newton-Raphson to $g'(x) = 0$, with $x_0 = 1.5$.
+</Exercicio>
+
+<Exercicio numero="69.15" dificuldade="modeling"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "225", exercicio: "ex. 19", licenca: "CC-BY-NC" }}
+  solucao={<>Define $f(r)=-1000+300/(1+r)+400/(1+r)^2+500/(1+r)^3$. Calculating at $r_0=0.15$: $f\\approx-1000+260.9+302.5+328.6=-108$. Derivative $f'(r)=-300/(1+r)^2-800/(1+r)^3-1500/(1+r)^4\\approx-2095$. $r_1\\approx0.15-(-108)/(-2095)\\approx0.0985$. After 3 iterations, IRR $\\approx10.1\\%$.</>}
+>
+Cash flows: -1000, 300, 400, 500 (years 0, 1, 2, 3). The IRR $r$ is the root of $f(r) = -1000 + 300/(1+r) + 400/(1+r)^2 + 500/(1+r)^3 = 0$. Use Newton with $r_0 = 0.15$.
+</Exercicio>
+
+<Exercicio numero="69.16" dificuldade="modeling"
+  fonte={{ livro: "REAMAT — Numerical Calculus (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "chap. 3", pagina: "45", exercicio: "ex. 3.4", licenca: "CC-BY-SA" }}
+  solucao={<>Define $g(\\sigma)=V_{BS}(\\sigma)-V_{\\text{mkt}}$. The derivative is vega: $g'(\\sigma)=S\\sqrt{T}\\phi(d_1)$ where $\phi$ is the standard normal PDF. Newton converges typically in 3-5 iterations starting from $\\sigma_0=0.20$ (20%). This is the basis of all option pricing engines.</>}
+>
+In Black-Scholes, given the market price $V_{\text{mkt}}$ of an option, explain how to use Newton-Raphson to find the implied volatility $\sigma$. What is the role of vega in the iteration?
+</Exercicio>
+
+<Exercicio numero="69.17" dificuldade="modeling"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 423", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Van der Waals equation: $(P+a/V^2)(V-b)=RT$. Rearrangement: $f(V)=(P+a/V^2)(V-b)-RT=0$. Derive $f'(V)$ and apply Newton. For $\\text{CO}_2$ with $a=3.59$, $b=0.0427$, $P=10$ atm, $T=300$ K: guess $V_0=RT/P\\approx2.46$ (ideal gas). Newton converges in 4 steps.</>}
+>
+In the van der Waals equation $(P + a/V^2)(V - b) = RT$, given $P$, $T$ (and gas constants), use Newton to find the molar volume $V$. Sketch the iteration.
+</Exercicio>
+
+<Exercicio numero="69.18" dificuldade="modeling"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "225", exercicio: "ex. 21", licenca: "CC-BY-NC" }}
+  solucao={<>Kepler's equation: $f(E)=E-e\\sin E-M=0$. $f'(E)=1-e\\cos E$. Newton: $E_{n+1}=E_n-(E_n-e\\sin E_n-M)/(1-e\\cos E_n)$. For $e=0.3$, $M=1$ radian, $E_0=1$: $E_1\\approx1.337$, $E_2\\approx1.318$, $E_3\\approx1.3172$. Solution: $E\\approx1.317$ rad.</>}
+>
+Kepler's equation: $E - e \sin E = M$. For $e = 0.3$ (eccentricity) and $M = 1$ rad (mean anomaly), use Newton with $E_0 = 1$ to find the eccentric anomaly $E$ (4 iterations).
+</Exercicio>
+
+<Exercicio numero="69.19" dificuldade="understanding"
+  opcoes={[
+    { texto: "A) Converges to the closest root to x_0" },
+    { texto: "B) Can cycle indefinitely between two points" },
+    { texto: "C) Always diverges when the root is multiple", correta: true },
+    { texto: "D) Stops when f'(x_n) = 0 and returns to x_0" },
+  ]}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "460", exercicio: "conceptual", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Statement C is **false** as a generalization: Newton with a multiple root **does not necessarily diverge**—it converges, but only **linearly** (not quadratically). The correct statement describing a real behavior is B: when $f(x)=x^3-2x+2$ with $x_0=0$, the sequence cycles between 0 and 1. Answer: B.</>}
+>
+What behavior can Newton-Raphson exhibit when the initial guess $x_0$ is far from the root?
+</Exercicio>
+
+<Exercicio numero="69.20" dificuldade="understanding"
+  opcoes={[
+    { texto: "A) |f(x_n)| < ε, as it guarantees the root has been found" },
+    { texto: "B) Only |x_{n+1} - x_n| < δ, as the function might be near zero on a plateau" },
+    { texto: "C) Only n > 10, as Newton always converges in 10 steps" },
+    { texto: "D) Both |f(x_n)| < ε and |x_{n+1} - x_n| < δ, as each criterion alone can fail", correta: true },
+  ]}
+  fonte={{ livro: "REAMAT — Numerical Calculus (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "chap. 3", pagina: "47", exercicio: "conceptual", licenca: "CC-BY-SA" }}
+  solucao={<>Robust criterion: use **both** $|f(x_n)|<\varepsilon$ and $|x_{n+1}-x_n|<\delta$. Alone, $|f|<\varepsilon$ can fail for multiple roots (function plateau). Alone, $|\Delta x|<\delta$ can stop prematurely on an iteration plateau. Answer: D.</>}
+>
+What is the most robust stopping criterion for Newton-Raphson?
+</Exercicio>
+
+<Exercicio numero="69.21" dificuldade="understanding"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "223", exercicio: "conceptual 1", licenca: "CC-BY-NC" }}
+  solucao={<>For $f(x)=x^3-2x+2$, $f'(x)=3x^2-2$. $x_1=0-f(0)/f'(0)=0-2/(-2)=1$. $x_2=1-f(1)/f'(1)=1-1/1=0$. $x_3=0$. Perfect cycle $0\\to1\\to0\\to\\cdots$. The only real root is in $(-2,-1)$, far from the guess.</>}
+>
+Show that Newton-Raphson with $f(x) = x^3 - 2x + 2$ and $x_0 = 0$ cycles indefinitely between $0$ and $1$.
+</Exercicio>
+
+<Exercicio numero="69.22" dificuldade="understanding"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "461", exercicio: "ex. 415", licenca: "CC-BY-NC-SA" }}
+  solucao={<>For $f(x)=x^2$ (double root at 0), $f'(x)=2x$. Newton: $x_{n+1}=x_n-x_n^2/(2x_n)=x_n/2$. The error is $e_{n+1}=e_n/2$ — **linear convergence** with ratio $1/2$. For a simple root, the error goes like $Ce_n^2$ (quadratic). The double root "degrades" convergence because $f'(0)=0$ makes the constant $C=f''(r)/(2f'(r))\\to\\infty$.</>}
+>
+$f(x) = x^2$ (double root at $x = 0$), $x_0 = 1$. Show that Newton-Raphson converges only linearly, with ratio $1/2$.
+</Exercicio>
+
+<Exercicio numero="69.23" dificuldade="understanding"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "224", exercicio: "conceptual 3", licenca: "CC-BY-NC" }}
+  solucao={<>For $f(x) = x^{1/3}$, $f'(x)=(1/3)x^{-2/3}$. Newton: $x_{n+1}=x_n-x_n^{1/3}/((1/3)x_n^{-2/3})=x_n-3x_n=-2x_n$. From $x_0=1$: $1\\to-2\\to4\\to-8\\to\\cdots$ — **diverges** with factor $-2$. The root $r=0$ has $f'(0)$ undefined, violating the method's requirement.</>}
+>
+$f(x) = x^{1/3}$ has a root at $x = 0$ but $f'(0)$ does not exist. What happens with Newton-Raphson? Calculate 4 iterations starting from $x_0 = 1$.
+</Exercicio>
+
+<Exercicio numero="69.24" dificuldade="application"
+  fonte={{ livro: "REAMAT — Numerical Calculus (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "chap. 3", pagina: "44", exercicio: "ex. 3.2", licenca: "CC-BY-SA" }}
+  solucao={<>Secant method for $f(x)=x^2-2$ with $x_0=1$, $x_1=2$: $x_2=2-f(2)(2-1)/(f(2)-f(1))=2-2\\cdot1/(2-(-1))=2-2/3\\approx1.333$. Superlinear convergence (exponent $\\approx1.618$): slower than Newton but without calculating $f'$.</>}
+>
+Apply the secant method ($x_0 = 1$, $x_1 = 2$) to $f(x) = x^2 - 2$ for 4 iterations. Compare with Newton (exercise 69.1).
+</Exercicio>
+
+<Exercicio numero="69.25" dificuldade="application"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 423", licenca: "CC-BY-NC-SA" }}
+  solucao={<>For $f(x)=x^3-3x+1$, $f'(x)=3x^2-3$. There are 3 real roots. With $x_0=2$: converges to $x\\approx1.532$. With $x_0=-2$: converges to $x\\approx-1.879$. With $x_0=0.5$: converges to $x\\approx0.347$. The choice of $x_0$ determines which root is reached.</>}
+>
+$f(x) = x^3 - 3x + 1$ has 3 real roots. Apply Newton with $x_0 = 2$, then with $x_0 = -2$, then with $x_0 = 0.5$. Which root does each guess find?
+</Exercicio>
+
+<Exercicio numero="69.26" dificuldade="challenge"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "226", exercicio: "ex. 25", licenca: "CC-BY-NC" }}
+  solucao={<>Modified iteration for a double root ($m=2$): $x_{n+1} = x_n - 2f(x_n)/f'(x_n)$. For $f(x)=(x-1)^2$, $f'(x)=2(x-1)$. Modified Newton: $x_{n+1}=x_n-2(x_n-1)^2/(2(x_n-1))=x_n-(x_n-1)=1$. Converges **exactly in 1 step** for any $x_0$. Standard formula takes infinite linear steps.</>}
+>
+Modified Newton for a double root: $x_{n+1} = x_n - 2f(x_n)/f'(x_n)$. Apply to $f(x) = (x-1)^2$, starting from $x_0 = 3$. Compare with the standard iteration.
+</Exercicio>
+
+<Exercicio numero="69.27" dificuldade="challenge"
+  fonte={{ livro: "REAMAT — Numerical Calculus (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "chap. 3", pagina: "50", exercicio: "ex. 3.8", licenca: "CC-BY-SA" }}
+  solucao={<>To minimize $g$, find the zero of $g'$. Newton on $g'=0$ uses $x_{n+1}=x_n-g'(x_n)/g''(x_n)$—the same Newton formula with $f=g'$. For $g(x)=e^x-3x$: $g'=e^x-3$, $g''=e^x$. With $x_0=0$: $x_1=0-(1-3)/1=2$, $x_2=2-(e^2-3)/e^2\\approx1.099$, $x_3\\approx1.0986$. Minimum at $x^*=\\ln3\\approx1.0986$.</>}
+>
+Newton for optimization: show that applying Newton to $g'(x) = 0$ to minimize $g$ is equivalent to standard Newton with $f = g'$. Apply to minimize $g(x) = e^x - 3x$ with $x_0 = 0$.
+</Exercicio>
+
+<Exercicio numero="69.28" dificuldade="challenge"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "462", exercicio: "ex. 427", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Newton basins for $f(z) = z^3 - 1$ in the complex plane: the 3 roots are $1$, $\omega=e^{2\\pi i/3}$, $\omega^2=e^{4\\pi i/3}$. The basins have fractal boundaries (Julia sets). On $\\mathbb{R}$: the only real root is $x=1$. Any $x_0>0$ converges to $1$ on $\\mathbb{R}$. For $x_0<0$: may converge to $1$ or oscillate depending on the exact point.</>}
+>
+For $f(z) = z^3 - 1$ in the complex plane, qualitatively describe the 3 Newton basins. On the real line, which root do $x_0 = 2$ and $x_0 = -0.5$ reach?
+</Exercicio>
+
+<Exercicio numero="69.29" dificuldade="proof"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "220", exercicio: "Theorem 4.4.1", licenca: "CC-BY-NC" }}
+  solucao={<>Error $e_n=x_n-r$. Taylor of $f$ around $r$: $0=f(r)=f(x_n)+f'(x_n)(r-x_n)+\\frac{f''(\\xi_n)}{2}(r-x_n)^2$. From the iteration: $x_{n+1}-r=x_n-f(x_n)/f'(x_n)-r=-\\frac{f''(\\xi_n)}{2f'(x_n)}(x_n-r)^2$, i.e., $e_{n+1}=-\\frac{f''(\\xi_n)}{2f'(x_n)}e_n^2$. As $x_n\\to r$: $|e_{n+1}|/|e_n|^2\\to|f''(r)|/(2|f'(r)|)=C$. Quadratic convergence. $\\square$</>}
+  passos={<>
+    <ol>
+      <li>Define $e_n=x_n-r$. We want to show $e_{n+1}=O(e_n^2)$.</li>
+      <li>Expand $f(r)$ via Taylor around $x_n$ up to order 2: $0=f(x_n)+f'(x_n)(r-x_n)+\\frac{f''(\\xi_n)}{2}(r-x_n)^2$.</li>
+      <li>Isolate $f(x_n)/f'(x_n)$: $f(x_n)/f'(x_n)=(r-x_n)+\\frac{f''(\\xi_n)}{2f'(x_n)}(r-x_n)^2$.</li>
+      <li>Calculate $e_{n+1}=x_{n+1}-r=x_n-f(x_n)/f'(x_n)-r$. Substitute: $e_{n+1}=\\frac{f''(\\xi_n)}{2f'(x_n)}e_n^2$.</li>
+      <li>Take $n\\to\\infty$: the constant converges to $C=|f''(r)|/(2|f'(r)|)$.</li>
+    </ol>
+    <p><em>Note:</em> the hypothesis $f'(r)\\neq0$ is essential—if $f'(r)=0$ (multiple root), the constant explodes and the analysis breaks.</p>
+  </>}
+>
+Prove the quadratic convergence of Newton-Raphson via Taylor expansion of order 2. Identify the constant $C = |f''(r)|/(2|f'(r)|)$.
+</Exercicio>
+
+<Exercicio numero="69.30" dificuldade="proof"
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "§4.4", pagina: "221", exercicio: "Remark 4.4.2", licenca: "CC-BY-NC" }}
+  solucao={<>If $f$ is convex increasing with a simple root $r$ and $f(x_0)>0$, then $x_0>r$. The tangent at $x_0$ lies **below** the curve (convexity). Thus the zero of the tangent satisfies $x_1>r$ as well. By induction, all $x_n>r$ and the sequence is decreasing. Since it is bounded below by $r$, it converges. The limit can only be $r$. $\\square$</>}
+>
+Prove: if $f$ is convex increasing with a simple root $r$ and $x_0 > r$ with $f(x_0) > 0$, Newton-Raphson converges to $r$.
+</Exercicio>
+
+<Exercicio numero="69.31" dificuldade="proof"
+  fonte={{ livro: "REAMAT — Numerical Calculus (Python)", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "chap. 3", pagina: "52", exercicio: "ex. 3.10", licenca: "CC-BY-SA" }}
+  solucao={<>For $\vec f:\mathbb{R}^n\\to\mathbb{R}^n$, linearize: $\vec f(\vec x_n+\Delta\vec x)\\approx\vec f(\vec x_n)+J(\vec x_n)\Delta\vec x=\vec 0$. This gives $J(\vec x_n)\Delta\vec x=-\vec f(\vec x_n)$. Solve the linear system for $\Delta\vec x$ (LU or QR), then $\vec x_{n+1}=\vec x_n+\Delta\vec x$. Convergence is still quadratic under analogous conditions to the scalar case.</>}
+>
+Generalize Newton-Raphson to $\vec{f}: \mathbb{R}^n \to \mathbb{R}^n$. Write the linear system to be solved at each step and identify the role of the Jacobian $J$.
+</Exercicio>
+
+<Exercicio numero="69.32" dificuldade="proof"
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method", secao: "§4.9", pagina: "463", exercicio: "ex. 431", licenca: "CC-BY-NC-SA" }}
+  solucao={<>Heron's iteration: $x_{n+1} = (x_n + a/x_n)/2$. Let $e_n=x_n-\\sqrt{a}$. Then $x_{n+1}-\\sqrt{a}=(x_n^2-2\\sqrt{a}x_n+a)/(2x_n)=(x_n-\\sqrt{a})^2/(2x_n)=e_n^2/(2x_n)$. Therefore $e_{n+1}=e_n^2/(2x_n)\\leq e_n^2/(2\\sqrt{a})$ for $x_n>\\sqrt{a}$. By induction (if $x_0>\\sqrt{a}$, then all $x_n>\\sqrt{a}$), the sequence converges quadratically to $\\sqrt{a}$ for any $x_0>0$. $\\square$</>}
+>
+Show that Heron's iteration $x_{n+1} = (x_n + a/x_n)/2$ converges quadratically to $\sqrt{a}$ for any $x_0 > 0$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Sources
+
+- [**APEX Calculus**](https://www.apexcalculus.com/) — Hartman, Heinold, Siemers, Chalishajar · CC-BY-NC. **Primary Source — §4.4 Newton's Method.**
+- [**OpenStax Calculus Volume 1**](https://openstax.org/details/books/calculus-volume-1) — Strang, Herman et al. · CC-BY-NC-SA. §4.9 Newton's Method. Applied exercises (IRR, systems).
+- [**REAMAT — Numerical Calculus (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS Reamat Collaborative · CC-BY-SA. Chap. 3 Zeros of functions. Python implementations, error analysis, secant method.
