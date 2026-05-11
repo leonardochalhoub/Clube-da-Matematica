@@ -62,25 +62,11 @@ interface Props {
   params: Promise<{ categoria: string; caminho: string[] }>
 }
 
-/** Códigos de locale != pt-BR (são prefixos de URL: /en/aulas/...). */
-const LOCALE_CODES = new Set(
-  Object.keys(LOCALES).filter((c) => c !== 'pt-BR'),
-)
-
-/**
- * Detecta se o primeiro segmento da URL é um locale (ex.: 'en', 'es').
- * Se for, devolve { locale, categoria, caminho } "reais" — descartando
- * o prefixo. Caso contrário devolve null.
- */
-function parseLocalePrefix(
-  segment: string,
-  rest: string[],
-): { locale: string; categoria: string; caminho: string[] } | null {
-  if (!LOCALE_CODES.has(segment)) return null
-  const [actualCategoria, ...actualCaminho] = rest
-  if (!actualCategoria) return null
-  return { locale: segment, categoria: actualCategoria, caminho: actualCaminho }
-}
+// This catch-all route owns PT-BR URLs only. Locale-prefixed URLs
+// (/en/..., /es/..., /zh/...) are owned by [locale]/[categoria]/[...caminho]
+// which reads MDX directly from disk via compileMDX. Mixing the manifest path
+// here was serving PT-BR fallbacks for locales that DO have translations on
+// disk — see memory bug-mdx-render-oom.md: ALWAYS compileMDX, NEVER manifest.
 
 export function generateStaticParams() {
   // Only emit routes for `publicado: true` content. Quarantined lessons
@@ -88,38 +74,12 @@ export function generateStaticParams() {
   // crash the build with malformed JSX.
   const conteudos = publicadosApenas()
 
-  // BUILD_LOCALE controls which routes this build emits.
-  // - Unset: emit ALL (PT-BR + every translated locale prefix). Used for
-  //   local dev / single-build mode.
-  // - Set: emit ONLY that locale's routes. Matrix-build mode (CI), where
-  //   each locale gets its own job and 11 jobs merge into the final out/.
-  const buildLocale = process.env.BUILD_LOCALE ?? ''
-
-  // Paths PT-BR (sem prefixo de locale)
-  const ptBR = conteudos.map(({ caminho }) => {
+  // PT-BR only — no locale prefixes. The [locale] sibling route handles
+  // every other locale via compileMDX from `content/i18n/<speechLang>/...`.
+  return conteudos.map(({ caminho }) => {
     const [categoria, ...rest] = caminho.split('/')
     return { categoria: categoria!, caminho: rest }
   })
-
-  if (buildLocale === 'pt-BR') return ptBR
-
-  // Paths com prefixo de locale (/en/aulas/..., /es/aulas/..., etc.)
-  // No matrix mode: só o locale-alvo. No single-build mode: todos.
-  const localePaths: Array<{ categoria: string; caminho: string[] }> = []
-  const targetLocales = buildLocale ? [buildLocale] : Array.from(LOCALE_CODES)
-  for (const localeCode of targetLocales) {
-    if (localeCode === 'pt-BR') continue
-    for (const c of conteudos) {
-      const partes = c.caminho.split('/')
-      // Aqui `categoria` recebe o LOCALE; `caminho` recebe categoria+resto
-      localePaths.push({
-        categoria: localeCode,
-        caminho: partes,
-      })
-    }
-  }
-  if (buildLocale) return localePaths
-  return [...ptBR, ...localePaths]
 }
 
 function caminhoCompleto(categoria: string, caminho: string[]): string {
@@ -131,98 +91,40 @@ function slugDoCaminho(caminho: string[]): string {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { categoria: rawCategoria, caminho: rawCaminho } = await params
-  // Same locale-prefix detection logic as the page handler.
-  const localeMatch = parseLocalePrefix(rawCategoria, rawCaminho)
-  const categoria = localeMatch ? localeMatch.categoria : rawCategoria
-  const caminho = localeMatch ? localeMatch.caminho : rawCaminho
-  const localeCode = (localeMatch?.locale ?? 'pt-BR') as Locale
-
+  const { categoria, caminho } = await params
   const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
   if (!conteudo) return { title: 'Não encontrado' }
 
-  // Use translated frontmatter (titulo, descricao) when a translation file
-  // exists. Falls back to PT-BR meta otherwise — but in that case the route
-  // is a PT-BR fallback, NOT a real localized translation, so we still tag
-  // canonical to PT-BR (hreflangAlternatesFor only emits hreflangs for
-  // locales whose translation file actually exists).
-  let titulo = conteudo.meta.titulo
-  let descricao = conteudo.meta.descricao
-  if (localeCode !== 'pt-BR') {
-    const info = LOCALES[localeCode]
-    const arquivo = caminhoArquivoMdx(
-      `${categoria}/${caminho.join('/')}`,
-      localeCode,
-      info.speechLang,
-    )
-    if (arquivo) {
-      try {
-        const { data } = await lerMdxSource(arquivo)
-        if (typeof data.titulo === 'string') titulo = data.titulo
-        if (typeof data.descricao === 'string') descricao = data.descricao
-      } catch {
-        // keep PT-BR meta
-      }
-    }
-  }
-
   return buildLessonMetadata({
     caminho: `${categoria}/${caminho.join('/')}`,
-    locale: localeCode,
-    titulo,
-    descricao,
+    locale: 'pt-BR',
+    titulo: conteudo.meta.titulo,
+    descricao: conteudo.meta.descricao,
   })
 }
 
 export default async function ConteudoPage({ params }: Props) {
-  const { categoria: rawCategoria, caminho: rawCaminho } = await params
-  // Se a URL é /<locale>/<categoria>/<...>, descasca o locale.
-  const localeMatch = parseLocalePrefix(rawCategoria, rawCaminho)
-  const categoria = localeMatch ? localeMatch.categoria : rawCategoria
-  const caminho = localeMatch ? localeMatch.caminho : rawCaminho
-
+  const { categoria, caminho } = await params
   const completo = caminhoCompleto(categoria, caminho)
   const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
   if (!conteudo || conteudo.caminho !== completo) notFound()
 
-  // ALL locales (PT-BR and translated) go through the webpack manifest
-  // path via carregarMdxLocalizado. compileMDX-rsc was dropping JSX
-  // expression props (opcoes, solucao, passos, fonte) on translated
-  // routes — manifest path preserves them. The manifest is filtered to
-  // `publicado: true` lessons so the module graph stays small enough
-  // to build.
-  const localeCode = (localeMatch?.locale ?? 'pt-BR') as Locale
-  const mod = await carregarMdxLocalizado(completo, localeCode)
+  // PT-BR-only: serve the canonical MDX module straight from the manifest.
+  // No locale fallback dance here — locale URLs live in the [locale] route.
+  const mod = await carregarMdxLocalizado(completo, 'pt-BR')
   if (!mod) notFound()
   const MDXContent: React.ComponentType = mod.default
 
-  // For non-PT-BR locales, read frontmatter from the translated MDX
-  // source so the page header (titulo, descricao) reflects the locale.
-  // If the translation file is missing, manifest fallback already
-  // returned the PT-BR module — leave frontmatter empty so we keep
-  // the PT-BR meta from `conteudo.meta` below.
-  let translatedFrontmatter: Record<string, unknown> = {}
-  if (localeCode !== 'pt-BR') {
-    const localeInfo = LOCALES[localeCode]
-    const arquivo = caminhoArquivoMdx(completo, localeCode, localeInfo.speechLang)
-    if (arquivo) {
-      try {
-        const { data } = await lerMdxSource(arquivo)
-        translatedFrontmatter = data
-      } catch {
-        // Frontmatter read failed — fall through with PT-BR meta.
-      }
-    }
-  }
   // Keep these symbols referenced so removing the compileMDX branch
   // doesn't dead-code the imports webpack needs at the top of file.
   void compileMDX
   void MDX_COMPONENTS
   void MDX_OPTIONS
-  const translatedRendered: React.ReactNode = null
-  void translatedRendered
+  void caminhoArquivoMdx
+  void lerMdxSource
+  void LOCALES
 
   const isAula = categoria === 'aulas'
   const isFinancas = categoria === 'financas-quantitativas'
@@ -256,41 +158,25 @@ export default async function ConteudoPage({ params }: Props) {
     }
   }
 
-  // Localized meta — non-PT-BR pages use the translated frontmatter
-  // (titulo, descricao, usadoEm) so the page header reflects the locale.
-  const localizedMeta = {
-    ...conteudo.meta,
-    ...(translatedFrontmatter as Partial<typeof conteudo.meta>),
-  }
-
   // ---------- JSON-LD structured data ----------
-  const ldLessonTitle =
-    (translatedFrontmatter.titulo as string | undefined) ?? conteudo.meta.titulo
-  const ldLessonDescription =
-    (translatedFrontmatter.descricao as string | undefined) ?? conteudo.meta.descricao
-  const ldTags = (translatedFrontmatter.tags as string[] | undefined) ?? conteudo.meta.tags ?? []
-  const ldPrereqs =
-    (translatedFrontmatter.prerrequisitos as string[] | undefined) ??
-    conteudo.meta.prerrequisitos ??
-    []
   const courseSchema = buildCourseSchema({
     caminho: completo,
-    locale: localeCode,
-    titulo: ldLessonTitle,
-    descricao: ldLessonDescription,
-    tags: ldTags,
-    prerrequisitos: ldPrereqs,
+    locale: 'pt-BR' as Locale,
+    titulo: conteudo.meta.titulo,
+    descricao: conteudo.meta.descricao,
+    tags: conteudo.meta.tags ?? [],
+    prerrequisitos: conteudo.meta.prerrequisitos ?? [],
     isAula,
   })
   const breadcrumbSchema = buildBreadcrumbSchema(
-    lessonBreadcrumbs(completo, localeCode, ldLessonTitle),
+    lessonBreadcrumbs(completo, 'pt-BR', conteudo.meta.titulo),
   )
 
   return (
     <>
       <JsonLd data={[courseSchema, breadcrumbSchema]} />
       <LessonPageShell
-        meta={localizedMeta}
+        meta={conteudo.meta}
         isAula={isAula}
         isFinancas={isFinancas}
         isEngenharia={isEngenharia}

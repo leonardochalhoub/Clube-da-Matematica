@@ -171,8 +171,13 @@ export default async function ConteudoLocalizadoPage({ params }: Props) {
       options: mdxOptions,
     })
     mdxRendered = compiled.content
-  } catch {
-    // Fallback PT-BR
+  } catch (err) {
+    // Surface the failure in build logs so we stop silently shipping
+    // PT-BR for translated pages that broke during compile.
+    console.error(
+      `[i18n-fallback] compileMDX failed for ${locale}/${completo} — serving PT-BR fallback. Reason:`,
+      err instanceof Error ? err.message : err,
+    )
     const ptArquivo = caminhoArquivoMdx(completo, 'pt-BR', 'pt-BR')
     if (!ptArquivo) notFound()
     const { content } = await lerMdxSource(ptArquivo)
