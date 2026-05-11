@@ -1,0 +1,792 @@
+---
+titulo: "Lição 100 — Consolidação Trimestre 10 (EDOs)"
+slug: "licao-100-consolidacao-trim-10"
+categoria: "aulas"
+subcategoria: "ano-3-trim-10"
+descricao: "Workshop integrador de EDOs: separáveis, lineares de 1ª ordem, populações, 2ª ordem com coeficientes constantes, vibrações, RLC, Euler numérico e resfriamento de Newton."
+ordem: 100
+publicado: true
+tags: ["EDO", "consolidação", "separável", "linear", "vibrações", "RLC", "Euler", "Newton", "ano-3", "trim-10"]
+prerrequisitos: ["licao-99-newton-resfriamento"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["AP Calculus BC (EUA)", "Leistungskurs Mathematik Klasse 12 (Alemanha)", "H2 Mathematics (Singapura)", "Spécialité Maths Terminale (França)"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\underbrace{y' + p(x)\,y = q(x)}_{\text{1ª ordem linear}} \quad \Big| \quad \underbrace{ay'' + by' + cy = q(x)}_{\text{2ª ordem coef.\,constantes}}"
+  legenda={<>Dwa modele strukturalne obejmują prawie wszelkie zastosowania trimestru. Model po lewej rozwiązuje się za pomocą <strong>czynnika całkującego</strong> <Eq>{`\\mu = e^{\\int p\\,dx}`}</Eq>. Model po prawej rozwiązuje się za pośrednictwem <strong>równania charakterystycznego</strong> <Eq>{`a\\lambda^2 + b\\lambda + c = 0`}</Eq>. Przypadki nieanalityczne otrzymują Euler lub RK4.</>}
+  audioTexto="Konsolidacja trimestru 10. Równania różniczkowe pierwszego rzędu: separowalne, liniowe z czynnikiem całkującym, modele populacyjne Malthusa i logistyczne, chłodzenie Newtona. Równania różniczkowe drugiego rzędu: równanie charakterystyczne, drgania masy i sprężyny, obwód RLC. Metody numeryczne: Euler i metoda Runge-Kutty czwartego rzędu."
+/>
+
+<aside>
+
+**Podręczniki obejmujące tę lekcję**
+
+- [**Notes on Diffy Qs**](https://www.jirka.org/diffyqs/) — Jiří Lebl · §1–2 i §7 · CC-BY-SA · <em>Główne źródło dla analitycznych równań różniczkowych 1. i 2. rzędu z przykładami konsolelidującymi.</em>
+- [**REAMAT — Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · Rozdz. 8 · CC-BY-SA · <em>Euler, błędy obcięcia, RK4 i stabilność — przegląd numeryczny trimestru.</em>
+- [**Calculus Volume 2**](https://openstax.org/details/books/calculus-volume-2) — OpenStax · §4.1–4.5 · CC-BY-NC-SA · <em>Przegląd stosowany: równania różniczkowe separowalne, liniowe 1. rzędu, logistyczne i chłodzenie z problemami syntezy.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Mapa technik i kryteriów decyzyjnych">
+
+<Definicao titulo="Schemat decyzyjny klasyfikacji równań różniczkowych">
+
+Dla danego zwykłego równania różniczkowego postępuj następująco:
+
+1. **Rząd?** Ile pochodnych ma równanie? Tylko <Eq>{`y'`}</Eq>: rząd 1. Ma <Eq>{`y''`}</Eq>: rząd 2.
+2. **Liniowe?** Wszystkie składniki w <Eq>{`y, y', y''`}</Eq> są liniowe (bez iloczynów, bez funkcji <Eq>{`y`}</Eq>)?
+3. **Liniowe 1. rzędu**: <Eq>{`y' + p(x)y = q(x)`}</Eq> → czynnik całkujący <Eq>{`\\mu = e^{\\int p\\,dx}`}</Eq>.
+4. **Separowalne 1. rzędu**: <Eq>{`y' = g(x)h(y)`}</Eq> → rozdziela i całkuje.
+5. **2. rzędu współczynniki stałe**: <Eq>{`ay'' + by' + cy = q(x)`}</Eq> → równanie charakterystyczne + <Eq>{`y_p`}</Eq> przez współczynniki nieoznaczone lub wariację parametrów.
+6. **Nieanalityczne**: każda forma, która nie pasuje powyżej → numeryczne (Euler/RK4).
+
+</Definicao>
+
+> "The existence and uniqueness theorem says: there is exactly one solution curve through each point (x₀, y₀) where f and ∂f/∂y are continuous."
+> — [Lebl, *Notes on Diffy Qs* §1.2](https://www.jirka.org/diffyqs/html/intro_section.html)
+
+> "The idea behind the integrating factor is to write the left-hand side as an exact derivative."
+> — [OpenStax *Calculus Vol. 2* §4.5](https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations)
+
+**Tabela technik trimestru:**
+
+| Równanie różniczkowe | Forma kanoniczna | Technika | Rozwiązanie ogólne |
+|---|---|---|---|
+| Separowalne | <Eq>{`y' = g(x)h(y)`}</Eq> | Rozdziela i całkuje | Niejawne |
+| Liniowe 1. rzędu | <Eq>{`y'+py=q`}</Eq> | <Eq>{`\\mu=e^{\\int p}`}</Eq> | <Eq>{`y = \\frac{1}{\\mu}\\int\\mu q\\,dx + C`}</Eq> |
+| Malthus | <Eq>{`\\dot P = rP`}</Eq> | Separowalne | <Eq>{`P = P_0 e^{rt}`}</Eq> |
+| Logistyczne | <Eq>{`\\dot P = rP(1-P/K)`}</Eq> | Separowalne + rozkład na ułamki proste | <Eq>{`P = K/(1+Ae^{-rt})`}</Eq> |
+| Chłodzenie | <Eq>{`\\dot T = -k(T-T_a)`}</Eq> | Separowalne | <Eq>{`T = T_a + (T_0-T_a)e^{-kt}`}</Eq> |
+| 2. rzędu jednorodne | <Eq>{`ay''+by'+cy=0`}</Eq> | Char. <Eq>{`a\\lambda^2+b\\lambda+c=0`}</Eq> | 3 przypadki |
+| 2. rzędu wymuszone | <Eq>{`ay''+by'+cy=q`}</Eq> | <Eq>{`y_h + y_p`}</Eq> | Współczynniki nieoznaczone |
+| Euler numeryczne | Dowolne | <Eq>{`y_{n+1}=y_n+hf`}</Eq> | Ciąg |
+
+<Teorema titulo="Struktura rozwiązania liniowego drugiego rzędu">
+
+Jeśli <Eq>{`y_1, y_2`}</Eq> są liniowo niezależnymi rozwiązaniami <Eq>{`ay'' + by' + cy = 0`}</Eq> i <Eq>{`y_p`}</Eq> jest dowolnym rozwiązaniem szczególnym <Eq>{`ay'' + by' + cy = q(x)`}</Eq>, to każde rozwiązanie równania niejednorodnego to
+
+<Equation latex="y = C_1 y_1 + C_2 y_2 + y_p, \quad C_1, C_2 \in \mathbb{R}." />
+
+**Dowód (zarys).** Niech <Eq>{`z`}</Eq> będzie innym rozwiązaniem; wtedy <Eq>{`z - y_p`}</Eq> spełnia równanie jednorodne, więc należy do przestrzeni rozpinającej <Eq>{`y_1, y_2`}</Eq>. <Eq>{`\\square`}</Eq>
+
+</Teorema>
+
+<Insight>
+
+**Analogia elektromechaniczna.** Tabela
+
+| Mechaniczny | Elektryczny |
+|---|---|
+| Masa <Eq>{`m`}</Eq> | Indukcyjność <Eq>{`L`}</Eq> |
+| Tłumik <Eq>{`c`}</Eq> | Opór <Eq>{`R`}</Eq> |
+| Sprężyna <Eq>{`k`}</Eq> | <Eq>{`1/C`}</Eq> |
+| Siła <Eq>{`F`}</Eq> | Napięcie <Eq>{`V`}</Eq> |
+| Pozycja <Eq>{`x`}</Eq> | Ładunek <Eq>{`Q`}</Eq> |
+
+jest dokładna, ponieważ oba systemy są modelowane tym samym równaniem różniczkowym drugiego rzędu. Inżynierowie zastępują systemy mechaniczne obwodami — łatwiej mierzyć — i importują wyniki z powrotem.
+
+</Insight>
+
+**SVG — Diagram decyzyjny równania różniczkowego**
+
+<svg viewBox="0 0 480 320" width="480" height="320" style={{fontFamily:"sans-serif",fontSize:"12px"}}>
+  <g>
+    <rect x="160" y="10" width="160" height="36" rx="6" fill="#e0f2fe" stroke="#0284c7" strokeWidth="1.5"/>
+    <text x="240" y="33" textAnchor="middle" fill="#0c4a6e">Równanie różniczkowe przybywa</text>
+  </g>
+  <g>
+    <line x1="240" y1="46" x2="240" y2="80" stroke="#64748b" strokeWidth="1.2"/>
+    <polygon points="240,80 235,72 245,72" fill="#64748b"/>
+  </g>
+  <g>
+    <rect x="160" y="80" width="160" height="36" rx="6" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1.5"/>
+    <text x="240" y="103" textAnchor="middle" fill="#713f12">Rząd?</text>
+  </g>
+  <g>
+    <line x1="160" y1="98" x2="60" y2="150" stroke="#64748b" strokeWidth="1.2"/>
+    <text x="100" y="128" textAnchor="middle" fill="#475569">1. rząd</text>
+  </g>
+  <g>
+    <line x1="320" y1="98" x2="420" y2="150" stroke="#64748b" strokeWidth="1.2"/>
+    <text x="380" y="128" textAnchor="middle" fill="#475569">2. rząd</text>
+  </g>
+  <g>
+    <rect x="10" y="150" width="100" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
+    <text x="60" y="163" textAnchor="middle" fill="#14532d" fontSize="11">Separowalne?</text>
+    <text x="60" y="178" textAnchor="middle" fill="#14532d" fontSize="10">→ Całkuje</text>
+  </g>
+  <g>
+    <rect x="120" y="150" width="100" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
+    <text x="170" y="163" textAnchor="middle" fill="#14532d" fontSize="11">Liniowe?</text>
+    <text x="170" y="178" textAnchor="middle" fill="#14532d" fontSize="10">→ Czynn. całk.</text>
+  </g>
+  <g>
+    <rect x="370" y="150" width="100" height="36" rx="6" fill="#fce7f3" stroke="#db2777" strokeWidth="1.5"/>
+    <text x="420" y="163" textAnchor="middle" fill="#831843" fontSize="11">Współ. stałe?</text>
+    <text x="420" y="178" textAnchor="middle" fill="#831843" fontSize="10">→ Char.</text>
+  </g>
+  <g>
+    <rect x="170" y="240" width="140" height="36" rx="6" fill="#f1f5f9" stroke="#475569" strokeWidth="1.5"/>
+    <text x="240" y="263" textAnchor="middle" fill="#1e293b">Numeryczne</text>
+  </g>
+  <g>
+    <line x1="60" y1="186" x2="60" y2="258" stroke="#64748b" strokeWidth="1" strokeDasharray="5,3"/>
+    <line x1="60" y1="258" x2="170" y2="258" stroke="#64748b" strokeWidth="1" strokeDasharray="5,3"/>
+    <text x="110" y="252" textAnchor="middle" fill="#475569" fontSize="10">nieanalityczne</text>
+  </g>
+</svg>
+
+</Porta>
+
+<Porta nivel="5" titulo="Równania zmieniające się w czasie">
+
+Nauczyliśmy się radzić sobie z **rzeczami, które cały czas się zmieniają**: temperatura, która ostygą, populacje, które rosną, mosty, które się kołyszą.
+
+Dla każdego rodzaju zmian istnieje **inny trik**. Czasami matematyka rozdziela zmienne w prostym obliczeniu. Czasami potrzebujesz „magicznego czynnika", który wszystko ułatwia. I gdy żaden trik nie działa, komputer robi to **krok za krokiem** aż do odpowiedzi.
+
+W tej lekcji łączymy wszystkie triki i wybieramy właściwy do każdego problemu.
+
+</Porta>
+
+<Porta nivel="10" titulo="Osiem technik, jedna mapa">
+
+Przez cały trimestr 10 nauczyłeś się **ośmiu sposobów** radzenia sobie z równaniami zmian:
+
+1. **Separowalne** — x i y rozdzielają się: całkuje każdą stronę.
+2. **Liniowe 1. rzędu** — czynnik całkujący transformuje do jednej strony.
+3. **Malthus** — wzrost proporcjonalny: wykładniczy.
+4. **Logistyka** — wzrost z limitem pojemności.
+5. **2. rzędu jednorodne** — równanie charakterystyczne daje wykładnicze lub sinusy.
+6. **Drgania** — masa-sprężyna z tłumieniem i wymuszeniem.
+7. **RLC** — identyczne do masy-sprężyny, ale z elektronami.
+8. **Euler/RK4** — gdy nie ma formuły zamkniętej, komputer rozwiązuje krok po kroku.
+
+**Jak wybrać?** Sprawdź ile pochodnych masz: tylko <Eq>{`y'`}</Eq> → pierwszy rząd. Ma <Eq>{`y''`}</Eq> → drugi. Jeśli rozpoznasz jeden z modeli kanonicznych (logistyka, chłodzenie, masa-sprężyna), używaj tego bezpośrednio.
+
+</Porta>
+
+<Porta nivel="15" titulo="Schemat decyzyjny i typowe błędy">
+
+### Szybka decyzja
+
+```
+Równanie różniczkowe przybywa:
+├─ Tylko y': 1. rząd
+│  ├─ Rozdzielić x i y? → separowalne, całkuje
+│  ├─ Forma y' + p(x)y = q(x)? → czynnik całkujący
+│  └─ Nic? → podstawienie (Bernoulli, dokładne) lub numeryczne
+└─ Ma y'': 2. rząd
+   ├─ Współczynniki stałe?
+   │  ├─ Jednorodne → równanie charakterystyczne
+   │  └─ Wymuszone → y_h + y_p (współczynniki nieoznaczone)
+   └─ Współczynniki zmienne → Cauchy-Euler, seria lub numeryczne
+```
+
+### Klasyczne błędy trimestru
+
+- **Zapomina rozwiązań stałych w separowalnych**: jeśli <Eq>{`h(y_0) = 0`}</Eq>, wtedy <Eq>{`y \\equiv y_0`}</Eq> jest rozwiązaniem osobliwym. Dzielenie przez <Eq>{`h(y)`}</Eq> działa tylko poza pierwiastkami.
+- **Używa czynnika całkującego w równaniu nielinowym**: <Eq>{`y' = y^2`}</Eq> nie jest liniowe, nie ma czynnika całkującego.
+- **Mylisz <Eq>{`\\omega_0`}</Eq> i <Eq>{`\\omega_d`}</Eq>**: częstotliwość naturalna vs. tłumiona. <Eq>{`\\omega_d = \\omega_0\\sqrt{1-\\zeta^2}`}</Eq>.
+- **Duży krok Eulera w problemie sztywnym**: system ze stałą czasu krótką (RLC z dużym R) destabilizuje jawny Euler.
+- **Rezonancja**: gdy siła ma częstotliwość <Eq>{`\\omega_0`}</Eq> i <Eq>{`\\zeta = 0`}</Eq>, <Eq>{`y_p`}</Eq> musi zawierać czynnik <Eq>{`t`}</Eq>.
+
+### Szybka weryfikacja
+
+Zawsze podstaw rozwiązanie w pierwotne równanie różniczkowe. Jeśli wynik się nie zgadza, rozwiązanie jest błędne.
+
+</Porta>
+
+<Porta nivel="25" titulo="Mapa inżynierska: domeny i kanoniczne równania różniczkowe">
+
+Równania różniczkowe to **język inżynierii**. Każda domena ma swoje modele strukturalne.
+
+### Mechanika
+
+- Dynamika translacyjna: <Eq>{`m\\ddot x = F`}</Eq>.
+- Drgania liniowe: <Eq>{`m\\ddot x + c\\dot x + kx = F(t)`}</Eq>. Współczynnik jakości <Eq>{`Q = 1/(2\\zeta)`}</Eq>.
+- Stabilność: linearyzacja wokół równowagi, wartości własne <Eq>{`Df(x^*)`}</Eq>.
+
+### Elektryczność
+
+- RC, RL, LC, RLC: dokładne analogi masy-sprężyny.
+- Linia transmisji: równanie telegrafisty (EDP → równanie różniczkowe przez separację).
+- Maszyny elektryczne: równania Parka (transformacja dq0).
+
+### Chemia i procesy
+
+- Kinetyka 1. rzędu: <Eq>{`\\dot c = -kc`}</Eq>.
+- CSTR z reakcją egzotermiczną: bilans masy + energia, system sprzężonych równań różniczkowych.
+- Dyfuzja-reakcja (1D): <Eq>{`D c'' = \\lambda c`}</Eq> (równanie 2. rzędu w przestrzeni).
+
+### Sterowanie
+
+- PID steruje obiektem 2. rzędu. Bieguny pętli zamkniętej określają odpowiedź.
+- Sprzężenie zwrotne stanu: <Eq>{`\\dot{\\mathbf x} = A\\mathbf x + B\\mathbf u`}</Eq>, <Eq>{`\\mathbf u = -K\\mathbf x`}</Eq>.
+- Kryterium Routha-Hurwitza: stabilność bez rozwiązywania równania.
+
+### Przepływ pracy zawodowy
+
+1. **Modeluj** z fizyki (bilansy).
+2. **Bezwymiarowaj** — identyfikuj Bi, Re, <Eq>{`\\zeta`}</Eq>, <Eq>{`\\omega_0 T`}</Eq>.
+3. **Linearyzuj** jeśli <Eq>{`\\Delta`}</Eq> małe; analityka staje się dostępna.
+4. **Rozwiąż** analitycznie lub numerycznie.
+5. **Waliduj** eksperymentem lub symulacją wysokiej wierności.
+6. **Optymalizuj** parametry (sterowanie, wymiarowanie).
+
+</Porta>
+
+<Porta nivel="40" titulo="Systemy dynamiczne, adjunkty i nowoczesne pogranicza">
+
+### Geometria i przepływy
+
+Każde autonomiczne równanie różniczkowe <Eq>{`\\dot x = f(x)`}</Eq> definiuje **przepływ** <Eq>{`\\phi_t`}</Eq> na rozmaitości. Pojęcia centralne:
+
+- **Równowagi**: <Eq>{`f(x^*) = 0`}</Eq>. Hartman-Grobman: <Eq>{`\\phi_t`}</Eq> jest lokalnie topologicznie sprzężony linearyzacji, jeśli <Eq>{`Df(x^*)`}</Eq> nie ma czystej wartości własnej urojonej.
+- **Rozmaitości stabilne/niestabilne**: niezmiennicze; strukturyzują portret fazowy.
+- **Bifurkacje**: siodłowo-węzłowe, Hopfa, podwojenie okresu. Diagramy bifurkacji parametrycznej.
+- **Chaos**: dodatnie wykładniki Lapunowa. Atraktor Lorenza.
+
+### Adjunkt równania różniczkowego
+
+Aby zoptymalizować funkcjonał <Eq>{`J = \\int_0^T g(x,u)\\,dt`}</Eq> z ograniczeniem <Eq>{`\\dot x = f(x,u)`}</Eq>, gradient względem <Eq>{`u`}</Eq> jest liczony za pośrednictwem **wstecznego równania adjunktowego**. Koszt: jedno całkowanie wprzód + jedno wstecz, niezależnie od wymiaru <Eq>{`u`}</Eq>. Fundament nowoczesnej wstecznej propagacji w Neural ODEs (Chen i in., NeurIPS 2018).
+
+### Metody nowoczesne
+
+- **SINDy** (Brunton i in., 2016): identyfikuje równanie różniczkowe z danych przez regresję rzadką.
+- **Neural ODE**: sieć rezydualna w granicy ciągłej; trenuje z adjunktem.
+- **PINN** (Raissi i in., 2019): minimalizuje residuum równania + dane.
+- **Całkowanie geometryczne**: symplektyczne (Störmer-Verlet) conservują energię; Lie-group zachowują strukturę.
+
+### Powiązana nagroda Nobla
+
+James Peebles otrzymał [Nagrodę Nobla z Fizyki 2019](https://www.nobelprize.org/prizes/physics/2019/summary/) za wkład teoretyczny w kosmologię fizyczną. Równania Friedmanna — które rządzą rozszerzaniem się wszechświata — są autonomicznymi równaniami różniczkowymi 1. rzędu dla współczynnika skalowania <Eq>{`a(t)`}</Eq>.
+
+### SDE
+
+Równania różniczkowe stochastyczne: <Eq>{`dX = f(X)\\,dt + g(X)\\,dW`}</Eq> (Itô). Finanse (Black-Scholes), biologia molekularna (szum genetyczny), sterowanie solidne.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Zastosowania integrujące z danymi rzeczywistymi">
+
+### Wybór modelu: praktyczna reguła
+
+Przed jakimkolwiek obliczeniem klasyfikuj problem w schemacie decyzyjnym. Przykłady z kontekstem brazylijskim:
+
+**Epidemia prosta (COVID-19, Brazylia):** <Eq>{`\\dot I = (\\beta - \\gamma)I`}</Eq> na początku. Separowalne → wykładnicze. Gdy <Eq>{`S`}</Eq> spada: <Eq>{`\\dot I = (\\beta S/N - \\gamma)I`}</Eq>, system SIR, rozwiązuje numerycznie.
+
+**Reaktory przemysłowe (Petrobras, rafineria):** Temperatura wyjściowa wymiennika ciepła: <Eq>{`mc_p \\dot T = UA(T_s - T)`}</Eq> — liniowe 1. rzędu, czynnik całkujący.
+
+**Struktura (budynek Paulista na wietrze):** Tryb podstawowy drgań: <Eq>{`m\\ddot x + c\\dot x + kx = F_0\\cos(\\omega t)`}</Eq>. Rezonancja niepokoi, gdy <Eq>{`\\omega \\approx \\omega_0`}</Eq>.
+
+**Filtr audio (wzmacniacz, São Paulo):** Przepustnik dolnoprzepustowy RLC, <Eq>{`f_c = \\omega_0/(2\\pi) = 1/(2\\pi\\sqrt{LC})`}</Eq>. Wybierz <Eq>{`L`}</Eq> i <Eq>{`C`}</Eq> dla <Eq>{`f_c = 1`}</Eq> kHz.
+
+**Farmakokinetyka (ANVISA):** Lek zanika: <Eq>{`\\dot C = -k_e C`}</Eq>. Okres półtrwania <Eq>{`t_{1/2} = \\ln 2/k_e`}</Eq>. Dla paracetamolu <Eq>{`t_{1/2} \\approx 2`}</Eq> h.
+
+### Ściąga trimestru
+
+```
+Separowalne:  ∫ dy/h(y) = ∫ g(x) dx
+Liniowe 1. rzędu:  μ = exp(∫ p dx), y = (1/μ)∫ μq dx + C
+Logistyka:  P = K / (1 + A e^{−rt})
+Chłodzenie: T = T_a + (T_0 − T_a) e^{−kt}
+Char. 2. rzędu:   a λ² + b λ + c = 0
+Drgania:   ω_0 = √(k/m), ζ = c/(2√(mk))
+RLC:        ω_0 = 1/√(LC), ζ = (R/2)√(C/L)
+Euler:      y_{n+1} = y_n + h f(t_n, y_n)
+```
+
+</Porta>
+
+</DuasPortas>
+
+## Przykłady rozwiązane
+
+<Exemplo titulo="Klasyfikuj i rozwiąż równanie różniczkowe 1. rzędu separowalne">
+
+**Problem.** Rozwiąż zagadnienie początkowe <Eq>{`y' = 2xy`}</Eq>, <Eq>{`y(0) = 3`}</Eq>.
+
+**Strategia.** Sprawdzić czy jest separowalne: przepisać jako <Eq>{`dy/y = 2x\\,dx`}</Eq> i całkować każdą stronę. Zastosuj warunek początkowy, aby określić stałą.
+
+**Rozwiązanie.**
+
+<Equation latex="\frac{dy}{y} = 2x\,dx \;\Longrightarrow\; \ln|y| = x^2 + C_1 \;\Longrightarrow\; y = Ce^{x^2}." />
+
+WP: <Eq>{`y(0) = C = 3`}</Eq>. Rozwiązanie: <Eq>{`y = 3e^{x^2}`}</Eq>.
+
+**Weryfikacja.** <Eq>{`y' = 6xe^{x^2} = 2x\\cdot 3e^{x^2} = 2xy`}</Eq>. <Eq>{`y(0) = 3`}</Eq>. Poprawnie.
+
+**Źródło.** [Lebl, *Notes on Diffy Qs* §1.3](https://www.jirka.org/diffyqs/html/separable_section.html), Ćwiczenie 1.3.2.
+
+</Exemplo>
+
+<Exemplo titulo="Czynnik całkujący: równanie liniowe 1. rzędu z q(x) nietrywialnym">
+
+**Problem.** Rozwiąż <Eq>{`y' + (2/x)y = x^2`}</Eq>.
+
+**Strategia.** Identyfikuj <Eq>{`p(x) = 2/x`}</Eq> i oblicz <Eq>{`\\mu = e^{\\int 2/x\\,dx} = x^2`}</Eq>. Pomnóż równanie przez <Eq>{`\\mu`}</Eq> i rozpoznaj lewą stronę jako pochodną iloczynu.
+
+**Rozwiązanie.**
+
+<Equation latex="\frac{d}{dx}(x^2 y) = x^4 \;\Longrightarrow\; x^2 y = \frac{x^5}{5} + C \;\Longrightarrow\; y = \frac{x^3}{5} + \frac{C}{x^2}." />
+
+**Weryfikacja.** <Eq>{`y' = 3x^2/5 - 2C/x^3`}</Eq>. Podstaw: <Eq>{`y' + 2y/x = 3x^2/5 - 2C/x^3 + 2x^2/5 + 2C/x^3 = x^2`}</Eq>. Zgadza się.
+
+**Źródło.** [OpenStax *Calculus Vol. 2* §4.5](https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations), Przykład 4.14.
+
+</Exemplo>
+
+<Exemplo titulo="Równanie charakterystyczne z pierwiastkami zespolonymi i warunkami początkowymi">
+
+**Problem.** Rozwiąż zagadnienie początkowe <Eq>{`y'' + 2y' + 5y = 0`}</Eq>, <Eq>{`y(0) = 1`}</Eq>, <Eq>{`y'(0) = -1`}</Eq>.
+
+**Strategia.** Oblicz równanie charakterystyczne <Eq>{`\\lambda^2 + 2\\lambda + 5 = 0`}</Eq>. Pierwiastkami zespolonymi <Eq>{`\\alpha \\pm i\\beta`}</Eq> dają rozwiązanie z wykładniczą i funkcjami trygonometrycznymi. Użyj warunków początkowych, aby określić <Eq>{`C_1, C_2`}</Eq>.
+
+**Rozwiązanie.**
+
+<Equation latex="\lambda = \frac{-2 \pm \sqrt{4-20}}{2} = -1 \pm 2i." />
+
+<Equation latex="y = e^{-x}(C_1\cos 2x + C_2 \sin 2x)." />
+
+WP w <Eq>{`x=0`}</Eq>: <Eq>{`y(0) = C_1 = 1`}</Eq>.
+
+<Equation latex="y' = -e^{-x}(C_1\cos 2x + C_2\sin 2x) + e^{-x}(-2C_1\sin 2x + 2C_2\cos 2x)." />
+
+<Eq>{`y'(0) = -C_1 + 2C_2 = -1 + 2C_2 = -1`}</Eq>, stąd <Eq>{`C_2 = 0`}</Eq>.
+
+Rozwiązanie: <Eq>{`y = e^{-x}\\cos 2x`}</Eq>.
+
+**Weryfikacja.** <Eq>{`y' = -e^{-x}\\cos 2x - 2e^{-x}\\sin 2x`}</Eq>; <Eq>{`y'' = e^{-x}\\cos 2x + 4e^{-x}\\sin 2x - 2e^{-x}\\sin 2x + ..`}</Eq> — po algebrze, <Eq>{`y'' + 2y' + 5y = 0`}</Eq>. Zgadza się.
+
+**Źródło.** [Lebl, *Notes on Diffy Qs* §2.2](https://www.jirka.org/diffyqs/html/secondlc_section.html), Przykład 2.2.4.
+
+</Exemplo>
+
+<Exemplo titulo="Model logistyczny z rzeczywistymi danymi populacyjnymi">
+
+**Problem.** Populacja miasta: 50 tys. w 2000, 80 tys. w 2010. Pojemność nośna szacowana na 200 tys. Model logistyczny <Eq>{`\\dot P = rP(1-P/K)`}</Eq>. Znajdź <Eq>{`r`}</Eq> i przewiduj populację w 2030.
+
+**Strategia.** Rozwiązanie logistyczne to <Eq>{`P(t) = K/(1+Ae^{-rt})`}</Eq>. Użyj <Eq>{`P(0) = 50`}</Eq>, aby znaleźć <Eq>{`A`}</Eq>; użyj <Eq>{`P(10) = 80`}</Eq>, aby znaleźć <Eq>{`r`}</Eq>; oblicz <Eq>{`P(30)`}</Eq>.
+
+**Rozwiązanie.** <Eq>{`K = 200`}</Eq>, <Eq>{`P(0) = 200/(1+A) = 50 \\Rightarrow A = 3`}</Eq>.
+
+<Equation latex="P(t) = \frac{200}{1 + 3e^{-rt}}." />
+
+<Eq>{`P(10) = 200/(1+3e^{-10r}) = 80 \\Rightarrow 1 + 3e^{-10r} = 2{,}5 \\Rightarrow e^{-10r} = 0{,}5`}</Eq>.
+
+<Eq>{`r = \\ln 2/10 \\approx 0{,}0693`}</Eq> rok⁻¹.
+
+<Eq>{`P(30) = 200/(1 + 3e^{-30 \\times 0{,}0693}) = 200/(1 + 3 \\times 0{,}125) = 200/1{,}375 \\approx 145`}</Eq> tys.
+
+**Weryfikacja.** <Eq>{`P(0) = 200/4 = 50`}</Eq>. <Eq>{`P(10) = 200/(1+3/2) = 200/2{,}5 = 80`}</Eq>. Zgadza się.
+
+**Źródło.** [OpenStax *Calculus Vol. 2* §4.4](https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation), Przykład 4.11.
+
+</Exemplo>
+
+<Exemplo titulo="Metoda Eulera zastosowana do chłodzenia Newtona: błąd vs. krok">
+
+**Problem.** Kawa 90 °C, <Eq>{`T_a = 22`}</Eq> °C, <Eq>{`k = 0{,}1`}</Eq> min⁻¹. Użyj Eulera z <Eq>{`h = 2`}</Eq> min, aby obliczyć <Eq>{`T(4)`}</Eq>. Porównaj z dokładną wartością.
+
+**Strategia.** Równanie różniczkowe: <Eq>{`T' = -0{,}1(T - 22)`}</Eq>, <Eq>{`T(0) = 90`}</Eq>. Dwa kroki Eulera. Dokładne rozwiązanie: <Eq>{`T(t) = 22 + 68e^{-0{,}1t}`}</Eq>.
+
+**Rozwiązanie.**
+
+Krok 1 (<Eq>{`t=0 \\to 2`}</Eq>): <Eq>{`f(0, 90) = -0{,}1(90-22) = -6{,}8`}</Eq>. <Eq>{`T(2) \\approx 90 + 2\\times(-6{,}8) = 76{,}4`}</Eq> °C.
+
+Krok 2 (<Eq>{`t=2 \\to 4`}</Eq>): <Eq>{`f(2, 76{,}4) = -0{,}1(76{,}4-22) = -5{,}44`}</Eq>. <Eq>{`T(4) \\approx 76{,}4 + 2\\times(-5{,}44) = 65{,}52`}</Eq> °C.
+
+Dokładne: <Eq>{`T(4) = 22 + 68e^{-0{,}4} = 22 + 68\\times 0{,}6703 \\approx 67{,}6`}</Eq> °C.
+
+Błąd: <Eq>{`67{,}6 - 65{,}5 = 2{,}1`}</Eq> °C (około 3%). Z <Eq>{`h = 0{,}5`}</Eq> min błąd spada do 0,13%.
+
+**Weryfikacja.** Formuła błędu lokalnego Eulera: <Eq>{`O(h^2) = O(4) = 0{,}1^2 \\times 68 \\times (e^{-0{,}1 \\times 0}/2) \\approx 0{,}34`}</Eq> °C na krok, kumulując ~0,68 °C — rząd poprawny.
+
+**Źródło.** [REAMAT UFRGS, *Cálculo Numérico* Rozdz. 8](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html), Sekcja 8.2, Przykład 8.3.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-100-consolidacao-trim-10">
+
+<Exercicio
+  numero="100.1"
+  dificuldade="aplicacao"
+  solucao={<>Separowalne. <Eq>{`dy/y = 3x\\,dx`}</Eq>. <Eq>{`\\ln|y| = 3x^2/2 + C_1`}</Eq>. <Eq>{`y = Ce^{3x^2/2}`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "20", exercicio: "Ćwiczenie 1.3.1", licenca: "CC-BY-SA" }}
+>
+Klasyfikuj i rozwiąż: <Eq>{`y' = 3xy`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.2"
+  dificuldade="aplicacao"
+  solucao={<>Liniowe 1. rzędu. <Eq>{`p = 1/x`}</Eq>, <Eq>{`\\mu = x`}</Eq>. <Eq>{`(xy)' = x^3`}</Eq>. <Eq>{`xy = x^4/4 + C`}</Eq>. <Eq>{`y = x^3/4 + C/x`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-5-first-order-linear-equations", secao: "§4.5", pagina: "392", exercicio: "Ćwiczenie 4.5.101", licenca: "CC-BY-NC-SA" }}
+>
+Klasyfikuj i rozwiąż: <Eq>{`y' + y/x = x^2`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.3"
+  dificuldade="aplicacao"
+  solucao={<>Charakterystyczne: <Eq>{`\\lambda^2 + 4\\lambda + 4 = (\\lambda+2)^2 = 0`}</Eq>. Pierwiastek podwójny <Eq>{`\\lambda = -2`}</Eq>. <Eq>{`y = (C_1 + C_2 x)e^{-2x}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Napisz równanie charakterystyczne: <Eq>{`\\lambda^2 + 4\\lambda + 4 = 0`}</Eq>.</li>
+      <li>Rozłóż na czynniki: <Eq>{`(\\lambda + 2)^2 = 0`}</Eq>, pierwiastek podwójny <Eq>{`\\lambda = -2`}</Eq>.</li>
+      <li>Pierwiastek podwójny wymaga dwóch wyrazów: <Eq>{`y = (C_1 + C_2 x)e^{-2x}`}</Eq>.</li>
+      <li>Sprawdź: <Eq>{`y'' + 4y' + 4y = 0`}</Eq>. Zgadza się po algebrze.</li>
+      <em>Sztuczka:</em> pierwiastek podwójny zawsze generuje dodatkowy czynnik x; bez niego miałbyś tylko jedno rozwiązanie, ale równanie 2. rzędu potrzebuje dwóch parametrów swobodnych.
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "82", exercicio: "Ćwiczenie 2.2.3", licenca: "CC-BY-SA" }}
+>
+Klasyfikuj i rozwiąż: <Eq>{`y'' + 4y' + 4y = 0`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.4"
+  dificuldade="aplicacao"
+  solucao={<>Jednorodne: <Eq>{`y_h = C_1\\cos 3x + C_2\\sin 3x`}</Eq>. Rezonancja: wymuszenie na częstotliwości naturalnej. <Eq>{`y_p = x(A\\cos 3x + B\\sin 3x)`}</Eq>. Podstawiając: <Eq>{`A = 0`}</Eq>, <Eq>{`B = 1/6`}</Eq>. <Eq>{`y = C_1\\cos 3x + C_2\\sin 3x + (x/6)\\sin 3x`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/forcedosc_section.html", secao: "§2.6", pagina: "108", exercicio: "Ćwiczenie 2.6.3", licenca: "CC-BY-SA" }}
+>
+Klasyfikuj i rozwiąż: <Eq>{`y'' + 9y = \\cos 3x`}</Eq> (uważaj na rezonancję).
+</Exercicio>
+
+<Exercicio
+  numero="100.5"
+  dificuldade="aplicacao"
+  solucao={<>Logistyka: <Eq>{`K=100`}</Eq>, <Eq>{`r=0{,}1`}</Eq>, <Eq>{`P_0=5`}</Eq>. <Eq>{`A = (100-5)/5 = 19`}</Eq>. <Eq>{`P(t) = 100/(1+19e^{-0{,}1t})`}</Eq>. Równowaga stabilna w <Eq>{`P=100`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "380", exercicio: "Ćwiczenie 4.4.201", licenca: "CC-BY-NC-SA" }}
+>
+Rozwiąż <Eq>{`\\dot P = 0{,}1P(1 - P/100)`}</Eq>, <Eq>{`P(0) = 5`}</Eq>. Jaka jest stabilna wartość równowagi?
+</Exercicio>
+
+<Exercicio
+  numero="100.6"
+  dificuldade="aplicacao"
+  solucao={<>Chłodzenie Newtona. <Eq>{`T(t) = 22 + 58e^{-0{,}05t}`}</Eq>. Równowaga: <Eq>{`T_a = 22`}</Eq> °C. Dla <Eq>{`T = 40`}</Eq>: <Eq>{`t = \\ln(58/18)/0{,}05 \\approx 23{,}5`}</Eq> min.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/auteq_section.html", secao: "§1.6", pagina: "38", exercicio: "Ćwiczenie 1.6.1", licenca: "CC-BY-SA" }}
+>
+Rozwiąż <Eq>{`\\dot T = -0{,}05(T - 22)`}</Eq>, <Eq>{`T(0) = 80`}</Eq>. W jakim czasie temperatura osiąga 40 °C?
+</Exercicio>
+
+<Exercicio
+  numero="100.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`L=0{,}1`}</Eq>, <Eq>{`R=1`}</Eq>, <Eq>{`C=0{,}1`}</Eq>. Char.: <Eq>{`0{,}1\\lambda^2 + \\lambda + 10 = 0`}</Eq>, <Eq>{`\\lambda = -5 \\pm 9{,}747i`}</Eq>. Niedotłumione. <Eq>{`Q(t) = e^{-5t}(\\cos(9{,}747t) + 0{,}513\\sin(9{,}747t))`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "107", exercicio: "Ćwiczenie 2.6.1", licenca: "CC-BY-SA" }}
+>
+Rozwiąż <Eq>{`0{,}1\\ddot Q + \\dot Q + 10Q = 0`}</Eq>, <Eq>{`Q(0) = 1`}</Eq>, <Eq>{`\\dot Q(0) = 0`}</Eq>. Klasyfikuj tłumienie.
+</Exercicio>
+
+<Exercicio
+  numero="100.8"
+  dificuldade="aplicacao"
+  solucao={<>Dokładne: <Eq>{`e^{-1} \\approx 0{,}3679`}</Eq>. Euler z <Eq>{`h=0{,}1`}</Eq>: <Eq>{`y_1 = 1 - 0{,}1 = 0{,}9`}</Eq>; po 10 krokach, <Eq>{`y_{10} = (0{,}9)^{10} \\approx 0{,}3487`}</Eq>. Błąd względny: ~5,2%. RK4 daje błąd mniejszy niż 0,001%.</>}
+  passos={<>
+    <ol>
+      <li>Euler: <Eq>{`y_{n+1} = y_n + h(-y_n) = y_n(1-h) = y_n \\times 0{,}9`}</Eq>.</li>
+      <li>Dziesięć kroków: <Eq>{`y_{10} = (0{,}9)^{10} \\approx 0{,}3487`}</Eq>.</li>
+      <li>Dokładne: <Eq>{`e^{-1} \\approx 0{,}3679`}</Eq>. Błąd: 0,0192.</li>
+      <li>Błąd Eulera to <Eq>{`O(h) = O(0{,}1)`}</Eq> — proporcjonalny do kroku.</li>
+      <em>Ciekawostka:</em> Dla <Eq>{`y' = -y`}</Eq>, jawny Euler jest stabilny wtedy i tylko wtedy, gdy <Eq>{`|1-h\\lambda| \\leq 1`}</Eq>, czyli <Eq>{`h \\leq 2`}</Eq>. Tu <Eq>{`h = 0{,}1`}</Eq> jest dobrze wewnątrz regionu stabilności.
+    </ol>
+  </>}
+  fonte={{ livro: "REAMAT UFRGS — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "Rozdz. 8", pagina: "148", exercicio: "Ćwiczenie 8.1", licenca: "CC-BY-SA" }}
+>
+Zastosuj metodę Eulera z <Eq>{`h = 0{,}1`}</Eq> do <Eq>{`y' = -y`}</Eq>, <Eq>{`y(0) = 1`}</Eq>, od <Eq>{`t=0`}</Eq> do <Eq>{`t=1`}</Eq>. Porównaj z <Eq>{`e^{-1}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.9"
+  dificuldade="aplikacao"
+  solucao={<>Przepisz: <Eq>{`y' = e^x \\cdot e^y`}</Eq>. Separowalne: <Eq>{`e^{-y}dy = e^x dx`}</Eq>. <Eq>{`-e^{-y} = e^x + C`}</Eq>. <Eq>{`y = -\\ln(-e^x - C)`}</Eq> (określone gdzie <Eq>{`e^x + C < 0`}</Eq>).</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "21", exercicio: "Ćwiczenie 1.3.5", licenca: "CC-BY-SA" }}
+>
+Rozwiąż <Eq>{`y' = e^{x+y}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.10"
+  dificuldade="aplikacao"
+  solucao={<>Jednorodne: <Eq>{`y_h = C_1 e^{2x} + C_2 e^{3x}`}</Eq>. Szczególne przez współczynniki nieoznaczone: <Eq>{`y_p = Ae^{4x}`}</Eq>. <Eq>{`16A - 20A + 6A = 1 \\Rightarrow 2A = 1 \\Rightarrow A = 1/2`}</Eq>. <Eq>{`y = C_1 e^{2x} + C_2 e^{3x} + e^{4x}/2`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nthorderle_section.html", secao: "§2.5", pagina: "98", exercicio: "Ćwiczenie 2.5.4", licenca: "CC-BY-SA" }}
+>
+Rozwiąż <Eq>{`y'' - 5y' + 6y = e^{4x}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.11"
+  dificuldade="aplicacao"
+  solucao={<>Masa-sprężyna bez tłumienia: <Eq>{`\\omega_0 = \\sqrt{k/m} = \\sqrt{4} = 2`}</Eq> rad/s. <Eq>{`x(t) = \\cos 2t`}</Eq>. Okres <Eq>{`T = \\pi`}</Eq> s, amplituda <Eq>{`A = 1`}</Eq>, faza <Eq>{`\\phi = 0`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "91", exercicio: "Ćwiczenie 2.4.1", licenca: "CC-BY-SA" }}
+>
+Masa-sprężyna bez tłumienia: <Eq>{`m = 1`}</Eq> kg, <Eq>{`k = 4`}</Eq> N/m, <Eq>{`x(0) = 1`}</Eq>, <Eq>{`\\dot x(0) = 0`}</Eq>. Znajdź okres, amplitudę i fazę.
+</Exercicio>
+
+<Exercicio
+  numero="100.12"
+  dificuldade="aplikacao"
+  solucao={<>Podstaw <Eq>{`y = e^{2x}\\cos 3x`}</Eq>: <Eq>{`y' = 2e^{2x}\\cos 3x - 3e^{2x}\\sin 3x`}</Eq>; <Eq>{`y'' = e^{2x}(4\\cos 3x - 12\\sin 3x - 9\\cos 3x) = e^{2x}(-5\\cos 3x - 12\\sin 3x)`}</Eq>. Wtedy <Eq>{`y'' - 4y' + 13y = e^{2x}(-5-4\\times 2+13)\\cos 3x + e^{2x}(-12-4\\times(-3))\\sin 3x = 0`}</Eq>. Zgadza się.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "83", exercicio: "Ćwiczenie 2.2.6", licenca: "CC-BY-SA" }}
+>
+Zweryfikuj przez bezpośrednie podstawienie, że <Eq>{`y = e^{2x}\\cos 3x`}</Eq> rozwiązuje <Eq>{`y'' - 4y' + 13y = 0`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.13"
+  dificuldade="aplikacao"
+  solucao={<>Logistyka z <Eq>{`K=1`}</Eq>, <Eq>{`r=1`}</Eq>: <Eq>{`y(t) = 1/(1+9e^{-t})`}</Eq>. <Eq>{`y \\to 1`}</Eq> gdy <Eq>{`t \\to \\infty`}</Eq>. Dla <Eq>{`y = 0{,}5`}</Eq>: <Eq>{`1 + 9e^{-t} = 2 \\Rightarrow e^{-t} = 1/9 \\Rightarrow t = \\ln 9 \\approx 2{,}2`}</Eq> jednostek czasu.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "382", exercicio: "Ćwiczenie 4.4.202", licenca: "CC-BY-NC-SA" }}
+>
+<Eq>{`\\dot y = y(1-y)`}</Eq>, <Eq>{`y(0) = 0{,}1`}</Eq>. Jaka jest wartość graniczna <Eq>{`y(\\infty)`}</Eq>? W jakim czasie <Eq>{`y = 0{,}5`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="100.14"
+  dificuldade="aplikacao"
+  solucao={<>Liniowe 1. rzędu z "rezonancją": <Eq>{`p = 2`}</Eq>, ale wymuszenie <Eq>{`q = 3e^{-2x}`}</Eq> też ma wykładnik <Eq>{`-2`}</Eq>. Czynnik całkujący: <Eq>{`\\mu = e^{2x}`}</Eq>. <Eq>{`(e^{2x}y)' = 3`}</Eq>. <Eq>{`e^{2x}y = 3x + C`}</Eq>. <Eq>{`y = (3x+C)e^{-2x}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Identyfikuj: <Eq>{`p = 2`}</Eq>, <Eq>{`q = 3e^{-2x}`}</Eq>. Czynnik całkujący: <Eq>{`\\mu = e^{\\int 2\\,dx} = e^{2x}`}</Eq>.</li>
+      <li>Pomnóż: <Eq>{`(e^{2x}y)' = e^{2x} \\cdot 3e^{-2x} = 3`}</Eq>.</li>
+      <li>Całkuj: <Eq>{`e^{2x}y = 3x + C`}</Eq>.</li>
+      <li>Rozwiązanie: <Eq>{`y = (3x + C)e^{-2x}`}</Eq>.</li>
+      <em>Sztuczka:</em> "rezonancja 1. rzędu" zachodzi gdy <Eq>{`q = Ae^{-px}`}</Eq> (wykładnik równy <Eq>{`-p`}</Eq>). Po pomnożeniu przez <Eq>{`\\mu = e^{px}`}</Eq>, prawa strona staje się stała i całka daje czynnik <Eq>{`x`}</Eq> — analogicznie do pierwszego pierwiastka w 2. rzędzie.
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "27", exercicio: "Ćwiczenie 1.4.4", licenca: "CC-BY-SA" }}
+>
+Rozwiąż <Eq>{`y' + 2y = 3e^{-2x}`}</Eq>. Wyjaśnij, dlaczego w rozwiązaniu pojawia się czynnik <Eq>{`x`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.15"
+  dificuldade="aplikacao"
+  solucao={<>Bernoulli z <Eq>{`n=2`}</Eq>: podstawienie <Eq>{`u = y^{-1}`}</Eq>, <Eq>{`u' = -y^{-2}y'`}</Eq>. Równanie w <Eq>{`u`}</Eq>: <Eq>{`u' - u = -x`}</Eq>. Liniowe: <Eq>{`\\mu = e^{-x}`}</Eq>. <Eq>{`(e^{-x}u)' = -xe^{-x}`}</Eq>. <Eq>{`u = x + 1 + Ce^x`}</Eq>. <Eq>{`y = 1/(x+1+Ce^x)`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "30", exercicio: "Ćwiczenie 1.4.8", licenca: "CC-BY-SA" }}
+>
+Bernoulli: rozwiąż <Eq>{`y' + y = xy^2`}</Eq> przez podstawienie <Eq>{`u = 1/y`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.16"
+  dificuldade="aplikacao"
+  solucao={<>Niech <Eq>{`v = y'`}</Eq>. Wtedy <Eq>{`v' = -v`}</Eq>. Liniowe separowalne: <Eq>{`v = Ce^{-x}`}</Eq>. Całkując: <Eq>{`y = -Ce^{-x} + D`}</Eq>, lub <Eq>{`y = Ae^{-x} + B`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "85", exercicio: "Ćwiczenie 2.2.8", licenca: "CC-BY-SA" }}
+>
+Rozwiąż <Eq>{`y'' = -y'`}</Eq>. (Wskazówka: obniż do 1. rzędu robi <Eq>{`v = y'`}</Eq>.)
+</Exercicio>
+
+<Exercicio
+  numero="100.17"
+  dificuldade="aplikacao"
+  solucao={<>Char.: <Eq>{`\\lambda^2 - 6\\lambda + 9 = (\\lambda-3)^2 = 0`}</Eq>. Pierwiastek podwójny <Eq>{`\\lambda = 3`}</Eq>. <Eq>{`y_h = (C_1 + C_2 x)e^{3x}`}</Eq>. Szczególne (zgadnij <Eq>{`y_p = Ae^{5x}`}</Eq>): <Eq>{`25A - 30A + 9A = 4 \\Rightarrow 4A = 4 \\Rightarrow A = 1`}</Eq>. <Eq>{`y = (C_1+C_2 x)e^{3x} + e^{5x}`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nthorderle_section.html", secao: "§2.5", pagina: "99", exercicio: "Ćwiczenie 2.5.6", licenca: "CC-BY-SA" }}
+>
+Rozwiąż <Eq>{`y'' - 6y' + 9y = 4e^{5x}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="100.18"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Separowalne — całkuj dy/y(1−y) z obu stron", correta: true },
+    { texto: "Liniowe z czynnikiem całkującym" },
+    { texto: "Równanie charakterystyczne 2. rzędu" },
+    { texto: "Metoda Eulera, bo nie ma rozwiązania analitycznego" }
+  ]}
+  solucao={<>Logistyka <Eq>{`\\dot P = rP(1-P/K)`}</Eq> jest separowalna: <Eq>{`dP/(P(1-P/K)) = r\\,dt`}</Eq>. Rozkład na ułamki proste rozwiązuje całkę po lewej. Nie jest liniowa (iloczyn <Eq>{`P^2/K`}</Eq> jest nieliniowy). Ma zamknięte rozwiązanie analityczne.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "377", exercicio: "Ćwiczenie 4.4.1", licenca: "CC-BY-NC-SA" }}
+>
+Jaka jest właściwa technika do rozwiązania równania logistycznego <Eq>{`\\dot P = rP(1 - P/K)`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="100.19"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Pierwiastkami rzeczywistymi ujemnymi: tłumienie nadkrytyczne, bez oscylacji", correta: true },
+    { texto: "Pierwiastkami czysto urojonymi: ciągła rezonancja" },
+    { texto: "Pierwiastkami z dodatnią częścią rzeczywistą: system stabilny" },
+    { texto: "Pierwiastkiem podwójnym: system niestabilny" }
+  ]}
+  solucao={<>Jeśli <Eq>{`\\Delta = b^2 - 4ac > 0`}</Eq> i oba pierwiastkami ujemnymi (<Eq>{`\\lambda_1, \\lambda_2 < 0`}</Eq>), rozwiązanie <Eq>{`y = C_1 e^{\\lambda_1 x} + C_2 e^{\\lambda_2 x}`}</Eq> dąży do zera bez oscylacji — tłumienie nadkrytyczne. Ujemna część rzeczywista gwarantuje stabilność; pierwiastkami rzeczywistymi (bez części urojonej) gwarantuje brak oscylacji.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "92", exercicio: "Ćwiczenie 2.4.4", licenca: "CC-BY-SA" }}
+>
+Dyskryminanta <Eq>{`\\Delta = b^2 - 4ac > 0`}</Eq> z oboma pierwiastkami ujemnymi. Jakie jest zachowanie rozwiązania <Eq>{`ay'' + by' + cy = 0`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="100.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Euler ma rząd 1 (błąd O(h)); RK4 ma rząd 4 (błąd O(h^4))", correta: true },
+    { texto: "Euler jest dokładniejszy ale wolniejszy" },
+    { texto: "Oba mają ten sam rząd zbieżności" },
+    { texto: "RK4 jest niestabilny dla problemów sztywnych" }
+  ]}
+  solucao={<>Euler postępuje z pochodną w jednym punkcie (styczna); błąd lokalny <Eq>{`O(h^2)`}</Eq>, globalny <Eq>{`O(h)`}</Eq>. RK4 używa średniej ważonej czterech ocen (Simpson-jak); błąd globalny <Eq>{`O(h^4)`}</Eq>. Aby zmniejszyć błąd do połowy: Euler musi podwoić liczbę kroków; RK4 musi tylko <Eq>{`2^{1/4} \\approx 1{,}19`}</Eq> razy więcej kroków.</>}
+  fonte={{ livro: "REAMAT UFRGS — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "Rozdz. 8", pagina: "152", exercicio: "Ćwiczenie 8.3", licenca: "CC-BY-SA" }}
+>
+Porównaj rząd zbieżności metody Eulera i RK4.
+</Exercicio>
+
+<Exercicio
+  numero="100.21"
+  dificuldade="aplicacao"
+  solucao={<>Chłodzenie sądowe: <Eq>{`T_0 = 37`}</Eq> °C, <Eq>{`T_a = 20`}</Eq> °C, <Eq>{`k = 0{,}3`}</Eq> h⁻¹. Zwłoki znalezione o 10 z <Eq>{`T = 33`}</Eq> °C. <Eq>{`33 = 20 + 17e^{-0{,}3t} \\Rightarrow e^{-0{,}3t} = 13/17 \\Rightarrow t = \\ln(17/13)/0{,}3 \\approx 0{,}8939`}</Eq> h. Śmierć o <Eq>{`10 - 0{,}9 \\approx 9{,}1`}</Eq> tj. około 09:06.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/auteq_section.html", secao: "§1.6", pagina: "40", exercicio: "Ćwiczenie 1.6.5", licenca: "CC-BY-SA" }}
+>
+Zwłoki znalezione o 10 z temperaturą 33 °C. Pokój 20 °C, <Eq>{`k = 0{,}3`}</Eq> h⁻¹. Oszacuj czas śmierci.
+</Exercicio>
+
+<Exercicio
+  numero="100.22"
+  dificuldade="modelagem"
+  solucao={<>Zawieszenie motocykla: <Eq>{`m = 200`}</Eq> kg, <Eq>{`k_s = 30000`}</Eq> N/m, <Eq>{`\\zeta = 0{,}5`}</Eq>. <Eq>{`\\omega_0 = \\sqrt{30000/200} = \\sqrt{150} \\approx 12{,}25`}</Eq> rad/s (1,95 Hz). <Eq>{`c = 2\\zeta\\sqrt{mk} = 2 \\times 0{,}5 \\times \\sqrt{6 \\times 10^6} \\approx 2449`}</Eq> N·s/m. Niedotłumione: <Eq>{`\\omega_d = \\omega_0\\sqrt{1-0{,}25} \\approx 10{,}61`}</Eq> rad/s. Bez przeregulowania.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/mv_section.html", secao: "§2.4", pagina: "94", exercicio: "Ćwiczenie 2.4.7", licenca: "CC-BY-SA" }}
+>
+Zawieszenie motocykla: <Eq>{`m = 200`}</Eq> kg, <Eq>{`k = 30`}</Eq> kN/m, <Eq>{`\\zeta = 0{,}5`}</Eq>. Oblicz częstotliwość naturalną, współczynnik tłumienia i klasyfikuj reżim.
+</Exercicio>
+
+<Exercicio
+  numero="100.23"
+  dificuldade="modelagem"
+  solucao={<>Ładowanie RC: <Eq>{`V_C(t) = 5(1 - e^{-t/\\tau})`}</Eq> z <Eq>{`\\tau = 5`}</Eq> ms. Dla <Eq>{`V_C = 4`}</Eq> V: <Eq>{`1 - e^{-t/\\tau} = 0{,}8 \\Rightarrow e^{-t/\\tau} = 0{,}2 \\Rightarrow t = 5\\ln 5 \\approx 8{,}05`}</Eq> ms.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "106", exercicio: "Ćwiczenie 2.6.4", licenca: "CC-BY-SA" }}
+>
+Obwód RC z <Eq>{`\\tau = RC = 5`}</Eq> ms, źródło 5 V skokami. W jakim czasie <Eq>{`V_C = 4`}</Eq> V?
+</Exercicio>
+
+<Exercicio
+  numero="100.24"
+  dificuldade="modelagem"
+  solucao={<>Filtr RC przepustnik dolny: <Eq>{`f_c = 1/(2\\pi RC) = 1`}</Eq> kHz. Tłumienie na 10 kHz: <Eq>{`|H| = 1/\\sqrt{1+(f/f_c)^2} = 1/\\sqrt{101} \\approx 0{,}0995`}</Eq>. W dB: <Eq>{`20\\log_{10}(0{,}0995) \\approx -20{,}0`}</Eq> dB (blisko 20 dB/dec × 1 dekada).</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/rlcsec_section.html", secao: "§2.6 (RLC)", pagina: "110", exercicio: "Ćwiczenie 2.6.5", licenca: "CC-BY-SA" }}
+>
+Filtr RC przepustnik dolny, <Eq>{`f_c = 1`}</Eq> kHz. Oblicz tłumienie (w dB) na <Eq>{`f = 10`}</Eq> kHz.
+</Exercicio>
+
+<Exercicio
+  numero="100.25"
+  dificuldade="modelagem"
+  solucao={<>Malthus: <Eq>{`P(t) = 1{,}4e^{0{,}004t}`}</Eq> miliardów, z <Eq>{`t`}</Eq> w latach od 2020. W 2050 (<Eq>{`t=30`}</Eq>): <Eq>{`P = 1{,}4e^{0{,}12} \\approx 1{,}4 \\times 1{,}1275 = 1{,}579`}</Eq> mld.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-3-separable-equations", secao: "§4.3", pagina: "367", exercicio: "Ćwiczenie 4.3.203", licenca: "CC-BY-NC-SA" }}
+>
+Chiny: 1,4 miliarda w 2020, tempo wzrostu 0,4%/rok. Model Malthusa przewiduje populację w 2050.
+</Exercicio>
+
+<Exercicio
+  numero="100.26"
+  dificuldade="modelagem"
+  solucao={<>Logistyka: <Eq>{`K=1{,}6`}</Eq> mld, <Eq>{`r=0{,}004`}</Eq>, <Eq>{`P_0=1{,}4`}</Eq>. <Eq>{`A = (1{,}6-1{,}4)/1{,}4 \\approx 0{,}143`}</Eq>. <Eq>{`P(30) = 1{,}6/(1+0{,}143e^{-0{,}12}) \\approx 1{,}6/1{,}126 \\approx 1{,}422`}</Eq> mld. Różnica vs. Malthus: <Eq>{`1{,}579 - 1{,}422 = 0{,}157`}</Eq> mld (157 milionów mniej). Pojemność nośna hamuje wzrost.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-4-the-logistic-equation", secao: "§4.4", pagina: "381", exercicio: "Ćwiczenie 4.4.203", licenca: "CC-BY-NC-SA" }}
+>
+Równe dane z poprzedniego ćwiczenia, ale ze względu na model logistyczny z <Eq>{`K = 1{,}6`}</Eq> miliarda. Porównaj z Malthusem w 2050.
+</Exercicio>
+
+<Exercicio
+  numero="100.27"
+  dificuldade="modelagem"
+  solucao={<>Rozpad leku: <Eq>{`C(t) = 100e^{-0{,}2t}`}</Eq> mg/L. Dla <Eq>{`C = 5`}</Eq>: <Eq>{`e^{-0{,}2t} = 0{,}05 \\Rightarrow t = \\ln(20)/0{,}2 = 5\\ln 20 \\approx 14{,}98`}</Eq> h. Po ~15 godzinach.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 2", url: "https://openstax.org/books/calculus-volume-2/pages/4-3-separable-equations", secao: "§4.3", pagina: "368", exercicio: "Ćwiczenie 4.3.204", licenca: "CC-BY-NC-SA" }}
+>
+Lek: <Eq>{`C(0) = 100`}</Eq> mg/L, <Eq>{`k_e = 0{,}2`}</Eq> h⁻¹. W jakim czasie stężenie spada do 5 mg/L?
+</Exercicio>
+
+<Exercicio
+  numero="100.28"
+  dificuldade="modelagem"
+  solucao={<>Zbiornik: stała objętość 100 L. <Eq>{`\\dot s = 5\\times 2 - 5\\times(s/100) = 10 - s/20`}</Eq>. Liniowe: <Eq>{`s(t) = 200(1 - e^{-t/20})`}</Eq>. Za 30 min: <Eq>{`s = 200(1-e^{-1{,}5}) \\approx 200\\times 0{,}7769 = 155{,}4`}</Eq> g.</>}
+  passos={<>
+    <ol>
+      <li>Przepływu soli na wejściu: <Eq>{`5 \\times 2 = 10`}</Eq> g/min.</li>
+      <li>Stężenie w zbiorniku: <Eq>{`s/100`}</Eq> g/L. Przepływ wyjściowy: <Eq>{`5 \\times s/100 = s/20`}</Eq> g/min.</li>
+      <li>Równanie różniczkowe: <Eq>{`\\dot s = 10 - s/20`}</Eq>. Liniowe z <Eq>{`p = 1/20`}</Eq>.</li>
+      <li>Rozwiązanie z <Eq>{`s(0) = 0`}</Eq>: <Eq>{`s(t) = 200(1 - e^{-t/20})`}</Eq>.</li>
+      <li><Eq>{`s(30) = 200(1 - e^{-1{,}5}) \\approx 155`}</Eq> g.</li>
+      <em>Ciekawostka:</em> Stężenie w równowadze (<Eq>{`t \\to \\infty`}</Eq>) to <Eq>{`200/100 = 2`}</Eq> g/L — równe stężeniu na wejściu. Zbiornik zawsze osiągnie stężenie źródła wejścia.
+    </ol>
+  </>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "29", exercicio: "Ćwiczenie 1.4.6", licenca: "CC-BY-SA" }}
+>
+Zbiornik z 100 L czystej wody otrzymuje 5 L/min solanki na 2 g/L; doskonała mieszanka wychodzi na 5 L/min. Jaka jest ilość soli za 30 min?
+</Exercicio>
+
+<Exercicio
+  numero="100.29"
+  dificuldade="modelagem"
+  solucao={<>Inwestycja ciągła: <Eq>{`\\dot S = rS + d`}</Eq> z <Eq>{`r=0{,}05`}</Eq>, <Eq>{`d=12000`}</Eq>/rok. Równowaga niestabilna w <Eq>{`S^* = -d/r = -240000`}</Eq>. Rozwiązanie: <Eq>{`S(t) = (S_0 + d/r)e^{rt} - d/r`}</Eq>. Z <Eq>{`S_0 = 0`}</Eq>: <Eq>{`S(30) = 240000(e^{1{,}5} - 1) \\approx 240000 \\times 3{,}4817 = 835603`}</Eq>. Majątek: R$ 835 tys.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "28", exercicio: "Ćwiczenie 1.4.5", licenca: "CC-BY-SA" }}
+>
+Inwestycja z ciągłym wpłynięciem: <Eq>{`\\dot S = 0{,}05 S + 12000`}</Eq>, <Eq>{`S(0) = 0`}</Eq>. Jaki jest majątek za 30 lat?
+</Exercicio>
+
+<Exercicio
+  numero="100.30"
+  dificuldade="modelagem"
+  solucao={<>Reaktor jądrowy: <Eq>{`\\dot N = (k-1)N/\\tau`}</Eq> z <Eq>{`k=1{,}001`}</Eq>, <Eq>{`\\tau = 10^{-3}`}</Eq> s. <Eq>{`\\dot N = N`}</Eq> (efektywna stopa wzrostu: 1 s⁻¹). Separowalne: <Eq>{`N = N_0 e^{t}`}</Eq>. Podwaja się gdy <Eq>{`e^t = 2 \\Rightarrow t = \\ln 2 \\approx 0{,}693`}</Eq> s. Mniej niż 1 sekunda — dlatego reaktory jądrowe potrzebują prętów sterujących.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/separable_section.html", secao: "§1.3", pagina: "22", exercicio: "Ćwiczenie 1.3.9", licenca: "CC-BY-SA" }}
+>
+Reaktor jądrowy: <Eq>{`\\dot N = (k-1)N/\\tau`}</Eq>, <Eq>{`\\tau = 10^{-3}`}</Eq> s, <Eq>{`k = 1{,}001`}</Eq>. W jakim czasie moc podwaja się?
+</Exercicio>
+
+<Exercicio
+  numero="100.31"
+  dificuldade="demonstracao"
+  solucao={<>Pokaż bezpośrednim obliczeniem. Ogólne rozwiązanie <Eq>{`y' + py = q`}</Eq> z <Eq>{`\\mu = e^{\\int p}`}</Eq> to <Eq>{`y = \\frac{1}{\\mu}\\int \\mu q\\,dx + C/\\mu`}</Eq>. Różniczkując: <Eq>{`y' = -p\\mu/(\\mu)\\int\\mu q + q = -py + q`}</Eq>. Zatem <Eq>{`y' + py = q`}</Eq>. Jedyność: jeśli <Eq>{`z`}</Eq> to inne rozwiązanie, <Eq>{`(y-z)' + p(y-z) = 0`}</Eq>; rozwiązanie: <Eq>{`y - z = C e^{-\\int p}`}</Eq>; jedyność wynika z warunku początkowego określającego <Eq>{`C`}</Eq>.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/intfac_section.html", secao: "§1.4", pagina: "25", exercicio: "Ćwiczenie 1.4.1", licenca: "CC-BY-SA" }}
+>
+Wykaż, że formuła czynnika całkującego rzeczywiście rozwiązuje <Eq>{`y' + p(x)y = q(x)`}</Eq>. Wykaż również jedyność rozwiązania dla danego warunku początkowego.
+</Exercicio>
+
+<Exercicio
+  numero="100.32"
+  dificuldade="demonstracao"
+  solucao={<>Wrońskian <Eq>{`e^{\\alpha x}\\cos\\beta x`}</Eq> i <Eq>{`e^{\\alpha x}\\sin\\beta x`}</Eq>: obliczony przez wyznacznik <Eq>{`2\\times 2`}</Eq>. <Eq>{`W = e^{\\alpha x}\\cos\\beta x \\cdot e^{\\alpha x}(\\alpha\\sin\\beta x + \\beta\\cos\\beta x) - e^{\\alpha x}\\sin\\beta x \\cdot e^{\\alpha x}(\\alpha\\cos\\beta x - \\beta\\sin\\beta x)`}</Eq>. Upraszczając: <Eq>{`W = \\beta e^{2\\alpha x}(\\cos^2\\beta x + \\sin^2\\beta x) = \\beta e^{2\\alpha x} \\neq 0`}</Eq> dla <Eq>{`\\beta \\neq 0`}</Eq>. Zatem liniowo niezależne.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/secondlc_section.html", secao: "§2.2", pagina: "84", exercicio: "Ćwiczenie 2.2.9", licenca: "CC-BY-SA" }}
+>
+Wykaż, że <Eq>{`e^{\\alpha x}\\cos\\beta x`}</Eq> i <Eq>{`e^{\\alpha x}\\sin\\beta x`}</Eq> są liniowo niezależne dla <Eq>{`\\beta \\neq 0`}</Eq>, obliczając Wrońskian.
+</Exercicio>
+
+<Exercicio
+  numero="100.33"
+  dificuldade="demonstracao"
+  solucao={<>Błąd lokalny Eulera na <Eq>{`[t_n, t_{n+1}]`}</Eq>: przez Taylora, <Eq>{`y(t_{n+1}) = y(t_n) + h y'(t_n) + h^2 y''(\\xi)/2`}</Eq>. Euler oblicza <Eq>{`y_{n+1} = y_n + h f(t_n, y_n)`}</Eq>. Błąd lokalny: <Eq>{`O(h^2)`}</Eq>. Sumując po <Eq>{`N = T/h`}</Eq> krokach: błąd globalny <Eq>{`\\leq N \\cdot O(h^2) = (T/h) O(h^2) = O(h)`}</Eq>. Euler ma globalnie rząd 1.</>}
+  fonte={{ livro: "REAMAT UFRGS — Cálculo Numérico", url: "https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html", secao: "Rozdz. 8", pagina: "150", exercicio: "Ćwiczenie 8.2", licenca: "CC-BY-SA" }}
+>
+Wykaż, że metoda Eulera ma globalny rząd zbieżności 1.
+</Exercicio>
+
+<Exercicio
+  numero="100.34"
+  dificuldade="desafio"
+  solucao={<>Lotka-Volterra: <Eq>{`\\dot x = x - 0{,}5xy`}</Eq>, <Eq>{`\\dot y = -0{,}5y + 0{,}25xy`}</Eq>. Równowagi: (0,0) i <Eq>{`(2, 2)`}</Eq>. W (2,2), jakobiana ma czysto urojone wartości własne → zamknięte orbity. Całka pierwsza: <Eq>{`0{,}5\\ln y - 0{,}25 y + 0{,}5\\ln x - x = C`}</Eq>. Nie ma formuły zamkniętej dla okresu; Euler lub RK4 numerycznie pokazuje <Eq>{`T \\approx 2\\pi/\\sqrt{(r_x)(r_y)} = 2\\pi/\\sqrt{0{,}5 \\times 0{,}25} \\approx 17{,}8`}</Eq> jednostek dla warunków blisko równowagi.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nlstability_section.html", secao: "§8.2", pagina: "310", exercicio: "Ćwiczenie 8.2.3", licenca: "CC-BY-SA" }}
+>
+**Lotka-Volterra.** <Eq>{`\\dot x = x - 0{,}5xy`}</Eq>, <Eq>{`\\dot y = -0{,}5y + 0{,}25xy`}</Eq>. Znajdź równowagi, analizuj stabilność przez jakobianę, i oszacuj okres oscylacji blisko nietrywialnej równowagi.
+</Exercicio>
+
+<Exercicio
+  numero="100.35"
+  dificuldade="desafio"
+  solucao={<>Wahadło duże: <Eq>{`\\ddot\\theta + \\sin\\theta = 0`}</Eq>. Całka energii: <Eq>{`\\dot\\theta^2/2 - \\cos\\theta = -\\cos\\theta_0`}</Eq> (z <Eq>{`\\dot\\theta(0)=0`}</Eq>). Okres: <Eq>{`T = 4\\int_0^{\\theta_0} d\\theta/\\sqrt{2(\\cos\\theta - \\cos\\theta_0)}`}</Eq>. To jest całka eliptyczna <Eq>{`T = 4K(\\sin(\\theta_0/2))`}</Eq> gdzie <Eq>{`K`}</Eq> to całka eliptyczna zupełna 1. rodzaju. Dla <Eq>{`\\theta_0 = \\pi/2`}</Eq>: <Eq>{`T = 4K(\\sin\\pi/4) = 4K(1/\\sqrt{2}) \\approx 4 \\times 1{,}8541 = 7{,}416`}</Eq> (s jeśli <Eq>{`g/l=1`}</Eq>), vs. <Eq>{`2\\pi \\approx 6{,}28`}</Eq> z przybliżenia małego kąta.</>}
+  fonte={{ livro: "Lebl — Notes on Diffy Qs", url: "https://www.jirka.org/diffyqs/html/nlstability_section.html", secao: "§8.2", pagina: "312", exercicio: "Ćwiczenie 8.2.6", licenca: "CC-BY-SA" }}
+>
+**Wahadło duże.** <Eq>{`\\ddot\\theta + \\sin\\theta = 0`}</Eq>, <Eq>{`\\theta(0) = \\pi/2`}</Eq>, <Eq>{`\\dot\\theta(0) = 0`}</Eq>. Wyraź dokładny okres jako całkę eliptyczną i porównaj z przybliżeniem małego kąta.
+</Exercicio>
+
+</ListaExercicios>
+
+## Źródła
+
+- **Lebl, Jiří.** *Notes on Diffy Qs: Differential Equations for Engineers.* Wersja 6.4. CC-BY-SA. [jirka.org/diffyqs](https://www.jirka.org/diffyqs/) — §1.2–2.6, §8.2: główne źródło dla równań różniczkowych analitycznych 1. i 2. rzędu z przykładami integrującymi.
+- **OpenStax.** *Calculus Volume 2.* CC-BY-NC-SA. [openstax.org/details/books/calculus-volume-2](https://openstax.org/details/books/calculus-volume-2) — §4.3–4.5: separowalne, liniowe, logistyka i chłodzenie z problemami syntezy.
+- **REAMAT UFRGS.** *Cálculo Numérico (Python).* CC-BY-SA. [ufrgs.br/reamat/CalculoNumerico/livro-py/main.html](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — Rozdz. 8: Euler, rząd zbieżności, RK4 i stabilność.
