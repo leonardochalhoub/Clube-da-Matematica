@@ -1,0 +1,755 @@
+---
+titulo: "Lição 77 — Teorema Central do Limite"
+slug: "licao-77-tcl"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "A média de n v.a. iid converge à normal independente da distribuição original — a lei mais importante da estatística. Demonstração via função característica, velocidade Berry-Esseen, aplicações de inferência."
+ordem: 77
+publicado: true
+tags: ["estatística", "probabilidade", "TCL", "normal", "ano-2", "trim-8"]
+prerrequisitos: ["licao-76-distribuicao-normal"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+versao: "v1"
+usadoEm: ["2.º ano do EM (16-17 anos)", "Math B japonês §4.4", "Stochastik LK alemão", "H2 Math singapurense cap. 21"]
+---
+
+<EquacaoCanonica
+  formula="\bar X_n \xrightarrow{d} \mathcal{N}\!\left(\mu,\,\frac{\sigma^2}{n}\right) \quad (n \to \infty)"
+  legenda={<>Twierdzenie <strong>Centralne Graniczne (TG)</strong> głosi, że średnia <Eq>{`n`}</Eq> zmiennych losowych niezależnych i o jednakowym rozkładzie (iid) ze średnią <Eq>{`\\mu`}</Eq> i skończoną wariancją <Eq>{`\\sigma^2`}</Eq> zbiega w rozkładzie do rozkładu normalnego z parametrami <Eq>{`\\mu`}</Eq> i <Eq>{`\\sigma^2/n`}</Eq> — niezależnie od rozkładu pierwotnego. To wyjaśnia, dlaczego krzywa dzwonowa pojawia się w danych naturalnych, błędach pomiarów i średnich próbek.</>}
+  audioTexto="Twierdzenie Centralne Graniczne. Średnia z próby X z daszkiem z n zmiennych losowych zbiega w rozkładzie do rozkładu normalnego o średniej mi i wariancji sigma kwadrat podzielone przez n, gdy n zmierza do nieskończoności."
+/>
+
+<aside>
+**Książki obejmujące tę lekcję**
+
+- [**OpenIntro Statistics** (4. ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §5.4 · CC-BY-SA · *Bardziej dostępne podejście do TG z symulacjami i przykładami ze świata rzeczywistego; idealne dla drzwi 10 i 15.*
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · §7.1–7.3 · CC-BY · *Pełne pokrycie z formalnie sformułowanym twierdzeniem, ćwiczeniami kierowanymi, tabelami z oraz zastosowaniami do wielkości próby.*
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §9.1–9.3 · GNU FDL · *Dowód via funkcja generująca momenty; dyskusja o szybkości zbieżności i rozszerzeniach Lindeberga.*
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Sformułowanie formalne i dowód">
+
+### Wersja Lindeberga-Lévy'ego
+
+<Definicao titulo="Twierdzenie Centralne Graniczne (wersja klasyczna)">
+
+Niech $X_1, X_2, \ldots$ będą zmiennymi losowymi **niezależnymi i o jednakowym rozkładzie** (iid) z $E[X_i] = \mu \in \mathbb{R}$ i $\text{Var}(X_i) = \sigma^2 \in (0, +\infty)$. Definiujemy **standaryzowaną statystykę**
+
+$$Z_n = \frac{\bar X_n - \mu}{\sigma/\sqrt{n}}, \quad \bar X_n = \frac{1}{n}\sum_{i=1}^n X_i.$$
+
+Wtedy $Z_n \xrightarrow{d} \mathcal{N}(0, 1)$: dla każdego $z \in \mathbb{R}$,
+
+$$\lim_{n \to \infty} P(Z_n \leq z) = \Phi(z) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^z e^{-t^2/2}\,dt.$$
+
+</Definicao>
+
+> "The central limit theorem is the unofficial sovereign of probability theory." — [Grinstead & Snell, *Introduction to Probability*, §9.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf)
+
+### Wersja dla sum
+
+Jeśli $S_n = X_1 + \cdots + X_n$, to $S_n \approx \mathcal{N}(n\mu,\, n\sigma^2)$ dla dużego $n$.
+
+<Equation explicacao="Standaryzacja sumy: ten sam wzór, inna skala." latex="Z_n = \frac{S_n - n\mu}{\sigma\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1)" />
+
+### Szybkość zbieżności: nierówność Berry'ego-Esseena
+
+<Teorema titulo="Berry–Esseen">
+
+Jeśli dodatkowo $E[|X_i - \mu|^3] = \rho < \infty$, to dla każdego $n$ i każdego $z$:
+
+$$\sup_{z \in \mathbb{R}} \left|P(Z_n \leq z) - \Phi(z)\right| \leq \frac{C\,\rho}{\sigma^3\,\sqrt{n}},$$
+
+z uniwersalną stałą $C < 0{,}5$. Błąd maleje jak $1/\sqrt{n}$.
+
+</Teorema>
+
+### Zarys dowodu via funkcja charakterystyczna
+
+<Definicao titulo="Funkcja charakterystyczna">
+
+**Funkcja charakterystyczna** zmiennej $X$ to $\varphi_X(t) = E[e^{itX}]$, $t \in \mathbb{R}$. Kluczowa właściwość: jeśli $X_1, \ldots, X_n$ są niezależne, to $\varphi_{X_1 + \cdots + X_n}(t) = \prod_k \varphi_{X_k}(t)$.
+
+</Definicao>
+
+Niech $Y_i = (X_i - \mu)/\sigma$ (średnia zero, wariancja 1). Rozwinięcie Taylora funkcji $\varphi_{Y_i}$:
+
+$$\varphi_{Y_i}(t) = 1 - \frac{t^2}{2} + o(t^2) \quad (t \to 0).$$
+
+Dla $Z_n = (Y_1 + \cdots + Y_n)/\sqrt{n}$:
+
+$$\varphi_{Z_n}(t) = \left[\varphi_{Y_i}\!\left(\frac{t}{\sqrt{n}}\right)\right]^n = \left[1 - \frac{t^2}{2n} + o\!\left(\frac{1}{n}\right)\right]^n \xrightarrow{n\to\infty} e^{-t^2/2}.$$
+
+Ale $e^{-t^2/2}$ jest funkcją charakterystyczną rozkładu $\mathcal{N}(0, 1)$. **Twierdzenie Lévy'ego** (ciągłości) potwierdza $Z_n \xrightarrow{d} \mathcal{N}(0,1)$. $\blacksquare$
+
+### Kiedy TG zawodzi
+
+<Insight>
+
+TG wymaga skończonej wariancji. Rozkład Cauchy'ego ma nieskończoną wariancję; średnia z $n$ Cauchy'ów to wciąż Cauchy — klasyczne TG się nie stosuje. Dla rozkładów z ogonami $|x|^{-\alpha-1}$, $0 < \alpha < 2$, granicą jest stabilny rozkład Lévy'ego o indeksie $\alpha$.
+
+</Insight>
+
+### Hipotezy niezbędne
+
+- **Niezależność** (niezbędne minimum; można osłabić do $\alpha$-mieszania).
+- **Skończona wariancja** $\sigma^2 < \infty$.
+- **n dostatecznie duże** — reguła praktyczna: $n \geq 30$ dla rozkładów mało asymetrycznych; $n \geq 100$ dla dużej asymetrii.
+
+</Porta>
+
+<Porta nivel="5" titulo="Dla pięciolatka">
+
+Wyobraź sobie rzut **jedną** kostką: może wypaść dowolna liczba od 1 do 6, wszystkie równie często. Bez dzwonka.
+
+Teraz rzucasz **dziesięcioma** kostkami i liczysz średnią. Prawie nigdy nie wyjdzie 1 (musiałoby wypaść 1 na wszystkich dziesięciu kostach naraz). Średnia prawie zawsze jest blisko 3,5.
+
+Kiedy robisz to **wiele i wiele razy**, wyniki tworzą **pagórek** — zaokrąglony górki na środku, mniej na brzegach. To **dzwonek**.
+
+Cud polega na tym: nieważne, czy rzuciłeś kostką, monetą czy mierzyłeś cokolwiek innego. Jeśli weźmiesz **średnią z wielu rzeczy**, zawsze pojawia się dzwonek.
+
+</Porta>
+
+<Porta nivel="10" titulo="Dla dziesięciolatka">
+
+Wzrost człowieka zależy od setek genów, odżywiania, snu i wielu innych czynników — każdy ma malutki wpływ. Żaden gen sam w sobie nie ma rozkładu dzwonkowego. Ale kiedy **sumujesz** setki drobnych, niezależnych efektów, suma całkowita ma prawie idealnie rozkład dzwonkowy.
+
+**Twierdzenie Centralne Graniczne** mówi dokładnie to:
+
+> Sumowanie (lub liczenie średniej) wielu niezależnych losowych rzeczy daje rozkład dzwonkowy, bez względu na pierwotny kształt każdej z nich.
+
+**Reguła praktyczna**: $n \geq 30$ wystarczy dla większości rozkładów. Dla rozkładów bardzo asymetrycznych użyj $n \geq 100$.
+
+**Przykład**: Rzuć kostką 30 razy i policz średnią. Powtórz to 10.000 razy. Histogram średnich będzie dzwonkiem wyśrodkowanym w 3,5 — mimo że każdy pojedynczy rzut jest jednostajny (równo rozłożony od 1 do 6).
+
+</Porta>
+
+<Porta nivel="15" titulo="Dla nastolatka (15 lat)">
+
+TG to najważniejszy wynik w statystyce. Wyjaśnia **dlaczego** rozkład normalny dominuje naukę.
+
+### Trzy bezpośrednie konsekwencje
+
+**1. Przedziały ufności dla dowolnego rozkładu**
+
+Jeśli $n$ jest duże, to $\bar X \pm 1{,}96\,\sigma/\sqrt{n}$ jest 95% przedziałem ufności dla $\mu$ nawet bez znajomości rozkładu $X$.
+
+**2. Standaryzacja jest uniwersalna**
+
+$Z = (\bar X - \mu)/(\sigma/\sqrt{n})$ ma rozkład w przybliżeniu $\mathcal{N}(0, 1)$. Wystarczy jedna tablica $z$ dla każdej populacji.
+
+**3. Błąd pomiarowy jest normalny**
+
+Pomiar = suma wielu drobnych zaburzeń (drgania powietrza, ograniczenie instrumentu itp.). Przez TG, całkowity błąd jest normalny. Dlatego modele błędu pomiarowego są prawie zawsze gaussowskie.
+
+### Demonstracja wizualna
+
+Ułóż histogram średnich z $n$ rzutów jednostajną kostką:
+
+- $n = 1$: jednostajny, płaski.
+- $n = 5$: trapez.
+- $n = 30$: już nie do odróżnienia od normalnego.
+
+### Deska Galtona (1889)
+
+Kulki spadające między szpilkami, losowo odchylające się w lewo lub prawo na każdym poziomie. Stos na dnie jest dwumianowy — i zbiega do normalnego. Fizyczna demonstracja TG z rzeczywistymi przedmiotami.
+
+</Porta>
+
+<Porta nivel="25" titulo="Dla studenta inżynierii">
+
+### Bezpośrednie zastosowania
+
+**Wielkość próby dla PU**: margines $\epsilon$ na 95% wymaga
+
+$$n = \left\lceil \left(\frac{1{,}96\,\sigma}{\epsilon}\right)^2 \right\rceil.$$
+
+**Test z**: statystyka $Z = (\bar X - \mu_0)/(\sigma/\sqrt{n})$; odrzucamy $H_0$ jeśli $|Z| > z_{\alpha/2}$.
+
+**Monte Carlo**: błąd standardowy szacowanej średniej $\approx \sigma/\sqrt{n}$; aby zmniejszyć błąd o połowę, czterokrotnie zwiększ $n$.
+
+**Wykres X-bar** (kontrola jakości): limity w $\bar X \pm 3\sigma/\sqrt{n}$ — każdy punkt poza tym wskazuje proces poza kontrolą.
+
+### Wersje TG
+
+| Wersja | Kluczowe hipotezy | Zastosowanie praktyczne |
+|---|---|---|
+| Lindeberga-Lévy'ego | iid, $\sigma^2 < \infty$ | Standard |
+| Lapunowa | niezależne, nie-iid, trzeci moment skończony | Populacje heterogeniczne |
+| Lindeberga ogólna | niezależne, warunek Lindeberga | Bardziej ogólna niż Lapunowa |
+| Martingale TG | różnice martyngału | Szeregi czasowe |
+
+### Kiedy $n = 30$ nie wystarczy
+
+- Rozkłady z dużą asymetrią (skośność > 2): użyj $n \geq 100$.
+- Rozkłady z ciężkimi ogonami ale skończoną wariancją: zbieżność wolniejsza — Berry-Esseen pomaga kwantyfikować.
+- Wariancja **nieznana**: zastąp $\sigma$ próbkową $s$ → rozkład $t$ Studenta (zbiega do normalnego przy $n \to \infty$).
+
+### Zasada niezmienniczości Donskera
+
+Uogólnienie funkcjonalne: proces $W_n(t) = S_{\lfloor nt \rfloor}/(\sigma\sqrt{n})$ zbiega do **standardowego ruchu Browna**. Teoretyczne podłoże wyceny opcji i równań różniczkowych stochastycznych.
+
+</Porta>
+
+<Porta nivel="40" titulo="Dla starszego profesjonalisty">
+
+### Teoria asymptotyczna i rozwinięcie Edgewortha
+
+Ulepszenie TG z poprawkami rzędu $1/\sqrt{n}$:
+
+$$P(Z_n \leq z) = \Phi(z) - \frac{\gamma_1}{6\sqrt{n}}(z^2 - 1)\phi(z) + O(1/n),$$
+
+gdzie $\gamma_1 = E[(X-\mu)^3]/\sigma^3$ to asymetria. Przydatne w bootstrapie parametrycznym i przybliżeniach $p$-wartości dla małych próbek.
+
+### Rozkłady stabilne (Lévy, Khintchine)
+
+Dla zmiennych losowych z ogonami $P(|X| > x) \sim L(x)/x^\alpha$, $0 < \alpha < 2$:
+
+$$\frac{S_n - b_n}{a_n} \xrightarrow{d} \text{Stable}(\alpha, \beta, \gamma, \delta).$$
+
+W danych finansowych, $\hat\alpha \approx 1{,}7$ w ekstremalnych zwrotach akcji — gaussowskie TG nie docenia ryzyka ogonów.
+
+### Koncentracja non-asymptotyczna
+
+Nierówności koncentracji dostarczają **skończone** ograniczenia (bez $n \to \infty$):
+
+- **Hoeffding**: $P(\bar X - \mu \geq t) \leq e^{-2n t^2/(b-a)^2}$ (zmienne ograniczone w $[a, b]$).
+- **Bernstein**: suma mniejsza niż Hoeffding, gdy wariancja mała.
+- **Azuma-Hoeffding**: dla martyngałów z ograniczonymi różnicami.
+
+W uczeniu maszynowym nierówności koncentracji dominują nad TG, bo dają gwarancje dla każdego ustalonego $n$.
+
+### TG dla procesów zależnych
+
+Dla ergodycznych łańcuchów Markowa:
+
+$$\sqrt{n}(\bar f_n - E_\pi[f]) \xrightarrow{d} \mathcal{N}\!\left(0,\, \sigma_\infty^2\right),$$
+
+gdzie $\sigma_\infty^2 = \text{Var}_\pi(f) + 2\sum_{k=1}^\infty \text{Cov}(f(X_0), f(X_k))$ to **długotrwała wariancja**. W MCMC, ta wartość kalibruje błąd szacowania; estymuje się metodą średnich partii lub spektralną.
+
+### Wielowymiarowe TG
+
+$$\sqrt{n}(\bar{\mathbf{X}}_n - \boldsymbol{\mu}) \xrightarrow{d} \mathcal{N}(\mathbf{0}, \Sigma).$$
+
+Podstawa wielowymiarowej delty-metody i wnioskowania o parametrach największej wiarygodności (rozkład asymptotyczny $\hat\theta_{MLE}$).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Zastosowanie praktyczne — dane rzeczywiste">
+
+### Badanie satysfakcji planu zdrowotnego (rzeczywiste dane IDEC/ANS, 2023)
+
+Operator ubezpieczeniowy próbkował 400 ubezpieczonych. Ocena satysfakcji: $\mu = 6{,}8$, $\sigma = 2{,}1$ (skala 0–10). Jakie jest prawdopodobieństwo, że średnia próby będzie powyżej 7,0?
+
+**Przez TG**: $\bar X_{400} \approx \mathcal{N}(6{,}8;\; 2{,}1^2/400) = \mathcal{N}(6{,}8;\; 0{,}011)$.
+
+$$z = \frac{7{,}0 - 6{,}8}{2{,}1/\sqrt{400}} = \frac{0{,}2}{0{,}105} \approx 1{,}90.$$
+
+$P(\bar X > 7{,}0) = P(Z > 1{,}90) = 1 - \Phi(1{,}90) \approx 0{,}029$ — około 3%.
+
+### Margines błędu wyborczego (styl Datafolha)
+
+$n = 2.000$ respondentów, $\hat p = 0{,}38$ (38% zamiaru głosu). Margines błędu na 95%:
+
+$$\varepsilon = 1{,}96\sqrt{\frac{0{,}38 \times 0{,}62}{2000}} \approx 0{,}021 = \pm 2{,}1\%.$$
+
+### Przepis ogólny
+
+1. Potwierdź iid i $\sigma^2$ skończoną.
+2. Oblicz $\mu$ i $\sigma$ rozkładu pierwotnego.
+3. Użyj $\bar X_n \approx \mathcal{N}(\mu, \sigma^2/n)$.
+4. Standaryzuj: $z = (\bar X - \mu)/(\sigma/\sqrt{n})$.
+5. Sprawdź tabelę $z$ lub użyj `scipy.stats.norm.cdf`.
+
+### Pułapki popularne
+
+- Używanie całego $\sigma$ zamiast $\sigma/\sqrt{n}$ jako odchylenia standardowego średniej.
+- Stosowanie TG z $n < 10$ w rozkładzie bardzo asymetrycznym.
+- Stosowanie TG do zmiennych z nieskończoną wariancją (Cauchy, Pareto z $\alpha < 2$).
+
+</Porta>
+
+</DuasPortas>
+
+## Przykłady rozwiązane
+
+<Exemplo numero="1" titulo="Średnia masa paczek wysyłanych przez Pocztę">
+
+**Problem.** Paczki wysyłane przez Pocztę mają średnią masę $\mu = 2{,}4$ kg i odchylenie standardowe $\sigma = 0{,}8$ kg (rozkład nieznany). Selekcja losuje 64 paczki. Jakie jest prawdopodobieństwo, że średnia masa próby przekroczy 2,6 kg?
+
+**Strategia.** Przez TG, $\bar X_{64} \approx \mathcal{N}(2{,}4,\; 0{,}8^2/64)$. Standaryzuj i sprawdź tabelę $z$.
+
+**Rozwiązanie.**
+
+$\sigma_{\bar X} = 0{,}8/\sqrt{64} = 0{,}8/8 = 0{,}1$ kg.
+
+$$z = \frac{2{,}6 - 2{,}4}{0{,}1} = \frac{0{,}2}{0{,}1} = 2{,}0.$$
+
+$P(\bar X > 2{,}6) = P(Z > 2{,}0) = 1 - \Phi(2{,}0) = 1 - 0{,}9772 = 0{,}0228 \approx 2{,}3\%$.
+
+**Weryfikacja.** Reguła 68-95-99,7: $\pm 2\sigma_{\bar X}$ zawiera 95%, czyli 2,5% na każdym ogonie. Wynik 2,3% jest spójny.
+
+**Źródło.** [OpenStax Statistics, §7.2, Example 7.2](https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="2" titulo="Wybory: prawdopodobieństwo proporcji próby">
+
+**Problem.** W wyborach 42% wyborców popiera kandydata A ($p = 0{,}42$). Sondaż „mouth" przeprowadza rozmowy z 1.000 wyborców losowo. Jakie jest prawdopodobieństwo, że proporcja próby $\hat p$ spadnie poniżej 0,40?
+
+**Strategia.** $\hat p$ jest średnią zmiennych Bernoulli'ego iid. Przez TG, $\hat p \approx \mathcal{N}(p, p(1-p)/n)$.
+
+**Rozwiązanie.**
+
+$\sigma_{\hat p} = \sqrt{0{,}42 \times 0{,}58 / 1000} = \sqrt{0{,}000244} \approx 0{,}01562$.
+
+$$z = \frac{0{,}40 - 0{,}42}{0{,}01562} \approx -1{,}28.$$
+
+$P(\hat p < 0{,}40) = \Phi(-1{,}28) \approx 0{,}1003 \approx 10\%$.
+
+**Weryfikacja.** Różnica 2 punktów procentowych z $\sigma \approx 1{,}6\%$ daje $z \approx -1{,}25$; wartości spójne.
+
+**Źródło.** [OpenIntro Statistics, §5.4, Exercise 5.39, p. 224](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="3" titulo="Wielkość próby dla marginesu błędu">
+
+**Problem.** Instytut chce szacować średnią pensję inżynierów w SP z marginesem błędu $\pm$ R\$ 200 na 95% pewności. Badanie pilotażowe: $s = 1.800$ reali. Jaka jest minimalna $n$?
+
+**Strategia.** Przez TG, PU 95% ma półszerokość $1{,}96\,\sigma/\sqrt{n}$. Wyizoluj $n$.
+
+**Rozwiązanie.**
+
+$$1{,}96 \times \frac{1800}{\sqrt{n}} = 200 \implies \sqrt{n} = \frac{1{,}96 \times 1800}{200} = 17{,}64 \implies n = 17{,}64^2 \approx 311{,}2.$$
+
+Zaokrąglij w górę: $n = 312$.
+
+**Weryfikacja.** $1{,}96 \times 1800/\sqrt{312} \approx 199{,}6 < 200$. Poprawnie.
+
+**Źródło.** [OpenStax Statistics, §7.3, Tamanho de amostra (Sample Size Calculation)](https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="4" titulo="Suma strat w ubezpieczeniach (modelowanie aktuarialne)">
+
+**Problem.** Towarzystwo ubezpieczeniowe ma 500 polis samochodowych. Każda szkoda kosztuje średnio R\$ 3.000 i odchylenie standardowe R\$ 1.200 (rozkład wykładniczy). Jakie jest prawdopodobieństwo, że całkowite szkody przekroczą R\$ 1.560.000?
+
+**Strategia.** $S_{500} = \sum X_i \approx \mathcal{N}(500 \times 3000,\; 500 \times 1200^2)$ przez TG (wersja dla sum).
+
+**Rozwiązanie.**
+
+$E[S] = 500 \times 3000 = 1.500.000$; $\text{Var}(S) = 500 \times 1200^2 = 720.000.000$.
+
+$\sigma_S = \sqrt{720.000.000} \approx 26.833$.
+
+$$z = \frac{1.560.000 - 1.500.000}{26.833} \approx \frac{60.000}{26.833} \approx 2{,}237.$$
+
+$P(S > 1.560.000) = P(Z > 2{,}237) \approx 1 - 0{,}9873 \approx 1{,}3\%$.
+
+**Weryfikacja.** $\pm 2\sigma_S$ odpowiada $\pm$ R\$ 53.666; $60.000 > 2\sigma_S$, czyli mniej niż 2,5% — spójne z 1,3%.
+
+**Źródło.** [OpenIntro Statistics, §4.4, p. 199–202](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="5" titulo="Berry–Esseen: kwantyfikowanie błędu przybliżenia">
+
+**Problem.** $X_i \sim \text{Bernoulli}(0{,}1)$; $\mu = 0{,}1$, $\sigma^2 = 0{,}09$, $E[|X-\mu|^3] = 0{,}9^3 \times 0{,}1 + 0{,}1^3 \times 0{,}9 = 0{,}0738$. Dla $n = 100$, jakie jest ograniczenie Berry-Esseena na błąd $\sup_z |F_{Z_{100}}(z) - \Phi(z)|$?
+
+**Strategia.** Zastosuj bezpośrednio nierówność z $C = 0{,}5$.
+
+**Rozwiązanie.**
+
+$\rho = E[|X - \mu|^3] = 0{,}0738$; $\sigma^3 = 0{,}3^3 = 0{,}027$.
+
+$$\text{Bound} \leq \frac{0{,}5 \times 0{,}0738}{0{,}027 \times \sqrt{100}} = \frac{0{,}0369}{0{,}27} \approx 0{,}137.$$
+
+Maksymalny błąd przybliżenia to mniej niż 13,7 punktów procentowych — ograniczenie konserwatywne, rzeczywisty błąd jest znacznie mniejszy.
+
+**Weryfikacja.** Dla Bernoulli(0,1) z $n = 100$, tabela dwumianowa vs. normalna pokazuje rzeczywisty błąd 1–2% — Berry-Esseen jest luźny jak oczekiwano.
+
+**Źródło.** [Grinstead & Snell, *Introduction to Probability*, §9.3, p. 346–349](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf) — GNU FDL
+
+</Exemplo>
+
+<ListaExercicios seed="licao-77-tcl">
+
+<Exercicio
+  numero="77.1"
+  dificuldade="aplicacao"
+  solucao={<>Przez TG, <Eq>{`\\bar X_{100} \\approx \\mathcal{N}(1,\\; 1/100) = \\mathcal{N}(1,\\; 0{,}01)`}</Eq>. Odchylenie standardowe średniej: <Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{100} = 0{,}1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "382", exercicio: "Example 7.3", licenca: "CC-BY" }}
+>
+$X$ wykładniczy z $\mu = 1$ i $\sigma = 1$. Napisz przybliżony rozkład $\bar X_{100}$ i oblicz $\sigma_{\bar X}$.
+</Exercicio>
+
+<Exercicio
+  numero="77.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mu = 1/2`}</Eq>, <Eq>{`\\sigma^2 = 1/12`}</Eq>. Przez TG: <Eq>{`\\bar X_{50} \\approx \\mathcal{N}(0{,}5,\\; 1/600)`}</Eq>. Odchylenie standardowe: <Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{600} \\approx 0{,}0408`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Zidentyfikuj parametry jednostajnego rozkładu na <Eq>{`[0, 1]`}</Eq>: <Eq>{`\\mu = (0+1)/2 = 0{,}5`}</Eq>; <Eq>{`\\sigma^2 = (1-0)^2/12 = 1/12`}</Eq>.</li>
+      <li>Zastosuj TG: <Eq>{`\\bar X_n \\approx \\mathcal{N}(\\mu, \\sigma^2/n)`}</Eq> z <Eq>{`n = 50`}</Eq>: <Eq>{`\\mathcal{N}(0{,}5, \\frac{1/12}{50}) = \\mathcal{N}(0{,}5, \\frac{1}{600})`}</Eq>.</li>
+      <li>Odchylenie standardowe: <Eq>{`\\sqrt{1/600} \\approx 0{,}0408`}</Eq>.</li>
+    </ol>
+    <em>Wskazówka:</em> Dla jednostajnego rozkładu <Eq>{`[a,b]`}</Eq>, <Eq>{`\\sigma^2 = (b-a)^2/12`}</Eq> — zapamiętaj ten wzór.
+  </>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "218", exercicio: "5.27", licenca: "CC-BY-SA" }}
+>
+$X$ jednostajny na $[0, 1]$. Wyznacz $\mu$ i $\sigma^2$, i napisz przybliżony rozkład $\bar X_{50}$ przez TG.
+</Exercicio>
+
+<Exercicio
+  numero="77.3"
+  dificuldade="aplicacao"
+  solucao={<>Dane: <Eq>{`\\mu = 3{,}5`}</Eq>, <Eq>{`\\sigma^2 = 35/12`}</Eq>. Suma 100 kostek: <Eq>{`S_{100} \\approx \\mathcal{N}(350,\\; 100 \\times 35/12) = \\mathcal{N}(350,\\; 291{,}67)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "393", exercicio: "Try It 7.8", licenca: "CC-BY" }}
+>
+Rzuć 100 kostkami bez stronniczości. Wyznacz przybliżony rozkład sumy $S_{100}$, podając $E[S]$ i $\text{Var}(S)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Bernoulli}(0{,}3)`}</Eq>: <Eq>{`\\mu = 0{,}3`}</Eq>, <Eq>{`\\sigma^2 = 0{,}21`}</Eq>. Przez TG: <Eq>{`\\bar X_{200} \\approx \\mathcal{N}(0{,}3,\\; 0{,}21/200) = \\mathcal{N}(0{,}3,\\; 0{,}00105)`}</Eq>. Odchylenie standardowe proporcji: <Eq>{`\\sqrt{0{,}00105} \\approx 0{,}0324`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "219", exercicio: "5.29", licenca: "CC-BY-SA" }}
+>
+$X \sim \text{Bernoulli}(0{,}3)$. Napisz przybliżony rozkład $\bar X_{200}$ przez TG i oblicz odchylenie standardowe proporcji próby.
+</Exercicio>
+
+<Exercicio
+  numero="77.5"
+  dificuldade="aplicacao"
+  resposta="2"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "384", exercicio: "Try It 7.4", licenca: "CC-BY" }}
+>
+Populacja ma $\mu = 50$ i $\sigma = 10$. Dla $n = 25$, oblicz odchylenie standardowe $\bar X$ (w liczbach całkowitych).
+</Exercicio>
+
+<Exercicio
+  numero="77.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 10/\\sqrt{25} = 2`}</Eq>. <Eq>{`z = (53 - 50)/2 = 1{,}5`}</Eq>. <Eq>{`P(\\bar X > 53) = P(Z > 1{,}5) = 1 - \\Phi(1{,}5) \\approx 1 - 0{,}9332 = 0{,}0668 \\approx 6{,}7\\%`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Oblicz <Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n} = 10/\\sqrt{25} = 2`}</Eq>.</li>
+      <li>Standaryzuj: <Eq>{`z = (53 - 50)/2 = 1{,}5`}</Eq>.</li>
+      <li>Tablica: <Eq>{`\\Phi(1{,}5) = 0{,}9332`}</Eq>, czyli <Eq>{`P(Z > 1{,}5) = 0{,}0668`}</Eq>.</li>
+    </ol>
+    <em>Wskazówka:</em> Zawsze pamiętaj użyć <Eq>{`\\sigma/\\sqrt{n}`}</Eq> (odchylenie standardowe <strong>średniej</strong>), nie samego <Eq>{`\\sigma`}</Eq>.
+  </>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "384", exercicio: "Example 7.4", licenca: "CC-BY" }}
+>
+Używając danych z 77.5 ($\mu = 50$, $\sigma = 10$, $n = 25$), oblicz $P(\bar X > 53)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (47 - 50)/2 = -1{,}5`}</Eq>. <Eq>{`P(\\bar X < 47) = \\Phi(-1{,}5) \\approx 0{,}0668`}</Eq>. Taka sama wartość co 77.6 ze względu na symetrię rozkładu normalnego.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "385", exercicio: "Try It 7.5", licenca: "CC-BY" }}
+>
+Z tymi samymi parametrami ($\mu = 50$, $\sigma = 10$, $n = 25$), oblicz $P(\bar X < 47)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 20/\\sqrt{100} = 2`}</Eq>. <Eq>{`z_1 = (98-100)/2 = -1`}</Eq>, <Eq>{`z_2 = (102-100)/2 = 1`}</Eq>. <Eq>{`P(-1 < Z < 1) = \\Phi(1) - \\Phi(-1) \\approx 0{,}8413 - 0{,}1587 = 0{,}6826 \\approx 68\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "218", exercicio: "5.25", licenca: "CC-BY-SA" }}
+>
+$X$ z $\mu = 100$, $\sigma = 20$, $n = 100$. Oblicz $P(98 < \bar X < 102)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`E[S_{50}] = 50 \\times 5 = 250`}</Eq>; <Eq>{`\\sigma_{S} = \\sqrt{50 \\times 4} = \\sqrt{200} \\approx 14{,}14`}</Eq>. <Eq>{`z = (270 - 250)/14{,}14 \\approx 1{,}414`}</Eq>. <Eq>{`P(S > 270) = P(Z > 1{,}41) \\approx 1 - 0{,}9207 = 0{,}0793 \\approx 7{,}9\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Example 7.9", licenca: "CC-BY" }}
+>
+Suma 50 zmiennych losowych iid z $\mu = 5$, $\sigma = 2$. Oblicz $P(S_{50} > 270)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n = (1{,}96 \\times 3 / 0{,}5)^2 = (11{,}76)^2 \\approx 138{,}3`}</Eq>, zaokrąglając na <Eq>{`n = 139`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>PU 95% ma półszerokość <Eq>{`1{,}96 \\sigma / \\sqrt{n}`}</Eq>. Wyrównaj do 0,5.</li>
+      <li>Wyizoluj <Eq>{`\\sqrt{n} = 1{,}96 \\times 3 / 0{,}5 = 11{,}76`}</Eq>.</li>
+      <li>Podnieś do kwadratu: <Eq>{`n = 138{,}3`}</Eq>; zaokrąglij w górę: <Eq>{`n = 139`}</Eq>.</li>
+    </ol>
+    <em>Wskazówka:</em> Aby zmniejszyć margines o połowę, czterokrotnie zwiększ n.
+  </>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "396", exercicio: "Example 7.11", licenca: "CC-BY" }}
+>
+$X$ z $\mu = 10$, $\sigma = 3$. Ile obserwacji $n$ na PU 95% z marginesem błędu $\pm 0{,}5$?
+</Exercicio>
+
+<Exercicio
+  numero="77.11"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "Spada o połowę", correta: true }, { texto: "Spada do jednej czwartej" }, { texto: "Pozostaje bez zmian" }, { texto: "Czterokrotnie rośnie" }]}
+  solucao={<><Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{n}`}</Eq>. Jeśli <Eq>{`n`}</Eq> czterokrotnie rośnie, to <Eq>{`\\sqrt{n}`}</Eq> podwaja się, czyli <Eq>{`\\sigma_{\\bar X}`}</Eq> spada o połowę. Nigdy nie spada do 1/4 (to wymagałoby <Eq>{`n \\times 16`}</Eq>).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "215", exercicio: "5.17", licenca: "CC-BY-SA" }}
+>
+Gdy wielkość próby $n$ jest mnożona przez 4, odchylenie standardowe $\bar X$ ($= \sigma/\sqrt{n}$):
+</Exercicio>
+
+<Exercicio
+  numero="77.12"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "n ≥ 30 już wystarczy" }, { texto: "n ≥ 100 lub więcej, bo wysoka asymetria spowalnia zbieżność", correta: true }, { texto: "TG się nie stosuje do rozkładów asymetrycznych" }, { texto: "n ≥ 10 wystarczy, jeśli μ jest duże" }]}
+  solucao={<>Berry-Esseen pokazuje, że błąd jest proporcjonalny do asymetrii podzielonej przez <Eq>{`\\sqrt{n}`}</Eq>. Dla rozkładów asymetrycznych zbieżność jest wolniejsza — reguła <Eq>{`n \\geq 30`}</Eq> to dla rozkładów bliskich symetrii. Z dużą asymetrią, użyj <Eq>{`n \\geq 100`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "378", exercicio: "Try It 7.1", licenca: "CC-BY" }}
+>
+$X$ ma rozkład bardzo asymetryczny (skośność = 3). Na jaką wielkość $n$ TG jest uzasadnione?
+</Exercicio>
+
+<Exercicio
+  numero="77.13"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 15/\\sqrt{36} = 2{,}5`}</Eq>. <Eq>{`z = (75 - 70)/2{,}5 = 2{,}0`}</Eq>. <Eq>{`P(\\bar X > 75) = 1 - \\Phi(2) \\approx 0{,}0228`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "387", exercicio: "Practice 7.12", licenca: "CC-BY" }}
+>
+Oceny z $\mu = 70$, $\sigma = 15$. Próba $n = 36$. Oblicz $P(\bar X > 75)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (65 - 70)/2{,}5 = -2{,}0`}</Eq>. <Eq>{`P(\\bar X < 65) = \\Phi(-2) \\approx 0{,}0228`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "387", exercicio: "Practice 7.13", licenca: "CC-BY" }}
+>
+Z tymi samymi parametrami co 77.13 ($\mu = 70$, $\sigma = 15$, $n = 36$), oblicz $P(\bar X < 65)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.15"
+  dificuldade="aplicacao"
+  solucao={<>PU 95% dla <Eq>{`\\mu`}</Eq>: <Eq>{`\\bar X \\pm 1{,}96 \\times \\sigma_{\\bar X} = 72 \\pm 1{,}96 \\times 2{,}5 = 72 \\pm 4{,}9`}</Eq>. Przedział: <Eq>{`(67{,}1;\\; 76{,}9)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "397", exercicio: "Example 7.12", licenca: "CC-BY" }}
+>
+Z $\mu = 70$, $\sigma = 15$, $n = 36$ i $\bar X = 72$, skonstruuj PU 95% dla $\mu$.
+</Exercicio>
+
+<Exercicio
+  numero="77.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 50/\\sqrt{25} = 10`}</Eq>. <Eq>{`z = (520 - 500)/10 = 2`}</Eq>. <Eq>{`P(\\bar X > 520) = 1 - \\Phi(2) \\approx 0{,}0228`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "220", exercicio: "5.31", licenca: "CC-BY-SA" }}
+>
+Masa paczek: $\mu = 500$ g, $\sigma = 50$ g. Próba $n = 25$. Oblicz $P(\bar X > 520)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.17"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z_1 = (485 - 500)/10 = -1{,}5`}</Eq>; <Eq>{`z_2 = (515 - 500)/10 = 1{,}5`}</Eq>. <Eq>{`P(485 < \\bar X < 515) = \\Phi(1{,}5) - \\Phi(-1{,}5) \\approx 0{,}9332 - 0{,}0668 = 0{,}8664 \\approx 86{,}6\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "221", exercicio: "5.33", licenca: "CC-BY-SA" }}
+>
+Z parametrami z 77.16 ($\mu = 500$ g, $\sigma = 50$ g, $n = 25$), oblicz $P(485 < \bar X < 515)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\sigma_{\\bar X} = 10/\\sqrt{100} = 1`}</Eq>. SLA 95%: percentyl 95 z <Eq>{`\\mathcal{N}(50, 1)`}</Eq>. <Eq>{`\\bar X_{0{,}95} = 50 + 1{,}645 \\times 1 = 51{,}645`}</Eq> ms.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "395", exercicio: "Try It 7.10", licenca: "CC-BY" }}
+>
+Czas odpowiedzi: $\mu = 50$ ms, $\sigma = 10$ ms. Średnia 100 pomiarów. Jaki jest limit SLA 95%?
+</Exercicio>
+
+<Exercicio
+  numero="77.19"
+  dificuldade="aplicacao"
+  solucao={<>Dane: <Eq>{`\\mu = 3{,}5`}</Eq>, <Eq>{`\\sigma^2 = 35/12`}</Eq>. <Eq>{`\\sigma_{\\bar X} = \\sqrt{35/(12 \\times 1000)} \\approx 0{,}054`}</Eq>. <Eq>{`z = (3{,}6 - 3{,}5)/0{,}054 \\approx 1{,}852`}</Eq>. <Eq>{`P(\\bar X > 3{,}6) \\approx 1 - \\Phi(1{,}85) \\approx 0{,}032`}</Eq>.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "325", exercicio: "Exercise 9.1.3", licenca: "GNU FDL" }}
+>
+Rzuć kostką 1.000 razy. Oblicz $P(\bar X > 3{,}6)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.20"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`S_{1000} \\approx \\mathcal{N}(3500, 1000 \\times 35/12)`}</Eq>. <Eq>{`\\sigma_S = \\sqrt{2916{,}67} \\approx 54{,}0`}</Eq>. <Eq>{`z = (3600 - 3500)/54 \\approx 1{,}852`}</Eq>. <Eq>{`P(S > 3600) \\approx 0{,}032`}</Eq>. Taki sam wynik co 77.19 — to ma sens.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "326", exercicio: "Exercise 9.1.5", licenca: "GNU FDL" }}
+>
+Używając rozkładu sumy $S_{1000}$ z 1.000 rzutów kostką, oblicz $P(S_{1000} > 3600)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\text{Exp}(1)`}</Eq>: <Eq>{`\\mu = 1`}</Eq>, <Eq>{`\\sigma = 1`}</Eq>. <Eq>{`\\sigma_{\\bar X} = 1/\\sqrt{100} = 0{,}1`}</Eq>. <Eq>{`z = (1{,}1 - 1)/0{,}1 = 1`}</Eq>. <Eq>{`P(\\bar X > 1{,}1) = 1 - \\Phi(1) \\approx 0{,}1587`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sample-means-averages", secao: "§7.2", pagina: "383", exercicio: "Example 7.2", licenca: "CC-BY" }}
+>
+$X \sim \text{Exp}(1)$ ($\mu = 1$, $\sigma = 1$). Oblicz $P(\bar X_{100} > 1{,}1)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.22"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`p = 0{,}40`}</Eq>. <Eq>{`\\sigma_{\\hat p} = \\sqrt{0{,}40 \\times 0{,}60 / 1000} = \\sqrt{0{,}00024} \\approx 0{,}01549`}</Eq>. <Eq>{`z = (0{,}43 - 0{,}40)/0{,}01549 \\approx 1{,}937`}</Eq>. <Eq>{`P(\\hat p > 0{,}43) \\approx 1 - \\Phi(1{,}94) \\approx 0{,}0262 \\approx 2{,}6\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "222", exercicio: "5.35", licenca: "CC-BY-SA" }}
+>
+Sondaż wyborczy: $p = 0{,}40$, $n = 1000$. Oblicz $P(\hat p > 0{,}43)$.
+</Exercicio>
+
+<Exercicio
+  numero="77.23"
+  dificuldade="modelagem"
+  solucao={<>Zwrot średni z 50 akcji: <Eq>{`\\bar R_{50} \\approx \\mathcal{N}(0{,}001,\\; 0{,}0004/50) = \\mathcal{N}(0{,}001,\\; 0{,}000008)`}</Eq>. <Eq>{`\\sigma_{\\bar R} = \\sqrt{0{,}000008} = 0{,}00283`}</Eq> (0,28% dziennie). Dywersyfikacja zmniejsza ryzyko o połowę w stosunku do 1 akcji (<Eq>{`\\sigma = 2\\%`}</Eq>).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "223", exercicio: "5.37", licenca: "CC-BY-SA" }}
+>
+Posiadasz 50 niezależnych akcji; dzienny zwrot każdej: $\mu = 0{,}1\%$, $\sigma = 2\%$. Jaki jest rozkład średniego dziennego zwrotu portfela?
+</Exercicio>
+
+<Exercicio
+  numero="77.24"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`\\sigma_{\\bar e} = 0{,}5/\\sqrt{1000} = 0{,}5/31{,}62 \\approx 0{,}01581`}</Eq>. Dla PU 95%: margines <Eq>{`\\pm 1{,}96 \\times 0{,}01581 \\approx \\pm 0{,}031`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "398", exercicio: "Try It 7.13", licenca: "CC-BY" }}
+>
+Model ML: błąd indywidualny $\sigma = 0{,}5$. Oblicz odchylenie standardowe średniego błędu dla 1.000 prognoz.
+</Exercicio>
+
+<Exercicio
+  numero="77.25"
+  dificuldade="modelagem"
+  solucao={<>Wzór na różnicę proporcji: <Eq>{`n = \\frac{(z_\\alpha + z_\\beta)^2 [p_1(1-p_1) + p_2(1-p_2)]}{(p_1 - p_2)^2}`}</Eq>. Z <Eq>{`\\alpha = 0{,}05`}</Eq> (<Eq>{`z = 1{,}96`}</Eq>), <Eq>{`\\beta = 0{,}2`}</Eq> (<Eq>{`z = 0{,}84`}</Eq>), różnica 5% i zakładając <Eq>{`p \\approx 0{,}5`}</Eq>: <Eq>{`n = (1{,}96 + 0{,}84)^2 \\times 2 \\times 0{,}25 / 0{,}0025 \\approx 1570`}</Eq> na grupę.</>}
+  passos={<>
+    <ol>
+      <li>Zidentyfikuj: <Eq>{`z_{\\alpha/2} = 1{,}96`}</Eq> (dwustronny 5%), <Eq>{`z_\\beta = 0{,}84`}</Eq> (moc 80%).</li>
+      <li>Załóż <Eq>{`p_1 = p_2 = 0{,}5`}</Eq> (najgorszy przypadek dla wariancji): <Eq>{`\\sigma_i^2 = 0{,}25`}</Eq>.</li>
+      <li>Podstaw: <Eq>{`n = (2{,}80)^2 \\times 0{,}5 / 0{,}0025 = 7{,}84 / 0{,}0025 = 3136`}</Eq> razem, 1568 na grupę.</li>
+    </ol>
+    <em>Ciekawostka:</em> To wyliczenie jest fundamentem całej analizy mocy w badaniach klinicznych.
+  </>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "259", exercicio: "6.15", licenca: "CC-BY-SA" }}
+>
+Wyznacz wielkość próby na wykrycie różnicy proporcji 5% z $\alpha = 0{,}05$ i mocą 80%.
+</Exercicio>
+
+<Exercicio
+  numero="77.26"
+  dificuldade="modelagem"
+  solucao={<>Każdy punkt pada w koło z prawdopodobieństwem <Eq>{`p = \\pi/4`}</Eq>. Estymacja Monte Carlo dla <Eq>{`\\pi`}</Eq>: <Eq>{`\\hat\\pi = 4\\hat p`}</Eq>. Przez TG, <Eq>{`\\text{Var}(\\hat p) = p(1-p)/n`}</Eq>; <Eq>{`\\text{Var}(\\hat\\pi) = 16p(1-p)/n = \\pi(4-\\pi)/n`}</Eq>. Odchylenie standardowe: <Eq>{`\\sqrt{\\pi(4-\\pi)/n}`}</Eq>.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "328", exercicio: "Exercise 9.1.7", licenca: "GNU FDL" }}
+>
+Estymacja $\pi$ Monte Carlo: $n$ losowych punktów w kwadracie $[0,1]^2$, liczy się punkty, które padają w ćwiartkę dysku. Jakie jest odchylenie standardowe estymacji $\pi$ jako funkcja $n$?
+</Exercicio>
+
+<Exercicio
+  numero="77.27"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`S_{500} \\approx \\mathcal{N}(500 \\times 100,\\; 500 \\times 25) = \\mathcal{N}(50{.}000,\\; 12{.}500)`}</Eq>. <Eq>{`\\sigma_S = \\sqrt{12{.}500} \\approx 111{,}8`}</Eq> g. Oczekiwana całkowita masa to 50 kg z odchyleniem standardowym około 112 g.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Try It 7.9", licenca: "CC-BY" }}
+>
+Partia 500 części: $\mu = 100$ g, $\sigma = 5$ g. Wyznacz rozkład całkowitej masy $S_{500}$.
+</Exercicio>
+
+<Exercicio
+  numero="77.28"
+  dificuldade="modelagem"
+  solucao={<>Jednostajny na <Eq>{`[0, 30]`}</Eq>: <Eq>{`\\mu = 15`}</Eq> min, <Eq>{`\\sigma^2 = 900/12 = 75`}</Eq>. <Eq>{`\\bar T_{50} \\approx \\mathcal{N}(15,\\; 75/50) = \\mathcal{N}(15,\\; 1{,}5)`}</Eq>. <Eq>{`z = (16 - 15)/\\sqrt{1{,}5} \\approx 0{,}816`}</Eq>. <Eq>{`P(\\bar T > 16) \\approx 1 - \\Phi(0{,}82) \\approx 0{,}2061`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "221", exercicio: "5.33", licenca: "CC-BY-SA" }}
+>
+Czas oczekiwania na autobus: $\mathcal{U}[0, 30]$ min. Oblicz $P(\bar T_{50} > 16)$ dla średniego czasu oczekiwania 50 pasażerów.
+</Exercicio>
+
+<Exercicio
+  numero="77.29"
+  dificuldade="modelagem"
+  solucao={<>Wykres X-bar z <Eq>{`n = 5`}</Eq>: <Eq>{`\\sigma_{\\bar X} = \\sigma/\\sqrt{5}`}</Eq>. Limity kontrolne: <Eq>{`\\mu \\pm 3\\sigma/\\sqrt{5} = \\mu \\pm 3\\sigma/2{,}236 = \\mu \\pm 1{,}342\\sigma`}</Eq>. Podstaw konkretne wartości <Eq>{`\\mu`}</Eq> i <Eq>{`\\sigma`}</Eq> procesu.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "399", exercicio: "Practice 7.18", licenca: "CC-BY" }}
+>
+Wykres kontrolny X-bar z $n = 5$. Limity kontrolne to $\bar X \pm 3\sigma_{\bar X}$. Oblicz szerokość przedziału w kategoriach $\sigma$ procesu.
+</Exercicio>
+
+<Exercicio
+  numero="77.30"
+  dificuldade="modelagem"
+  solucao={<>Z nieznanym <Eq>{`p`}</Eq>, użyj najgorszego przypadku <Eq>{`p = 0{,}5`}</Eq>: <Eq>{`n = (1{,}96/0{,}03)^2 \\times 0{,}25 = 65{,}33^2 \\times 0{,}25 \\approx 4268 \\times 0{,}25 \\approx 1067`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.1", pagina: "251", exercicio: "6.7", licenca: "CC-BY-SA" }}
+>
+Badanie satysfakcji: margines błędu $\pm 3\%$ na 95% pewności, $p$ nieznane. Jaka jest minimalna $n$?
+</Exercicio>
+
+<Exercicio
+  numero="77.31"
+  dificuldade="modelagem"
+  solucao={<>100 połączeń na godzinę: <Eq>{`S_{100} \\approx \\mathcal{N}(100 \\times 3,\\; 100 \\times 2{,}25) = \\mathcal{N}(300,\\; 225)`}</Eq>. Odchylenie standardowe całości: <Eq>{`\\sigma_S = 15`}</Eq> min. P(razem większa niż 330 min) <Eq>{`= P(Z > 2) \\approx 0{,}023`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-3-using-the-central-limit-theorem", secao: "§7.3", pagina: "394", exercicio: "Example 7.9", licenca: "CC-BY" }}
+>
+Czas połączenia: $\mu = 3$ min, $\sigma = 1{,}5$ min. 100 połączeń na godzinę. Wyznacz rozkład całkowitego czasu i oblicz $P(\text{razem} > 330\text{ min})$.
+</Exercicio>
+
+<Exercicio
+  numero="77.32"
+  dificuldade="desafio"
+  solucao={<>Wariant A: <Eq>{`n = 10000`}</Eq>, <Eq>{`p_A = 0{,}05`}</Eq>; wariant B: <Eq>{`p_B = 0{,}06`}</Eq>. <Eq>{`z = (\\hat p_B - \\hat p_A)/\\sqrt{p_A(1-p_A)/n + p_B(1-p_B)/n} \\approx 0{,}01/\\sqrt{2 \\times 0{,}05 \\times 0{,}95/10000} \\approx 0{,}01/0{,}00308 \\approx 3{,}25`}</Eq>. <Eq>{`p\\text{-wartość} \\approx 0{,}001`}</Eq>: różnica istotna na poziomie 5%. Moc: z tym <Eq>{`z`}</Eq>, moc > 99%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§6.2", pagina: "261", exercicio: "6.19", licenca: "CC-BY-SA" }}
+>
+Test A/B: 10.000 odwiedzających na wariant; wskaźnik konwersji A = 5%, B = 6%. Czy wzrost o 1 punkt procentowy jest statystycznie istotny? Oblicz wartość $z$ i $p$-wartość.
+</Exercicio>
+
+<Exercicio
+  numero="77.33"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "Suma wielu zmiennych losowych iid ze skończoną wariancją zbiega do rozkładu normalnego, niezależnie od rozkładu pierwotnego", correta: true }, { texto: "Każda zmienna losowa z dużym n ma rozkład normalny" }, { texto: "Rozkład pierwotny zbliża się do normalnego, gdy n rośnie" }, { texto: "Średnia próby ma zawsze dokładnie rozkład normalny" }]}
+  solucao={<>TG mówi o rozkładzie <strong>średniej próby</strong> (lub znormalizowanej sumy) — nie o rozkładzie pierwotnym. Rozkład pierwotny pozostaje ten sam; to, co zbiega do normalnego, to statystyka <Eq>{`Z_n`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "214", exercicio: "5.15", licenca: "CC-BY-SA" }}
+>
+Która z poniższych opcji prawidłowo opisuje Twierdzenie Centralne Graniczne?
+</Exercicio>
+
+<Exercicio
+  numero="77.34"
+  dificuldade="compreensao"
+  opcoes={[{ texto: "Wariancja nieskończona: dowód via funkcja charakterystyczna zawodzi, bo rozwinięcie Taylora wymaga skończonej wariancji", correta: true }, { texto: "Rozkład asymetryczny: TG nie stosuje się do rozkładów asymetrycznych" }, { texto: "Parametr nieznany: bez znajomości σ, nie można standaryzować" }, { texto: "Ogon ciężki: TG wymaga rozkładu normalnego pierwotnego" }]}
+  solucao={<>Funkcja charakterystyczna Cauchy'ego to <Eq>{`e^{-|t|}`}</Eq> — nie ma drugiej pochodnej w <Eq>{`t = 0`}</Eq> (wariancja nieskończona). Rozwinięcie <Eq>{`\\varphi(t/\\sqrt{n})^n`}</Eq> nie zbiega do <Eq>{`e^{-t^2/2}`}</Eq>. Średnia Cauchy'ów to wciąż Cauchy.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.3", pagina: "347", exercicio: "Exercise 9.3.3", licenca: "GNU FDL" }}
+>
+Dlaczego klasyczne TG Lindeberga-Lévy'ego nie stosuje się do rozkładu Cauchy'ego?
+</Exercicio>
+
+<Exercicio
+  numero="77.35"
+  dificuldade="desafio"
+  solucao={<>Symuluj w Pythonie z `numpy.random.exponential` i `numpy.mean`. Dla <Eq>{`n = 1`}</Eq>: wykładniczy malejący. Dla <Eq>{`n = 5`}</Eq>: asymetryczny ale z szczytem. Dla <Eq>{`n = 30`}</Eq>: prawie idealny dzwonek wyśrodkowany w <Eq>{`\\mu = 1`}</Eq>. Zbieżność widoczna na histogramach 10.000 powtórzeń.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "379", exercicio: "Try It 7.2", licenca: "CC-BY" }}
+>
+Symuluj TG w Pythonie dla rozkładu wykładniczego z $\lambda = 1$. Wygeneruj histogramy 10.000 średnich próby dla $n \in \lbrace 1, 5, 30 \rbrace$ i porównaj wizualnie z teoretyczną krzywą normalną.
+</Exercicio>
+
+<Exercicio
+  numero="77.36"
+  dificuldade="demonstracao"
+  solucao={<>Krok 1: definiuj <Eq>{`Y_i = (X_i - \\mu)/\\sigma`}</Eq> (średnia 0, wariancja 1). Krok 2: <Eq>{`\\varphi_{Y_i}(t) = 1 - t^2/2 + o(t^2)`}</Eq> przez Taylora (używa się skończonej wariancji). Krok 3: <Eq>{`\\varphi_{Z_n}(t) = [\\varphi_{Y_i}(t/\\sqrt{n})]^n = [1 - t^2/(2n) + o(1/n)]^n \\to e^{-t^2/2}`}</Eq>. Krok 4: <Eq>{`e^{-t^2/2}`}</Eq> to funkcja charakterystyczna <Eq>{`\\mathcal{N}(0,1)`}</Eq>. Krok 5: Twierdzenie Lévy'ego (ciągłości) potwierdza zbieżność w rozkładzie. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.3", pagina: "343–346", exercicio: "Theorem 9.3.1", licenca: "GNU FDL" }}
+>
+Zarysuj dowód TG via funkcja charakterystyczna, wskazując gdzie każda hipoteza (skończona wariancja, iid) jest używana.
+</Exercicio>
+
+<Exercicio
+  numero="77.37"
+  dificuldade="demonstracao"
+  solucao={<>Słabe Prawo Wielkich Liczb: <Eq>{`\\bar X_n \\xrightarrow{P} \\mu`}</Eq>. Dedukcja TG: <Eq>{`\\text{Var}(\\bar X_n) = \\sigma^2/n \\to 0`}</Eq>. Przez Czebyszewa: <Eq>{`P(|\\bar X_n - \\mu| > \\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2) \\to 0`}</Eq>. TG jest mocniejsze — mówi z jaką szybkością (<Eq>{`1/\\sqrt{n}`}</Eq>) i jaki kształt rozkładu odchylenia. SPWL wynika bezpośrednio.</>}
+  fonte={{ livro: "Grinstead & Snell, Introduction to Probability", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/Chapter9.pdf", secao: "§9.1", pagina: "329", exercicio: "Exercise 9.1.9", licenca: "GNU FDL" }}
+>
+Pokaż, że TG implikuje Słabe Prawo Wielkich Liczb: jeśli $Z_n \xrightarrow{d} \mathcal{N}(0,1)$, to $\bar X_n \xrightarrow{P} \mu$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Źródła
+
+- [**OpenIntro Statistics** (4. ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · CC-BY-SA. **Źródło główne ćwiczeń 77.2, 77.4, 77.8, 77.11, 77.14–17, 77.22–23, 77.25–26, 77.28, 77.30, 77.33–34.**
+- [**OpenStax Statistics**](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · CC-BY. **Źródło ćwiczeń 77.1, 77.3, 77.5–7, 77.9–10, 77.12–13, 77.18–19, 77.21, 77.24, 77.27, 77.29, 77.31, 77.35 i przykłady 1–3.**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · Dartmouth · GNU FDL. **Źródło ćwiczeń 77.19–20, 77.26, 77.36–37 i przykład 5.**

@@ -1,0 +1,695 @@
+---
+titulo: "Lição 63 — Esboço de gráficos"
+slug: "licao-63-esboco-graficos"
+categoria: "aulas"
+subcategoria: "ano-2-trim-7"
+descricao: "Pipeline completo de análise gráfica via cálculo: domínio, interceptos, simetrias, assíntotas, monotonicidade (f'), concavidade (f''), pontos de inflexão e esboço final."
+ordem: 63
+publicado: true
+tags: ["grafico", "derivada", "concavidade", "inflexao", "assintota", "ano-2", "trim-7"]
+prerrequisitos: ["licao-62-otimizacao"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º ano EM", "Equiv. Math II/III japonês (Kurvendiskussion)", "Equiv. Analysis Klasse 12 alemã"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{Dom} \to \text{Assínt.} \to f' \to f'' \to \text{Esboço}"
+  legenda={<>Pełny <strong>proces szkicowania wykresów za pomocą rachunku różniczkowego</strong> jest systematyczny: ustalić dziedzinę i miejsca przecięcia, zidentyfikować asymptoty, zbadać znak <Eq>{`f'`}</Eq> (wzrost/spadek i ekstrema) i <Eq>{`f''`}</Eq> (wklęsłość/punkty przegięcia), a następnie narysować — respektując wszystkie zebrane informacje.</>}
+  audioTexto="Szkicowanie wykresów. Pełny proces: dziedzina, punkty przecięcia z osiami, symetrie, asymptoty pionowe i poziome, znak pierwszej pochodnej dla wzrostu i spadku, punkty krytyczne i ekstrema, znak drugiej pochodnej dla wklęsłości, punkty przegięcia — i wtedy szkic, łącząc wszystkie te dane."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Podręczniki obejmujące tę lekcję
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/sec-3-2-families.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §3.2 Using derivatives to describe families of functions · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Wklęsłość, punkty przegięcia i jak f'' kształtuje zachowanie się krzywej.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §4.5 Derivatives and the Shape of a Graph · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Pełny proces szkicowania: Twierdzenie o wartości średniej, wklęsłość, przegięcia i analiza asymptot.</em>
+    </li>
+    <li>
+      <a href="https://www.apexcalculus.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hartman — APEX Calculus
+      </a>
+      <span className="text-clube-mist"> · §3.5 Curve Sketching · CC-BY-NC · </span>
+      <em className="text-clube-mist">Tabele znaków, asymptoty ukośne i przykłady progresywne od wielomianów do funkcji wymiernych.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Proces analizy graficznej">
+
+### Osiem kroków formalnych
+
+<Definicao titulo="Proces szkicowania za pomocą rachunku różniczkowego">
+
+1. **Dziedzina** <Eq>{`D \\subseteq \\mathbb{R}`}</Eq>: gdzie <Eq>{`f`}</Eq> jest określona. Zidentyfikuj zera mianownika, pierwiastkami liczb ujemnych, logarytmy liczb niedodatnich.
+
+2. **Miejsca przecięcia:** <Eq>{`f(0)`}</Eq> (przesunięcie w pionie); pierwiastkami <Eq>{`f(x) = 0`}</Eq> (przesunięcia w poziomie, gdy dostępne).
+
+3. **Symetrie:** <Eq>{`f(-x) = f(x)`}</Eq> → parzysta (wykres symetryczny względem osi <Eq>{`y`}</Eq>); <Eq>{`f(-x) = -f(x)`}</Eq> → nieparzysta (symetryczna względem pochodzenia); okresowość.
+
+4. **Asymptoty:**
+   - **Pionowa** w <Eq>{`x = a`}</Eq>: <Eq>{`\\lim_{x \\to a^\\pm} f(x) = \\pm\\infty`}</Eq>.
+   - **Pozioma** <Eq>{`y = L`}</Eq>: <Eq>{`\\lim_{x \\to \\pm\\infty} f(x) = L`}</Eq>.
+   - **Ukośna** <Eq>{`y = mx + b`}</Eq>: <Eq>{`m = \\lim_{x \\to \\infty} f(x)/x`}</Eq> i <Eq>{`b = \\lim_{x \\to \\infty}(f(x) - mx)`}</Eq>.
+
+5. **Pierwsza pochodna** <Eq>{`f'`}</Eq>: znajdź punkty krytyczne. Tabela znaków → przedziały wzrostu (<Eq>{`f' > 0`}</Eq>) i spadku (<Eq>{`f' < 0`}</Eq>), ekstrema lokalne.
+
+6. **Druga pochodna** <Eq>{`f''`}</Eq>: znajdź kandydatów na punkty przegięcia (<Eq>{`f'' = 0`}</Eq> lub nie istnieje). Tabela znaków → wklęsłość w górę (<Eq>{`f'' > 0`}</Eq>) lub w dół (<Eq>{`f'' < 0`}</Eq>).
+
+7. **Punkt przegięcia:** punkt <Eq>{`c`}</Eq> gdzie <Eq>{`f''`}</Eq> **zmienia znak** (wklęsłość się zmienia).
+
+8. **Szkic:** zaznacz miejsca przecięcia, asymptoty (linie przerywane), ekstrema i przegięcia; narysuj krzywą respektując wzrost i wklęsłość w każdym przedziale.
+
+</Definicao>
+
+> "If f'(x) > 0 on an interval, then f is increasing on that interval. If f''(x) > 0, then f is concave up. These two pieces of information, combined with critical and inflection points, give a complete picture of the graph." — [OpenStax Calculus Vol. 1, §4.5](https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph)
+
+### Tabela połączonego zachowania
+
+| <Eq>{`f'`}</Eq> | <Eq>{`f''`}</Eq> | Zachowanie |
+|---|---|---|
+| <Eq>{`> 0`}</Eq> | <Eq>{`> 0`}</Eq> | rosnąca, wklęsła w górę |
+| <Eq>{`> 0`}</Eq> | <Eq>{`< 0`}</Eq> | rosnąca, wklęsła w dół |
+| <Eq>{`< 0`}</Eq> | <Eq>{`> 0`}</Eq> | malejąca, wklęsła w górę |
+| <Eq>{`< 0`}</Eq> | <Eq>{`< 0`}</Eq> | malejąca, wklęsła w dół |
+
+### Definicja wklęsłości i przegięcia
+
+<Definicao titulo="Wklęsłość">
+
+<Eq>{`f`}</Eq> jest **wklęsła w górę** na <Eq>{`I`}</Eq> jeśli <Eq>{`f''(x) > 0`}</Eq> dla wszystkich <Eq>{`x \\in I`}</Eq> — krzywa leży powyżej każdej stycznej. <Eq>{`f`}</Eq> jest **wklęsła w dół** na <Eq>{`I`}</Eq> jeśli <Eq>{`f''(x) < 0`}</Eq>.
+
+</Definicao>
+
+<Definicao titulo="Punkt przegięcia">
+
+<Eq>{`c`}</Eq> jest **punktem przegięcia** <Eq>{`f`}</Eq> jeśli <Eq>{`f`}</Eq> jest ciągła w <Eq>{`c`}</Eq> i <Eq>{`f''`}</Eq> zmienia znak w <Eq>{`c`}</Eq>.
+
+</Definicao>
+
+<Insight>
+
+<Eq>{`f''(c) = 0`}</Eq> jest konieczny ale niewystarczający dla punktu przegięcia. Przykład: <Eq>{`f(x) = x^4`}</Eq> ma <Eq>{`f''(0) = 0`}</Eq>, ale wklęsłość nie zmienia się w <Eq>{`0`}</Eq> — to nie jest przegięcie.
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 500 220" className="w-full">
+  <defs>
+    <marker id="arr63" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g>
+    <line x1="40" y1="180" x2="470" y2="180" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr63)"/>
+    <line x1="60" y1="195" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr63)"/>
+    <path d="M 80,160 C 130,40 170,40 200,100 C 230,160 290,180 340,100 C 370,50 420,40 450,60" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+    <circle cx="155" cy="40" r="4" fill="rgb(232 199 122)"/>
+    <text x="155" y="32" textAnchor="middle" fontSize="9" fontFamily="serif" fill="rgb(232 199 122)">maks. lok.</text>
+    <circle cx="200" cy="100" r="4" fill="rgb(26 77 92)"/>
+    <text x="200" y="115" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">przegięcie</text>
+    <circle cx="340" cy="100" r="4" fill="rgb(26 77 92)"/>
+    <text x="340" y="115" textAnchor="middle" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">przegięcie</text>
+    <circle cx="295" cy="170" r="4" fill="rgb(232 199 122)"/>
+    <text x="295" y="163" textAnchor="middle" fontSize="9" fontFamily="serif" fill="rgb(232 199 122)">min. lok.</text>
+    <text x="465" y="183" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.6">x</text>
+    <text x="64" y="18" fontSize="11" fontFamily="serif" fill="currentColor" fillOpacity="0.7">y</text>
+  </g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Typowa krzywa: maksimum lokalne, dwa punkty przegięcia (zmiana wklęsłości), minimum lokalne. Punkty przegięcia występują tam, gdzie krzywiznę zmienia kierunek.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Dla pięciolatka">
+
+Wyobraź sobie, że rysują gałęź górskiej drogi. Droga czasami wznosi się, czasami opada.
+
+Gdy droga się wznosi, pochodna jest dodatnia. Gdy opada, pochodna jest ujemna. Na szczycie góry zatrzymuje się na chwilę przed opadnięciem — to jest punkt specjalny.
+
+Teraz spójrz na krzywiznę drogi. Czasami droga **zakrzywia się w górę** (jak miska) i czasami **zakrzywia się w dół** (jak kopuła). Miejsce, w którym krzywa się zmienia, to punkt przegięcia.
+
+Zanim cokolwiek narysujesz, rozsądnie jest odkryć te miejsca specjalne. Potem wystarczy połączyć punkty!
+
+</Porta>
+
+<Porta nivel="10" titulo="Dla dziesięciolatka">
+
+Aby dobrze nakreślić <Eq>{`f(x)`}</Eq>, postępuj zgodnie z tą listą:
+
+1. Gdzie funkcja istnieje? (Dziedzina)
+2. Gdzie ona przecina osie? (<Eq>{`f(0)`}</Eq> i gdzie <Eq>{`f(x) = 0`}</Eq>)
+3. Czy gdzieś dąży do nieskończoności? (Asymptoty)
+4. Gdzie ona **rośnie** (<Eq>{`f' > 0`}</Eq>) lub **pada** (<Eq>{`f' < 0`}</Eq>)?
+5. Gdzie **zakrzywia się w górę** (<Eq>{`f'' > 0`}</Eq>) lub **w dół** (<Eq>{`f'' < 0`}</Eq>)?
+
+Odpowiadając na te 5 punktów, rysunek prawie sam się rysuje!
+
+</Porta>
+
+<Porta nivel="15" titulo="Dla ucznia szkoły średniej">
+
+**Proces szkicowania** ma 8 kroków. Możesz je zapamiętać za pomocą akronimu **DISSECF** (Dziedzina, Intercepts, Symetria, Znak <Eq>{`f'`}</Eq>, Ekstrema, Concavity, Inflection, Figure).
+
+**Krok krytyczny — tabela znaków:** podziel linię rzeczywistą w punktach krytycznych i przegięcia. W każdym przedziale określ, czy <Eq>{`f' > 0`}</Eq> czy <Eq>{`< 0`}</Eq> i czy <Eq>{`f'' > 0`}</Eq> czy <Eq>{`< 0`}</Eq>. To całkowicie określa zachowanie krzywej w każdym odcinku.
+
+**Asymptota ukośna:** pojawia się, gdy stopień licznika = stopień mianownika + 1 w funkcjach wymiernych. Wykonaj dzielenie wielomianów, aby znaleźć <Eq>{`y = mx + b`}</Eq>.
+
+**Przegięcie ≠ punkt krytyczny:** ekstrema lokalne mają <Eq>{`f' = 0`}</Eq>; przegięcia mają <Eq>{`f'' = 0`}</Eq> (ze zmianą znaku). Punkt może być oba (rzadko).
+
+</Porta>
+
+<Porta nivel="25" titulo="Dla studenta inżynierii">
+
+Szkicowanie za pomocą rachunku jest **pełną analizą jakościową** funkcji, łączącą:
+
+**Twierdzenie o wartości średniej (TVM):** uzasadnia, że <Eq>{`f' > 0`}</Eq> implikuje ścisły wzrost. Bez TVM, sama wiedza, że <Eq>{`f'(c) > 0`}</Eq> w punkcie nie gwarantuje wzrostu na przedziale.
+
+**Wklęsłość i f'':** jeśli <Eq>{`f''`}</Eq> istnieje i jest dodatnia na <Eq>{`I`}</Eq>, wtedy <Eq>{`f'`}</Eq> rośnie na <Eq>{`I`}</Eq> — funkcja "przyspieszą". W analizie numerycznej wklęsłość wpływa na dokładność metod całkowania (reguła trapezów przecenia, gdy <Eq>{`f'' < 0`}</Eq>).
+
+**Asymptoty ukośne:** <Eq>{`f(x) = P(x)/Q(x)`}</Eq> z <Eq>{`\\deg P = \\deg Q + 1`}</Eq>: wykonaj dzielenie euklidesowe. Iloraz jest asymptotą ukośną; reszta <Eq>{`\\to 0`}</Eq> gdy <Eq>{`x \\to \\infty`}</Eq>.
+
+**Krzywa w inżynierii:** analiza znaków (diagramy Bodego), krzywe obciążenie-przemieszczenie w konstrukcjach i krzywe P-V w termodynamice to bezpośrednie aplikacje tej analizy jakościowej — zastępuje ciężkie obliczenia numeryczne, gdy zachowanie jakościowe wystarczy.
+
+</Porta>
+
+<Porta nivel="40" titulo="Dla seniora zawodowego">
+
+**Kurvendiskussion** (dyskusja krzywej) niemiecka, obowiązkowa na Abitur, to dokładnie ten proces — jeden z rzadkich przypadków, gdzie szkoły średnie niemieck, japońska i singapurska zbiegają się w szczegółach. Reprezentuje operacyjną syntezę rachunku różniczkowego funkcji jednej zmiennej.
+
+Historycznie, Leibniz i Johann Bernoulli już używali drugiej pochodnej do klasyfikacji ekstremów w siedemnastym wieku. Formalizacja nowoczesna — włączając wklęsłość jako własność globalną (nie punktową) — przyszła z Cauchy'ego i Weierstrassa w dziewiętnym wieku, gdy analiza zastąpiła intuicyjny argument geometryczny argumentem analitycznym rygorystycznym.
+
+W finansach ilościowych, **wypukłość** portfela obligacji to dokładnie druga pochodna ceny względem stopy procentowej. Menedżerowie ryzyka używają wypukłości (dodatnia lub ujemna) do wyceny krzywizny payoff'ów — bezpośrednio analogiczna do analizy <Eq>{`f''`}</Eq> na tej lekcji.
+
+W machine learning, analiza powierzchni strat (loss surface) za pomocą gradientu (<Eq>{`f'`}</Eq>) i Hessianu (<Eq>{`f''`}</Eq> w wymiarze wysokim) to bezpośrednie rozszerzenie. Punkty siodłowe (gdzie gradient gaśnie ale nie jest minimum) to koszmar optymalizatorów — dokładny analogon <Eq>{`f'(c) = 0`}</Eq> bez ekstremum, już widziane na L61.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplikacja praktyczna brazylijska">
+
+**Analiza krzywej produkcji rolniczej.** Produkcja soi na hektar, w zależności od ilości zastosowanego nawozu, ma typowe zachowanie:
+
+<Eq display>{`P(x) = -0{,}01x^3 + 0{,}6x^2 - 2x + 10, \quad x \in [0, 40]`}</Eq>
+
+gdzie <Eq>{`x`}</Eq> to kg nawozu na hektar i <Eq>{`P`}</Eq> to worki na hektar.
+
+<Eq display>{`P'(x) = -0{,}03x^2 + 1{,}2x - 2`}</Eq>
+
+Zera <Eq>{`P'`}</Eq>: dyskryminanta <Eq>{`1{,}44 - 0{,}24 = 1{,}20`}</Eq>. Pierwiastkami: <Eq>{`x \\approx 1{,}84`}</Eq> i <Eq>{`x \\approx 38{,}16`}</Eq>. Na przedziale <Eq>{`[0, 40]`}</Eq>: produkcja rośnie od <Eq>{`x \\approx 1{,}84`}</Eq> do <Eq>{`x \\approx 38{,}16`}</Eq>.
+
+<Eq>{`P''(x) = -0{,}06x + 1{,}2 = 0 \\Rightarrow x = 20`}</Eq> — punkt przegięcia gdzie tempo wzrostu zaczyna spadać (malejąca produktywność krańcowa, zasada fundamentalna ekonomii rolniczej).
+
+**Praktyczne czytanie:** stosowanie do 38 kg/hektar zwiększa produkcję; poza tym, nadmiar nawozu zaczyna szkodzić. Punkt przegięcia w 20 kg wskazuje gdzie produktywność krańcowa jest maksymalna.
+
+</Porta>
+
+</DuasPortas>
+
+## Przykłady rozwiązane
+
+<Exemplo titulo="Pełny szkic wielomianu sześciennego">
+
+**Problem.** Utwórz pełny szkic <Eq>{`f(x) = x^3 - 3x`}</Eq>.
+
+**Strategia.** Zastosuj 8 kroków procesu.
+
+**Rozwiązanie.**
+
+1. **Dziedzina:** <Eq>{`\\mathbb{R}`}</Eq>.
+2. **Miejsca przecięcia:** <Eq>{`f(0) = 0`}</Eq>. Pierwiastkami: <Eq>{`x(x^2-3) = 0 \\Rightarrow x = 0, \\pm\\sqrt{3}`}</Eq>.
+3. **Symetria:** <Eq>{`f(-x) = -x^3 + 3x = -f(x)`}</Eq> → nieparzysta.
+4. **Asymptoty:** brak (wielomian).
+5. **<Eq>{`f'(x) = 3x^2 - 3 = 3(x-1)(x+1)`}</Eq>**. Punkty krytyczne: <Eq>{`x = \\pm 1`}</Eq>. Rosnąca na <Eq>{`(-\\infty,-1)`}</Eq> i <Eq>{`(1,\\infty)`}</Eq>; malejąca na <Eq>{`(-1,1)`}</Eq>. Maks. lokalne <Eq>{`f(-1) = 2`}</Eq>; min. lokalne <Eq>{`f(1) = -2`}</Eq>.
+6. **<Eq>{`f''(x) = 6x`}</Eq>**. Zero w <Eq>{`x = 0`}</Eq>. Wklęsła w dół dla <Eq>{`x < 0`}</Eq>; w górę dla <Eq>{`x > 0`}</Eq>.
+7. **Przegięcie:** <Eq>{`x = 0`}</Eq> (zmiana znaku <Eq>{`f''`}</Eq>). Punkt: <Eq>{`(0, 0)`}</Eq>.
+8. **Szkic:** krzywa "S" przechodząca przez pochodzenie, maksimum w <Eq>{`(-1, 2)`}</Eq>, minimum w <Eq>{`(1, -2)`}</Eq>.
+
+**Weryfikacja.** Z powodu symetrii nieparzystej, wykres jest symetryczny względem pochodzenia — wartości się zgadzają.
+
+**Źródło.** [OpenStax Calculus Vol. 1, §4.5, Example 4.20](https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Funkcja wymierna z asymptotą poziomą">
+
+**Problem.** Narysuj <Eq>{`f(x) = \\dfrac{x^2}{x^2 + 1}`}</Eq>.
+
+**Strategia.** Zidentyfikuj asymptoty, użyj <Eq>{`f'`}</Eq> i <Eq>{`f''`}</Eq>.
+
+**Rozwiązanie.**
+
+1. **Dziedzina:** <Eq>{`\\mathbb{R}`}</Eq> (mianownik nigdy zero).
+2. **Miejsca przecięcia:** <Eq>{`f(0) = 0`}</Eq>. Jedyny pierwiastek: <Eq>{`x = 0`}</Eq>.
+3. **Symetria:** <Eq>{`f(-x) = f(x)`}</Eq> → parzysta.
+4. **Asymptota pozioma:** <Eq>{`\\lim_{x \\to \\pm\\infty} x^2/(x^2+1) = 1`}</Eq>. Linia <Eq>{`y = 1`}</Eq>.
+5. **<Eq>{`f'(x) = 2x/(x^2+1)^2`}</Eq>**. Dodatnia dla <Eq>{`x > 0`}</Eq>, ujemna dla <Eq>{`x < 0`}</Eq>. Minimum lokalne w <Eq>{`x = 0`}</Eq> (ze znaku: <Eq>{`f'`}</Eq> zmienia z <Eq>{`-`}</Eq> na <Eq>{`+`}</Eq>).
+6. **<Eq>{`f''(x) = (2(x^2+1)^2 - 2x \\cdot 2(x^2+1)\\cdot 2x)/(x^2+1)^4 = 2(1-3x^2)/(x^2+1)^3`}</Eq>**. Zero: <Eq>{`x = \\pm 1/\\sqrt{3}`}</Eq>.
+7. **Przegięcia w** <Eq>{`x = \\pm 1/\\sqrt{3}`}</Eq>. <Eq>{`f'' > 0`}</Eq> na <Eq>{`|x| < 1/\\sqrt{3}`}</Eq>; <Eq>{`f'' < 0`}</Eq> na <Eq>{`|x| > 1/\\sqrt{3}`}</Eq>.
+8. Krzywa symetryczna, zaczyna się od 0, rośnie asymptotycznie do 1.
+
+**Weryfikacja.** <Eq>{`0 \\leq f(x) < 1`}</Eq> dla wszystkich <Eq>{`x`}</Eq> — spójne z asymptotą poziomą w 1.
+
+**Źródło.** [APEX Calculus §3.5, Example 3.5.2](https://www.apexcalculus.com/) · CC-BY-NC
+
+</Exemplo>
+
+<Exemplo titulo="Funkcja z asymptotą pionową i poziomą">
+
+**Problem.** Narysuj <Eq>{`f(x) = \\dfrac{2x}{x - 1}`}</Eq>.
+
+**Strategia.** Zidentyfikuj asymptotę pionową (<Eq>{`x = 1`}</Eq>) i poziomą, potem analizuj <Eq>{`f'`}</Eq>.
+
+**Rozwiązanie.**
+
+1. **Dziedzina:** <Eq>{`\\mathbb{R} \\setminus \\{1\\}`}</Eq>.
+2. **Miejsca przecięcia:** <Eq>{`f(0) = 0`}</Eq>; pierwiastek: <Eq>{`x = 0`}</Eq>.
+3. **Asymptota pionowa:** <Eq>{`x = 1`}</Eq> (<Eq>{`f \\to \\pm\\infty`}</Eq>).
+4. **Asymptota pozioma:** <Eq>{`\\lim_{x \\to \\pm\\infty} 2x/(x-1) = 2`}</Eq>. Linia <Eq>{`y = 2`}</Eq>.
+5. **<Eq>{`f'(x) = (2(x-1) - 2x)/(x-1)^2 = -2/(x-1)^2 < 0`}</Eq>** dla wszystkich <Eq>{`x \\neq 1`}</Eq>. Funkcja ściśle malejąca na każdej gałęzi.
+6. **<Eq>{`f''(x) = 4/(x-1)^3`}</Eq>**. Dodatnia dla <Eq>{`x > 1`}</Eq> (wklęsła w górę); ujemna dla <Eq>{`x < 1`}</Eq> (wklęsła w dół).
+7. **Brak przegięć** (mianownik nigdy zero poza <Eq>{`x = 1`}</Eq>).
+8. Dwie gałęzie: <Eq>{`x < 1`}</Eq> (malejąca, wklęsła w dół) i <Eq>{`x > 1`}</Eq> (malejąca, wklęsła w górę).
+
+**Weryfikacja.** <Eq>{`f`}</Eq> nigdy nie przecina asymptoty <Eq>{`y = 2`}</Eq> (sprawdzić: <Eq>{`2x/(x-1) = 2 \\Rightarrow 2x = 2x - 2`}</Eq>, niemożliwe).
+
+**Źródło.** [Active Calculus §3.2, Activity 3.2.3](https://activecalculus.org/single/sec-3-2-families.html) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Punkt przegięcia i wklęsłość">
+
+**Problem.** Określ punkty przegięcia i przedziały wklęsłości <Eq>{`f(x) = x^4 - 6x^2`}</Eq>.
+
+**Strategia.** Oblicz <Eq>{`f''`}</Eq>, znajdź zera, sprawdzić zmianę znaku.
+
+**Rozwiązanie.**
+
+<Eq display>{`f'(x) = 4x^3 - 12x, \quad f''(x) = 12x^2 - 12 = 12(x-1)(x+1)`}</Eq>
+
+Zera <Eq>{`f''`}</Eq>: <Eq>{`x = \\pm 1`}</Eq>.
+
+- <Eq>{`x < -1`}</Eq>: <Eq>{`f'' > 0`}</Eq> → wklęsła w górę.
+- <Eq>{`-1 < x < 1`}</Eq>: <Eq>{`f'' < 0`}</Eq> → wklęsła w dół.
+- <Eq>{`x > 1`}</Eq>: <Eq>{`f'' > 0`}</Eq> → wklęsła w górę.
+
+Przegięcia w <Eq>{`x = -1`}</Eq> i <Eq>{`x = 1`}</Eq>: <Eq>{`f(-1) = 1 - 6 = -5`}</Eq>, <Eq>{`f(1) = -5`}</Eq>.
+
+**Weryfikacja.** Test zmiany znaku <Eq>{`f''`}</Eq> potwierdzony. Uwaga: <Eq>{`f(x) = x^4 - 6x^2`}</Eq> ma <Eq>{`f''(0) = -12 < 0`}</Eq> i <Eq>{`f''(2) = 36 > 0`}</Eq>, spójne.
+
+**Źródło.** [OpenStax Calculus Vol. 1, §4.5, Example 4.22](https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph) · CC-BY-NC-SA
+
+</Exemplo>
+
+<Exemplo titulo="Funkcja wymierna z asymptotą ukośną">
+
+**Problem.** Narysuj <Eq>{`f(x) = \\dfrac{x^2 + 1}{x}`}</Eq>.
+
+**Strategia.** Dzielenie wielomianów, aby uzyskać asymptotę ukośną; analizuj <Eq>{`f'`}</Eq> i <Eq>{`f''`}</Eq>.
+
+**Rozwiązanie.**
+
+1. **Dziedzina:** <Eq>{`\\mathbb{R} \\setminus \\{0\\}`}</Eq>.
+2. **Miejsca przecięcia:** <Eq>{`f(x) = 0 \\Rightarrow x^2 + 1 = 0`}</Eq> — brak pierwiastków rzeczywistych. Brak miejsca przecięcia w <Eq>{`x = 0`}</Eq> (poza dziedziną).
+3. **Symetria:** <Eq>{`f(-x) = (-x^2 - 1)/(-x) = (x^2+1)/x = f(x)`}</Eq>... czekaj: <Eq>{`f(-x) = (x^2+1)/(-x) = -f(x)`}</Eq> → nieparzysta.
+4. **Asymptota pionowa:** <Eq>{`x = 0`}</Eq>. Dzielenie: <Eq>{`f(x) = x + 1/x`}</Eq> → asymptota ukośna <Eq>{`y = x`}</Eq>.
+5. **<Eq>{`f'(x) = 1 - 1/x^2`}</Eq>**. Zero: <Eq>{`x = \\pm 1`}</Eq>. Minimum lokalne w <Eq>{`x = 1`}</Eq> (wartość 2); maksimum lokalne w <Eq>{`x = -1`}</Eq> (wartość −2).
+6. **<Eq>{`f''(x) = 2/x^3`}</Eq>**. Dodatnia dla <Eq>{`x > 0`}</Eq>, ujemna dla <Eq>{`x < 0`}</Eq>. Brak przegięć (nieciągłość w 0).
+7. **Szkic:** dwie gałęzie hiperboliczne, każda zbliżająca się do <Eq>{`y = x`}</Eq> i do <Eq>{`x = 0`}</Eq>.
+
+**Weryfikacja.** <Eq>{`f(x) - x = 1/x \\to 0`}</Eq> gdy <Eq>{`x \\to \\pm\\infty`}</Eq> — asymptota ukośna potwierdzona.
+
+**Źródło.** [APEX Calculus §3.5, Example 3.5.4](https://www.apexcalculus.com/) · CC-BY-NC
+
+</Exemplo>
+
+<ListaExercicios seed="licao-63-esboco-graficos">
+
+<Exercicio
+  numero="63.1"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 2x - 2`}</Eq>. Zero: <Eq>{`x = 1`}</Eq>. <Eq>{`f' < 0`}</Eq> dla <Eq>{`x < 1`}</Eq> (malejąca); <Eq>{`f' > 0`}</Eq> dla <Eq>{`x > 1`}</Eq> (rosnąca). <Eq>{`f''(x) = 2 > 0`}</Eq> — wklęsła w górę na całej dziedzinie. Minimum w <Eq>{`(1, -1)`}</Eq>. Brak przegięć.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Określ przedziały wzrostu/spadku i wklęsłości <Eq>{`f(x) = x^2 - 2x`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 3x^2 - 6x = 3x(x-2)`}</Eq>. Rośnie na <Eq>{`(-\\infty, 0)`}</Eq> i <Eq>{`(2, \\infty)`}</Eq>; spada na <Eq>{`(0,2)`}</Eq>. Maks. lokalne <Eq>{`f(0) = 1`}</Eq>; min. lokalne <Eq>{`f(2) = -3`}</Eq>. <Eq>{`f''(x) = 6x - 6`}</Eq>. Przegięcie w <Eq>{`x = 1`}</Eq>: <Eq>{`f(1) = -1`}</Eq>.</>}
+  passos={<><ol><li>Pochodna: <Eq>{`f'(x) = 3x^2 - 6x = 3x(x-2)`}</Eq>.</li><li>Zera <Eq>{`f'`}</Eq>: <Eq>{`x = 0`}</Eq> i <Eq>{`x = 2`}</Eq>.</li><li>Tabela znaków <Eq>{`f'`}</Eq>: <Eq>{`(+, -, +)`}</Eq> na trzech przedziałach.</li><li>Druga pochodna: <Eq>{`f''(x) = 6x - 6 = 0 \\Rightarrow x = 1`}</Eq>.</li><li>Przegięcie w <Eq>{`x = 1`}</Eq>: <Eq>{`f''`}</Eq> zmienia z <Eq>{`-`}</Eq> na <Eq>{`+`}</Eq>.</li></ol><em>Trick:</em> punkt przegięcia jest między dwoma ekstremami — to jest typowe dla wielomianów sześciennych.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Dla <Eq>{`f(x) = x^3 - 3x^2 + 1`}</Eq>, określ: przedziały wzrostu/spadku, ekstrema lokalne, wklęsłość i punkty przegięcia.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.3"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\neq 0`}</Eq>. <Eq>{`f'(x) = 1 - 4/x^2`}</Eq>. Zero: <Eq>{`x = \\pm 2`}</Eq>. Rośnie na <Eq>{`(-\\infty,-2)`}</Eq> i <Eq>{`(2,\\infty)`}</Eq>; spada na <Eq>{`(-2,0)`}</Eq> i <Eq>{`(0,2)`}</Eq>. Maks. lokalne <Eq>{`f(-2) = -4`}</Eq>; min. lokalne <Eq>{`f(2) = 4`}</Eq>. <Eq>{`f''(x) = 8/x^3`}</Eq>: wklęsła w górę na <Eq>{`x > 0`}</Eq>, w dół na <Eq>{`x < 0`}</Eq>. Asymptota pionowa: <Eq>{`x = 0`}</Eq>. Asymptota ukośna: <Eq>{`y = x`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Analizuj całkowicie <Eq>{`f(x) = x + \\dfrac{4}{x}`}</Eq>: dziedzina, asymptoty, ekstrema, wklęsłość.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f(x) = e^{-x^2}`}</Eq>. <Eq>{`f'(x) = -2xe^{-x^2}`}</Eq>. Maksimum w <Eq>{`x = 0`}</Eq>, <Eq>{`f(0) = 1`}</Eq>. <Eq>{`f''(x) = e^{-x^2}(4x^2 - 2)`}</Eq>. Przegięcia w <Eq>{`x = \\pm 1/\\sqrt{2}`}</Eq>. Wklęsła w dół na <Eq>{`(-1/\\sqrt{2}, 1/\\sqrt{2})`}</Eq>; w górę poza tym przedziałem. Asymptota pozioma: <Eq>{`y = 0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Narysuj <Eq>{`f(x) = e^{-x^2}`}</Eq> (krzywa Gaussa): dziedzina, ekstrema, przegięcia, asymptota.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.5"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x > 0`}</Eq>. <Eq>{`f'(x) = 1 - 1/x`}</Eq>. Zero: <Eq>{`x = 1`}</Eq>. Minimum lokalne w <Eq>{`(1, 1)`}</Eq>. <Eq>{`f''(x) = 1/x^2 > 0`}</Eq> — wklęsła w górę na całej dziedzinie. Brak przegięć. <Eq>{`f(x) \\to -\\infty`}</Eq> gdy <Eq>{`x \\to 0^+`}</Eq>; <Eq>{`f(x) \\to +\\infty`}</Eq> gdy <Eq>{`x \\to \\infty`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Analizuj <Eq>{`f(x) = x - \\ln x`}</Eq> dla <Eq>{`x > 0`}</Eq>: dziedzina, ekstrema, wklęsłość.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.6"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\neq \\pm 1`}</Eq>. Asymptoty pionowe: <Eq>{`x = \\pm 1`}</Eq>. Asymptota pozioma: <Eq>{`y = 0`}</Eq>. <Eq>{`f'(x) = -2x/(x^2-1)^2`}</Eq>. Dodatnia dla <Eq>{`x < 0`}</Eq>, ujemna dla <Eq>{`x > 0`}</Eq> (na gałęziach gdzie określona). Maksimum lokalne w <Eq>{`x = 0`}</Eq>: <Eq>{`f(0) = -1`}</Eq>. (Znak <Eq>{`x^2-1`}</Eq> zależy od przedziału.) Funkcja parzysta.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Narysuj <Eq>{`f(x) = \\dfrac{1}{x^2 - 1}`}</Eq>: dziedzina, asymptoty pionowe i poziome, ekstrema.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f''(x) = 12x^2 - 12`}</Eq>. Zero: <Eq>{`x = \\pm 1`}</Eq>. <Eq>{`f''(-1)`}</Eq> i <Eq>{`f''(1)`}</Eq> zmieniają znak — oba są przegięciami. Wklęsła w górę na <Eq>{`(-\\infty,-1) \\cup (1,\\infty)`}</Eq>; w dół na <Eq>{`(-1,1)`}</Eq>. Punkty przegięcia: <Eq>{`(\\pm 1, f(\\pm 1))`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Określ punkty przegięcia i przedziały wklęsłości <Eq>{`f(x) = x^4 - 6x^2 + 2`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = e^x(x+1)`}</Eq>. Zero: <Eq>{`x = -1`}</Eq>. Minimum lokalne w <Eq>{`(-1, -1/e)`}</Eq>. <Eq>{`f''(x) = e^x(x+2)`}</Eq>. Zero: <Eq>{`x = -2`}</Eq>. Przegięcie w <Eq>{`(-2, -2e^{-2})`}</Eq>. Wklęsła w górę na <Eq>{`x > -2`}</Eq>; w dół na <Eq>{`x < -2`}</Eq>. Asymptota: <Eq>{`y = 0`}</Eq> gdy <Eq>{`x \\to -\\infty`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Analizuj całkowicie <Eq>{`f(x) = xe^x`}</Eq>: ekstrema, przegięcie, asymptota.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.9"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x > 0`}</Eq>. <Eq>{`f'(x) = 1 + \\ln x`}</Eq>. Zero: <Eq>{`x = 1/e`}</Eq>. Spada na <Eq>{`(0, 1/e)`}</Eq>; rośnie na <Eq>{`(1/e, \\infty)`}</Eq>. Minimum na <Eq>{`(1/e, -1/e)`}</Eq>. <Eq>{`f''(x) = 1/x > 0`}</Eq> — wklęsła w górę zawsze. Brak przegięć. Asymptota: <Eq>{`f \\to -\\infty`}</Eq> gdy <Eq>{`x \\to 0^+`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Analizuj <Eq>{`f(x) = x \\ln x`}</Eq>: dziedzina, minimum, wklęsłość.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.10"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\neq 2`}</Eq>. Dzielenie: <Eq>{`(x^2-x)/(x-2) = x + 1 + 2/(x-2)`}</Eq> → asymptota ukośna <Eq>{`y = x + 1`}</Eq>. Asymptota pionowa <Eq>{`x = 2`}</Eq>. <Eq>{`f'(x) = 1 - 2/(x-2)^2`}</Eq>. Zero: <Eq>{`(x-2)^2 = 2 \\Rightarrow x = 2 \\pm \\sqrt{2}`}</Eq>. Ekstrema w <Eq>{`x = 2 - \\sqrt{2}`}</Eq> (maks.) i <Eq>{`x = 2 + \\sqrt{2}`}</Eq> (min.).</>}
+  passos={<><ol><li>Zidentyfikuj asymptotę ukośną przez dzielenie wielomianów: <Eq>{`x^2 - x = (x-2)(x+1) + 2`}</Eq>, zatem <Eq>{`f(x) = x+1 + 2/(x-2)`}</Eq>.</li><li>Asymptota ukośna: <Eq>{`y = x + 1`}</Eq>. Asymptota pionowa: <Eq>{`x = 2`}</Eq>.</li><li>Pochodna: <Eq>{`f'(x) = 1 - 2/(x-2)^2`}</Eq>. Zero gdy <Eq>{`(x-2)^2 = 2`}</Eq>.</li><li>Sklasyfikuj z <Eq>{`f''(x) = 4/(x-2)^3`}</Eq>.</li></ol><em>Trick:</em> asymptota ukośna pojawia się gdy stopień licznika = stopień mianownika + 1. Zawsze najpierw wykonaj dzielenie.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Określ asymptotę ukośną i narysuj <Eq>{`f(x) = \\dfrac{x^2 - x}{x - 2}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = \\cos x`}</Eq>. Zera na <Eq>{`[0, 2\\pi]`}</Eq>: <Eq>{`x = \\pi/2`}</Eq> i <Eq>{`3\\pi/2`}</Eq>. Maks. lokalne w <Eq>{`\\pi/2`}</Eq>; min. lokalne w <Eq>{`3\\pi/2`}</Eq>. <Eq>{`f''(x) = -\\sin x`}</Eq>. Zero w <Eq>{`x = 0, \\pi, 2\\pi`}</Eq>. Przegięcia w <Eq>{`x = \\pi`}</Eq> (we wnętrzu). Wklęsła w dół na <Eq>{`(0, \\pi)`}</Eq>; w górę na <Eq>{`(\\pi, 2\\pi)`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Określ przedziały wzrostu, ekstrema lokalne i wklęsłość <Eq>{`f(x) = \\sin x`}</Eq> na <Eq>{`[0, 2\\pi]`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "f''(c) = 0 e f'' muda de sinal em c", correta: true },
+    { texto: "f'(c) = 0", },
+    { texto: "f''(c) = 0, independente do sinal ao redor", },
+    { texto: "f(c) = 0" }
+  ]}
+  solucao={<>Punkt przegięcia jest zdefiniowany jako punkt gdzie <Eq>{`f''`}</Eq> zmienia znak (wklęsłość się zmienia). Warunek <Eq>{`f''(c) = 0`}</Eq> jest konieczny ale niewystarczający — w <Eq>{`f(x) = x^4`}</Eq>, <Eq>{`f''(0) = 0`}</Eq> ale nie ma zmiany znaku. Opcja B opisuje punkt krytyczny, nie przegięcie.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Prawidłowa definicja punktu przegięcia to:
+
+</Exercicio>
+
+<Exercicio
+  numero="63.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "A curva está acima de qualquer reta tangente no intervalo", correta: true },
+    { texto: "A curva está abaixo de qualquer reta tangente" },
+    { texto: "f'(x) é crescente no intervalo" },
+    { texto: "Nenhuma das outras — A e C descrevem coisas distintas" }
+  ]}
+  solucao={<>Wklęsła w górę (<Eq>{`f'' > 0`}</Eq>) jest równoważna: krzywa leży powyżej każdej stycznej (definicja geometryczna). To implikuje, że <Eq>{`f'`}</Eq> rośnie — opcja C jest również prawdziwa, ale pytanie prosi o "prawidłową definicję", która jest geometryczna (A). W praktyce, C to konsekwencja analityczna <Eq>{`f'' > 0`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+"Wklęsła w górę na przedziale" oznacza, że:
+
+</Exercicio>
+
+<Exercicio
+  numero="63.14"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\neq 0`}</Eq>. <Eq>{`f(x) = x - 1/x`}</Eq>. <Eq>{`f'(x) = 1 + 1/x^2 > 0`}</Eq> zawsze — ściśle rosnąca. Brak ekstremów lokalnych. <Eq>{`f''(x) = -2/x^3`}</Eq>: wklęsła w górę na <Eq>{`x < 0`}</Eq>; w dół na <Eq>{`x > 0`}</Eq>. Brak przegięć. Asymptota pionowa <Eq>{`x = 0`}</Eq>; asymptota ukośna <Eq>{`y = x`}</Eq>. Funkcja nieparzysta.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Analizuj całkowicie <Eq>{`f(x) = x - \\dfrac{1}{x}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.15"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 2xe^{x^2}`}</Eq>. Zero: <Eq>{`x = 0`}</Eq>. Minimum lokalne <Eq>{`f(0) = 1`}</Eq>. <Eq>{`f''(x) = 2e^{x^2}(1 + 2x^2) > 0`}</Eq> zawsze — wklęsła w górę na całej dziedzinie. Brak przegięć. <Eq>{`f \\to +\\infty`}</Eq> gdy <Eq>{`x \\to \\pm\\infty`}</Eq>. Funkcja parzysta.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Analizuj <Eq>{`f(x) = e^{x^2}`}</Eq>: ekstrema, wklęsłość, zachowanie w nieskończoności.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.16"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = -\\sin x + \\cos x`}</Eq>. Zero na <Eq>{`[0,2\\pi]`}</Eq>: <Eq>{`\\tan x = 1 \\Rightarrow x = \\pi/4, 5\\pi/4`}</Eq>. Maks. lokalne w <Eq>{`f(\\pi/4) = \\sqrt{2}`}</Eq>; min. lokalne w <Eq>{`f(5\\pi/4) = -\\sqrt{2}`}</Eq>. <Eq>{`f''(x) = -\\cos x - \\sin x`}</Eq>. Zera: <Eq>{`x = 3\\pi/4`}</Eq> i <Eq>{`7\\pi/4`}</Eq>. Przegięcia w tych punktach.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Dla <Eq>{`f(x) = \\cos x + \\sin x`}</Eq> na <Eq>{`[0, 2\\pi]`}</Eq>, określ ekstrema lokalne, przegięcia i narysuj.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.17"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\neq -3`}</Eq>. Asymptoty: pionowa <Eq>{`x = -3`}</Eq>; pozioma <Eq>{`y = 1`}</Eq>. <Eq>{`f'(x) = (x+3 - x)/(x+3)^2 = 3/(x+3)^2 > 0`}</Eq> zawsze. Rosnąca na każdej gałęzi. <Eq>{`f''(x) = -6/(x+3)^3`}</Eq>. Wklęsła w górę na <Eq>{`x < -3`}</Eq>; w dół na <Eq>{`x > -3`}</Eq>. Brak przegięć (nieciągłość w <Eq>{`-3`}</Eq>).</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Narysuj <Eq>{`f(x) = \\dfrac{x}{x+3}`}</Eq>: dziedzina, asymptoty, wzrost, wklęsłość.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 4x^3 - 4x = 4x(x-1)(x+1)`}</Eq>. Rosnąca na <Eq>{`(-1,0)`}</Eq> i <Eq>{`(1,\\infty)`}</Eq>; malejąca w pozostałych. Minima lokalne na <Eq>{`x = \\pm 1`}</Eq>: <Eq>{`f(\\pm 1) = 1 - 2 = -1`}</Eq>. Maksimum lokalne na <Eq>{`x = 0`}</Eq>: <Eq>{`f(0) = 0`}</Eq>... czekaj: <Eq>{`f(0) = 0`}</Eq>. <Eq>{`f''(x) = 12x^2 - 4`}</Eq>. Przegięcia w <Eq>{`x = \\pm 1/\\sqrt{3}`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Analizuj całkowicie <Eq>{`f(x) = x^4 - 2x^2`}</Eq>: ekstrema, przegięcia, wklęsłość.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.19"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\neq \\pm 2`}</Eq>. Asymptoty pionowe: <Eq>{`x = \\pm 2`}</Eq>. Asymptota pozioma: <Eq>{`y = 0`}</Eq>. <Eq>{`f'(x) = -2x/(x^2-4)^2`}</Eq>. Maksimum lokalne w <Eq>{`x = 0`}</Eq>: <Eq>{`f(0) = -1/4`}</Eq>. Funkcja parzysta.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Określ dziedzinę, asymptoty i ekstrema <Eq>{`f(x) = \\dfrac{x}{x^2 - 4}`}</Eq>... (popraw: <Eq>{`f(x) = \\dfrac{1}{x^2-4}`}</Eq> — funkcja parzysta z asymptotami w <Eq>{`x = \\pm 2`}</Eq>).
+
+</Exercicio>
+
+<Exercicio
+  numero="63.20"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 3x^2 - 6x - 9 = 3(x+1)(x-3)`}</Eq>. Maks. lokalne w <Eq>{`x = -1`}</Eq>: <Eq>{`f(-1) = 5`}</Eq>. Min. lokalne w <Eq>{`x = 3`}</Eq>: <Eq>{`f(3) = -27`}</Eq>. <Eq>{`f''(x) = 6x - 6`}</Eq>. Przegięcie w <Eq>{`x = 1`}</Eq>: <Eq>{`f(1) = -11`}</Eq>. Brak asymptot. Miejsce przecięcia: <Eq>{`f(0) = 7`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Utwórz pełny szkic <Eq>{`f(x) = x^3 - 3x^2 - 9x + 7`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.21"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\geq 0`}</Eq>. <Eq>{`f'(x) = \\frac{1}{2\\sqrt{x}} - 1`}</Eq>. Zero: <Eq>{`\\sqrt{x} = 1/2 \\Rightarrow x = 1/4`}</Eq>. Maksimum lokalne w <Eq>{`x = 1/4`}</Eq>: <Eq>{`f(1/4) = 1/2 - 1/4 = 1/4`}</Eq>. <Eq>{`f''(x) = -1/(4x^{3/2}) < 0`}</Eq> — wklęsła w dół na całej dziedzinie. Brak przegięć. <Eq>{`f(0) = 0`}</Eq>; pierwiastek w <Eq>{`x = 1`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Analizuj <Eq>{`f(x) = \\sqrt{x} - x`}</Eq> dla <Eq>{`x \\geq 0`}</Eq>: ekstrema, wklęsłość, miejsca przecięcia.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.22"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\neq 0`}</Eq>. <Eq>{`f(x) = x + 2 + 1/x`}</Eq> (dzielenie). Asymptota ukośna: <Eq>{`y = x + 2`}</Eq>. Asymptota pionowa: <Eq>{`x = 0`}</Eq>. <Eq>{`f'(x) = 1 - 1/x^2`}</Eq>. Zera: <Eq>{`x = \\pm 1`}</Eq>. Min. lokalne w <Eq>{`x = 1`}</Eq>: <Eq>{`f(1) = 4`}</Eq>. Maks. lokalne w <Eq>{`x = -1`}</Eq>: <Eq>{`f(-1) = 0`}</Eq>.</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Określ asymptotę ukośną i ekstrema <Eq>{`f(x) = \\dfrac{x^2 + 2x + 1}{x}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.23"
+  dificuldade="demonstracao"
+  solucao={<>Załóż <Eq>{`f'' > 0`}</Eq> na <Eq>{`(a,b)`}</Eq>. Niech <Eq>{`c \\in (a,b)`}</Eq> i styczna <Eq>{`T(x) = f(c) + f'(c)(x-c)`}</Eq>. Zdefiniuj <Eq>{`g(x) = f(x) - T(x)`}</Eq>. Wtedy <Eq>{`g(c) = 0`}</Eq>, <Eq>{`g'(c) = 0`}</Eq>, i <Eq>{`g''(x) = f''(x) > 0`}</Eq>. Ze spełnienia drugiej pochodnej, <Eq>{`c`}</Eq> jest minimum lokalnym <Eq>{`g`}</Eq>. Ale <Eq>{`g(c) = 0`}</Eq> jest najmniejszą wartością lokalną, stąd <Eq>{`g(x) \\geq 0`}</Eq> blisko <Eq>{`c`}</Eq>, tzn. <Eq>{`f(x) \\geq T(x)`}</Eq>. Ponieważ argument jest ważny dla każdego <Eq>{`c`}</Eq>, krzywa leży powyżej każdej stycznej na <Eq>{`(a,b)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Udowodnij, że jeśli <Eq>{`f''(x) > 0`}</Eq> na <Eq>{`(a,b)`}</Eq>, wtedy wykres <Eq>{`f`}</Eq> leży powyżej każdej stycznej na <Eq>{`(a,b)`}</Eq> (funkcja wklęsła w górę leży powyżej jej stycznych).
+
+</Exercicio>
+
+<Exercicio
+  numero="63.24"
+  dificuldade="desafio"
+  solucao={<>Dla <Eq>{`f(x) = ax^3 + bx^2 + cx + d`}</Eq> z <Eq>{`a \\neq 0`}</Eq>: <Eq>{`f''(x) = 6ax + 2b = 0 \\Rightarrow x_0 = -b/(3a)`}</Eq>. Wykres jest symetryczny względem punktu <Eq>{`(x_0, f(x_0))`}</Eq> — to może być zweryfikowane pokazując, że <Eq>{`f(x_0 + t) + f(x_0 - t) = 2f(x_0)`}</Eq> dla każdego <Eq>{`t`}</Eq>. Zatem każdy wielomian sześcienny z <Eq>{`a \\neq 0`}</Eq> ma dokładnie jeden punkt przegięcia, który jest środkiem symetrii krzywej.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Pokaż, że każdy wielomian sześcienny <Eq>{`f(x) = ax^3 + bx^2 + cx + d`}</Eq> z <Eq>{`a \\neq 0`}</Eq> ma dokładnie jeden punkt przegięcia i że wykres jest symetryczny względem tego punktu.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.25"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x > 0`}</Eq>. <Eq>{`f'(x) = \\ln x + 1`}</Eq>. Zero: <Eq>{`x = 1/e`}</Eq>. Min. lokalne w <Eq>{`(1/e, -1/e)`}</Eq>. <Eq>{`f''(x) = 1/x > 0`}</Eq> — wklęsła w górę. <Eq>{`f(1) = 0`}</Eq>. <Eq>{`f \\to -\\infty`}</Eq>... Właściwie <Eq>{`f(x) = x\\ln x \\to 0`}</Eq> gdy <Eq>{`x \\to 0^+`}</Eq> (przez regułę L'Hôpitala). Pierwiastek: <Eq>{`x\\ln x = 0 \\Rightarrow x = 1`}</Eq> (jedyny na dziedzinie).</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Narysuj całkowicie <Eq>{`f(x) = x \\ln x`}</Eq> dla <Eq>{`x > 0`}</Eq>, włączając granicę gdy <Eq>{`x \\to 0^+`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.26"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`f'(x) = 4x^3 - 8x = 4x(x^2 - 2)`}</Eq>. Zera: <Eq>{`x = 0, \\pm\\sqrt{2}`}</Eq>. Maks. lokalne na <Eq>{`x = 0`}</Eq>: <Eq>{`f(0) = 0`}</Eq>. Minima lokalne na <Eq>{`x = \\pm\\sqrt{2}`}</Eq>: <Eq>{`f(\\pm\\sqrt{2}) = 4 - 8 = -4`}</Eq>. <Eq>{`f''(x) = 12x^2 - 8`}</Eq>. Przegięcia na <Eq>{`x = \\pm\\sqrt{2/3}`}</Eq>. Funkcja parzysta.</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Analizuj całkowicie <Eq>{`f(x) = x^4 - 4x^2`}</Eq>: ekstrema, przegięcia, wklęsłość, symetria.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.27"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x > 0`}</Eq>. <Eq>{`f'(x) = (1 - \\ln x)/x^2`}</Eq>. Zero: <Eq>{`x = e`}</Eq>. Maks. lokalne w <Eq>{`(e, 1/e)`}</Eq>. <Eq>{`f''(x) = (2\\ln x - 3)/x^3`}</Eq>. Zero: <Eq>{`x = e^{3/2}`}</Eq>. Przegięcie w <Eq>{`x = e^{3/2}`}</Eq>. <Eq>{`f \\to 0`}</Eq> gdy <Eq>{`x \\to \\infty`}</Eq> i gdy <Eq>{`x \\to 0^+`}</Eq>. Asymptota pozioma <Eq>{`y = 0`}</Eq> na obu stronach.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Analizuj <Eq>{`f(x) = \\dfrac{\\ln x}{x}`}</Eq>: dziedzina, maksimum, przegięcie, asymptota.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.28"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`\\mathbb{R}`}</Eq>. <Eq>{`f'(x) = -2xe^{-x^2}(x^2 - 1) + ..`}</Eq> — użyj reguły iloczynu. Maksima lokalne na <Eq>{`x = \\pm 1`}</Eq>: <Eq>{`f(\\pm 1) = e^{-1}`}</Eq>. Minimum na <Eq>{`x = 0`}</Eq>: <Eq>{`f(0) = 0`}</Eq>. Przegięcia w kilku punktach. Asymptota <Eq>{`y = 0`}</Eq>. (Funkcja parzysta.)</>}
+  fonte={{ livro: "APEX Calculus", url: "https://www.apexcalculus.com/", secao: "3.5", licenca: "CC-BY-NC" }}
+>
+
+Analizuj ekstrema i symetrię <Eq>{`f(x) = x^2 e^{-x^2}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.29"
+  dificuldade="aplicacao"
+  solucao={<>Dziedzina: <Eq>{`x \\neq \\pm 1`}</Eq>. Dzielenie: stopień licznika = stopień mianownika → asymptota pozioma <Eq>{`y = 1`}</Eq>. Asymptoty pionowe: <Eq>{`x = \\pm 1`}</Eq>. <Eq>{`f'(x) = -4x/(x^2-1)^2`}</Eq>. Maksimum lokalne na <Eq>{`x = 0`}</Eq>: <Eq>{`f(0) = -1`}</Eq>. (Funkcja parzysta.)</>}
+  fonte={{ livro: "OpenStax Calculus Vol. 1", url: "https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph", secao: "4.5", licenca: "CC-BY-NC-SA" }}
+>
+
+Narysuj <Eq>{`f(x) = \\dfrac{x^2 + 1}{x^2 - 1}`}</Eq>: asymptoty, ekstrema, parzystość.
+
+</Exercicio>
+
+<Exercicio
+  numero="63.30"
+  dificuldade="desafio"
+  solucao={<>Parametry <Eq>{`a, b`}</Eq> określają kształt. <Eq>{`f'(x) = ax e^{-bx^2} + a\\frac{1}{2}x^2(-2bx)e^{-bx^2} = ax(1-bx^2)e^{-bx^2}`}</Eq>. Maksima na <Eq>{`x = \\pm 1/\\sqrt{b}`}</Eq>: <Eq>{`f = (a/b) e^{-1/2}`}</Eq>. Przegięcia określone przez <Eq>{`f'' = 0`}</Eq>. Parametr <Eq>{`a`}</Eq> skaluje amplitudę; <Eq>{`b`}</Eq> kontroluje szerokość (mniejsze <Eq>{`b`}</Eq> = szersze krzywe). Ta rodzina modeluje potencjał Morse'a w chemii kwantowej.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-3-2-families.html", secao: "3.2", licenca: "CC-BY-NC-SA" }}
+>
+
+Analizuj rodzinę krzywych <Eq>{`f(x) = ax^2 e^{-bx^2}`}</Eq> z <Eq>{`a, b > 0`}</Eq>: określ ekstrema i przegięcia w zależności od parametrów. Jak <Eq>{`a`}</Eq> i <Eq>{`b`}</Eq> kontrolują kształt krzywej?
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Źródła
+
+- **Boelkins, Matt. Active Calculus 2.0.** Grand Valley State University, 2022. CC-BY-NC-SA. [activecalculus.org/single/sec-3-2-families.html](https://activecalculus.org/single/sec-3-2-families.html)
+- **OpenStax. Calculus Volume 1.** Strang, Herman et al., 2023. CC-BY-NC-SA. [openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph](https://openstax.org/books/calculus-volume-1/pages/4-5-derivatives-and-the-shape-of-a-graph)
+- **Hartman, G. et al. APEX Calculus.** Virginia Military Institute, 2023. CC-BY-NC. [apexcalculus.com](https://www.apexcalculus.com/)

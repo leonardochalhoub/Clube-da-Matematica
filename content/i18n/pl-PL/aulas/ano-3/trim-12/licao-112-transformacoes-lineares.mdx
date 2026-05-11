@@ -1,0 +1,854 @@
+---
+titulo: "Lição 112 — Transformações lineares"
+slug: "licao-112-transformacoes-lineares"
+categoria: "aulas"
+subcategoria: "ano-3-trim-12"
+descricao: "Funções entre espaços vetoriais que preservam combinação linear. Representação matricial em uma base. Mudança de base. A operação fundamental que torna ML, gráficos 3D e processamento de sinais possíveis."
+ordem: 112
+publicado: true
+tags: ["álgebra linear", "transformação linear", "matriz", "ano-3", "trim-12"]
+prerrequisitos: ["licao-111-espacos-vetoriais"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Leistungskurs alemão (Lineare Algebra)", "Math III japonês", "H2 Math singapurense", "graduação engenharia 1.º semestre"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="T(au + bv) = a\,T(u) + b\,T(v)"
+  legenda={<>Przekształcenie <strong>liniowe</strong> to funkcja <Eq>{`T: V \\to W`}</Eq> między przestrzeniami wektorowymi, która zachowuje dodawanie i mnożenie przez skalar. W ustalnej bazie jest reprezentowane przez <strong>macierz</strong>: zastosowanie <Eq>{`T`}</Eq> do wektora sprowadza się do mnożenia macierzowego <Eq>{`T(v) = Av`}</Eq>.</>}
+  audioTexto="Przekształcenie liniowe. T od a u plus b v, równa się a razy T od u, plus b razy T od v. Funkcja zachowuje kombinacje liniowe. W ustalonej bazie zastosowanie T to to samo co mnożenie przez macierz T."
+/>
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Książki obejmujące tę lekcję
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="http://linear.ups.edu/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Beezer — A First Course in Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · §LT–§ILT (Linear Transformations) · GNU FDL · </span>
+      <em className="text-clube-mist">Definicja aksjomatyczna, reprezentacja macierzowa, jądro i obraz — główne źródło tej lekcji.</em>
+    </li>
+    <li>
+      <a href="https://hefferon.net/linearalgebra/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hefferon — Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · rozdz. 3 (Maps Between Spaces) · CC-BY-SA · </span>
+      <em className="text-clube-mist">Perspektywa geometryczna na przekształcenia płaszczyzny i przestrzeni; zmiana bazy i macierze podobne.</em>
+    </li>
+    <li>
+      <a href="https://linear.axler.net/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Axler — Linear Algebra Done Right (wyd. 4.)
+      </a>
+      <span className="text-clube-mist"> · rozdz. 3 (Linear Maps) · CC-BY-NC · </span>
+      <em className="text-clube-mist">Podejście bez wyznaczników na początku; mapy liniowe jako obiekty pierwszej klasy z własną algebrą.</em>
+    </li>
+  </ul>
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definicja ścisła">
+
+### Przekształcenia liniowe
+
+<Definicao titulo="Przekształcenie liniowe (mapa liniowa)">
+
+Niech $V$ i $W$ będą przestrzeniami wektorowymi nad ciałem $K$. Funkcja $T: V \to W$ nazywa się **przekształceniem liniowym** (lub **mapą liniową**), jeśli dla wszystkich $u, v \in V$ i wszystkich $a \in K$:
+
+<Equation explicacao="Zachowanie sumy: obraz sumy równa się sumie obrazów." latex="T(u + v) = T(u) + T(v)" />
+
+<Equation explicacao="Zachowanie skalara: obraz wielokrotności równa się wielokrotności obrazu." latex="T(av) = a\,T(v)" />
+
+Oba warunki można połączyć w jeden: $T(au + bv) = aT(u) + bT(v)$ dla wszystkich $u, v \in V$ i $a, b \in K$.
+
+</Definicao>
+
+> "Przekształcenie liniowe to funkcja z jednej przestrzeni wektorowej do drugiej, która zachowuje operacje przestrzeni wektorowej dodawania wektorów i mnożenia przez skalar." — [Beezer — A First Course in Linear Algebra, §LT](http://linear.ups.edu/fcla/section-LT.html)
+
+<Definicao titulo="Natychmiastowe konsekwencje liniowości">
+
+Każde przekształcenie liniowe spełnia:
+
+- **$T(0_V) = 0_W$**: obraz wektora zerowego to zero. (Dowód: $T(0_V) = T(0 \cdot 0_V) = 0\,T(0_V) = 0_W$.)
+- **$T(-v) = -T(v)$**: obraz liczby przeciwnej to liczba przeciwna obrazu.
+- **$T\left(\sum_{i=1}^n a_i v_i\right) = \sum_{i=1}^n a_i T(v_i)$**: liniowość rozciąga się na dowolne kombinacje liniowe.
+
+**Ostrożnie:** Funkcja afiniczna $x \mapsto Ax + b$ z $b \neq 0$ **nie jest liniowa** — łamie $T(0) = 0$.
+
+</Definicao>
+
+> "Jeśli $T$ jest przekształceniem liniowym, to $T(0) = 0$." — [Beezer — A First Course in Linear Algebra, Twierdzenie LTTZZ, §LT](http://linear.ups.edu/fcla/section-LT.html)
+
+### Reprezentacja macierzowa
+
+<Definicao titulo="Macierz przekształcenia liniowego">
+
+Ustalmy bazę $\mathcal{B} = \{v_1, \ldots, v_n\}$ przestrzeni $V$ i bazę $\mathcal{C} = \{w_1, \ldots, w_m\}$ przestrzeni $W$. **Macierz $T$ w bazach $\mathcal{B}$ i $\mathcal{C}$**, oznaczana $[T]_{\mathcal{B}}^{\mathcal{C}} \in M_{m \times n}(K)$, to macierz, której $j$-ta kolumna to wektor $T(v_j)$ zapisany we współrzędnych w bazie $\mathcal{C}$:
+
+<Equation explicacao="Kolumna j macierzy [T] to T(v_j) we współrzędnych C. Dla każdego wektora v ze współrzędnymi x w B, mamy T(v) ze współrzędnymi [T]x w C." latex="[T]_j = [T(v_j)]_{\mathcal{C}}" />
+
+Wynik: $T$ jest **całkowicie określone** wartościami na bazie. Zastosowanie $T$ do każdego $v$ jest równoważne mnożeniu $[T]$ przez wektor współrzędnych $v$ w $\mathcal{B}$.
+
+</Definicao>
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 200" className="w-full">
+<defs>
+  <marker id="arr112" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="20" y="60" width="120" height="80" rx="10" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="80" y="95" textAnchor="middle" fontSize="13" fontFamily="serif" fontStyle="italic" fill="currentColor">V</text>
+  <text x="80" y="115" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">baza B</text>
+</g>
+<g>
+  <rect x="380" y="60" width="120" height="80" rx="10" fill="rgb(199 107 63 / 0.15)" stroke="rgb(199 107 63)" strokeWidth="1.5"/>
+  <text x="440" y="95" textAnchor="middle" fontSize="13" fontFamily="serif" fontStyle="italic" fill="currentColor">W</text>
+  <text x="440" y="115" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">baza C</text>
+</g>
+<g>
+  <line x1="145" y1="100" x2="375" y2="100" stroke="rgb(232 199 122)" strokeWidth="2.5" markerEnd="url(#arr112)"/>
+  <text x="260" y="90" textAnchor="middle" fontSize="12" fontFamily="serif" fontStyle="italic" fill="rgb(201 163 95)">T</text>
+</g>
+<g>
+  <text x="80" y="170" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">wsp. x w B</text>
+  <text x="440" y="170" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">wsp. [T]x w C</text>
+</g>
+<g>
+  <text x="260" y="145" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">[T] ∈ M(m×n)</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Diagram: <em>T</em> przekształca wektory z <em>V</em> (z bazą <em>B</em>) do <em>W</em> (z bazą <em>C</em>). We współrzędnych operacja to mnożenie przez macierz <em>[T]</em>.
+</figcaption>
+</figure>
+
+### Zmiana bazy i macierze podobne
+
+<Teorema titulo="Macierze podobne reprezentują to samo przekształcenie">
+
+Niech $[T]_{\mathcal{B}}$ i $[T]_{\mathcal{B}'}$ będą macierzami $T: V \to V$ w bazach $\mathcal{B}$ i $\mathcal{B}'$ przestrzeni $V$, i niech $P$ będzie macierzą zmiany bazy z $\mathcal{B}'$ na $\mathcal{B}$. Wtedy:
+
+<Equation explicacao="Macierze podobne: to samo przekształcenie, różne bazy. P jest odwracalna — kolumny to wektory B' we współrzędnych B." latex="[T]_{\mathcal{B}'} = P^{-1}\,[T]_{\mathcal{B}}\,P" />
+
+Dwie macierze $A$ i $B$ są **podobne** ($A \sim B$), jeśli istnieje macierz odwracalna $P$ taka, że $B = P^{-1}AP$. Macierze podobne mają ten sam wyznacznik, ten sam ślad i te same wartości własne.
+
+</Teorema>
+
+> "Dwie macierze reprezentujące to samo przekształcenie liniowe w różnych bazach są nazywane macierzami podobnymi, i $B = P^{-1}AP$ dla pewnej macierzy odwracalnej $P$." — [Hefferon — Linear Algebra, rozdz. 3 §III.1](https://hefferon.net/linearalgebra/index.html)
+
+### Złożenie
+
+<Teorema titulo="Złożenie przekształceń liniowych">
+
+Jeśli $S: U \to V$ i $T: V \to W$ są przekształceniami liniowymi, to $T \circ S: U \to W$ jest liniowe, a w ustalonych bazach:
+
+<Equation explicacao="Złożenie staje się iloczynem macierzowym. Porządek: [T][S] (S stosowane pierwsze, T potem — taki sam porządek jak w złożeniu)." latex="[T \circ S] = [T]\,[S]" />
+
+**Konsekwencja**: iloczyn macierzowy ma konkretne znaczenie geometryczne — jest złożeniem przekształceń.
+
+</Teorema>
+
+<Insight>
+
+**Dlaczego bazy?** Przekształcenie liniowe $T$ to obiekt geometryczny: istnieje niezależnie od współrzędnych. **Macierz** to *fotografia* $T$ w konkretnej bazie. Zmiana bazy to zmiana kąta fotografowania — obiekt się nie zmienia, zmienia się tylko reprezentacja. To motywuje diagonalizację (Lekcja 115): szukanie bazy, w której fotografia staje się najprostsza.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Dla pięciolatka">
+
+Wyobraź sobie **magiczne lustro** u wejścia do domu.
+
+Przychodzisz z torbą, a lustro pokazuje torbę po drugiej stronie. Przychodzisz z kapeluszem, pokazuje kapelusz. Jeśli wejdziesz z torbą I kapeluszem razem, lustro pokazuje oba — dokładnie tak, jak gdybyś pokazał każdy osobno.
+
+**Przekształcenie liniowe** to uczciwe lustro: nic nie wymyśla ani nie ukrywa. Gdybyś podwoił torbę (zmienił ją w dwie torby), lustro również podwoiłoby obraz.
+
+Co lustro **nie robi**: nie pcha cię na bok. Gdybyś przyszedł z niczym, obraz byłby nic. (Magiczne lustro, które coś przesuwa — to nie jest liniowe!)
+
+</Porta>
+
+<Porta nivel="10" titulo="Dla dziesięciolatka">
+
+Znasz **obrót**: obrócić figurę na płaszczyźnie. I **skalę**: rozciągnąć lub zmniejszyć. Obie te operacje to **przekształcenia liniowe**.
+
+Ich reguła jest prosta:
+
+- Jeśli złączysz dwa wektory, a potem obrócisz — wynik to to samo co obrócić każdy osobno, a potem złączyć.
+- Jeśli podwoisz wektor, a potem obrócisz — wynik to to samo co obrócić, a potem podwoić.
+
+I tu przychodzi magia: **każde przekształcenie liniowe można zapisać jako macierz**.
+
+Obrót o 90° na płaszczyźnie:
+
+$$R = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$$
+
+Zastosowanie $R$ do wektora $\begin{pmatrix}1 \\ 0\end{pmatrix}$ (wskazującego w prawo) daje $\begin{pmatrix}0 \\ 1\end{pmatrix}$ (wskazującego w górę). Wektor obrócił się dokładnie o 90°!
+
+</Porta>
+
+<Porta nivel="15" titulo="Dla nastolatka 15-letniego">
+
+Przekształcenia liniowe to **centralna operacja** algebry liniowej. Cała teoria macierzy, którą uczyłeś się od Lekcji 31, to w gruncie rzeczy algebra przekształceń liniowych.
+
+### Dlaczego macierz działa?
+
+W bazie $\{e_1, \ldots, e_n\}$ każdy wektor $v$ można zapisać jako $v = a_1 e_1 + \cdots + a_n e_n$. Z liniowości:
+
+$$T(v) = a_1 T(e_1) + \cdots + a_n T(e_n)$$
+
+**Wniosek**: aby wiedzieć, co $T$ robi każdemu wektorowi, wystarczy wiedzieć, co $T$ robi wektorom bazy. A te obrazy wektorów $T(e_1), \ldots, T(e_n)$ to **kolumny** macierzy $T$.
+
+### Kanoniczne przekształcenia płaszczyzny
+
+| Przekształcenie | Macierz $2 \times 2$ | Co robi |
+|---|---|---|
+| Tożsamość | $\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$ | Nic nie zmienia |
+| Obrót $\theta$ | $\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$ | Obraca o $\theta$ stopni |
+| Odbicie oś $x$ | $\begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}$ | Odbija pionowo |
+| Skala $k$ | $kI$ | Mnoży rozmiar przez $k$ |
+| Projekcja na $x$ | $\begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$ | Rzutuje na oś $x$ |
+
+### Złożenie to iloczyn
+
+Zastosować $S$, a potem $T$: $(T \circ S)(v) = T(S(v))$. W macierzach: $[T][S]v$. **Ostrożnie: porządek ma znaczenie.** Ogólnie $AB \neq BA$.
+
+<Insight>
+
+**Zmiana bazy** to dokładnie to: to samo przekształcenie widziane z innego kąta. Kiedy Lekcja 115 opowie o diagonalizacji, będziesz szukać bazy, w której macierz staje się diagonalna (najprostsza możliwa). Wszystko zaczyna się tutaj.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="25" titulo="Dla studenta inżynierii">
+
+W inżynierii algebra liniowa to: **dane (wektory) + operacje (macierze) = system**. Przekształcenia liniowe to poziom koncepcyjny powyżej macierzy — i opanowanie tego poziomu rozdziela tych, którzy "liczą" od tych, którzy "rozumieją".
+
+### Ważne kategorie przekształceń
+
+| Typ | Warunek | Pojawia się w |
+|---|---|---|
+| Izomorfizm | Bijekcja liniowa | Zmiana współrzędnych |
+| Projekcja ortogonalna | $P^2 = P$, $P = P^T$ | Najmniejsze kwadraty, PCA |
+| Odbicie | $R^2 = I$, $R \neq I$ | Householder QR |
+| Obrót | Ortogonalny, $\det = 1$ | Robotyka, CG, mechanika kwantowa |
+| Nilpotentny | $N^k = 0$ dla pewnego $k$ | Forma Jordana, równania różniczkowe |
+| Idempotentny | $A^2 = A$ | Projekcje, warunkowe oczekiwanie |
+
+### Zastosowania obliczeniowe
+
+**Grafika komputerowa**: potok renderowania 3D używa złożenia przekształceń liniowych (model → widok → projekcja). Współrzędne jednorodne $\mathbb{R}^4$ reprezentują translację jako przekształcenie liniowe w wyższym wymiarze.
+
+**Przetwarzanie sygnałów**: dyskretna splot = mnożenie przez macierz Toeplitza. FFT (Szybka Transformata Fouriera) to ortogonalne przekształcenie liniowe — a jej efektywna implementacja to to, co czyni kompresję audio możliwą.
+
+**Uczenie maszynowe**: każda **warstwa gęsta** sieci neuronowej to $y = W x + b$ — część liniowa $Wx$ to przekształcenie liniowe, $b$ to część afiniczna. Cała "kompresja informacji" między warstwami jest liniowa; nieliniowości pochodzą z aktywacji (ReLU, sigmoid, itd.).
+
+**Sterowanie systemami**: system LTI (liniowy niezmienny w czasie) ma dynamikę $\dot{x} = Ax + Bu$, $y = Cx + Du$. Macierze $A, B, C, D$ to stałe przekształcenia liniowe.
+
+### Koszt obliczeniowy
+
+Mnożenie macierz-wektor $A \in \mathbb{R}^{m \times n}$, $v \in \mathbb{R}^n$: $O(mn)$ operacji. Mnożenie macierz-macierz: $O(n^3)$ (Strassen: $O(n^{2.807})$). GPU to sprzęt specjalizowany dokładnie na to — cała nowoczesna AI skaluje się poprzez masywną paralelizację mnożeń macierzowych.
+
+**Praktyczna reguła**: nigdy nie obliczaj $A^{-1}$ jawnie, aby rozwiązać $Ax = b$. Użyj rozkładu LU lub Cholesky'ego — ten sam koszt $O(n^3)$ ale bez gromadzenia błędów numerycznych.
+
+</Porta>
+
+<Porta nivel="40" titulo="Dla starszego pracownika">
+
+### Kategoria $\mathbf{Vect}_K$
+
+Przekształcenia liniowe to **morfizmy** kategorii przestrzeni wektorowych nad $K$. Złożenie to iloczyn macierzowy. Tożsamość to $\text{id}_V$. Izomorfizmy to odwracalne. Ta perspektywa kategoryczna wyjaśnia strukturę:
+
+- $\text{Hom}(V, W)$ (zbiór wszystkich przekształceń liniowych z $V$ do $W$) to sam w sobie przestrzeń wektorowa wymiaru $(\dim V)(\dim W)$.
+- Złożenie jest dwuliniowe: $\text{Hom}(V, W) \times \text{Hom}(U, V) \to \text{Hom}(U, W)$.
+
+### Pierwsze twierdzenie o izomorfizmie
+
+Każde $T: V \to W$ dopuszcza kanoniczną faktoryzację:
+
+$$V \twoheadrightarrow V/\ker T \xrightarrow{\bar{T}} \operatorname{Im}(T) \hookrightarrow W$$
+
+gdzie $\bar{T}$ to izomorfizm. **Twierdzenie o Jądrze-Obrazie** (rank-nullity) to konsekwencja: $\dim V = \dim \ker T + \dim \operatorname{Im}(T)$.
+
+### Rozkłady obliczeniowe
+
+Dla macierzy (reprezentacji przekształceń):
+
+- **LU**: $A = LU$ — eliminacja Gaussa, $O(n^3)$, podstawa wszystkich solverów bezpośrednich.
+- **QR**: $A = QR$ — Gram-Schmidt lub Householder. $O(mn^2)$ dla $m \geq n$. Podstawa najmniejszych kwadratów i metody QR dla wartości własnych.
+- **Cholesky**: $A = LL^T$ dla SPD — $O(n^3/3)$, połowa kosztu LU.
+- **SVD**: $A = U\Sigma V^T$ — Lekcja 117. Najpełniejszy rozkład; zawsze istnieje, nawet dla macierzy prostokątnych.
+- **Jordan**: postać kanoniczna dla $\mathbb{C}$ — istotne dla równań różniczkowych i systemów sterowania.
+
+### Operatory w nieskończonym wymiarze
+
+W $L^2(\mathbb{R})$ przekształcenia liniowe to:
+- **Mnożenie**: $(M_g f)(x) = g(x)f(x)$ — ograniczone jeśli $g \in L^\infty$.
+- **Splot**: $(K_h f)(x) = \int h(x-y)f(y)\,dy$ — nierówność Younga determinuje ograniczoność.
+- **Różniczkowanie**: $D = d/dx$ — **nieograniczone** (unbounded), ale zamknięte.
+- **Transformata Fouriera**: unitarna na $L^2$ (twierdzenie Plancherela).
+
+### Twierdzenie spektralne
+
+Samosprzężony, zwartym operator w przestrzeni Hilberta ma dyskretny rozkład spektralny — wartości własne rzeczywiste, wektory własne ortogonalne. **Mechanika kwantowa** żyje tutaj: obserwable to samosprzężone operatory w $L^2$, wartości własne to możliwe wyniki pomiarów.
+
+**Programowanie różniczkowalne**: pochodna $f: \mathbb{R}^n \to \mathbb{R}^m$ w punkcie to przekształcenie liniowe (jakobian). Całe szkolenie sieci neuronowej poprzez schodzenie gradientem to iteracja po tych liniowych, nieskończenie małych zmianach.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktyka — dane i kontekst brazylijskie">
+
+### Jak sprawdzić liniowość: praktyczny przepis
+
+Dla każdej kandydatki $T$:
+
+1. Oblicz $T(u + v)$ i porównaj z $T(u) + T(v)$. Czy są równe dla wszystkich $u, v$?
+2. Oblicz $T(\lambda v)$ i porównaj z $\lambda T(v)$. Czy są równe dla wszystkich $\lambda$?
+3. Sprawdź $T(0) = 0$. Jeśli nie, zatrzymaj się — nie jest liniowa.
+
+Jeśli któryś warunek nie jest spełniony, funkcja **nie jest liniowa**.
+
+### Jak zbudować macierz: algorytm kolumna-po-kolumnie
+
+1. Wybierz bazę $\{e_1, \ldots, e_n\}$ przestrzeni $V$.
+2. Oblicz $T(e_1), T(e_2), \ldots, T(e_n)$ (obrazy wektorów bazy).
+3. Każdy $T(e_j)$ zapisany we współrzędnych bazy $W$ staje się $j$-tą kolumną macierzy.
+
+**Przykład**: $T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x, y) = (2x + y,\ x - 3y)$.
+
+Baza kanoniczna: $e_1 = (1, 0)$, $e_2 = (0, 1)$.
+
+$T(e_1) = T(1, 0) = (2, 1) \Rightarrow$ kolumna 1: $\begin{pmatrix}2\\1\end{pmatrix}$
+
+$T(e_2) = T(0, 1) = (1, -3) \Rightarrow$ kolumna 2: $\begin{pmatrix}1\\-3\end{pmatrix}$
+
+Macierz: $[T] = \begin{pmatrix}2 & 1 \\ 1 & -3\end{pmatrix}$.
+
+### Zastosowanie w finansach: zwrot z portfela
+
+Portfel z $n$ aktywami i wagami $w = (w_1, \ldots, w_n)$ ma oczekiwany zwrot $r_p = w^\top \mu$, gdzie $\mu$ to wektor oczekiwanych zwrotów. To przekształcenie liniowe $T: \mathbb{R}^n \to \mathbb{R}$, $T(w) = w^\top \mu$. Optymalizacja portfela (Markowitz) minimalizuje $w^\top \Sigma w$ pod warunkiem $w^\top \mu = r_\text{cel}$ — problem kwadratowy z ograniczeniem liniowym.
+
+### Dla reszty Trimestru 12
+
+Wszystkie lekcje trimestru 12 budują na przekształceniach liniowych:
+
+- **Lekcja 113**: jądro i obraz ($\ker T$ i $\operatorname{Im} T$), twierdzenie o jądrze-obrazie.
+- **Lekcja 114**: wartości własne i wektory własne (kierunki, które $T$ tylko skaluje).
+- **Lekcja 115**: diagonalizacja (baza, gdzie $[T]$ staje się diagonalna).
+- **Lekcja 117**: SVD (rozkład bardziej ogólny, zawsze istnieje).
+
+Opanowanie koncepcji tej lekcji to warunek wstępny dla wszystkich następnych.
+
+</Porta>
+
+</DuasPortas>
+
+## Przykłady rozwiązane
+
+<Exemplo titulo="Sprawdzić liniowość T(x, y) = (2x, 3y)" numero="1">
+
+**Problem:** Ustal, czy $T: \mathbb{R}^2 \to \mathbb{R}^2$ określona przez $T(x, y) = (2x,\, 3y)$ to przekształcenie liniowe.
+
+**Strategia:** Sprawdzić dwa warunki definicji: zachowanie sumy i zachowanie skalara. Użyć ogólnych wektorów.
+
+**Rozwiązanie:**
+
+Niech $u = (x_1, y_1)$ i $v = (x_2, y_2)$ będą wektorami w $\mathbb{R}^2$, i $a \in \mathbb{R}$ bądź skalarem.
+
+1. **Zachowanie sumy:**
+$$T(u + v) = T(x_1 + x_2,\; y_1 + y_2) = (2(x_1+x_2),\; 3(y_1+y_2))$$
+$$= (2x_1 + 2x_2,\; 3y_1 + 3y_2) = (2x_1, 3y_1) + (2x_2, 3y_2) = T(u) + T(v). \checkmark$$
+
+2. **Zachowanie skalara:**
+$$T(a u) = T(ax_1, ay_1) = (2ax_1,\; 3ay_1) = a(2x_1, 3y_1) = a\,T(u). \checkmark$$
+
+**Weryfikacja:** Ponieważ oba warunki zostały zweryfikowane dla ogólnych wektorów, $T$ jest liniowa. Dodatkowo $T(0, 0) = (0, 0) = 0$ — spójne z liniowością.
+
+**Źródło.** [Beezer — A First Course in Linear Algebra, §LT Przykład LTPM](http://linear.ups.edu/fcla/section-LT.html) — licencja GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="Zbudować macierz obrotu 60 stopni" numero="2">
+
+**Problem:** Znajdź macierz $2 \times 2$, która reprezentuje obrót o $60°$ na płaszczyźnie $\mathbb{R}^2$.
+
+**Strategia:** Zastosować algorytm kolumna-po-kolumnie: obliczyć, gdzie $T$ przekształca $e_1 = (1,0)$ i $e_2 = (0,1)$. Obrazy to kolumny.
+
+**Rozwiązanie:**
+
+1. **Obraz $e_1$:** Wektor $(1, 0)$ wskazuje w prawo (kąt $0°$). Po obrocie o $60°$ wskazuje w kąt $60°$:
+$$T(e_1) = (\cos 60°,\; \sin 60°) = \left(\frac{1}{2},\; \frac{\sqrt{3}}{2}\right)$$
+
+2. **Obraz $e_2$:** Wektor $(0, 1)$ wskazuje w górę (kąt $90°$). Po obrocie o $60°$ wskazuje w kąt $150°$:
+$$T(e_2) = (\cos 150°,\; \sin 150°) = \left(-\frac{\sqrt{3}}{2},\; \frac{1}{2}\right)$$
+
+3. **Złożyć macierz** (kolumny = obrazy):
+$$[T] = \begin{pmatrix} \cos 60° & \cos 150° \\ \sin 60° & \sin 150° \end{pmatrix} = \begin{pmatrix} 1/2 & -\sqrt{3}/2 \\ \sqrt{3}/2 & 1/2 \end{pmatrix}$$
+
+**Weryfikacja:** $\det[T] = (1/2)(1/2) - (-\sqrt{3}/2)(\sqrt{3}/2) = 1/4 + 3/4 = 1$. Obroty zachowują pole — $\det = 1$ jest poprawny. I $[T]^\top [T] = I$ (macierz ortogonalna), potwierdzając, że normy są zachowywane.
+
+**Źródło.** [Hefferon — Linear Algebra, rozdz. 3 §I Przykład 1.9](https://hefferon.net/linearalgebra/index.html) — licencja CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Różniczkowanie w P2 — macierz w bazie kanonicznej" numero="3">
+
+**Problem:** Zdefiniuj $D: \mathcal{P}_2 \to \mathcal{P}_2$ przez $D(p) = p'$ (zwykła pochodna). Pokaż, że $D$ jest liniowe i znajdź jego macierz w bazie $\mathcal{B} = \{1, x, x^2\}$.
+
+**Strategia:** (1) Sprawdzić liniowość używając własności pochodnej. (2) Obliczyć $D$ na każdym wektorze bazy i złożyć kolumny.
+
+**Rozwiązanie:**
+
+1. **Liniowość:**
+$$D(p + q) = (p + q)' = p' + q' = D(p) + D(q). \checkmark$$
+$$D(\lambda p) = (\lambda p)' = \lambda p' = \lambda D(p). \checkmark$$
+
+2. **Obrazy wektorów bazy:**
+
+$$D(1) = 0 = 0 \cdot 1 + 0 \cdot x + 0 \cdot x^2 \Rightarrow \text{kolumna 1: } \begin{pmatrix}0\\0\\0\end{pmatrix}$$
+
+$$D(x) = 1 = 1 \cdot 1 + 0 \cdot x + 0 \cdot x^2 \Rightarrow \text{kolumna 2: } \begin{pmatrix}1\\0\\0\end{pmatrix}$$
+
+$$D(x^2) = 2x = 0 \cdot 1 + 2 \cdot x + 0 \cdot x^2 \Rightarrow \text{kolumna 3: } \begin{pmatrix}0\\2\\0\end{pmatrix}$$
+
+3. **Macierz:**
+$$[D]_{\mathcal{B}} = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 2 \\ 0 & 0 & 0 \end{pmatrix}$$
+
+**Weryfikacja:** Zastosuj $[D]$ do wektora współrzędnych $p = 3 + 2x + 5x^2$, czyli $(3, 2, 5)^\top$:
+$$[D]\begin{pmatrix}3\\2\\5\end{pmatrix} = \begin{pmatrix}2\\10\\0\end{pmatrix}$$
+To odpowiada wielomianowi $2 + 10x$. I rzeczywiście $p'(x) = 2 + 10x$. Poprawnie.
+
+**Źródło.** [Beezer — A First Course in Linear Algebra, §LT Przykład MLTCV](http://linear.ups.edu/fcla/section-LT.html) — licencja GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="Zmiana bazy — ta sama T, różne macierze" numero="4">
+
+**Problem:** Niech $T: \mathbb{R}^2 \to \mathbb{R}^2$ będzie odbiciem względem osi $x$: $T(x, y) = (x, -y)$.
+(a) Znajdź $[T]$ w bazie kanonicznej $\mathcal{B} = \{e_1, e_2\}$.
+(b) Znajdź $[T]$ w bazie $\mathcal{B}' = \{(1,1),\, (1,-1)\}$.
+(c) Potwierdź, że $[T]_{\mathcal{B}'} = P^{-1}[T]_{\mathcal{B}}\,P$.
+
+**Strategia:** (a) Algorytm kolumna-po-kolumnie w każdej bazie. (c) Użyć formuły zmiany bazy z $P = $ macierz, której kolumny to wektory $\mathcal{B}'$ we współrzędnych $\mathcal{B}$.
+
+**Rozwiązanie:**
+
+**(a)** Baza kanoniczna:
+$$T(e_1) = T(1, 0) = (1, 0) \Rightarrow \text{kol. 1: } (1, 0)^\top$$
+$$T(e_2) = T(0, 1) = (0, -1) \Rightarrow \text{kol. 2: } (0, -1)^\top$$
+$$[T]_{\mathcal{B}} = \begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}$$
+
+**(b)** Baza $\mathcal{B}' = \{v_1, v_2\} = \{(1,1),(1,-1)\}$. Obliczyć obrazy we współrzędnych $\mathcal{B}'$:
+$$T(v_1) = T(1,1) = (1,-1) = v_2 = 0 \cdot v_1 + 1 \cdot v_2 \Rightarrow \text{kol. 1: } (0, 1)^\top$$
+$$T(v_2) = T(1,-1) = (1,1) = v_1 = 1 \cdot v_1 + 0 \cdot v_2 \Rightarrow \text{kol. 2: } (1, 0)^\top$$
+$$[T]_{\mathcal{B}'} = \begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix}$$
+
+**(c)** Macierz $P$ (kolumny to $v_1, v_2$ we współrzędnych kanonicznych):
+$$P = \begin{pmatrix}1 & 1 \\ 1 & -1\end{pmatrix}, \quad P^{-1} = \frac{1}{-2}\begin{pmatrix}-1 & -1 \\ -1 & 1\end{pmatrix} = \begin{pmatrix}1/2 & 1/2 \\ 1/2 & -1/2\end{pmatrix}$$
+
+$$P^{-1}[T]_{\mathcal{B}}P = \begin{pmatrix}1/2 & 1/2 \\ 1/2 & -1/2\end{pmatrix}\begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}\begin{pmatrix}1 & 1 \\ 1 & -1\end{pmatrix} = \begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix} = [T]_{\mathcal{B}'}. \checkmark$$
+
+**Weryfikacja:** W $\mathcal{B}'$ odbicie zamienia $v_1 \leftrightarrow v_2$, więc macierz powinna być dokładnie permutacją $\begin{pmatrix}0&1\\1&0\end{pmatrix}$ — ma to sens geometryczny.
+
+**Źródło.** [Hefferon — Linear Algebra, rozdz. 3 §V Ćwiczenie 1.18](https://hefferon.net/linearalgebra/index.html) — licencja CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Złożenie przekształceń i iloczyn macierzowy" numero="5">
+
+**Problem:** Zdefiniuj $S: \mathbb{R}^2 \to \mathbb{R}^2$ jako ścinanie poziome $S(x, y) = (x + 2y,\, y)$ i $T: \mathbb{R}^2 \to \mathbb{R}^2$ jako odbicie $T(x, y) = (-x,\, y)$. Oblicz (a) macierze $[S]$ i $[T]$; (b) macierz $T \circ S$; (c) sprawdzenie obliczaniem $(T \circ S)(3, 1)$ bezpośrednio i poprzez iloczyn macierzowy.
+
+**Strategia:** Algorytm kolumna-po-kolumnie dla każdego przekształcenia. Złożenie = iloczyn macierzowy $[T][S]$.
+
+**Rozwiązanie:**
+
+**(a)** Macierze poprzez kolumna-po-kolumnie:
+$$[S] = \begin{pmatrix}1 & 2 \\ 0 & 1\end{pmatrix}, \quad [T] = \begin{pmatrix}-1 & 0 \\ 0 & 1\end{pmatrix}$$
+
+**(b)** Złożenie $T \circ S$ (zastosować $S$ pierwsze, potem $T$):
+$$[T \circ S] = [T][S] = \begin{pmatrix}-1 & 0 \\ 0 & 1\end{pmatrix}\begin{pmatrix}1 & 2 \\ 0 & 1\end{pmatrix} = \begin{pmatrix}-1 & -2 \\ 0 & 1\end{pmatrix}$$
+
+**(c)** Weryfikacja dla $(3, 1)$:
+
+**Bezpośrednio:** $S(3, 1) = (3 + 2\cdot1,\; 1) = (5, 1)$. Potem $T(5, 1) = (-5, 1)$.
+
+**Poprzez macierz:** $[T \circ S]\begin{pmatrix}3\\1\end{pmatrix} = \begin{pmatrix}-1 & -2 \\ 0 & 1\end{pmatrix}\begin{pmatrix}3\\1\end{pmatrix} = \begin{pmatrix}-3-2\\0+1\end{pmatrix} = \begin{pmatrix}-5\\1\end{pmatrix}$.
+
+Wynik: $(-5, 1)$ — identyczny. Iloczyn macierzowy = złożenie przekształceń.
+
+**Źródło.** [Axler — Linear Algebra Done Right wyd. 4., §3B Ćwiczenie 1](https://linear.axler.net/) — licencja CC-BY-NC.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-112-transformacoes-lineares">
+
+### Blok A — Sprawdzenie liniowości (112.1 do 112.12)
+
+<Exercicio numero="112.1" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C20", licenca: "GNU FDL" }}
+  solucao={<>Weryfikujemy oba warunki. Niech <Eq>{`u = (x_1,y_1)`}</Eq>, <Eq>{`v = (x_2,y_2)`}</Eq>. Suma: <Eq>{`T(u+v) = (2(x_1+x_2), 3(y_1+y_2)) = T(u)+T(v)`}</Eq>. Skalar: <Eq>{`T(au) = (2ax_1, 3ay_1) = aT(u)`}</Eq>. Zatem <Eq>{`T`}</Eq> jest liniowa. Macierz: <Eq>{`\\begin{pmatrix}2&0\\\\0&3\\end{pmatrix}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Napisz ogólne wektory <Eq>{`u = (x_1,y_1)`}</Eq>, <Eq>{`v = (x_2,y_2)`}</Eq> i skalar <Eq>{`a \\in \\mathbb{R}`}</Eq>. Pracujemy z ogólnymi, aby udowodnić dla <em>każdej</em> pary, nie tylko dla przykładu.</li>
+      <li>Warunek sumy: oblicz <Eq>{`T(u+v)`}</Eq> i porównaj z <Eq>{`T(u)+T(v)`}</Eq>. Powinny być równe.</li>
+      <li>Warunek skalara: oblicz <Eq>{`T(au)`}</Eq> i porównaj z <Eq>{`aT(u)`}</Eq>.</li>
+      <li>Dla macierzy: zastosuj algorytm kolumna-po-kolumnie. <Eq>{`T(e_1) = T(1,0) = (2,0)`}</Eq> → kolumna 1. <Eq>{`T(e_2) = T(0,1) = (0,3)`}</Eq> → kolumna 2.</li>
+    </ol>
+    <em>Trik:</em> <Eq>{`T(x,y) = (2x, 3y)`}</Eq> to niejednorodna skala — rozciąga oś <Eq>{`x`}</Eq> przez 2 i oś <Eq>{`y`}</Eq> przez 3. Przekształcenia skalujące są zawsze liniowe.
+  </>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x, y) = (2x,\, 3y)$. Sprawdź, że $T$ jest liniowa i znajdź jej macierz.
+</Exercicio>
+
+<Exercicio numero="112.2" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Nie jest liniowa — łamie $T(0) = 0$", correta: true },
+    { texto: "Jest liniowa — spełnia $T(u+v)=T(u)+T(v)$" },
+    { texto: "Jest liniowa — to funkcja afiniczna" },
+    { texto: "Nie jest liniowa — nie jest iniektywna" },
+  ]}
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C21", licenca: "GNU FDL" }}
+  solucao={<>Wystarczy sprawdzić zero: <Eq>{`T(0,0) = (0+1, 0) = (1,0) \\neq (0,0)`}</Eq>. Ponieważ każde przekształcenie liniowe spełnia <Eq>{`T(0) = 0`}</Eq>, ta funkcja NIE jest liniowa. To translacja, czyli przekształcenie afiniczne.</>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x, y) = (x + 1,\, y)$. Dlaczego $T$ nie jest przekształceniem liniowym?
+</Exercicio>
+
+<Exercicio numero="112.3" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.1", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T(x) = x^2`}</Eq> nie jest liniowa. Przykład: <Eq>{`T(1+1) = T(2) = 4`}</Eq>, ale <Eq>{`T(1)+T(1) = 1+1 = 2 \\neq 4`}</Eq>. Warunek sumy nie jest spełniony. Dodatkowo <Eq>{`T(-1) = 1 \\neq -1 = -T(1)`}</Eq>.</>}
+>
+$T: \mathbb{R} \to \mathbb{R}$, $T(x) = x^2$. Podaj konkretny kontrprzykład, aby pokazać, że $T$ nie jest liniowa.
+</Exercicio>
+
+<Exercicio numero="112.4" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C22", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T(x,y) = (y,x)`}</Eq> jest liniowa. Macierz: <Eq>{`T(e_1) = T(1,0) = (0,1)`}</Eq> i <Eq>{`T(e_2) = T(0,1) = (1,0)`}</Eq>. Zatem <Eq>{`[T] = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>. To macierz permutacji — zamienia współrzędne.</>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x, y) = (y,\, x)$. Pokaż, że jest liniowa i znajdź jej macierz $2 \times 2$.
+</Exercicio>
+
+<Exercicio numero="112.5" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C30", licenca: "GNU FDL" }}
+  solucao={<>Jest liniowa. Macierz $2 \times 3$: <Eq>{`T(e_1)=(1,0)`}</Eq>, <Eq>{`T(e_2)=(1,1)`}</Eq>, <Eq>{`T(e_3)=(0,1)`}</Eq>. Zatem <Eq>{`[T] = \\begin{pmatrix}1&1&0\\\\0&1&1\\end{pmatrix}`}</Eq>.</>}
+>
+$T: \mathbb{R}^3 \to \mathbb{R}^2$, $T(x, y, z) = (x + y,\, y + z)$. Pokaż, że jest liniowa i znajdź macierz $2 \times 3$.
+</Exercicio>
+
+<Exercicio numero="112.6" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.5", licenca: "CC-BY-NC" }}
+  solucao={<>Różniczkowanie <Eq>{`D: \\mathcal{P}_3 \\to \\mathcal{P}_3`}</Eq>, <Eq>{`D(p) = p'`}</Eq>. Baza <Eq>{`\\{1, x, x^2, x^3\\}`}</Eq>: <Eq>{`D(1)=0`}</Eq>, <Eq>{`D(x)=1`}</Eq>, <Eq>{`D(x^2)=2x`}</Eq>, <Eq>{`D(x^3)=3x^2`}</Eq>. Macierz $4\\times4$: <Eq>{`[D] = \\begin{pmatrix}0&1&0&0\\\\0&0&2&0\\\\0&0&0&3\\\\0&0&0&0\\end{pmatrix}`}</Eq>. Jest nilpotentna: <Eq>{`D^4=0`}</Eq>.</>}
+>
+$D: \mathcal{P}_3 \to \mathcal{P}_3$, $D(p) = p'$. Znajdź macierz $4 \times 4$ w bazie $\{1, x, x^2, x^3\}$. Co jest specjalnego w tej macierzy?
+</Exercicio>
+
+<Exercicio numero="112.7" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C31", licenca: "GNU FDL" }}
+  solucao={<>Integracja <Eq>{`I: \\mathcal{P}_2 \\to \\mathcal{P}_3`}</Eq>, <Eq>{`I(p)(x) = \\int_0^x p(t)\\,dt`}</Eq>. Jest liniowa z własności całki. Obrazy: <Eq>{`I(1)=x`}</Eq>, <Eq>{`I(x)=x^2/2`}</Eq>, <Eq>{`I(x^2)=x^3/3`}</Eq>. Macierz $4\\times3$: kolumny to <Eq>{`(0,1,0,0)^\\top`}</Eq>, <Eq>{`(0,0,1/2,0)^\\top`}</Eq>, <Eq>{`(0,0,0,1/3)^\\top`}</Eq>.</>}
+>
+$I: \mathcal{P}_2 \to \mathcal{P}_3$, $I(p)(x) = \int_0^x p(t)\,dt$. Pokaż, że jest liniowa i znajdź macierz $4 \times 3$ w bazach kanonicznych.
+</Exercicio>
+
+<Exercicio numero="112.8" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.11", licenca: "CC-BY-SA" }}
+  solucao={<>Transpozycja <Eq>{`T(A) = A^T`}</Eq> w <Eq>{`\\mathcal{M}_2`}</Eq>. Baza kanoniczna: <Eq>{`E_{11}, E_{12}, E_{21}, E_{22}`}</Eq>. <Eq>{`T(E_{11})=E_{11}`}</Eq>, <Eq>{`T(E_{12})=E_{21}`}</Eq>, <Eq>{`T(E_{21})=E_{12}`}</Eq>, <Eq>{`T(E_{22})=E_{22}`}</Eq>. Macierz $4\\times4$: permutuje współrzędne 2 i 3. Jest liniowa, ponieważ <Eq>{`(A+B)^T = A^T+B^T`}</Eq> i <Eq>{`(aA)^T = aA^T`}</Eq>.</>}
+>
+$T: \mathcal{M}_2 \to \mathcal{M}_2$, $T(A) = A^\top$. Pokaż, że jest liniowa i napisz macierz $4 \times 4$ w bazie kanonicznej $\mathcal{M}_2$.
+</Exercicio>
+
+<Exercicio numero="112.9" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.10", licenca: "CC-BY-NC" }}
+  solucao={<>Tak, jest liniowa. Ustalając <Eq>{`B`}</Eq>, dla każdych <Eq>{`A_1, A_2`}</Eq> i skalara <Eq>{`a`}</Eq>: <Eq>{`(A_1+A_2)B = A_1 B + A_2 B`}</Eq> (rozdzielność) i <Eq>{`(aA)B = a(AB)`}</Eq> (łączność). Obie własności mnożenia macierzy gwarantują liniowość.</>}
+>
+Ustal $B \in \mathcal{M}_n$. Określ $T: \mathcal{M}_n \to \mathcal{M}_n$ przez $T(A) = AB$. Pokaż, że $T$ jest liniowa.
+</Exercicio>
+
+<Exercicio numero="112.10" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Nie — $\\det(2A) = 2^n\\det(A) \\neq 2\\det(A)$ na ogół", correta: true },
+    { texto: "Tak — $\\det(A+B) = \\det A + \\det B$" },
+    { texto: "Nie — wyznacznik nie jest określony w przestrzeniach wektorowych" },
+    { texto: "Tak — $\\det$ jest wieloliniowy, zatem liniowy" },
+  ]}
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.20", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`T(A) = \\det A`}</Eq> nie jest liniowa. Aby to zobaczyć, weź <Eq>{`A = I_2`}</Eq>: <Eq>{`T(2I) = \\det(2I) = 4`}</Eq>, ale <Eq>{`2T(I) = 2\\cdot1 = 2`}</Eq>. Wyraźnie <Eq>{`4 \\neq 2`}</Eq>. Wyznacznik jest <em>wieloliniowy</em> (liniowy w każdej kolumnie oddzielnie), ale nie jest liniowy jako funkcja macierzy.</>}
+>
+$T: \mathcal{M}_2 \to \mathbb{R}$, $T(A) = \det A$. Czy $T$ jest przekształceniem liniowym?
+</Exercicio>
+
+<Exercicio numero="112.11" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C40", licenca: "GNU FDL" }}
+  solucao={<>Każdy wielomian <Eq>{`p(x) = a_0 + a_1 x + a_2 x^2`}</Eq> spełnia: <Eq>{`T(p)(x) = p(2x) = a_0 + 2a_1 x + 4a_2 x^2`}</Eq>. W bazie <Eq>{`\\{1, x, x^2\\}`}</Eq>: <Eq>{`T(1)=1`}</Eq>, <Eq>{`T(x)=2x`}</Eq>, <Eq>{`T(x^2)=4x^2`}</Eq>. Macierz diagonalna: <Eq>{`\\mathrm{diag}(1,2,4)`}</Eq>.</>}
+>
+$T: \mathcal{P}_2 \to \mathcal{P}_2$, $T(p)(x) = p(2x)$. Pokaż, że jest liniowa i znajdź macierz diagonalną w bazie $\{1, x, x^2\}$.
+</Exercicio>
+
+<Exercicio numero="112.12" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.7", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T(v) = 0`}</Eq> dla każdego <Eq>{`v`}</Eq>. Przekształcenie zerowe jest trywialnie liniowe: <Eq>{`T(u+v) = 0 = 0+0 = T(u)+T(v)`}</Eq>. Macierz to macierz zerowa <Eq>{`0_{m\\times n}`}</Eq>.</>}
+>
+$T: V \to W$, $T(v) = 0$ dla każdego $v \in V$. Pokaż, że $T$ jest liniowa. Jaka jest jej macierz w każdej bazie?
+</Exercicio>
+
+### Blok B — Obliczenie macierzy (112.13 do 112.24)
+
+<Exercicio numero="112.13" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.3", licenca: "CC-BY-SA" }}
+  solucao={<>Obrót o 45°: <Eq>{`\\cos 45° = \\sin 45° = \\sqrt{2}/2`}</Eq>. Macierz: <Eq>{`R_{45} = \\begin{pmatrix}\\sqrt{2}/2 & -\\sqrt{2}/2 \\\\ \\sqrt{2}/2 & \\sqrt{2}/2\\end{pmatrix}`}</Eq>. Weryfikacja: <Eq>{`\\det = 1`}</Eq> i <Eq>{`R^T R = I`}</Eq>.</>}
+>
+Znajdź macierz $2 \times 2$ obrotu o 45° na płaszczyźnie. Sprawdź, że jej wyznacznik to 1.
+</Exercicio>
+
+<Exercicio numero="112.14" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.5", licenca: "CC-BY-SA" }}
+  solucao={<>Odbicie przez prostą <Eq>{`y=x`}</Eq>: <Eq>{`T(e_1) = T(1,0) = (0,1)`}</Eq> i <Eq>{`T(e_2) = T(0,1) = (1,0)`}</Eq>. Zatem <Eq>{`[T] = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>. Zauważ <Eq>{`[T]^2 = I`}</Eq> — odbić dwa razy wraca do oryginału.</>}
+>
+Znajdź macierz $2 \times 2$ odbicia przez prostą $y = x$. Sprawdź, że $[T]^2 = I$.
+</Exercicio>
+
+<Exercicio numero="112.15" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C50", licenca: "GNU FDL" }}
+  solucao={<>Rzut ortogonalny na oś <Eq>{`y`}</Eq>: <Eq>{`T(x,y) = (0,y)`}</Eq>. Macierz: <Eq>{`T(e_1) = (0,0)`}</Eq>, <Eq>{`T(e_2) = (0,1)`}</Eq>. Zatem <Eq>{`P = \\begin{pmatrix}0&0\\\\0&1\\end{pmatrix}`}</Eq>. Idempotentna: <Eq>{`P^2 = P`}</Eq>.</>}
+>
+Znajdź macierz $2 \times 2$ rzutu ortogonalnego na oś $y$. Sprawdź, że $P^2 = P$ (idempotencja).
+</Exercicio>
+
+<Exercicio numero="112.16" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.8", licenca: "CC-BY-SA" }}
+  solucao={<>Rzut ortogonalny na prostą <Eq>{`y=x`}</Eq>: wzór na rzut w kierunku <Eq>{`u = (1,1)/\\sqrt{2}`}</Eq> to <Eq>{`P = uu^T = \\frac{1}{2}\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix}`}</Eq>. Weryfikacja: <Eq>{`P^2 = \\frac{1}{4}\\begin{pmatrix}2&2\\\\2&2\\end{pmatrix} \\cdot \\frac{1}{1} = \\frac{1}{2}\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix} = P`}</Eq>.</>}
+>
+Znajdź macierz $2 \times 2$ rzutu ortogonalnego na prostą $y = x$. Sprawdź idempotencję.
+</Exercicio>
+
+<Exercicio numero="112.17" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.14", licenca: "CC-BY-SA" }}
+  solucao={<>Skala niejednorodna: <Eq>{`T(x,y) = (3x, 2y)`}</Eq>. Macierz: <Eq>{`\\begin{pmatrix}3&0\\\\0&2\\end{pmatrix}`}</Eq>. Wyznacznik: <Eq>{`6`}</Eq> — przekształcenie mnoży pola przez 6.</>}
+>
+Znajdź macierz skali niejednorodnej $(x,y) \mapsto (3x,\, 2y)$. Jakie jest znaczenie geometryczne wyznacznika?
+</Exercicio>
+
+<Exercicio numero="112.18" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.15", licenca: "CC-BY-SA" }}
+  solucao={<>Ścinanie poziome o współczynniku 2: <Eq>{`T(x,y)=(x+2y, y)`}</Eq>. Macierz: <Eq>{`\\begin{pmatrix}1&2\\\\0&1\\end{pmatrix}`}</Eq>. Wyznacznik: <Eq>{`1`}</Eq> — zachowuje pola.</>}
+>
+Znajdź macierz ścinania poziomego o współczynniku 2: $T(x, y) = (x + 2y,\, y)$.
+</Exercicio>
+
+<Exercicio numero="112.19" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C55", licenca: "GNU FDL" }}
+  solucao={<>Złożenie: obrót 30° i potem skala 2. <Eq>{`R_{30} = \\begin{pmatrix}\\sqrt{3}/2 & -1/2 \\\\ 1/2 & \\sqrt{3}/2\\end{pmatrix}`}</Eq>, <Eq>{`E_2 = 2I`}</Eq>. Iloczyn: <Eq>{`E_2 R_{30} = \\begin{pmatrix}\\sqrt{3} & -1 \\\\ 1 & \\sqrt{3}\\end{pmatrix}`}</Eq>. Geometrycznie: skala przez 2 I obrót o 30° (w tej kolejności: obrót wcześniej, skala potem).</>}
+  passos={<>
+    <ol>
+      <li>Napisz macierz obrotu o 30° używając ogólnego wzoru <Eq>{`R_\\theta = \\begin{pmatrix}\\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta\\end{pmatrix}`}</Eq>. Podstawiając <Eq>{`\\theta = 30°`}</Eq>: <Eq>{`\\cos30° = \\sqrt{3}/2`}</Eq>, <Eq>{`\\sin30° = 1/2`}</Eq>.</li>
+      <li>Skala 2 ma macierz <Eq>{`2I = \\begin{pmatrix}2&0\\\\0&2\\end{pmatrix}`}</Eq>. Mnożenie wektora przez tę macierz podwaja każdą współrzędną.</li>
+      <li>Złożenie "obrót potem skala": przekształcenie, które stosujemy pierwsze, trafia na prawo w iloczynie. Chcemy skalę ∘ obrót = <Eq>{`(2I)(R_{30})`}</Eq>.</li>
+      <li>Wykonaj iloczyn: pomnóż wiersz za wierszem. Wynik <Eq>{`\\begin{pmatrix}\\sqrt{3}&-1\\\\1&\\sqrt{3}\\end{pmatrix}`}</Eq> ma wyznacznik <Eq>{`3+1=4=2^2`}</Eq> — ma sens, bo skalowanie przez 2 mnoży pola przez <Eq>{`2^2 = 4`}</Eq>.</li>
+    </ol>
+    <em>Trik:</em> Przekształcenie, które stosujemy pierwsze, zawsze trafia na prawo w iloczynie macierzy. "Obrót potem skala" = (skala) × (obrót). Ta konwencja powoduje klasyczny błąd w programowaniu grafiki.
+  </>}
+>
+Złożenie: obrót o 30° następnie skala przez 2. Oblicz macierz iloczynu $[E_2][R_{30}]$.
+</Exercicio>
+
+<Exercicio numero="112.20" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §II", pagina: "ex. 2.7", licenca: "CC-BY-SA" }}
+  solucao={<>Odbicie <Eq>{`y=x`}</Eq> następnie obrót 90°. Odbicie: <Eq>{`F = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>. Obrót 90°: <Eq>{`R_{90} = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}`}</Eq>. Iloczyn: <Eq>{`R_{90}F = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix} = \\begin{pmatrix}-1&0\\\\0&1\\end{pmatrix}`}</Eq>. To jest odbicie przez oś <Eq>{`y`}</Eq>!</>}
+>
+Złożenie: odbicie przez prostą $y = x$ następnie obrót o 90°. Oblicz macierz iloczynu i określ wynikowe przekształcenie.
+</Exercicio>
+
+<Exercicio numero="112.21" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C60", licenca: "GNU FDL" }}
+  solucao={<>Obrót o 90° w <Eq>{`\\mathbb{R}^3`}</Eq> wokół osi <Eq>{`z`}</Eq>: oś <Eq>{`z`}</Eq> pozostaje ustalona, płaszczyzna <Eq>{`xy`}</Eq> się obraca. <Eq>{`T(e_1) = (0,1,0)`}</Eq>, <Eq>{`T(e_2) = (-1,0,0)`}</Eq>, <Eq>{`T(e_3) = (0,0,1)`}</Eq>. Macierz $3\\times3$: <Eq>{`\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}`}</Eq>.</>}
+>
+W $\mathbb{R}^3$ znajdź macierz $3 \times 3$ obrotu o 90° wokół osi $z$ (oś $z$ pozostaje ustalona).
+</Exercicio>
+
+<Exercicio numero="112.22" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.16", licenca: "CC-BY-SA" }}
+  solucao={<>Rzut na płaszczyznę <Eq>{`xy`}</Eq>: <Eq>{`T(x,y,z) = (x,y,0)`}</Eq>. Kolumna-po-kolumnie: <Eq>{`T(e_1)=(1,0,0)`}</Eq>, <Eq>{`T(e_2)=(0,1,0)`}</Eq>, <Eq>{`T(e_3)=(0,0,0)`}</Eq>. Macierz: <Eq>{`\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&0\\end{pmatrix}`}</Eq>. Idempotentna: <Eq>{`P^2=P`}</Eq>.</>}
+>
+W $\mathbb{R}^3$ znajdź macierz $3 \times 3$ rzutu ortogonalnego na płaszczyznę $xy$.
+</Exercicio>
+
+<Exercicio numero="112.23" dificuldade="aplicacao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. C65", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T: \\mathcal{P}_2 \\to \\mathcal{P}_2`}</Eq>, <Eq>{`T(p) = p' + p`}</Eq>. Obrazy bazy <Eq>{`\\{1, x, x^2\\}`}</Eq>: <Eq>{`T(1) = 0+1 = 1`}</Eq>, <Eq>{`T(x) = 1+x`}</Eq>, <Eq>{`T(x^2) = 2x+x^2`}</Eq>. Macierz: <Eq>{`[T] = \\begin{pmatrix}1&1&0\\\\0&1&2\\\\0&0&1\\end{pmatrix}`}</Eq>. Górna trójkątna — wszystkie wartości własne to 1.</>}
+>
+$T: \mathcal{P}_2 \to \mathcal{P}_2$, $T(p) = p' + p$. Znajdź macierz $3 \times 3$ w bazie kanonicznej.
+</Exercicio>
+
+<Exercicio numero="112.24" dificuldade="aplicacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.5", licenca: "CC-BY-NC" }}
+  solucao={<><Eq>{`T: \\mathbb{R}^3 \\to \\mathbb{R}^3`}</Eq>, <Eq>{`T(v) = v \\times w`}</Eq> z <Eq>{`w = (1,1,1)`}</Eq>. Dla <Eq>{`v = (x,y,z)`}</Eq>: <Eq>{`T(v) = (y-z,\\ z-x,\\ x-y)`}</Eq>. Macierze kolumna-po-kolumnie: <Eq>{`T(e_1)=(0,-1,1)`}</Eq>, <Eq>{`T(e_2)=(1,0,-1)`}</Eq>, <Eq>{`T(e_3)=(-1,1,0)`}</Eq>. Zatem <Eq>{`[T] = \\begin{pmatrix}0&1&-1\\\\-1&0&1\\\\1&-1&0\\end{pmatrix}`}</Eq>. Antysymetryczna: <Eq>{`[T]^T = -[T]`}</Eq>.</>}
+>
+$T: \mathbb{R}^3 \to \mathbb{R}^3$, $T(v) = v \times (1,1,1)$ (iloczyn wektorowy z $(1,1,1)$ ustalone). Znajdź macierz $3 \times 3$.
+</Exercicio>
+
+### Blok C — Zmiana bazy i macierze podobne (112.25 do 112.34)
+
+<Exercicio numero="112.25" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §V", pagina: "ex. 1.10", licenca: "CC-BY-SA" }}
+  solucao={<>Odbicie <Eq>{`T(x,y) = (x,-y)`}</Eq>. Baza kanoniczna: <Eq>{`[T]_{\\mathcal{B}} = \\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}`}</Eq>. Nowa baza <Eq>{`\\mathcal{B}' = \\{(1,1),(1,-1)\\}`}</Eq>: <Eq>{`T(1,1)=(1,-1)=v_2`}</Eq>, <Eq>{`T(1,-1)=(1,1)=v_1`}</Eq>. Zatem <Eq>{`[T]_{\\mathcal{B}'} = \\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}`}</Eq>. Macierze podobne, to samo przekształcenie.</>}
+  passos={<>
+    <ol>
+      <li>Oblicz <Eq>{`[T]_{\\mathcal{B}}`}</Eq> w bazie kanonicznej metodą kolumna-po-kolumnie: <Eq>{`T(e_1)=(1,0)`}</Eq> i <Eq>{`T(e_2)=(0,-1)`}</Eq>.</li>
+      <li>Dla bazy <Eq>{`\\mathcal{B}' = \\{v_1,v_2\\} = \\{(1,1),(1,-1)\\}`}</Eq>, oblicz <Eq>{`T(v_1)`}</Eq> i <Eq>{`T(v_2)`}</Eq>.</li>
+      <li>Wyraź każdy obraz we współrzędnych <Eq>{`\\mathcal{B}'`}</Eq>: napisz <Eq>{`T(v_j) = a\\cdot v_1 + b \\cdot v_2`}</Eq> i rozwiąż dla <Eq>{`(a,b)`}</Eq>. Te współrzędne tworzą kolumnę <Eq>{`j`}</Eq>.</li>
+      <li>Porównaj dwie macierze. Są różne, ale reprezentują tę samą operację geometryczną.</li>
+    </ol>
+    <em>Obserwacja:</em> W <Eq>{`\\mathcal{B}'`}</Eq> odbicie zamienia dwa wektory bazy — dlatego macierz staje się permutacją <Eq>{`\\begin{pmatrix}0&1\\1&0\\end{pmatrix}`}</Eq>, która jest prostsza niż diagonalna w bazie kanonicznej!
+  </>}
+>
+$T: \mathbb{R}^2 \to \mathbb{R}^2$, $T(x,y) = (x, -y)$ (odbicie przez oś $x$). Znajdź $[T]$ w bazie kanonicznej i w bazie $\mathcal{B}' = \{(1,1),\,(1,-1)\}$. Potwierdź, że są podobne.
+</Exercicio>
+
+<Exercicio numero="112.26" dificuldade="aplicacao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §V", pagina: "ex. 1.14", licenca: "CC-BY-SA" }}
+  solucao={<>Jeśli <Eq>{`A \\sim B`}</Eq>, istnieje odwracalna <Eq>{`P`}</Eq> z <Eq>{`B = P^{-1}AP`}</Eq>. Wtedy: <Eq>{`\\det B = \\det(P^{-1})\\det(A)\\det(P) = \\frac{\\det A}{\\det P}\\cdot\\det P = \\det A`}</Eq>. I <Eq>{`\\text{tr}(B) = \\text{tr}(P^{-1}AP) = \\text{tr}(APP^{-1}) = \\text{tr}(A)`}</Eq> (cykliczność śladu).</>}
+>
+Pokaż, że macierze podobne mają taki sam wyznacznik i taki sam ślad.
+</Exercicio>
+
+<Exercicio numero="112.27" dificuldade="aplikacao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.10", licenca: "CC-BY-NC" }}
+  solucao={<>Jeśli <Eq>{`A \\sim B`}</Eq>, istnieje odwracalna <Eq>{`P`}</Eq> z <Eq>{`B = P^{-1}AP`}</Eq>. Wtedy <Eq>{`B^k = (P^{-1}AP)^k = P^{-1}A^kP`}</Eq>, zatem <Eq>{`A^k \\sim B^k`}</Eq>. Jeśli <Eq>{`A`}</Eq> jest nilpotentna (<Eq>{`A^k=0`}</Eq>), to <Eq>{`B^k = P^{-1}0P = 0`}</Eq>, zatem <Eq>{`B`}</Eq> też jest nilpotentna.</>}
+>
+Pokaż, że jeśli $A \sim B$ (podobne), to $A^k \sim B^k$ dla każdego $k \geq 1$. Wniosek: nilpotencja jest niezmiennikiem podobieństwa.
+</Exercicio>
+
+<Exercicio numero="112.28" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.22", licenca: "CC-BY-SA" }}
+  solucao={<>Współrzędne jednorodne: reprezentować punkt <Eq>{`(x,y) \\in \\mathbb{R}^2`}</Eq> jako <Eq>{`(x,y,1) \\in \\mathbb{R}^3`}</Eq>. Translacja przez <Eq>{`(a,b)`}</Eq>: <Eq>{`\\begin{pmatrix}1&0&a\\\\0&1&b\\\\0&0&1\\end{pmatrix}\\begin{pmatrix}x\\\\y\\\\1\\end{pmatrix} = \\begin{pmatrix}x+a\\\\y+b\\\\1\\end{pmatrix}`}</Eq>. Translacja staje się mnożeniem macierzowym — liniowa w <Eq>{`\\mathbb{R}^3`}</Eq> nawet jeśli nie jest liniowa w <Eq>{`\\mathbb{R}^2`}</Eq>.</>}
+>
+W grafice komputerowej translacja przez $(a, b)$ w $\mathbb{R}^2$ nie jest przekształceniem liniowym. Jak współrzędne jednorodne pozwalają reprezentować ją jako przekształcenie liniowe w $\mathbb{R}^3$? Napisz macierz $3 \times 3$.
+</Exercicio>
+
+<Exercicio numero="112.29" dificuldade="modelagem"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. M30", licenca: "GNU FDL" }}
+  solucao={<>Zwrot z portfela: <Eq>{`r_p = w^\\top \\mu`}</Eq>. Jest przekształceniem liniowym <Eq>{`T: \\mathbb{R}^n \\to \\mathbb{R}`}</Eq> z <Eq>{`T(w) = \\mu^\\top w`}</Eq>. Liniowa w <Eq>{`w`}</Eq>: jeśli podwoisz wszystkie wagi, zwrot się podwaja. Wariancja portfela <Eq>{`\\sigma_p^2 = w^\\top \\Sigma w`}</Eq> to forma <em>dwuliniowa</em> (nie liniowa).</>}
+>
+Portfel z $n$ aktywami, wagi $w \in \mathbb{R}^n$, oczekiwane zwroty $\mu \in \mathbb{R}^n$. Czy oczekiwany zwrot $r_p = w^\top \mu$ jest przekształceniem liniowym w $w$? A wariancja $\sigma_p^2 = w^\top \Sigma w$?
+</Exercicio>
+
+<Exercicio numero="112.30" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §III", pagina: "ex. 3.8", licenca: "CC-BY-SA" }}
+  solucao={<>Splot 1D z jądrem rozmiaru 3 nad sygnałem rozmiaru 5: wyjście rozmiaru 3. Jądro <Eq>{`k = (k_0, k_1, k_2)`}</Eq>, wejście <Eq>{`x = (x_0,\\ldots,x_4)`}</Eq>. Wyjście <Eq>{`y_i = \\sum_{j=0}^{2} k_j x_{i+j}`}</Eq>. Macierz Toeplitza $3\\times5$: każdy wiersz to jądro przesunięte o jedną pozycję.</>}
+>
+Napisz macierz Toeplitza $3 \times 5$, która realizuje dyskretny 1D splot z jądrem $k = (1, 2, 1)$ nad sygnałem długości 5 (wyjście ważne, długość 3).
+</Exercicio>
+
+<Exercicio numero="112.31" dificuldade="modelagem"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.15", licenca: "CC-BY-NC" }}
+  solucao={<>Warstwa gęsta: <Eq>{`y = Wx + b`}</Eq>. Część <Eq>{`Wx`}</Eq> to przekształcenie liniowe <Eq>{`W: \\mathbb{R}^{n_{\\rm in}} \\to \\mathbb{R}^{n_{\\rm out}}`}</Eq>. <Eq>{`b`}</Eq> (bias) czyni warstwę <em>afiniczną</em>, nie liniową. Nieliniowość sieci pochodzi z funkcji aktywacji (ReLU, sigmoid) stosowanych po każdej warstwie afinicznej.</>}
+>
+W uczeniu maszynowym warstwa gęsta to $y = Wx + b$. Która część jest przekształceniem liniowym? Dlaczego dodanie $b$ nie czyni warstwy liniową? Skąd pochodzi nieliniowość sieci neuronowej?
+</Exercicio>
+
+<Exercicio numero="112.32" dificuldade="modelagem"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. M35", licenca: "GNU FDL" }}
+  solucao={<>System LTI: <Eq>{`\\dot{x} = Ax`}</Eq>, rozwiązanie <Eq>{`x(t) = e^{At}x_0`}</Eq>. Zastosowanie <Eq>{`x_0 \\mapsto x(t)`}</Eq> jest przekształceniem liniowym: <Eq>{`e^{At}(x_0 + y_0) = e^{At}x_0 + e^{At}y_0`}</Eq>. Macierz przejścia to <Eq>{`\\Phi(t) = e^{At}`}</Eq>. W inżynierii sterowania wartości własne <Eq>{`A`}</Eq> określają stabilność systemu.</>}
+>
+System LTI: $\dot{x} = Ax$, rozwiązanie $x(t) = e^{At}x_0$. Pokaż, że zastosowanie $x_0 \mapsto x(t)$ jest przekształceniem liniowym. Co to jest macierz $e^{At}$?
+</Exercicio>
+
+<Exercicio numero="112.33" dificuldade="modelagem"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §III", pagina: "ex. 3.12", licenca: "CC-BY-SA" }}
+  solucao={<>Różniczkowanie <Eq>{`D: \\mathcal{P}_n \\to \\mathcal{P}_n`}</Eq>. Macierz nilpotentna: <Eq>{`D^{n+1} = 0`}</Eq>, ponieważ różniczkowanie $n+1$ razy każdy wielomian stopnia <Eq>{`n`}</Eq> daje zero. Geometrycznie: stopień spada z każdym różniczkowaniem, a po <Eq>{`n+1`}</Eq> aplikacjach każdy wielomian idzie do zera.</>}
+>
+Operator różniczkowania $D: \mathcal{P}_n \to \mathcal{P}_n$ ma nilpotentną macierz. Wyjaśnij, dlaczego $D^{n+1} = 0$ i co to oznacza w kategoriach wielomianów.
+</Exercicio>
+
+<Exercicio numero="112.34" dificuldade="modelagem"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.14", licenca: "CC-BY-NC" }}
+  solucao={<>Wymiar <Eq>{`\\mathcal{L}(V,W) = \\mathrm{Hom}(V,W)`}</Eq>: każdy element jest określony wartościami na bazie <Eq>{`V`}</Eq> (n wektorów), i każdy obraz żyje w <Eq>{`W`}</Eq> (wymiar m). To <Eq>{`n \\cdot m`}</Eq> wolnych skalarów. Zatem <Eq>{`\\dim \\mathcal{L}(V,W) = mn`}</Eq>. Dla <Eq>{`V=W=\\mathbb{R}^n`}</Eq>: <Eq>{`n^2`}</Eq> wpisów = wymiar <Eq>{`\\mathcal{M}_{n}(\\mathbb{R})`}</Eq>.</>}
+>
+Dlaczego $\dim \mathcal{L}(V, W) = (\dim V)(\dim W)$? Co to mówi o przestrzeni wszystkich macierzy $m \times n$?
+</Exercicio>
+
+### Blok D — Rozumienie i dowód (112.35 do 112.44)
+
+<Exercicio numero="112.35" dificuldade="compreensao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. T10", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`T(0)=0`}</Eq> jest konieczne ale nie wystarczające. Przykład: <Eq>{`T: \\mathbb{R} \\to \\mathbb{R}`}</Eq>, <Eq>{`T(x) = x^2`}</Eq>. Mamy <Eq>{`T(0)=0`}</Eq>, ale <Eq>{`T(1+1)=4 \\neq 1+1=T(1)+T(1)`}</Eq>. Zatem warunek <Eq>{`T(0)=0`}</Eq> jest konieczny (każda liniowa go spełnia) ale nie wystarczający (istnieją nieliniowe, które go spełniają).</>}
+>
+$T(0) = 0$ to warunek konieczny dla liniowości. Podaj przykład $T$ z $T(0) = 0$, które nie jest liniowe. Dlaczego $T(0) = 0$ nie jest wystarczające?
+</Exercicio>
+
+<Exercicio numero="112.36" dificuldade="compreensao"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §V", pagina: "ex. 1.17", licenca: "CC-BY-SA" }}
+  solucao={<>Jeśli <Eq>{`A`}</Eq> reprezentuje <Eq>{`T`}</Eq> w <Eq>{`\\mathcal{B}`}</Eq> i chcemy <Eq>{`[T]_{\\mathcal{B}'}`}</Eq>: niech <Eq>{`P`}</Eq> będzie macierzą, której kolumny to wektory <Eq>{`\\mathcal{B}'`}</Eq> we współrzędnych <Eq>{`\\mathcal{B}`}</Eq>. Wtedy <Eq>{`[T]_{\\mathcal{B}'} = P^{-1}AP`}</Eq>. Wzór czytamy: "konwertuj z <Eq>{`\\mathcal{B}'`}</Eq> na <Eq>{`\\mathcal{B}`}</Eq> przez <Eq>{`P`}</Eq>, zastosuj <Eq>{`A`}</Eq>, konwertuj z powrotem przez <Eq>{`P^{-1}`}</Eq>".</>}
+>
+Jeśli $A = [T]_{\mathcal{B}}$ reprezentuje $T$ w $\mathcal{B}$, wyjaśnij geometryczne znaczenie formuły $[T]_{\mathcal{B}'} = P^{-1}AP$. Co robi każdy czynnik?
+</Exercicio>
+
+<Exercicio numero="112.37" dificuldade="compreensao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.3", licenca: "CC-BY-NC" }}
+  solucao={<>Iloczyn macierzowy <Eq>{`[T][S]`}</Eq> realizuje złożenie <Eq>{`T \\circ S`}</Eq>. Dowód: dla każdego <Eq>{`v`}</Eq> ze współrzędnymi <Eq>{`x`}</Eq> w <Eq>{`\\mathcal{B}`}</Eq>, <Eq>{`(T \\circ S)(v)`}</Eq> ma współrzędne <Eq>{`[T]([S]x)`}</Eq>. Ale to jest dokładnie <Eq>{`([T][S])x`}</Eq> z definicji iloczynu macierzowego.</>}
+>
+Wyjaśnij, bez obliczania, dlaczego iloczyn macierzowy $[T][S]$ jest dokładnie złożeniem $T \circ S$. Jaki jest związek między definicją iloczynu macierzowego i definicją złożenia?
+</Exercicio>
+
+<Exercicio numero="112.38" dificuldade="compreensao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT", pagina: "ex. T20", licenca: "GNU FDL" }}
+  solucao={<>Niech <Eq>{`T_1, T_2 \\in \\mathcal{L}(V,W)`}</Eq>. Definiuje się <Eq>{`(T_1+T_2)(v) = T_1(v)+T_2(v)`}</Eq> i <Eq>{`(aT)(v) = a\\cdot T(v)`}</Eq>. Weryfikacja: <Eq>{`(T_1+T_2)(u+v) = T_1(u+v)+T_2(u+v) = T_1(u)+T_1(v)+T_2(u)+T_2(v) = (T_1+T_2)(u)+(T_1+T_2)(v)`}</Eq>. Zatem <Eq>{`\\mathcal{L}(V,W)`}</Eq> jest domknięty pod sumą i skalarem — jest przestrzenią wektorową.</>}
+>
+Pokaż, że $\mathcal{L}(V, W)$ (zbiór wszystkich przekształceń liniowych z $V$ do $W$) jest sam w sobie przestrzenią wektorową, z operacjami $(T_1 + T_2)(v) = T_1(v) + T_2(v)$ i $(aT)(v) = a\,T(v)$.
+</Exercicio>
+
+<Exercicio numero="112.39" dificuldade="desafio"
+  fonte={{ livro: "Hefferon — Linear Algebra", url: "https://hefferon.net/linearalgebra/index.html", secao: "rozdz. 3 §I", pagina: "ex. 1.28", licenca: "CC-BY-SA" }}
+  solucao={<>Chcemy <Eq>{`T: \\mathbb{R}^2 \\to \\mathbb{R}^2`}</Eq> z <Eq>{`T^2 = -I`}</Eq>. Obrót o 90° działa: <Eq>{`R_{90} = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}`}</Eq>. Wtedy <Eq>{`R_{90}^2 = \\begin{pmatrix}-1&0\\\\0&-1\\end{pmatrix} = -I`}</Eq>. Ta własność jest analogiczna do <Eq>{`i^2 = -1`}</Eq> w liczbach zespolonych — obrót o 90° działa jak jednostka urojona <Eq>{`i`}</Eq>!</>}
+>
+Znajdź $T: \mathbb{R}^2 \to \mathbb{R}^2$ z $T^2 = -I$ (negatyw tożsamości). Sugeruje się obrót o 90°. Jaki jest związek z liczbami zespolonymi?
+</Exercicio>
+
+<Exercicio numero="112.40" dificuldade="desafio"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3A", pagina: "ex. 3A.17", licenca: "CC-BY-NC" }}
+  solucao={<>Każde <Eq>{`T: \\mathbb{R} \\to \\mathbb{R}`}</Eq> liniowe ma formę <Eq>{`T(x) = T(1)\\cdot x`}</Eq>. Dowód: dla każdego <Eq>{`x \\in \\mathbb{R}`}</Eq>, <Eq>{`T(x) = T(x \\cdot 1) = x\\,T(1)`}</Eq> z liniowości (zachowanie skalara). Zatem <Eq>{`a = T(1) \\in \\mathbb{R}`}</Eq> całkowicie określa <Eq>{`T`}</Eq>, i <Eq>{`T(x) = ax`}</Eq>.</>}
+>
+Dowód: każde przekształcenie liniowe $T: \mathbb{R} \to \mathbb{R}$ ma formę $T(x) = ax$ dla pewnego $a \in \mathbb{R}$.
+</Exercicio>
+
+<Exercicio numero="112.41" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT Twierdzenie LTLC", pagina: "s. 320", licenca: "GNU FDL" }}
+  solucao={<>Niech <Eq>{`S: U \\to V`}</Eq> i <Eq>{`T: V \\to W`}</Eq> będą liniowe. Dla każdych <Eq>{`u_1, u_2 \\in U`}</Eq> i <Eq>{`a \\in K`}</Eq>: Suma: <Eq>{`(T\\circ S)(u_1+u_2) = T(S(u_1+u_2)) = T(S(u_1)+S(u_2)) = T(S(u_1))+T(S(u_2)) = (T\\circ S)(u_1)+(T\\circ S)(u_2)`}</Eq>. Skalar: analogicznie. Zatem <Eq>{`T \\circ S`}</Eq> jest liniowe. <Eq>{`\\square`}</Eq></>}
+>
+**Dowód.** Udowodnij, że złożenie przekształceń liniowych jest liniowe. Niech $S: U \to V$ i $T: V \to W$ obie będą liniowe. Pokaż, że $T \circ S: U \to W$ jest liniowe.
+</Exercicio>
+
+<Exercicio numero="112.42" dificuldade="demonstracao"
+  fonte={{ livro: "Axler — Linear Algebra Done Right wyd. 4.", url: "https://linear.axler.net/", secao: "§3B", pagina: "ex. 3B.2", licenca: "CC-BY-NC" }}
+  solucao={<>Niech <Eq>{`T: V \\to W`}</Eq> będzie liniowe i <Eq>{`c_1, \\ldots, c_n \\in K`}</Eq>, <Eq>{`v_1, \\ldots, v_n \\in V`}</Eq>. Wtedy: <Eq>{`T\\left(\\sum_{i=1}^n c_i v_i\\right) = \\sum_{i=1}^n c_i T(v_i)`}</Eq>. Dowód przez indukcję: baza <Eq>{`n=1`}</Eq> to zachowanie skalara; krok: <Eq>{`T(c_1v_1 + \\cdots + c_n v_n) = T(c_1v_1 + \\cdots + c_{n-1}v_{n-1}) + T(c_n v_n) = \\sum_{i=1}^{n-1}c_i T(v_i) + c_n T(v_n)`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+**Dowód.** Udowodnij przez indukcję, że każde przekształcenie liniowe zachowuje dowolne kombinacje liniowe: $T\!\left(\sum c_i v_i\right) = \sum c_i T(v_i)$.
+</Exercicio>
+
+<Exercicio numero="112.43" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§ILT Twierdzenie KILT", pagina: "s. 338", licenca: "GNU FDL" }}
+  solucao={<>(<Eq>{`\\Rightarrow`}</Eq>) Jeśli <Eq>{`T`}</Eq> jest iniektywna i <Eq>{`T(v)=0=T(0)`}</Eq>, to <Eq>{`v=0`}</Eq>, stąd <Eq>{`\\ker T = \\{0\\}`}</Eq>. (<Eq>{`\\Leftarrow`}</Eq>) Jeśli <Eq>{`\\ker T = \\{0\\}`}</Eq> i <Eq>{`T(u)=T(v)`}</Eq>, to <Eq>{`T(u-v) = T(u)-T(v) = 0`}</Eq>, zatem <Eq>{`u-v \\in \\ker T = \\{0\\}`}</Eq>, stąd <Eq>{`u=v`}</Eq>. <Eq>{`\\square`}</Eq></>}
+>
+**Dowód.** Udowodnij: $T$ liniowe jest iniektywne $\iff \ker T = \{0\}$.
+</Exercicio>
+
+<Exercicio numero="112.44" dificuldade="demonstracao"
+  fonte={{ livro: "Beezer — A First Course in Linear Algebra", url: "http://linear.ups.edu/fcla/section-LT.html", secao: "§LT Twierdzenie MBLT", pagina: "s. 325", licenca: "GNU FDL" }}
+  solucao={<>Niech <Eq>{`\\mathcal{B} = \\{v_1,\\ldots,v_n\\}`}</Eq> będzie bazą <Eq>{`V`}</Eq>. Każde <Eq>{`v \\in V`}</Eq> zapisuje się jednoznacznie jako <Eq>{`v = \\sum a_i v_i`}</Eq>. Definiując <Eq>{`T(v) = \\sum a_i w_i`}</Eq> z dowolnymi <Eq>{`w_i \\in W`}</Eq>: (i) <Eq>{`T`}</Eq> jest dobrze określone (jednoznaczność reprezentacji); (ii) jest liniowe (z konstrukcji); (iii) jest jedyne z tymi wartościami na bazie (każde inne o takich samych wartościach zbiegają się na każdej kombinacji liniowej). To pokazuje, że baza całkowicie określa przekształcenie liniowe. <Eq>{`\\square`}</Eq></>}
+>
+**Dowód.** Udowodnij twierdzenie o rozszerzeniu liniowym: dane przestrzenie wektorowe $V$ (wymiar $n$) i $W$, oraz wektory $w_1, \ldots, w_n \in W$ dowolne, istnieje jedyne przekształcenie liniowe $T: V \to W$ z $T(v_i) = w_i$ dla $i = 1, \ldots, n$.
+</Exercicio>
+
+</ListaExercicios>
+
+## Źródła
+
+- [**Beezer — A First Course in Linear Algebra**](http://linear.ups.edu/) — Rob Beezer · 2022 · EN · GNU FDL. §LT (Linear Transformations) i §ILT (Injective Linear Transformations). **Główne źródło tej lekcji.**
+- [**Hefferon — Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · wyd. 4. · EN · CC-BY-SA. Rozdz. 3 (Maps Between Spaces): perspektywa geometryczna i przykłady przekształceń płaszczyzny.
+- [**Axler — Linear Algebra Done Right**](https://linear.axler.net/) — Sheldon Axler · wyd. 4. · EN · CC-BY-NC. §3A–§3B: mapy liniowe jako obiekty pierwszej klasy; bez wyznaczników jako fundamentu.

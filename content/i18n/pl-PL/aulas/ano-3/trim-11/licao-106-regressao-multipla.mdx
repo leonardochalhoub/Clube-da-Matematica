@@ -1,0 +1,625 @@
+---
+titulo: "Lição 106 — Regressão múltipla"
+slug: "licao-106-regressao-multipla"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Modelo com p preditores, solução matricial OLS, R² ajustado, multicolinearidade, seleção de variáveis e diagnóstico de pressupostos."
+ordem: 106
+publicado: true
+tags: ["estatística inferencial", "regressão múltipla", "OLS", "ano-3", "trim-11"]
+prerrequisitos: ["licao-105-regressao-simples"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik LK alemão (Klasse 12)", "H2 Mathematics Singapura (§15)", "econometria introdutória"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{y}"
+  legenda={<>W <strong>regresji wielorakiej</strong> z <Eq>{`p`}</Eq> predyktorami estymator OLS jest rozwiązaniem macierzowym równań normalnych. Każdy współczynnik <Eq>{`\\hat\\beta_j`}</Eq> mierzy wpływ <Eq>{`X_j`}</Eq> na <Eq>{`Y`}</Eq> przy utrzymaniu pozostałych predyktorów stałych — tzw. <em>efekt cząstkowy</em>.</>}
+  audioTexto="Regresja wieloraka. Beta kapelusz wektor równa się odwrotności iksów transpozycji iksy, pomnożonej przez iksy transponowane ipsilon. Każdy współczynnik beta jota kapelusz to efekt cząstkowy predyktora jota, kontrolując pozostałe. Uogólnienie macierzowe regresji prostej."
+/>
+
+<aside>
+
+**Książki obejmujące tę lekcję**
+
+- [**OpenIntro Statistics** (4. ed.)](https://www.openintro.org/book/os/) · §8.1–8.4 · CC-BY-SA · <em>Pedagogiczne omówienie regresji wielorakiej z interpretacją współczynników cząstkowych, skorygowanym R² i wyborem modelu; zbiory danych dostępne online do replikacji.</em>
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §13.1–13.5 · CC-BY · <em>Podejście stosowane z tabelami ANOVA regresji wielorakiej, testami F globalnymi i częściowymi, oraz przykładami z danymi rzeczywistymi.</em>
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) · Regressão múltipla · CC-BY-SA · <em>Odniesienie w PT-BR z notacją macierzową zgodną z brazylijskim programem inżynierskim.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definicja rygorystyczna">
+
+### Model regresji liniowej wielorakiej
+
+<Definicao titulo="Model i notacja macierzowa">
+
+Dla $n$ obserwacji i $p$ predyktorów:
+
+$$Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i2} + \cdots + \beta_p X_{ip} + \varepsilon_i, \quad \varepsilon_i \stackrel{i.i.d.}{\sim} \mathcal{N}(0,\sigma^2)$$
+
+W postaci macierzowej: $\mathbf{Y} = X\boldsymbol\beta + \boldsymbol\varepsilon$, gdzie:
+
+- $\mathbf{Y} \in \mathbb{R}^n$: wektor odpowiedzi.
+- $X \in \mathbb{R}^{n\times(p+1)}$: macierz projektowania (pierwsza kolumna jedynek dla wyrazu wolnego).
+- $\boldsymbol\beta \in \mathbb{R}^{p+1}$: wektor współczynników.
+- $\boldsymbol\varepsilon \in \mathbb{R}^n$: wektor błędów.
+
+</Definicao>
+
+> "The multiple regression model is $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_k x_k + \varepsilon$. The coefficient $\beta_i$ measures the expected change in $y$ per unit change in $x_i$ when all other predictors are held constant." — [OpenIntro Statistics, §8.1](https://www.openintro.org/book/os/), p. 362
+
+<Definicao titulo="Estymator OLS i równania normalne">
+
+Minimalizacja $SSE = \|\mathbf{Y} - X\boldsymbol\beta\|^2$ prowadzi do równań normalnych:
+
+$$X^TX\hat{\boldsymbol\beta} = X^T\mathbf{Y}$$
+
+którego rozwiązanie (gdy $X^TX$ jest odwracalne) to:
+
+<Equation explicacao="Estymator OLS macierzowy: istnieje gdy predyktory są liniowo niezależne." latex="\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{Y}" />
+
+Macierz wariancji-kowariancji estymatorów to:
+
+<Equation explicacao="Cov estymatora: odwrotnie proporcjonalna do X'X. Więcej danych lub większa zmienność X zmniejsza wariancję." latex="\text{Cov}(\hat{\boldsymbol\beta}) = \sigma^2 (X^TX)^{-1}" />
+
+</Definicao>
+
+### Metryki dopasowania
+
+<Definicao titulo="R² skorygowany">
+
+$R^2$ rośnie wraz z każdym dodanym predyktorem — nawet nieistotnym. Skorygowany $R^2$ karze za liczbę parametrów:
+
+<Equation explicacao="R² skorygowany: karze za złożoność. Może spaść przy dodaniu słabego predyktora." latex="\bar R^2 = 1 - \frac{SSE/(n-p-1)}{SST/(n-1)}" />
+
+Jeśli $\bar R^2$ wzrasta z nowym predyktorem, ulepsza model; jeśli spada, pogarsza.
+
+</Definicao>
+
+### Wnioskowanie
+
+<Definicao titulo="Test t cząstkowy i test F globalny">
+
+**Test $t$ cząstkowy** dla $H_0: \beta_j = 0$ (z pozostałymi predyktorami w modelu):
+
+<Equation explicacao="Testuje czy predyktor Xj ma znaczący efekt biorąc pod uwagę że pozostałe już są w modelu." latex="T_j = \frac{\hat\beta_j}{SE(\hat\beta_j)} \sim t_{n-p-1}" />
+
+**Test $F$ globalny** dla $H_0: \beta_1 = \cdots = \beta_p = 0$:
+
+<Equation explicacao="Testuje czy model jako całość wyjaśnia więcej niż średnia Y." latex="F = \frac{SSR/p}{SSE/(n-p-1)} \sim F_{p,\,n-p-1}" />
+
+</Definicao>
+
+<Definicao titulo="Współliniowość i VIF">
+
+Gdy dwa lub więcej predyktorów są silnie skorelowane, $X^TX$ staje się prawie-osobliwe i $SE(\hat\beta_j)$ nadmuchnięte — współczynniki niestabilne i trudne do interpretacji.
+
+**Współczynnik inflacji wariancji:**
+
+<Equation explicacao="VIF mierzy o ile wariancja beta_j zwiększa się przez korelację z innymi predyktorami. VIF > 10 jest niepokojące." latex="VIF_j = \frac{1}{1 - R_j^2}" />
+
+gdzie $R_j^2$ to $R^2$ regresji $X_j$ względem pozostałych predyktorów.
+
+</Definicao>
+
+<Insight>
+
+W regresji prostej $\hat\beta_1$ i współczynnik korelacji zawsze mają ten sam znak. W regresji wielorakiej korelacja między $X_j$ i $Y$ może mieć przeciwny znak do $\hat\beta_j$ (efekt supresji). Dzieje się tak ponieważ współczynnik cząstkowy kontroluje inne predyktory.
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 160" className="w-full">
+<g>
+  <text x="10" y="20" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8" fontWeight="bold">Macierz projektowania X (n=4, p=2)</text>
+  <rect x="10" y="30" width="200" height="110" rx="4" fill="none" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1"/>
+  <text x="20" y="50" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₁₁   X₁₂</text>
+  <text x="20" y="70" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₂₁   X₂₂</text>
+  <text x="20" y="90" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₃₁   X₃₂</text>
+  <text x="20" y="110" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₄₁   X₄₂</text>
+  <text x="60" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×(p+1)</text>
+</g>
+<g>
+  <text x="230" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">×</text>
+</g>
+<g>
+  <rect x="250" y="30" width="60" height="110" rx="4" fill="none" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1"/>
+  <text x="270" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₀</text>
+  <text x="270" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₁</text>
+  <text x="270" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₂</text>
+  <text x="280" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">(p+1)×1</text>
+</g>
+<g>
+  <text x="335" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">=</text>
+</g>
+<g>
+  <rect x="355" y="30" width="50" height="110" rx="4" fill="none" stroke="rgb(26 77 92)" strokeOpacity="0.5" strokeWidth="1.5"/>
+  <text x="375" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₁</text>
+  <text x="375" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₂</text>
+  <text x="375" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₃</text>
+  <text x="375" y="115" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₄</text>
+  <text x="380" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×1</text>
+</g>
+<g>
+  <text x="425" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">+</text>
+</g>
+<g>
+  <rect x="445" y="30" width="60" height="110" rx="4" fill="none" stroke="rgb(199 107 63)" strokeOpacity="0.5" strokeWidth="1.5"/>
+  <text x="465" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₁</text>
+  <text x="465" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₂</text>
+  <text x="465" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₃</text>
+  <text x="465" y="115" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₄</text>
+  <text x="475" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×1</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Reprezentacja macierzowa modelu: $\mathbf{Y} = X\boldsymbol\beta + \boldsymbol\varepsilon$. Pierwsza kolumna jedynek w $X$ generuje wyraz wolny $\beta_0$.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Dla dziecka 5-letniego">
+
+Na poprzedniej lekcji używałeś **jednej linijki** aby przewidzieć jedną rzecz z drugiej: wzrost aby przewidzieć wagę.
+
+Teraz wyobraź sobie że chcesz przewidzieć wagę osoby i masz **dwie informacje**: wzrost I wiek. Z dwiema informacjami razem twoja prognoza będzie lepsza!
+
+Regresja wieloraka to jak posiadanie **kilku linijek naraz** — każda mierzy coś innego — i wszystkie razem robią dokładniejszą prognozę.
+
+</Porta>
+
+<Porta nivel="10" titulo="Dla dziecka 10-letniego">
+
+W regresji prostej używałeś tylko **jednej zmiennej** ($X$) aby przewidzieć ($Y$). Ale prawie zawsze mamy dostępne więcej informacji.
+
+Na przykład aby przewidzieć **cenę domu** możesz użyć:
+- $X_1$ = powierzchnia w m²
+- $X_2$ = liczba pokoi
+- $X_3$ = odległość od centrum (w km)
+
+Regresja wieloraka dopasowuje formułę typu:
+
+$$\hat Y = \hat\beta_0 + \hat\beta_1 X_1 + \hat\beta_2 X_2 + \hat\beta_3 X_3$$
+
+Każde $\hat\beta_j$ mówi: "jeśli zwiększę $X_j$ o jedną jednostkę, utrzymując inne stałe, o ile średnio zmieni się $Y$?"
+
+</Porta>
+
+<Porta nivel="15" titulo="Dla nastolatka 15-letniego">
+
+Regresja wieloraka uogólnia prostą poprzez włączenie $p$ predyktorów. Model to:
+
+$$Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p + \varepsilon$$
+
+**Interpretacja współczynników:** $\hat\beta_j$ to efekt $X_j$ na $Y$, **utrzymując wszystkie inne predyktory stałe** (efekt cząstkowy lub "ceteris paribus").
+
+**Dlaczego to ważne?** Wyobraź sobie przewidywanie wynagrodzenia pracownika używając doświadczenia ($X_1$) i poziomu edukacji ($X_2$). Efekt doświadczenia na wynagrodzenie różni się gdy kontrolujesz edukację od sytuacji gdy ignorujesz edukację.
+
+**R² vs. R² skorygowany:** dodanie dowolnej zmiennej zwiększa $R^2$, nawet jeśli jest nieistotna. Skorygowany $\bar R^2$ karze za dodatkowe zmienne — użyj go do porównywania modeli z różną liczbą predyktorów.
+
+</Porta>
+
+<Porta nivel="25" titulo="Dla studenta inżynierii">
+
+**Algebra macierzowa modelu**
+
+Dany $X \in \mathbb{R}^{n\times(p+1)}$ z rzędem kolumn $p+1$ (predyktory LI), OLS rozwiązuje:
+
+$$\min_{\boldsymbol\beta} \|\mathbf{Y} - X\boldsymbol\beta\|^2 \implies \hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{Y}$$
+
+Wektor wartości dopasowanych to $\hat{\mathbf{Y}} = H\mathbf{Y}$, gdzie $H = X(X^TX)^{-1}X^T$ to **macierz hat** (projekcja ortogonalna na przestrzeń kolumn $X$). Reszty $\mathbf{e} = (I-H)\mathbf{Y}$ są ortogonalne do $\hat{\mathbf{Y}}$.
+
+**Tabela ANOVA wieloraka**
+
+| Źródło | SS | df | MS | F |
+|---|---|---|---|---|
+| Regresja | $SSR$ | $p$ | $SSR/p$ | $MSR/MSE$ |
+| Błąd | $SSE$ | $n-p-1$ | $SSE/(n-p-1)$ | — |
+| Całość | $SST$ | $n-1$ | — | — |
+
+**Selekcja zmiennych:** AIC, BIC, $\bar R^2$, walidacja krzyżowa. Metody automatyczne: stepwise (forward, backward, both) — przydatne ale nie zastępują rozumowania merytorycznego.
+
+**Współliniowość:** $\text{det}(X^TX) \to 0$ implikuje niestabilną inwersję. Regresja grzbietowa ($L_2$): $\hat{\boldsymbol\beta}_{ridge} = (X^TX + \lambda I)^{-1}X^T\mathbf{Y}$ regularyzuje bez selekcji; Lasso ($L_1$) wybiera zmienne automatycznie.
+
+</Porta>
+
+<Porta nivel="40" titulo="Dla starszego profesjonalisty">
+
+Regresja wieloraka dominuje analizę empiryczną w naukach społecznych, epidemiologii i finansach. Centralne debaty metodologiczne:
+
+**Identyfikacja przyczynowa:** OLS z kontrolami nie rozwiązuje endogeniczności. "Model potencjalnych wyników" (Rubin) odróżnia efekt przyczynowy od warunkowego skojarzenia. Design oparty na zmienności egzogenicznej (eksperymenty naturalne, RDD, DiD, IV) to nowoczesny język przyczynowości w ekonomii — uznany nagrodą Nobla z Ekonomii 2021 (Card, Angrist, Imbens). Patrz [nobelprize.org/prizes/economic-sciences/2021/summary/](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/).
+
+**Overfitting i walidacja:** w małych próbach z wieloma predyktorami ($p \approx n$) OLS overfittuje. Regularyzacja (ridge, lasso, elastic net) i walidacja krzyżowa $k$-fold to standard w ML; w ekonometrii, użycie osobnych danych testowych nadal jest normą.
+
+**Błędy standardowe odporne:** heteroskedastyczność i autokorelacja naruszają $\text{Cov}(\boldsymbol\varepsilon) = \sigma^2 I$. Błędy White'a (HC) i Newey-West'a (HAC) poprawiają macierz wariancji bez wymagania formy funkcjonalnej dla heteroskedastyczności.
+
+**Regresja w wysokich wymiarach ($p > n$):** OLS nie ma rozwiązania. Lasso przez spadek współrzędnych, PCR, PLS. Wnioskowanie po selekcji (debiased Lasso) to aktywny obszar badań.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplikacja brazylijska">
+
+**Cena nieruchomości w São Paulo (dane symulowane zgodnie ze standardem IBGE FipeZap)**
+
+Regresja ceny sprzedaży $Y$ (w tys. R\$) na: powierzchnia $X_1$ (m²), liczba pokoi $X_2$ i odległość metra $X_3$ (km). Z $n=150$ transakcji:
+
+$$\hat Y = 180 + 4{,}2 X_1 + 35 X_2 - 12 X_3$$
+
+- $\hat\beta_1 = 4{,}2$: każdy dodatkowy m² wart jest średnio 4,2 tys. R\$ (kontrolując pokoje i metro).
+- $\hat\beta_2 = 35$: każdy dodatkowy pokój dodaje średnio 35 tys. R\$ (kontrolując powierzchnię i metro).
+- $\hat\beta_3 = -12$: każdy km więcej od metra zmniejsza o 12 tys. R\$ (kontrolując powierzchnię i pokoje).
+- $R^2 = 0{,}78$, $\bar R^2 = 0{,}77$: model wyjaśnia 77% zmienności cen dostosowując do złożoności.
+
+**Test F globalny:** $F = 172{,}4$ z p-wartością poniżej 0,001 — trzy predyktory razem są wysoko znaczące.
+
+**Ostrożność:** współliniowość między powierzchnią i pokojami ($r = 0{,}69$) nadmuchuje $SE$ — VIF obliczone: $VIF_1 = 2{,}3$, $VIF_2 = 2{,}1$, $VIF_3 = 1{,}1$. Wszystkie poniżej 10: współliniowość akceptowalna.
+
+</Porta>
+
+</DuasPortas>
+
+## Przykłady rozwiązane
+
+<Exemplo numero="106.1" titulo="Dopasowanie i interpretacja z dwoma predyktorami">
+
+**Problem.** Regresja rocznego wynagrodzenia $Y$ (tys. R\$) na doświadczenie $X_1$ (lata) i edukację $X_2$ (lata nauki) dała: $\hat Y = -12 + 2{,}8 X_1 + 5{,}2 X_2$, z $n=50$, $R^2=0{,}74$, $\bar R^2=0{,}73$.
+
+Zinterpretuj każdy współczynnik i oblicz prognozę dla profesjonalisty z 10 latami doświadczenia i 16 latami edukacji.
+
+**Strategia.** Zinterpretuj każde $\hat\beta_j$ jako efekt cząstkowy (ceteris paribus). Podstaw wartości do równania dopasowanego.
+
+**Rozwiązanie.**
+
+- $\hat\beta_0 = -12$: wyraz wolny (bez istotnej interpretacji merytorycznej sam w sobie — żaden profesjonalista nie ma zero lat doświadczenia i edukacji).
+- $\hat\beta_1 = 2{,}8$: kontrolując edukację, każdy dodatkowy rok doświadczenia wiąże się średnio z 2,8 tys. R\$/rok więcej.
+- $\hat\beta_2 = 5{,}2$: kontrolując doświadczenie, każdy dodatkowy rok edukacji wiąże się średnio z 5,2 tys. R\$/rok więcej.
+
+Prognoza: $\hat Y = -12 + 2{,}8\times10 + 5{,}2\times16 = -12+28+83{,}2 = 99{,}2$ tys. R\$/rok.
+
+**Weryfikacja.** $\bar R^2 = 0{,}73$ blisko $R^2 = 0{,}74$: tylko 2 predyktory, mała kara — model oszczędny.
+
+**Źródło.** [OpenIntro Statistics, §8.1, Przykład 8.1](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.2" titulo="R² skorygowany przy wyborze między modelami">
+
+**Problem.** Trzy modele do przewidywania domowego zużycia energii elektrycznej ($n=80$):
+
+| Model | Predyktory | $R^2$ | $\bar R^2$ |
+|---|---|---|---|
+| M1 | powierzchnia | 0,61 | 0,61 |
+| M2 | powierzchnia + liczba mieszkańców | 0,71 | 0,70 |
+| M3 | powierzchnia + liczba mieszkańców + dochód + temperatura + dzień tygodnia | 0,74 | 0,70 |
+
+Który model wybrać?
+
+**Strategia.** Porównaj $\bar R^2$ — karze za liczbę predyktorów.
+
+**Rozwiązanie.**
+
+M2 i M3 mają ten sam $\bar R^2 = 0{,}70$, ale M3 używa 5 predyktorów przeciw 2 z M2. Zgodnie z zasadą parsymonii (brzytwa Ockhama), **M2 jest preferowany**: dodanie 3 predyktorów nie ulepsza $\bar R^2$ — nie wносią informacji netto.
+
+Zwróć uwagę że $R^2$ M3 (0,74) przewyższa M2 (0,71) — ale $R^2$ zawsze rośnie z dodatkowymi predyktorami, nawet nieistotnymi.
+
+**Weryfikacja.** Mogłabyś potwierdzić z AIC/BIC: $AIC = n\ln(SSE/n) + 2(p+1)$ — niższy jest lepszy.
+
+**Źródło.** [OpenIntro Statistics, §8.3, Tabela 8.7](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.3" titulo="Test F globalny i tabela ANOVA">
+
+**Problem.** Regresja z $p=3$ predyktorami, $n=40$: $SST=2400$, $SSE=720$. Złóż tabelę ANOVA i testuj $H_0: \beta_1=\beta_2=\beta_3=0$ na poziomie 5%.
+
+**Strategia.** Oblicz SSR, df, MS, F; porównaj z wartością krytyczną $F_{3,36;\,0{,}05}$.
+
+**Rozwiązanie.**
+
+$SSR = 2400-720 = 1680$; $R^2 = 1680/2400 = 0{,}70$.
+
+| Źródło | SS | df | MS | F |
+|---|---|---|---|---|
+| Regresja | 1680 | 3 | 560 | 28,0 |
+| Błąd | 720 | 36 | 20 | — |
+| Całość | 2400 | 39 | — | — |
+
+$F_{3,36;\,0{,}05} \approx 2{,}87$. Ponieważ $F = 28{,}0 \gg 2{,}87$, odrzucamy $H_0$: model jako całość jest wysoko znaczący.
+
+**Weryfikacja.** $MSE = 20 \implies \hat\sigma = \sqrt{20} \approx 4{,}47$ — resztkowe odchylenie standardowe w jednostkach $Y$.
+
+**Źródło.** [OpenStax Statistics, §13.4](https://openstax.org/books/statistics/pages/13-4-facts-about-the-f-distribution) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="106.4" titulo="Detectar współliniowość przez VIF">
+
+**Problem.** Regresja ceny pojazdu ($Y$) na moc ($X_1$), pojemność ($X_2$) i wagę ($X_3$). Regresje pomocnicze: $R_1^2=0{,}89$ ($X_1$ na $X_2, X_3$), $R_2^2=0{,}91$, $R_3^2=0{,}85$. Oblicz VIFy i oceń.
+
+**Strategia.** $VIF_j = 1/(1-R_j^2)$.
+
+**Rozwiązanie.**
+
+$VIF_1 = 1/(1-0{,}89) = 9{,}09$; $VIF_2 = 1/(1-0{,}91) = 11{,}1$; $VIF_3 = 1/(1-0{,}85) = 6{,}67$.
+
+$VIF_2 = 11{,}1 > 10$: pojemność wykazuje silną współliniowość z innymi zmiennymi.
+
+**Działanie:** usuń $X_2$ z modelu lub połącz $X_1$ i $X_2$ w złożony indeks (analiza głównych składowych).
+
+**Weryfikacja.** Po usunięciu $X_2$, przelicz VIFy dla pozostałych predyktorów.
+
+**Źródło.** [OpenIntro Statistics, §8.4](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.5" titulo="Zmienna dummy i interakcja">
+
+**Problem.** Przewidywanie wynagrodzenia $Y$ (tys. R\$/rok) używając doświadczenia $X_1$ (lata) i płci $D$ (1=kobieta, 0=mężczyzna). Wynik: $\hat Y = 45 + 2{,}5X_1 - 8D$.
+
+Zinterpretuj współczynnik $D$ i oblicz prognozy wynagrodzeń dla: (a) mężczyzny z 10 latami doświadczenia; (b) kobiety z 10 latami doświadczenia.
+
+**Strategia.** Zmienna dummy tworzy dwa różne wyrazy wolne (jeden dla każdej płci), utrzymując równe nachylenie.
+
+**Rozwiązanie.**
+
+$\hat\beta_D = -8$: kontrolując doświadczenie, kobiety zarabiają średnio 8 tys. R\$/rok mniej niż mężczyźni — różnica sumaryczna (nie przyczynowa, bo nie kontrolujemy sektor, stanowisko, czas pracy).
+
+(a) Mężczyzna ($D=0$), $X_1=10$: $\hat Y = 45 + 25 - 0 = 70$ tys. R\$/rok.
+
+(b) Kobieta ($D=1$), $X_1=10$: $\hat Y = 45 + 25 - 8 = 62$ tys. R\$/rok.
+
+**Weryfikacja.** Różnica jest stała ($-8$) dla każdego poziomu doświadczenia — model bez interakcji zakłada efekt addytywny. Aby pozwolić na różne nachylenia, dodaj $X_1 \times D$.
+
+**Źródło.** [OpenIntro Statistics, §8.2, Przykład 8.4](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-106-regressao-multipla">
+
+<Exercicio
+  numero="106.1"
+  dificuldade="aplicacao"
+  solucao={<>Efekt cząstkowy każdego predyktora: utrzymać pozostałe stałe. <Eq>{`\\hat\\beta_1 = 3{,}2`}</Eq>: każdy dodatkowy m² dodaje 3,2 tys. R\$ do ceny, kontrolując pokoje i piętro. <Eq>{`\\hat\\beta_2 = 28`}</Eq>: każdy dodatkowy pokój dodaje 28 tys. R\$. <Eq>{`\\hat\\beta_3 = 5{,}5`}</Eq>: każde dodatkowe piętro dodaje 5,5 tys. R\$.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "8.1", licenca: "CC-BY-SA" }}
+>
+Regresja: $\hat Y = 50 + 3{,}2X_1 + 28X_2 + 5{,}5X_3$ (cena w tys. R\$, powierzchnia m², pokoje, piętro). Zinterpretuj każdy współczynnik.
+</Exercicio>
+
+<Exercicio
+  numero="106.2"
+  dificuldade="aplicacao"
+  passos={<>
+    <ol>
+      <li>Zidentyfikuj wartości: <Eq>{`X_1=80`}</Eq> m², <Eq>{`X_2=3`}</Eq> pokoje, <Eq>{`X_3=5`}</Eq> piętro.</li>
+      <li>Podstaw do równania: <Eq>{`\\hat Y = 50 + 3{,}2 \\times 80 + 28 \\times 3 + 5{,}5 \\times 5`}</Eq>.</li>
+      <li><Eq>{`= 50 + 256 + 84 + 27{,}5 = 417{,}5`}</Eq> tys. R\$.</li>
+      <li>Reszta: <Eq>{`e = 450 - 417{,}5 = 32{,}5`}</Eq> tys. R\<Eq>{`. Mieszkanie kosztuje R\\`}</Eq> 32.500 więcej niż przewiduje model.</li>
+      <li><em>Wskazówka:</em> dodatnia reszta = obserwowana powyżej oczekiwanej (może wskazywać na uprzywilejowaną lokalizację nie uchwycona przez predyktory).</li>
+    </ol>
+  </>}
+  solucao={<>Prognoza: R\<Eq>{` 417.500. Reszta: R\\`}</Eq> 32.500 (mieszkanie powyżej przewidywanego przez model).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "8.3", licenca: "CC-BY-SA" }}
+>
+Używając $\hat Y = 50 + 3{,}2X_1 + 28X_2 + 5{,}5X_3$, oblicz prognozę i resztę dla mieszkania 80 m², 3 pokoje, piętro 5 z obserwowaną ceną 450 tys. R\$.
+</Exercicio>
+
+<Exercicio
+  numero="106.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\bar R^2 = 1 - \\frac{SSE/(n-p-1)}{SST/(n-1)} = 1 - \\frac{800/36}{2000/39} = 1 - \\frac{22{,}2}{51{,}3} = 1 - 0{,}433 = 0{,}567`}</Eq>. Porównaj z <Eq>{`R^2 = 1-800/2000 = 0{,}60`}</Eq>: dostosowana ocena spada nieznacznie.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "373", exercicio: "8.19", licenca: "CC-BY-SA" }}
+>
+$n=40$, $p=3$ predyktory, $SST=2000$, $SSE=800$. Oblicz $R^2$ i $\bar R^2$.
+</Exercicio>
+
+<Exercicio
+  numero="106.4"
+  dificuldade="aplicacao"
+  solucao={<>M1: <Eq>{`\\bar R^2_1 = 1-(1-0{,}60)\\times(n-1)/(n-2)`}</Eq>. Z <Eq>{`n=50`}</Eq>: <Eq>{`\\bar R^2_1 = 1-0{,}40\\times49/48 = 1-0{,}408 = 0{,}592`}</Eq>. M2: <Eq>{`\\bar R^2_2 = 1-0{,}35\\times49/46 = 1-0{,}373 = 0{,}627`}</Eq>. M3: <Eq>{`\\bar R^2_3 = 1-0{,}32\\times49/43 = 1-0{,}365 = 0{,}635`}</Eq>. M3 ma większy <Eq>{`\\bar R^2`}</Eq>: preferowany spośród trzech.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "374", exercicio: "8.21", licenca: "CC-BY-SA" }}
+>
+$n=50$. Trzy modele z $p=1,3,6$ predyktorami i $SSE/SST = 0{,}40$; $0{,}35$; $0{,}32$. Oblicz $\bar R^2$ każdego i wskaż preferowany.
+</Exercicio>
+
+<Exercicio
+  numero="106.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`SSR = 0{,}72 \\times 3600 = 2592`}</Eq>; <Eq>{`SSE = 3600 - 2592 = 1008`}</Eq>; <Eq>{`MSR = 2592/4 = 648`}</Eq>; <Eq>{`MSE = 1008/55 = 18{,}3`}</Eq>; <Eq>{`F = 648/18{,}3 = 35{,}4`}</Eq>. Wartość krytyczna <Eq>{`F_{4,55;\\,0{,}05} \\approx 2{,}54`}</Eq>: odrzuć <Eq>{`H_0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-4-facts-about-the-f-distribution", secao: "§13.4", pagina: "710", exercicio: "13.9", licenca: "CC-BY" }}
+>
+$n=60$, $p=4$, $SST=3600$, $R^2=0{,}72$. Złóż tabelę ANOVA i testuj model na poziomie 5%.
+</Exercicio>
+
+<Exercicio
+  numero="106.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`VIF_j = 1/(1-R_j^2)`}</Eq>. <Eq>{`VIF_1 = 1/(1-0{,}30) = 1{,}43`}</Eq>; <Eq>{`VIF_2 = 1/(1-0{,}70) = 3{,}33`}</Eq>; <Eq>{`VIF_3 = 1/(1-0{,}92) = 12{,}5`}</Eq>. <Eq>{`VIF_3 > 10`}</Eq>: predyktor 3 wykazuje silną współliniowość.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "376", exercicio: "8.25", licenca: "CC-BY-SA" }}
+>
+Regresje pomocnicze dla 3 predyktorów: $R_1^2=0{,}30$, $R_2^2=0{,}70$, $R_3^2=0{,}92$. Oblicz VIFy i zidentyfikuj silną współliniowość.
+</Exercicio>
+
+<Exercicio
+  numero="106.7"
+  dificuldade="aplicacao"
+  passos={<>
+    <ol>
+      <li>Model z dummy: <Eq>{`\\hat Y = \\hat\\beta_0 + \\hat\\beta_1 X_1 + \\hat\\beta_2 D`}</Eq> gdzie <Eq>{`D=1`}</Eq> jeśli leczony, <Eq>{`D=0`}</Eq> jeśli kontrola.</li>
+      <li><Eq>{`\\hat\\beta_2`}</Eq> to średnia różnica <Eq>{`Y`}</Eq> między leczonymi i kontrolą, kontrolując <Eq>{`X_1`}</Eq>.</li>
+      <li>Z <Eq>{`\\hat\\beta_2 = 12{,}4`}</Eq>: program jest związany ze średnim wzrostem 12,4 punktów w ocenie, biorąc pod uwagę ten sam poziom dochodów rodzinnych.</li>
+      <li><em>Obserwacja:</em> to wciąż nie jest efekt przyczynowy — wymaga randomizacji lub quasi-eksperymentalnego designu.</li>
+    </ol>
+  </>}
+  solucao={<>Współczynnik dummy wskazuje że uczestnictwo w programie wiąże się z 12,4 punktami więcej na egzaminie, kontrolując dochody rodzinne. Efekt przyczynowy wymaga odpowiedniego eksperymentalnego designu.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "368", exercicio: "8.9", licenca: "CC-BY-SA" }}
+>
+Regresja wyniku ENEM na dochody rodzinne ($X_1$) i uczestnictwo w programie wsparcia ($D$: 1=tak, 0=nie): $\hat Y = 480 + 8{,}2X_1 + 12{,}4D$, $n=200$. Zinterpretuj $\hat\beta_D = 12{,}4$.
+</Exercicio>
+
+<Exercicio
+  numero="106.8"
+  dificuldade="aplicacao"
+  solucao={<>Test <Eq>{`t`}</Eq>: <Eq>{`T = 2{,}8/0{,}7 = 4{,}0`}</Eq>. Z <Eq>{`df = n-p-1 = 50-3-1 = 46`}</Eq>, <Eq>{`t_{46;\\,0{,}025} \\approx 2{,}013`}</Eq>. Ponieważ <Eq>{`|T| = 4{,}0 > 2{,}013`}</Eq>, odrzucamy <Eq>{`H_0: \\beta_1 = 0`}</Eq>. Predyktor <Eq>{`X_1`}</Eq> jest znaczący na poziomie 5%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-the-regression-equation", secao: "§13.3", pagina: "706", exercicio: "13.7", licenca: "CC-BY" }}
+>
+$n=50$, $p=3$, $\hat\beta_1=2{,}8$, $SE(\hat\beta_1)=0{,}7$. Testuj $H_0:\beta_1=0$ na poziomie 5% (dwustronnie).
+</Exercicio>
+
+<Exercicio
+  numero="106.9"
+  dificuldade="aplicacao"
+  solucao={<>PU 95% dla <Eq>{`\\beta_2`}</Eq>: <Eq>{`\\hat\\beta_2 \\pm t_{46;\\,0{,}025} \\times SE(\\hat\\beta_2) = 5{,}2 \\pm 2{,}013 \\times 1{,}8 = 5{,}2 \\pm 3{,}62 = (1{,}58;\\; 8{,}82)`}</Eq>. PU nie zawiera 0: <Eq>{`\\beta_2`}</Eq> jest znaczący na poziomie 5%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "364", exercicio: "8.5", licenca: "CC-BY-SA" }}
+>
+$n=50$, $p=3$, $\hat\beta_2=5{,}2$, $SE(\hat\beta_2)=1{,}8$. Zbuduj PU 95% dla $\beta_2$. Użyj $t_{46;\,0{,}025}\approx 2{,}013$.
+</Exercicio>
+
+<Exercicio
+  numero="106.10"
+  dificuldade="aplicacao"
+  solucao={<>Suma reszt zawsze równa się zero w każdej regresji z wyrazem wolnym: <Eq>{`\\sum e_i = 0`}</Eq>. Zatem piąta reszta to <Eq>{`e_5 = -(3{,}2 - 1{,}5 - 0{,}8 + 2{,}1) = -5{,}0`}</Eq>. Weryfikuj: suma <Eq>{`3{,}2-1{,}5-0{,}8+2{,}1-5{,}0 = 0`}</Eq>. Poprawnie.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "8.3 (adaptado)", licenca: "CC-BY-SA" }}
+>
+Cztery z pięciu reszt regresji to: $3{,}2$; $-1{,}5$; $-0{,}8$; $2{,}1$. Jaka jest piąta reszta?
+</Exercicio>
+
+<Exercicio
+  numero="106.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "R² zawsze spada gdy dodajemy nieistotny predyktor", correta: false },
+    { texto: "R² skorygowany może spaść gdy dodajemy nieistotny predyktor", correta: true },
+    { texto: "R² i R² skorygowany zawsze są równe", correta: false },
+    { texto: "R² skorygowany zawsze jest większy od R²", correta: false }
+  ]}
+  solucao={<><Eq>{`R^2`}</Eq> nigdy nie spada gdy dodajemy predyktory (właściwość matematyczna OLS). <Eq>{`\\bar R^2`}</Eq> karze za liczbę predyktorów i może spaść gdy dodany predyktor jest słaby. Dlatego <Eq>{`\\bar R^2`}</Eq> to odpowiedni kryterium do porównywania modeli z różną liczbą predyktorów.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "373", exercicio: "8.17", licenca: "CC-BY-SA" }}
+>
+Które stwierdzenie o $R^2$ i $R^2$ skorygowanym jest PRAWDZIWE?
+</Exercicio>
+
+<Exercicio
+  numero="106.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Współliniowość czyni estymatory obciążonymi", correta: false },
+    { texto: "Współliniowość nadmuchuje błędy standardowe współczynników", correta: true },
+    { texto: "Współliniowość unieważnia globalny test F", correta: false },
+    { texto: "Współliniowość występuje tylko gdy VIF = 0", correta: false }
+  ]}
+  solucao={<>Współliniowość nie biasuje estymatorów (pozostają one BLUE), ale czyni <Eq>{`X^TX`}</Eq> prawie-osobliwą, nadmuchując <Eq>{`(X^TX)^{-1}`}</Eq> i w konsekwencji <Eq>{`SE`}</Eq>. Indywidualne testy <Eq>{`t`}</Eq> tracą moc, ale globalny test <Eq>{`F`}</Eq> i prognozy pozostają wiarygodne.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "375", exercicio: "8.23", licenca: "CC-BY-SA" }}
+>
+Jaki jest główny praktyczny efekt współliniowości w regresji wielorakiej?
+</Exercicio>
+
+<Exercicio
+  numero="106.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Współczynnik X₁ w regresji wielorakiej równa się współczynnikowi z regresji prostej Y na X₁", correta: false },
+    { texto: "Dodanie X₂ do modelu może zmienić znak X₁", correta: true },
+    { texto: "Współczynniki cząstkowe zawsze są mniejsze od prostych", correta: false },
+    { texto: "W regresji wielorakiej β₁ mierzy marginalną korelację między X₁ i Y", correta: false }
+  ]}
+  solucao={<>Zjawisko to zwane jest "odwróceniem znaku" lub efektem supresji. Występuje gdy <Eq>{`X_2`}</Eq> jest skorelowany z <Eq>{`X_1`}</Eq> w taki sposób że kontrolowanie <Eq>{`X_2`}</Eq> ujawnia prawdziwą relację <Eq>{`X_1`}</Eq> z <Eq>{`Y`}</Eq>. Klasyczny przykład: pozytywna korelacja między strażami pożarnymi a szkodami — kontrolując rozmiar pożaru, efekt może się odwrócić.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "369", exercicio: "8.11", licenca: "CC-BY-SA" }}
+>
+Które stwierdzenie o współczynnikach cząstkowych w regresji wielorakiej jest PRAWDZIWE?
+</Exercicio>
+
+<Exercicio
+  numero="106.14"
+  dificuldade="modelagem"
+  solucao={<>Z <Eq>{`p = 4`}</Eq> predyktorami: <Eq>{`MSE = SSE/(n-p-1) = 5400/(80-4-1) = 5400/75 = 72`}</Eq>. <Eq>{`\\hat\\sigma = \\sqrt{72} \\approx 8{,}49`}</Eq> tys. R\<Eq>{`. Typowa rodzina błądzi średnio R\\`}</Eq> 8.490 w prognozowanym zużyciu. <Eq>{`\\bar R^2 = 1-(72)/(SST/79)`}</Eq>. Z <Eq>{`SST = 18000`}</Eq>: <Eq>{`\\bar R^2 = 1-72/227{,}8 = 1-0{,}316 = 0{,}684`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-the-regression-equation", secao: "§13.3", pagina: "705", exercicio: "13.5", licenca: "CC-BY" }}
+>
+Regresja miesięcznych wydatków rodziny (tys. R\$) na 4 predyktorach społeczno-ekonomicznych: $n=80$, $SST=18000$, $SSE=5400$. Oblicz $MSE$, $\hat\sigma$ i $\bar R^2$.
+</Exercicio>
+
+<Exercicio
+  numero="106.15"
+  dificuldade="modelagem"
+  passos={<>
+    <ol>
+      <li>Model bez interakcji: jedna linia z równym nachyleniem dla mężczyzn i kobiet.</li>
+      <li>Dla mężczyzn (<Eq>{`D=0`}</Eq>): <Eq>{`\\hat Y = 45 + 2{,}5X_1`}</Eq>. Dla kobiet (<Eq>{`D=1`}</Eq>): <Eq>{`\\hat Y = 45 + 2{,}5X_1 - 8 = 37 + 2{,}5X_1`}</Eq>.</li>
+      <li>Różnica wynagrodzenia między płciami jest stała na 8 tys. R\$ dla każdego poziomu doświadczenia.</li>
+      <li>Aby testować czy różnica zmienia się z doświadczeniem, dodaj termin interakcji <Eq>{`X_1 \\times D`}</Eq>.</li>
+      <li><em>Obserwacja:</em> model z interakcją to <Eq>{`\\hat Y = \\beta_0 + \\beta_1 X_1 + \\beta_2 D + \\beta_3(X_1 \\cdot D)`}</Eq>. Jeśli <Eq>{`\\hat\\beta_3`}</Eq> jest znaczący, różnica płci zmienia się z doświadczeniem.</li>
+    </ol>
+  </>}
+  solucao={<>Mężczyzna 10 lat: R\<Eq>{` 70 tys. Kobieta 10 lat: R\\`}</Eq> 62 tys. Różnica wynagrodzenia 8 tys. R\$ jest stała w modelu bez interakcji.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "368", exercicio: "8.9", licenca: "CC-BY-SA" }}
+>
+Model: $\hat Y = 45 + 2{,}5X_1 - 8D$ (wynagrodzenie w tys. R\$, doświadczenie w latach, $D$=1 jeśli kobieta). Oblicz wynagrodzenia dla (a) mężczyzny, 10 lat; (b) kobiety, 10 lat. Jak dodać interakcję aby sprawdzić czy różnica zmienia się z doświadczeniem?
+</Exercicio>
+
+<Exercicio
+  numero="106.16"
+  dificuldade="modelagem"
+  solucao={<>Porównaj modele z i bez <Eq>{`X_3`}</Eq>: jeśli <Eq>{`\\bar R^2`}</Eq> rośnie przy włączeniu <Eq>{`X_3`}</Eq>, zachowaj. Alternatywa: przeprowadź cząstkowy test <Eq>{`t`}</Eq> dla <Eq>{`\\hat\\beta_3`}</Eq>. Jeśli p-wartość mniejsza niż 0,05, <Eq>{`X_3`}</Eq> jest znaczący biorąc pod uwagę pozostałe. Kryterium AIC: <Eq>{`AIC = n\\ln(SSE/n) + 2(p+1)`}</Eq>, niższy lepszy. Użyj VIF aby sprawdzić czy <Eq>{`X_3`}</Eq> wprowadza silną współliniowość.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "372", exercicio: "8.15", licenca: "CC-BY-SA" }}
+>
+Badacz ma model regresji z 2 predyktorami ($R^2=0{,}65$, $\bar R^2=0{,}64$) i rozważa dodanie trzeciego predyktora. Opisz dwa kryteria aby zdecydować czy go uwzględnić.
+</Exercicio>
+
+<Exercicio
+  numero="106.17"
+  dificuldade="desafio"
+  solucao={<>Macierz hat <Eq>{`H = X(X^TX)^{-1}X^T`}</Eq> jest symetryczna (<Eq>{`H^T=H`}</Eq>) i idempotentna (<Eq>{`H^2=H`}</Eq>). Idempotencja: <Eq>{`H^2 = X(X^TX)^{-1}X^TX(X^TX)^{-1}X^T = X(X^TX)^{-1}X^T = H`}</Eq>. To potwierdza że <Eq>{`H`}</Eq> to ortogonalna projekcja: zastosowanie go dwa razy daje ten sam wynik.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "Dowód algebraiczny", licenca: "CC-BY-SA" }}
+>
+Udowodnij że macierz hat $H = X(X^TX)^{-1}X^T$ jest idempotentna: $H^2 = H$.
+</Exercicio>
+
+<Exercicio
+  numero="106.18"
+  dificuldade="desafio"
+  passos={<>
+    <ol>
+      <li>Z <Eq>{`n=6`}</Eq>, <Eq>{`p=2`}</Eq>: zbuduj <Eq>{`X`}</Eq> (kolumna jedynek, kolumna <Eq>{`X_1`}</Eq>, kolumna <Eq>{`X_2`}</Eq>).</li>
+      <li>Oblicz <Eq>{`X^TX`}</Eq> (macierz 3×3).</li>
+      <li>Oblicz <Eq>{`(X^TX)^{-1}`}</Eq>.</li>
+      <li>Oblicz <Eq>{`X^T\\mathbf{y}`}</Eq> (wektor 3×1).</li>
+      <li>Pomnóż: <Eq>{`\\hat{\\boldsymbol\\beta} = (X^TX)^{-1}X^T\\mathbf{y}`}</Eq>.</li>
+      <li><em>Ciekawostka:</em> w rzeczywistych aplikacjach <Eq>{`(X^TX)^{-1}`}</Eq> jest obliczana numerycznie przez rozkład QR, nie przez bezpośrednią inwersję (bardziej stabilne numerycznie).</li>
+    </ol>
+  </>}
+  solucao={<>Zbuduj macierze z podanych danych, oblicz iloczyn i uzyskaj <Eq>{`\\hat{\\boldsymbol\\beta}`}</Eq>. To zadanie najlepiej jest rozwiązać z kalkulatorem macierzowym lub R/Python.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "8.1 (macierzowy)", licenca: "CC-BY-SA" }}
+>
+Dane: $n=6$ obserwacji z $Y=(10,14,18,12,16,20)$, $X_1=(1,2,3,2,3,4)$, $X_2=(5,4,3,6,5,4)$. Napisz macierz projektowania $X$ i opisz procedurę do obliczenia $\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{y}$ (nie trzeba wykonywać inwersji ręcznie — opisz kroki).
+</Exercicio>
+
+<Exercicio
+  numero="106.19"
+  dificuldade="demonstracao"
+  solucao={<>Musimy pokazać że <Eq>{`\\sum e_i = 0`}</Eq>. Ponieważ <Eq>{`\\mathbf{e} = (I-H)\\mathbf{Y}`}</Eq> i pierwsza kolumna <Eq>{`X`}</Eq> to wektor jedynek (<Eq>{`\\mathbf{1}`}</Eq>), mamy <Eq>{`X^T\\mathbf{e} = X^T(I-H)\\mathbf{Y} = X^T\\mathbf{Y} - X^TX(X^TX)^{-1}X^T\\mathbf{Y} = \\mathbf{0}`}</Eq>. Pierwszy wiersz <Eq>{`X^T`}</Eq> to <Eq>{`\\mathbf{1}^T`}</Eq>, zatem <Eq>{`\\mathbf{1}^T\\mathbf{e} = \\sum e_i = 0`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "Dowód", licenca: "CC-BY-SA" }}
+>
+Udowodnij że w każdej regresji z wyrazem wolnym, $\sum_{i=1}^n e_i = 0$, używając ortogonalności $X^T\mathbf{e} = \mathbf{0}$.
+</Exercicio>
+
+<Exercicio
+  numero="106.20"
+  dificuldade="desafio"
+  solucao={<>Formuła dla różnicy <Eq>{`\\bar R^2`}</Eq> przy dodaniu predyktora: <Eq>{`\\bar R^2`}</Eq> wzrasta wtedy i tylko wtedy gdy częściowa wartość <Eq>{`F`}</Eq> nowego predyktora jest większa niż 1. Równoważnie: <Eq>{`\\bar R^2`}</Eq> modelu rozszerzonego <Eq>{`>`}</Eq> <Eq>{`\\bar R^2`}</Eq> modelu redukowanego <Eq>{`\\Leftrightarrow`}</Eq> <Eq>{`T_j^2 > 1`}</Eq>. To pokazuje że kryterium <Eq>{`\\bar R^2`}</Eq> jest mniej konserwatywne niż test <Eq>{`t`}</Eq> na poziomie 5% (który wymagałby <Eq>{`|T_j| > t_{n-p-1;\\,0{,}025} \\approx 2`}</Eq>).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "374", exercicio: "8.23 (koncepcyjne)", licenca: "CC-BY-SA" }}
+>
+Pokaż że dodanie predyktora do modelu zwiększa $\bar R^2$ wtedy i tylko wtedy gdy statystyka $|T|$ nowego predyktora jest większa niż 1.
+</Exercicio>
+
+</ListaExercicios>
+
+## Źródła
+
+- [**OpenIntro Statistics** (4. ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · Rozdział 8 (Multiple and logistic regression). Źródło pierwotne dla interpretacji współczynników, $\bar R^2$, współliniowości i zmiennych dummy.
+- [**Statistics** — OpenStax](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · Rozdział 13 (Linear Regression and Correlation — Multiple). Źródło dla tabel ANOVA regresji wielorakiej i globalnego testu F.
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) — kolaboratywne · CC-BY-SA · Sekcja regresji wielorakiej. Odniesienie w PT-BR z notacją macierzową.
