@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import rehypeSlug from 'rehype-slug'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings' 
 import {
   carregarTodosConteudos,
   carregarPorSlug,
@@ -226,6 +226,7 @@ export default async function ConteudoPage({ params }: Props) {
 
   const isAula = categoria === 'aulas'
   const isFinancas = categoria === 'financas-quantitativas'
+  const isEngenharia = categoria === 'engenharia'
 
   let prevLicao: { num: number; titulo: string; caminho?: string } | undefined
   let nextLicao: { num: number; titulo: string; caminho?: string } | undefined
@@ -292,6 +293,7 @@ export default async function ConteudoPage({ params }: Props) {
         meta={localizedMeta}
         isAula={isAula}
         isFinancas={isFinancas}
+        isEngenharia={isEngenharia}
         caminho={completo}
         prevLicao={prevLicao}
         nextLicao={nextLicao}

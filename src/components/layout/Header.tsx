@@ -10,6 +10,7 @@ import { useLocale } from './LocaleProvider'
 const NAV_LINKS = [
   { href: '/ensino-medio', tKey: 'nav.middleSchool' },
   { href: '/financas', tKey: 'nav.finance' },
+  { href: '/engenharia',  tKey: 'nav.engineering' },
   { href: '/livros', tKey: 'nav.books' },
   { href: '/videos', tKey: 'nav.videos' },
   { href: '/provas', tKey: 'nav.exams' },
