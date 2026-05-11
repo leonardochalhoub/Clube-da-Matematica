@@ -1,0 +1,625 @@
+---
+titulo: "Lição 106 — Regressão múltipla"
+slug: "licao-106-regressao-multipla"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Modelo con p predictores, solución matricial OLS, R² ajustado, multicolinealidad, selección de variables y diagnóstico de supuestos."
+ordem: 106
+publicado: true
+tags: ["estatística inferencial", "regressão múltipla", "OLS", "ano-3", "trim-11"]
+prerrequisitos: ["licao-105-regressao-simples"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik LK alemão (Klasse 12)", "H2 Mathematics Singapura (§15)", "econometria introdutória"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{y}"
+  legenda={<>En la <strong>regresión múltiple</strong> con <Eq>{`p`}</Eq> predictores, el estimador OLS es la solución matricial de las ecuaciones normales. Cada coeficiente <Eq>{`\\hat\\beta_j`}</Eq> mide el efecto de <Eq>{`X_j`}</Eq> sobre <Eq>{`Y`}</Eq> manteniendo los demás predictores fijos — el llamado <em>efecto parcial</em>.</>}
+  audioTexto="Regresión múltiple. Beta estimado vector igual a la inversa de equis transpuesta equis, multiplicada por equis transpuesta y. Cada coeficiente beta jota estimado es el efecto parcial del predictor jota, controlando los demás. Generalización matricial de la regresión simple."
+/>
+
+<aside>
+
+**Libros que cubren esta lección**
+
+- [**OpenIntro Statistics** (4ª ed.)](https://www.openintro.org/book/os/) · §8.1–8.4 · CC-BY-SA · <em>Tratamiento pedagógico de la regresión múltiple con interpretación de coeficientes parciales, R² ajustado y selección de modelos; conjuntos de datos disponibles en línea para reproducción.</em>
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §13.1–13.5 · CC-BY · <em>Enfoque aplicado con tablas ANOVA de regresión múltiple, pruebas F global y parcial, y ejemplos con datos reales.</em>
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) · Regressão múltipla · CC-BY-SA · <em>Referencia en PT-BR con notación matricial compatible con el currículo de ingeniería brasileño.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definición rigurosa">
+
+### Modelo de regresión lineal múltiple
+
+<Definicao titulo="Modelo y notacion matricial">
+
+Para $n$ observaciones y $p$ predictores:
+
+$$Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i2} + \cdots + \beta_p X_{ip} + \varepsilon_i, \quad \varepsilon_i \stackrel{i.i.d.}{\sim} \mathcal{N}(0,\sigma^2)$$
+
+En forma matricial: $\mathbf{Y} = X\boldsymbol\beta + \boldsymbol\varepsilon$, donde:
+
+- $\mathbf{Y} \in \mathbb{R}^n$: vector de respuestas.
+- $X \in \mathbb{R}^{n\times(p+1)}$: matriz de diseño (primera columna de 1s para el intercepto).
+- $\boldsymbol\beta \in \mathbb{R}^{p+1}$: vector de coeficientes.
+- $\boldsymbol\varepsilon \in \mathbb{R}^n$: vector de errores.
+
+</Definicao>
+
+> "The multiple regression model is $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_k x_k + \varepsilon$. The coefficient $\beta_i$ measures the expected change in $y$ per unit change in $x_i$ when all other predictors are held constant." — [OpenIntro Statistics, §8.1](https://www.openintro.org/book/os/), p. 362
+
+<Definicao titulo="Estimador OLS y ecuaciones normales">
+
+Minimizar $SSE = \|\mathbf{Y} - X\boldsymbol\beta\|^2$ conduce a las ecuaciones normales:
+
+$$X^TX\hat{\boldsymbol\beta} = X^T\mathbf{Y}$$
+
+cuya solución (cuando $X^TX$ es invertible) es:
+
+<Equation explicacao="Estimador OLS matricial: existe cuando los predictores son linealmente independientes." latex="\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{Y}" />
+
+La matriz de varianza-covarianza de los estimadores es:
+
+<Equation explicacao="Cov del estimador: inversamente proporcional a X'X. Más datos o mayor variación en X reduce la varianza." latex="\text{Cov}(\hat{\boldsymbol\beta}) = \sigma^2 (X^TX)^{-1}" />
+
+</Definicao>
+
+### Métricas de ajuste
+
+<Definicao titulo="R² ajustado">
+
+El $R^2$ crece con cualquier predictor añadido — incluso uno irrelevante. El $R^2$ ajustado penaliza por el número de parámetros:
+
+<Equation explicacao="R² ajustado: penaliza por la complejidad. Puede descender al añadir un predictor débil." latex="\bar R^2 = 1 - \frac{SSE/(n-p-1)}{SST/(n-1)}" />
+
+Si $\bar R^2$ aumenta al añadir un nuevo predictor, el predictor mejora el modelo; si desciende, lo perjudica.
+
+</Definicao>
+
+### Inferencia
+
+<Definicao titulo="Prueba t parcial y prueba F global">
+
+**Prueba $t$ parcial** para $H_0: \beta_j = 0$ (con los demás predictores en el modelo):
+
+<Equation explicacao="Contrasta si el predictor Xj tiene efecto significativo dado que los demás ya están en el modelo." latex="T_j = \frac{\hat\beta_j}{SE(\hat\beta_j)} \sim t_{n-p-1}" />
+
+**Prueba $F$ global** para $H_0: \beta_1 = \cdots = \beta_p = 0$:
+
+<Equation explicacao="Contrasta si el modelo en su conjunto explica más que la media de Y." latex="F = \frac{SSR/p}{SSE/(n-p-1)} \sim F_{p,\,n-p-1}" />
+
+</Definicao>
+
+<Definicao titulo="Multicolinealidad y VIF">
+
+Cuando dos o más predictores están muy correlacionados, $X^TX$ se vuelve casi singular y los $SE(\hat\beta_j)$ se inflan — coeficientes inestables y difíciles de interpretar.
+
+**Factor de Inflación de la Varianza:**
+
+<Equation explicacao="VIF mide cuánto aumenta la varianza de beta_j por la correlación con los otros predictores. VIF mayor que 10 es preocupante." latex="VIF_j = \frac{1}{1 - R_j^2}" />
+
+donde $R_j^2$ es el $R^2$ de la regresión de $X_j$ sobre los demás predictores.
+
+</Definicao>
+
+<Insight>
+
+En regresión simple, $\hat\beta_1$ y el coeficiente de correlación tienen siempre el mismo signo. En regresión múltiple, la correlación entre $X_j$ e $Y$ puede tener signo opuesto al de $\hat\beta_j$ (efecto de supresión). Esto ocurre porque el coeficiente parcial controla los demás predictores.
+
+</Insight>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 160" className="w-full">
+<g>
+  <text x="10" y="20" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.8" fontWeight="bold">Matriz de diseño X (n=4, p=2)</text>
+  <rect x="10" y="30" width="200" height="110" rx="4" fill="none" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1"/>
+  <text x="20" y="50" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₁₁   X₁₂</text>
+  <text x="20" y="70" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₂₁   X₂₂</text>
+  <text x="20" y="90" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₃₁   X₃₂</text>
+  <text x="20" y="110" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">1   X₄₁   X₄₂</text>
+  <text x="60" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×(p+1)</text>
+</g>
+<g>
+  <text x="230" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">×</text>
+</g>
+<g>
+  <rect x="250" y="30" width="60" height="110" rx="4" fill="none" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1"/>
+  <text x="270" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₀</text>
+  <text x="270" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₁</text>
+  <text x="270" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">β₂</text>
+  <text x="280" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">(p+1)×1</text>
+</g>
+<g>
+  <text x="335" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">=</text>
+</g>
+<g>
+  <rect x="355" y="30" width="50" height="110" rx="4" fill="none" stroke="rgb(26 77 92)" strokeOpacity="0.5" strokeWidth="1.5"/>
+  <text x="375" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₁</text>
+  <text x="375" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₂</text>
+  <text x="375" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₃</text>
+  <text x="375" y="115" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)" fillOpacity="0.9">Ŷ₄</text>
+  <text x="380" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×1</text>
+</g>
+<g>
+  <text x="425" y="82" fontSize="16" fill="rgb(232 199 122)" textAnchor="middle">+</text>
+</g>
+<g>
+  <rect x="445" y="30" width="60" height="110" rx="4" fill="none" stroke="rgb(199 107 63)" strokeOpacity="0.5" strokeWidth="1.5"/>
+  <text x="465" y="55" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₁</text>
+  <text x="465" y="75" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₂</text>
+  <text x="465" y="95" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₃</text>
+  <text x="465" y="115" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(199 107 63)" fillOpacity="0.9">ε₄</text>
+  <text x="475" y="135" fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="middle">n×1</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Representación matricial del modelo: $\mathbf{Y} = X\boldsymbol\beta + \boldsymbol\varepsilon$. La primera columna de 1s en $X$ genera el intercepto $\beta_0$.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Para un niño de 5 años">
+
+En la lección anterior, usaste **una regla** para predecir una cosa a partir de otra: la altura para predecir el peso.
+
+Ahora imagina que quieres predecir el peso de una persona y tienes **dos informaciones**: la altura Y la edad. Con dos informaciones juntas, ¡tu predicción mejora!
+
+La regresión múltiple es como tener **varias reglas al mismo tiempo** — cada una mide una cosa diferente — y todas juntas hacen una predicción más acertada.
+
+</Porta>
+
+<Porta nivel="10" titulo="Para un niño de 10 años">
+
+En la regresión simple, usabas solo **una variable** ($X$) para predecir ($Y$). Pero casi siempre tenemos más información disponible.
+
+Por ejemplo, para predecir el **precio de una vivienda** puedes usar:
+- $X_1$ = superficie en m²
+- $X_2$ = número de habitaciones
+- $X_3$ = distancia al centro (en km)
+
+La regresión múltiple ajusta una fórmula del tipo:
+
+$$\hat Y = \hat\beta_0 + \hat\beta_1 X_1 + \hat\beta_2 X_2 + \hat\beta_3 X_3$$
+
+Cada $\hat\beta_j$ dice: "si aumento $X_j$ en una unidad, manteniendo los demás fijos, ¿cuánto cambia $Y$ en promedio?"
+
+</Porta>
+
+<Porta nivel="15" titulo="Para un adolescente de 15 años">
+
+La regresión múltiple generaliza la simple incluyendo $p$ predictores. El modelo es:
+
+$$Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p + \varepsilon$$
+
+**Interpretación de los coeficientes:** $\hat\beta_j$ es el efecto de $X_j$ sobre $Y$, **manteniendo todos los demás predictores constantes** (efecto parcial o "ceteris paribus").
+
+**¿Por qué importa esto?** Imagina predecir el salario de un empleado usando años de experiencia ($X_1$) y nivel de estudios ($X_2$). El efecto de la experiencia en el salario es distinto cuando controlas por nivel de estudios que cuando ignoras los estudios.
+
+**R² vs. R² ajustado:** añadir cualquier variable aumenta $R^2$, aunque sea irrelevante. El $\bar R^2$ (ajustado) penaliza por variables extra — úsalo para comparar modelos con distinto número de predictores.
+
+</Porta>
+
+<Porta nivel="25" titulo="Para un estudiante de ingeniería">
+
+**Álgebra matricial del modelo**
+
+Dado $X \in \mathbb{R}^{n\times(p+1)}$ con rango columna $p+1$ (predictores LI), el OLS resuelve:
+
+$$\min_{\boldsymbol\beta} \|\mathbf{Y} - X\boldsymbol\beta\|^2 \implies \hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{Y}$$
+
+El vector de valores ajustados es $\hat{\mathbf{Y}} = H\mathbf{Y}$, donde $H = X(X^TX)^{-1}X^T$ es el **hat matrix** (proyección ortogonal sobre el espacio columna de $X$). Los residuos $\mathbf{e} = (I-H)\mathbf{Y}$ son ortogonales a $\hat{\mathbf{Y}}$.
+
+**Tabla ANOVA múltiple**
+
+| Fuente | SS | df | MS | F |
+|---|---|---|---|---|
+| Regresión | $SSR$ | $p$ | $SSR/p$ | $MSR/MSE$ |
+| Error | $SSE$ | $n-p-1$ | $SSE/(n-p-1)$ | — |
+| Total | $SST$ | $n-1$ | — | — |
+
+**Selección de variables:** AIC, BIC, $\bar R^2$, validación cruzada. Métodos automáticos: stepwise (forward, backward, both) — útiles pero no sustituyen el razonamiento sustantivo.
+
+**Multicolinealidad:** $\text{det}(X^TX) \to 0$ implica inversión inestable. Regresión Ridge ($L_2$): $\hat{\boldsymbol\beta}_{ridge} = (X^TX + \lambda I)^{-1}X^T\mathbf{Y}$ regulariza sin selección; Lasso ($L_1$) selecciona variables automáticamente.
+
+</Porta>
+
+<Porta nivel="40" titulo="Para un profesional sénior">
+
+La regresión múltiple domina el análisis empírico en ciencias sociales, epidemiología y finanzas. Los debates metodológicos centrales:
+
+**Identificación causal:** OLS con controles no resuelve la endogeneidad. El "modelo de resultado potencial" (Rubin) distingue efecto causal de asociación condicional. El diseño basado en variación exógena (experimentos naturales, RDD, DiD, IV) es el lenguaje moderno de la causalidad en economía — reconocido por el Nobel de Economía 2021 (Card, Angrist, Imbens). Véase [nobelprize.org/prizes/economic-sciences/2021/summary/](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/).
+
+**Sobreajuste y validación:** en muestras pequeñas con muchos predictores ($p \approx n$), OLS sobreajusta. La regularización (ridge, lasso, elastic net) y la validación cruzada $k$-fold son el estándar en ML; en econometría, el uso de datos de prueba separados sigue siendo la norma.
+
+**Errores estándar robustos:** la heterocedasticidad y la correlación serial violan $\text{Cov}(\boldsymbol\varepsilon) = \sigma^2 I$. Los errores de White (HC) y Newey-West (HAC) corrigen la matriz de varianza sin exigir forma funcional para la heterocedasticidad.
+
+**Regresión en alta dimensión ($p > n$):** OLS no tiene solución única. Lasso mediante descenso por coordenadas, PCR, PLS. La inferencia post-selección (debiased Lasso) es un área de investigación activa.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicación en contexto brasileño">
+
+**Precio de inmuebles en São Paulo (datos simulados conforme al estándar IBGE FipeZap)**
+
+Regresión del precio de venta $Y$ (en BRL mil, en reales) sobre: superficie $X_1$ (m²), número de habitaciones $X_2$ y distancia al metro $X_3$ (km). Con $n=150$ transacciones:
+
+$$\hat Y = 180 + 4{,}2 X_1 + 35 X_2 - 12 X_3$$
+
+- $\hat\beta_1 = 4{,}2$: cada m² adicional vale, en promedio, BRL 4.200 (controlando habitaciones y metro).
+- $\hat\beta_2 = 35$: cada habitación extra añade BRL 35.000 (controlando superficie y metro).
+- $\hat\beta_3 = -12$: cada km adicional al metro reduce BRL 12.000 (controlando superficie y habitaciones).
+- $R^2 = 0{,}78$, $\bar R^2 = 0{,}77$: el modelo explica el 77% de la variabilidad de precios ajustando por la complejidad.
+
+**Prueba F global:** $F = 172{,}4$ con $p$-valor menor que 0,001 — los tres predictores en conjunto son altamente significativos.
+
+**Atención:** la multicolinealidad entre superficie y habitaciones ($r = 0{,}69$) infla los $SE$ — VIF calculados: $VIF_1 = 2{,}3$, $VIF_2 = 2{,}1$, $VIF_3 = 1{,}1$. Todos por debajo de 10: multicolinealidad aceptable.
+
+</Porta>
+
+</DuasPortas>
+
+## Ejemplos resueltos
+
+<Exemplo numero="106.1" titulo="Ajuste e interpretacion con dos predictores">
+
+**Problema.** Regresión del salario anual $Y$ (BRL mil, en reales) sobre experiencia $X_1$ (años) y escolaridad $X_2$ (años de estudio) produjo: $\hat Y = -12 + 2{,}8 X_1 + 5{,}2 X_2$, con $n=50$, $R^2=0{,}74$, $\bar R^2=0{,}73$.
+
+Interprete cada coeficiente y calcule la predicción para un profesional con 10 años de experiencia y 16 años de estudio.
+
+**Estrategia.** Interpretar cada $\hat\beta_j$ como efecto parcial (ceteris paribus). Sustituir los valores en la ecuación ajustada.
+
+**Resolución.**
+
+- $\hat\beta_0 = -12$: intercepto (sin interpretación sustantiva aislada — ningún profesional tiene cero años de experiencia y estudio).
+- $\hat\beta_1 = 2{,}8$: controlando la escolaridad, cada año adicional de experiencia está asociado a BRL 2.800/año más, en promedio.
+- $\hat\beta_2 = 5{,}2$: controlando la experiencia, cada año adicional de estudio está asociado a BRL 5.200/año más.
+
+Predicción: $\hat Y = -12 + 2{,}8\times10 + 5{,}2\times16 = -12+28+83{,}2 = 99{,}2$ mil BRL/año.
+
+**Verificación.** $\bar R^2 = 0{,}73$ próximo a $R^2 = 0{,}74$: solo 2 predictores, poca penalización — modelo parsimonioso.
+
+**Fuente.** [OpenIntro Statistics, §8.1, Ejemplo 8.1](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.2" titulo="R² ajustado en la seleccion entre modelos">
+
+**Problema.** Tres modelos para predecir el consumo de energía eléctrica domiciliaria ($n=80$):
+
+| Modelo | Predictores | $R^2$ | $\bar R^2$ |
+|---|---|---|---|
+| M1 | superficie | 0,61 | 0,61 |
+| M2 | superficie + nº residentes | 0,71 | 0,70 |
+| M3 | superficie + nº residentes + renta + temperatura + día semana | 0,74 | 0,70 |
+
+¿Qué modelo preferir?
+
+**Estrategia.** Comparar $\bar R^2$ — penaliza por número de predictores.
+
+**Resolución.**
+
+M2 y M3 tienen el mismo $\bar R^2 = 0{,}70$, pero M3 usa 5 predictores frente a 2 de M2. Por el principio de parsimonia (navaja de Occam), **se prefiere M2**: añadir 3 predictores no mejora el $\bar R^2$ — no aportan información neta.
+
+Nótese que $R^2$ de M3 (0,74) supera a M2 (0,71) — pero $R^2$ siempre crece con predictores adicionales, aunque sean irrelevantes.
+
+**Verificación.** Podría confirmarse con AIC/BIC: $AIC = n\ln(SSE/n) + 2(p+1)$ — menor es mejor.
+
+**Fuente.** [OpenIntro Statistics, §8.3, Tabla 8.7](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.3" titulo="Prueba F global y tabla ANOVA">
+
+**Problema.** Regresión con $p=3$ predictores, $n=40$: $SST=2400$, $SSE=720$. Construya la tabla ANOVA y contraste $H_0: \beta_1=\beta_2=\beta_3=0$ al nivel del 5%.
+
+**Estrategia.** Calcular SSR, df, MS, F; comparar con el valor crítico $F_{3,36;\,0{,}05}$.
+
+**Resolución.**
+
+$SSR = 2400-720 = 1680$; $R^2 = 1680/2400 = 0{,}70$.
+
+| Fuente | SS | df | MS | F |
+|---|---|---|---|---|
+| Regresión | 1680 | 3 | 560 | 28,0 |
+| Error | 720 | 36 | 20 | — |
+| Total | 2400 | 39 | — | — |
+
+$F_{3,36;\,0{,}05} \approx 2{,}87$. Como $F = 28{,}0 \gg 2{,}87$, rechazamos $H_0$: el modelo en su conjunto es altamente significativo.
+
+**Verificación.** $MSE = 20 \implies \hat\sigma = \sqrt{20} \approx 4{,}47$ — desviación típica residual en unidades de $Y$.
+
+**Fuente.** [OpenStax Statistics, §13.4](https://openstax.org/books/statistics/pages/13-4-facts-about-the-f-distribution) — CC-BY
+
+</Exemplo>
+
+<Exemplo numero="106.4" titulo="Detectar multicolinealidad mediante VIF">
+
+**Problema.** Regresión del precio de un vehículo ($Y$) sobre potencia ($X_1$), cilindrada ($X_2$) y peso ($X_3$). Regresiones auxiliares: $R_1^2=0{,}89$ ($X_1$ sobre $X_2, X_3$), $R_2^2=0{,}91$, $R_3^2=0{,}85$. Calcule los VIF y evalúe.
+
+**Estrategia.** $VIF_j = 1/(1-R_j^2)$.
+
+**Resolución.**
+
+$VIF_1 = 1/(1-0{,}89) = 9{,}09$; $VIF_2 = 1/(1-0{,}91) = 11{,}1$; $VIF_3 = 1/(1-0{,}85) = 6{,}67$.
+
+$VIF_2 = 11{,}1 > 10$: la cilindrada presenta multicolinealidad severa con las demás variables.
+
+**Acción:** eliminar $X_2$ del modelo o combinar $X_1$ y $X_2$ en un índice compuesto (análisis de componentes principales).
+
+**Verificación.** Tras eliminar $X_2$, recalcular los VIF para los predictores restantes.
+
+**Fuente.** [OpenIntro Statistics, §8.4](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<Exemplo numero="106.5" titulo="Variable dummy e interaccion">
+
+**Problema.** Predecir el salario $Y$ (BRL mil/año, en reales) usando experiencia $X_1$ (años) y género $D$ (1=femenino, 0=masculino). Resultado: $\hat Y = 45 + 2{,}5X_1 - 8D$.
+
+Interprete el coeficiente de $D$ y calcule los salarios previstos para: (a) hombre con 10 años de experiencia; (b) mujer con 10 años de experiencia.
+
+**Estrategia.** La variable dummy crea dos interceptos distintos (uno por género), manteniendo la pendiente igual.
+
+**Resolución.**
+
+$\hat\beta_D = -8$: controlando la experiencia, las mujeres ganan en promedio BRL 8.000/año menos que los hombres — diferencia bruta (no causal, pues no controlamos sector, cargo ni jornada).
+
+(a) Hombre ($D=0$), $X_1=10$: $\hat Y = 45 + 25 - 0 = 70$ mil BRL/año.
+
+(b) Mujer ($D=1$), $X_1=10$: $\hat Y = 45 + 25 - 8 = 62$ mil BRL/año.
+
+**Verificación.** La diferencia es constante ($-8$) para cualquier nivel de experiencia — el modelo sin interacción asume efecto aditivo. Para permitir pendientes distintas, añadir $X_1 \times D$.
+
+**Fuente.** [OpenIntro Statistics, §8.2, Ejemplo 8.4](https://www.openintro.org/book/os/) — CC-BY-SA
+
+</Exemplo>
+
+<ListaExercicios seed="licao-106-regressao-multipla">
+
+<Exercicio
+  numero="106.1"
+  dificuldade="aplicacao"
+  solucao={<>Efecto parcial de cada predictor: mantener los demás fijos. <Eq>{`\\hat\\beta_1 = 3{,}2`}</Eq>: cada m² extra añade BRL 3.200 al precio, controlando habitaciones y planta. <Eq>{`\\hat\\beta_2 = 28`}</Eq>: cada habitación más añade BRL 28.000. <Eq>{`\\hat\\beta_3 = 5{,}5`}</Eq>: cada planta más añade BRL 5.500.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "8.1", licenca: "CC-BY-SA" }}
+>
+Regresión: $\hat Y = 50 + 3{,}2X_1 + 28X_2 + 5{,}5X_3$ (precio en BRL mil, superficie m², habitaciones, planta). Interprete cada coeficiente.
+</Exercicio>
+
+<Exercicio
+  numero="106.2"
+  dificuldade="aplicacao"
+  passos={<>
+    <ol>
+      <li>Identifique los valores: <Eq>{`X_1=80`}</Eq> m², <Eq>{`X_2=3`}</Eq> habitaciones, <Eq>{`X_3=5`}</Eq> planta.</li>
+      <li>Sustituya en la ecuación: <Eq>{`\\hat Y = 50 + 3{,}2 \\times 80 + 28 \\times 3 + 5{,}5 \\times 5`}</Eq>.</li>
+      <li><Eq>{`= 50 + 256 + 84 + 27{,}5 = 417{,}5`}</Eq> mil BRL.</li>
+      <li>Residuo: <Eq>{`e = 450 - 417{,}5 = 32{,}5`}</Eq> mil BRL. El piso cuesta BRL 32.500 más de lo que predice el modelo.</li>
+      <li><em>Truco:</em> residuo positivo = observado por encima del esperado (puede indicar ubicación privilegiada no capturada por los predictores).</li>
+    </ol>
+  </>}
+  solucao={<>Predicción: BRL 417.500. Residuo: BRL 32.500 (piso por encima de lo previsto por el modelo).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "8.3", licenca: "CC-BY-SA" }}
+>
+Usando $\hat Y = 50 + 3{,}2X_1 + 28X_2 + 5{,}5X_3$, calcule la predicción y el residuo para un piso de 80 m², 3 habitaciones, 5ª planta con precio observado de BRL 450 mil.
+</Exercicio>
+
+<Exercicio
+  numero="106.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\bar R^2 = 1 - \\frac{SSE/(n-p-1)}{SST/(n-1)} = 1 - \\frac{800/36}{2000/39} = 1 - \\frac{22{,}2}{51{,}3} = 1 - 0{,}433 = 0{,}567`}</Eq>. Comparar con <Eq>{`R^2 = 1-800/2000 = 0{,}60`}</Eq>: el ajuste penalizado desciende levemente.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "373", exercicio: "8.19", licenca: "CC-BY-SA" }}
+>
+$n=40$, $p=3$ predictores, $SST=2000$, $SSE=800$. Calcule $R^2$ y $\bar R^2$.
+</Exercicio>
+
+<Exercicio
+  numero="106.4"
+  dificuldade="aplicacao"
+  solucao={<>M1: <Eq>{`\\bar R^2_1 = 1-(1-0{,}60)\\times(n-1)/(n-2)`}</Eq>. Con <Eq>{`n=50`}</Eq>: <Eq>{`\\bar R^2_1 = 1-0{,}40\\times49/48 = 1-0{,}408 = 0{,}592`}</Eq>. M2: <Eq>{`\\bar R^2_2 = 1-0{,}35\\times49/46 = 1-0{,}373 = 0{,}627`}</Eq>. M3: <Eq>{`\\bar R^2_3 = 1-0{,}32\\times49/43 = 1-0{,}365 = 0{,}635`}</Eq>. M3 tiene el mayor <Eq>{`\\bar R^2`}</Eq>: es preferible entre los tres.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "374", exercicio: "8.21", licenca: "CC-BY-SA" }}
+>
+$n=50$. Tres modelos con $p=1,3,6$ predictores y $SSE/SST = 0{,}40$; $0{,}35$; $0{,}32$. Calcule $\bar R^2$ de cada uno e indique el preferible.
+</Exercicio>
+
+<Exercicio
+  numero="106.5"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`SSR = 0{,}72 \\times 3600 = 2592`}</Eq>; <Eq>{`SSE = 3600 - 2592 = 1008`}</Eq>; <Eq>{`MSR = 2592/4 = 648`}</Eq>; <Eq>{`MSE = 1008/55 = 18{,}3`}</Eq>; <Eq>{`F = 648/18{,}3 = 35{,}4`}</Eq>. Valor crítico <Eq>{`F_{4,55;\\,0{,}05} \\approx 2{,}54`}</Eq>: se rechaza <Eq>{`H_0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-4-facts-about-the-f-distribution", secao: "§13.4", pagina: "710", exercicio: "13.9", licenca: "CC-BY" }}
+>
+$n=60$, $p=4$, $SST=3600$, $R^2=0{,}72$. Construya la tabla ANOVA y contraste el modelo al nivel del 5%.
+</Exercicio>
+
+<Exercicio
+  numero="106.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`VIF_j = 1/(1-R_j^2)`}</Eq>. <Eq>{`VIF_1 = 1/(1-0{,}30) = 1{,}43`}</Eq>; <Eq>{`VIF_2 = 1/(1-0{,}70) = 3{,}33`}</Eq>; <Eq>{`VIF_3 = 1/(1-0{,}92) = 12{,}5`}</Eq>. <Eq>{`VIF_3 > 10`}</Eq>: el predictor 3 presenta multicolinealidad severa.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "376", exercicio: "8.25", licenca: "CC-BY-SA" }}
+>
+Regresiones auxiliares para 3 predictores: $R_1^2=0{,}30$, $R_2^2=0{,}70$, $R_3^2=0{,}92$. Calcule los VIF e identifique la multicolinealidad severa.
+</Exercicio>
+
+<Exercicio
+  numero="106.7"
+  dificuldade="aplicacao"
+  passos={<>
+    <ol>
+      <li>Modelo con dummy: <Eq>{`\\hat Y = \\hat\\beta_0 + \\hat\\beta_1 X_1 + \\hat\\beta_2 D`}</Eq> donde <Eq>{`D=1`}</Eq> si tratado, <Eq>{`D=0`}</Eq> si control.</li>
+      <li><Eq>{`\\hat\\beta_2`}</Eq> es la diferencia media de <Eq>{`Y`}</Eq> entre tratados y controles, controlando por <Eq>{`X_1`}</Eq>.</li>
+      <li>Con <Eq>{`\\hat\\beta_2 = 12{,}4`}</Eq>: el programa está asociado a un aumento medio de 12,4 puntos en la nota, dado el mismo nivel de renta familiar.</li>
+      <li><em>Observación:</em> esto no es todavía efecto causal — se requiere aleatorización o diseño cuasi-experimental.</li>
+    </ol>
+  </>}
+  solucao={<>El coeficiente de la dummy indica que participar en el programa está asociado a 12,4 puntos más en la nota, controlando por la renta familiar. El efecto causal requiere un diseño experimental adecuado.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "368", exercicio: "8.9", licenca: "CC-BY-SA" }}
+>
+Regresión de la nota del ENEM en renta familiar ($X_1$) y participación en programa de refuerzo ($D$: 1=sí, 0=no): $\hat Y = 480 + 8{,}2X_1 + 12{,}4D$, $n=200$. Interprete $\hat\beta_D = 12{,}4$.
+</Exercicio>
+
+<Exercicio
+  numero="106.8"
+  dificuldade="aplicacao"
+  solucao={<>Prueba <Eq>{`t`}</Eq>: <Eq>{`T = 2{,}8/0{,}7 = 4{,}0`}</Eq>. Con <Eq>{`df = n-p-1 = 50-3-1 = 46`}</Eq>, <Eq>{`t_{46;\\,0{,}025} \\approx 2{,}013`}</Eq>. Como <Eq>{`|T| = 4{,}0 > 2{,}013`}</Eq>, rechazamos <Eq>{`H_0: \\beta_1 = 0`}</Eq>. El predictor <Eq>{`X_1`}</Eq> es significativo al nivel del 5%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-the-regression-equation", secao: "§13.3", pagina: "706", exercicio: "13.7", licenca: "CC-BY" }}
+>
+$n=50$, $p=3$, $\hat\beta_1=2{,}8$, $SE(\hat\beta_1)=0{,}7$. Contraste $H_0:\beta_1=0$ al nivel del 5% (bilateral).
+</Exercicio>
+
+<Exercicio
+  numero="106.9"
+  dificuldade="aplicacao"
+  solucao={<>IC del 95% para <Eq>{`\\beta_2`}</Eq>: <Eq>{`\\hat\\beta_2 \\pm t_{46;\\,0{,}025} \\times SE(\\hat\\beta_2) = 5{,}2 \\pm 2{,}013 \\times 1{,}8 = 5{,}2 \\pm 3{,}62 = (1{,}58;\\; 8{,}82)`}</Eq>. El IC no contiene 0: <Eq>{`\\beta_2`}</Eq> es significativo al nivel del 5%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "364", exercicio: "8.5", licenca: "CC-BY-SA" }}
+>
+$n=50$, $p=3$, $\hat\beta_2=5{,}2$, $SE(\hat\beta_2)=1{,}8$. Construya un IC del 95% para $\beta_2$. Use $t_{46;\,0{,}025}\approx 2{,}013$.
+</Exercicio>
+
+<Exercicio
+  numero="106.10"
+  dificuldade="aplicacao"
+  solucao={<>La suma de los residuos es siempre cero en cualquier regresión con intercepto: <Eq>{`\\sum e_i = 0`}</Eq>. Por tanto el quinto residuo es <Eq>{`e_5 = -(3{,}2 - 1{,}5 - 0{,}8 + 2{,}1) = -5{,}0`}</Eq>. Verificar: suma <Eq>{`3{,}2-1{,}5-0{,}8+2{,}1-5{,}0 = 0`}</Eq>. Correcto.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "8.3 (adaptado)", licenca: "CC-BY-SA" }}
+>
+Cuatro de los cinco residuos de una regresión son: $3{,}2$; $-1{,}5$; $-0{,}8$; $2{,}1$. ¿Cuál es el quinto residuo?
+</Exercicio>
+
+<Exercicio
+  numero="106.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "R² siempre desciende cuando añadimos un predictor irrelevante", correta: false },
+    { texto: "R² ajustado puede descender cuando añadimos un predictor irrelevante", correta: true },
+    { texto: "R² y R² ajustado son siempre iguales", correta: false },
+    { texto: "R² ajustado es siempre mayor que R²", correta: false }
+  ]}
+  solucao={<><Eq>{`R^2`}</Eq> nunca desciende al añadir predictores (propiedad matemática del OLS). <Eq>{`\\bar R^2`}</Eq> penaliza por el número de predictores y puede descender cuando el predictor añadido es débil. Por eso <Eq>{`\\bar R^2`}</Eq> es el criterio adecuado para comparar modelos con distinto número de predictores.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "373", exercicio: "8.17", licenca: "CC-BY-SA" }}
+>
+¿Qué afirmación sobre $R^2$ y $R^2$ ajustado es CORRECTA?
+</Exercicio>
+
+<Exercicio
+  numero="106.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "La multicolinealidad sesga los estimadores", correta: false },
+    { texto: "La multicolinealidad infla los errores estándar de los coeficientes", correta: true },
+    { texto: "La multicolinealidad invalida la prueba F global", correta: false },
+    { texto: "La multicolinealidad solo ocurre cuando VIF = 0", correta: false }
+  ]}
+  solucao={<>La multicolinealidad no sesga los estimadores (siguen siendo BLUE), pero hace que <Eq>{`X^TX`}</Eq> sea casi singular, inflando <Eq>{`(X^TX)^{-1}`}</Eq> y por tanto los <Eq>{`SE`}</Eq>. Las pruebas <Eq>{`t`}</Eq> individuales pierden potencia, pero la prueba <Eq>{`F`}</Eq> global y las predicciones siguen siendo fiables.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.4", pagina: "375", exercicio: "8.23", licenca: "CC-BY-SA" }}
+>
+¿Cuál es el principal efecto práctico de la multicolinealidad en la regresión múltiple?
+</Exercicio>
+
+<Exercicio
+  numero="106.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "El coeficiente de X₁ en la regresión múltiple es igual al de la regresión simple de Y en X₁", correta: false },
+    { texto: "Añadir X₂ al modelo puede cambiar el signo de X₁", correta: true },
+    { texto: "Los coeficientes parciales son siempre menores que los simples", correta: false },
+    { texto: "En la regresión múltiple, β₁ mide la correlación marginal entre X₁ e Y", correta: false }
+  ]}
+  solucao={<>El fenómeno se denomina "inversión de signo" o efecto de supresión. Ocurre cuando <Eq>{`X_2`}</Eq> está correlacionado con <Eq>{`X_1`}</Eq> de manera que controlar por <Eq>{`X_2`}</Eq> revela la verdadera relación de <Eq>{`X_1`}</Eq> con <Eq>{`Y`}</Eq>. Ejemplo clásico: correlación positiva entre bombas de incendio y daños — al controlar por el tamaño del incendio, el efecto puede cambiar.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "369", exercicio: "8.11", licenca: "CC-BY-SA" }}
+>
+¿Qué afirmación sobre coeficientes parciales en regresión múltiple es CORRECTA?
+</Exercicio>
+
+<Exercicio
+  numero="106.14"
+  dificuldade="modelagem"
+  solucao={<>Con <Eq>{`p = 4`}</Eq> predictores: <Eq>{`MSE = SSE/(n-p-1) = 5400/(80-4-1) = 5400/75 = 72`}</Eq>. <Eq>{`\\hat\\sigma = \\sqrt{72} \\approx 8{,}49`}</Eq> mil BRL. Una familia típica se desvía en promedio BRL 8.490 en el consumo previsto. <Eq>{`\\bar R^2 = 1-(72)/(SST/79)`}</Eq>. Con <Eq>{`SST = 18000`}</Eq>: <Eq>{`\\bar R^2 = 1-72/227{,}8 = 1-0{,}316 = 0{,}684`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/13-3-the-regression-equation", secao: "§13.3", pagina: "705", exercicio: "13.5", licenca: "CC-BY" }}
+>
+Regresión del gasto mensual familiar (BRL mil, en reales) sobre 4 predictores socioeconómicos: $n=80$, $SST=18000$, $SSE=5400$. Calcule $MSE$, $\hat\sigma$ y $\bar R^2$.
+</Exercicio>
+
+<Exercicio
+  numero="106.15"
+  dificuldade="modelagem"
+  passos={<>
+    <ol>
+      <li>Modelo sin interacción: una recta de pendiente igual para hombres y mujeres.</li>
+      <li>Para hombres (<Eq>{`D=0`}</Eq>): <Eq>{`\\hat Y = 45 + 2{,}5X_1`}</Eq>. Para mujeres (<Eq>{`D=1`}</Eq>): <Eq>{`\\hat Y = 45 + 2{,}5X_1 - 8 = 37 + 2{,}5X_1`}</Eq>.</li>
+      <li>La diferencia salarial entre géneros es constante en BRL 8 mil para cualquier nivel de experiencia.</li>
+      <li>Para contrastar si la diferencia varía con la experiencia, añadir el término de interacción <Eq>{`X_1 \\times D`}</Eq>.</li>
+      <li><em>Observación:</em> el modelo con interacción es <Eq>{`\\hat Y = \\beta_0 + \\beta_1 X_1 + \\beta_2 D + \\beta_3(X_1 \\cdot D)`}</Eq>. Si <Eq>{`\\hat\\beta_3`}</Eq> es significativo, la diferencia de género varía con la experiencia.</li>
+    </ol>
+  </>}
+  solucao={<>Hombre 10 años: BRL 70 mil. Mujer 10 años: BRL 62 mil. La brecha salarial de BRL 8 mil es constante en el modelo sin interacción.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.2", pagina: "368", exercicio: "8.9", licenca: "CC-BY-SA" }}
+>
+Modelo: $\hat Y = 45 + 2{,}5X_1 - 8D$ (salario en BRL mil, experiencia en años, $D$=1 si mujer). Calcule salarios para (a) hombre, 10 años; (b) mujer, 10 años. ¿Cómo incluir la interacción para verificar si la brecha varía con la experiencia?
+</Exercicio>
+
+<Exercicio
+  numero="106.16"
+  dificuldade="modelagem"
+  solucao={<>Comparar modelos con y sin <Eq>{`X_3`}</Eq>: si <Eq>{`\\bar R^2`}</Eq> sube al incluir <Eq>{`X_3`}</Eq>, mantenerlo. Alternativa: realizar la prueba <Eq>{`t`}</Eq> parcial para <Eq>{`\\hat\\beta_3`}</Eq>. Si el p-valor es menor que 0,05, <Eq>{`X_3`}</Eq> es significativo dado los demás. Criterio AIC: <Eq>{`AIC = n\\ln(SSE/n) + 2(p+1)`}</Eq>, menor es mejor. Usar VIF para verificar si <Eq>{`X_3`}</Eq> introduce multicolinealidad severa.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "372", exercicio: "8.15", licenca: "CC-BY-SA" }}
+>
+Un investigador tiene un modelo de regresión con 2 predictores ($R^2=0{,}65$, $\bar R^2=0{,}64$) y considera añadir un tercer predictor. Describa dos criterios para decidir si debe incluirlo.
+</Exercicio>
+
+<Exercicio
+  numero="106.17"
+  dificuldade="desafio"
+  solucao={<>El hat matrix <Eq>{`H = X(X^TX)^{-1}X^T`}</Eq> es simétrico (<Eq>{`H^T=H`}</Eq>) e idempotente (<Eq>{`H^2=H`}</Eq>). Idempotencia: <Eq>{`H^2 = X(X^TX)^{-1}X^TX(X^TX)^{-1}X^T = X(X^TX)^{-1}X^T = H`}</Eq>. Esto confirma que <Eq>{`H`}</Eq> es una proyección ortogonal: aplicarla dos veces da el mismo resultado.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "Prova algébrica", licenca: "CC-BY-SA" }}
+>
+Demuestre que el hat matrix $H = X(X^TX)^{-1}X^T$ es idempotente: $H^2 = H$.
+</Exercicio>
+
+<Exercicio
+  numero="106.18"
+  dificuldade="desafio"
+  passos={<>
+    <ol>
+      <li>Con <Eq>{`n=6`}</Eq>, <Eq>{`p=2`}</Eq>: montar <Eq>{`X`}</Eq> (columna de 1s, columna <Eq>{`X_1`}</Eq>, columna <Eq>{`X_2`}</Eq>).</li>
+      <li>Calcular <Eq>{`X^TX`}</Eq> (matriz 3×3).</li>
+      <li>Calcular <Eq>{`(X^TX)^{-1}`}</Eq>.</li>
+      <li>Calcular <Eq>{`X^T\\mathbf{y}`}</Eq> (vector 3×1).</li>
+      <li>Multiplicar: <Eq>{`\\hat{\\boldsymbol\\beta} = (X^TX)^{-1}X^T\\mathbf{y}`}</Eq>.</li>
+      <li><em>Curiosidad:</em> en aplicaciones reales, <Eq>{`(X^TX)^{-1}`}</Eq> se calcula numéricamente mediante descomposición QR, no por la inversa directa (más estable numéricamente).</li>
+    </ol>
+  </>}
+  solucao={<>Montar las matrices con los datos proporcionados, calcular el producto y obtener <Eq>{`\\hat{\\boldsymbol\\beta}`}</Eq>. Este ejercicio se resuelve mejor con una calculadora matricial o R/Python.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "362", exercicio: "8.1 (matricial)", licenca: "CC-BY-SA" }}
+>
+Datos: $n=6$ observaciones con $Y=(10,14,18,12,16,20)$, $X_1=(1,2,3,2,3,4)$, $X_2=(5,4,3,6,5,4)$. Escriba la matriz de diseño $X$ y enuncie el procedimiento para calcular $\hat{\boldsymbol\beta} = (X^TX)^{-1}X^T\mathbf{y}$ (no es necesario ejecutar la inversión a mano — describa los pasos).
+</Exercicio>
+
+<Exercicio
+  numero="106.19"
+  dificuldade="demonstracao"
+  solucao={<>Debemos mostrar que <Eq>{`\\sum e_i = 0`}</Eq>. Como <Eq>{`\\mathbf{e} = (I-H)\\mathbf{Y}`}</Eq> y la primera columna de <Eq>{`X`}</Eq> es un vector de 1s (<Eq>{`\\mathbf{1}`}</Eq>), tenemos <Eq>{`X^T\\mathbf{e} = X^T(I-H)\\mathbf{Y} = X^T\\mathbf{Y} - X^TX(X^TX)^{-1}X^T\\mathbf{Y} = \\mathbf{0}`}</Eq>. La primera fila de <Eq>{`X^T`}</Eq> es <Eq>{`\\mathbf{1}^T`}</Eq>, por tanto <Eq>{`\\mathbf{1}^T\\mathbf{e} = \\sum e_i = 0`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.1", pagina: "363", exercicio: "Prova", licenca: "CC-BY-SA" }}
+>
+Demuestre que en cualquier regresión con intercepto, $\sum_{i=1}^n e_i = 0$, usando la ortogonalidad $X^T\mathbf{e} = \mathbf{0}$.
+</Exercicio>
+
+<Exercicio
+  numero="106.20"
+  dificuldade="desafio"
+  solucao={<>Fórmula de la diferencia de <Eq>{`\\bar R^2`}</Eq> al añadir un predictor: <Eq>{`\\bar R^2`}</Eq> aumenta si y solo si el valor <Eq>{`F`}</Eq> parcial del nuevo predictor es mayor que 1. Equivalentemente: <Eq>{`\\bar R^2`}</Eq> del modelo ampliado <Eq>{`>`}</Eq> <Eq>{`\\bar R^2`}</Eq> del modelo reducido <Eq>{`\\Leftrightarrow`}</Eq> <Eq>{`T_j^2 > 1`}</Eq>. Esto muestra que el criterio <Eq>{`\\bar R^2`}</Eq> es menos conservador que la prueba <Eq>{`t`}</Eq> al nivel del 5% (que exigiría <Eq>{`|T_j| > t_{n-p-1;\\,0{,}025} \\approx 2`}</Eq>).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "374", exercicio: "8.23 (conceitual)", licenca: "CC-BY-SA" }}
+>
+Muestre que añadir un predictor al modelo aumenta $\bar R^2$ si y solo si el estadístico $|T|$ del nuevo predictor es mayor que 1.
+</Exercicio>
+
+</ListaExercicios>
+
+## Fuentes
+
+- [**OpenIntro Statistics** (4ª ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · Capítulo 8 (Multiple and logistic regression). Fuente primaria para la interpretación de coeficientes, $\bar R^2$, multicolinealidad y variables dummy.
+- [**Statistics** — OpenStax](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY · Capítulo 13 (Linear Regression and Correlation — Multiple). Fuente para tablas ANOVA de regresión múltiple y prueba F global.
+- [**Probabilidade e Estatística** — Wikilivros](https://pt.wikibooks.org/wiki/Probabilidade_e_Estat%C3%ADstica) — colaborativo · CC-BY-SA · Sección de regresión múltiple. Referencia en PT-BR con notación matricial.

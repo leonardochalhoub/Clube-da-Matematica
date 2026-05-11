@@ -1,0 +1,803 @@
+---
+titulo: "Lección 101 — Muestreo: tipos, sesgos y distribución muestral"
+slug: "licao-101-amostragem"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Muestreo aleatorio simple, estratificado y por conglomerados. Sesgos de selección. Distribución muestral de la media y el Teorema Central del Límite."
+ordem: 101
+publicado: true
+tags: ["estatística inferencial", "amostragem", "TCL", "ano-3", "trim-11"]
+prerrequisitos: ["licao-100-variavel-aleatoria"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º año de Bachillerato (17-18 años)", "Equiv. Stochastik LK alemán", "Equiv. Math B japonés", "H2 Statistics singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\bar X = \frac{1}{n}\sum_{i=1}^{n} X_i, \quad \mathrm{E}[\bar X] = \mu, \quad \mathrm{Var}(\bar X) = \frac{\sigma^2}{n}"
+  legenda={<>La <strong>media muestral</strong> <Eq>{`\\bar X`}</Eq> es insesgada para <Eq>{`\\mu`}</Eq> y su varianza decrece con <Eq>{`n`}</Eq>. Por el Teorema Central del Límite, <Eq>{`\\bar X`}</Eq> tiene distribución aproximadamente normal para <Eq>{`n`}</Eq> suficientemente grande, independientemente de la distribución de la población.</>}
+  audioTexto="Media muestral X barra igual a uno entre n por la suma de los X i. Esperanza de X barra igual a mu: estimador insesgado. Varianza de X barra igual a sigma al cuadrado entre n: disminuye conforme aumentamos n. Por el Teorema Central del Límite, X barra sigue distribución normal para n grande."
+/>
+
+<aside>
+
+**Libros que cubren esta lección**
+
+- [**OpenIntro Statistics** (4.ª ed.) — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · §1.3–1.4 y §4.1 · CC-BY-SA · <em>Cubre los tipos de muestreo, sesgos comunes y distribución muestral de la media con ejemplos aplicados y ejercicios abiertos.</em>
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §1.1–1.3 y §7.1–7.3 · CC-BY · <em>Presenta el muestreo aleatorio simple, estratificado, sistemático y por conglomerados con datos cotidianos; adaptable al contexto español.</em>
+- [**Statistical Thinking for the 21st Century** — Russell Poldrack](https://statsthinking21.org/) · Cap. 3–4 · CC-BY-NC · <em>Trata el sesgo muestral y la distribución muestral con simulaciones en R; buena conexión con la puerta de los 25 años.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definición rigurosa">
+
+### Estructura: población, muestra y parámetros
+
+<Definicao titulo="Población, muestra y estimador">
+
+- **Población** $\mathcal{P}$: conjunto completo de elementos de interés. Sus parámetros ($\mu$, $\sigma^2$, $p$, …) son **fijos pero desconocidos**.
+- **Muestra** $X_1, X_2, \ldots, X_n$: subconjunto observado. Son **variables aleatorias** antes de ser recogidas; **realizaciones** después.
+- **Estimador** $\hat\theta = T(X_1, \ldots, X_n)$: estadístico calculado a partir de la muestra para aproximar $\theta$.
+
+</Definicao>
+
+> "Una muestra es un subconjunto de la población. Un estadístico es un número calculado a partir de una muestra. Los parámetros son números que resumen datos de una población entera." — [OpenStax Statistics, §1.1](https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms)
+
+### Tipos de muestreo
+
+<Definicao titulo="Muestreo aleatorio simple (MAS)">
+
+Cada subconjunto de tamaño $n$ de la población tiene la misma probabilidad de ser seleccionado. Formalmente, si la población tiene $N$ elementos, cada muestra de tamaño $n$ tiene probabilidad $\binom{N}{n}^{-1}$.
+
+<Equation explicacao="Probabilidad de inclusión en el MAS: cada elemento tiene la misma oportunidad." latex="\pi_i = \frac{n}{N} \quad \text{para todo } i \in \mathcal{P}" />
+
+</Definicao>
+
+<Definicao titulo="Muestreo estratificado">
+
+La población se divide en $K$ estratos homogéneos. Se realiza MAS dentro de cada estrato con tamaño $n_k$.
+
+<Equation explicacao="Estimador de la media estratificada: media ponderada de las medias de cada estrato." latex="\bar X_{\text{est}} = \sum_{k=1}^K \frac{N_k}{N} \bar X_k" />
+
+Ventaja: reduce la varianza cuando los estratos son más homogéneos que la población.
+
+</Definicao>
+
+<Definicao titulo="Muestreo por conglomerados">
+
+La población se agrupa en conglomerados (p. ej., barrios, aulas). Se sortean algunos conglomerados completos. Útil cuando la lista completa de la población no está disponible o el desplazamiento es costoso.
+
+</Definicao>
+
+> "En el muestreo estratificado, la población se divide en grupos llamados estratos. A continuación se selecciona una muestra aleatoria de cada estrato." — [OpenStax Statistics, §1.3](https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement)
+
+### Propiedades deseables de los estimadores
+
+<Definicao titulo="Insesgadez, consistencia y eficiencia">
+
+Sea $\hat\theta$ un estimador de $\theta$.
+
+- **Insesgadez**: $\mathrm{E}[\hat\theta] = \theta$. El estimador no sobreestima ni subestima de forma sistemática.
+- **Consistencia**: $\hat\theta \xrightarrow{P} \theta$ cuando $n \to \infty$. Con más datos, converge al valor verdadero.
+- **Eficiencia**: en la clase de estimadores insesgados, $\hat\theta$ tiene la menor varianza posible (alcanzando la cota de Cramér-Rao).
+
+</Definicao>
+
+### Distribución muestral de la media
+
+<Teorema titulo="Teorema Central del Límite (TCL)">
+
+Sean $X_1, X_2, \ldots, X_n$ iid con $\mathrm{E}[X_i] = \mu$ y $\mathrm{Var}(X_i) = \sigma^2 < \infty$. Entonces:
+
+<Equation explicacao="La tipificación de la media muestral converge en distribución a la Normal estándar." latex="\frac{\bar X - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1) \quad \text{cuando } n \to \infty" />
+
+De forma equivalente, para $n$ grande: $\bar X \overset{\text{aprox.}}{\sim} \mathcal{N}\!\left(\mu,\, \sigma^2/n\right)$.
+
+**Regla práctica**: $n \geq 30$ es suficiente para poblaciones aproximadamente simétricas; poblaciones muy asimétricas requieren un $n$ mayor.
+
+</Teorema>
+
+<Insight>
+
+El TCL es el milagro central de la estadística: la forma de la distribución de la población (uniforme, exponencial, bimodal…) no importa. Para $n$ suficientemente grande, la media muestral siempre se distribuye de forma aproximadamente normal. Por eso las encuestas electorales con 2000 personas estiman millones de votantes con un error del 2%.
+
+</Insight>
+
+### Sesgos habituales
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 160" className="w-full">
+<defs>
+  <marker id="arr101" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="rgb(26 77 92)"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="10" width="110" height="40" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="65" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">Selección</text>
+</g>
+<g>
+  <rect x="145" y="10" width="110" height="40" rx="6" fill="rgb(232 199 122 / 0.2)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="200" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">No-respuesta</text>
+</g>
+<g>
+  <rect x="280" y="10" width="110" height="40" rx="6" fill="rgb(199 107 63 / 0.2)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="335" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">Autoselección</text>
+</g>
+<g>
+  <rect x="415" y="10" width="100" height="40" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="465" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">Survivorship</text>
+</g>
+<g>
+  <text x="65" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">encuesta online:</text>
+  <text x="65" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">excluye sin internet</text>
+</g>
+<g>
+  <text x="200" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">quien responde</text>
+  <text x="200" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">difiere de quien no</text>
+</g>
+<g>
+  <text x="335" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">voluntarios difieren</text>
+  <text x="335" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">de la población</text>
+</g>
+<g>
+  <text x="465" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">solo analiza a quien</text>
+  <text x="465" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">sobrevivió</text>
+</g>
+<g>
+  <line x1="260" y1="140" x2="260" y2="108" stroke="rgb(26 77 92)" strokeWidth="1" strokeDasharray="4,3"/>
+  <text x="260" y="155" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.6">Todos producen estimaciones sistemáticamente erróneas</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Cuatro fuentes clásicas de sesgo muestral. Cada una hace que la muestra no represente a la población objetivo.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Para un niño de 5 años">
+
+Quieres saber cuál es el helado favorito de todos los niños del colegio. Pero el colegio tiene **500 niños** y no puedes preguntarles a todos.
+
+Entonces **sorteas 40 niños** y les preguntas solo a ellos. Si el sorteo está bien hecho — sin dejar fuera a ningún grupo — su respuesta se va a **parecer mucho a la de todos**.
+
+Cuantos más niños preguntes, más exacta será la respuesta. Eso es el **muestreo**: tomar un trocito para entender el todo.
+
+</Porta>
+
+<Porta nivel="10" titulo="Para un niño de 10 años">
+
+Cuando quieres saber algo sobre **mucha gente** (todos los españoles, todos los niños de la ciudad), no puedes preguntarle a todo el mundo. Entonces usas una **muestra** — un grupito elegido con cuidado.
+
+**El secreto está en: ¿cómo elegirlo?**
+
+- **Aleatorio simple**: sortear a cualquier persona, como en una lotería. Todos tienen la misma oportunidad.
+- **Estratificado**: dividir en grupos (chicos/chicas, por ejemplo) y sortear dentro de cada grupo por separado. Garantiza que ningún grupo quede fuera.
+- **Por conglomerado**: sortear barrios enteros y entrevistar a todos los del barrio sorteado.
+
+**¿Y qué ocurre cuando calculas la media de la muestra?**
+
+La media muestral $\bar X$ no va a ser **exactamente** la media de todos, pero sí va a estar **cerca**. Y si lo repites con muestras distintas, las medias quedan centradas alrededor de la media real $\mu$. Eso es el **Teorema Central del Límite** — una de las ideas más poderosas de las matemáticas.
+
+</Porta>
+
+<Porta nivel="15" titulo="Para un adolescente de 15 años">
+
+### ¿Por qué muestrear?
+
+El censo (medir toda la población) es caro, lento y a veces imposible. Un buen muestreo te da una estimación precisa **con una fracción del esfuerzo**.
+
+Ejemplos reales:
+- INE: la Encuesta de Población Activa usa unas 65 000 familias para estimar empleo y renta de 47 millones de españoles.
+- Encuestas electorales: 2000 entrevistas estiman la intención de voto con un error de $\pm$ 2%.
+- Control de calidad industrial: 100 piezas inspeccionadas estiman defectos en un lote de 100 000.
+
+### Tipos de muestreo
+
+| Tipo | Idea | Cuándo usarlo |
+|---|---|---|
+| MAS | sortear $n$ individuos con igual probabilidad | base teórica estándar |
+| Estratificado | sortear dentro de grupos homogéneos | garantiza representación de subgrupos |
+| Sistemático | cada $k$-ésimo elemento de la lista | lista ordenada disponible |
+| Conglomerados | sortear grupos completos | lista individual no disponible o costosa |
+
+### La distribución muestral de $\bar X$
+
+$\bar X$ es una **variable aleatoria**: su valor cambia de muestra en muestra. Pero:
+
+- $\mathrm{E}[\bar X] = \mu$ (insesgado: en promedio acierta)
+- $\mathrm{Var}(\bar X) = \sigma^2/n$ (cuantas más observaciones, más estable)
+- Error estándar: $\mathrm{SE}(\bar X) = \sigma/\sqrt{n}$
+
+El error estándar decrece con $\sqrt{n}$: para reducir el error a la mitad, hay que **cuadruplicar** $n$.
+
+### Margen de error
+
+Para el 95% de confianza: $\mathrm{ME} = 1{,}96 \cdot \sigma/\sqrt{n}$.
+
+Encuesta con $n = 2000$ y $\hat p = 0{,}45$: $\mathrm{ME} = 1{,}96\sqrt{0{,}45 \cdot 0{,}55/2000} \approx 0{,}022$. Resultado: 45% $\pm$ 2,2%.
+
+</Porta>
+
+<Porta nivel="25" titulo="Para un estudiante de ingeniería">
+
+### Muestreo aleatorio simple: el modelo formal
+
+$X_1, \ldots, X_n \overset{\text{iid}}{\sim} F$, donde $F$ es la distribución desconocida de la población, con $\mathrm{E}[X] = \mu$ y $\mathrm{Var}(X) = \sigma^2$.
+
+### Ley de los Grandes Números
+
+**Débil (Khinchin)**: $\bar X_n \xrightarrow{P} \mu$ para cualquier $F$ con $\mathrm{E}[|X|] < \infty$.
+
+**Fuerte (Kolmogorov)**: $\bar X_n \xrightarrow{\text{c.s.}} \mu$ — convergencia casi segura (trayectoria a trayectoria, excepto en un conjunto de probabilidad cero).
+
+### Teorema Central del Límite
+
+$$\sqrt{n}\,\frac{\bar X_n - \mu}{\sigma} \xrightarrow{d} \mathcal{N}(0,1)$$
+
+Aplicabilidad práctica: $n \geq 30$ para poblaciones simétricas; poblaciones con alta curtosis o asimetría (como renta o precios de activos) pueden requerir un $n$ mucho mayor.
+
+### Estimadores y sus propiedades
+
+| Propiedad | Definición formal |
+|---|---|
+| Insesgadez | $\mathrm{E}[\hat\theta] = \theta$ |
+| Consistencia | $\hat\theta \xrightarrow{P} \theta$ |
+| Eficiencia (UMVUE) | $\mathrm{Var}(\hat\theta) = [nI(\theta)]^{-1}$ |
+| Suficiencia | $f(\mathbf{x} \mid \theta) = g(T(\mathbf{x}), \theta)\,h(\mathbf{x})$ |
+
+### Cota de Cramér-Rao
+
+$$\mathrm{Var}(\hat\theta) \geq \frac{1}{nI(\theta)}, \quad I(\theta) = \mathrm{E}\!\left[\left(\frac{\partial}{\partial\theta}\log f(X;\theta)\right)^2\right]$$
+
+El estimador de máxima verosimilitud (MLE) alcanza asintóticamente esta cota.
+
+### Tamaño de muestra para precisión $E$
+
+$$n = \left\lceil\frac{z_{\alpha/2}^2\,\sigma^2}{E^2}\right\rceil$$
+
+Para proporción (caso menos favorable $p = 0{,}5$): $n = z_{\alpha/2}^2/(4E^2)$. Con 95% y $E = 3\%$: $n \approx 1067$.
+
+### Muestreo estratificado: ganancia de eficiencia
+
+Varianza del estimador estratificado frente al MAS:
+
+$$\mathrm{Var}(\bar X_{\text{est}}) = \sum_{k=1}^K \left(\frac{N_k}{N}\right)^2 \frac{\sigma_k^2}{n_k} \leq \mathrm{Var}(\bar X_{\text{MAS}})$$
+
+La ganancia es máxima cuando los estratos son internamente homogéneos (baja varianza intra-estrato).
+
+</Porta>
+
+<Porta nivel="40" titulo="Para un profesional sénior">
+
+### Inferencia basada en diseño frente a inferencia basada en modelo
+
+La dicotomía fundamental de la teoría del muestreo moderno:
+
+- **Design-based** (Neyman, 1934): la aleatoriedad proviene del mecanismo de selección. El estimador Horvitz-Thompson $\hat T_{HT} = \sum_{i \in S} Y_i/\pi_i$ es insesgado para cualquier valor de $Y$.
+- **Model-based** (marco de superpoblación): trata los $Y_i$ como realizaciones de un modelo estocástico; la aleatoriedad de la muestra es secundaria.
+
+### Estimador Horvitz-Thompson
+
+$$\hat T_{HT} = \sum_{i \in S} \frac{Y_i}{\pi_i}, \quad \widehat{\mathrm{Var}}(\hat T_{HT}) = \sum_{i \in S}\sum_{j \in S} \frac{\pi_{ij} - \pi_i\pi_j}{\pi_{ij}} \frac{Y_i}{\pi_i}\frac{Y_j}{\pi_j}$$
+
+Permite muestreo complejo (estratos anidados, probabilidades desiguales) manteniendo insesgadez exacta.
+
+### No-respuesta y calibración
+
+La poststratificación y el *raking* ajustan los pesos muestrales usando variables auxiliares conocidas en la población (censo), reduciendo el sesgo de no-respuesta sin modelar explícitamente el mecanismo de ausencia.
+
+### Concentración de medida
+
+Cota no asintótica de Hoeffding para $X_i \in [a, b]$:
+
+$$P(\lvert\bar X - \mu\rvert > t) \leq 2\exp\!\left(-\frac{2n\,t^2}{(b-a)^2}\right)$$
+
+Útil en aprendizaje automático (PAC learning) y en el análisis de A/B testing con tamaños muestrales pequeños.
+
+### Inferencia causal y muestreo
+
+Los ensayos controlados aleatorizados (RCTs) son muestreo con asignación aleatoria al tratamiento. Joshua Angrist y Guido Imbens recibieron el [Premio Nobel de Economía de 2021](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/) por desarrollar métodos cuasiexperimentales (variables instrumentales, RDD, diferencias en diferencias) para extraer inferencia causal cuando el RCT no es viable.
+
+### Bootstrap y variantes
+
+- **No paramétrico**: remuestrea con reposición de $\{X_1, \ldots, X_n\}$, calcula $\hat\theta^*$ en cada réplica, estima varianza e intervalos.
+- **Block bootstrap**: preserva la estructura de dependencia en series temporales (bloques solapados, bootstrap estacionario).
+- **Bayesian bootstrap**: sustituye el remuestreo por pesos Dirichlet, produciendo una distribución posterior sobre el funcional.
+
+### Estadística secuencial
+
+El SPRT (Sequential Probability Ratio Test) de Wald detiene la recogida de datos en cuanto la evidencia es suficiente, minimizando el $n$ esperado. En el A/B testing moderno, los *always-valid p-values* (e-values, anytime-valid inference) resuelven el problema del *peeking* sin inflar el error de Tipo I.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Aplicación práctica">
+
+### Encuesta de Población Activa (EPA): muestreo estratificado por conglomerados en dos etapas
+
+El INE usa **muestreo por conglomerados en dos etapas estratificadas** en la EPA:
+
+1. **Estrato**: cada comunidad autónoma constituye un estrato principal.
+2. **Primera etapa**: se sortean Secciones Censales (unidades primarias de muestreo).
+3. **Segunda etapa**: dentro de cada sección sorteada, se lista los hogares y se selecciona una fracción fija.
+
+Resultado: unas 65 000 familias entrevistadas cada trimestre, representando a 47 millones de españoles, con un coeficiente de variación inferior al 5% para estimaciones nacionales de la tasa de desempleo.
+
+### Control de calidad: muestreo por atributos
+
+Los lotes de productos industriales se inspeccionan mediante **muestreo por atributos**. Para un lote de $N = 10\,000$ unidades y un NCA (Nivel de Calidad Aceptable) del 1%, la tabla indica $n = 200$ piezas; el lote se rechaza si se encuentran más de 5 piezas defectuosas.
+
+El error estándar de la proporción estimada es:
+
+$$\mathrm{SE}(\hat p) = \sqrt{\frac{\hat p(1-\hat p)}{n}} = \sqrt{\frac{0{,}025 \cdot 0{,}975}{200}} \approx 0{,}011$$
+
+Margen de error de $\pm$ 1,1% con el 95% de confianza.
+
+### Encuesta electoral
+
+Los institutos demoscópicos usan cuotas (estrato por región, género, franja de edad) más selección aleatoria dentro de cada cuota. Con $n = 2000$, el margen de error para proporciones es:
+
+$$\mathrm{ME} = 1{,}96\sqrt{\frac{0{,}5 \cdot 0{,}5}{2000}} \approx 2{,}2\%$$
+
+</Porta>
+
+</DuasPortas>
+
+## Ejemplos resueltos
+
+<Exemplo numero="101.1" titulo="Error estándar de la media muestral (básico)">
+
+**Problema.** Una encuesta sobre renta mensual recoge datos de $n = 64$ trabajadores. La desviación típica poblacional es conocida: $\sigma = 800$ (en reales). Calcula el error estándar de la media muestral.
+
+**Estrategia.** Aplicar directamente la fórmula $\mathrm{SE}(\bar X) = \sigma/\sqrt{n}$.
+
+**Resolución.**
+
+$$\mathrm{SE}(\bar X) = \frac{\sigma}{\sqrt{n}} = \frac{800}{\sqrt{64}} = \frac{800}{8} = 100$$
+
+El error estándar es 100 reales (BRL).
+
+**Verificación.** Para $n = 256$ (cuatro veces mayor): $\mathrm{SE} = 800/16 = 50$. Cuadruplicar $n$ reduce el error estándar a la mitad. Coherente con la relación $\mathrm{SE} \propto 1/\sqrt{n}$.
+
+**Fuente.** [OpenStax Statistics, §7.1, Ejemplo 7.1](https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="101.2" titulo="Tamaño de muestra para margen de error (intermedio)">
+
+**Problema.** Un investigador quiere estimar la proporción de estudiantes de bachillerato que trabajan, con un margen de error máximo del 3% al 95% de confianza. ¿Cuál es el tamaño mínimo de muestra?
+
+**Estrategia.** Usar la fórmula conservadora $n = z_{\alpha/2}^2/(4E^2)$ con $p = 0{,}5$ (caso más desfavorable).
+
+**Resolución.**
+
+$$n = \frac{z_{\alpha/2}^2}{4E^2} = \frac{(1{,}960)^2}{4 \cdot (0{,}03)^2} = \frac{3{,}8416}{0{,}0036} \approx 1068$$
+
+Se redondea **hacia arriba**: $n = 1068$.
+
+**Verificación.** Con $n = 1068$ y $p = 0{,}5$: $\mathrm{ME} = 1{,}96\sqrt{0{,}25/1068} = 1{,}96 \cdot 0{,}01531 \approx 0{,}030$. Dentro del límite del 3%.
+
+**Fuente.** [OpenIntro Statistics, §5.2, Ejemplo 5.10](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="101.3" titulo="Aplicación del TCL — probabilidad de la media muestral (intermedio)">
+
+**Problema.** El tiempo de atención en un centro de salud tiene media $\mu = 18$ min y desviación $\sigma = 6$ min. Se recoge una muestra de $n = 36$ atenciones. ¿Cuál es la probabilidad de que la media muestral sea mayor que 20 min?
+
+**Estrategia.** Por el TCL, $\bar X \approx \mathcal{N}(18,\, 36/36) = \mathcal{N}(18, 1)$. Tipificar y usar la tabla Z.
+
+**Resolución.**
+
+$$Z = \frac{\bar X - \mu}{\sigma/\sqrt{n}} = \frac{20 - 18}{6/\sqrt{36}} = \frac{2}{1} = 2{,}00$$
+
+$$P(\bar X > 20) = P(Z > 2{,}00) = 1 - \Phi(2{,}00) = 1 - 0{,}9772 = 0{,}0228$$
+
+Probabilidad de aproximadamente el 2,3%.
+
+**Verificación.** El valor $\bar X = 20$ está 2 desviaciones típicas por encima de la media: por la regla 68-95-99,7, solo alrededor del 2,5% de las medias muestrales deben caer por encima de $\mu + 2\,\mathrm{SE}$. El resultado 2,28% es coherente.
+
+**Fuente.** [OpenStax Statistics, §7.2, Ejemplo 7.3](https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sums) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="101.4" titulo="Identificación de sesgo muestral (conceptual)">
+
+**Problema.** Una revista de negocios realiza una encuesta online sobre satisfacción con el sistema tributario, obteniendo un 80% de respuestas negativas. El editor afirma: "8 de cada 10 empresarios están insatisfechos con los impuestos". Identifica los sesgos presentes.
+
+**Estrategia.** Verificar cada etapa del proceso muestral: quién tiene acceso, quién responde, quién está representado.
+
+**Resolución.**
+
+Se acumulan tres sesgos:
+
+1. **Sesgo de selección**: la encuesta online excluye a empresarios sin acceso digital (pequeños negocios rurales, microemprendedores informales).
+2. **Sesgo de no-respuesta**: las cuestiones tributarias movilizan más a quienes están insatisfechos (quien está satisfecho no siente urgencia en responder).
+3. **Sesgo de marco muestral**: los lectores de la revista son empresarios de mayor tamaño o con interés específico en gestión — no representan al universo de todos los "empresarios".
+
+**Conclusión**: la estimación del 80% sobreestima sistemáticamente la insatisfacción en la población general.
+
+**Verificación.** Una encuesta del instituto nacional de estadística con muestra probabilística, llevada a cabo por entrevistadores, produciría un resultado distinto — y metodológicamente defendible.
+
+**Fuente.** [OpenIntro Statistics, §1.4, Sección "Sampling Bias"](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="101.5" titulo="Muestreo estratificado: cálculo de eficiencia (avanzado)">
+
+**Problema.** Una empresa tiene 3 departamentos: A (200 empleados, $\sigma_A = 4$ mil), B (500 empleados, $\sigma_B = 2$ mil), C (300 empleados, $\sigma_C = 6$ mil). Presupuesto para $n = 100$ entrevistas. Compara la varianza del MAS con la del estratificado proporcional para estimar el salario medio.
+
+**Estrategia.** Calcular la varianza del MAS y la del estratificado (asignación proporcional).
+
+**Resolución.**
+
+Varianza de la población: $\sigma^2 = \sum (N_k/N)\sigma_k^2$ (aproximación — ignora la varianza entre medias de los estratos para simplificar):
+
+Asignación proporcional: $n_A = 20$, $n_B = 50$, $n_C = 30$.
+
+$$\mathrm{Var}(\bar X_{\text{est}}) = \sum_{k} \left(\frac{N_k}{N}\right)^2 \frac{\sigma_k^2}{n_k}$$
+
+$$= \left(\frac{200}{1000}\right)^2\frac{16}{20} + \left(\frac{500}{1000}\right)^2\frac{4}{50} + \left(\frac{300}{1000}\right)^2\frac{36}{30}$$
+
+$$= 0{,}04 \cdot 0{,}8 + 0{,}25 \cdot 0{,}08 + 0{,}09 \cdot 1{,}2 = 0{,}032 + 0{,}020 + 0{,}108 = 0{,}160$$
+
+Error estándar estratificado: $\sqrt{0{,}160} \approx 0{,}40$ mil.
+
+Para comparación, el MAS simple con $n = 100$ y varianza total aproximada $\sigma^2 \approx (200 \cdot 16 + 500 \cdot 4 + 300 \cdot 36)/1000 = (3200 + 2000 + 10800)/1000 = 16$ daría $\mathrm{Var}(\bar X_{\text{MAS}}) = 16/100 = 0{,}160$. En este caso la asignación proporcional coincide numéricamente con el MAS — la ganancia de eficiencia surge cuando las medias de los estratos difieren mucho.
+
+**Verificación.** El resultado confirma la teoría: con asignación proporcional y estratos con varianzas distintas, el estratificado es al menos tan eficiente como el MAS.
+
+**Fuente.** [OpenIntro Statistics, §1.4, Ejercicio 1.35](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-101-amostragem">
+
+<Exercicio
+  numero="101.1"
+  dificuldade="aplicacao"
+  solucao={<>El error estándar es <Eq>{`\\mathrm{SE} = \\sigma/\\sqrt{n} = 50/\\sqrt{100} = 5`}</Eq> g. Como el estimador es insesgado, la media muestral está centrada en <Eq>{`\\mu`}</Eq>, con una fluctuación de 5 g a su alrededor.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "396", exercicio: "7.1", licenca: "CC-BY" }}
+>
+Una fábrica produce tornillos con peso medio $\mu$ y desviación típica $\sigma = 50$ g. Se recoge una muestra de $n = 100$ tornillos. Calcula el error estándar de la media muestral.
+</Exercicio>
+
+<Exercicio
+  numero="101.2"
+  dificuldade="aplicacao"
+  solucao={<>Cuadruplicar <Eq>{`n`}</Eq> reduce el error estándar a la mitad, pues <Eq>{`\\mathrm{SE} \\propto 1/\\sqrt{n}`}</Eq>. De <Eq>{`n = 25`}</Eq> a <Eq>{`n = 100`}</Eq>: <Eq>{`\\mathrm{SE}`}</Eq> pasa de <Eq>{`\\sigma/5`}</Eq> a <Eq>{`\\sigma/10`}</Eq>. Reducción del 50%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "174", exercicio: "4.3", licenca: "CC-BY-SA" }}
+>
+Una encuesta comienza con $n = 25$. ¿Cuántas veces hay que aumentar $n$ para reducir el error estándar a la mitad? Explícalo usando la fórmula.
+</Exercicio>
+
+<Exercicio
+  numero="101.3"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Identifica los parámetros: <Eq>{`\\mu = 120`}</Eq>, <Eq>{`\\sigma = 15`}</Eq>, <Eq>{`n = 9`}</Eq>.</li>
+<li>Calcula el error estándar: <Eq>{`\\mathrm{SE} = 15/\\sqrt{9} = 5`}</Eq>.</li>
+<li>Tipifica: <Eq>{`Z = (\\bar X - \\mu)/\\mathrm{SE}`}</Eq>. Para <Eq>{`\\bar X = 125`}</Eq>: <Eq>{`Z = (125-120)/5 = 1{,}00`}</Eq>.</li>
+<li>Consulta la tabla Z: <Eq>{`P(Z > 1{,}00) = 1 - 0{,}8413 = 0{,}1587`}</Eq>.</li>
+<li><em>Truco:</em> Si la distribución de la población es normal, el resultado vale para cualquier <Eq>{`n`}</Eq> — no es necesario el TCL.</li>
+</ol>
+  </>}
+  solucao={<>Por el TCL (o normalidad de la población), <Eq>{`\\bar X \\sim \\mathcal{N}(120, 25)`}</Eq>. La probabilidad de <Eq>{`\\bar X > 125`}</Eq> es <Eq>{`P(Z > 1{,}00) \\approx 15{,}87\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "398", exercicio: "7.3", licenca: "CC-BY" }}
+>
+El tiempo de espera en una sucursal bancaria tiene distribución normal con $\mu = 120$ s y $\sigma = 15$ s. Se recoge una muestra de $n = 9$ clientes. ¿Cuál es la probabilidad de que $\bar X > 125$ s?
+</Exercicio>
+
+<Exercicio
+  numero="101.4"
+  dificuldade="aplicacao"
+  solucao={<>Muestreo estratificado, con estratos por género y franja de edad. Garantiza una representación adecuada de subgrupos que podrían estar infrarrepresentados en un MAS con muestra pequeña.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.17", licenca: "CC-BY-SA" }}
+>
+Un hospital quiere estimar la satisfacción de los pacientes con la atención. La directora sabe que el género y la franja de edad influyen mucho en la percepción. ¿Qué tipo de muestreo es más adecuado? Justifica tu respuesta.
+</Exercicio>
+
+<Exercicio
+  numero="101.5"
+  dificuldade="aplicacao"
+  solucao={<>Sesgo de autoselección. Quien responde voluntariamente a encuestas de satisfacción tiende a tener opiniones más extremas (muy satisfecho o muy insatisfecho) que la población general de clientes.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "31", exercicio: "1.19", licenca: "CC-BY-SA" }}
+>
+Una tienda online envía un correo electrónico pidiendo una valoración tras cada compra. Solo el 12% de los clientes responde. Identifica el tipo de sesgo más probable y explica su efecto sobre la estimación.
+</Exercicio>
+
+<Exercicio
+  numero="101.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n = z_{\\alpha/2}^2/(4E^2) = (1{,}960)^2/(4 \\cdot 0{,}04^2) = 3{,}8416/0{,}0064 \\approx 601`}</Eq>. Necesario: 601 hogares.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "454", exercicio: "8.31", licenca: "CC-BY" }}
+>
+Una encuesta quiere estimar la proporción de hogares con acceso a internet en zona rural, con margen de error del 4% al 95% de confianza. ¿Cuál es el tamaño mínimo de muestra?
+</Exercicio>
+
+<Exercicio
+  numero="101.7"
+  dificuldade="aplicacao"
+  solucao={<>Sesgo de supervivencia. El análisis considera únicamente empresas que aún existen, ignorando las que quebraron. El rendimiento medio de las supervivientes sobreestima el rendimiento esperado de una empresa nueva.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "32", exercicio: "1.21", licenca: "CC-BY-SA" }}
+>
+Un consultor analiza el crecimiento medio de 50 startups fundadas hace 5 años que aún están activas, concluyendo que "las startups crecen de media un 120% al año". ¿Qué sesgo está presente?
+</Exercicio>
+
+<Exercicio
+  numero="101.8"
+  dificuldade="aplicacao"
+  solucao={<>Insesgado: sí, pues <Eq>{`\\mathrm{E}[\\bar X] = \\mu`}</Eq> para cualquier <Eq>{`n`}</Eq>. Consistente: sí, pues <Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n \\to 0`}</Eq>. Eficiente: entre los estimadores lineales insesgados de <Eq>{`\\mu`}</Eq>, <Eq>{`\\bar X`}</Eq> tiene varianza mínima (Gauss-Markov).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.1", licenca: "CC-BY-SA" }}
+>
+Muestra que la media muestral $\bar X$ es (a) insesgada, (b) consistente y (c) eficiente para $\mu$, en la clase de los estimadores lineales.
+</Exercicio>
+
+<Exercicio
+  numero="101.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sigma/\\sqrt{n} = 40/\\sqrt{400} = 2`}</Eq> (en reales). El intervalo de 2 errores estándar: la media muestral estará entre <Eq>{`\\mu - 4`}</Eq> y <Eq>{`\\mu + 4`}</Eq> en aproximadamente el 95% de las muestras.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "399", exercicio: "7.5", licenca: "CC-BY" }}
+>
+Un estudio sobre gasto en transporte público recoge $n = 400$ registros. La desviación típica histórica es $\sigma = R\$\,40$ (en reales). Calcula el error estándar e interpreta su significado.
+</Exercicio>
+
+<Exercicio
+  numero="101.10"
+  dificuldade="aplicacao"
+  solucao={<>El MAS da igual oportunidad a cada empresa. El estratificado por sector garantiza que cada sector (industria, comercio, servicios) esté representado proporcionalmente. Por conglomerados consistiría en sortear municipios y entrevistar a todas las empresas del municipio sorteado. El estratificado es más eficiente cuando la renta media varía mucho entre sectores.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement", secao: "§1.3", pagina: "18", exercicio: "1.5", licenca: "CC-BY" }}
+>
+El INE quiere estimar la renta media de las empresas. Describe cómo serían un MAS, un estratificado por sector y uno por conglomerado. ¿Cuál sería más eficiente? ¿Por qué?
+</Exercicio>
+
+<Exercicio
+  numero="101.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "El sesgo es cero; la varianza es positiva y decrece con n", correta: true },
+    { texto: "El sesgo es positivo; la varianza es cero" },
+    { texto: "El sesgo es negativo; la varianza crece con n" },
+    { texto: "Tanto el sesgo como la varianza son cero para n grande" }
+  ]}
+  solucao={<><Eq>{`\\mathrm{E}[\\bar X] = \\mu`}</Eq> implica sesgo cero. <Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n > 0`}</Eq> y decrece con <Eq>{`n`}</Eq>. Para varianza cero se necesitaría <Eq>{`n \\to \\infty`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.2", licenca: "CC-BY-SA" }}
+>
+Para la media muestral $\bar X$ con $n$ fijo y población iid, ¿cuál afirmación es correcta?
+</Exercicio>
+
+<Exercicio
+  numero="101.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Porque el tamaño de la muestra es suficientemente grande para que se aplique el TCL" },
+    { texto: "Porque la población es necesariamente normal", correta: false },
+    { texto: "Porque la muestra es estratificada" },
+    { texto: "Porque la desviación típica es pequeña" }
+  ]}
+  solucao={<>El TCL garantiza que <Eq>{`\\bar X`}</Eq> se aproxima a la normal para <Eq>{`n`}</Eq> grande, independientemente de la distribución de la población. La distribución de la población no necesita ser normal.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "394", exercicio: "7.1c", licenca: "CC-BY" }}
+>
+¿Por qué, en muchas encuestas prácticas, la media muestral tiene distribución aproximadamente normal, aunque no se conozca la distribución exacta de la población?
+</Exercicio>
+
+<Exercicio
+  numero="101.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "No: cada muestra posible de tamaño n tiene igual probabilidad de ser seleccionada", correta: true },
+    { texto: "Sí: cada individuo tiene igual probabilidad de estar en la muestra, pero los conjuntos pueden tener probabilidades distintas" },
+    { texto: "Sí: el MAS garantiza representación proporcional de todos los subgrupos" },
+    { texto: "No: solo el muestreo sistemático garantiza equiprobabilidad" }
+  ]}
+  solucao={<>En el MAS, la equiprobabilidad de individuo (todos tienen probabilidad <Eq>{`n/N`}</Eq>) y la equiprobabilidad de subconjunto son equivalentes — cada conjunto de <Eq>{`n`}</Eq> individuos tiene la misma oportunidad. Esto NO garantiza la representación de todos los subgrupos (puede ocurrir por azar que algún grupo quede sin representación).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "28", exercicio: "1.15", licenca: "CC-BY-SA" }}
+>
+Afirmación: "En el muestreo aleatorio simple, cada individuo tiene la misma probabilidad de ser elegido. Esto equivale a decir que cada conjunto de $n$ individuos tiene la misma probabilidad de ser la muestra." ¿Es correcta la afirmación?
+</Exercicio>
+
+<Exercicio
+  numero="101.14"
+  dificuldade="aplicacao"
+  solucao={<>Por el TCL, <Eq>{`\\bar X \\sim \\mathcal{N}(3{,}5,\\, 1{,}5^2/36) = \\mathcal{N}(3{,}5,\\, 0{,}0625)`}</Eq>. <Eq>{`P(\\bar X < 3{,}2) = P(Z < (3{,}2 - 3{,}5)/0{,}25) = P(Z < -1{,}20) = 0{,}1151`}</Eq>. Probabilidad de alrededor del 11,5%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "400", exercicio: "7.7", licenca: "CC-BY" }}
+>
+La nota media histórica de un examen es $\mu = 3{,}5$ con $\sigma = 1{,}5$. Para un grupo de $n = 36$ estudiantes, ¿cuál es la probabilidad de que la media del grupo sea menor que 3,2?
+</Exercicio>
+
+<Exercicio
+  numero="101.15"
+  dificuldade="aplicacao"
+  solucao={<>Por conglomerados en dos etapas: sortear municipios (primera etapa) y después sortear calles dentro de los municipios sorteados. Eficiente operativamente porque concentra las entrevistas en pocos municipios, reduciendo el coste de desplazamiento.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.18", licenca: "CC-BY-SA" }}
+>
+El INE necesita estimar el acceso al saneamiento básico en municipios de toda España, con presupuesto limitado. La lista de hogares no está disponible, pero sí la de municipios y calles. Propón un plan de muestreo.
+</Exercicio>
+
+<Exercicio
+  numero="101.16"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>La fórmula del error estándar de la proporción es <Eq>{`\\mathrm{SE} = \\sqrt{p(1-p)/n}`}</Eq>.</li>
+<li>Sustituye: <Eq>{`\\mathrm{SE} = \\sqrt{0{,}6 \\cdot 0{,}4 / 400} = \\sqrt{0{,}24/400} = \\sqrt{0{,}0006} \\approx 0{,}0245`}</Eq>.</li>
+<li>Margen de error al 95%: <Eq>{`1{,}96 \\times 0{,}0245 \\approx 0{,}048`}</Eq>, es decir, <Eq>{`\\pm 4{,}8\\%`}</Eq>.</li>
+<li><em>Observación:</em> El margen de error de la proporción es máximo cuando <Eq>{`p = 0{,}5`}</Eq>. Para <Eq>{`p = 0{,}6`}</Eq>, el margen es ligeramente menor que para <Eq>{`p = 0{,}5`}</Eq>.</li>
+</ol>
+  </>}
+  solucao={<><Eq>{`\\mathrm{SE}(\\hat p) = \\sqrt{0{,}6 \\cdot 0{,}4/400} \\approx 0{,}0245`}</Eq>. Margen de error: <Eq>{`\\pm 4{,}8\\%`}</Eq>. Resultado: 60% <Eq>{`\\pm`}</Eq> 4,8%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "450", exercicio: "8.27", licenca: "CC-BY" }}
+>
+Una encuesta con $n = 400$ votantes encontró $\hat p = 60\%$ de aprobación al gobierno municipal. Calcula el error estándar y el margen de error al 95% de confianza.
+</Exercicio>
+
+<Exercicio
+  numero="101.17"
+  dificuldade="aplicacao"
+  solucao={<>De <Eq>{`n = z^2/(4E^2)`}</Eq>: para <Eq>{`E = 0{,}05`}</Eq> y 95%: <Eq>{`n = 3{,}8416/(4 \\cdot 0{,}0025) = 384{,}16 \\approx 385`}</Eq>. Para <Eq>{`E = 0{,}025`}</Eq>: <Eq>{`n = 3{,}8416/0{,}0025 = 1537`}</Eq>. Reducir el margen a la mitad cuadruplica el tamaño necesario.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "214", exercicio: "5.11", licenca: "CC-BY-SA" }}
+>
+Calcula los tamaños mínimos de muestra para estimar una proporción con margen de error del (a) 5% y (b) 2,5%, ambos con 95% de confianza. Explica la relación entre los resultados.
+</Exercicio>
+
+<Exercicio
+  numero="101.18"
+  dificuldade="aplicacao"
+  solucao={<>Muestreo sistemático: listar los 3000 clientes; sortear uno entre los 10 primeros (p. ej., el 4); seleccionar el 4.º, el 14.º, el 24.º, … hasta 300 clientes. Es equivalente al MAS cuando la lista no está ordenada por variables correlacionadas con el resultado de interés.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement", secao: "§1.3", pagina: "20", exercicio: "1.7", licenca: "CC-BY" }}
+>
+Una empresa tiene 3000 clientes registrados en orden de número de contrato. Quiere seleccionar 300 para una encuesta. Describe el procedimiento de muestreo sistemático y analiza cuándo puede introducir sesgo.
+</Exercicio>
+
+<Exercicio
+  numero="101.19"
+  dificuldade="aplicacao"
+  solucao={<>Por el TCL: <Eq>{`\\bar X \\sim \\mathcal{N}(70, 100/64) = \\mathcal{N}(70, 1{,}5625)`}</Eq>. <Eq>{`P(68 \\leq \\bar X \\leq 72) = P(-1{,}6 \\leq Z \\leq 1{,}6)`}</Eq>. <Eq>{`= \\Phi(1{,}6) - \\Phi(-1{,}6) = 0{,}9452 - 0{,}0548 = 0{,}8904`}</Eq>. Probabilidad de aproximadamente el 89%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "401", exercicio: "7.9", licenca: "CC-BY" }}
+>
+El peso de paquetes de arroz tiene $\mu = 70$ kg y $\sigma = 10$ kg. Para una muestra de $n = 64$, calcula $P(68 \leq \bar X \leq 72)$.
+</Exercicio>
+
+<Exercicio
+  numero="101.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Sesgo de no-respuesta: quien devuelve los cuestionarios difiere sistemáticamente de quien no lo hace" },
+    { texto: "Sesgo de supervivencia: solo participan alumnos aún matriculados", correta: true },
+    { texto: "Sesgo de selección por acceso a internet" },
+    { texto: "Sesgo de autoselección de voluntarios" }
+  ]}
+  solucao={<>Los alumnos que abandonaron el curso (potencialmente los más insatisfechos) no figuran en la lista de matriculados y, por tanto, no pueden ser entrevistados. La encuesta mide la satisfacción únicamente entre los "supervivientes" del programa, sobreestimando la satisfacción media.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "32", exercicio: "1.22", licenca: "CC-BY-SA" }}
+>
+Una universidad hace una encuesta de satisfacción con alumnos **actualmente matriculados**. ¿Cuál es el sesgo más relevante en este enfoque?
+</Exercicio>
+
+<Exercicio
+  numero="101.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sqrt{p(1-p)/n}`}</Eq>. Se maximiza en <Eq>{`p = 0{,}5`}</Eq>: <Eq>{`\\mathrm{SE}_{\\max} = 0{,}5/\\sqrt{n}`}</Eq>. Para 95%: <Eq>{`n = (1{,}96 \\cdot 0{,}5/0{,}02)^2 = 2401`}</Eq>. Se redondea a 2401.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "455", exercicio: "8.33", licenca: "CC-BY" }}
+>
+Sin conocimiento previo de $p$, ¿cuál es el tamaño mínimo de muestra para estimar una proporción con margen de error del 2% al 95%?
+</Exercicio>
+
+<Exercicio
+  numero="101.22"
+  dificuldade="aplicacao"
+  solucao={<>Sesgo de selección: la encuesta puerta a puerta solo alcanza a quien está en casa durante el día — típicamente desempleados, jubilados y trabajadores domésticos. Los trabajadores a tiempo completo quedan sistemáticamente fuera de la muestra.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "31", exercicio: "1.20", licenca: "CC-BY-SA" }}
+>
+Un investigador entrevista a vecinos de una ciudad llamando a puertas entre las 9h y las 17h de días laborables. Quiere estimar la renta media familiar. Identifica el sesgo y describe su dirección (¿subestima o sobreestima la renta media?).
+</Exercicio>
+
+<Exercicio
+  numero="101.23"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Fórmula: <Eq>{`\\mathrm{SE}(\\bar X) = \\sigma/\\sqrt{n}`}</Eq>.</li>
+<li>Para <Eq>{`n = 25`}</Eq>: <Eq>{`\\mathrm{SE} = 12/\\sqrt{25} = 12/5 = 2{,}4`}</Eq> min.</li>
+<li>Para <Eq>{`n = 100`}</Eq>: <Eq>{`\\mathrm{SE} = 12/\\sqrt{100} = 12/10 = 1{,}2`}</Eq> min.</li>
+<li>Razón: <Eq>{`2{,}4/1{,}2 = 2`}</Eq>. Doblar <Eq>{`\\sqrt{n}`}</Eq> (cuadruplicar <Eq>{`n`}</Eq>) reduce el SE a la mitad.</li>
+<li><em>Truco:</em> Para reducir el SE por un factor <Eq>{`k`}</Eq>, multiplica <Eq>{`n`}</Eq> por <Eq>{`k^2`}</Eq>.</li>
+</ol>
+  </>}
+  solucao={<>Para <Eq>{`n = 25`}</Eq>: <Eq>{`\\mathrm{SE} = 2{,}4`}</Eq> min. Para <Eq>{`n = 100`}</Eq>: <Eq>{`\\mathrm{SE} = 1{,}2`}</Eq> min. Cuadruplicar <Eq>{`n`}</Eq> reduce el SE a la mitad.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "397", exercicio: "7.2", licenca: "CC-BY" }}
+>
+El tiempo de consulta médica tiene $\sigma = 12$ min. Calcula el error estándar de la media para $n = 25$ y $n = 100$, y compáralos.
+</Exercicio>
+
+<Exercicio
+  numero="101.24"
+  dificuldade="aplicacao"
+  solucao={<>Por el TCL, <Eq>{`\\bar X \\sim \\mathcal{N}(500, 80^2/100) = \\mathcal{N}(500, 64)`}</Eq>. <Eq>{`P(\\bar X > 510) = P(Z > (510-500)/8) = P(Z > 1{,}25) = 1 - 0{,}8944 = 0{,}1056`}</Eq>. Probabilidad del 10,6%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "402", exercicio: "7.11", licenca: "CC-BY" }}
+>
+El consumo mensual de electricidad de una ciudad tiene $\mu = 500$ kWh y $\sigma = 80$ kWh. Para $n = 100$ hogares sorteados, calcula $P(\bar X > 510)$.
+</Exercicio>
+
+<Exercicio
+  numero="101.25"
+  dificuldade="modelagem"
+  passos={<>
+<ol>
+<li>La EPA usa muestreo estratificado por comunidad autónoma y conglomerados en dos etapas.</li>
+<li>Para estimar el desempleo nacional con margen de <Eq>{`\\pm 0{,}5\\%`}</Eq> al 95%, usa <Eq>{`n \\geq z^2/(4E^2) = 3{,}8416/(4 \\cdot 0{,}0025) \\approx 384`}</Eq> observaciones de desempleo. Pero la tasa de desempleo es baja (<Eq>{`p \\approx 0{,}12`}</Eq>), por lo que la fórmula se ajusta a <Eq>{`n \\geq z^2 p(1-p)/E^2 \\approx 1628`}</Eq>.</li>
+<li>En la práctica, el INE usa 65 000 familias para soportar estimaciones autonómicas simultáneas y corregir efectos de diseño (DEFF mayor que 1 por conglomeración).</li>
+<li><em>Curiosidad:</em> El "efecto de diseño" (design effect) es el cociente entre la varianza real del estimador complejo y la varianza teórica del MAS. En la EPA, el DEFF para el desempleo nacional es aproximadamente 1,5 — el conglomerado induce correlación intra-clúster que aumenta la varianza estimada.</li>
+</ol>
+  </>}
+  solucao={<>Para una estimativa nacional con <Eq>{`\\pm 0{,}5\\%`}</Eq> de margen y <Eq>{`p \\approx 0{,}12`}</Eq>: <Eq>{`n \\geq 1{,}96^2 \\cdot 0{,}12 \\cdot 0{,}88/0{,}005^2 \\approx 16{.}295`}</Eq>. El INE usa 65 000 para soportar estimaciones autonómicas con menor margen. El efecto de diseño (DEFF) del muestreo conglomerado eleva la varianza efectiva, exigiendo una muestra mayor que un MAS puro.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "213", exercicio: "5.9", licenca: "CC-BY-SA" }}
+>
+El INE usa unas 65 000 familias en la EPA. La tasa de desempleo nacional es de aproximadamente el 12%. (a) ¿Cuál sería el $n$ mínimo teórico para estimar el desempleo con margen de $\pm 0{,}5\%$ al 95%? (b) ¿Por qué el INE usa un $n$ mucho mayor?
+</Exercicio>
+
+<Exercicio
+  numero="101.26"
+  dificuldade="modelagem"
+  solucao={<>Muestreo estratificado con estratos por código postal (proxy de renta) y asignación óptima de Neyman: <Eq>{`n_k \\propto N_k \\sigma_k`}</Eq>. Los estratos con alta variabilidad de renta reciben más entrevistas, aunque sean más pequeños. Esto minimiza la varianza total del estimador para el mismo coste.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.18", licenca: "CC-BY-SA" }}
+>
+Un banco quiere estimar la morosidad media en su cartera de crédito de 500 000 clientes. La variabilidad de la morosidad varía mucho según el nivel de renta. Propón un plan de muestreo eficiente y justifica la asignación de entrevistas por estrato.
+</Exercicio>
+
+<Exercicio
+  numero="101.27"
+  dificuldade="modelagem"
+  solucao={<>Sesgo de supervivencia. Los fondos que cesan operaciones (por mal rendimiento) desaparecen de la base de datos. Analizar únicamente fondos activos sobreestima sistemáticamente el rendimiento medio histórico. La comparación correcta exige incluir todos los fondos que existían en el período, incluidos los que cerraron.</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 3", pagina: "47", exercicio: "3.2", licenca: "CC-BY-NC" }}
+>
+Un analista financiero compara el rendimiento medio histórico de fondos de inversión activos y concluye que los gestores activos superan al índice. Los datos incluyen únicamente fondos que aún existen hoy. Identifica el sesgo y explica cómo afecta a la conclusión.
+</Exercicio>
+
+<Exercicio
+  numero="101.28"
+  dificuldade="modelagem"
+  passos={<>
+<ol>
+<li>El estimador insesgado de la varianza poblacional es <Eq>{`S^2 = \\frac{1}{n-1}\\sum_{i=1}^n (X_i - \\bar X)^2`}</Eq>.</li>
+<li>Expande: <Eq>{`\\mathrm{E}[S^2] = \\frac{1}{n-1}\\mathrm{E}\\left[\\sum (X_i - \\bar X)^2\\right]`}</Eq>.</li>
+<li>Usando <Eq>{`\\sum (X_i - \\bar X)^2 = \\sum X_i^2 - n\\bar X^2`}</Eq> y <Eq>{`\\mathrm{E}[\\sum X_i^2] = n(\\sigma^2 + \\mu^2)`}</Eq>, <Eq>{`\\mathrm{E}[n\\bar X^2] = n(\\sigma^2/n + \\mu^2)`}</Eq>.</li>
+<li>Resultado: <Eq>{`\\mathrm{E}[S^2] = \\sigma^2`}</Eq>. El divisor <Eq>{`n-1`}</Eq> (y no <Eq>{`n`}</Eq>) es lo que garantiza la insesgadez.</li>
+<li><em>Truco:</em> El divisor <Eq>{`n-1`}</Eq> "corrige" el hecho de que <Eq>{`\\bar X`}</Eq> está ligeramente más cerca de los datos que <Eq>{`\\mu`}</Eq> — un grado de libertad se "gasta" en la estimación de la media.</li>
+</ol>
+  </>}
+  solucao={<>Demuestra que <Eq>{`\\mathrm{E}[S^2] = \\sigma^2`}</Eq> con el divisor <Eq>{`n-1`}</Eq>. El argumento central: <Eq>{`\\sum(X_i - \\bar X)^2 = \\sum X_i^2 - n\\bar X^2`}</Eq> y <Eq>{`\\mathrm{E}[\\bar X^2] = \\sigma^2/n + \\mu^2`}</Eq>. El divisor <Eq>{`n-1`}</Eq> corrige el sesgo que surgiría con <Eq>{`n`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "175", exercicio: "4.5", licenca: "CC-BY-SA" }}
+>
+Muestra algebraicamente que $S^2 = \frac{1}{n-1}\sum(X_i - \bar X)^2$ es insesgado para $\sigma^2$. ¿Por qué el divisor es $n-1$ y no $n$?
+</Exercicio>
+
+<Exercicio
+  numero="101.29"
+  dificuldade="desafio"
+  solucao={<>Para <Eq>{`X_i \\in [0, 1]`}</Eq> y <Eq>{`t = 0{,}05`}</Eq>, <Eq>{`n = 100`}</Eq>: <Eq>{`P(|\\bar X - \\mu| > 0{,}05) \\leq 2\\exp(-2 \\cdot 100 \\cdot 0{,}0025/1) = 2e^{-0{,}5} \\approx 2 \\cdot 0{,}6065 = 1{,}213`}</Eq>. La cota es mayor que 1, por lo tanto no es informativa en este caso. Para <Eq>{`n = 1000`}</Eq>: <Eq>{`2e^{-5} \\approx 0{,}0135`}</Eq> — ahora garantiza menos del 1,4% de probabilidad de error mayor que el 5%.</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 4", pagina: "65", exercicio: "4.3", licenca: "CC-BY-NC" }}
+>
+Aplica la desigualdad de Hoeffding para $X_i \in [0, 1]$: $P(|\bar X - \mu| > t) \leq 2\exp(-2nt^2)$. Para $t = 0{,}05$, calcula la cota para $n = 100$ y $n = 1000$. Interpreta el resultado.
+</Exercicio>
+
+<Exercicio
+  numero="101.30"
+  dificuldade="demonstracao"
+  solucao={<>Prueba de la insesgadez de la media muestral: <Eq>{`\\mathrm{E}[\\bar X] = \\mathrm{E}\\left[\\frac{1}{n}\\sum_{i=1}^n X_i\\right] = \\frac{1}{n}\\sum_{i=1}^n \\mathrm{E}[X_i] = \\frac{1}{n} \\cdot n\\mu = \\mu`}</Eq>. Consistencia: <Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n \\to 0`}</Eq>; por la desigualdad de Chebyshev: <Eq>{`P(|\\bar X - \\mu| > \\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2) \\to 0`}</Eq> para todo <Eq>{`\\varepsilon > 0`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.1", licenca: "CC-BY-SA" }}
+>
+Prueba formalmente que la media muestral $\bar X = \frac{1}{n}\sum X_i$ es (a) insesgada y (b) consistente para $\mu$, usando la desigualdad de Chebyshev para la parte (b).
+</Exercicio>
+
+</ListaExercicios>
+
+## Fuentes
+
+- [**OpenIntro Statistics** (4.ª ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA. Secciones §1.3–1.4 (tipos de muestreo y sesgos) y §4.1–4.2 (distribución muestral).
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY. Capítulo 1 (introducción al muestreo) y Capítulo 7 (distribución muestral y TCL).
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC. Capítulos 3–4 (sesgo muestral y distribución muestral con simulaciones).
