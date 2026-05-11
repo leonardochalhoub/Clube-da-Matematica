@@ -1,0 +1,694 @@
+---
+titulo: "Lição 118 — Análise de Componentes Principais (PCA)"
+slug: "licao-118-pca"
+categoria: "aulas"
+subcategoria: "ano-3-trim-12"
+descricao: "Hotelling 1933: diagonalizar a covariância para encontrar direções de máxima variância. Scores, variância explicada, scree plot. Conexão com SVD. Aplicação em ML, finanças, genômica."
+ordem: 118
+publicado: true
+tags: ["álgebra linear", "PCA", "estatística", "redução de dimensão", "ano-3", "trim-12"]
+prerrequisitos: ["licao-117-svd"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+versao: "v1"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Stochastik LK alemão", "Equiv. H2 Math Statistics singapurense", "Equiv. Math B japonês avançado"]
+---
+
+<EquacaoCanonica
+  formula="\Sigma = V \Lambda V^T, \quad z_k = V_k^T (x - \bar{x})"
+  legenda={<>Die <strong>PCA</strong> (Hotelling, 1933) diagonalisiert die Stichproben-Kovarianzmatrix <Eq>{`\\Sigma`}</Eq> zentrierter Daten. Die Eigenvektoren <Eq>{`v_k`}</Eq> (Spalten von <Eq>{`V`}</Eq>) sind die <strong>Richtungen maximaler Varianz</strong>; die Eigenwerte <Eq>{`\\lambda_k`}</Eq> sind die Varianzen in diesen Richtungen. Die Projektion auf <Eq>{`V_k`}</Eq> bewahrt das Maximum der Gesamtvarianz mit weniger Dimensionen.</>}
+  audioTexto="PCA, Hauptkomponentenanalyse. Die Kovarianzmatrix Sigma zerlegt sich als V Lambda V transponiert. Die Hauptrichtungen sind die Spalten von V; die erklärten Varianzen sind die Eigenwerte Lambda k. Der Score z k projiziert das Datum x auf die k-te Hauptkomponente. Hotelling 1933."
+/>
+
+<aside>
+
+**Bücher, die diese Lektion abdecken**
+
+- [**Understanding Linear Algebra**](https://understandinglinearalgebra.org/chap7.html) — David Austin · §7.1–7.2 · CC-BY-SA · *Zugängliche Einführung in PCA via SVD mit numerischen Beispielen und Abbildungen; Grundlage der Türen 10-25.*
+- [**Introduction to Applied Linear Algebra (VMLS)**](https://web.stanford.edu/~boyd/vmls/) — Boyd, Vandenberghe · §10.1–10.3 · CC-BY-NC-ND · *Rigorose Behandlung von Kovarianz, Optimalität der PCA und ML-Anwendungen; Fundament der formalen Tür und 25.*
+- [**OpenIntro Statistics**](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §8.3 · CC-BY-SA · *Statistische Perspektive: erklärte Varianz, Scree-Plot, Interpretation der Komponenten; Übungen mit echten Daten.*
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Mathematische Definition">
+
+### Setup und Stichproben-Kovarianzmatrix
+
+<Definicao titulo="Zentrierte Daten und Kovarianzmatrix">
+
+Daten <Eq>{`X \\in \\mathbb{R}^{N \\times d}`}</Eq> (<Eq>{`N`}</Eq> Stichproben, <Eq>{`d`}</Eq> Features). Zentriere sie:
+
+<Equation explicacao="Das Subtrahieren des Mittelwerts von jedem Feature eliminiert die konstante Komponente und macht die Daten null-mittig." latex="\tilde{X} = X - \mathbf{1}\bar{x}^T, \quad \bar{x} = \frac{1}{N}\sum_{i=1}^N x_i" />
+
+**Stichproben-Kovarianzmatrix:**
+
+<Equation explicacao="Sigma ist symmetrisch positiv semidefinit (PSD): alle Eigenwerte sind nicht-negativ." latex="\Sigma = \frac{1}{N-1}\tilde{X}^T \tilde{X} \in \mathbb{R}^{d \times d}" />
+
+</Definicao>
+
+> "The covariance matrix $\Sigma$ is always symmetric and positive semidefinite. Its eigenvalues are nonnegative and the eigenvectors form an orthonormal basis of $\mathbb{R}^d$." — [Introduction to Applied Linear Algebra (VMLS), §10.1](https://web.stanford.edu/~boyd/vmls/)
+
+### Hauptkomponenten
+
+<Definicao titulo="PCA: Spektralzerlegung der Kovarianz">
+
+<Equation explicacao="Sigma ist diagonalisierbar (symmetrisch PSD): V orthogonal, Lambda diagonal mit Eigenwerten in absteigender Reihenfolge." latex="\Sigma = V \Lambda V^T, \quad \Lambda = \text{diag}(\lambda_1, \ldots, \lambda_d), \quad \lambda_1 \geq \cdots \geq \lambda_d \geq 0" />
+
+- **Hauptvektor** <Eq>{`k`}</Eq>: <Eq>{`v_k`}</Eq> — <Eq>{`k`}</Eq>-te Spalte von <Eq>{`V`}</Eq>.
+- **Score** der Stichprobe <Eq>{`x_i`}</Eq> auf PC <Eq>{`k`}</Eq>: <Eq>{`z_{ik} = v_k^T(x_i - \\bar{x})`}</Eq>.
+- **Erklärte Varianz** durch PC <Eq>{`k`}</Eq>: <Eq>{`\\lambda_k`}</Eq>.
+- **Anteil erklärter Varianz**: <Eq>{`\\lambda_k / \\sum_j \\lambda_j`}</Eq>.
+- **Gesamtvarianz**: <Eq>{`\\sum_j \\lambda_j = \\text{tr}(\\Sigma)`}</Eq>.
+
+</Definicao>
+
+### Optimalität
+
+<Teorema titulo="PCA maximiert projizierte Varianz (Hotelling 1933)">
+
+Die erste Hauptkomponente <Eq>{`v_1`}</Eq> ist die Richtung, die die Varianz der Projektion maximiert:
+
+<Equation explicacao="Unter allen Einheitsrichtungen ist v1 diejenige, für die die projizierten Daten die größte Varianz haben." latex="v_1 = \arg\max_{\|v\|=1} v^T \Sigma v" />
+
+Die <Eq>{`k`}</Eq>-te PC maximiert die verbleibende Varianz unter der Orthogonalität zu <Eq>{`v_1, \\ldots, v_{k-1}`}</Eq>. Dies ist ein Rayleigh-Quotient-Problem — die Lösung ist der <Eq>{`k`}</Eq>-te Eigenvektor von <Eq>{`\\Sigma`}</Eq>.
+
+</Teorema>
+
+> "The principal components are the eigenvectors of the data covariance matrix, ordered by decreasing eigenvalue. The first principal component captures the maximum variance; successive components capture maximum residual variance subject to orthogonality." — [Understanding Linear Algebra, §7.1](https://understandinglinearalgebra.org/chap7.html)
+
+### Verbindung zu SVD
+
+<Definicao titulo="PCA via SVD der zentrierten Datenmatrix">
+
+Wenn <Eq>{`\\tilde{X} = U \\Sigma_{SVD} V^T`}</Eq> (SVD der zentrierten Matrix):
+
+- **Hauptkomponenten**: Spalten von <Eq>{`V`}</Eq> (die gleichen wie die von <Eq>{`\\Sigma_{cov}`}</Eq>).
+- **Scores**: <Eq>{`Z = \\tilde{X} V = U \\Sigma_{SVD}`}</Eq>.
+- **Kovarianz-Eigenwerte**: <Eq>{`\\lambda_k = \\sigma_k^2 / (N-1)`}</Eq>.
+
+Die SVD von <Eq>{`\\tilde{X}`}</Eq> ist **numerisch stabiler** als die direkte Zerlegung von <Eq>{`\\Sigma_{cov}`}</Eq> (vermeidet die Quadrierung, die Rundungsfehler verstärkt).
+
+</Definicao>
+
+### Rekonstruktion und Approximationsfehler
+
+<Equation explicacao="Das Beibehalten von K Komponenten minimiert den mittleren quadratischen Rekonstruktionsfehler unter allen Rang-K-Projektionen (Eckart-Young auf PCA angewendet)." latex="\hat{x}_i = \bar{x} + \sum_{k=1}^K z_{ik}\, v_k" />
+
+Rekonstruktionsfehler: <Eq>{`\\frac{1}{N}\\sum_i \\|x_i - \\hat{x}_i\\|^2 = \\sum_{k > K} \\lambda_k`}</Eq>.
+
+<Insight>
+
+Das **Scree-Plot** zeigt <Eq>{`\\lambda_k`}</Eq> gegen <Eq>{`k`}</Eq>. Der "Knick" der Kurve zeigt an, wo zusätzliche Varianz pro Komponente vernachlässigbar wird. Faustregel: <Eq>{`K`}</Eq> wählen, so dass kumulierte Varianz <Eq>{`\\geq 95\\%`}</Eq> für quantitative Analyse, <Eq>{`\\geq 80\\%`}</Eq> für Visualisierung.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein 5-jähriges Kind">
+
+Stell dir vor, du hast eine **Schachtel mit Murmeln**, die auf dem Boden in Form eines **Wurst-Sticks** verstreut sind — lang in eine Richtung, dünn in die andere.
+
+**Hauptkomponente** ist einfach die **"lange Richtung des Sticks"** — die Hauptrichtung, in der die Murmeln am meisten verteilt sind.
+
+Wenn ich dich fragen würde, zu erklären, wo jede Murmel ist, mit nur **einer einzigen Zahl**, wäre die beste Zahl "wo sie entlang des Sticks liegt". Die anderen Richtungen sind viel weniger wichtig.
+
+PCA findet diesen "Stick-Achsen" automatisch, auch in 100 oder 1000 Dimensionen, wo du es nicht sehen kannst.
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein 10-jähriges Kind">
+
+Du hast Daten von **Körpergröße und Gewicht** von 1000 Personen. Jede Person ist ein Punkt in einem 2D-Diagramm. Aber Größe und Gewicht sind **stark korreliert**: große Personen wiegen tendenziell mehr.
+
+Die Punkte bilden eine **elongierte Wolke** — wie ein geneigter Wurst-Stick. PCA findet:
+
+- **Hauptrichtung**: die Richtung des Sticks (Mischung aus Höhe+Gewicht). Erfasst 90%+ der Variation.
+- **Nebenrichtung**: senkrecht dazu. Erfasst die individuellen Abweichungen.
+
+Wenn du jede Person nur auf der **Hauptrichtung** projizierst, verlierst du wenig — die meiste Variation ist dort. Du hast von 2D zu 1D reduziert.
+
+Bei realen Problemen mit 100 Features findet PCA die **5-10 Hauptrichtungen**, die fast alle Variationen erfassen. **Reduziert drastisch** die Datengröße ohne großen Informationsverlust.
+
+</Porta>
+
+<Porta nivel="15" titulo="Für einen 15-jährigen Teenager">
+
+PCA ist das am häufigsten verwendete Werkzeug für explorative Datenanalyse in der Datenwissenschaft. **Jedes Mal, wenn du "Dimensionsreduktion" hörst**, ist es wahrscheinlich PCA oder eine Variante.
+
+### 6-Schritt-Rezept
+
+1. **Sammle Daten**: Matrix <Eq>{`X \\in \\mathbb{R}^{N \\times d}`}</Eq>.
+2. **Zentriere**: subtrahiere Mittelwert von jeder Spalte: <Eq>{`\\tilde{X} = X - \\bar{X}`}</Eq>.
+3. **Berechne SVD**: <Eq>{`\\tilde{X} = U \\Sigma V^T`}</Eq> (oder Eigenzerlegung von <Eq>{`\\Sigma_{cov}`}</Eq>).
+4. **Scree-Plot**: plotte <Eq>{`\\sigma_k^2`}</Eq> gegen <Eq>{`k`}</Eq>.
+5. **Wähle <Eq>{`K`}</Eq>**: wo die Kurve "knickt" oder kumulierte Varianz <Eq>{`\\geq 95\\%`}</Eq>.
+6. **Projiziere**: <Eq>{`Z = \\tilde{X} V_K`}</Eq> sind die Scores in den <Eq>{`K`}</Eq> PCs.
+
+### Erklärte Varianz
+
+<Eq>{`\\text{ExpVar}(k) = \\lambda_k / \\sum_j \\lambda_j`}</Eq>. Kumulativ: <Eq>{`\\sum_{k=1}^K \\text{ExpVar}(k)`}</Eq>.
+
+### Wann PCA gut vs. schlecht funktioniert
+
+| Funktioniert | Funktioniert nicht |
+|---|---|
+| Korrelierte Variablen | Nicht-lineare Struktur |
+| Ähnliche Skalierungen | Starke Ausreißer (nutze Robust PCA) |
+| Zeichnungen in 2D wünschen | Klassifikation wünschen (nutze LDA) |
+
+### Klassischer Fall: Iris-Dataset (Fisher, 1936)
+
+4 Features (Blütenblatt-/Kelchblattlänge/-breite). PCA reduziert auf 2D und bewahrt 95%+ der Varianz. Die Visualisierung zeigt 3 Cluster von Arten deutlich getrennt — Fisher zeigte das bereits 1936.
+
+</Porta>
+
+<Porta nivel="25" titulo="Für einen Ingenieurstudenten">
+
+PCA ist das erste Werkzeug in jeder Daten-Pipeline. Sie tiefgreifend zu verstehen (nicht nur die Rezepte) ist essentiell.
+
+### Optimalität: Beweis mit Rayleigh-Quotient
+
+Wir wollen <Eq>{`v^* = \\arg\\max_{\\|v\\|=1} v^T \\Sigma v`}</Eq>. Nutze Lagrange-Multiplikatoren:
+
+<Eq>{`\\mathcal{L}(v, \\mu) = v^T \\Sigma v - \\mu(\\|v\\|^2 - 1)`}</Eq>
+
+Ableiten nach <Eq>{`v`}</Eq> und zu Null setzen: <Eq>{`2\\Sigma v = 2\\mu v`}</Eq>, also <Eq>{`\\Sigma v = \\mu v`}</Eq>. Daher ist <Eq>{`v^*`}</Eq> ein Eigenvektor von <Eq>{`\\Sigma`}</Eq> und das Maximum ist <Eq>{`\\mu = v^{*T} \\Sigma v^* = \\lambda_1`}</Eq> (größter Eigenwert).
+
+### Typische ML-Pipeline
+
+```
+Rohdaten → standardisieren → PCA(K Komponenten) → Modell(kNN, SVM, NN, ...)
+```
+
+Reduziert Dimensionen → reduziert Overfitting + beschleunigt Training.
+
+### Kanonische Anwendungen
+
+**Genomik**: Microarray mit 30.000 Genen × 100 Patienten. PCA reduziert auf ~10 Dimensionen → Cluster von Krebsuntertypen (Golub et al. 1999).
+
+**Finanzen**: Yield Curve — 3 PCs (Level, Slope, Curvature) erfassen ~99% der Varianz (Litterman-Scheinkman 1991). Basis des gesamten Fixed-Income-Handels.
+
+**Computer Vision**: Eigenfaces (Turk-Pentland 1991) — PCA zentrierter Gesichter → Basen für Gesichtserkennung.
+
+**Bioinformatik**: 1000 Genomes Project — PCA von Allelen zeigt geografische Struktur (Cluster pro Kontinent).
+
+### Standardisierung: klassische Falle
+
+Wenn Features unterschiedliche Skalen haben (z.B. Gehalt in R\$ vs Alter in Jahren), dominiert ohne Standardisierung das Gehalt die Varianz. Mache immer z-Score vor PCA, es sei denn, die Skalen sind bewusst vergleichbar.
+
+### Python-Code
+
+```python
+import numpy as np
+from sklearn.decomposition import PCA
+
+# Standardisieren (IMMER bei unterschiedlichen Skalen)
+X_std = (X - X.mean(axis=0)) / X.std(axis=0, ddof=1)
+
+# PCA
+pca = PCA(n_components=10)
+Z = pca.fit_transform(X_std)
+
+print("Erklärte Varianz:", pca.explained_variance_ratio_)
+print("Kumulativ:", np.cumsum(pca.explained_variance_ratio_))
+
+# Loadings (Eigenvektoren)
+print("Komponenten (Loadings):", pca.components_.shape)
+```
+
+### Orthogonalität der Scores
+
+Die PCs sind per Konstruktion orthogonal: <Eq>{`\\text{Cov}(z_j, z_k) = 0`}</Eq> für <Eq>{`j \\neq k`}</Eq>. Das eliminiert Multikollinearität — Scores können direkt als Features in linearen Modellen verwendet werden.
+
+### Wichtige Varianten
+
+| Variante | Wann nutzen |
+|---|---|
+| Kernel PCA | Nicht-lineare Struktur in Daten |
+| Sparse PCA | Interpretierbare Komponenten wünschen |
+| Robust PCA | Daten mit Ausreißern (Candès-Li-Ma-Wright) |
+| Incremental PCA | Streaming-Daten |
+| Probabilistic PCA | Fehlende Daten, Bayesian-Inferenz |
+
+</Porta>
+
+<Porta nivel="40" titulo="Für einen Profis">
+
+PCA ist nicht "nur" Dimensionsreduktion — es ist der optimale Darstellungssatz für Daten mit Struktur zweiter Momente.
+
+### Historischer Kontext
+
+Karl Pearson (1901) führte die Idee der "besten Anpassungslinien" in multivariaten Daten ein — was wir heute PC1 nennen. Harold Hotelling (1933) formalisierte die komplette Methode für mehrere Komponentenanalysen im Kontext psychometrischer Variablen. Die Verbindung zu SVD stammt von Eckart-Young (1936). Der Name "Hauptkomponentenanalyse" kommt von Hotelling.
+
+Für 50 Jahre war PCA hauptsächlich multivariate Statistik (Pearson, Fisher, Hotelling, Rao). In den 1980er-90ern transformierte die Anwendung in Computer Vision (Eigenfaces, Turk-Pentland 1991) und Signalverarbeitung PCA zum Standard-Preprocessing-Werkzeug im ML.
+
+### Verbindung zur Informationstheorie
+
+PCA minimiert verlorene Information in der Kompression, wenn "Verlust" durch mittleren quadratischen Fehler gemessen wird. Für Gaußverteilungen ist PCA **optimal** im Shannon-Sinne: maximiert Entropie der Scores bei Beibehaltung der Gesamtvarianz. Für nicht-Gaußverteilungen kann Independent Component Analysis (ICA) besser sein.
+
+### PCA und statistische Inferenz
+
+Wie viele Komponenten behalten? Formale Kriterien:
+
+- **Kaiser-Kriterium**: behalte PCs mit <Eq>{`\\lambda_k > 1`}</Eq> (Varianz über Eins, wenn Daten standardisiert).
+- **Scree-Test**: Schnitt beim sichtbaren "Knick".
+- **Marchenko-Pastur-Verteilung**: für reines Rauschen (<Eq>{`X`}</Eq> Gaußiid), folgen Eigenwerte von <Eq>{`\\Sigma_{cov}`}</Eq> der MP-Verteilung. Behalte PCs, deren <Eq>{`\\lambda_k`}</Eq> die obere Grenze dieser Verteilung überschreitet.
+- **Bootstrap**: Resample die Daten und überprüfe PC-Stabilität.
+
+### PCA und Transformers
+
+Die Multi-Head-Aufmerksamkeit von Transformers (Vaswani 2017) kann als gradientenbasiert erlernte PCA interpretiert werden: das Produkt <Eq>{`Q K^T`}</Eq> berechnet Token-Korrelationen; softmax normalisiert auf Verteilung; das Produkt mit <Eq>{`V`}</Eq> ist eine gewichtete Projektion. Im Wesentlichen lernt jeder Kopf eine Unterraum-Projektion, die PCA mit kontextabhängigen Gewichten ähnelt.
+
+Low-Rank Adaptation (LoRA, Hu 2022) — LLM-Fine-Tuning — rechtfertigt die Low-Rank-Störung <Eq>{`\\Delta W = BA`}</Eq> genau, weil vortrainierte Gewichte in einer intrinsischen Low-Dimensionsmannigfaltigkeit leben, analog zur Eckart-Young Rang-K-Approximation.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktische Anwendung">
+
+### PCA in ENEM-Mikrodaten
+
+Der ENEM hat ~200 Variablen pro Kandidat (Noten, sozioökonomischer Fragebogen, Schule). PCA der Kandidaten×Variablen-Matrix:
+
+1. **Zentriere und standardisiere** (z-Score pro Spalte).
+2. **Berechne SVD** von <Eq>{`\\tilde X`}</Eq>.
+3. **Scree-Plot**: identifiziere wie viele PCs 80%, 90%, 95% erklären.
+4. **Interpretiere PC1**: ist normalerweise der "Allgemeinleistungs-Faktor".
+5. **Interpretiere PC2**: ist normalerweise "Schultyp" (öffentlich vs privat).
+6. **Visualisiere** in 2D (PC1 × PC2): zeigt regionale und sozioökonomische Struktur.
+
+Forscher des INEP machen genau das für Gerechtigkeitsberichte.
+
+### PCA in Portfolio-Management
+
+Gegeben <Eq>{`n`}</Eq> Aktien mit täglichen Renditen:
+
+1. Berechne Korrelationsmatrix <Eq>{`R`}</Eq> (Kovarianz standardisierter Renditen).
+2. PCA von <Eq>{`R`}</Eq>: PC1 ist normalerweise der "Markt" (alle korreliert).
+3. PC2 kann "Sektor" sein (Finanzen vs Technologie vs Rohstoffe).
+4. **Nicht-systematisches Risiko**: Varianz erklärt von letzten PCs.
+5. **Hedge**: Short in PC1 eliminiert Marktrisiko (Beta-Hedge).
+
+Institutionelle Manager (Banken, Fonds) nutzen PCA für **Risikoattribution** — zerlegen Portfolio-Risiko in systematische Komponenten (PCs) und idiosynkratische.
+
+</Porta>
+
+</DuasPortas>
+
+## Gelöste Beispiele
+
+<Exemplo titulo="PCA eines einfachen 3D-Datensatzes" numero="1">
+
+**Problem.** Gegeben <Eq>{`\\tilde{X} = \\begin{pmatrix} 2 & 0 & 0 \\\\ 0 & 1 & 1 \\\\ 0 & -1 & -1 \\\\ -2 & 0 & 0 \\end{pmatrix}`}</Eq> (4 Stichproben, 3 Features, bereits zentriert), berechne die Kovarianzmatrix, die Eigenwerte und die erklärte Varianz.
+
+**Strategie.** Berechne <Eq>{`\\Sigma = \\tilde{X}^T \\tilde{X} / (N-1)`}</Eq> und zerlege sie.
+
+**Lösung.**
+
+<Eq>{`\\tilde{X}^T \\tilde{X} = \\begin{pmatrix} 8 & 0 & 0 \\\\ 0 & 2 & 2 \\\\ 0 & 2 & 2 \\end{pmatrix}`}</Eq>. Mit <Eq>{`N - 1 = 3`}</Eq>: <Eq>{`\\Sigma = \\begin{pmatrix} 8/3 & 0 & 0 \\\\ 0 & 2/3 & 2/3 \\\\ 0 & 2/3 & 2/3 \\end{pmatrix}`}</Eq>.
+
+Eigenwerte: <Eq>{`\\lambda_1 = 8/3`}</Eq>, <Eq>{`\\lambda_2 = 4/3`}</Eq>, <Eq>{`\\lambda_3 = 0`}</Eq>. Gesamtvarianz: <Eq>{`8/3 + 4/3 = 4`}</Eq>.
+
+Erklärte Varianz: PC1 = 8/3 / 4 = 66,7%; PC2 = 4/3 / 4 = 33,3%; PC3 = 0%.
+
+**Verifikation.** <Eq>{`\\text{tr}(\\Sigma) = 8/3 + 2/3 + 2/3 = 12/3 = 4 = \\lambda_1 + \\lambda_2 + \\lambda_3`}</Eq>. ✓ Mit 2 PCs wird 100% erklärt — die Daten leben in einer 2D-Ebene.
+
+**Quelle.** [Understanding Linear Algebra, §7.1 Übung 7.1.1](https://understandinglinearalgebra.org/chap7.html) — David Austin · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Berechnung von Scores und Rekonstruktion" numero="2">
+
+**Problem.** Zweidimensionale zentrierte Daten mit Kovarianz <Eq>{`\\Sigma = \\begin{pmatrix} 4 & 2 \\\\ 2 & 1 \\end{pmatrix}`}</Eq>. Finde die PCs, berechne den Score der Stichprobe <Eq>{`x = (2, 1)^T`}</Eq> auf PC1, und rekonstruiere mit 1 Komponente.
+
+**Strategie.** Eigenzerlegung von <Eq>{`\\Sigma`}</Eq>, dann Projektion und Rekonstruktion.
+
+**Lösung.**
+
+Charakteristisches Polynom: <Eq>{`(4 - \\lambda)(1 - \\lambda) - 4 = 0`}</Eq>, also <Eq>{`\\lambda^2 - 5\\lambda = 0`}</Eq>, ergibt <Eq>{`\\lambda_1 = 5`}</Eq> und <Eq>{`\\lambda_2 = 0`}</Eq>.
+
+Eigenvektor von <Eq>{`\\lambda_1 = 5`}</Eq>: <Eq>{`v_1 = (1/\\sqrt{5})(2, 1)^T`}</Eq>.
+
+Score von <Eq>{`x = (2,1)^T`}</Eq> auf PC1: <Eq>{`z_1 = v_1^T x = (2 \\cdot 2 + 1 \\cdot 1)/\\sqrt{5} = 5/\\sqrt{5} = \\sqrt{5}`}</Eq>.
+
+Rekonstruktion mit 1 Komponente: <Eq>{`\\hat x = z_1 v_1 = \\sqrt{5} \\cdot (1/\\sqrt{5})(2,1)^T = (2,1)^T`}</Eq>.
+
+**Verifikation.** Rekonstruktionsfehler Null — das Datum <Eq>{`x`}</Eq> liegt exakt im Unterraum von PC1 (da <Eq>{`\\lambda_2 = 0`}</Eq>, Daten sind degeneriert). ✓
+
+**Quelle.** [Introduction to Applied Linear Algebra (VMLS), §10.2](https://web.stanford.edu/~boyd/vmls/) — Boyd, Vandenberghe · CC-BY-NC-ND.
+
+</Exemplo>
+
+<Exemplo titulo="Erklärte Varianz und Scree-Plot" numero="3">
+
+**Problem.** Eine PCA-Analyse von 50 Variablen ergibt die 5 größten Eigenwerte: 15, 8, 4, 2, 1. Gesamtvarianz = 50 (standardisierte Daten, jede Variable hat Varianz 1). Berechne: (a) Varianz erklärt von jeder PC; (b) kumulierte Varianz; (c) welches K für 90% wählen.
+
+**Strategie.** Einfache Proportionen, dann kumulierte Summe.
+
+**Lösung.**
+
+(a) ExpVar(k): 15/50 = 30%, 8/50 = 16%, 4/50 = 8%, 2/50 = 4%, 1/50 = 2%.
+
+(b) Kumuliert: 30%, 46%, 54%, 58%, 60%.
+
+(c) Nach 5 PCs, kumulativ = 60% — nicht ausreichend für 90%. Die anderen 45 PCs summieren 40%. Für 90% würden wir wahrscheinlich ~15-20 PCs brauchen (hängt von der Verteilung der restlichen Eigenwerte ab).
+
+**Verifikation.** Summe der 5 Teile = 60%, konsistent mit verbleibender Varianz von 40%. ✓
+
+**Quelle.** [OpenIntro Statistics, §8.3 Übung 8.27](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="PCA via SVD und Verbindung zur Kovarianz" numero="4">
+
+**Problem.** Zeige, dass die PCs, die via SVD von <Eq>{`\\tilde X`}</Eq> erhalten werden, identisch mit denen aus Eigenzerlegung von <Eq>{`\\Sigma = \\tilde X^T \\tilde X / (N-1)`}</Eq> sind. Identifiziere wie Singulärwerte von <Eq>{`\\tilde X`}</Eq> mit Eigenwerten von <Eq>{`\\Sigma`}</Eq> zusammenhängen.
+
+**Strategie.** Nutze <Eq>{`\\tilde X = U \\Sigma_{SVD} V^T`}</Eq> und ersetze in <Eq>{`\\Sigma`}</Eq>.
+
+**Lösung.**
+
+<Eq>{`\\Sigma_{cov} = \\frac{1}{N-1} \\tilde X^T \\tilde X = \\frac{1}{N-1}(V \\Sigma_{SVD}^T U^T)(U \\Sigma_{SVD} V^T)`}</Eq>
+
+<Eq>{`= \\frac{1}{N-1} V \\Sigma_{SVD}^T \\Sigma_{SVD} V^T = V \\cdot \\frac{\\Sigma_{SVD}^2}{N-1} \\cdot V^T`}</Eq>
+
+Daher: Eigenwerte von <Eq>{`\\Sigma_{cov}`}</Eq> sind <Eq>{`\\lambda_k = \\sigma_k^2/(N-1)`}</Eq>, und die Eigenvektoren (Spalten von <Eq>{`V`}</Eq>) sind genau die rechten Singularvektoren von <Eq>{`\\tilde X`}</Eq>.
+
+**Verifikation.** Die Relation <Eq>{`\\lambda_k = \\sigma_k^2/(N-1)`}</Eq> ist konsistent: wenn <Eq>{`\\sigma_k \\to 0`}</Eq>, dann <Eq>{`\\lambda_k \\to 0`}</Eq> (PC ohne Varianz). ✓
+
+**Quelle.** [Introduction to Applied Linear Algebra (VMLS), §10.3](https://web.stanford.edu/~boyd/vmls/) — Boyd, Vandenberghe · CC-BY-NC-ND.
+
+</Exemplo>
+
+<Exemplo titulo="PCA angewendet auf brasilianische Aktienrenditen" numero="5">
+
+**Problem.** Du hast tägliche Renditen von 5 B3-Aktien (PETR4, VALE3, ITUB4, BBDC4, WEGE3) über 252 Tage. Die Kovarianzmatrix (annualisiert, in %) ist:
+
+<Eq>{`\\Sigma = \\begin{pmatrix} 45 & 20 & 12 & 11 & 8 \\\\ 20 & 38 & 10 & 9 & 6 \\\\ 12 & 10 & 22 & 14 & 5 \\\\ 11 & 9 & 14 & 20 & 4 \\\\ 8 & 6 & 5 & 4 & 15 \\end{pmatrix}`}</Eq>
+
+Die 3 größten Eigenwerte sind ungefähr 82, 23, 11. Berechne: (a) Gesamtvarianz; (b) Varianz erklärt durch die 3 PCs; (c) ökonomische Interpretation.
+
+**Strategie.** Gesamtvarianz = Spur von <Eq>{`\\Sigma`}</Eq>; erklärte Varianz = Anteil der Eigenwerte.
+
+**Lösung.**
+
+(a) Gesamtvarianz: <Eq>{`\\text{tr}(\\Sigma) = 45 + 38 + 22 + 20 + 15 = 140`}</Eq>.
+
+(b) 3 PCs erklären: <Eq>{`(82 + 23 + 11)/140 = 116/140 \\approx 82{,}9\\%`}</Eq>.
+
+(c) PC1 (82/140 = 58,6%): positiv korreliert mit allen Aktien — Marktfaktor ("Beta"). PC2 (23/140 = 16,4%): wahrscheinlich unterscheidet Rohstoffe (PETR4, VALE3) von Finanzwerten (ITUB4, BBDC4). PC3: verbleibende idiosynkratische Risiken.
+
+**Verifikation.** 3 der 5 Komponenten erklären 82,9% — konsistent mit empirischen Studien von brasilianischen Yield Curves mit Dominanz der ersten PCs.
+
+**Quelle.** [OpenIntro Statistics, §8.3](https://www.openintro.org/book/os/) — Diez et al. · CC-BY-SA. Kovarianzstruktur motiviert durch empirische Ergebnisse von Schwellenländer-Märkten.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-118-pca">
+
+<Exercicio
+  numero="118.1"
+  dificuldade="compreensao"
+  solucao={<>Zentrieren eliminiert die konstante Komponente der Daten — ohne Zentrierung zeigt PC1 auf den Mittelwert, nicht auf die Richtung maximaler Varianz. Nach dem Zentrieren erfasst der erste Eigenvektor von <Eq>{`\\Sigma`}</Eq> genau die Richtung größten Ausbrei tungs.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.1", pagina: "341", exercicio: "7.1.2", licenca: "CC-BY-SA" }}
+>
+Warum ist es notwendig, die Daten zu zentrieren (den Mittelwert abzuziehen), bevor PCA angewendet wird?
+</Exercicio>
+
+<Exercicio
+  numero="118.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\Sigma = \\begin{pmatrix} 4 & 6 \\\\ 6 & 9 \\end{pmatrix}`}</Eq>. Eigenwerte: <Eq>{`\\text{tr} = 13`}</Eq>, <Eq>{`\\det = 0`}</Eq>. Daher <Eq>{`\\lambda_1 = 13`}</Eq>, <Eq>{`\\lambda_2 = 0`}</Eq>. PC1 = Eigenvektor von <Eq>{`\\lambda_1`}</Eq>: löse <Eq>{`(\\Sigma - 13I)v = 0`}</Eq>: <Eq>{`v_1 = (1/\\sqrt{13})(2,3)^T`}</Eq>. Erklärte Varianz: 100% in PC1.</>}
+  passos={<><ol><li>Berechne <Eq>{`\\Sigma = \\tilde X^T \\tilde X / (N-1)`}</Eq>.</li><li>Berechne Spur und Determinante von <Eq>{`\\Sigma`}</Eq>.</li><li>Eigenwerte via Formel: <Eq>{`\\lambda = (\\text{tr} \\pm \\sqrt{\\text{tr}^2 - 4\\det})/2`}</Eq>.</li><li>Eigenvektor von <Eq>{`\\lambda_1`}</Eq>: löse <Eq>{`(\\Sigma - \\lambda_1 I)v = 0`}</Eq>.</li><li><em>Trick:</em> det = 0 bedeutet, dass Daten auf einer Linie live (Anpassungslinie) — PCA findet diese Linie exakt.</li></ol></>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.1", pagina: "342", exercicio: "7.1.3", licenca: "CC-BY-SA" }}
+>
+Gegeben <Eq>{`\\tilde X = \\begin{pmatrix} 2 & 3 \\\\ -2 & -3 \\end{pmatrix}`}</Eq>, berechne die Kovarianz und die Hauptkomponenten.
+</Exercicio>
+
+<Exercicio
+  numero="118.3"
+  dificuldade="aplicacao"
+  solucao={<>Gesamtvarianz = <Eq>{`\\text{tr}(\\Sigma) = \\sum_k \\lambda_k`}</Eq>. Varianz erklärt durch PC <Eq>{`k`}</Eq>: <Eq>{`\\lambda_k / \\text{tr}(\\Sigma)`}</Eq>. Für <Eq>{`\\lambda = (10, 5, 3, 1, 1)`}</Eq>: Total = 20. ExpVar: 50%, 25%, 15%, 5%, 5%. Kumulativ: 50%, 75%, 90%, 95%, 100%. Für 90%: K = 3.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "382", exercicio: "8.25", licenca: "CC-BY-SA" }}
+>
+Eigenwerte von <Eq>{`\\Sigma`}</Eq>: <Eq>{`10, 5, 3, 1, 1`}</Eq>. Berechne die Varianz erklärt von jeder PC und die Kumulativwerte. Für welches <Eq>{`K`}</Eq> erreicht die kumulierte Varianz 90%?
+</Exercicio>
+
+<Exercicio
+  numero="118.4"
+  dificuldade="aplicacao"
+  solucao={<>Score von <Eq>{`x = (3, -1)^T`}</Eq> auf PC1 <Eq>{`v_1 = (1/\\sqrt{2})(1,1)^T`}</Eq>: <Eq>{`z_1 = v_1^T x = (3 + (-1))/\\sqrt{2} = 2/\\sqrt{2} = \\sqrt{2}`}</Eq>. Score auf PC2 <Eq>{`v_2 = (1/\\sqrt{2})(1,-1)^T`}</Eq>: <Eq>{`z_2 = (3 - (-1))/\\sqrt{2} = 4/\\sqrt{2} = 2\\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.2", pagina: "195", exercicio: "10.2", licenca: "CC-BY-NC-ND" }}
+>
+PCs eines 2D-Datensatzes: <Eq>{`v_1 = (1,1)^T/\\sqrt{2}`}</Eq>, <Eq>{`v_2 = (1,-1)^T/\\sqrt{2}`}</Eq>. Berechne die Scores von <Eq>{`x = (3,-1)^T`}</Eq> in beiden Komponenten.
+</Exercicio>
+
+<Exercicio
+  numero="118.5"
+  dificuldade="aplicacao"
+  solucao={<>Rekonstruktion mit K = 1: <Eq>{`\\hat x = \\bar x + z_1 v_1`}</Eq>. Wenn <Eq>{`\\bar x = 0`}</Eq> (zentrierte Daten), <Eq>{`\\hat x = z_1 v_1 = \\sqrt{2} \\cdot (1,1)^T/\\sqrt{2} = (1,1)^T`}</Eq>. Fehler: <Eq>{`\\|x - \\hat x\\| = \\|(3,-1)^T - (1,1)^T\\| = \\|(2,-2)^T\\| = 2\\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.2", pagina: "196", exercicio: "10.3", licenca: "CC-BY-NC-ND" }}
+>
+Nutze die Daten der vorherigen Übung, rekonstruiere <Eq>{`x = (3,-1)^T`}</Eq> mit nur PC1. Wie groß ist der Rekonstruktionsfehler?
+</Exercicio>
+
+<Exercicio
+  numero="118.6"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "SVD von X zentriert ist numerisch stabiler: vermeidet die Quadrierung, die Rundungsfehler beim Berechnen von X^T X verstärkt", correta: true },
+    { texto: "SVD von X zentriert ist langsamer als Eigenzerlegung von Sigma" },
+    { texto: "Eigenzerlegung von Sigma gibt andere PCs als SVD von X" },
+    { texto: "SVD von X zentriert funktioniert nur wenn X quadratisch ist" }
+  ]}
+  solucao={<>Die Berechnung von <Eq>{`\\Sigma = \\tilde X^T \\tilde X/(N-1)`}</Eq> und dann Eigenzerlegung ist mathematisch äquivalent zu SVD von <Eq>{`\\tilde X`}</Eq>, aber numerisch inferior: die Bildung von <Eq>{`\\tilde X^T \\tilde X`}</Eq> quadriert die Konditionszahl. SVD von <Eq>{`\\tilde X`}</Eq> ist der industrielle Standard (von sklearn verwendet).</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.3", pagina: "198", exercicio: "10.5", licenca: "CC-BY-NC-ND" }}
+>
+Warum ist es vorzuziehen, PCA via SVD der Datenmatrix <Eq>{`\\tilde X`}</Eq> zu berechnen anstatt <Eq>{`\\Sigma`}</Eq> direkt zu eigenzerlegten?
+</Exercicio>
+
+<Exercicio
+  numero="118.7"
+  dificuldade="aplicacao"
+  solucao={<>Eigenwerte von <Eq>{`\\Sigma = \\begin{pmatrix} 9 & 3 \\\\ 3 & 1 \\end{pmatrix}`}</Eq>: <Eq>{`\\text{tr} = 10`}</Eq>, <Eq>{`\\det = 9 - 9 = 0`}</Eq>. Daher <Eq>{`\\lambda_1 = 10`}</Eq>, <Eq>{`\\lambda_2 = 0`}</Eq>. Rang der Kovarianz = 1. PC1 = <Eq>{`(3,1)^T/\\sqrt{10}`}</Eq>. 100% der Varianz in PC1.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.1", pagina: "344", exercicio: "7.1.5", licenca: "CC-BY-SA" }}
+>
+Berechne die PCs von <Eq>{`\\Sigma = \\begin{pmatrix} 9 & 3 \\\\ 3 & 1 \\end{pmatrix}`}</Eq>. Welche Varianz wird durch jede Komponente erklärt?
+</Exercicio>
+
+<Exercicio
+  numero="118.8"
+  dificuldade="aplicacao"
+  solucao={<>Mit standardisierten Daten ist <Eq>{`\\Sigma`}</Eq> die Korrelationsmatrix: Diagonale = 1. Gesamtvarianz = d = Anzahl Features. PC mit <Eq>{`\\lambda_k > 1`}</Eq> erklärt mehr Varianz als ein einzelnes Original-Feature — Kaiser-Kriterium. Behalte PCs mit <Eq>{`\\lambda_k > 1`}</Eq> ist eine konservative aber weit verbreitete Heuristik.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "383", exercicio: "8.26", licenca: "CC-BY-SA" }}
+>
+Mit standardisierten Daten (z-Score), wie groß ist die Gesamtvarianz? Was bedeutet das Kaiser-Kriterium, nur PCs mit Eigenwert größer als 1 zu behalten?
+</Exercicio>
+
+<Exercicio
+  numero="118.9"
+  dificuldade="aplicacao"
+  passos={<><ol><li>Wenn Daten 3 PCs mit Varianz 5, 3, 2 und Total 10 haben, ExpVar = 50%, 30%, 20%.</li><li>Kumulierte Varianz mit K = 2: 80%.</li><li>Rekonstruktionsfehler mit K = 2: <Eq>{`\\lambda_3 = 2`}</Eq> (Summe der Varianzen der verworfenen PCs).</li><li><em>Trick:</em> Rekonstruktionsfehler ist immer die Summe der Varianzen der verworfenen PCs.</li></ol></>}
+  solucao={<>Mittlerer quadratischer Rekonstruktionsfehler beim Behalten von K PCs: <Eq>{`\\sum_{k > K} \\lambda_k`}</Eq>. Für <Eq>{`(5, 3, 2)`}</Eq>: mit K = 2, Fehler = 2; mit K = 1, Fehler = 3 + 2 = 5.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.2", pagina: "197", exercicio: "10.4", licenca: "CC-BY-NC-ND" }}
+>
+Datensatz mit Eigenwerten <Eq>{`5, 3, 2`}</Eq> (Total 10). Berechne den mittleren quadratischen Rekonstruktionsfehler beim Behalten von K = 1 und K = 2 Komponenten.
+</Exercicio>
+
+<Exercicio
+  numero="118.10"
+  dificuldade="modelagem"
+  solucao={<>PC1 von Aktienrenditen ist normalerweise der Marktfaktor: alle Renditen sind positiv korreliert. Loadings von ähnlicher Größe deuten auf den "Beta"-Faktor des Marktes hin. Hohes Beta = Aktie volatiler als Markt; niedriges Beta = weniger volatil. Subtrahiere die PC1-Komponente aus einem Portfolio = neutralisiere Marktrisiko (Market-Neutral-Strategie).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "385", exercicio: "8.30", licenca: "CC-BY-SA" }}
+>
+PCA von Renditen von 10 Aktien ergab PC1 mit positivem Loading von ähnlicher Größe für alle Aktien. Was repräsentiert PC1 ökonomisch? Wie würde ein Portfolio-Manager diese Information nutzen?
+</Exercicio>
+
+<Exercicio
+  numero="118.11"
+  dificuldade="aplicacao"
+  solucao={<>Relation: <Eq>{`\\lambda_k = \\sigma_k^2 / (N - 1)`}</Eq>. Für <Eq>{`N = 101`}</Eq>, <Eq>{`N - 1 = 100`}</Eq>. Wenn <Eq>{`\\sigma_1 = 20`}</Eq>: <Eq>{`\\lambda_1 = 400/100 = 4`}</Eq>. Wenn <Eq>{`\\sigma_2 = 10`}</Eq>: <Eq>{`\\lambda_2 = 100/100 = 1`}</Eq>. Varianz erklärt durch PC1: <Eq>{`\\lambda_1/(\\lambda_1 + \\lambda_2) = 4/5 = 80\\%`}</Eq>.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.2", pagina: "350", exercicio: "7.2.2", licenca: "CC-BY-SA" }}
+>
+SVD von <Eq>{`\\tilde X`}</Eq> mit <Eq>{`N = 101`}</Eq> Stichproben ergab Singulärwerte <Eq>{`\\sigma_1 = 20, \\sigma_2 = 10`}</Eq>. Berechne die entsprechenden Eigenwerte der Kovarianz und die Varianz erklärt durch PC1.
+</Exercicio>
+
+<Exercicio
+  numero="118.12"
+  dificuldade="compreensao"
+  solucao={<>PCs sind per Konstruktion orthogonal (Eigenvektoren symmetrischer Matrizen zu verschiedenen Eigenwerten sind orthogonal). Scores <Eq>{`z_j = v_j^T \\tilde x`}</Eq> und <Eq>{`z_k = v_k^T \\tilde x`}</Eq> haben Kovarianz Null: <Eq>{`\\text{Cov}(z_j, z_k) = v_j^T \\Sigma v_k = \\lambda_k v_j^T v_k = 0`}</Eq>. Scores sind unkorreliert — das eliminiert Multikollinearität in nachfolgenden Modellen.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.1", pagina: "193", exercicio: "10.1", licenca: "CC-BY-NC-ND" }}
+>
+Beweise, dass die Scores verschiedener Hauptkomponenten untereinander unkorreliert sind.
+</Exercicio>
+
+<Exercicio
+  numero="118.13"
+  dificuldade="aplicacao"
+  solucao={<>Für <Eq>{`d = 50`}</Eq> standardisierte Features, Gesamtvarianz = 50. Mit K = 10 PCs und absteigenden Eigenwerten: wenn die 10 ersten <Eq>{`50 \\times 0{,}95 = 47{,}5`}</Eq> summieren, dann kumulierte Varianz = 95%. Parameteranzahl für PCA von Rang K: <Eq>{`Kd + K`}</Eq> (Loadings + Varianzen) vs <Eq>{`d^2`}</Eq> für vollständige Kovarianz. Große Einsparung.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.2", pagina: "352", exercicio: "7.2.4", licenca: "CC-BY-SA" }}
+>
+Ein Datensatz hat 50 standardisierte Features. Mit K = 10 PCs, die 95% der Varianz erfassen, wie viele Parameter sind notwendig, um die Kovarianz via Rang-K-PCA gegenüber vollständiger Kovarianz zu repräsentieren?
+</Exercicio>
+
+<Exercicio
+  numero="118.14"
+  dificuldade="modelagem"
+  solucao={<>Level, Slope, Curvature sind die 3 ersten PCs der Yield Curve (Litterman-Scheinkman 1991). Level: alle Yields steigen/fallen zusammen (PC1 mit einheitlichen positiven Loadings). Slope: kurze Maturität fällt, lange steigt (PC2 mit anwachsenden Loadings). Curvature: Extremwerte steigen, Mitte fällt — "Bogen-Form" (PC3). Diese 3 Faktoren erklären ~99% der täglichen Varianz der amerikanischen und brasilianischen Zinsstruktur.</>}
+  passos={<><ol><li>Konstruiere Matrix tägl icher Yields: Zeilen = Tage, Spalten = Maturitäten (1m, 3m, 1a, 2a, 5a, 10a, 30a).</li><li>Zentriere pro Maturität und appliziere PCA.</li><li>PC1: Loading fast konstant über alle Maturitäten.</li><li>PC2: Loading anwachsend (negativ bei kurz, positiv bei lang).</li><li>PC3: Loading in U-Form (Spitzen an Enden, Tal in Mitte).</li><li><em>Kurioses:</em> Fixed-Income-Manager nennen diese Faktoren "Level, Slope und Curvature" des Portfolios.</li></ol></>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "386", exercicio: "8.31", licenca: "CC-BY-SA" }}
+>
+Erkläre, was die 3 ersten PCs der brasilianischen Zinsstruktur repräsentieren. Warum erklären diese 3 Faktoren ~99% der Varianz?
+</Exercicio>
+
+<Exercicio
+  numero="118.15"
+  dificuldade="aplicacao"
+  solucao={<>Standardisierung macht <Eq>{`\\Sigma`}</Eq> zur Korrelationsmatrix (Diagonale = 1). Ohne Standardisierung dominieren Features mit größerer Varianz die PCs — PC1 ist im wesentlichen die Feature mit größter Skalierung. Mit Standardisierung gewichtet PCA gleichmäßig die Korrelationsstruktur. Empfehlung: standardisiere IMMER wenn Features unterschiedliche Skalen haben; nicht standardisieren nur wenn die Skaladifferenzen absichtlich und vergleichbar sind.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.1", pagina: "345", exercicio: "7.1.6", licenca: "CC-BY-SA" }}
+>
+Erkläre den Unterschied zwischen PCA mit und ohne vorherige Standardisierung (z-Score). Wann solltest du NICHT standardisieren?
+</Exercicio>
+
+<Exercicio
+  numero="118.16"
+  dificuldade="demonstracao"
+  solucao={<>Beweis: sei <Eq>{`P_K = V_K V_K^T`}</Eq> der orthogonale Projektor auf den Raum der K PCs. Quadratischer Fehler: <Eq>{`\\frac{1}{N}\\sum_i \\|\\tilde x_i - P_K \\tilde x_i\\|^2 = \\frac{1}{N}\\|\\tilde X - \\tilde X P_K^T\\|_F^2`}</Eq>. Nach Eckart-Young auf <Eq>{`\\tilde X`}</Eq> wird das Minimum erreicht wenn die K Spalten von <Eq>{`P_K`}</Eq> die K ersten Singularvektoren sind — die sind die K ersten PCs. Minimum = <Eq>{`\\sum_{k > K} \\sigma_k^2/(N-1) = \\sum_{k > K} \\lambda_k`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.3", pagina: "200", exercicio: "10.7", licenca: "CC-BY-NC-ND" }}
+>
+Zeige, dass die Projektion auf die K ersten PCs den mittleren quadratischen Rekonstruktionsfehler unter allen linearen Rang-K-Projektionen minimiert. Wie groß ist der Minimalfehler in Termen der Eigenwerte?
+</Exercicio>
+
+<Exercicio
+  numero="118.17"
+  dificuldade="aplicacao"
+  solucao={<>Scree-Plot: plotte <Eq>{`\\lambda_k`}</Eq> (y-Achse) gegen <Eq>{`k`}</Eq> (x-Achse). Der "Knick" ist wo die Kurve von steil zu flach wechselt — zeigt an wo PCs dahinter wenig beitragen. Für <Eq>{`\\lambda = (12, 8, 3, 1, 1, 1, 1, 1)`}</Eq> (insgesamt 28): der Knick liegt zwischen k = 2 und k = 3 (von 8 zu 3 ist großer Sprung). Behalte 2 PCs: 71% erklärte Varianz. Behalte 3: 82%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "384", exercicio: "8.28", licenca: "CC-BY-SA" }}
+>
+Eigenwerte in absteigender Reihenfolge: 12, 8, 3, 1, 1, 1, 1, 1. Konstruiere mental den Scree-Plot und identifiziere den "Knick". Wie viele PCs solltest du behalten für 80% Varianz?
+</Exercicio>
+
+<Exercicio
+  numero="118.18"
+  dificuldade="modelagem"
+  solucao={<>Eigenfaces: PCA von zentrierten Gesichtern (jedes Gesicht = Pixel-Vektor). PC1 = "durchschnittliches Gesicht mit maximaler Variation". Die K PCs bilden Basis für Erkennung: projiziere neues Gesicht in PCA-Raum und miss Abstand zum nächsten Gesicht. Mit K = 50-100 PCs, hohe Genauigkeitsrate auch mit N = 400 Bildern von 100x100 Pixeln. Original-Dimension: 10000. Reduziert: 50-100. Kompressionsfaktor 100-200x.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.2", pagina: "354", exercicio: "7.2.6", licenca: "CC-BY-SA" }}
+>
+Beschreibe die Eigenfaces-Methode (Turk-Pentland 1991) für Gesichtserkennung mittels PCA. Welche Dimensionaliät wird im Vergleich zu Original-Pixeln erreicht?
+</Exercicio>
+
+<Exercicio
+  numero="118.19"
+  dificuldade="aplicacao"
+  solucao={<>ICA (Independent Component Analysis) vs PCA: PCA findet Richtungen maximaler Varianz (zweiter Moment), ICA findet statistisch unabhängige Komponenten (alle Momente). PCA nimmt an zweiter Moment ist ausreichend (Gaussianität). ICA ist notwendig wenn latente Komponenten nicht-Gaußverteilungen haben — z.B. blinde Signal-Trennung (Cocktail-Party-Problem), fMRI-Analyse (neuronale Signale nicht-Gaußsch).</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.1", pagina: "194", exercicio: "10.6", licenca: "CC-BY-NC-ND" }}
+>
+Was ist der konzeptuelle Unterschied zwischen PCA und ICA (Independent Component Analysis)? In welcher Art Problem ist ICA notwendig?
+</Exercicio>
+
+<Exercicio
+  numero="118.20"
+  dificuldade="aplicacao"
+  solucao={<>Wenn <Eq>{`\\Sigma = I`}</Eq> (Identität — alle Features unabhängig und gleiche Varianz), sind alle Eigenwerte gleich 1 und jede orthonormale Basis ist gleich gut als Satz von PCs. PCA reduziert Dimensionen nicht — es gibt keine "wichtigeren Richtungen". Das zeigt Daten sind bereits dekommen: es gibt keine Kovarianzstruktur zu exploitieren.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.1", pagina: "346", exercicio: "7.1.7", licenca: "CC-BY-SA" }}
+>
+Was passiert wenn die Kovarianzmatrix die Identität ist (<Eq>{`\\Sigma = I`}</Eq>)? Was impliziert das für PCA und Dimensionsreduktion?
+</Exercicio>
+
+<Exercicio
+  numero="118.21"
+  dificuldade="demonstracao"
+  solucao={<>Beweis der Orthogonalität von PCs für verschiedene Eigenwerte: seien <Eq>{`\\Sigma v_1 = \\lambda_1 v_1`}</Eq> und <Eq>{`\\Sigma v_2 = \\lambda_2 v_2`}</Eq> mit <Eq>{`\\lambda_1 \\neq \\lambda_2`}</Eq>. Dann <Eq>{`\\lambda_1 v_1^T v_2 = (\\Sigma v_1)^T v_2 = v_1^T \\Sigma^T v_2 = v_1^T \\Sigma v_2 = \\lambda_2 v_1^T v_2`}</Eq>. Daher <Eq>{`(\\lambda_1 - \\lambda_2) v_1^T v_2 = 0`}</Eq>. Da <Eq>{`\\lambda_1 \\neq \\lambda_2`}</Eq>, dann <Eq>{`v_1^T v_2 = 0`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.1", pagina: "192", exercicio: "10.0", licenca: "CC-BY-NC-ND" }}
+>
+Beweise, dass Eigenvektoren einer symmetrischen Matrix zu verschiedenen Eigenwerten orthogonal sind. Nutze dies um die Orthogonalität der PCs zu rechtfertigen.
+</Exercicio>
+
+<Exercicio
+  numero="118.22"
+  dificuldade="modelagem"
+  solucao={<>Biplot PCA: zeigt gleichzeitig die Scores (Stichproben projiziert auf PC1/PC2) und Loadings (Pfeile der Features auf PC1/PC2). Features mit langem Pfeil = hohe Varianz in jenen Richtungen. Features mit parallelen Pfeilen = hoch korreliert. Stichproben geclustert = Cluster. Pfeil zeigend auf Stichproben-Gruppe = das Feature ist hoch in diesen Stichproben. Standard-Tool für explorative Analyse.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "388", exercicio: "8.33", licenca: "CC-BY-SA" }}
+>
+Erkläre was ein Biplot von PCA zeigt. Wie interpretierst du Richtung und Länge der Feature-Pfeile und die Position der Stichproben?
+</Exercicio>
+
+<Exercicio
+  numero="118.23"
+  dificuldade="aplicacao"
+  solucao={<>Robust PCA (Candès-Li-Ma-Wright 2011): zerlegt <Eq>{`M = L + S`}</Eq> wo <Eq>{`L`}</Eq> niedrig-rang (klassische PCA) und <Eq>{`S`}</Eq> dünn besetzt (Ausreißer). Minimiere <Eq>{`\\|L\\|_* + \\lambda \\|S\\|_1`}</Eq> (Kern + L1-Norm). Klassische PCA ist sensibel für Ausreißer weil sie L2-Quadrat-Norm minimiert — ein großer Ausreißer dominiert PC1.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.2", pagina: "356", exercicio: "7.2.8", licenca: "CC-BY-SA" }}
+>
+Warum ist klassische PCA sensibel für Ausreißer? Wie geht Robust PCA mit diesem Problem um?
+</Exercicio>
+
+<Exercicio
+  numero="118.24"
+  dificuldade="aplicacao"
+  solucao={<>Gesamtvarianz mit standardisierten Daten = d = 100. Nach PCA mit K = 5 PCs erklärend 80%: erfasste Varianz = 80. Zur Kompression: speichere Scores <Eq>{`Z \\in \\mathbb{R}^{N \\times 5}`}</Eq> und Loadings <Eq>{`V_K \\in \\mathbb{R}^{100 \\times 5}`}</Eq> und Mittelwert <Eq>{`\\bar x \\in \\mathbb{R}^{100}`}</Eq>. Gesamt: <Eq>{`N \\times 5 + 100 \\times 5 + 100`}</Eq> Floats vs <Eq>{`N \\times 100`}</Eq> Original. Für <Eq>{`N = 1000`}</Eq>: <Eq>{`5100 + 100 = 5600`}</Eq> vs <Eq>{`100000`}</Eq> — 18x Faktor.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.2", pagina: "198", exercicio: "10.4b", licenca: "CC-BY-NC-ND" }}
+>
+Datensatz: N = 1000 Stichproben, d = 100 standardisierte Features. PCA mit K = 5 PCs erklärt 80% der Varianz. Berechne den Kompressionsfaktor von Daten (Verhältnis zwischen Original- und PCA-Repräsentations-Speicherung).
+</Exercicio>
+
+<Exercicio
+  numero="118.25"
+  dificuldade="desafio"
+  solucao={<>Kernel PCA: ersetze das Skalarprodukt <Eq>{`x_i^T x_j`}</Eq> mit Kernel <Eq>{`k(x_i, x_j)`}</Eq> (z.B. RBF <Eq>{`e^{-\\|x_i - x_j\\|^2/(2\\gamma)}`}</Eq>). Die Gram-Matrix <Eq>{`K_{ij} = k(x_i, x_j)`}</Eq> ist PSD — PCA dieser Matrix entspricht PCA im impliziten Feature-Raum des Kernels (Mercer). Erlaubt nicht-lineare Struktur zu erfassen die klassische PCA nicht sieht, mit Komplexität <Eq>{`O(N^2)`}</Eq> statt <Eq>{`O(Nd)`}</Eq>.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.2", pagina: "358", exercicio: "7.2.10", licenca: "CC-BY-SA" }}
+>
+Erkläre die Idee von Kernel PCA. Wie erlaubt die Ersetzung des Skalarprodukts durch einen Kernel nicht-lineare Struktur zu erfassen? Was ist die Rechenkomplexität?
+</Exercicio>
+
+<Exercicio
+  numero="118.26"
+  dificuldade="aplicacao"
+  solucao={<>Mit N Stichproben und d Features, <Eq>{`\\tilde X \\in \\mathbb{R}^{N \\times d}`}</Eq>. SVD: <Eq>{`U \\in \\mathbb{R}^{N \\times N}`}</Eq>, <Eq>{`\\Sigma_{SVD} \\in \\mathbb{R}^{N \\times d}`}</Eq>, <Eq>{`V \\in \\mathbb{R}^{d \\times d}`}</Eq>. Wenn <Eq>{`N \\gg d`}</Eq> (viele Stichproben, wenig Features): Eigenzerlegung von <Eq>{`\\Sigma_{cov} \\in \\mathbb{R}^{d \\times d}`}</Eq> ist <Eq>{`O(d^3)`}</Eq> — billiger als komplette SVD. Wenn <Eq>{`N \\ll d`}</Eq> (Genomik): Eigenzerlegung von <Eq>{`\\tilde X \\tilde X^T \\in \\mathbb{R}^{N \\times N}`}</Eq> (Dualitäts-Trick) ist <Eq>{`O(N^3)`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.3", pagina: "201", exercicio: "10.8", licenca: "CC-BY-NC-ND" }}
+>
+Erkläre den "Dual Trick" von PCA: wenn <Eq>{`N \\ll d`}</Eq> (mehr Features als Stichproben), wie berechnest du PCA effizient? Wie groß ist die Komplexität in jedem Fall?
+</Exercicio>
+
+<Exercicio
+  numero="118.27"
+  dificuldade="aplicacao"
+  solucao={<>Interpretation von PC1 im ENEM: wenn Loadings von PC1 positiv für alle Noten sind (CN, CH, LC, MT, Aufsatz), ist PC1 die "Gesamt-Leistung" — der Faktor der gemeinsame Variation in allen Prüfungen erfasst. Schüler mit hohem PC1 ist gut in allem. PC2 unterscheidet normalerweise Leistung in Exakten (MT, CN) vs Geisteswissenschaften (CH, LC, Aufsatz).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "387", exercicio: "8.32", licenca: "CC-BY-SA" }}
+>
+PCA von ENEM-2023-Mikrodaten (5 Noten: CN, CH, LC, MT, Aufsatz) ergab PC1 mit positiven Loadings ähnlicher Größe für alle Noten. Interpretiere PC1. Was könnte PC2 repräsentieren?
+</Exercicio>
+
+<Exercicio
+  numero="118.28"
+  dificuldade="demonstracao"
+  solucao={<>Varianz der Scores: <Eq>{`\\text{Var}(z_k) = \\frac{1}{N-1} \\sum_i z_{ik}^2 = \\frac{1}{N-1} \\|\\tilde X v_k\\|^2`}</Eq>. Nutze SVD <Eq>{`\\tilde X = U \\Sigma_{SVD} V^T`}</Eq>: <Eq>{`\\tilde X v_k = U \\Sigma_{SVD} V^T v_k = \\sigma_k u_k`}</Eq>. Daher <Eq>{`\\text{Var}(z_k) = \\sigma_k^2/(N-1) = \\lambda_k`}</Eq>. Die Varianz des k-ten Scores ist exakt der k-te Eigenwert der Kovarianz.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap7.html", secao: "§7.2", pagina: "351", exercicio: "7.2.3", licenca: "CC-BY-SA" }}
+>
+Beweise dass die Stichproben-Varianz des k-ten Scores <Eq>{`z_k = \\tilde X v_k`}</Eq> gleich dem k-ten Eigenwert der Kovarianz <Eq>{`\\lambda_k`}</Eq> ist. Nutze die Verbindung zu SVD.
+</Exercicio>
+
+<Exercicio
+  numero="118.29"
+  dificuldade="modelagem"
+  solucao={<>PCA im 1000 Genomes Project: jede Person wird durch Vektor von genetischen Varianten (SNPs) repräsentiert — d von ~1 Million Varianten. PCA der Genotyp-Matrix zeigt geografische Struktur: PC1 trennt Europäer von Afrikanern; PC2 trennt Europäer von Asiaten; PC3 kann sub-kontinentale Gruppen trennen. Genetische Struktur spiegelt ancestrale Geografie — PCA wiederherstellung ohne Supervision, der evolutionären und Migrations-Geschichte der Menschheit.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§8.3", pagina: "389", exercicio: "8.34", licenca: "CC-BY-SA" }}
+>
+Im 1000 Genomes Project zeigt PCA von Genomdaten von ~2500 Menschen aus 26 Populationen Cluster pro Kontinent. Erkläre wie das möglich ist und was die 3 ersten PCs genetisch repräsentieren.
+</Exercicio>
+
+<Exercicio
+  numero="118.30"
+  dificuldade="desafio"
+  solucao={<>Probabilistic PCA (Tipping-Bishop 1999): generatives latentes Modell <Eq>{`x = W z + \\mu + \\varepsilon`}</Eq> mit <Eq>{`z \\sim N(0,I)`}</Eq> und <Eq>{`\\varepsilon \\sim N(0, \\sigma^2 I)`}</Eq>. Die Maximum-Likelihood-Lösung für W ist genau die PCs (skaliert). Vorteile: (1) behandelt fehlende Daten (missing data via EM-Algorithmus); (2) liefert Log-Likelihood für Modellauswahl; (3) generiert neue Daten via <Eq>{`p(x) = N(\\mu, W W^T + \\sigma^2 I)`}</Eq>. Reduziert zu klassischer PCA wenn <Eq>{`\\sigma^2 \\to 0`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Applied Linear Algebra (VMLS)", url: "https://web.stanford.edu/~boyd/vmls/", secao: "§10.3", pagina: "202", exercicio: "10.9", licenca: "CC-BY-NC-ND" }}
+>
+Beschreibe das Probabilistic PCA-Modell (Tipping-Bishop 1999). Welche Vorteile hat es gegenüber klassischer PCA? Wie reduziert sich dieses Modell zur klassischen PCA in einem Grenzfall?
+</Exercicio>
+
+</ListaExercicios>
+
+## Quellen
+
+- [Understanding Linear Algebra](https://understandinglinearalgebra.org/) — David Austin · Grand Valley State University · CC-BY-SA · Kapitel 7: PCA via SVD, erklärte Varianz, Scree-Plot, Anwendungen.
+- [Introduction to Applied Linear Algebra (VMLS)](https://web.stanford.edu/~boyd/vmls/) — Stephen Boyd, Lieven Vandenberghe · Stanford University · CC-BY-NC-ND · Kap. 10: rigorose Theorie von PCA, Optimalität, SVD-Verbindung, ML-Anwendungen.
+- [OpenIntro Statistics](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA · §8.3: statistische Perspektive, erklärte Varianz, Interpretation von Komponenten, Übungen mit echten Daten.

@@ -1,0 +1,888 @@
+---
+titulo: "Lição 73 — Quartis, percentis e boxplot"
+slug: "licao-73-quartis"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Resumo de 5 números: mín, Q1, mediana, Q3, máx. IQR, boxplot e regra 1,5 IQR para detectar outliers. Medidas robustas em dados assimétricos."
+ordem: 73
+publicado: true
+tags: ["estatística", "quartis", "boxplot", "percentil", "ano-2", "trim-8"]
+prerrequisitos: ["licao-72"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math Statistics — Singapura", "AP Statistics — EUA", "Math B — Japão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="IQR = Q_3 - Q_1, \quad \text{outlier se } x < Q_1 - 1{,}5\,IQR \text{ ou } x > Q_3 + 1{,}5\,IQR"
+  legenda={<>사분위수 범위 <strong>IQR</strong> = <Eq>{`Q_3 - Q_1`}</Eq>은 전체 데이터의 중앙 50%를 포함합니다. <strong>Tukey의 규칙</strong>(1977)은 각 사분위수로부터 <Eq>{`1{,}5 \\times IQR`}</Eq> 이상 떨어진 모든 점을 이상치(outlier)로 표시합니다. 이 기준은 평균이나 표준편차에 의존하지 않으므로 견고한 방법입니다.</>}
+  audioTexto="사분위수 범위는 Q 3 마이너스 Q 1입니다. Tukey 규칙은 Q 1 마이너스 1.5곱하기 IQR보다 작거나 Q 3 더하기 1.5곱하기 IQR보다 큰 모든 값을 이상치로 분류합니다."
+/>
+
+<aside>
+
+**이 강의를 다루는 교재**
+
+- [**OpenIntro Statistics** (4판)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §2.1–2.2 · CC-BY-SA · <em>상자 그림, IQR 및 Tukey 규칙의 완벽한 설명. 실제 데이터와 단계적 문제 포함.</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §2.3–2.4 · CC-BY · <em>백분위수, 사분위수 및 그래프 표현. 선형 보간을 이용한 계산 방법 포함.</em>
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §5.1 · GNU FDL · <em>순서 통계량의 확률론적 기초. 사분위수는 연속 분포의 백분위수 특수 사례.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="엄밀한 정의">
+
+### 순서 통계량과 백분위수
+
+<Definicao titulo="백분위수 P_p">
+
+$n$개의 순서 있는 관측값 $x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$이 주어질 때, **백분위수 $P_p$** ($0 \leq p \leq 100$)는 데이터의 대략 $p\%$가 이 값 이하에 있는 값입니다.
+
+선형 보간 방법(Hyndman-Fan 7형, NumPy와 R의 기본값):
+
+$$L = \frac{p}{100}(n - 1) + 1$$
+
+$L$이 정수이면 $P_p = x_{(L)}$입니다. $L = j + d$ (단, $d \in (0,1)$)일 때:
+
+$$P_p = x_{(j)} + d\,(x_{(j+1)} - x_{(j)})$$
+
+</Definicao>
+
+> "The first quartile, $Q_1$, is the value such that 25% of the data fall below it, and the third quartile, $Q_3$, is such that 75% of the data fall below it." — [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/)
+
+<Definicao titulo="사분위수와 5개 요약">
+
+- $Q_1 = P_{25}$: 하위 사분위수, 하위 4분의 1 구간의 경계.
+- $Q_2 = P_{50}$: **중앙값**.
+- $Q_3 = P_{75}$: 상위 사분위수, 하위 4분의 3 구간의 경계.
+
+**5개 요약(Tukey, 1977)**:
+
+$$(\min,\; Q_1,\; Q_2,\; Q_3,\; \max)$$
+
+분포의 형태를 가정하지 않고 위치와 산포를 나타냅니다.
+
+</Definicao>
+
+<Definicao titulo="사분위수 범위와 Tukey 규칙">
+
+$$IQR = Q_3 - Q_1$$
+
+상자 그림의 **수염(whiskers)**은 다음 범위 내의 마지막 데이터까지 연장됩니다:
+
+$$[Q_1 - 1{,}5 \cdot IQR,\quad Q_3 + 1{,}5 \cdot IQR]$$
+
+이 구간을 벗어난 점들은 **잠재적 이상치(outliers)**로 표시됩니다(개별적으로 표시).
+
+> "When a data set includes values that appear much larger or smaller than the rest of the data, they are called outliers... A commonly used rule says that a data point is considered a suspected outlier if it is more than 1.5 × IQR below the first quartile or more than 1.5 × IQR above the third quartile." — [OpenStax Statistics §2.4](https://openstax.org/books/statistics/pages/2-4-box-plots)
+
+</Definicao>
+
+<Teorema titulo="IQR의 견고성">
+
+추정량의 **붕괴점(breakdown point)**는 추정량을 임의로 크게 만드는 오염된 데이터의 비율입니다.
+
+- 평균: 붕괴점 0%(하나의 극단값도 파괴할 수 있음).
+- 중앙값: 붕괴점 50%(위치 추정량 중 가장 견고함).
+- IQR: 붕괴점 25%(데이터의 4분의 1까지의 오염에 견고함).
+
+결과: 비대칭 분포 또는 이상치가 있는 경우, 중앙값과 IQR이 평균과 표준편차보다 바람직합니다.
+
+</Teorema>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 160" className="w-full">
+<defs><marker id="arr73" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+<g>
+  <line x1="60" x2="520" y1="80" y2="80" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr73)"/>
+  <line x1="130" x2="130" y1="60" y2="100" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.6"/>
+  <line x1="480" x2="480" y1="60" y2="100" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.6"/>
+  <rect x="220" y="55" width="170" height="50" fill="rgb(26 77 92 / 0.25)" stroke="rgb(26 77 92)" strokeWidth="2"/>
+  <line x1="305" x2="305" y1="55" y2="105" stroke="rgb(232 199 122)" strokeWidth="3"/>
+  <line x1="130" x2="220" y1="80" y2="80" stroke="currentColor" strokeWidth="2"/>
+  <line x1="390" x2="480" y1="80" y2="80" stroke="currentColor" strokeWidth="2"/>
+  <circle cx="95" cy="80" r="4" fill="rgb(199 107 63)" stroke="rgb(199 107 63)"/>
+  <circle cx="510" cy="80" r="4" fill="rgb(199 107 63)" stroke="rgb(199 107 63)"/>
+  <text x="130" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">최소</text>
+  <text x="220" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₁</text>
+  <text x="305" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₂</text>
+  <text x="390" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Q₃</text>
+  <text x="480" y="120" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">최대</text>
+  <text x="95" y="120" textAnchor="middle" fontSize="10" fill="rgb(199 107 63)" fillOpacity="0.9">이상치</text>
+  <text x="510" y="120" textAnchor="middle" fontSize="10" fill="rgb(199 107 63)" fillOpacity="0.9">이상치</text>
+  <text x="305" y="42" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">IQR</text>
+  <line x1="222" x2="388" y1="42" y2="42" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1"/>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+상자 그림의 구조: 상자(Q1부터 Q3까지), 중앙값 선, 수염(극단값까지), 이상치는 개별 점으로 표시.
+</figcaption>
+</figure>
+
+<Insight>
+
+정규분포 데이터의 경우, 1.5 IQR 규칙은 관측값의 약 0.7%만을 이상치로 표시합니다. 드물지만 합리적 범위입니다. Tukey는 1.5를 의도적으로 선택했습니다. 조사할 가치가 있을 만큼 드물지만, 실제 표본에서 절대 나타나지 않을 정도로 드물지는 않습니다.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="5살 어린이를 위해">
+
+반 전체 어린이들을 키 순서로 일렬로 세우세요.
+
+바로 **중간**에 있는 어린이가 **중앙값**입니다. 절반은 더 작고, 절반은 더 큽니다.
+
+이제 일렬을 두 그룹으로 나눕니다. 작은 그룹의 중간 어린이가 **Q1**입니다. 큰 그룹의 중간 어린이가 **Q3**입니다.
+
+**상자 그림**은 Q1부터 Q3까지의 작은 상자를 그립니다. 이곳에 "중간" 반이 있습니다. 아주 작거나 아주 큰 어린이들은 **분리된 점**으로 표시됩니다. 이들이 이상치(outliers)입니다.
+
+</Porta>
+
+<Porta nivel="10" titulo="10살 어린이를 위해">
+
+11명 학생의 점수를 생각해 봅시다: 2, 4, 5, 5, 6, **7**, 8, 8, 9, 9, 10.
+
+- **중앙값** ($Q_2$): 중간 위치의 점수, 6번째 자리 = **7**.
+- **$Q_1$**: 낮은 5개 점수의 중앙값(2, 4, 5, 5, 6) = **5**.
+- **$Q_3$**: 높은 5개 점수의 중앙값(8, 8, 9, 9, 10) = **9**.
+- **IQR** = 9 − 5 = **4**.
+- 하한: $5 - 1{,}5 \times 4 = -1$. 상한: $9 + 1{,}5 \times 4 = 15$.
+- 어떤 점수도 이 범위를 벗어나지 않으므로, 이상치 없음.
+
+**상자 그림**은 5부터 9까지의 상자를 그립니다. 중앙값은 7입니다. 수염은 2와 10까지 갑니다. 학생이 0점을 받으면 분리된 점으로 나타납니다.
+
+**상자 그림이 유용한 이유는?** 아주 작은 그래프 하나로 볼 수 있습니다: 중심이 어디 있는지, 반이 얼마나 흩어져 있는지, 분포가 비대칭인지, 누가 이상치인지.
+
+</Porta>
+
+<Porta nivel="15" titulo="15살 십대를 위해">
+
+사분위수와 상자 그림은 **견고한 도구**입니다. 극단값의 영향을 거의 받지 않습니다. 비교해 봅시다:
+
+| 통계량 | 견고성 | 사용 시점 |
+|---|---|---|
+| 평균과 표준편차 | 약함(이상치 1개가 모든 것을 바꿈) | 대칭 분포, 이상치 없음 |
+| 중앙값과 IQR | 견고함(이상치 25-50%까지도 견딤) | 비대칭 분포 또는 이상치 있음 |
+
+### 1.5 IQR 규칙 — 왜 1.5일까?
+
+Tukey(1977)는 1.5를 선택했습니다. 정규분포 데이터에서 이는 약 0.7%의 관측값만을 표시하기 때문입니다. 조사할 가치가 있을 만큼 드물지만, 절대 일어나지 않을 정도로 드물지는 않습니다.
+
+### 예시: 회사의 급여
+
+11명 직원의 급여(만원): 3, 4, 4, 5, 5, 5, 6, 6, 7, 7, 80 (CEO).
+
+- 평균: 11.1만원 — 오도하는 수치. CEO가 평균을 끌어올립니다.
+- 중앙값: 5만원 — 전형적인 급여를 나타냅니다.
+
+한국통계청이 중위 소득을 발표하는 이유가 이것입니다. 평균 소득은 고소득자에 의해 왜곡됩니다.
+
+### 연속 확률변수의 사분위수
+
+연속 확률변수 $X$가 누적분포함수 $F$를 가질 때, 백분위수 $p$는 $Q_p = F^{-1}(p/100)$입니다. 표준정규분포: $Q_1 \approx -0{,}674$, $Q_3 \approx 0{,}674$, $IQR \approx 1{,}349$.
+
+</Porta>
+
+<Porta nivel="25" titulo="공학 학생을 위해">
+
+### 탐색적 자료분석(EDA)과 병렬 상자 그림
+
+**탐색적 자료분석**(Tukey, 1977)의 핵심 도구: 범주별로 분포 비교. 예시: 5개 서버의 지연 시간, 3명 의사의 평균 대기 시간, 4개 알고리즘의 처리량. 한 눈에 누가 더 가변적인지, 누가 이상치를 가진 지, 누가 중앙값이 높은지 알 수 있습니다.
+
+### 사분위수의 다양한 정의
+
+백분위수 계산에는 9가지 방법이 있습니다(Hyndman-Fan). 두 가지 일반적인 방법:
+
+1. **Tukey(hinges)**: $Q_1$은 하위 절반의 중앙값. $n$이 홀수일 때 전체 중앙값은 제외.
+2. **선형 보간**(NumPy `np.percentile` with `method='linear'`): 위치 $L = 1 + (p/100)(n-1)$.
+
+$n$이 크면($> 30$), 차이는 무시할 수 있습니다. 시험과 보고서에서는 방법을 명시하세요.
+
+### $\sigma$의 견고한 추정량
+
+정규분포: $IQR \approx 1{,}349\,\sigma$. 따라서:
+
+$$\hat\sigma_{\text{견고}} = \frac{IQR}{1{,}349}$$
+
+이상치가 표준편차를 오염할 의심이 있을 때 유용합니다.
+
+### 상자 그림 vs. 바이올린 그림
+
+상자 그림은 **쌍봉 분포**를 숨깁니다. 바이올린 그림은 핵심 밀도 추정(KDE)을 겹쳐 표시합니다. 더 정보가 많지만 계산 비용이 높습니다.
+
+### Python 구현
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+data = np.array([...])
+q1, q2, q3 = np.percentile(data, [25, 50, 75])
+iqr = q3 - q1
+lower = q1 - 1.5 * iqr
+upper = q3 + 1.5 * iqr
+outliers = data[(data < lower) | (data > upper)]
+
+# 시각화
+plt.boxplot(data)
+plt.show()
+```
+
+`pandas.DataFrame.describe()`는 자동으로 최소, 25%, 50%, 75%, 최대를 제공합니다.
+
+</Porta>
+
+<Porta nivel="40" titulo="고급 전문가를 위해">
+
+### 순서 통계량 — 이론적 기초
+
+사분위수는 **순서 통계량** $X_{(k)}$의 특수한 경우입니다. 모집단 밀도 $f$, 누적분포함수 $F$에서 크기 $n$ 표본의 경우, $X_{(k)}$의 밀도는:
+
+$$f_{X_{(k)}}(x) = \frac{n!}{(k-1)!(n-k)!}\, F(x)^{k-1}\, (1-F(x))^{n-k}\, f(x)$$
+
+이를 통해 사분위수의 근사 분산과 중앙값 및 IQR에 대한 비모수 신뢰 구간을 구성할 수 있습니다.
+
+### 붕괴점(Hampel, 1971)
+
+**붕괴점**은 견고성을 형식화합니다. 추정량이 참값에서 임의로 멀어지도록 하는 오염된 데이터의 최소 비율입니다.
+
+| 추정량 | 붕괴점 |
+|---|---|
+| 평균 | 0% |
+| 중앙값 | 50% |
+| IQR | 25% |
+| 10% 절사 평균 | 10% |
+
+절사 평균($\alpha$-trimmed mean)은 통계적 효율과 견고성 사이의 절충입니다.
+
+### 이론적 분포의 사분위수
+
+| 분포 | $Q_1$ | $Q_2$ | $Q_3$ | $IQR$ |
+|---|---|---|---|---|
+| 정규(0,1) | $-0{,}674$ | $0$ | $0{,}674$ | $1{,}349$ |
+| 지수(1) | $0{,}288$ | $0{,}693$ | $1{,}386$ | $1{,}099$ |
+| 균등(0,1) | $0{,}25$ | $0{,}50$ | $0{,}75$ | $0{,}50$ |
+
+### 고차원의 이상치
+
+$\mathbb{R}^p$에서 $p$가 크면, 1D 상자 그림은 작동하지 않습니다. **차원의 저주**는 거의 모든 관측값을 어떤 투영에서든 이상치로 만듭니다. 현대적 도구: 견고한 공분산(MCD — Minimum Covariance Determinant)이 있는 **Mahalanobis 거리**, Local Outlier Factor(LOF), Isolation Forest.
+
+### 역사적 맥락
+
+John W. Tukey는 1977년 *Exploratory Data Analysis*에서 상자 그림을 소개했습니다. 이는 정식 모델 이전의 반복적이고 시각적 분석 철학의 일부입니다. EDA 접근법은 현대 자료분석 전체에 영향을 미쳤으며, 고전적 확인 전통(가설 검정)과 대조됩니다.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="실무 응용">
+
+### 6단계 조리법
+
+1. **데이터 정렬** — 작은 것부터 큰 것 순서로.
+2. **중앙값** ($Q_2$) — 중앙 값(또는 $n$이 짝수면 중앙 두 값의 평균).
+3. **$Q_1$과 $Q_3$** — 하위 및 상위 절반의 중앙값.
+4. **IQR** — $Q_3 - Q_1$.
+5. **Tukey 한계** — $Q_1 - 1{,}5 \cdot IQR$과 $Q_3 + 1{,}5 \cdot IQR$.
+6. **이상치** — 이 범위 밖의 데이터.
+
+### 스프레드시트에서(Excel/LibreOffice)
+
+| 함수 | 결과 |
+|---|---|
+| `QUARTILE.INC(범위; 1)` | $Q_1$ |
+| `QUARTILE.INC(범위; 3)` | $Q_3$ |
+| `MEDIAN(범위)` | 중앙값 |
+| `PERCENTILE.INC(범위; 0.9)` | $P_{90}$ |
+
+### 피해야 할 흔한 오류
+
+- **보간 없이 $Q_1$ 계산** — $n/4$는 보통 정수가 아닙니다. 가장 가까운 이웃 두 개 사이를 보간하세요.
+- **비대칭 분포에서 평균 보고** — 급여, 소득, 부동산. 항상 중앙값을 선호하세요.
+- **조사 없이 이상치 버리기** — 이상치가 집합의 가장 가치 있는 데이터일 수 있습니다(사기, 드문 실패, 발견).
+- **다양한 스케일의 데이터에 같은 상자 그림 사용** — 비교 전에 정규화하세요.
+
+</Porta>
+
+</DuasPortas>
+
+## 풀이 예시
+
+<Exemplo numero="73.1" titulo="5개 요약(작은 집합)" dificuldade="basico">
+
+**문제.** 데이터에 대한 5개 요약을 계산하세요: 4, 7, 2, 9, 5, 11, 3, 8, 6, 10.
+
+**전략.** 정렬, Q1, Q2, Q3 위치를 선형 보간으로 찾기.
+
+**풀이.** 정렬됨: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ($n = 10$).
+
+- 중앙값 ($Q_2$): 위치 5, 6의 값의 평균 = $(6 + 7)/2 = 6{,}5$.
+- $Q_1$: 하위 5개(2, 3, 4, 5, 6)의 중앙값 = 4.
+- $Q_3$: 상위 5개(7, 8, 9, 10, 11)의 중앙값 = 9.
+- $\min = 2$, $\max = 11$.
+
+**5개 요약**: $(2,\; 4,\; 6{,}5,\; 9,\; 11)$.
+
+**검증.** $IQR = 9 - 4 = 5$. 한계: $4 - 7{,}5 = -3{,}5$, $9 + 7{,}5 = 16{,}5$. 모든 데이터 범위 내 — 이상치 없음. [2, 11]의 균등 분포와 일치합니다.
+
+**출처.** [OpenIntro Statistics §2.1](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="73.2" titulo="이상치 감지(급여)" dificuldade="basico">
+
+**문제.** 9명 직원의 월급(만원): 3, 3, 4, 4, 5, 5, 6, 7, 45. 이상치가 있나요?
+
+**전략.** 사분위수 계산, 1.5 IQR 규칙 적용.
+
+**풀이.** $n = 9$, 데이터 이미 정렬됨.
+
+- $Q_2$: 위치 5 = 5.
+- $Q_1$: (3, 3, 4, 4)의 중앙값 = 3.5.
+- $Q_3$: (5, 6, 7, 45)의 중앙값 = 6.5.
+- $IQR = 6{,}5 - 3{,}5 = 3$.
+- 상한: $6{,}5 + 1{,}5 \times 3 = 11$.
+- 45만원 급여 > 11만원: **이상치**.
+
+**검증.** 평균은 9.1만원이 되는데, 이상치로 왜곡됩니다. 중앙값 = 5만원이 전형적인 급여를 더 잘 나타냅니다. 이것이 바로 통계청이 중위 소득을 발표하는 이유입니다.
+
+**출처.** [OpenStax Statistics §2.4](https://openstax.org/books/statistics/pages/2-4-box-plots) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="73.3" titulo="선형 보간으로 백분위수 계산" dificuldade="intermediario">
+
+**문제.** 20명 학생의 정렬된 점수: 28, 35, 42, 48, 51, 55, 58, 61, 63, 65, 68, 70, 72, 74, 77, 80, 83, 87, 91, 96. $P_{80}$을 계산하세요.
+
+**전략.** 위치 공식 $L = 1 + (p/100)(n-1)$ 사용.
+
+**풀이.** $p = 80$, $n = 20$.
+
+$$L = 1 + 0{,}80 \times 19 = 1 + 15{,}2 = 16{,}2$$
+
+$j = 16$, $d = 0{,}2$. 위치 16, 17의 데이터는 $x_{(16)} = 80$, $x_{(17)} = 83$.
+
+$$P_{80} = 80 + 0{,}2 \times (83 - 80) = 80 + 0{,}6 = 80{,}6$$
+
+**검증.** 20명의 80% = 16명 이상. 처음 16명은: 28, 35, ..., 80. 점 $P_{80} = 80{,}6$는 80 바로 위 — 정확합니다.
+
+**출처.** [OpenStax Statistics §2.3](https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="73.4" titulo="병렬 상자 그림(A/B 검정)" dificuldade="intermediario">
+
+**문제.** 두 서버의 로딩 시간(ms):
+- 서버 A: 120, 125, 128, 130, 132, 135, 138, 140, 142, 500.
+- 서버 B: 200, 210, 215, 220, 222, 225, 228, 230, 235, 240.
+
+5개 요약을 사용해서 비교하고 이상치를 찾으세요.
+
+**전략.** 각 서버별 사분위수 계산, 1.5 IQR 규칙 적용, 비교 해석.
+
+**풀이.**
+
+*서버 A* ($n = 10$):
+- $Q_1$: 위치 2-3의 평균 = $(125 + 128)/2 = 126{,}5$.
+- $Q_2$: 위치 5-6의 평균 = $(132 + 135)/2 = 133{,}5$.
+- $Q_3$: 위치 8-9의 평균 = $(140 + 142)/2 = 141$.
+- $IQR_A = 141 - 126{,}5 = 14{,}5$. 상한: $141 + 21{,}75 = 162{,}75$.
+- **500ms는 A의 이상치**.
+
+*서버 B* ($n = 10$):
+- $Q_1 = 212{,}5$, $Q_2 = 223{,}5$, $Q_3 = 231{,}5$.
+- $IQR_B = 19$. 한계: $[184{,}0;\; 260{,}0]$. 이상치 없음.
+
+**검증.** 서버 A는 중앙값이 더 낮고(133.5 vs. 223.5ms) 변동성도 낮습니다($IQR = 14{,}5$ vs. 19). 하지만 심각한 이상치(500ms)가 있습니다. 서버 A는 이상치가 드물고 수용 가능하면 선호. 서버 B는 일관성이 중요하면 선호.
+
+**출처.** [OpenIntro Statistics §2.2](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="73.5" titulo="연속 분포의 IQR" dificuldade="avancado">
+
+**문제.** $X \sim \text{지수}(\lambda = 1)$에 대해, $Q_1$, $Q_3$, IQR을 해석적으로 계산하세요.
+
+**전략.** 누적분포함수를 0.25, 0.75에서 역함수.
+
+**풀이.** $F(x) = 1 - e^{-x}$ for $x \geq 0$.
+
+$$Q_1 = F^{-1}(0{,}25): \quad 1 - e^{-Q_1} = 0{,}25 \implies Q_1 = -\ln(0{,}75) \approx 0{,}288$$
+
+$$Q_3 = F^{-1}(0{,}75): \quad 1 - e^{-Q_3} = 0{,}75 \implies Q_3 = -\ln(0{,}25) = \ln 4 \approx 1{,}386$$
+
+$$IQR = \ln 4 - \ln(4/3) = \ln 3 \approx 1{,}099$$
+
+**검증.** 중앙값은 $-\ln(0{,}5) = \ln 2 \approx 0{,}693$. 주목: $Q_2 - Q_1 \approx 0{,}405$, $Q_3 - Q_2 \approx 0{,}693$. 우측 편향이므로 상위 꼬리가 더 길다는 것을 확인합니다.
+
+**출처.** [Introduction to Probability — Grinstead, Snell §5.1](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-73-quartis">
+
+### 블록 A — 직접 계산(73.1 - 73.12)
+
+<Exercicio
+  numero="73.1"
+  dificuldade="aplicacao"
+  solucao={<>정렬됨: 1, 3, 5, 7, 9 (<Eq>{`n = 5`}</Eq>). 중앙값: 위치 3 = <strong>5</strong>. <Eq>{`Q_1`}</Eq>: (1, 3)의 중앙값 = <strong>2</strong>. <Eq>{`Q_3`}</Eq>: (7, 9)의 중앙값 = <strong>8</strong>. 5개 요약: (1, 2, 5, 8, 9).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "53", exercicio: "2.1", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>정렬: 1, 3, 5, 7, 9. <Eq>{`n = 5`}</Eq>는 홀수, 중앙값 = 3번째 값: 5.</li><li><Eq>{`Q_1`}</Eq> = 하위 절반(1, 3)의 중앙값 = 1과 3의 평균 = 2.</li><li><Eq>{`Q_3`}</Eq> = 상위 절반(7, 9)의 중앙값 = 7과 9의 평균 = 8.</li></ol><em>팁:</em> <Eq>{`n`}</Eq>이 홀수이면 절반으로 나누기 전에 중앙값 제외.</>}
+>
+
+데이터: 1, 3, 5, 7, 9. 중앙값, $Q_1$, $Q_3$을 계산하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.2"
+  dificuldade="aplicacao"
+  solucao={<>정렬됨: 2, 4, 6, 8, 10, 12 (<Eq>{`n = 6`}</Eq>). 중앙값: <Eq>{`(6+8)/2 = 7`}</Eq>. <Eq>{`Q_1`}</Eq>: (2, 4, 6)의 중앙값 = 4. <Eq>{`Q_3`}</Eq>: (8, 10, 12)의 중앙값 = 10. 5개 요약: (2, 4, 7, 10, 12).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "54", exercicio: "2.3", licenca: "CC-BY-SA" }}
+>
+
+데이터: 2, 4, 6, 8, 10, 12. 5개 요약을 계산하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.3"
+  dificuldade="aplicacao"
+  solucao={<>정렬됨: 4, 5, 6, 6, 7, 7, 8, 8, 9, 10 (<Eq>{`n = 10`}</Eq>). <Eq>{`Q_2 = (7+7)/2 = 7`}</Eq>. <Eq>{`Q_1`}</Eq>: (4, 5, 6, 6, 7)의 중앙값 = 6. <Eq>{`Q_3`}</Eq>: (7, 8, 8, 9, 10)의 중앙값 = 8.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "72", exercicio: "2.3.1", licenca: "CC-BY" }}
+>
+
+성적: 4, 5, 6, 6, 7, 7, 8, 8, 9, 10. $Q_1$, $Q_2$, $Q_3$을 계산하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.4"
+  dificuldade="aplicacao"
+  resposta="14"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "55", exercicio: "2.5", licenca: "CC-BY-SA" }}
+  solucao={<>정렬됨: 12, 14, 18, 22, 25, 28, 32 (<Eq>{`n = 7`}</Eq>). <Eq>{`Q_1`}</Eq> = 14(2번째 값). <Eq>{`Q_3`}</Eq> = 28(6번째 값). <Eq>{`IQR = 28 - 14 = 14`}</Eq>.</>}
+>
+
+데이터의 $IQR$을 계산하세요: 12, 14, 18, 22, 25, 28, 32.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.5"
+  dificuldade="aplicacao"
+  solucao={<>정렬 데이터: 18, 20, 21, 22, 23, 24, 25, 27, 30, 35, 60 (<Eq>{`n = 11`}</Eq>). <Eq>{`Q_1 = 21`}</Eq>, <Eq>{`Q_3 = 30`}</Eq>, <Eq>{`IQR = 9`}</Eq>. 상한: <Eq>{`30 + 13{,}5 = 43{,}5`}</Eq>. 값 60은 초과: <strong>이상치</strong>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "84", exercicio: "2.4.3", licenca: "CC-BY" }}
+  passos={<><ol><li>정렬 및 찾기: <Eq>{`Q_1 = 21`}</Eq>(3번째 위치), 중앙값 = 24, <Eq>{`Q_3 = 30`}</Eq>(9번째 위치).</li><li><Eq>{`IQR = 30 - 21 = 9`}</Eq>.</li><li>상한: <Eq>{`Q_3 + 1{,}5 \\times IQR = 30 + 13{,}5 = 43{,}5`}</Eq>.</li><li>값 60은 43.5보다 큼 — Tukey 규칙으로 이상치 분류.</li></ol><em>참고:</em> 하한 = <Eq>{`21 - 13{,}5 = 7{,}5`}</Eq>. 다른 값들은 모두 7.5보다 크므로 하한 이상치 없음.</>}
+>
+
+연령: 18, 20, 21, 22, 23, 24, 25, 27, 30, 35, 60. 1.5 IQR 규칙을 적용하세요. 이상치가 있나요?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.6"
+  dificuldade="aplicacao"
+  solucao={<>데이터: 2, 3, 3, 4, 4, 5, 5, 6, 8, 50 (<Eq>{`n = 10`}</Eq>). 중앙값 = <Eq>{`(4+5)/2 = 4{,}5`}</Eq>. <Eq>{`Q_1`}</Eq> = (2, 3, 3, 4, 4)의 중앙값 = 3. <Eq>{`Q_3`}</Eq> = (5, 5, 6, 8, 50)의 중앙값 = 6. <Eq>{`IQR = 3`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "56", exercicio: "2.7", licensa: "CC-BY-SA" }}
+>
+
+급여(만원): 2, 3, 3, 4, 4, 5, 5, 6, 8, 50. 중앙값과 $IQR$을 계산하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.7"
+  dificuldade="aplicacao"
+  solucao={<>공식 <Eq>{`L = 1 + (p/100)(n-1)`}</Eq> 사용, $p = 75$, $n = 100$: <Eq>{`L = 1 + 0{,}75 \\times 99 = 1 + 74{,}25 = 75{,}25`}</Eq>. 위치 75, 76 사이를 보간.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "73", exercicio: "2.3.5", licenca: "CC-BY" }}
+>
+
+$n = 100$개 정렬 데이터에서 선형 보간 방법으로 $Q_3$의 위치는?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.8"
+  dificuldade="aplicacao"
+  solucao={<>데이터: 10, 11, 11, 12, 13, 13, 14, 14, 15, 100 (<Eq>{`n = 10`}</Eq>). <Eq>{`Q_1 = 11`}</Eq>, <Eq>{`Q_3 = 14`}</Eq>, <Eq>{`IQR = 3`}</Eq>. 상한: <Eq>{`14 + 4{,}5 = 18{,}5`}</Eq>. 값 100은 이상치.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "85", exercicio: "2.4.5", licenca: "CC-BY" }}
+>
+
+시간(초): 10, 11, 11, 12, 13, 13, 14, 14, 15, 100. Tukey 한계를 계산하고 이상치를 찾으세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.9"
+  dificuldade="aplicacao"
+  solucao={<>정렬 체중: 60, 62, 64, 65, 65, 67, 70, 72, 75, 80. <Eq>{`Q_1 = 64{,}5`}</Eq>, 중앙값 = 66, <Eq>{`Q_3 = 71`}</Eq>. 상자는 64.5에서 71, 중앙값 선은 66. 수염은 60에서 80(이상치 없음). 분포는 약간 우측 편향.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "60", exercicio: "2.11", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>정렬: 60, 62, 64, 65, 65, 67, 70, 72, 75, 80 (<Eq>{`n = 10`}</Eq>).</li><li>중앙값: 위치 5, 6의 평균 = <Eq>{`(65+67)/2 = 66`}</Eq>.</li><li><Eq>{`Q_1`}</Eq>: (60, 62, 64, 65, 65)의 중앙값 = 64. <Eq>{`Q_3`}</Eq>: (67, 70, 72, 75, 80)의 중앙값 = 72. 주의: 일부 책은 중앙 중앙값 제외 — 방법 확인.</li><li><Eq>{`IQR = 72 - 64 = 8`}</Eq>. 한계: <Eq>{`64 - 12 = 52`}</Eq>, <Eq>{`72 + 12 = 84`}</Eq>. 모든 체중이 범위 내.</li></ol><em>참고:</em> 상자 내 중앙값의 위치는 비대칭을 나타냅니다. $Q_1$에 가까우면 우측 꼬리가 김.</>}
+>
+
+체중(kg): 60, 62, 64, 65, 65, 67, 70, 72, 75, 80. 상자 그림의 모든 요소를 설명하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.10"
+  dificuldade="aplicacao"
+  resposta="1.349"
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "183", exercicio: "5.1.12", licenca: "GNU FDL" }}
+  solucao={<><Eq>{`Z \\sim \\mathcal N(0,1)`}</Eq>: <Eq>{`Q_1 = \\Phi^{-1}(0{,}25) \\approx -0{,}674`}</Eq>, <Eq>{`Q_3 = \\Phi^{-1}(0{,}75) \\approx 0{,}674`}</Eq>. 대칭으로 <Eq>{`IQR = 2 \\times 0{,}674 = 1{,}348 \\approx 1{,}349`}</Eq>.</>}
+>
+
+$Z \sim \mathcal N(0,1)$에 대해 $Q_3 - Q_1 = ?$
+
+</Exercicio>
+
+<Exercicio
+  numero="73.11"
+  dificuldade="aplicacao"
+  solucao={<>견고한 추정량: <Eq>{`\\hat\\sigma = IQR / 1{,}349 = 6{,}7 / 1{,}349 \\approx 4{,}97`}</Eq>. 이상치가 표준편차를 오염할 의심이 있을 때 유용.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "87", exercicio: "2.4.11", licenca: "CC-BY" }}
+>
+
+$IQR = 6{,}7$인 데이터. 견고한 추정량 $\hat\sigma = IQR/1{,}349$를 사용해 $\hat\sigma$를 계산하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.12"
+  dificuldade="aplicacao"
+  solucao={<>규칙 <Eq>{`Q_3 + 3 \\cdot IQR`}</Eq>는 <Eq>{`\\approx Q_3 + 3 \\times 1{,}349\\sigma = \\mu + 0{,}674\\sigma + 4{,}047\\sigma = \\mu + 4{,}721\\sigma`}</Eq>와 같습니다. <Eq>{`P(Z > 4{,}72) \\approx 0{,}00001`}</Eq>. 1000번의 정규 관측에서, <Eq>{`\\approx 0{,}01`}</Eq>을 예상 — 사실상 0.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "184", exercicio: "5.1.14", licenca: "GNU FDL" }}
+>
+
+1000번의 정규 관측 표본에서 $Q_3 + 3 \cdot IQR$을 초과하는 점이 몇 개나 예상됩니까?
+
+</Exercicio>
+
+### 블록 B — 해석과 비교(73.13 - 73.22)
+
+<Exercicio
+  numero="73.13"
+  dificuldade="aplicacao"
+  solucao={<>상자 그림 A: 좁은 상자(<Eq>{`IQR`}</Eq> 작음)에 중앙값이 중앙에 → 낮은 산포, 대칭. 상자 그림 B: 넓은 상자(<Eq>{`IQR`}</Eq> 큼)에 중앙값이 <Eq>{`Q_1`}</Eq> 근처 → 높은 산포, 우측 편향(상위 꼬리 김).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "61", exercicio: "2.13", licensa: "CC-BY-SA" }}
+>
+
+상자 그림 A: 좁은 상자, 중앙값 중앙. 상자 그림 B: 넓은 상자, 중앙값이 $Q_1$에 가까움. 두 집합의 산포와 비대칭을 비교하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.14"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "중앙값 위", correta: true}, {texto: "중앙값 아래"}, {texto: "중앙값과 같음"}, {texto: "판단 불가"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "57", exercicio: "2.9", licena: "CC-BY-SA" }}
+  solucao={<>우측 꼬리가 긴 분포에서 꼬리가 평균을 위로 끌어올립니다. 중앙값은 위치 기반이므로 꼬리의 영향을 받지 않습니다. 따라서 평균은 중앙값 <strong>위</strong>에 있습니다.</>}
+>
+
+우측 꼬리가 긴 분포. 평균은 중앙값에 대해 어느 위치에 있습니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.15"
+  dificuldade="aplicacao"
+  resposta="B"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "86", exercicio: "2.4.7", licena: "CC-BY" }}
+  solucao={<><Eq>{`IQR`}</Eq>은 중앙 50%의 산포를 측정합니다. B의 <Eq>{`IQR = 20`}</Eq>은 A의 <Eq>{`IQR = 5`}</Eq>보다 4배 — B가 훨씬 더 산포.</>}
+>
+
+집합 A: $IQR = 5$, 집합 B: $IQR = 20$. 어느 것이 중앙 데이터에서 더 많은 산포를 가지고 있습니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.16"
+  dificuldade="aplicacao"
+  solucao={<>둘 다 중앙값 50. A에서 <Eq>{`Q_3 - Q_2 = 55 - 50 = 5`}</Eq>(상위 절반 좁음). B에서 <Eq>{`Q_3 - Q_2 = 80 - 50 = 30`}</Eq>(상위 절반 넓음). B가 우측으로 훨씬 더 비대칭.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "62", exercicio: "2.15", licensa: "CC-BY-SA" }}
+>
+
+A와 B의 중앙값은 모두 50. A의 $Q_3 = 55$, B의 $Q_3 = 80$. 어느 것이 우측으로 더 비대칭입니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.17"
+  dificuldade="aplicacao"
+  solucao={<>급여의 $P_{90}$ = 30만원은: 직원의 90%가 월 30만원 이하를 버는 것. 10%가 그보다 더 벌어요.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "74", exercicio: "2.3.7", licena: "CC-BY" }}
+>
+
+회사 급여의 $P_{90}$ = 30만원. 이 정보를 해석하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.18"
+  dificuldade="aplicacao"
+  solucao={<>학생이 수능의 $P_{85}$에 있다는 것: 그 학생이 그 해 응시자의 85%보다 높거나 같은 점수를 받았다는 의미.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-3-measures-of-the-location-of-the-data", secao: "§2.3", pagina: "75", exercicio: "2.3.9", licena: "CC-BY" }}
+>
+
+학생이 수능의 $P_{85}$에 있습니다. 이것은 무엇을 의미합니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.19"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "모든 데이터가 같거나 매우 집중됨", correta: true}, {texto: "데이터에 많은 이상치가 있음"}, {texto: "분포가 쌍봉형"}, {texto: "평균이 0"}]}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "58", exercicio: "2.8", licensa: "CC-BY-SA" }}
+  solucao={<><Eq>{`Q_1 = Q_2 = Q_3`}</Eq>이면, <Eq>{`IQR = 0`}</Eq>. 최소한 중앙 50%의 데이터가 같은 값을 가지고 있다는 뜻 — 중앙 50%의 최대 집중. 모든 데이터가 같거나 반복된 값이 많을 수 있습니다.</>}
+>
+
+$Q_1 = Q_2 = Q_3$이면 데이터에 대해 무엇을 결론지을 수 있습니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.20"
+  dificuldade="compreensao"
+  solucao={<>아니오. 정규 데이터에서 1.5 IQR 규칙은 약 <Eq>{`0{,}7\\%`}</Eq>의 관측값을 이상치로 표시합니다. 5%는 아닙니다. "5%를 이상치"로 하려면 약 <Eq>{`Q_1 - 0{,}69 \\cdot IQR`}</Eq>을 사용하면 되는데, 이는 1.5 IQR이 아닙니다. Tukey의 규칙은 이상치가 드물되 불가능하지는 않도록 의도적으로 보정되었습니다.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "63", exercicio: "2.17", licensa: "CC-BY-SA" }}
+>
+
+"1.5 IQR 규칙은 정규 데이터에서 5%를 이상치로 표시한다"는 문장이 맞습니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.21"
+  dificuldade="aplicacao"
+  solucao={<>7개 값의 5개 요약: 최소 = 40, <Eq>{`Q_1 = 52`}</Eq>, 중앙값 = 58, <Eq>{`Q_3 = 64`}</Eq>, 최대 = 72. <Eq>{`IQR = 12`}</Eq>. 상한: <Eq>{`64 + 18 = 82`}</Eq>. 이상치 없음.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "89", exercicio: "2.4.15", licena: "CC-BY" }}
+>
+
+연령(세): 40, 52, 55, 58, 62, 66, 72. 5개 요약을 계산하고 이상치를 확인하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.22"
+  dificuldade="aplicacao"
+  solucao={<>성적: 3, 5, 6, 7, 7, 8, 8, 9, 10, 10. 중앙값 = <Eq>{`(7+8)/2 = 7{,}5`}</Eq>. <Eq>{`Q_1 = 6`}</Eq>, <Eq>{`Q_3 = 9`}</Eq>. <Eq>{`IQR = 3`}</Eq>. 한계: <Eq>{`[6 - 4{,}5;\\; 9 + 4{,}5] = [1{,}5;\\; 13{,}5]`}</Eq>. 이상치 없음.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "64", exercicio: "2.19", licensa: "CC-BY-SA" }}
+>
+
+10명 학생의 성적: 3, 5, 6, 7, 7, 8, 8, 9, 10, 10. 상자 그림 완성(이상치 확인 포함).
+
+</Exercicio>
+
+### 블록 C — 한국 데이터 모델링(73.23 - 73.32)
+
+<Exercicio
+  numero="73.23"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`Q_1 = 5`}</Eq>, <Eq>{`Q_3 = 8`}</Eq>일 때, 성적 9.5는 <Eq>{`Q_3`}</Eq> 위 — 네, 상위 25% 범위.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "90", exercicio: "2.4.17", licena: "CC-BY" }}
+>
+
+100명 반: $Q_1 = 5$, $Q_3 = 8$. 학생이 9.5를 맞았습니다. 상위 25% 범위에 있습니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.24"
+  dificuldade="modelagem"
+  solucao={<>한국의 소득은 우측으로 크게 치우쳐져 있습니다. 소수 고소득층이 평균을 끌어올려 "전형적인" 소득 척도로는 왜곡됩니다. 중앙값은 극단값 영향을 받지 않아 중위 소득자가 버는 금액을 더 잘 나타냅니다. 예시: 2023년 한국 가구의 평균 소득은 3,459만원이지만 중앙값은 1,850만원 — 87% 차이.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "56", exercicio: "2.6", licensa: "CC-BY-SA" }}
+>
+
+통계청이 소득 불평등 보고서에서 평균이 아닌 중위 소득을 발표하는 이유는 무엇입니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.25"
+  dificuldade="modelagem"
+  solucao={<><Eq>{`Q_1 = 9{,}98`}</Eq> mm, <Eq>{`Q_3 = 10{,}02`}</Eq> mm인 부품: 중앙 50%가 9.98 - 10.02 mm. 규격은 <Eq>{`10{,}00 \\pm 0{,}05`}</Eq>, 즉 9.95 - 10.05 mm. 사분위수가 규격 범위 내에 잘 맞으므로 공정이 중심에 있는 것 같습니다. 완전한 판정을 위해서는 <Eq>{`C_p`}</Eq>, <Eq>{`C_{pk}`}</Eq>를 계산하거나 정규성을 가정해야 합니다.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "91", exercicio: "2.4.19", licena: "CC-BY" }}
+>
+
+생산 부품의 지름: $Q_1 = 9{,}98$ mm, $Q_3 = 10{,}02$ mm. 규격: $10{,}00 \pm 0{,}05$ mm. 공정이 중심에 있습니까? 부적합 위험이 있습니까?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.26"
+  dificuldade="modelagem"
+  solucao={<>변형 A: 중앙값 1.2초, <Eq>{`IQR = 0{,}3`}</Eq>(일관되지만 약간 느림). 변형 B: 중앙값 1.1초, <Eq>{`IQR = 1{,}5`}</Eq>(중앙값은 더 빠르지만 매우 가변적 — 이상치 가능성 높음). UX 관점에서는 A를 선호. 사용자는 때때로 빠르고 때로 느린 로딩보다 항상 일관되게 빠른 로딩을 선호합니다.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "65", exercicio: "2.21", licensa: "CC-BY-SA" }}
+>
+
+사이트 A/B 검정: 변형 A는 중앙값 1.2초, $IQR = 0{,}3$. 변형 B는 중앙값 1.1초, $IQR = 1{,}5$. 운영 환경에 배포할 것은? 산포 통계로 정당화하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.27"
+  dificuldade="modelagem"
+  solucao={<>조사 없이 이상치를 제거하면 안 됩니다. 금융 거래의 이상치: (a) 입력 오류(제거 가능, 문서화 필요); (b) 실제 사기(보존해야 함 — 가장 정보가 많음); (c) 고가 고객. 사기 탐지 모델의 학습 데이터에서 이상치를 제거하는 것은 특히 해롭습니다. 모델이 정확히 높은 위험 사례를 감지하는 법을 배우지 않습니다.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "92", exercicio: "2.4.21", licena: "CC-BY" }}
+>
+
+금융 거래에서 사기로 보이는 이상치를 발견했습니다. 분석 전에 제거해야 합니까? 통계적 논증으로 정당화하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.28"
+  dificuldade="modelagem"
+  solucao={<>시스템 응답 시간: 120, 130, 135, 140, 142, 145, 148, 150, 155, 380 ms. <Eq>{`Q_1 = 134`}</Eq>, <Eq>{`Q_3 = 149`}</Eq>, <Eq>{`IQR = 15`}</Eq>. 한계: <Eq>{`149 + 22{,}5 = 171{,}5`}</Eq>. 값 380 ms는 이상치 — 타임아웃 또는 네트워크 장애 가능성. SLA 200 ms에 대해 이상치를 제외하면 시스템이 충족합니다.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "66", exercicio: "2.23", licensa: "CC-BY-SA" }}
+>
+
+응답 시간(ms): 120, 130, 135, 140, 142, 145, 148, 150, 155, 380. 5개 요약을 계산하고 200ms SLA 준수 여부를 사분위수로 평가하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.29"
+  dificuldade="modelagem"
+  solucao={<>병원 4개 병동. 평균 입원 기간(일): A(5,8,9,10,12), B(3,4,4,5,20), C(7,8,8,9,10), D(2,3,15,18,25). B와 D는 이상치(복잡한 사례). A는 균등 분포(<Eq>{`IQR = 3`}</Eq>), C는 최소 변동성(<Eq>{`IQR = 1`}</Eq>). 침상 할당 결정은 중앙값보다 <Eq>{`IQR`}</Eq> 낮음(더 예측 가능)을 우선.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "93", exercicio: "2.4.23", licena: "CC-BY" }}
+>
+
+병원의 4개 병동. 입원 기간(일): 병동A: 5, 8, 9, 10, 12; 병동B: 3, 4, 4, 5, 20; 병동C: 7, 8, 8, 9, 10; 병동D: 2, 3, 15, 18, 25. 5개 요약을 구성하고 어느 병동이 침상 관리에서 가장 예측 가능한지 찾으세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.30"
+  dificuldade="modelagem"
+  solucao={<>학교별 수능 점수. 학교 A: 중앙값 650, <Eq>{`IQR = 80`}</Eq>. 학교 B: 중앙값 620, <Eq>{`IQR = 200`}</Eq>. A가 더 동질적(낮은 <Eq>{`IQR`}</Eq>) 및 높은 중앙값. B는 내부 불평등이 높음 — 일부 학생은 매우 우수, 일부는 부족. 정책상 B는 수준 맞춤, A는 심화가 필요.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "67", exercicio: "2.25", licensa: "CC-BY-SA" }}
+>
+
+학교별 수능 점수. 학교 A: 중앙값 650, $IQR = 80$. 학교 B: 중앙값 620, $IQR = 200$. 어느 학교가 더 균등한 성과를 보입니까? 각 패턴이 교육 정책에 어떤 제안을 하는지?
+
+</Exercicio>
+
+<Exercicio
+  numero="73.31"
+  dificuldade="modelagem"
+  solucao={<>서울의 월평균 강수량(mm): 234, 181, 130, 83, 68, 52, 44, 47, 82, 122, 145, 201. 정렬: 44, 47, 52, 68, 82, 83, 122, 130, 145, 181, 201, 234. <Eq>{`Q_1 = 60`}</Eq>, 중앙값 = <Eq>{`(83+122)/2 = 102{,}5`}</Eq>, <Eq>{`Q_3 = 163`}</Eq>. <Eq>{`IQR = 103`}</Eq>. 이상치 없음(한계: [-94.5, 317.5]). 분포는 우측 편향: 강수량이 여름에 집중.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/2-4-box-plots", secao: "§2.4", pagina: "94", exercicio: "2.4.25", licena: "CC-BY" }}
+>
+
+서울의 월평균 강수량(mm): 234, 181, 130, 83, 68, 52, 44, 47, 82, 122, 145, 201. 5개 요약을 계산하고 계절성을 해석하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.32"
+  dificuldade="modelagem"
+  solucao={<>부동산 가격: R$ 250천, 280천, 310천, 320천, 340천, 350천, 380천, 390천, 420천, 1,800천. 중앙값 = R$ 345천, 평균 = R$ 484천 — 엄청난 차이, 고급 부동산이 평균을 끌어올림. 동네 전형 부동산 가격책정에는 중앙값이 올바른 기준. 1,800천 부동산은 이상치(<Eq>{`Q_3 + 1{,}5 \\cdot IQR`}</Eq> = R$ 550천).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.1", pagina: "59", exercicio: "2.10", licensa: "CC-BY-SA" }}
+>
+
+동네 부동산 가격(만원): 250, 280, 310, 320, 340, 350, 380, 390, 420, 1800. 중앙값과 평균을 계산하세요. 구매자가 전형적인 가격으로 중앙값을 사용해야 하는 이유는?
+
+</Exercicio>
+
+### 블록 D — 이해 및 증명(73.33 - 73.40)
+
+<Exercicio
+  numero="73.33"
+  dificuldade="compreensao"
+  solucao={<>중앙값과 IQR은 데이터의 순서에만 의존하고, 절대값에는 아닙니다. 관측값 하나가 무한대가 되어도: 중앙값은 변하지 않음(여전히 중앙 위치), IQR도 변하지 않음(여전히 중앙 50% 측정). 평균과 표준편차는 값을 직접 더하므로, 하나의 무한 값이 둘 다 무한으로 만듭니다.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "68", exercicio: "2.27", licensa: "CC-BY-SA" }}
+>
+
+중앙값과 IQR이 "견고"하지만 평균과 표준편차는 그렇지 않은 이유를 자신의 말로 설명하세요. 구체적 예시를 사용.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.34"
+  dificuldade="compreensao"
+  solucao={<>그렇습니다. 예시: 쌍봉형, 10과 90에 피크, 중간값 드문. 각 피크에 25% 데이터가 있으면, <Eq>{`Q_1 \\approx 10`}</Eq>, <Eq>{`Q_2 \\approx 50`}</Eq>, <Eq>{`Q_3 \\approx 90`}</Eq> — [10, 90] 균등 분포와 동일. 상자 그림은 "넓은 상자"를 보지만 두 모드를 구분 못합니다. 히스토그램과 바이올린 그림이 상자 그림을 보완.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "69", exercicio: "2.29", licensa: "CC-BY-SA" }}
+>
+
+상자 그림이 쌍봉형 분포를 숨길 수 있습니까? 단일봉 분포와 같은 상자 그림을 가지는 쌍봉형 분포의 구체적 예시를 만드세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.35"
+  dificuldade="compreensao"
+  opcoes={[{texto: "IQR = 0.5", correta: true}, {texto: "IQR = 1.0"}, {texto: "IQR = 0.25"}, {texto: "IQR = 2.0"}]}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "185", exercicio: "5.1.15", licena: "GNU FDL" }}
+  solucao={<><Eq>{`X \\sim \\text{균등}(0, 1)`}</Eq>에 대해, CDF는 <Eq>{`F(x) = x`}</Eq>. 따라서 <Eq>{`Q_1 = F^{-1}(0{,}25) = 0{,}25`}</Eq>, <Eq>{`Q_3 = 0{,}75`}</Eq>. 그러므로 <Eq>{`IQR = 0{,}75 - 0{,}25 = 0{,}5`}</Eq>.</>}
+>
+
+$X \sim \text{균등}(0, 1)$에 대해 $IQR$은:
+
+</Exercicio>
+
+<Exercicio
+  numero="73.36"
+  dificuldade="desafio"
+  solucao={<><Eq>{`X \\sim \\text{지수}(\\lambda)`}</Eq>: CDF <Eq>{`F(x) = 1 - e^{-\\lambda x}`}</Eq>. <Eq>{`Q_1 = -\\ln(0{,}75)/\\lambda`}</Eq>, <Eq>{`Q_3 = -\\ln(0{,}25)/\\lambda = \\ln(4)/\\lambda`}</Eq>. <Eq>{`IQR = (\\ln 4 - \\ln(4/3))/\\lambda = \\ln 3/\\lambda \\approx 1{,}099/\\lambda`}</Eq>. $\lambda = 1$일 때: <Eq>{`IQR = \\ln 3 \\approx 1{,}099`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "186", exercicio: "5.1.17", licena: "GNU FDL" }}
+>
+
+$X \sim \text{지수}(\lambda)$의 $IQR$을 해석적으로 계산하세요. $\lambda$의 함수로 나타내세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.37"
+  dificuldade="desafio"
+  solucao={<>IQR의 붕괴점: 크기 $n$ 표본을 생각해 봅시다. $Q_1$을 "파괴"하려면 최소 $n/4$개 점을 어떤 한계를 넘어 옮겨야 합니다. 따라서 붕괴점은 $1/4 = 25\%$. 중앙값도 유사: 50%. 평균은 1개 점만 필요(0%).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§2.2", pagina: "70", exercicio: "2.31", licensa: "CC-BY-SA" }}
+>
+
+$IQR$의 붕괴점이 25%, 중앙값의 붕괴점이 50%, 평균의 붕괴점이 0%임을 논증하세요.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.38"
+  dificuldade="demonstracao"
+  solucao={<><Eq>{`X`}</Eq>가 $\mu$에 대해 대칭 밀도인 연속 확률변수: 대칭은 <Eq>{`f(\\mu + t) = f(\\mu - t)`}</Eq> 모든 $t$에 대해. 그러면 <Eq>{`P(X \\leq \\mu) = \\int_{-\\infty}^\\mu f(x)\\,dx`}</Eq>. 변수 변환 <Eq>{`u = 2\\mu - x`}</Eq>: 적분은 <Eq>{`\\int_\\mu^\\infty f(u)\\,du = P(X \\geq \\mu)`}</Eq>. 따라서 <Eq>{`P(X \\leq \\mu) = P(X \\geq \\mu) = 1/2`}</Eq>, 그래서 $\mu$는 중앙값.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "187", exercicio: "5.1.19", licena: "GNU FDL" }}
+>
+
+증명: $X$가 $\mu$에 대해 대칭인 밀도의 연속 확률변수이면, $\mu$는 $X$의 중앙값입니다.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.39"
+  dificuldade="demonstracao"
+  solucao={<><Eq>{`X \\sim \\text{균등}(0,1)`}</Eq>의 경우, 순서 통계량은 <Eq>{`X_{(k)} \\sim \\text{베타}(k, n-k+1)`}</Eq>. 특히, <Eq>{`X_{(\\lceil n/4 \\rceil)} \\to Q_1 = 0{,}25`}</Eq> $n \\to \\infty$일 때 대수의 법칙으로 거의 확실히. <Eq>{`X_{(k)}`}</Eq>의 분산은 <Eq>{`k(n-k+1)/[(n+1)^2(n+2)]`}</Eq>, $n \\to \\infty$일 때 0 수렴.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "188", exercicio: "5.1.21", licena: "GNU FDL" }}
+>
+
+$n \to \infty$이고 균등(0,1)에서 iid 표본일 때, $Q_1$의 표본 추정량이 0.25로 수렴함을 보이세요. 순서 통계량의 성질을 사용.
+
+</Exercicio>
+
+<Exercicio
+  numero="73.40"
+  dificuldade="demonstracao"
+  solucao={<>중앙값은 <Eq>{`E[|X - c|]`}</Eq>를 최소화합니다. 증명: <Eq>{`g(c) = E[|X - c|] = \\int_{-\\infty}^c (c-x)f(x)\\,dx + \\int_c^\\infty (x-c)f(x)\\,dx`}</Eq>. 미분: <Eq>{`g'(c) = \\int_{-\\infty}^c f(x)\\,dx - \\int_c^\\infty f(x)\\,dx = F(c) - (1 - F(c)) = 2F(c) - 1`}</Eq>. 0으로 놓으면: <Eq>{`F(c) = 1/2`}</Eq>, 즉 $c = \text{중앙값}$. <Eq>{`g''(c) = 2f(c) > 0`}</Eq>이므로 최솟값.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.1", pagina: "189", exercicio: "5.1.23", licena: "GNU FDL" }}
+>
+
+중앙값이 모든 $c \in \mathbb{R}$에 대해 $E[|X - c|]$를 최소화함을 증명하세요.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## 출처
+
+- [**OpenIntro Statistics** (4판)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · KO · CC-BY-SA. **주요 출처 — §2.1(사분위수, 백분위수)과 §2.2(상자 그림, 이상치).**
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · KO · CC-BY. **§2.3(선형 보간 백분위수)과 §2.4(상자 그림과 1.5 IQR 규칙).**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · 1997 · KO · GNU FDL. **§5.1 — 연속 분포의 사분위수, 순서 통계량.**

@@ -1,0 +1,726 @@
+---
+titulo: "Lição 117 — Decomposição em valores singulares (SVD)"
+slug: "licao-117-svd"
+categoria: "aulas"
+subcategoria: "ano-3-trim-12"
+descricao: "A = U Σ Vᵀ funciona para qualquer matriz real. Valores singulares revelam a estrutura geométrica. Base de compressão de imagens, recomendação, PCA e pseudoinversa."
+ordem: 117
+publicado: true
+tags: ["álgebra linear", "SVD", "valores singulares", "compressão", "ano-3", "trim-12"]
+prerrequisitos: ["licao-116-matrizes-especiais"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+versao: "v1"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Lineare Algebra LK alemão", "Equiv. H2 Math singapurense", "Equiv. Math III japonês avançado"]
+---
+
+<EquacaoCanonica
+  formula="A = U\Sigma V^T"
+  legenda={<>Die <strong>SVD</strong> ist die allgemeinste Zerlegung der linearen Algebra: jede Matrix <Eq>{`m \\times n`}</Eq> lässt sich schreiben als <Eq>{`A = U\\Sigma V^T`}</Eq> mit <Eq>{`U`}</Eq> und <Eq>{`V`}</Eq> orthogonal und <Eq>{`\\Sigma`}</Eq> diagonal mit <strong>Singulärwerten</strong> <Eq>{`\\sigma_1 \\geq \\sigma_2 \\geq \\cdots \\geq 0`}</Eq>. Die Zerlegung existiert für jede reelle (oder komplexe) Matrix — auch rechteckige. Sie ist die Grundlage für PCA, Bildkompression, Empfehlungssysteme und stabile Regression.</>}
+  audioTexto="SVD: A gleich U mal Sigma mal V Transponiert. U und V sind orthogonal. Sigma ist diagonal mit nicht-negativen Singulärwerten in absteigender Reihenfolge. Gilt für jede reelle Matrix, einschließlich rechteckiger. Es ist die Verallgemeinerung des Spektralsatzes."
+/>
+
+<aside>
+
+**Bücher zu diesem Thema**
+
+- [**Understanding Linear Algebra**](https://understandinglinearalgebra.org/chap6.html) — David Austin · §6.3–6.4 · CC-BY-SA · *Geometrische Darstellung der SVD mit vollständigen numerischen Beispielen und Ellipsoidtransformationsfiguren; ausgezeichnet für die Türen 10 und 15.*
+- [**A First Course in Linear Algebra**](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · §SVD · GNU FDL · *Rigorose Demonstration der Existenz und Eindeutigkeit der SVD mit Hilfslemmata; Basis für die formale Tür.*
+- [**Álgebra Linear** (REAMAT UFRGS)](https://www.ufrgs.br/reamat/AlgebraLinear/index.html) — Reamat Colaborativo · Kap. SVD · CC-BY-SA · *PT-BR-Quelle mit Beispielen zu Kompression und Pseudoinverser; ideal für numerische Übungen.*
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definition und Theorem">
+
+### SVD-Theorem
+
+<Definicao titulo="Singulärwertzerlegung (SVD)">
+
+Für jede <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq> existieren:
+
+- <Eq>{`U \\in \\mathbb{R}^{m \\times m}`}</Eq> orthogonal (Spalten = **linke Singularvektoren**),
+- <Eq>{`V \\in \\mathbb{R}^{n \\times n}`}</Eq> orthogonal (Spalten = **rechte Singularvektoren**),
+- <Eq>{`\\Sigma \\in \\mathbb{R}^{m \\times n}`}</Eq> mit Diagonaleinträgen <Eq>{`\\sigma_1 \\geq \\sigma_2 \\geq \\cdots \\geq \\sigma_r > 0 = \\sigma_{r+1} = \\cdots`}</Eq>,
+
+so dass <Eq>{`A = U \\Sigma V^T`}</Eq>. Die ganze Zahl <Eq>{`r = \\text{rank}(A)`}</Eq>.
+
+</Definicao>
+
+> "Any matrix A with rank r can be written as a product $A = U \Sigma V^T$ where U is orthogonal ($m \times m$), $\Sigma$ is diagonal ($m \times n$, nonnegative entries decreasing), and V is orthogonal ($n \times n$). The diagonal entries $\sigma_1 \geq \cdots \geq \sigma_r > 0$ are the singular values of A." — [Understanding Linear Algebra, §6.3](https://understandinglinearalgebra.org/chap6.html)
+
+<Definicao titulo="Kompakte SVD und Rang-1-Expansion">
+
+Die **kompakte SVD** (wirtschaftlich) behält nur die <Eq>{`r`}</Eq> nicht-trivialen Spalten:
+
+<Equation explicacao="Expansion: A ist die Summe von r Rang-1-Matrizen, gewichtet nach Singulärwerten." latex="A = U_r \Sigma_r V_r^T = \sum_{i=1}^r \sigma_i\, u_i v_i^T" />
+
+Jeder Term <Eq>{`\\sigma_i u_i v_i^T`}</Eq> ist eine **Rang-1-Matrix** — äußeres Produkt eines Spaltenvektors mit einem Zeilenvektor.
+
+</Definicao>
+
+> "Theorem (Existence of SVD). Every real matrix A has a singular value decomposition. The singular values are the positive square roots of the nonzero eigenvalues of $A^T A$." — [A First Course in Linear Algebra, §SVD](http://linear.ups.edu/html/section-SVD.html)
+
+### Verbindung zu Eigenwerten
+
+<Definicao titulo="SVD und die Matrizen A^T A und A A^T">
+
+- <Eq>{`A^T A = V (\\Sigma^T \\Sigma) V^T`}</Eq>: die **Eigenwerte** von <Eq>{`A^T A`}</Eq> sind <Eq>{`\\sigma_i^2`}</Eq>, Eigenvektoren = Spalten von <Eq>{`V`}</Eq>.
+- <Eq>{`A A^T = U (\\Sigma \\Sigma^T) U^T`}</Eq>: die **Eigenwerte** von <Eq>{`A A^T`}</Eq> sind dieselben <Eq>{`\\sigma_i^2`}</Eq>, Eigenvektoren = Spalten von <Eq>{`U`}</Eq>.
+- Singulärwerte sind **immer reell und nicht-negativ**, auch wenn <Eq>{`A`}</Eq> komplexe Eigenwerte hat.
+
+</Definicao>
+
+### Die 4 fundamentalen Untervektorräume via SVD
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 560 170" className="w-full">
+<defs>
+  <marker id="arr117" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="20" width="240" height="60" rx="8" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="130" y="42" textAnchor="middle" fontSize="12" fontFamily="serif" fontWeight="bold" fill="currentColor">Eingaberaum (R^n)</text>
+  <text x="60" y="62" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(26 77 92)">Row(A) = Spalten r von V</text>
+  <text x="60" y="76" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">ker(A) = Spalten n-r von V</text>
+</g>
+<g>
+  <rect x="310" y="20" width="240" height="60" rx="8" fill="rgb(201 163 95 / 0.2)" stroke="rgb(201 163 95)" strokeWidth="1.5"/>
+  <text x="430" y="42" textAnchor="middle" fontSize="12" fontFamily="serif" fontWeight="bold" fill="currentColor">Ausgaberaum (R^m)</text>
+  <text x="360" y="62" fontSize="10" fontFamily="ui-monospace,monospace" fill="rgb(201 163 95)">Col(A) = Spalten r von U</text>
+  <text x="360" y="76" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">ker(A^T) = Spalten m-r von U</text>
+</g>
+<g>
+  <line x1="250" y1="50" x2="308" y2="50" stroke="rgb(61 122 95)" strokeWidth="2" markerEnd="url(#arr117)"/>
+  <text x="279" y="44" textAnchor="middle" fontSize="10" fontFamily="serif" fill="rgb(61 122 95)">A</text>
+</g>
+<text x="280" y="130" textAnchor="middle" fontSize="11" fontFamily="serif" fill="currentColor" fillOpacity="0.7">Spalten von U und V bilden orthonormale Basen der 4 Untervektorräume von A.</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">Die 4 fundamentalen Untervektorräume von Strang direkt aus der SVD gelesen.</figcaption>
+</figure>
+
+### Eckart-Young-Theorem
+
+<Teorema titulo="Beste Approximation von Rang k (Eckart-Young, 1936)">
+
+Die beste Approximation von Rang <Eq>{`k`}</Eq> von <Eq>{`A`}</Eq> (in Frobenius-Norm und Spektralnorm) ist:
+
+<Equation explicacao="Truncate die SVD auf die k größten Singulärwerte gibt die beste Rang-k-Approximation im Sinne kleinster Quadrate." latex="A_k = \sum_{i=1}^k \sigma_i\, u_i v_i^T" />
+
+Fehler: <Eq>{`\\|A - A_k\\|_F^2 = \\sigma_{k+1}^2 + \\cdots + \\sigma_r^2`}</Eq>, <Eq>{`\\|A - A_k\\|_2 = \\sigma_{k+1}`}</Eq>.
+
+</Teorema>
+
+### Moore-Penrose-Pseudoinverse
+
+<Definicao titulo="Pseudoinverse via SVD">
+
+<Equation explicacao="Invertiere die positiven Singulärwerte an der Stelle von Sigma; setze die Nullen zu Null. Löse min ||Ax - b|| mit minimaler Normlösung." latex="A^+ = V \Sigma^+ U^T" />
+
+wobei <Eq>{`\\Sigma^+`}</Eq> durch Ersetzen jedes <Eq>{`\\sigma_i > 0`}</Eq> durch <Eq>{`1/\\sigma_i`}</Eq> und Transponieren erhalten wird. Die Lösung <Eq>{`x^* = A^+ b`}</Eq> minimiert <Eq>{`\\|Ax - b\\|`}</Eq> mit kleinster Norm <Eq>{`\\|x\\|`}</Eq> unter allen Minimierern.
+
+</Definicao>
+
+<Insight>
+
+Die **Konditionszahl** von <Eq>{`A`}</Eq> ist <Eq>{`\\kappa_2(A) = \\sigma_1 / \\sigma_r`}</Eq>. Ein System <Eq>{`Ax = b`}</Eq> mit großer <Eq>{`\\kappa_2`}</Eq> ist schlecht konditioniert: kleine Fehler in <Eq>{`b`}</Eq> erzeugen große Fehler in <Eq>{`x`}</Eq>. SVD ist das standarddiagnostische Werkzeug für Schlechtkonditionierung.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein 5-jähriges Kind">
+
+Stell dir vor, du hast ein **Farbfoto** eines Hundes. Das Foto ist voller farbiger Punkte — es sind viele! SVD ist ein **Organisationszauber**: es zerlegt das Foto in **Schichten der Bedeutung**.
+
+Die erste Schicht erfasst die wichtigsten Teile — die Silhouette des Hundes. Die zweite erfasst etwas kleinere Details. Und so weiter.
+
+Wenn du nur die ersten wichtigsten Schichten zusammensetzt, kannst du den Hund immer noch erkennen — aber mit **viel weniger Speicher**. So speichert der Computer kleinere Fotos, ohne zu viel Qualität zu verlieren.
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein 10-jähriges Kind">
+
+Jede Matrix kann in drei Teile zerlegt werden: <Eq>{`A = U \\Sigma V^T`}</Eq>.
+
+- <Eq>{`V^T`}</Eq> ist eine **Rotation** des Eingaberaums.
+- <Eq>{`\\Sigma`}</Eq> ist eine **Skalierung** — streckt oder schrumpft jede Richtung um eine Zahl <Eq>{`\\sigma_i \\geq 0`}</Eq>.
+- <Eq>{`U`}</Eq> ist eine andere **Rotation** im Ausgaberaum.
+
+Diese Zahlen <Eq>{`\\sigma_i`}</Eq> — die **Singulärwerte** — sagen die Bedeutung jeder Richtung. Die größte <Eq>{`\\sigma_1`}</Eq> ist die wichtigste Richtung; die kleinste ist die unwichtigste.
+
+**Kompressionstrick**: in einem Foto von <Eq>{`1000 \\times 1000`}</Eq> Pixeln, wenn du nur die 50 größten Singulärwerte behältst, speicherst du <Eq>{`50 \\times 1000 + 50 + 50 \\times 1000 = 100050`}</Eq> Zahlen statt 1 Million — **10 Mal weniger**. Das Bild sieht immer noch gut aus.
+
+</Porta>
+
+<Porta nivel="15" titulo="Für einen 15-jährigen Teenager">
+
+SVD ist die wichtigste Zerlegung der angewandten linearen Algebra. Sie kombiniert drei Eigenschaften, die keine andere Zerlegung gleichzeitig hat: **Allgemeingültigkeit** (funktioniert für jede Matrix), **Orthogonalität** (die Basen <Eq>{`U, V`}</Eq> sind orthonormal) und **Eindeutigkeit** (Singulärwerte sind eindeutig).
+
+### Geometrie
+
+Jede lineare Matrix <Eq>{`A: \\mathbb{R}^n \\to \\mathbb{R}^m`}</Eq> bildet die Einheitssphäre auf ein **Ellipsoid** ab. Die Halbachsen des Ellipsoids haben Längen <Eq>{`\\sigma_1 \\geq \\cdots \\geq \\sigma_r`}</Eq> und zeigen in die Richtungen <Eq>{`u_1, \\ldots, u_r`}</Eq>.
+
+- <Eq>{`V^T`}</Eq> rotiert den Eingaberaum (richtet die Vektoren <Eq>{`v_i`}</Eq> mit den kanonischen Achsen aus).
+- <Eq>{`\\Sigma`}</Eq> streckt jede Achse um <Eq>{`\\sigma_i`}</Eq>.
+- <Eq>{`U`}</Eq> rotiert das Ergebnis in den Ausgaberaum.
+
+### Vergleich mit Diagonalisierung
+
+| Aspekt | Diagonalisierung | SVD |
+|---|---|---|
+| Anwendbar auf | Quadratische diagonalisierbare | Jede Matrix |
+| Existenz | Kann fehlschlagen | Existiert immer |
+| Basen | <Eq>{`P, P^{-1}`}</Eq> (nicht orthogonal) | <Eq>{`U, V`}</Eq> orthogonal |
+| Werte | Eigenwerte (<Eq>{`\\mathbb{C}`}</Eq> generell) | Singulär (<Eq>{`\\geq 0`}</Eq> reell) |
+
+### Sofortige Anwendung: Bildkompression
+
+Ein Graustufenbild ist eine Matrix <Eq>{`M \\in \\mathbb{R}^{m \\times n}`}</Eq>. Durch Truncation der SVD auf <Eq>{`k`}</Eq> Terme:
+
+- Speicherung von <Eq>{`A_k`}</Eq> erfordert <Eq>{`k(m + n + 1)`}</Eq> Zahlen statt <Eq>{`mn`}</Eq>.
+- Relativer Frobenius-Fehler: <Eq>{`\\|A - A_k\\|_F / \\|A\\|_F = \\sqrt{\\sum_{i>k} \\sigma_i^2} / \\sqrt{\\sum_i \\sigma_i^2}`}</Eq>.
+
+### Netflix Prize Fall (2009)
+
+Netflix hatte Bewertungsmatrix: <Eq>{`\\approx 10^7`}</Eq> Benutzer <Eq>{`\\times 10^5`}</Eq> Filme, dünn besetzt. Niedrig-Rang-Approximation (SVD-Variante) sagte fehlende Bewertungen voraus. Das Gewinnerteam BellKor's Pragmatic Chaos verbesserte die Genauigkeit um 10% und gewann 1 Million US-Dollar.
+
+</Porta>
+
+<Porta nivel="25" titulo="Für einen Ingenieurstudenten">
+
+SVD ist das Schweizer Messer der computergestützten linearen Algebra. Sie löst schlecht konditionierte Systeme, entdeckt latente Struktur, komprimiert Daten mit optimaler Garantie.
+
+### Rechenalgorithmus
+
+**Für kleine <Eq>{`A`}</Eq>:**
+1. Berechne <Eq>{`A^T A`}</Eq> (symmetrisch PSD).
+2. Zerlege <Eq>{`A^T A = V \\Lambda V^T`}</Eq> (Eigenvektoren).
+3. <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq>; <Eq>{`u_i = A v_i / \\sigma_i`}</Eq> für <Eq>{`\\sigma_i > 0`}</Eq>.
+
+**Für große <Eq>{`A`}</Eq>:** Golub-Reinsch-Algorithmus, <Eq>{`O(\\min(mn^2, m^2n))`}</Eq>. Für Top-<Eq>{`k`}</Eq>: randomisierte SVD (Halko-Martinsson-Tropp), <Eq>{`O(mnk)`}</Eq> erwartet.
+
+### Anwendungen nach Domäne
+
+**Computersicht**: Eigenfaces (Turk-Pentland 1991) — SVD der zentrierten Gesichtsmatrix → Basen zur Gesichtserkennung.
+
+**ML**: Word Embeddings GloVe — SVD der Wort-Co-Vorkommensmatrix; Whitening — <Eq>{`W = V \\Sigma^{-1}`}</Eq> dekorreliert Features.
+
+**Finanzen**: PCA der Zinsstrukturkurve — 3 Hauptfaktoren (Level, Steigung, Wölbung) erfassen ~99% der Varianz (Litterman-Scheinkman 1991).
+
+**Numerik**: Numerischer Rang <Eq>{`r_\\epsilon = \\#\\{\\sigma_i > \\epsilon \\cdot \\sigma_1\\}`}</Eq>; robuste Lösung kleinster Quadrate via Pseudoinverser.
+
+### Python-Code
+
+```python
+import numpy as np
+
+A = np.random.randn(200, 50)
+U, s, Vt = np.linalg.svd(A, full_matrices=False)
+
+# Rang-k-Approximation
+k = 10
+A_k = U[:, :k] @ np.diag(s[:k]) @ Vt[:k, :]
+print("Relativer Frobenius-Fehler:", np.linalg.norm(A - A_k, 'fro') / np.linalg.norm(A, 'fro'))
+
+# Pseudoinverse und kleinste Quadrate
+b = np.random.randn(200)
+x_pinv = np.linalg.lstsq(A, b, rcond=None)[0]  # verwendet SVD intern
+```
+
+### Tikhonov-Regularisierung via SVD
+
+Statt die <Eq>{`\\sigma_i`}</Eq> direkt zu invertieren (unstabil wenn <Eq>{`\\sigma_i`}</Eq> klein), verwende:
+
+<Equation explicacao="Tikhonov: schrumpft die kleinen Singulärwerte, vermeidet Rauschverstärkung." latex="x_\lambda = \sum_{i=1}^r \frac{\sigma_i}{\sigma_i^2 + \lambda}\, (u_i^T b)\, v_i" />
+
+Für <Eq>{`\\lambda \\to 0`}</Eq> gewinnen wir die Pseudoinverse; für großes <Eq>{`\\lambda`}</Eq> schrumpft die Lösung.
+
+</Porta>
+
+<Porta nivel="40" titulo="Für einen Senior-Profi">
+
+SVD ist nicht nur ein Algorithmus — es ist die universelle kanonische Form einer linearen Transformation. Jede Matrix hat eine SVD; nicht jede Matrix hat echte Eigenzerlegung.
+
+### Historischer Kontext
+
+Eugenio Beltrami (1873) und Camille Jordan (1874) zeigten SVD unabhängig voneinander für Quadratmatrizen. Erhard Schmidt (1907) verallgemeinerte für Integraloperatoren (Hilbert-Schmidt-Kerne). Die moderne Form für rechteckige Matrizen stammt von Carl Eckart und Gale Young (1936), die auch das Approximationstheorem bewiesen.
+
+### Verbindung zu Funktionalanalysis
+
+Für kompakte Operatoren <Eq>{`T: H_1 \\to H_2`}</Eq> in Hilberträumen ist die Schmidt-Zerlegung:
+
+<Equation explicacao="Unendlich-dimensionale Verallgemeinerung der SVD: kompakte Operatoren zerlegen sich in abzählbare Summen von Rang-1-Operatoren." latex="T = \sum_{i=1}^\infty \sigma_i\, \langle \cdot, v_i \rangle\, u_i" />
+
+Die **Singulärwerte** von <Eq>{`T`}</Eq> bilden eine Folge in <Eq>{`\\ell^2`}</Eq>. Das ist die Struktur hinter Signalkompression, Hauptkomponentenanalyse und spektralen Kernel-Methoden.
+
+### Randomisierte SVD (Halko-Martinsson-Tropp 2011)
+
+Für Matrizen mit niedrigem numerischen Rang ist exakte SVD unnötig. Der Algorithmus:
+
+1. Proben zufällige Spalte: <Eq>{`Y = A \\Omega`}</Eq> mit <Eq>{`\\Omega \\in \\mathbb{R}^{n \\times (k+p)}`}</Eq> Gauß'sch.
+2. Orthogonalisiere: <Eq>{`Q, R = \\text{QR}(Y)`}</Eq>.
+3. Faktorisiere die Projektion: SVD von <Eq>{`Q^T A`}</Eq> (kleine — <Eq>{`(k+p) \\times n`}</Eq>).
+
+Mit Überabtastung <Eq>{`p \\approx 10`}</Eq> ist der erwartete Fehler nah am Eckart-Young-Optimum. Ermöglicht SVD von <Eq>{`10^6 \\times 10^6`}</Eq>-Matrizen mit begrenztem Speicher.
+
+### SVD und modernes maschinelles Lernen
+
+Transformers (Vaswani et al. 2017) zerlegen die Aufmerksamkeit als Produkt von drei Matrizen: <Eq>{`Q, K, V`}</Eq>. Die Geometrie der Multi-Head-Aufmerksamkeit ist im Grunde eine durch Gradientenabstieg erlernte SVD — die "Heads" lernen Hauptuntervektorräume der Trainingsdaten.
+
+Low-Rank Adaptation (LoRA, 2021) — Fine-Tuning von LLMs — stört vortrainierte Gewichte <Eq>{`W`}</Eq> mit <Eq>{`\\Delta W = BA`}</Eq> von niedrigem Rang, genau das, was SVD als Signalstruktur in Rausch rechtfertigt.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktische Anwendung">
+
+### Schritt-für-Schritt-Bildkompression
+
+Gegeben ein Graustufenbild mit Matrix <Eq>{`A \\in \\mathbb{R}^{512 \\times 512}`}</Eq>:
+
+1. Berechne komplette SVD: <Eq>{`A = U \\Sigma V^T`}</Eq>, mit <Eq>{`\\sigma_1 \\geq \\cdots \\geq \\sigma_{512} \\geq 0`}</Eq>.
+2. Wähle <Eq>{`k`}</Eq>: plotte <Eq>{`\\sigma_i`}</Eq> vs <Eq>{`i`}</Eq> (Scree-Plot); schneid am "Knie" oder wo kumulierte erklärte Varianz <Eq>{`\\geq 95\\%`}</Eq>.
+3. Speichere: <Eq>{`U_{[:, :k]}`}</Eq>, <Eq>{`\\sigma_{1:k}`}</Eq>, <Eq>{`V_{[:, :k]}`}</Eq> — insgesamt <Eq>{`k(512 + 1 + 512)`}</Eq> Floats.
+4. Rekonstruiere: <Eq>{`A_k = U_k \\, \\text{diag}(\\sigma_{1:k}) \\, V_k^T`}</Eq>.
+
+Mit <Eq>{`k = 50`}</Eq>: Kompressionsverhältnis <Eq>{`512^2 / (50 \\times 1025) \\approx 5{,}1\\times`}</Eq>. Visuell nicht vom Original zu unterscheiden.
+
+### Diagnose schlecht konditionierter Regression
+
+In einer linearen Regression <Eq>{`y = X \\beta + \\varepsilon`}</Eq> mit schlecht konditioniertem <Eq>{`X`}</Eq>:
+
+1. SVD von <Eq>{`X = U \\Sigma V^T`}</Eq>.
+2. <Eq>{`\\kappa_2(X) = \\sigma_1 / \\sigma_r`}</Eq>. Wenn <Eq>{`> 30`}</Eq>, gibt es Multikollinearität.
+3. Wende Ridge an: <Eq>{`\\hat\\beta_\\lambda = V (\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T U^T y`}</Eq>.
+4. Wähle <Eq>{`\\lambda`}</Eq> via Kreuzvalidation.
+
+### Praktische Übung: ENEM nach Staat
+
+Die ENEM-Mikrodaten haben ~200 Variablen pro Kandidat. SVD der Staat-×-Variable-Matrix (26 Bundesländer × 200 Items) identifiziert die 3-5 "Ungleichheitsachsen", die die regionale Leistung strukturieren — Analyse veröffentlicht von INEP-Forschern jede Auflage.
+
+</Porta>
+
+</DuasPortas>
+
+## Gelöste Beispiele
+
+<Exemplo titulo="SVD einer einfachen 2×2-Matrix" numero="1">
+
+**Problem.** Berechne die SVD von <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix}`}</Eq>.
+
+**Strategie.** Berechne <Eq>{`A^T A`}</Eq>, zerlege in Eigenvektoren/Eigenwerte, erhalte <Eq>{`V`}</Eq> und <Eq>{`\\Sigma`}</Eq>, dann <Eq>{`U`}</Eq>.
+
+**Lösung.**
+
+<Eq>{`A^T A = \\begin{pmatrix} 3 & 4 \\\\ 0 & 5 \\end{pmatrix}\\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix} = \\begin{pmatrix} 25 & 20 \\\\ 20 & 25 \\end{pmatrix}`}</Eq>
+
+Eigenwerte: <Eq>{`\\det(A^T A - \\lambda I) = (25 - \\lambda)^2 - 400 = 0`}</Eq>, also <Eq>{`\\lambda_1 = 45`}</Eq> und <Eq>{`\\lambda_2 = 5`}</Eq>.
+
+Singulärwerte: <Eq>{`\\sigma_1 = \\sqrt{45} = 3\\sqrt{5}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>.
+
+Eigenvektoren von <Eq>{`A^T A`}</Eq>: für <Eq>{`\\lambda_1 = 45`}</Eq>, löse <Eq>{`(A^T A - 45I)v = 0`}</Eq>: <Eq>{`v_1 = (1/\\sqrt{2})(1, 1)^T`}</Eq>; für <Eq>{`\\lambda_2 = 5`}</Eq>: <Eq>{`v_2 = (1/\\sqrt{2})(1, -1)^T`}</Eq>.
+
+Vektoren auf der linken Seite: <Eq>{`u_i = Av_i / \\sigma_i`}</Eq>.
+
+<Eq>{`u_1 = A v_1 / (3\\sqrt{5}) = (1/(3\\sqrt{5})) \\begin{pmatrix} 3/\\sqrt{2} \\\\ 9/\\sqrt{2} \\end{pmatrix} = (1/\\sqrt{10})\\begin{pmatrix}1\\\\3\\end{pmatrix}`}</Eq>
+
+**Überprüfung.** <Eq>{`U \\Sigma V^T`}</Eq> sollte <Eq>{`A`}</Eq> numerisch reproduzieren (mit Rechner überprüfen).
+
+**Quelle.** [Understanding Linear Algebra, §6.3](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Rang einer Matrix und Untervektorräume via SVD" numero="2">
+
+**Problem.** Bestimme den Rang und Basen der 4 Untervektorräume von <Eq>{`A = \\begin{pmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\end{pmatrix}`}</Eq> via SVD.
+
+**Strategie.** <Eq>{`A`}</Eq> ist <Eq>{`2 \\times 3`}</Eq>. Da Zeile 2 das Doppelte von Zeile 1 ist, ist der Rang 1.
+
+**Lösung.**
+
+<Eq>{`A^T A = \\begin{pmatrix} 1 & 2 \\\\ 2 & 4 \\\\ 3 & 6 \\end{pmatrix}\\begin{pmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\end{pmatrix} = \\begin{pmatrix} 5 & 10 & 15 \\\\ 10 & 20 & 30 \\\\ 15 & 30 & 45 \\end{pmatrix}`}</Eq>
+
+Nicht-null-Eigenwert: <Eq>{`\\lambda_1 = \\text{tr}(A^T A) = 70`}</Eq> (Summe der Quadrate aller Einträge, da Rang 1). Singulärwert: <Eq>{`\\sigma_1 = \\sqrt{70}`}</Eq>.
+
+<Eq>{`v_1 = (1/\\sqrt{14})(1, 2, 3)^T`}</Eq> (Richtung der Zeile von <Eq>{`A`}</Eq>). <Eq>{`u_1 = Av_1/\\sigma_1 = (1/\\sqrt{2})(1, 2)^T`}</Eq>.
+
+**Die 4 Untervektorräume:**
+- <Eq>{`\\text{Row}(A) = \\text{span}\\{(1,2,3)\\}`}</Eq> — Spalte 1 von <Eq>{`V`}</Eq>.
+- <Eq>{`\\ker(A) = \\text{span}\\{(-2,1,0), (-3,0,1)\\}`}</Eq> — Spalten 2-3 von <Eq>{`V`}</Eq>.
+- <Eq>{`\\text{Col}(A) = \\text{span}\\{(1,2)\\}`}</Eq> — Spalte 1 von <Eq>{`U`}</Eq>.
+- <Eq>{`\\ker(A^T) = \\text{span}\\{(-2,1)\\}`}</Eq> — Spalte 2 von <Eq>{`U`}</Eq>.
+
+**Überprüfung.** Rang = Anzahl positiver Singulärwerte = 1. Bestätigen: dim Row + dim ker = 1 + 2 = 3 = n. ✓
+
+**Quelle.** [A First Course in Linear Algebra, §SVD und §FS](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="Beste Rang-1-Approximation durch Eckart-Young-Theorem" numero="3">
+
+**Problem.** Gegeben <Eq>{`A = \\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\\\ 1 & 1 \\end{pmatrix}`}</Eq>, finde die beste Rang-1-Approximation und berechne den Frobenius-Fehler.
+
+**Strategie.** Berechne die SVD und behalte nur den ersten Term.
+
+**Lösung.**
+
+<Eq>{`A^T A = \\begin{pmatrix} 6 & 5 \\\\ 5 & 6 \\end{pmatrix}`}</Eq>. Eigenwerte: 11 und 1. Singulärwerte: <Eq>{`\\sigma_1 = \\sqrt{11}`}</Eq>, <Eq>{`\\sigma_2 = 1`}</Eq>.
+
+<Eq>{`v_1 = (1/\\sqrt{2})(1,1)^T`}</Eq>, <Eq>{`v_2 = (1/\\sqrt{2})(1,-1)^T`}</Eq>.
+
+<Eq>{`u_1 = Av_1/\\sqrt{11} = (1/\\sqrt{22})(3, 3, 2)^T`}</Eq> (normalisiert).
+
+Beste Rang-1-Approximation:
+
+<Eq>{`A_1 = \\sigma_1 u_1 v_1^T = \\sqrt{11} \\cdot \\frac{1}{\\sqrt{22}}\\begin{pmatrix}3\\\\3\\\\2\\end{pmatrix} \\cdot \\frac{1}{\\sqrt{2}}\\begin{pmatrix}1&1\\end{pmatrix} = \\frac{1}{2}\\begin{pmatrix}3&3\\\\3&3\\\\2&2\\end{pmatrix}`}</Eq>
+
+Fehler: <Eq>{`\\|A - A_1\\|_F = \\sigma_2 = 1`}</Eq>.
+
+**Überprüfung.** <Eq>{`\\|A\\|_F^2 = 4+1+1+4+1+1 = 12 = \\sigma_1^2 + \\sigma_2^2 = 11 + 1`}</Eq>. ✓
+
+**Quelle.** [Understanding Linear Algebra, §6.4 Aufgabe 6.4.3](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Pseudoinverse einer rechteckigen Matrix" numero="4">
+
+**Problem.** Berechne <Eq>{`A^+`}</Eq> für <Eq>{`A = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq> und löse das Kleinste-Quadrate-System <Eq>{`\\min \\|Ax - b\\|`}</Eq> mit <Eq>{`b = (2, 3, 1)^T`}</Eq>.
+
+**Strategie.** <Eq>{`A`}</Eq> hat orthonormale Spalten, also ist SVD trivial: <Eq>{`U = I_{3\\times 3}`}</Eq> (Spalten der Reihe nach), <Eq>{`\\Sigma = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq>, <Eq>{`V = I_{2\\times 2}`}</Eq>.
+
+**Lösung.**
+
+<Eq>{`\\Sigma^+ = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\end{pmatrix}`}</Eq>, daher <Eq>{`A^+ = V \\Sigma^+ U^T = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\end{pmatrix}`}</Eq>.
+
+Lösung: <Eq>{`x^* = A^+ b = (2, 3)^T`}</Eq>.
+
+Residuum: <Eq>{`b - Ax^* = (2,3,1)^T - (2,3,0)^T = (0,0,1)^T`}</Eq>. Minimaler Fehler: <Eq>{`\\|b - Ax^*\\| = 1`}</Eq> (die dritte Komponente von <Eq>{`b`}</Eq> ist irreduzibel).
+
+**Überprüfung.** <Eq>{`A`}</Eq> hat Rang 2. Die Lösung <Eq>{`x^* = (2,3)^T`}</Eq> ist von minimaler Norm. <Eq>{`\\|A^+ A\\| = I_2`}</Eq>. ✓
+
+**Quelle.** [A First Course in Linear Algebra, §SVD Aufgabe SVD.C15](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="Bildkompression: Kompressionsverhältnis und Fehler" numero="5">
+
+**Problem.** Ein Graustufenbild hat <Eq>{`512 \\times 512`}</Eq> Pixel. Die Singulärwerte verfallen wie <Eq>{`\\sigma_i = 10^4 / i`}</Eq>. Berechne: (a) die kumulierte erklärte Varianz durch die ersten <Eq>{`k = 20`}</Eq> Komponenten; (b) das Kompressionsverhältnis mit <Eq>{`k = 20`}</Eq>; (c) den relativen Frobenius-Fehler.
+
+**Strategie.** Verwende die Formeln des Eckart-Young-Theorems und Kompressionsdefinition.
+
+**Lösung.**
+
+(a) <Eq>{`\\|A\\|_F^2 = \\sum_{i=1}^{512} \\sigma_i^2 = 10^8 \\sum_{i=1}^{512} 1/i^2 \\approx 10^8 \\cdot 1{,}6449 = 1{,}645 \\times 10^8`}</Eq>.
+
+<Eq>{`\\sum_{i=1}^{20} \\sigma_i^2 = 10^8 \\sum_{i=1}^{20} 1/i^2 \\approx 10^8 \\cdot 1{,}5962`}</Eq>.
+
+Erklärte Varianz: <Eq>{`1{,}5962 / 1{,}6449 \\approx 97{,}0\\%`}</Eq>.
+
+(b) Speicherung von <Eq>{`A_k`}</Eq>: <Eq>{`k(m + n + 1) = 20(512 + 512 + 1) = 20505`}</Eq> vs <Eq>{`512^2 = 262144`}</Eq>. Verhältnis: <Eq>{`262144 / 20505 \\approx 12{,}8\\times`}</Eq>.
+
+(c) Relativer Fehler: <Eq>{`\\sqrt{1 - 0{,}970} = \\sqrt{0{,}030} \\approx 17{,}3\\%`}</Eq> (in Frobenius).
+
+**Überprüfung.** Mit <Eq>{`k = 50`}</Eq> würde die erklärte Varianz noch größer und der Fehler kleiner. Die Wahl <Eq>{`k = 20`}</Eq> erfasst bereits 97% mit Kompression 12.8x — ausgezeichnet zur Visualisierung.
+
+**Quelle.** [Understanding Linear Algebra, §6.4](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA. Verfallmodell von <Eq>{`\\sigma_i`}</Eq> analog zu Aufgabe 6.4.5.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-117-svd">
+
+<Exercicio
+  numero="117.1"
+  dificuldade="compreensao"
+  solucao={<>Singulärwerte sind die Quadratwurzeln der Eigenwerte von <Eq>{`A^T A`}</Eq>. Sie sind immer reell und nicht-negativ, im Gegensatz zu Eigenwerten von <Eq>{`A`}</Eq>, die komplex sein können. Für symmetrische positiv semidefinite Matrizen fallen Eigenwerte und Singulärwerte zusammen.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "311", exercicio: "6.3.1", licenca: "CC-BY-SA" }}
+>
+Erkläre den Unterschied zwischen Eigenwerten und Singulärwerten einer Matrix <Eq>{`A`}</Eq>. Für welche Art von Matrix stimmen sie überein?
+</Exercicio>
+
+<Exercicio
+  numero="117.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix} 9 & 0 \\\\ 0 & 16 \\end{pmatrix}`}</Eq>. Eigenwerte: 9 und 16. Singulärwerte: <Eq>{`\\sigma_1 = 4`}</Eq>, <Eq>{`\\sigma_2 = 3`}</Eq>. <Eq>{`V = I_2`}</Eq> (da <Eq>{`A^T A`}</Eq> schon diagonal ist). <Eq>{`U`}</Eq>: Spalten <Eq>{`u_i = Av_i/\\sigma_i`}</Eq> — da <Eq>{`A`}</Eq> skalierte orthonormale Spalten hat, <Eq>{`u_1 = (0,1)^T`}</Eq>, <Eq>{`u_2 = (1,0)^T`}</Eq>.</>}
+  passos={<><ol><li>Berechne <Eq>{`A^T A`}</Eq>: multipliziere Transponierte mit Original.</li><li>Finde Eigenwerte von <Eq>{`A^T A`}</Eq> (diagonal, sind die Einträge im Quadrat, umsortiert).</li><li>Singulärwerte: <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq> in absteigender Reihenfolge.</li><li>Vektoren <Eq>{`v_i`}</Eq>: Eigenvektoren von <Eq>{`A^T A`}</Eq>.</li><li>Vektoren <Eq>{`u_i = Av_i/\\sigma_i`}</Eq>.</li><li><em>Trick:</em> für <Eq>{`A`}</Eq> diagonal ist SVD trivial — sortiere nur nach <Eq>{`\\sigma`}</Eq> absteigend.</li></ol></>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "498", exercicio: "SVD.C10", licenca: "GNU FDL" }}
+>
+Berechne die SVD von <Eq>{`A = \\begin{pmatrix} 0 & 3 \\\\ 4 & 0 \\end{pmatrix}`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="117.3"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix} 2 & 2 \\\\ 2 & 2 \\end{pmatrix}`}</Eq>. Eigenwerte: 4 und 0. Singulärwert: <Eq>{`\\sigma_1 = 2`}</Eq>. <Eq>{`v_1 = (1/\\sqrt{2})(1,1)^T`}</Eq>. <Eq>{`u_1 = Av_1/2 = (1/\\sqrt{2})(1,1)^T`}</Eq>. Rang = 1.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "313", exercicio: "6.3.3", licenca: "CC-BY-SA" }}
+>
+Berechne die kompakte SVD von <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 1 & 1 \\end{pmatrix}`}</Eq>. Was ist der Rang von <Eq>{`A`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="117.4"
+  dificuldade="aplicacao"
+  solucao={<>Rang = Anzahl strikt positiver Singulärwerte. Für <Eq>{`A`}</Eq> mit gegebener SVD ist der Rang 2, da <Eq>{`\\sigma_1 = 5`}</Eq> und <Eq>{`\\sigma_2 = 3`}</Eq> beide positiv sind.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "500", exercicio: "SVD.M20", licenca: "GNU FDL" }}
+>
+Wenn die SVD von <Eq>{`A \\in \\mathbb{R}^{4 \\times 3}`}</Eq> Singulärwerte <Eq>{`\\sigma_1 = 5, \\sigma_2 = 3, \\sigma_3 = 0`}</Eq> hat, was ist der Rang von <Eq>{`A`}</Eq>? Welche Dimension hat <Eq>{`\\ker(A)`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="117.5"
+  dificuldade="aplicacao"
+  solucao={<>Beste Rang-1-Approximation: <Eq>{`A_1 = \\sigma_1 u_1 v_1^T`}</Eq>. Frobenius-Fehler: <Eq>{`\\|A - A_1\\|_F = \\sqrt{\\sigma_2^2 + \\sigma_3^2} = \\sqrt{4 + 1} = \\sqrt{5}`}</Eq>. Spektraler Fehler: <Eq>{`\\|A - A_1\\|_2 = \\sigma_2 = 2`}</Eq>.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "325", exercicio: "6.4.1", licenca: "CC-BY-SA" }}
+>
+Die SVD von <Eq>{`A`}</Eq> hat Singulärwerte <Eq>{`\\sigma_1 = 8, \\sigma_2 = 2, \\sigma_3 = 1`}</Eq>. Berechne den Frobenius-Fehler und den spektralen Fehler der besten Rang-1-Approximation.
+</Exercicio>
+
+<Exercicio
+  numero="117.6"
+  dificuldade="aplicacao"
+  solucao={<>Unter Verwendung von SVD <Eq>{`A = U \\Sigma V^T`}</Eq>: <Eq>{`\\Sigma^+ = \\begin{pmatrix} 1/5 & 0 & 0 \\\\ 0 & 1/3 & 0 \\end{pmatrix}`}</Eq>. <Eq>{`A^+ = V \\Sigma^+ U^T \\in \\mathbb{R}^{3 \\times 2}`}</Eq>. Kleinste-Quadrate-Lösung: <Eq>{`x^* = A^+ b`}</Eq>.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "502", exercicio: "SVD.C20", licenca: "GNU FDL" }}
+>
+Beschreibe, wie man die Pseudoinverse <Eq>{`A^+`}</Eq> von <Eq>{`A \\in \\mathbb{R}^{2 \\times 3}`}</Eq> mit Singulärwerten <Eq>{`\\sigma_1 = 5, \\sigma_2 = 3`}</Eq> und Rang 2 berechnet. Welche Dimension hat <Eq>{`A^+`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="117.7"
+  dificuldade="compreensao"
+  solucao={<>Die Konditionszahl <Eq>{`\\kappa_2(A) = \\sigma_1 / \\sigma_r = 100 / 0{,}01 = 10^4`}</Eq>. Ein sehr schlecht konditioniertes System: relative Fehler in <Eq>{`b`}</Eq> werden um bis zu <Eq>{`10^4`}</Eq> in <Eq>{`x`}</Eq> verstärkt. Daten mit 4 signifikanten Ziffern können völlig an Präzision verlieren.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "318", exercicio: "6.3.7", licenca: "CC-BY-SA" }}
+>
+Eine Matrix <Eq>{`A \\in \\mathbb{R}^{10 \\times 10}`}</Eq> hat Singulärwerte <Eq>{`\\sigma_1 = 100`}</Eq> und <Eq>{`\\sigma_{10} = 0{,}01`}</Eq>. Berechne <Eq>{`\\kappa_2(A)`}</Eq> und interpretiere, was das für die numerische Lösung von <Eq>{`Ax = b`}</Eq> bedeutet.
+</Exercicio>
+
+<Exercicio
+  numero="117.8"
+  dificuldade="aplicacao"
+  solucao={<>Kumulierte erklärte Varianz: <Eq>{`\\sum_{i=1}^k \\sigma_i^2 / \\sum_{j=1}^r \\sigma_j^2`}</Eq>. Mit <Eq>{`\\sigma = (10, 5, 2, 1)`}</Eq>: <Eq>{`\\sum \\sigma_i^2 = 100 + 25 + 4 + 1 = 130`}</Eq>. Top-1: <Eq>{`100/130 \\approx 76{,}9\\%`}</Eq>. Top-2: <Eq>{`125/130 \\approx 96{,}2\\%`}</Eq>. Wähle <Eq>{`k = 2`}</Eq> für 95%.</>}
+  passos={<><ol><li>Berechne <Eq>{`\\|A\\|_F^2 = \\sum_i \\sigma_i^2`}</Eq>.</li><li>Berechne kumulierte erklärte Varianz bis jedem <Eq>{`k`}</Eq>.</li><li>Finde das kleinste <Eq>{`k`}</Eq> so dass die kumulierte Proportion <Eq>{`\\geq 0{,}95`}</Eq>.</li><li><em>Trick:</em> der Scree-Plot zeigt <Eq>{`\\sigma_i`}</Eq> vs <Eq>{`i`}</Eq>; das "Knie" entspricht typischerweise ~95%.</li></ol></>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "327", exercicio: "6.4.4", licenca: "CC-BY-SA" }}
+>
+Eine Matrix hat Singulärwerte <Eq>{`\\sigma_1 = 10, \\sigma_2 = 5, \\sigma_3 = 2, \\sigma_4 = 1`}</Eq>. Was ist das kleinste <Eq>{`k`}</Eq> so dass die Rang-k-Approximation mindestens 95% der Frobenius-Varianz erklärt?
+</Exercicio>
+
+<Exercicio
+  numero="117.9"
+  dificuldade="aplicacao"
+  solucao={<>Für <Eq>{`A`}</Eq> symmetrisch PSD, <Eq>{`A = Q \\Lambda Q^T`}</Eq> (spektrale Zerlegung) ist bereits eine SVD mit <Eq>{`U = V = Q`}</Eq> und <Eq>{`\\Sigma = \\Lambda`}</Eq>. Die Singulärwerte sind die Eigenwerte (nicht-negativ durch PSD). SVD fällt mit Diagonalisierung zusammen.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "497", exercicio: "SVD.T10", licenca: "GNU FDL" }}
+>
+Zeige, dass für eine symmetrische positiv semidefinite Matrix <Eq>{`A = Q \\Lambda Q^T`}</Eq> die SVD <Eq>{`U = V = Q`}</Eq> und <Eq>{`\\Sigma = \\Lambda`}</Eq> hat. Was sind die Singulärwerte in diesem Fall?
+</Exercicio>
+
+<Exercicio
+  numero="117.10"
+  dificuldade="modelagem"
+  solucao={<>Speicherkosten SVD-Truncation: <Eq>{`k(m + n + 1)`}</Eq> reelle Zahlen. Original: <Eq>{`mn`}</Eq>. Kompressionsverhältnis: <Eq>{`mn / [k(m+n+1)]`}</Eq>. Für <Eq>{`m = n = 1000`}</Eq>, <Eq>{`k = 50`}</Eq>: <Eq>{`10^6 / [50 \\times 2001] \\approx 10`}</Eq>. Kompressionsfaktor 10x. Relativer Frobenius-Fehler: <Eq>{`\\sqrt{\\sum_{i > 50} \\sigma_i^2} / \\|A\\|_F`}</Eq>.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "328", exercicio: "6.4.5", licenca: "CC-BY-SA" }}
+>
+Ein Graustufenbild ist eine <Eq>{`1000 \\times 1000`}</Eq>-Matrix. Wenn du die SVD-Truncation mit <Eq>{`k = 50`}</Eq> Komponenten speicherst, wie viele Floats speicherst du im Vergleich zum Original? Was ist der Kompressionsfaktor?
+</Exercicio>
+
+<Exercicio
+  numero="117.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Spalten von U bilden Basis des Spaltenraums von A und Spalten von V bilden Basis des Zeilenraums von A", correta: true },
+    { texto: "Spalten von U sind Eigenvektoren von A und Spalten von V sind Eigenvektoren von A^T" },
+    { texto: "U und V sind dieselbe Matrix wenn A quadratisch ist" },
+    { texto: "Die letzten Spalten von U bilden Basis des Zeilenraums von A" }
+  ]}
+  solucao={<>Die ersten <Eq>{`r`}</Eq> Spalten von <Eq>{`U`}</Eq> bilden orthonormale Basis von <Eq>{`\\text{Col}(A)`}</Eq>; die letzten <Eq>{`m - r`}</Eq> von <Eq>{`\\ker(A^T)`}</Eq>. Die ersten <Eq>{`r`}</Eq> Spalten von <Eq>{`V`}</Eq> bilden Basis von <Eq>{`\\text{Row}(A)`}</Eq>; die letzten <Eq>{`n - r`}</Eq> von <Eq>{`\\ker(A)`}</Eq>.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "315", exercicio: "6.3.4", licenca: "CC-BY-SA" }}
+>
+Welche Aussage über die Interpretation von <Eq>{`U`}</Eq> und <Eq>{`V`}</Eq> in der SVD ist korrekt?
+</Exercicio>
+
+<Exercicio
+  numero="117.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\|A\\|_2 = \\sigma_1`}</Eq> (Spektralnorm = größter Singulärwert). <Eq>{`\\|A\\|_F = \\sqrt{\\sigma_1^2 + \\cdots + \\sigma_r^2}`}</Eq> (Frobenius-Norm). Für <Eq>{`A`}</Eq> mit <Eq>{`\\sigma = (6, 3, 2, 1)`}</Eq>: <Eq>{`\\|A\\|_2 = 6`}</Eq>, <Eq>{`\\|A\\|_F = \\sqrt{50} = 5\\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "501", exercicio: "SVD.M30", licenca: "GNU FDL" }}
+>
+Die SVD von <Eq>{`A`}</Eq> hat Singulärwerte <Eq>{`6, 3, 2, 1`}</Eq>. Berechne die Spektralnorm <Eq>{`\\|A\\|_2`}</Eq> und die Frobenius-Norm <Eq>{`\\|A\\|_F`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="117.13"
+  dificuldade="aplicacao"
+  solucao={<>Speicherkosten für alle <Eq>{`r`}</Eq> Komponenten: <Eq>{`r(m + n + 1) = 100(512 + 512 + 1) = 102500`}</Eq> vs <Eq>{`512^2 = 262144`}</Eq>. Es gibt immer noch Kompression auch wenn man alles speichert. Prozentsatz der Varianz erklärt von den ersten 10: hängt von der <Eq>{`\\sigma_i`}</Eq>-Verteilung ab.</>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "148", exercicio: "SVD-3", licenca: "CC-BY-SA" }}
+>
+Ein Bild <Eq>{`512 \\times 512`}</Eq> hat numerischen Rang <Eq>{`r = 100`}</Eq>. Was ist das Kompressionsverhältnis wenn man die komplette SVD von Rang <Eq>{`r`}</Eq> speichert statt der Originalmatrix?
+</Exercicio>
+
+<Exercicio
+  numero="117.14"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\|Ax\\| \\leq \\sigma_1 \\|x\\|`}</Eq> und <Eq>{`\\min_{\\|x\\|=1} \\|Ax\\| = \\sigma_r`}</Eq>. Die Matrix macht den maximalen Stretch um <Eq>{`\\sigma_1`}</Eq> (in der Richtung <Eq>{`v_1`}</Eq>) und minimalen um <Eq>{`\\sigma_r`}</Eq> (in der Richtung <Eq>{`v_r`}</Eq>). Die Einheitssphäre wird auf ein Ellipsoid mit Halbachsen <Eq>{`\\sigma_1 \\geq \\cdots \\geq \\sigma_r`}</Eq> abgebildet.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "319", exercicio: "6.3.9", licenca: "CC-BY-SA" }}
+>
+Erkläre geometrisch, was die SVD über die Transformation der Einheitssphäre von <Eq>{`\\mathbb{R}^n`}</Eq> durch die Matrix <Eq>{`A`}</Eq> aussagt. Welche Länge haben die Halbachsen des resultierenden Ellipsoids?
+</Exercicio>
+
+<Exercicio
+  numero="117.15"
+  dificuldade="aplicacao"
+  solucao={<>Von der SVD-Expansion: <Eq>{`Av_i = \\sigma_i u_i`}</Eq> für <Eq>{`1 \\leq i \\leq r`}</Eq> und <Eq>{`Av_j = 0`}</Eq> für <Eq>{`j > r`}</Eq>. Daher sind <Eq>{`v_1, \\ldots, v_r`}</Eq> Basis des Zeilenraums und <Eq>{`Av_i`}</Eq> hat Norm <Eq>{`\\sigma_i`}</Eq>.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "499", exercicio: "SVD.T15", licenca: "GNU FDL" }}
+>
+Zeige, dass in der SVD <Eq>{`Av_i = \\sigma_i u_i`}</Eq> für alle <Eq>{`i`}</Eq> gilt. Verwende das um zu verifizieren, dass <Eq>{`\\|Av_i\\| = \\sigma_i`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="117.16"
+  dificuldade="modelagem"
+  solucao={<>LSA: stelle Dokumente als TF-IDF-Vektoren in einem Termraum dar. Die Term-Dokument-Matrix <Eq>{`A`}</Eq> hat SVD. Die ersten <Eq>{`k`}</Eq> rechten Singularvektoren repräsentieren <Eq>{`k`}</Eq> "latente Themen". Neue Dokumente werden projiziert: <Eq>{`q_{\\text{neu}} = A_{\\text{neu}} V_k \\Sigma_k^{-1}`}</Eq>. Ähnliche Dokumente liegen nah beieinander in diesem Raum.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "330", exercicio: "6.4.8", licenca: "CC-BY-SA" }}
+>
+In der latent semantic analysis (LSA) wird die SVD einer Term-Dokument-Matrix auf die <Eq>{`k`}</Eq> größten Singulärwerte trunciert. Erkläre konzeptionell, warum das "latente Themen" in den Dokumenten erfasst.
+</Exercicio>
+
+<Exercicio
+  numero="117.17"
+  dificuldade="demonstracao"
+  solucao={<>Nach Eckart-Young minimiert <Eq>{`A_k`}</Eq> <Eq>{`\\|A - B\\|_F`}</Eq> unter allen Matrizen <Eq>{`B`}</Eq> von Rang <Eq>{`\\leq k`}</Eq>. Beweis: jede <Eq>{`B`}</Eq> von Rang <Eq>{`k`}</Eq> hat Nullraum von Dimension <Eq>{`\\geq n - k`}</Eq>, daher existiert <Eq>{`x`}</Eq> Einheitsvektor im Nullraum von <Eq>{`B`}</Eq> und im Raum von <Eq>{`v_1, \\ldots, v_{k+1}`}</Eq>. Dann <Eq>{`\\|A - B\\|_F \\geq \\|(A - B)x\\| = \\|Ax\\| \\geq \\sigma_{k+1}`}</Eq>. Das Minimum wird in <Eq>{`A_k`}</Eq> erreicht.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "505", exercicio: "SVD.T30", licenca: "GNU FDL" }}
+>
+Formuliere das Eckart-Young-Theorem und skizziere die Idee des Beweises, dass <Eq>{`A_k`}</Eq> tatsächlich die beste Rang-k-Approximation in Spektralnorm ist.
+</Exercicio>
+
+<Exercicio
+  numero="117.18"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\|A^T A\\|_2 = \\sigma_1(A^T A) = \\sigma_1(A)^2`}</Eq> (da Eigenwerte von <Eq>{`A^T A`}</Eq> sind <Eq>{`\\sigma_i(A)^2`}</Eq>). <Eq>{`\\|A^T A\\|_F = \\sqrt{\\sum \\sigma_i^4}`}</Eq>. Für <Eq>{`A`}</Eq> mit <Eq>{`\\sigma = (5, 3, 1)`}</Eq>: <Eq>{`\\|A^T A\\|_2 = 25`}</Eq>, <Eq>{`\\|A^T A\\|_F = \\sqrt{625 + 81 + 1} = \\sqrt{707}`}</Eq>.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "316", exercicio: "6.3.5", licenca: "CC-BY-SA" }}
+>
+Wenn <Eq>{`A`}</Eq> Singulärwerte <Eq>{`5, 3, 1`}</Eq> hat, welche sind die Singulärwerte von <Eq>{`A^T A`}</Eq>? Berechne <Eq>{`\\|A^T A\\|_2`}</Eq> und <Eq>{`\\|A^T A\\|_F`}</Eq>.
+</Exercicio>
+
+<Exercicio
+  numero="117.19"
+  dificuldade="aplicacao"
+  solucao={<>Numerischer Rang: Anzahl von Singulärwerten über <Eq>{`\\epsilon \\cdot \\sigma_1`}</Eq> wobei <Eq>{`\\epsilon`}</Eq> die Maschinengenauigkeit ist (~<Eq>{`10^{-15}`}</Eq> für float64). Für <Eq>{`\\sigma = (100, 10, 1, 0{,}001, 0{,}00001)`}</Eq> mit <Eq>{`\\epsilon = 10^{-12}`}</Eq>: Schwelle = <Eq>{`10^{-10}`}</Eq>, daher numerischer Rang = 4 (die ersten 4 liegen darüber).</>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "150", exercicio: "SVD-5", licenca: "CC-BY-SA" }}
+>
+Eine Matrix hat Singulärwerte <Eq>{`100, 10, 1, 0{,}001, 0{,}00001`}</Eq>. Verwende Schwelle <Eq>{`\\epsilon = 10^{-12}`}</Eq> relativ zum größten Singulärwert. Welche ist der numerische Rang?
+</Exercicio>
+
+<Exercicio
+  numero="117.20"
+  dificuldade="aplicacao"
+  solucao={<>Für <Eq>{`A`}</Eq> orthogonal: <Eq>{`A^T A = I`}</Eq>, also alle Eigenwerte von <Eq>{`A^T A`}</Eq> sind 1, daher alle Singulärwerte von <Eq>{`A`}</Eq> sind 1. SVD: <Eq>{`A = U I V^T`}</Eq> mit <Eq>{`\\Sigma = I`}</Eq>. Konditionszahl: <Eq>{`\\kappa_2(A) = 1`}</Eq> — perfekt konditioniert.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "498", exercicio: "SVD.T20", licenca: "GNU FDL" }}
+>
+Beweise, dass eine orthogonale Matrix alle Singulärwerte gleich 1 hat. Welche ist die Konditionszahl einer orthogonalen Matrix?
+</Exercicio>
+
+<Exercicio
+  numero="117.21"
+  dificuldade="modelagem"
+  solucao={<>Linearfaktor-Modell: Renditen von <Eq>{`n`}</Eq> Aktien über <Eq>{`T`}</Eq> Tage bilden Matrix <Eq>{`R \\in \\mathbb{R}^{T \\times n}`}</Eq>. SVD der zentrierten <Eq>{`\\tilde R`}</Eq>: die ersten <Eq>{`k`}</Eq> Spalten von <Eq>{`V`}</Eq> sind Portfoliofaktoren. Singulärwerte zum Quadrat geteilt durch <Eq>{`T - 1`}</Eq> sind Eigenwerte der Kovarianz — Varianzen der Faktoren. Systematisches Risiko wird von den ersten Faktoren erfasst.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "331", exercicio: "6.4.9", licenca: "CC-BY-SA" }}
+>
+Erkläre, wie die SVD der Aktienrendite-Matrix "Risikofaktoren" in einem Portfolio identifiziert. Was repräsentieren die ersten rechten Singularvektoren <Eq>{`v_1, v_2, v_3`}</Eq> wirtschaftlich?
+</Exercicio>
+
+<Exercicio
+  numero="117.22"
+  dificuldade="aplicacao"
+  solucao={<>Singulärwerte von <Eq>{`A^T`}</Eq> sind dieselben wie von <Eq>{`A`}</Eq>. Denn <Eq>{`(A^T)^T A^T = A A^T`}</Eq>, das dieselben nicht-null Eigenwerte wie <Eq>{`A^T A`}</Eq> hat (von der zirkulären Spur-Produktregel). Also <Eq>{`\\sigma_i(A^T) = \\sigma_i(A)`}</Eq>.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "499", exercicio: "SVD.T12", licenca: "GNU FDL" }}
+>
+Beweise, dass <Eq>{`A`}</Eq> und <Eq>{`A^T`}</Eq> dieselben nicht-null Singulärwerte haben.
+</Exercicio>
+
+<Exercicio
+  numero="117.23"
+  dificuldade="aplicacao"
+  solucao={<>Kleinste-Quadrate-Lösung mit Tikhonov-Regularisierung: <Eq>{`x_\\lambda = (A^T A + \\lambda I)^{-1} A^T b = V (\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T U^T b = \\sum_i \\frac{\\sigma_i}{\\sigma_i^2 + \\lambda} (u_i^T b) v_i`}</Eq>. Für <Eq>{`\\lambda \\to 0`}</Eq> erhalten wir Pseudoinverse. Für großes <Eq>{`\\lambda`}</Eq> schrumpft gegen Null.</>}
+  passos={<><ol><li>Ersetze <Eq>{`A = U \\Sigma V^T`}</Eq> in der Ridge-Formel.</li><li>Vereinfache <Eq>{`(A^T A + \\lambda I)^{-1} = V(\\Sigma^T \\Sigma + \\lambda I)^{-1}V^T`}</Eq>.</li><li>Die Diagonale von <Eq>{`(\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T`}</Eq> ist <Eq>{`\\sigma_i / (\\sigma_i^2 + \\lambda)`}</Eq>.</li><li><em>Trick:</em> Ridge = geglättete Pseudoinverse — schrumpft Komponenten mit <Eq>{`\\sigma_i^2 \\ll \\lambda`}</Eq>.</li></ol></>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "152", exercicio: "SVD-7", licenca: "CC-BY-SA" }}
+>
+Leite die Ridge-Regression-Lösung <Eq>{`x_\\lambda = (A^T A + \\lambda I)^{-1} A^T b`}</Eq> in Bezug auf die SVD von <Eq>{`A`}</Eq> her.
+</Exercicio>
+
+<Exercicio
+  numero="117.24"
+  dificuldade="aplicacao"
+  solucao={<>Drei Deformationsachsen: Level (alle Yields steigen zusammen), Steigung (kurze vs lange Fälligkeit), Wölbung (Mitte vs Enden). Litterman-Scheinkman (1991) zeigten, dass diese 3 HKs ~99% der Varianz der US-Staatsanleihe-Zinsstrukturkurve erklären. SVD der täglichen Yield-Matrix (Zeit × Fälligkeit) extrahiert diese Faktoren automatisch.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "332", exercicio: "6.4.10", licenca: "CC-BY-SA" }}
+>
+Die brasilianische Zinsstrukturkurve hat tägliche Yield-Daten in 10 verschiedenen Fälligkeiten. SVD dieser Matrix identifiziert 3 Hauptfaktoren. Welche sind diese Faktoren wirtschaftlich?
+</Exercicio>
+
+<Exercicio
+  numero="117.25"
+  dificuldade="aplicacao"
+  solucao={<>Kompressionsverhältnis für Bild <Eq>{`m \\times n`}</Eq> mit <Eq>{`k`}</Eq> Singulären: <Eq>{`mn / [k(m + n + 1)]`}</Eq>. Um vorteilhaft zu sein: <Eq>{`k(m+n+1) < mn`}</Eq>, oder <Eq>{`k < mn/(m+n+1)`}</Eq>. Für <Eq>{`m = n = 1000`}</Eq>: <Eq>{`k < 10^6/2001 \\approx 499`}</Eq>. Für jedes <Eq>{`k < n/2`}</Eq> gibt es Kompression. Für <Eq>{`k = 100`}</Eq>: Verhältnis ungefähr 5x.</>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "149", exercicio: "SVD-4", licenca: "CC-BY-SA" }}
+>
+Für welche Werte von <Eq>{`k`}</Eq> nimmt die SVD-Truncation eines Bildes <Eq>{`n \\times n`}</Eq> weniger Speicher auf als das Original? Leite die allgemeine Bedingung her.
+</Exercicio>
+
+<Exercicio
+  numero="117.26"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Summe der Quadrate aller Singulärwerte von A", correta: true },
+    { texto: "Summe aller Singulärwerte von A" },
+    { texto: "Größter Singulärwert von A zum Quadrat" },
+    { texto: "Produkt aller Singulärwerte von A" }
+  ]}
+  solucao={<><Eq>{`\\|A\\|_F^2 = \\text{tr}(A^T A) = \\sum_i \\sigma_i^2`}</Eq>. Das ist die zentrale Identität, die Frobenius-Norm mit SVD verbindet und die Fehlerformel von Eckart-Young rechtfertigt.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "501", exercicio: "SVD.M25", licenca: "GNU FDL" }}
+>
+Die Frobenius-Norm <Eq>{`\\|A\\|_F^2`}</Eq> ist gleich:
+</Exercicio>
+
+<Exercicio
+  numero="117.27"
+  dificuldade="aplicacao"
+  solucao={<>Singulärwerte von <Eq>{`cA`}</Eq>: <Eq>{`|c| \\sigma_i(A)`}</Eq>. Denn SVD von <Eq>{`cA = U (c\\Sigma) V^T`}</Eq>; Singulärwerte sind die Einträge von <Eq>{`|c|\\Sigma`}</Eq>. Singulärwerte von <Eq>{`AB`}</Eq> haben keine einfache Formel allgemein, aber <Eq>{`\\sigma_1(AB) \\leq \\sigma_1(A) \\sigma_1(B)`}</Eq>.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "317", exercicio: "6.3.6", licenca: "CC-BY-SA" }}
+>
+Wenn <Eq>{`A`}</Eq> Singulärwerte <Eq>{`\\sigma_1, \\sigma_2, \\sigma_3`}</Eq> hat, welche sind die Singulärwerte von <Eq>{`-3A`}</Eq>?
+</Exercicio>
+
+<Exercicio
+  numero="117.28"
+  dificuldade="demonstracao"
+  solucao={<>Vier Untervektorräume via SVD: (1) <Eq>{`\\text{Col}(A) = \\text{span}\\{u_1, \\ldots, u_r\\}`}</Eq> (Dimension <Eq>{`r`}</Eq>); (2) <Eq>{`\\ker(A^T) = \\text{span}\\{u_{r+1}, \\ldots, u_m\\}`}</Eq> (Dimension <Eq>{`m - r`}</Eq>); (3) <Eq>{`\\text{Row}(A) = \\text{span}\\{v_1, \\ldots, v_r\\}`}</Eq> (Dimension <Eq>{`r`}</Eq>); (4) <Eq>{`\\ker(A) = \\text{span}\\{v_{r+1}, \\ldots, v_n\\}`}</Eq> (Dimension <Eq>{`n - r`}</Eq>). Beweis: <Eq>{`Av_j = \\sigma_j u_j`}</Eq> für <Eq>{`j \\leq r`}</Eq> und <Eq>{`Av_j = 0`}</Eq> für <Eq>{`j > r`}</Eq>.</>}
+  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "503", exercicio: "SVD.T25", licenca: "GNU FDL" }}
+>
+Demonstriere, dass die Spalten von <Eq>{`U`}</Eq> und <Eq>{`V`}</Eq> in der SVD von <Eq>{`A`}</Eq> orthonormale Basen der 4 fundamentalen Untervektorräume von <Eq>{`A`}</Eq> bilden. Formuliere jeden Untervektorraum und seine Basis explizit.
+</Exercicio>
+
+<Exercicio
+  numero="117.29"
+  dificuldade="modelagem"
+  solucao={<>Schritte: (1) montiere Bewertungsmatrix <Eq>{`R`}</Eq> (Benutzer × Artikel, dünn besetzt); (2) fülle Fehlwerte mit Mittelwert; (3) zentriere nach Benutzer; (4) SVD-Truncation von Rang <Eq>{`k`}</Eq>; (5) Approximation <Eq>{`R_k = U_k \\Sigma_k V_k^T`}</Eq> füllt die fehlenden Bewertungen; (6) empfehle die Artikel mit höchstem vorhergesagtem Wert. Die Idee ist, dass "latente Geschmäcker" von den ersten <Eq>{`k`}</Eq> Faktoren erfasst werden.</>}
+  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "154", exercicio: "SVD-9", licenca: "CC-BY-SA" }}
+>
+Beschreibe den Algorithmus zur Empfehlung durch kollaborative SVD: gegeben eine dünn besetzte Benutzer-Artikel-Matrix, wie kann die SVD-Truncation fehlende Bewertungen vorhersagen und Artikel empfehlen?
+</Exercicio>
+
+<Exercicio
+  numero="117.30"
+  dificuldade="desafio"
+  solucao={<>Randomisierte SVD (Halko-Martinsson-Tropp 2011): (1) Generiere <Eq>{`\\Omega \\in \\mathbb{R}^{n \\times (k+p)}`}</Eq> zufällig; (2) <Eq>{`Y = A \\Omega`}</Eq> (Skizze des Bildes); (3) <Eq>{`Q, R = \\text{QR}(Y)`}</Eq>; (4) <Eq>{`B = Q^T A`}</Eq> (klein); (5) SVD von <Eq>{`B = \\hat U \\Sigma V^T`}</Eq>; (6) <Eq>{`U = Q \\hat U`}</Eq>. Komplexität: <Eq>{`O(mn(k+p))`}</Eq> vs <Eq>{`O(mn^2)`}</Eq> für exakte SVD. Mit Überabtastung <Eq>{`p = 10`}</Eq> ist der erwartete Fehler nah am Eckart-Young-Optimum.</>}
+  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "334", exercicio: "6.4.12", licenca: "CC-BY-SA" }}
+>
+Beschreibe den randomisierten SVD-Algorithmus von Halko-Martinsson-Tropp (2011) in 5 Schritten. Warum ist er vorteilhaft für große Matrizen mit niedrigem numerischen Rang? Welche Komplexität hat er im Vergleich zu exakter SVD?
+</Exercicio>
+
+</ListaExercicios>
+
+## Quellen
+
+- [Understanding Linear Algebra](https://understandinglinearalgebra.org/) — David Austin · Grand Valley State University · CC-BY-SA · Hauptreferenz für Geometrie, Beispiele und Übungen zur SVD (§6.3–6.4).
+- [A First Course in Linear Algebra](http://linear.ups.edu/) — Rob Beezer · University of Puget Sound · GNU FDL · Rigorose Demonstrationen der SVD-Existenz, Pseudoinverser und Untervektorräume (§SVD).
+- [Álgebra Linear (REAMAT UFRGS)](https://www.ufrgs.br/reamat/AlgebraLinear/index.html) — Reamat Colaborativo · UFRGS · CC-BY-SA · Übungen in PT-BR zu Kompression, numerischem Rang und Regularisierung.
+- [Introduction to Applied Linear Algebra (VMLS)](https://web.stanford.edu/~boyd/vmls/) — Boyd, Vandenberghe · Stanford · CC-BY-NC-ND · Kontext von Anwendungen in ML und Ingenieurwissenschaft.

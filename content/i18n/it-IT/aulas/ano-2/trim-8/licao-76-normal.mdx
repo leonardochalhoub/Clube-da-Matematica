@@ -1,0 +1,910 @@
+---
+titulo: "Lição 76 — Distribuição normal"
+slug: "licao-76-normal"
+categoria: "aulas"
+subcategoria: "ano-2-trim-8"
+descricao: "Curva de sino: densidade, padronização Z, regra 68-95-99,7, intervalos de confiança e testes Z. A distribuição central da estatística e das ciências aplicadas."
+ordem: 76
+publicado: true
+tags: ["estatística", "probabilidade", "normal", "gaussiana", "ano-2", "trim-8"]
+prerrequisitos: ["licao-75"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["Stochastik — Leistungskurs alemão", "H2 Math — Singapura", "AP Statistics — EUA", "Math B — Japão"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="f(x) = \frac{1}{\sigma\sqrt{2\pi}}\,e^{-\frac{(x-\mu)^2}{2\sigma^2}}, \quad Z = \frac{X-\mu}{\sigma}"
+  legenda={<>La distribuzione <strong>normale</strong> <Eq>{`\\mathcal N(\\mu, \\sigma^2)`}</Eq> è la più importante in statistica. La sua densità è simmetrica attorno a <Eq>{`\\mu`}</Eq>, con larghezza controllata da <Eq>{`\\sigma`}</Eq>. La <strong>standardizzazione</strong> <Eq>{`Z = (X-\\mu)/\\sigma`}</Eq> converte qualsiasi normale in normale standard, consentendo di usare una sola tabella per tutti i calcoli di probabilità.</>}
+  audioTexto="Distribuzione normale. Densità uguale a uno su sigma radice di due pi, per esponenziale di meno x meno mu al quadrato, diviso due sigma quadrato. La standardizzazione Z è x meno mu diviso sigma."
+/>
+
+<aside>
+
+**Libri che coprono questa lezione**
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · §3.5 · CC-BY-SA · <em>Standardizzazione Z, tavola normale, regola 68-95-99,7, verifica di normalità (Q-Q plot); esercizi di livello AP con dati reali.</em>
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · §6.1–6.4 · CC-BY · <em>Densità, CDF, intervalli di confidenza per media, teorema del limite centrale; calcolatore TI e Python; esercizi livello AP.</em>
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · §5.2 · GNU FDL · <em>Derivazione della normale come limite della binomiale (De Moivre-Laplace); funzione generatrice dei momenti; entropia massima; esercizi dimostrativi.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definizione rigorosa">
+
+### Densità e parametri
+
+<Definicao titulo="Distribuzione normale N(mu, sigma^2)">
+
+$X \sim \mathcal N(\mu, \sigma^2)$ se $X$ ha densità:
+
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}}\,\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right), \quad x \in \mathbb{R}$$
+
+- $\mu \in \mathbb{R}$: parametro di <strong>localizzazione</strong> (media = mediana = moda).
+- $\sigma > 0$: parametro di <strong>scala</strong> (deviazione standard).
+- $\sigma^2$: varianza.
+
+La normalizzazione $\int_{-\infty}^{+\infty} f(x)\,dx = 1$ segue dal risultato gaussiano classico: $\int_{-\infty}^{+\infty} e^{-x^2/2}\,dx = \sqrt{2\pi}$ (dimostrazione per coordinate polari).
+
+</Definicao>
+
+> "Se $X$ è una variabile casuale e $X$ ha una distribuzione normale con media $\mu$ e deviazione standard $\sigma$, scriviamo $X \sim N(\mu, \sigma)$. La media $\mu$ è il centro della curva simmetrica e la deviazione standard $\sigma$ fornisce la dispersione." — [OpenStax Statistics §6.1](https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution)
+
+<Definicao titulo="Normale standard e standardizzazione">
+
+$Z \sim \mathcal N(0, 1)$. CDF:
+
+$$\Phi(z) = P(Z \leq z) = \int_{-\infty}^z \frac{1}{\sqrt{2\pi}} e^{-t^2/2}\,dt$$
+
+Senza forma chiusa elementare — tabulata o calcolata numericamente.
+
+<strong>Standardizzazione</strong>: se $X \sim \mathcal N(\mu, \sigma^2)$, allora $Z = (X - \mu)/\sigma \sim \mathcal N(0,1)$.
+
+<strong>Simmetria</strong>: $\Phi(-z) = 1 - \Phi(z)$.
+
+<strong>Quantili notevoli</strong>:
+- $z_{0{,}975} = 1{,}96$ (IC bilaterale 95%).
+- $z_{0{,}95} = 1{,}645$ (IC unilaterale 95%).
+- $z_{0{,}995} = 2{,}576$ (IC bilaterale 99%).
+
+</Definicao>
+
+> "Le distribuzioni normali sono simmetriche attorno alla loro media... L'area sotto una curva di distribuzione normale entro una deviazione standard dalla media è approssimativamente il 68%, entro due deviazioni standard approssimativamente il 95%, e entro tre deviazioni standard approssimativamente il 99,7%." — [OpenIntro Statistics §3.5](https://www.openintro.org/book/os/)
+
+<Teorema titulo="Regola 68-95-99,7 (regola sigma)">
+
+Per $X \sim \mathcal N(\mu, \sigma^2)$:
+
+$$P(\mu - \sigma \leq X \leq \mu + \sigma) \approx 0{,}6827$$
+
+$$P(\mu - 2\sigma \leq X \leq \mu + 2\sigma) \approx 0{,}9545$$
+
+$$P(\mu - 3\sigma \leq X \leq \mu + 3\sigma) \approx 0{,}9973$$
+
+</Teorema>
+
+<Teorema titulo="Proprietà di chiusura">
+
+1. <strong>Combinazione lineare</strong>: $aX + b \sim \mathcal N(a\mu + b,\; a^2\sigma^2)$.
+2. <strong>Somma indipendente</strong>: se $X \sim \mathcal N(\mu_1, \sigma_1^2)$ e $Y \sim \mathcal N(\mu_2, \sigma_2^2)$ indipendenti, allora $X + Y \sim \mathcal N(\mu_1+\mu_2,\; \sigma_1^2+\sigma_2^2)$.
+3. <strong>Media campionaria</strong>: $\bar X = (1/n)\sum X_i$ con $X_i$ iid da $\mathcal N(\mu, \sigma^2)$ soddisfa $\bar X \sim \mathcal N(\mu, \sigma^2/n)$.
+
+</Teorema>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 540 180" className="w-full">
+<defs>
+  <marker id="arr76" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+</defs>
+<g>
+  <line x1="30" x2="510" y1="140" y2="140" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr76)"/>
+  <path d="M 50,138 C 80,138 100,135 120,120 C 150,95 170,55 200,38 C 220,28 230,25 270,25 C 310,25 320,28 340,38 C 370,55 390,95 420,120 C 440,135 460,138 490,138" fill="none" stroke="rgb(26 77 92)" strokeWidth="2.5"/>
+  <path d="M 200,38 C 220,28 230,25 270,25 C 310,25 320,28 340,38 L 340,138 L 200,138 Z" fill="rgb(26 77 92 / 0.15)"/>
+  <path d="M 120,120 C 150,95 170,55 200,38 L 200,138 L 120,138 Z" fill="rgb(232 199 122 / 0.15)"/>
+  <path d="M 340,38 C 370,55 390,95 420,120 L 420,138 L 340,138 Z" fill="rgb(232 199 122 / 0.15)"/>
+  <line x1="270" x2="270" y1="25" y2="140" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4,3"/>
+  <line x1="200" x2="200" y1="38" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" strokeDasharray="3,3"/>
+  <line x1="340" x2="340" y1="38" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" strokeDasharray="3,3"/>
+  <line x1="120" x2="120" y1="120" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" strokeDasharray="3,3"/>
+  <line x1="420" x2="420" y1="120" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" strokeDasharray="3,3"/>
+  <text x="270" y="158" textAnchor="middle" fontSize="11" fontFamily="serif" fill="currentColor">μ</text>
+  <text x="200" y="158" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">μ−σ</text>
+  <text x="340" y="158" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.7">μ+σ</text>
+  <text x="120" y="158" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.5">μ−2σ</text>
+  <text x="420" y="158" textAnchor="middle" fontSize="10" fontFamily="serif" fill="currentColor" fillOpacity="0.5">μ+2σ</text>
+  <text x="270" y="72" textAnchor="middle" fontSize="10" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">68%</text>
+  <text x="160" y="115" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.6">13,6%</text>
+  <text x="380" y="115" textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.6">13,6%</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Curva normale: il 68% dei dati tra μ ± σ (regione centrale scura), il 27,2% tra μ ± 2σ (regioni laterali), lo 0,3% nelle code oltre μ ± 3σ.
+</figcaption>
+</figure>
+
+<Insight>
+
+La normale massimizza l'<strong>entropia differenziale</strong> tra tutte le distribuzioni con media $\mu$ e varianza $\sigma^2$ fisse. Questo fornisce una giustificazione bayesiana: assumere la normalità significa assumere la quantità minima di informazione aggiuntiva date le restrizioni su media e varianza — la distribuzione "più agnostica" compatibile con ciò che si sa.
+
+</Insight>
+
+</Porta>
+
+<Porta nivel="5" titulo="Per un bambino di 5 anni">
+
+Immagina di misurare l'altezza di <strong>mille bambini</strong> della tua età. La maggior parte è vicina all'altezza media. Pochissimi sono molto bassi, pochissimi molto alti.
+
+Se fai un grafico, appare una <strong>montagna simmetrica</strong> — la famosa <strong>campana</strong>. Questa montagna è la distribuzione normale.
+
+Quanto più vicino al centro, più bambini. Ai bordi, quasi nessuno.
+
+</Porta>
+
+<Porta nivel="10" titulo="Per un bambino di 10 anni">
+
+La normale è la distribuzione più comune in natura:
+
+- Altezze umane
+- Errori di misurazione in laboratorio
+- Voti di un esame ben elaborato
+- Dimensioni delle foglie su un albero
+
+Due numeri descrivono completamente la curva:
+
+- $\mu$ (la <strong>media</strong>): dove si trova il picco.
+- $\sigma$ (la <strong>deviazione standard</strong>): quanto è larga la curva.
+
+<strong>Regola magica 68-95-99,7</strong>:
+- Il 68% dei dati sta tra $\mu - \sigma$ e $\mu + \sigma$.
+- Il 95% tra $\mu - 2\sigma$ e $\mu + 2\sigma$.
+- Il 99,7% tra $\mu - 3\sigma$ e $\mu + 3\sigma$.
+
+Esempio: altezze di adulti brasiliani: $\mu = 170$ cm, $\sigma = 8$ cm. Allora il 95% è tra 154 e 186 cm.
+
+</Porta>
+
+<Porta nivel="15" titulo="Per un adolescente di 15 anni">
+
+La normale è così importante per tre ragioni:
+
+1. <strong>Sorge naturalmente</strong>: quando molti fattori piccoli e indipendenti si sommano, il risultato tende verso la normale (Teorema del Limite Centrale — prossima lezione).
+2. <strong>Algebra semplice</strong>: le somme e le medie di normali indipendenti sono normali.
+3. <strong>Fonda la statistica inferenziale</strong>: IC, test di ipotesi, regressione.
+
+### Come usare la tavola Z
+
+Per calcolare $P(X \leq c)$ in qualsiasi $\mathcal N(\mu, \sigma^2)$:
+
+1. Standardizza: $z = (c - \mu)/\sigma$.
+2. Consulta la tabella $\Phi(z)$ (oppure usa `DIST.NORMP.N(z; VERO)`).
+3. Per $P(X \geq c)$: usa la simmetria $\Phi(-z) = 1 - \Phi(z)$.
+
+<strong>Esempio</strong>: esame con $\mu = 70$, $\sigma = 10$. $P(X \geq 85)$?
+$z = (85-70)/10 = 1{,}5$. $P(Z \geq 1{,}5) = 1 - \Phi(1{,}5) \approx 1 - 0{,}933 = 0{,}067$ (6,7%).
+
+### Storia
+
+Carl Friedrich Gauss (1809) utilizzò la normale per modellare gli errori di osservazione astronomica ("errori normali"). Abraham de Moivre (1733) aveva già derivato la curva come limite della binomiale. Per questo "gaussiana" e "normale" sono sinonimi.
+
+### Quando la normale non si applica
+
+- Redditi e prezzi immobiliari (distribuzione con coda lunga).
+- Conteggi rari (Poisson).
+- Tempi di attesa (esponenziale).
+- Rendimenti finanziari (coda più pesante della normale — "cigni neri").
+
+</Porta>
+
+<Porta nivel="25" titulo="Per uno studente di ingegneria">
+
+### Intervallo di confidenza per la media
+
+Per $X_1, \ldots, X_n$ iid da $\mathcal N(\mu, \sigma^2)$ con $\sigma$ noto:
+
+$$\bar X \sim \mathcal N\!\left(\mu, \frac{\sigma^2}{n}\right) \implies \bar X \pm 1{,}96\,\frac{\sigma}{\sqrt n} \text{ è IC 95\% per } \mu$$
+
+Con $\sigma$ ignoto: sostituisci con $s$ e usa la distribuzione <strong>t di Student</strong> (lezioni 79+).
+
+### Test z per la media
+
+$H_0: \mu = \mu_0$. Statistica di test:
+
+$$z = \frac{\bar X - \mu_0}{\sigma/\sqrt n}$$
+
+Rifiuta $H_0$ (bilaterale, $\alpha = 5\%$) se $|z| > 1{,}96$.
+
+### Ingegneria delle tolleranze (Six Sigma)
+
+Pezzo con diametro $\mathcal N(10{,}00;\; 0{,}02^2)$ mm. Tolleranza $10{,}00 \pm 0{,}05$ mm.
+
+$z = 0{,}05/0{,}02 = 2{,}5$. $P(|Z| > 2{,}5) = 2\Phi(-2{,}5) \approx 1{,}24\%$.
+
+Per 1000 pezzi: $\sim 12$ scarti. Per Six Sigma (3,4 ppm): $z \approx 4{,}5$.
+
+### Miscela di normali (GMM)
+
+$$f(x) = \sum_k \pi_k\,\mathcal N(x;\, \mu_k, \sigma_k^2)$$
+
+Modella popolazioni eterogenee (es.: altezze di popolazioni miste, score di cluster). Aggiustato dall'algoritmo EM. Base dei Gaussian Mixture Models nel ML.
+
+### Q-Q plot (diagnosi di normalità)
+
+Traccia i quantili campionari rispetto ai teorici di $\mathcal N(0,1)$. Una linea retta $y = x$ indica normalità. Le curve indicano asimmetria (skew) o code pesanti (curtosi). Complementato dal test di Shapiro-Wilk ($n < 50$) o Anderson-Darling.
+
+### Implementazione Python
+
+```python
+from scipy.stats import norm
+norm.cdf(1.96)                       # 0.975
+norm.ppf(0.975)                      # 1.96
+norm.pdf(0)                          # 0.3989 (picco della N(0,1))
+norm.cdf(85, loc=70, scale=10)       # P(X <= 85) con mu=70, sigma=10
+norm.rvs(loc=0, scale=1, size=1000)  # campioni
+```
+
+</Porta>
+
+<Porta nivel="40" titulo="Per un professionista senior">
+
+### Caratterizzazione per funzione caratteristica
+
+La funzione caratteristica di $\mathcal N(\mu, \sigma^2)$ è:
+
+$$\varphi(t) = E[e^{itX}] = \exp\!\left(i\mu t - \frac{\sigma^2 t^2}{2}\right)$$
+
+Unica tra le distribuzioni con varianza finita con $\log \varphi$ quadratico. Permette di provare il TCL via continuità di Lévy: se $\varphi_{X_n}(t) \to e^{-t^2/2}$ puntualmente, allora $X_n \to Z \sim \mathcal N(0,1)$ in distribuzione.
+
+### Normale multivariata
+
+$\mathbf X \sim \mathcal N(\boldsymbol\mu, \Sigma)$ con vettore di medie $\boldsymbol\mu$ e matrice di covarianza $\Sigma$ semidefinita positiva. Densità:
+
+$$f(\mathbf x) = \frac{1}{(2\pi)^{p/2}|\Sigma|^{1/2}} \exp\!\left(-\frac{1}{2}(\mathbf x - \boldsymbol\mu)^\top \Sigma^{-1} (\mathbf x - \boldsymbol\mu)\right)$$
+
+Le marginali e le condizionali rimangono normali. Base di PCA, regressione lineare multivariata, filtro di Kalman, processi gaussiani e reti neurali bayesiane.
+
+### Coda leggera vs. coda pesante
+
+La coda normale decade come $e^{-x^2/2}$ — superesponenzialmente rapida. Gli eventi a $5\sigma$ dovrebbero verificarsi meno di $10^{-6}$ volte per un milione di osservazioni. In finanza: LTCM (1998) e crisi del 2008 hanno coinvolto eventi di "$10\sigma$". La lezione: le distribuzioni con <strong>coda pesante</strong> (t-Student, Pareto, Lévy stabile) modellano meglio i rischi estremi.
+
+### Massima entropia
+
+Tra tutte le distribuzioni su $\mathbb{R}$ con $E[X] = \mu$ e $E[X^2] = \sigma^2 + \mu^2$ fissati, la normale massimizza l'entropia differenziale $h(X) = -\int f \log f\,dx$. Giustificazione per il principio della massima entropia nella modellazione statistica bayesiana.
+
+### Moto browniano e Black-Scholes
+
+Il processo di Wiener $W_t$ ha incrementi $W_{t+\Delta} - W_t \sim \mathcal N(0, \Delta)$, indipendenti. È il fondamento continuo del TCL: limite delle somme di salti iid. La formula di Black-Scholes (lezione 119) utilizza esplicitamente $W_t$ e la normale standard $\Phi$ per il pricing delle opzioni. Vedi [Premio Nobel per l'Economia 1997](https://www.nobelprize.org/prizes/economic-sciences/1997/summary/).
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Applicazione pratica">
+
+### Ricetta di 4 passi
+
+1. <strong>Identifica $\mu$ e $\sigma$</strong> della popolazione.
+2. <strong>Standardizza</strong>: $z = (x - \mu)/\sigma$.
+3. <strong>Consulta la tavola</strong> $\Phi(z)$ o usa foglio di calcolo/Python.
+4. <strong>Usa la simmetria</strong>: $P(X \geq c) = 1 - P(X \leq c) = \Phi(-z)$.
+
+### Nei fogli di calcolo (Excel / LibreOffice)
+
+| Funzione | Risultato |
+|---|---|
+| `DIST.NORMP.N(z; VERO)` | $\Phi(z)$ |
+| `DIST.NORM.N(x; mu; sigma; VERO)` | $P(X \leq x)$ |
+| `INV.NORMP.N(prob)` | Quantile $z$ |
+| `INV.NORM.N(prob; mu; sigma)` | Quantile di $\mathcal N(\mu,\sigma^2)$ |
+
+### Quando NON usare la normale
+
+- Dati strettamente positivi con coda lunga: <strong>log-normale</strong> (stipendi, prezzi).
+- Conteggi rari: <strong>Poisson</strong>.
+- Tempi fino all'evento: <strong>esponenziale</strong> o <strong>Weibull</strong>.
+- Rendimenti finanziari giornalieri: <strong>t di Student</strong> (coda più pesante).
+- Proporzioni: <strong>binomiale</strong> o <strong>beta</strong>.
+
+### Verifica rapida di normalità
+
+1. Istogramma simmetrico a campana?
+2. Il 68% dei dati in $[\bar x - s;\; \bar x + s]$?
+3. Q-Q plot dritto?
+4. Test di Shapiro-Wilk ($n < 50$) con p-valore $> 0{,}05$.
+
+</Porta>
+
+</DuasPortas>
+
+## Esempi risolti
+
+<Esempio numero="76.1" titulo="Standardizzazione e tavola Z" dificuldade="basico">
+
+<strong>Problema.</strong> $X \sim \mathcal N(70, 10^2)$. Calcola $P(X \leq 85)$.
+
+<strong>Strategia.</strong> Standardizza e consulta la tavola $\Phi$.
+
+<strong>Risoluzione.</strong>
+
+$$z = \frac{85 - 70}{10} = 1{,}5$$
+
+$$P(X \leq 85) = P(Z \leq 1{,}5) = \Phi(1{,}5) \approx 0{,}9332$$
+
+<strong>Verifica.</strong> 85 è a $1{,}5\sigma$ sopra la media. Dalla regola 68-95-99,7, $\approx 84\%$ sono sotto $\mu + \sigma = 80$, e ancora di più sotto $\mu + 1{,}5\sigma = 85$. Il risultato $\approx 93\%$ è plausibile.
+
+<strong>Fonte.</strong> [OpenIntro Statistics §3.5](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Esempio>
+
+<Esempio numero="76.2" titulo="Regola 68-95-99,7 applicata" dificuldade="basico">
+
+<strong>Problema.</strong> Il QI segue $\mathcal N(100, 15^2)$. Quale % della popolazione ha QI tra 85 e 115? E sopra 130?
+
+<strong>Strategia.</strong> Identifica le posizioni in $\sigma$ e applica la regola.
+
+<strong>Risoluzione.</strong>
+
+- 85 = $\mu - \sigma$ e 115 = $\mu + \sigma$ (intervallo $\pm 1\sigma$): $P(85 \leq X \leq 115) \approx 68\%$.
+- 130 = $\mu + 2\sigma$: $P(X > 130) = (1 - 0{,}9545)/2 \approx 2{,}28\%$.
+
+<strong>Verifica.</strong> Il 68% tra $\pm 1\sigma$ e il 2,28% sopra $+2\sigma$ sono risultati tabulati della normale standard. La scala dei QI è stata calibrata deliberatamente per avere $\sigma = 15$ e questi percentili hanno senso.
+
+<strong>Fonte.</strong> [OpenStax Statistics §6.1](https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution) — CC-BY.
+
+</Esempio>
+
+<Esempio numero="76.3" titulo="Tolleranze di ingegneria" dificuldade="intermediario">
+
+<strong>Problema.</strong> Pezzi con diametro $\mathcal N(10{,}00;\; 0{,}02^2)$ mm. Specifica $10{,}00 \pm 0{,}05$ mm. Quale frazione è scartata?
+
+<strong>Strategia.</strong> Calcola $P(|X - 10| > 0{,}05)$ tramite standardizzazione.
+
+<strong>Risoluzione.</strong>
+
+$$z = \frac{0{,}05}{0{,}02} = 2{,}5$$
+
+$$P(|X - 10| > 0{,}05) = P(|Z| > 2{,}5) = 2\Phi(-2{,}5) = 2 \times 0{,}0062 = 0{,}0124$$
+
+Circa il $1{,}24\%$ dei pezzi viene scartato — approssimativamente <strong>12 per 1000</strong>.
+
+<strong>Verifica.</strong> $z = 2{,}5$ è tra $2\sigma$ (2,28% fuori) e $3\sigma$ (0,27% fuori). Il risultato 1,24% è coerente con questo intervallo. Per Six Sigma (3,4 ppm), sarebbe necessario $z \approx 4{,}5$.
+
+<strong>Fonte.</strong> [OpenStax Statistics §6.3](https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution) — CC-BY.
+
+</Esempio>
+
+<Esempio numero="76.4" titulo="Intervallo di confidenza per la media" dificuldade="intermediario">
+
+<strong>Problema.</strong> Campione di $n = 25$ pezzi, $\bar X = 105$ mm, $\sigma = 10$ mm (noto). Costruisci IC 95% per $\mu$.
+
+<strong>Strategia.</strong> Usa $\bar X \sim \mathcal N(\mu, \sigma^2/n)$ e $z_{0{,}975} = 1{,}96$.
+
+<strong>Risoluzione.</strong>
+
+$$SE = \frac{\sigma}{\sqrt n} = \frac{10}{\sqrt{25}} = 2$$
+
+$$IC_{95\%} = \left[\bar X - 1{,}96 \cdot SE;\; \bar X + 1{,}96 \cdot SE\right] = [105 - 3{,}92;\; 105 + 3{,}92] = [101{,}08;\; 108{,}92]$$
+
+<strong>Verifica.</strong> La larghezza totale dell'IC è $2 \times 3{,}92 = 7{,}84$ mm. Poiché $\sigma = 10$ e $n = 25$, l'errore standard è 2 — metà della deviazione della popolazione, ridotto da $\sqrt{25}$. L'intervallo copre la media vera nel 95% dei campioni.
+
+<strong>Fonte.</strong> [OpenIntro Statistics §4.2](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Esempio>
+
+<Esempio numero="76.5" titulo="Derivazione: integrale gaussiano" dificuldade="avancado">
+
+<strong>Problema.</strong> Dimostra che $\int_{-\infty}^{+\infty} e^{-x^2/2}\,dx = \sqrt{2\pi}$ con il trucco delle coordinate polari.
+
+<strong>Strategia.</strong> Calcola $I^2$ dove $I = \int e^{-x^2/2}\,dx$ e convertire a polari.
+
+<strong>Risoluzione.</strong> Sia $I = \int_{-\infty}^{+\infty} e^{-x^2/2}\,dx$.
+
+$$I^2 = \left(\int_{-\infty}^{+\infty} e^{-x^2/2}\,dx\right)\!\left(\int_{-\infty}^{+\infty} e^{-y^2/2}\,dy\right) = \int_{-\infty}^{+\infty}\!\int_{-\infty}^{+\infty} e^{-(x^2+y^2)/2}\,dx\,dy$$
+
+Polari: $x = r\cos\theta$, $y = r\sin\theta$, Jacobiano $r$:
+
+$$I^2 = \int_0^{2\pi}\!\int_0^{+\infty} e^{-r^2/2}\,r\,dr\,d\theta = 2\pi \int_0^{+\infty} r\,e^{-r^2/2}\,dr$$
+
+Sostituzione $u = r^2/2$: $\int_0^\infty r e^{-r^2/2}\,dr = [-e^{-r^2/2}]_0^\infty = 1$.
+
+Dunque $I^2 = 2\pi$, quindi $I = \sqrt{2\pi}$.
+
+<strong>Verifica.</strong> La densità $f(x) = e^{-x^2/2}/\sqrt{2\pi}$ si integra 1 su $\mathbb R$ — consistente con la normalità di $Z$.
+
+<strong>Fonte.</strong> [Introduction to Probability — Grinstead, Snell §5.2](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — GNU FDL.
+
+</Esempio>
+
+<ListaExercicios seed="licao-76-normal">
+
+### Blocco A — Standardizzazione e tavola Z (76.1 a 76.14)
+
+<Exercicio
+  numero="76.1"
+  dificuldade="aplicacao"
+  resposta="1,5"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "150", exercicio: "3.62", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`z = (X - \\mu)/\\sigma = (85 - 70)/10 = 15/10 = 1{,}5`}</Eq>.</>}
+>
+
+$X \sim \mathcal N(70, 10^2)$. Calcola lo z-score per $X = 85$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (80 - 100)/15 = -20/15 = -1{,}33`}</Eq>. Valore sotto la media; z-score negativo.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "151", exercicio: "3.64", licenca: "CC-BY-SA" }}
+>
+
+$X \sim \mathcal N(100, 15^2)$. Calcola lo z-score per $X = 80$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.3"
+  dificuldade="aplicacao"
+  resposta="0,975"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "319", exercicio: "6.1.1", licenca: "CC-BY" }}
+  solucao={<><Eq>{`P(Z \\leq 1{,}96) = \\Phi(1{,}96) = 0{,}975`}</Eq>. Questo è il quantile 97,5% della normale standard — base degli IC al 95%.</>}
+>
+
+Calcola $P(Z \leq 1{,}96)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.4"
+  dificuldade="aplicacao"
+  resposta="0,025"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "320", exercicio: "6.1.3", licenca: "CC-BY" }}
+  solucao={<>Per simmetria: <Eq>{`P(Z \\geq 1{,}96) = 1 - \\Phi(1{,}96) = 1 - 0{,}975 = 0{,}025`}</Eq>.</>}
+>
+
+Calcola $P(Z \geq 1{,}96)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.5"
+  dificuldade="aplicacao"
+  solucao={<>Per simmetria: <Eq>{`P(-1{,}96 \\leq Z \\leq 1{,}96) = \\Phi(1{,}96) - \\Phi(-1{,}96) = 0{,}975 - 0{,}025 = 0{,}950`}</Eq>. Questo è l'intervallo bilaterale al 95%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "152", exercicio: "3.66", licenca: "CC-BY-SA" }}
+  passos={<><ol><li><Eq>{`P(-1{,}96 \\leq Z \\leq 1{,}96) = P(Z \\leq 1{,}96) - P(Z \\leq -1{,}96)`}</Eq>.</li><li><Eq>{`P(Z \\leq -1{,}96) = \\Phi(-1{,}96) = 1 - \\Phi(1{,}96) = 0{,}025`}</Eq> (simmetria).</li><li>Risultato: <Eq>{`0{,}975 - 0{,}025 = 0{,}950`}</Eq>.</li></ol><em>Trucco:</em> l'intervallo <Eq>{`[-1{,}96;\\; 1{,}96]`}</Eq> cattura esattamente il 95% dell'area della normale standard — fondamentale per gli IC al 95%.</>}
+>
+
+Calcola $P(-1{,}96 \leq Z \leq 1{,}96)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.6"
+  dificuldade="aplicacao"
+  resposta="0,0668"
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "321", exercicio: "6.1.5", licenca: "CC-BY" }}
+  solucao={<><Eq>{`P(Z \\leq -1{,}5) = \\Phi(-1{,}5) = 1 - \\Phi(1{,}5) = 1 - 0{,}9332 = 0{,}0668`}</Eq>.</>}
+>
+
+Calcola $P(Z \leq -1{,}5)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.7"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`P(0 \\leq Z \\leq 2) = \\Phi(2) - \\Phi(0) = 0{,}9772 - 0{,}5000 = 0{,}4772`}</Eq>. Quasi il 48% della distribuzione è tra la media e 2 deviazioni sopra.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "153", exercicio: "3.68", licenca: "CC-BY-SA" }}
+>
+
+Calcola $P(0 \leq Z \leq 2)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`z = (65 - 50)/10 = 1{,}5`}</Eq>. <Eq>{`P(X > 65) = P(Z > 1{,}5) = 1 - 0{,}9332 = 0{,}0668`}</Eq>. Circa il 6,7% sopra 65.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "322", exercicio: "6.1.7", licenca: "CC-BY" }}
+>
+
+$X \sim \mathcal N(50, 10^2)$. Calcola $P(X > 65)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.9"
+  dificuldade="aplicacao"
+  resposta="0,68"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "154", exercicio: "3.70", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`P(40 < X < 60) = P(-1 < Z < 1) \\approx 0{,}6827`}</Eq>. Questo è l'intervallo <Eq>{`\\mu \\pm \\sigma`}</Eq> — regola 68%.</>}
+>
+
+$X \sim \mathcal N(50, 10^2)$. Calcola $P(40 < X < 60)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.10"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\mathcal N(0, 4)`}</Eq>: qui <Eq>{`\\sigma^2 = 4`}</Eq>, quindi <Eq>{`\\sigma = 2`}</Eq>. <Eq>{`z = (3-0)/2 = 1{,}5`}</Eq>. <Eq>{`P(X > 3) = P(Z > 1{,}5) \\approx 0{,}0668`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "323", exercicio: "6.1.9", licenca: "CC-BY" }}
+>
+
+$X \sim \mathcal N(0, 4)$ (varianza = 4). Calcola $P(X > 3)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.11"
+  dificuldade="aplicacao"
+  solucao={<>Quantile 90%: <Eq>{`z_{0{,}90} = \\Phi^{-1}(0{,}90) \\approx 1{,}282`}</Eq>. <Eq>{`x = \\mu + z \\sigma = 100 + 1{,}282 \\times 15 \\approx 119{,}2`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "155", exercicio: "3.72", licenca: "CC-BY-SA" }}
+  passos={<><ol><li>Quantile 90% nella normale standard: <Eq>{`z = \\Phi^{-1}(0{,}90) \\approx 1{,}282`}</Eq>.</li><li>Destandardizza: <Eq>{`x = \\mu + z\\sigma = 100 + 1{,}282 \\times 15 \\approx 119{,}2`}</Eq>.</li></ol><em>Trucco:</em> "destandardizzare" = invertire la standardizzazione. Se <Eq>{`z = (x-\\mu)/\\sigma`}</Eq>, allora <Eq>{`x = \\mu + z\\sigma`}</Eq>.</>}
+>
+
+Calcola il quantile 90% di $\mathcal N(100, 15^2)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.12"
+  dificuldade="aplicacao"
+  solucao={<>Quantile 25% (primo quartile): <Eq>{`z_{0{,}25} = \\Phi^{-1}(0{,}25) \\approx -0{,}674`}</Eq>. <Eq>{`x = 100 + (-0{,}674) \\times 15 \\approx 89{,}9`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "324", exercicio: "6.1.11", licenca: "CC-BY" }}
+>
+
+Calcola $Q_1$ (quantile 25%) di $\mathcal N(100, 15^2)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.13"
+  dificuldade="aplicacao"
+  resposta="68%"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "156", exercicio: "3.74", licenca: "CC-BY-SA" }}
+  solucao={<>QI <Eq>{`\\sim \\mathcal N(100, 15^2)`}</Eq>. L'intervallo [85, 115] = <Eq>{`[\\mu - \\sigma;\\; \\mu + \\sigma]`}</Eq>. Dalla regola 68-95-99,7: <Eq>{`P(85 \\leq X \\leq 115) \\approx 68\\%`}</Eq>.</>}
+>
+
+QI $\sim \mathcal N(100, 15^2)$. Quale % della popolazione ha QI tra 85 e 115?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.14"
+  dificuldade="aplicacao"
+  resposta="2,5%"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "157", exercicio: "3.76", licenca: "CC-BY-SA" }}
+  solucao={<>130 = <Eq>{`\\mu + 2\\sigma`}</Eq>. Dall'intervallo <Eq>{`\\pm 2\\sigma`}</Eq> che copre 95%: restano 5% nelle code, 2,5% in ogni coda. <Eq>{`P(X > 130) \\approx 2{,}5\\%`}</Eq>.</>}
+>
+
+QI $\sim \mathcal N(100, 15^2)$. Quale % ha QI sopra 130?
+
+</Exercicio>
+
+### Blocco B — Applicazioni 68-95-99,7 e quantili (76.15 a 76.24)
+
+<Exercicio
+  numero="76.15"
+  dificuldade="aplicacao"
+  solucao={<>145 = <Eq>{`\\mu + 3\\sigma`}</Eq>. L'intervallo <Eq>{`\\pm 3\\sigma`}</Eq> copre il 99,7%. Restano 0,3% nelle code, 0,15% in ogni coda. <Eq>{`P(X > 145) \\approx 0{,}15\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "325", exercicio: "6.1.13", licenca: "CC-BY" }}
+>
+
+QI $\sim \mathcal N(100, 15^2)$. Quale % ha QI sopra 145?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.16"
+  dificuldade="aplicacao"
+  solucao={<>186 = 170 + 16 = <Eq>{`\\mu + 2\\sigma`}</Eq> (con <Eq>{`\\sigma = 8`}</Eq>). <Eq>{`P(X > 186) \\approx 2{,}5\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "158", exercicio: "3.78", licenca: "CC-BY-SA" }}
+>
+
+Altezze $\sim \mathcal N(170, 8^2)$ cm. Quale % ha altezza sopra 186 cm?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.17"
+  dificuldade="aplicacao"
+  solucao={<>Top 5% equivale al quantile 95%: <Eq>{`z_{0{,}95} \\approx 1{,}645`}</Eq>. <Eq>{`x = 70 + 1{,}645 \\times 10 \\approx 86{,}5`}</Eq>. Voti sopra 86,5 sono top 5%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "326", exercicio: "6.1.15", licenca: "CC-BY" }}
+  passos={<><ol><li>Top 5% → quantile 95% della distribuzione.</li><li>Normale standard: <Eq>{`z_{0{,}95} \\approx 1{,}645`}</Eq>.</li><li>Destandardizza: <Eq>{`x = 70 + 1{,}645 \\times 10 = 86{,}45`}</Eq>.</li></ol><em>Trucco:</em> "top k%" = quantile (100-k)% della distribuzione. Top 5% = percentile 95.</>}
+>
+
+Voti $\sim \mathcal N(70, 10^2)$. Da quale voto inizia il top 5%?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.18"
+  dificuldade="aplicacao"
+  resposta="0,0027"
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "159", exercicio: "3.80", licenca: "CC-BY-SA" }}
+  solucao={<><Eq>{`P(|Z| > 3) = 2(1 - \\Phi(3)) = 2(1 - 0{,}9987) = 2 \\times 0{,}0013 = 0{,}0027`}</Eq>. Regola <Eq>{`3\\sigma`}</Eq>: 0,27% nelle code.</>}
+>
+
+$X \sim \mathcal N(0, 1)$. Calcola $P(|X| > 3)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.19"
+  dificuldade="aplicacao"
+  opcoes={[{texto: "Mediana = moda = mu (per l'asse di simmetria della distribuzione)", correta: true}, {texto: "Mediana = mu + sigma"}, {texto: "Mediana = mu^2"}, {texto: "La moda è indefinita per le distribuzioni continue"}]}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "327", exercicio: "6.1.17", licenca: "CC-BY" }}
+  solucao={<>La normale è simmetrica attorno a <Eq>{`\\mu`}</Eq>. Per simmetria: <Eq>{`P(X \\leq \\mu) = 0{,}5`}</Eq> → <Eq>{`\\mu`}</Eq> è la mediana. Il picco della densità è a <Eq>{`\\mu`}</Eq> → <Eq>{`\\mu`}</Eq> è la moda. I tre coincidono.</>}
+>
+
+Per $X \sim \mathcal N(\mu, \sigma^2)$, quale la relazione tra mediana, moda e $\mu$?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.20"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`X \\sim \\mathcal N(20, 16)`}</Eq> (<Eq>{`\\sigma = 4`}</Eq>) e <Eq>{`Y \\sim \\mathcal N(10, 9)`}</Eq> (<Eq>{`\\sigma = 3`}</Eq>) indipendenti. <Eq>{`X + Y \\sim \\mathcal N(30, 25)`}</Eq>, quindi <Eq>{`\\mu_{X+Y} = 30`}</Eq> e <Eq>{`\\sigma_{X+Y} = 5`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "160", exercicio: "3.82", licenca: "CC-BY-SA" }}
+>
+
+$X \sim \mathcal N(20, 4^2)$ e $Y \sim \mathcal N(10, 3^2)$ indipendenti. Quale la distribuzione di $X + Y$?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.21"
+  dificuldade="aplicacao"
+  solucao={<>Stipendio <Eq>{`\\sim \\mathcal N(5000, 1500^2)`}</Eq>. Quantile 90%: <Eq>{`z = 1{,}282`}</Eq>. <Eq>{`x = 5000 + 1{,}282 \\times 1500 \\approx 6923`}</Eq>. Il top 10% guadagna più di R$ 6.923.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "328", exercicio: "6.1.19", licenca: "CC-BY" }}
+>
+
+Stipendio mensile $\sim \mathcal N(5000, 1500^2)$ reais. Quale il salario minimo del top 10%?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.22"
+  dificuldade="aplicacao"
+  solucao={<>Volo: <Eq>{`X \\sim \\mathcal N(120, 10^2)`}</Eq> min. Quantile 99%: <Eq>{`z_{0{,}99} \\approx 2{,}326`}</Eq>. <Eq>{`x = 120 + 2{,}326 \\times 10 \\approx 143{,}3`}</Eq> min. Riserva 144 min (arrotonda per eccesso) per il 99% di confidenza.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "161", exercicio: "3.84", licenca: "CC-BY-SA" }}
+>
+
+Durata del volo $\sim \mathcal N(120, 10^2)$ min. Quanto tempo riservarsi per avere il 99% di confidenza di arrivare in orario?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.23"
+  dificuldade="aplicacao"
+  solucao={<>Rendimento giornaliero: <Eq>{`X \\sim \\mathcal N(0{,}001, 0{,}01^2)`}</Eq>. Perdita maggiore del 2% = <Eq>{`P(X < -0{,}02)`}</Eq>. <Eq>{`z = (-0{,}02 - 0{,}001)/0{,}01 = -2{,}1`}</Eq>. <Eq>{`P(Z < -2{,}1) \\approx 0{,}0179`}</Eq> o 1,79%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "329", exercicio: "6.1.21", licenca: "CC-BY" }}
+>
+
+Rendimenti giornalieri di azione $\sim \mathcal N(0{,}001,\; 0{,}01^2)$. Calcola $P(\text{perdita} > 2\%)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.24"
+  dificuldade="aplicacao"
+  solucao={<>Voltaggio <Eq>{`\\sim \\mathcal N(220, 5^2)`}</Eq>. <Eq>{`P(V > 235) = P(Z > (235-220)/5) = P(Z > 3) \\approx 0{,}0013`}</Eq>. Circa lo 0,13% delle misurazioni fallirebbero.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "162", exercicio: "3.86", licenca: "CC-BY-SA" }}
+>
+
+Voltaggio $\sim \mathcal N(220, 5^2)$. L'apparecchio si guasta se $V > 235$ V. Calcola la probabilità di guasto.
+
+</Exercicio>
+
+### Blocco C — Modellazione e inferenza (76.25 a 76.36)
+
+<Exercicio
+  numero="76.25"
+  dificuldade="modelagem"
+  solucao={<>Tolleranza: <Eq>{`z = 0{,}05/0{,}02 = 2{,}5`}</Eq>. <Eq>{`P(|X-10| > 0{,}05) = 2\\Phi(-2{,}5) = 2 \\times 0{,}0062 = 0{,}0124`}</Eq>. Frazione scaricata: 1,24% — circa 12 pezzi su 1000.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "345", exercicio: "6.3.1", licenca: "CC-BY" }}
+  passos={<><ol><li>Standardizza il limite di tolleranza: <Eq>{`z = 0{,}05/0{,}02 = 2{,}5`}</Eq>.</li><li><Eq>{`P(\\text{scarto}) = P(|Z| > 2{,}5) = 2(1 - \\Phi(2{,}5))`}</Eq>.</li><li><Eq>{`\\Phi(2{,}5) \\approx 0{,}9938`}</Eq>. Quindi <Eq>{`P = 2 \\times 0{,}0062 = 0{,}0124`}</Eq>.</li></ol><em>Curiosità:</em> Six Sigma richiede <Eq>{`z \\geq 4{,}5`}</Eq>, riducendo i difetti a 3,4 ppm — 365 volte meno di questo processo.</>}
+>
+
+Pezzi con diametro $\mathcal N(10{,}00;\; 0{,}02^2)$ mm. Tolleranza $10{,}00 \pm 0{,}05$ mm. Quale frazione è scartata?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.26"
+  dificuldade="modelagem"
+  solucao={<>Indagine: <Eq>{`\\hat p \\sim \\mathcal N(0{,}5, 0{,}5 \\times 0{,}5/1000)`}</Eq>. IC 95%: <Eq>{`0{,}5 \\pm 1{,}96 \\times \\sqrt{0{,}25/1000} = 0{,}5 \\pm 0{,}031`}</Eq>. Intervallo: [0,469; 0,531].</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "172", exercicio: "4.20", licenca: "CC-BY-SA" }}
+>
+
+Indagine con 1000 intervistati stima la proporzione vera $p = 0{,}50$. Costruisci IC 95% per $p$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.27"
+  dificuldade="modelagem"
+  solucao={<>IC 95% per media: <Eq>{`\\bar X \\pm z_{0{,}975} \\sigma/\\sqrt{n} = 105 \\pm 1{,}96 \\times 10/5 = 105 \\pm 3{,}92 = [101{,}08;\\; 108{,}92]`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.2", pagina: "173", exercicio: "4.22", licenca: "CC-BY-SA" }}
+>
+
+$\bar X = 105$, $n = 25$, $\sigma = 10$ (noto). Costruisci IC 95% per $\mu$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.28"
+  dificuldade="modelagem"
+  solucao={<>Test z bilaterale: <Eq>{`z = (\\bar X - \\mu_0)/(\\sigma/\\sqrt n) = (105 - 100)/(10/5) = 5/2 = 2{,}5`}</Eq>. <Eq>{`p\\text{-value} = 2 \\times P(Z > 2{,}5) = 2 \\times 0{,}0062 = 0{,}0124`}</Eq>. Poiché 0,0124 < 0,05, si rifiuta <Eq>{`H_0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "346", exercicio: "6.3.3", licenca: "CC-BY" }}
+  passos={<><ol><li>Statistica di test: <Eq>{`z = (105-100)/(10/5) = 2{,}5`}</Eq>.</li><li>p-value bilaterale: <Eq>{`2 \\times P(Z > 2{,}5) = 2 \\times 0{,}0062 = 0{,}0124`}</Eq>.</li><li>Decisione: 0,0124 < 0,05 → rifiuta <Eq>{`H_0`}</Eq> al livello 5%.</li></ol><em>Trucco:</em> p-value bilaterale = 2 × (area nella coda più estrema). Confronta con <Eq>{`\\alpha`}</Eq>, non con <Eq>{`\\alpha/2`}</Eq>.</>}
+>
+
+Test $H_0: \mu = 100$ vs. $H_1: \mu \neq 100$. $\bar X = 105$, $n = 25$, $\sigma = 10$. Calcola il p-value e decidi.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.29"
+  dificuldade="modelagem"
+  solucao={<>Tempo di esecuzione: <Eq>{`X \\sim \\mathcal N(50, 5^2)`}</Eq> ms. SLA al 95%: <Eq>{`x = 50 + 1{,}645 \\times 5 \\approx 58{,}2`}</Eq> ms. Definisci il limite SLA a 59 ms (arrotonda per eccesso).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "163", exercicio: "3.88", licenca: "CC-BY-SA" }}
+>
+
+Tempo di esecuzione $\sim \mathcal N(50, 5^2)$ ms. Per garantire SLA con il 95% delle richieste sotto il limite, quale soglia definire?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.30"
+  dificuldade="modelagem"
+  solucao={<>Six Sigma standard: <Eq>{`\\pm 6\\sigma`}</Eq> copre <Eq>{`2 \\times (1 - \\Phi(6)) \\approx 2 \\times 10^{-9}`}</Eq> — difetti praticamente zero. Con aggiustamento di 1,5σ per deriva del processo: equivalente a <Eq>{`\\pm 4{,}5\\sigma`}</Eq> effettivi. <Eq>{`2(1-\\Phi(4{,}5)) \\approx 3{,}4 \\times 10^{-6}`}</Eq> = 3,4 ppm. Da qui "Six Sigma = 3,4 difetti per milione".</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "347", exercicio: "6.3.5", licenca: "CC-BY" }}
+>
+
+Six Sigma: specifica $\mu \pm 6\sigma$. Con aggiustamento di 1,5σ per deriva del processo, calcola i difetti per milione. Perché il risultato è 3,4 ppm e non praticamente zero?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.31"
+  dificuldade="modelagem"
+  solucao={<>Grafico X-bar: <Eq>{`n = 5`}</Eq>, <Eq>{`\\sigma`}</Eq> noto. Limiti di controllo <Eq>{`\\pm 3\\sigma/\\sqrt n`}</Eq>: <Eq>{`UCL = \\bar{\\bar X} + 3\\sigma/\\sqrt 5`}</Eq>, <Eq>{`LCL = \\bar{\\bar X} - 3\\sigma/\\sqrt 5`}</Eq>. Per <Eq>{`\\sigma = 2`}</Eq> e <Eq>{`\\bar{\\bar X} = 100`}</Eq>: <Eq>{`UCL = 100 + 6/\\sqrt 5 \\approx 102{,}68`}</Eq>, <Eq>{`LCL \\approx 97{,}32`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "164", exercicio: "3.90", licenca: "CC-BY-SA" }}
+>
+
+Grafico X-bar con $n = 5$, $\sigma = 2$ (noto), $\bar{\bar{X}} = 100$. Calcola UCL e LCL a $\pm 3\sigma$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.32"
+  dificuldade="modelagem"
+  solucao={<>Modello ML: score <Eq>{`\\sim \\mathcal N(0{,}80, 0{,}05^2)`}</Eq>. Soglia per top 20% = quantile 80%: <Eq>{`z_{0{,}80} \\approx 0{,}842`}</Eq>. <Eq>{`x = 0{,}80 + 0{,}842 \\times 0{,}05 \\approx 0{,}842`}</Eq>. Modelli con score > 0,842 sono nel top 20%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-1-the-standard-normal-distribution", secao: "§6.1", pagina: "330", exercicio: "6.1.23", licenca: "CC-BY" }}
+>
+
+Score di modello ML $\sim \mathcal N(0{,}80,\; 0{,}05^2)$. Quale la soglia per selezionare il top 20% dei modelli?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.33"
+  dificuldade="modelagem"
+  solucao={<>Resistore 100Ω ± 5%: tolleranza = [95, 105]Ω. Se <Eq>{`\\sigma = 5/3 \\approx 1{,}67`}</Eq> (poiché 3σ = 5): <Eq>{`z = 5/1{,}67 = 3`}</Eq>. <Eq>{`P(95 \\leq X \\leq 105) = P(|Z| \\leq 3) \\approx 0{,}9973`}</Eq>. 99,73% entro tolleranza.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "165", exercicio: "3.92", licenca: "CC-BY-SA" }}
+>
+
+Resistore 100Ω con tolleranza $\pm 5\%$. Assumendo $\sigma = 5/3$ ohm (3$\sigma$ = tolleranza), calcola la frazione entro specifica.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.34"
+  dificuldade="modelagem"
+  solucao={<>Borsa: rendimenti giornalieri <Eq>{`\\sim \\mathcal N(0{,}05\\%/252; \\; 20\\%^2/252)`}</Eq>. Parametri annuali: rendimento atteso 5%, <Eq>{`\\sigma = 20\\%`}</Eq>. Prob. rendimento annuale negativo: <Eq>{`P(X < 0) = \\Phi(-0{,}05/0{,}20) = \\Phi(-0{,}25) \\approx 40\\%`}</Eq>. Elevata probabilità di perdita in un singolo anno!</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "348", exercicio: "6.3.7", licenca: "CC-BY" }}
+>
+
+Rendimento annuale di portafoglio $\sim \mathcal N(5\%, 20\%^2)$. Calcola la probabilità di rendimento negativo in un anno.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.35"
+  dificuldade="modelagem"
+  solucao={<>ENEM: voti <Eq>{`\\sim \\mathcal N(520, 110^2)`}</Eq>. <Eq>{`P(\\text{voto} > 700) = P(Z > 1{,}636) \\approx 0{,}051`}</Eq>. Circa il 5% dei candidati vota sopra 700 — consistente con la difficoltà dell'esame.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "166", exercicio: "3.94", licenca: "CC-BY-SA" }}
+>
+
+Voti dell'ENEM (Matematica) $\sim \mathcal N(520, 110^2)$. Calcola $P(\text{voto} > 700)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.36"
+  dificuldade="modelagem"
+  solucao={<>IPCA accumulato annuale: <Eq>{`X \\sim \\mathcal N(4{,}5\\%, 1{,}5\\%^2)`}</Eq>. Limite superiore del target = 6,5%. <Eq>{`P(X > 6{,}5) = P(Z > (6{,}5-4{,}5)/1{,}5) = P(Z > 1{,}33) \\approx 0{,}092`}</Eq>. Circa il 9,2% di probabilità di superare il target di inflazione.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/6-3-estimating-the-binomial-with-the-normal-distribution", secao: "§6.3", pagina: "349", exercicio: "6.3.9", licenca: "CC-BY" }}
+>
+
+IPCA annuale modellato come $\mathcal N(4{,}5\%,\; 1{,}5\%^2)$. Target di inflazione: fino a 6,5%. Quale la probabilità di superare il target?
+
+</Exercicio>
+
+### Blocco D — Comprensione e dimostrazione (76.37 a 76.42)
+
+<Exercicio
+  numero="76.37"
+  dificuldade="compreensao"
+  solucao={<>Standardizziamo per usare una singola tavola (quella della normale standard <Eq>{`\\mathcal N(0,1)`}</Eq>) per calcolare probabilità di qualsiasi normale <Eq>{`\\mathcal N(\\mu, \\sigma^2)`}</Eq>. Senza standardizzazione, avremmo bisogno di una tavola diversa per ogni coppia <Eq>{`(\\mu, \\sigma)`}</Eq> — impossibile. La trasformazione <Eq>{`Z = (X-\\mu)/\\sigma`}</Eq> è un cambio di scala e origine che mappa qualsiasi normale nella standard.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§3.5", pagina: "167", exercicio: "3.96", licenca: "CC-BY-SA" }}
+>
+
+Perché standardizziamo alla normale standard? Cosa giustifica l'esistenza di una singola tavola $\Phi(z)$?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.38"
+  dificuldade="compreensao"
+  opcoes={[{texto: "La coda della normale è fina (decade come e^{-x^2/2}); la t-Student ha coda più pesante e modella meglio i rischi estremi in finanza", correta: true}, {texto: "La coda della normale è pesante; la t-Student è più fina"}, {texto: "Normale e t-Student hanno code identiche per n grande"}, {texto: "La normale ha coda più pesante di qualsiasi altra distribuzione continua"}]}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "210", exercicio: "5.2.11", licenca: "GNU FDL" }}
+  solucao={<>La normale ha coda "fina": decade come <Eq>{`e^{-x^2/2}`}</Eq>, superesponenzialmente. Gli eventi a <Eq>{`5\\sigma`}</Eq> hanno probabilità <Eq>{`\\approx 3 \\times 10^{-7}`}</Eq> — quasi impossibili. La t-Student con pochi gradi di libertà decade come polinomio: code molto più pesanti, modellando meglio i "cigni neri" in finanza.</>}
+>
+
+La coda della normale è "fina" o "pesante"? Perché questo importa nella modellazione del rischio finanziario?
+
+</Exercicio>
+
+<Exercicio
+  numero="76.39"
+  dificuldade="desafio"
+  solucao={<>Se <Eq>{`X \\sim \\mathcal N(0,1)`}</Eq>, allora <Eq>{`Y = X^2`}</Eq> ha CDF <Eq>{`P(Y \\leq y) = P(-\\sqrt y \\leq X \\leq \\sqrt y) = \\Phi(\\sqrt y) - \\Phi(-\\sqrt y) = 2\\Phi(\\sqrt y) - 1`}</Eq>. Derivando: <Eq>{`f_Y(y) = \\frac{1}{\\sqrt y} \\phi(\\sqrt y)`}</Eq> per <Eq>{`y > 0`}</Eq>, dove <Eq>{`\\phi`}</Eq> è la densità normale standard. Questa è la densità chi-quadrato con 1 grado di libertà: <Eq>{`f_Y(y) = y^{1/2-1} e^{-y/2} / (2^{1/2}\\Gamma(1/2))`}</Eq>.</>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "211", exercicio: "5.2.13", licenca: "GNU FDL" }}
+>
+
+Mostra che se $X \sim \mathcal N(0, 1)$, allora $Y = X^2$ ha distribuzione chi-quadrato con 1 grado di libertà.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.40"
+  dificuldade="demonstracao"
+  solucao={<>Sia <Eq>{`X \\sim \\mathcal N(\\mu, \\sigma^2)`}</Eq>, <Eq>{`Y = aX + b`}</Eq>. CDF di <Eq>{`Y`}</Eq>: <Eq>{`P(Y \\leq y) = P(aX + b \\leq y) = P(X \\leq (y-b)/a) = \\Phi((y-b-a\\mu)/(a\\sigma))`}</Eq>. Derivando: densità di <Eq>{`Y`}</Eq> è <Eq>{`(1/(a\\sigma)) \\phi((y - (a\\mu+b))/(a\\sigma))`}</Eq>, che è la densità di <Eq>{`\\mathcal N(a\\mu+b, a^2\\sigma^2)`}</Eq>. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "212", exercicio: "5.2.15", licenca: "GNU FDL" }}
+>
+
+Dimostra che se $X \sim \mathcal N(\mu, \sigma^2)$ e $Y = aX + b$ (con $a > 0$), allora $Y \sim \mathcal N(a\mu + b,\; a^2\sigma^2)$.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.41"
+  dificuldade="demonstracao"
+  solucao={<>Integrale gaussiano: <Eq>{`I = \\int_{-\\infty}^{+\\infty} e^{-x^2/2}\\,dx`}</Eq>. <Eq>{`I^2 = \\int\\int e^{-(x^2+y^2)/2}\\,dx\\,dy`}</Eq>. Polari: <Eq>{`I^2 = \\int_0^{2\\pi} d\\theta \\int_0^\\infty r e^{-r^2/2}\\,dr = 2\\pi \\times [-e^{-r^2/2}]_0^\\infty = 2\\pi \\times 1 = 2\\pi`}</Eq>. Quindi <Eq>{`I = \\sqrt{2\\pi}`}</Eq>. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "213", exercicio: "5.2.17", licenca: "GNU FDL" }}
+>
+
+Dimostra che $\int_{-\infty}^{+\infty} e^{-x^2/2}\,dx = \sqrt{2\pi}$ con il trucco delle coordinate polari.
+
+</Exercicio>
+
+<Exercicio
+  numero="76.42"
+  dificuldade="demonstracao"
+  solucao={<>La normale massimizza entropia differenziale tra distribuzioni con media <Eq>{`\\mu`}</Eq> e varianza <Eq>{`\\sigma^2`}</Eq> fisse. Dimostrazione via moltiplicatori di Lagrange: massimizza <Eq>{`h(f) = -\\int f \\ln f`}</Eq> soggetto a <Eq>{`\\int f = 1`}</Eq>, <Eq>{`\\int xf = \\mu`}</Eq>, <Eq>{`\\int x^2 f = \\sigma^2 + \\mu^2`}</Eq>. La funzione Lagrangiana conduce alla soluzione <Eq>{`f(x) = e^{\\lambda_0 + \\lambda_1 x + \\lambda_2 x^2}`}</Eq>. Per essere integrabile con varianza finita, <Eq>{`\\lambda_2 < 0`}</Eq> e la soluzione è la normale Gaussiana. Il valore massimo di entropia è <Eq>{`h = \\frac{1}{2}\\ln(2\\pi e \\sigma^2)`}</Eq>. <Eq>{`\\blacksquare`}</Eq></>}
+  fonte={{ livro: "Introduction to Probability — Grinstead, Snell", url: "https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html", secao: "§5.2", pagina: "214", exercicio: "5.2.19", licenca: "GNU FDL" }}
+>
+
+Dimostra (schizzo) che la distribuzione normale massimizza l'entropia differenziale tra tutte le distribuzioni continue con media $\mu$ e varianza $\sigma^2$ fisse.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Fonti
+
+- [**OpenIntro Statistics** (4ª ed)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · 2019 · EN · CC-BY-SA. **Fonte primaria — §3.5 (standardizzazione, regola 68-95-99,7, Q-Q plot, applicazioni).**
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · 2022 · EN · CC-BY. **§6.1–6.4 — densità, CDF, IC, TCL, esercizi livello AP.**
+- [**Introduction to Probability** (Grinstead-Snell)](https://chance.dartmouth.edu/teaching_aids/books_articles/probability_book/book.html) — Grinstead, Snell · 1997 · EN · GNU FDL. **§5.2 — integrale gaussiano, MGF, massima entropia, limite De Moivre-Laplace; esercizi dimostrativi.**
