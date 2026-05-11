@@ -24,6 +24,14 @@ import { SearchDiscovery } from '@/components/layout/SearchDiscovery'
 import { HomeHero } from '@/components/layout/HomeHero'
 import { HomePhilosophy } from '@/components/layout/HomePhilosophy'
 import { CheerBanner } from '@/components/layout/CheerBanner'
+import { JsonLd } from '@/components/seo/JsonLd'
+import {
+  buildOrganizationSchema,
+  buildWebSiteSchema,
+} from '@/lib/seo/structured-data'
+import { buildHomeMetadata } from '@/lib/seo/metadata'
+
+export const metadata = buildHomeMetadata('pt-BR')
 
 /** Conta exercícios em arquivos MDX via regex (extraído em build time). */
 function contarExercicios(): number {
@@ -46,6 +54,11 @@ const TODOS_LIVROS = [
   ...TOP_20, ...PRE_CALCULO, ...CALCULO, ...ALGEBRA_LINEAR, ...EDO_EDP,
   ...ANALISE, ...PROBABILIDADE, ...METODOS_NUMERICOS, ...LOGICA_PROVA,
   ...FISICA, ...PT_BR, ...CLASSICOS, ...MULTILINGUE, ...ML_CD,
+]
+
+const homeStructuredData = [
+  buildOrganizationSchema('pt-BR'),
+  buildWebSiteSchema('pt-BR'),
 ]
 
 export default function HomePage() {
@@ -88,6 +101,7 @@ export default function HomePage() {
 
   return (
     <>
+      <JsonLd data={homeStructuredData} />
       {/* Faixa fina com frase aleatória de incentivo (avô torcedor). */}
       <CheerBanner />
 

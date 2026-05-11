@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import { carregarTodosConteudos } from '@/lib/content/loader'
 import {
   PROGRAMA_EM,
@@ -7,13 +6,16 @@ import {
   HORAS_TOTAIS,
 } from '@/content/programa-em'
 import { EnsinoMedioPageContent } from '@/components/layout/EnsinoMedioPageContent'
+import { buildSectionMetadata } from '@/lib/seo/metadata'
 
 // Metadata em PT-BR (SSG). Conteúdo visível i18n via LocaleProvider client-side.
-export const metadata: Metadata = {
-  title: 'Ensino Médio',
-  description:
-    'Ensino Médio brasileiro otimizado — 12 trimestres, 120 lições, calibrado pelos currículos oficiais de Japão, Alemanha e Singapura.',
-}
+export const metadata = buildSectionMetadata({
+  path: 'ensino-medio',
+  locale: 'pt-BR',
+  titulo: 'Ensino Médio',
+  descricao:
+    'Ensino Médio brasileiro otimizado — 12 trimestres, 120 lições, calibrado pelos currículos oficiais de Japão, Alemanha e Singapura. Equivalente a High School (US/UK), Bachillerato (ES/CO).',
+})
 
 export default function EnsinoMedioPage() {
   const todos = carregarTodosConteudos()

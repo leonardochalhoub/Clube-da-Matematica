@@ -41,10 +41,13 @@ export async function generateMetadata({
   const num = numFromSlug(anoSlug)
   const ano = PROGRAMA_EM.find((a) => a.num === num)
   if (!ano) return { title: 'Ensino Médio' }
-  return {
-    title: ano.titulo,
-    description: ano.resumo,
-  }
+  const { buildSectionMetadata } = await import('@/lib/seo/metadata')
+  return buildSectionMetadata({
+    path: `ensino-medio/ano-${num}`,
+    locale: 'pt-BR',
+    titulo: ano.titulo,
+    descricao: ano.resumo,
+  })
 }
 
 export default async function AnoEnsinoMedioPage({ params }: PageProps) {

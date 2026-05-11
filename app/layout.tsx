@@ -19,32 +19,58 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
+import { SITE_ORIGIN, BASE_PATH } from '@/lib/seo/site'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(`${SITE_ORIGIN}${BASE_PATH || ''}`),
   title: {
     default: 'Clube da Matemática — Aprenda matemática de verdade',
     template: '%s · Clube da Matemática',
   },
   description:
-    'Site de matemática open source e gratuito. Toda equação tem 6 portas: formal científica + explicações para 5, 10, 15, 25 e 40 anos. Aprenda matemática de verdade.',
+    'Curso completo de matemática para o Ensino Médio brasileiro — 120 lições, 3 anos, 4.770 exercícios sourceados. Open source, gratuito, em 11 idiomas. Do conjunto de números a Black-Scholes.',
   keywords: [
-    'matemática',
-    'cálculo',
-    'cálculo numérico',
-    'método numérico',
-    'bisseção',
-    'newton-raphson',
-    'black-scholes',
-    'opções',
-    'finanças quantitativas',
-    'open source',
-    'pt-br',
+    'matemática', 'matemáticas', 'mathematics', 'maths',
+    'cálculo', 'cálculo numérico', 'calculus',
+    'derivadas', 'derivatives', 'integrals', 'integrais',
+    'limites', 'limits', 'limites',
+    'álgebra linear', 'linear algebra',
+    'estatística', 'statistics', 'estadística',
+    'black-scholes', 'opções', 'options',
+    'ensino médio', 'high school', 'bachillerato',
+    'open source', 'gratuito', 'free', 'oer',
+    'método numérico', 'newton-raphson', 'bisseção',
   ],
   authors: [{ name: 'Clube da Matemática' }],
+  creator: 'Clube da Matemática',
+  publisher: 'Clube da Matemática',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'Clube da Matemática',
-    description: 'Aprenda matemática de verdade. Open source, gratuito, em português.',
+    description:
+      'Curso aberto e gratuito de matemática para o Ensino Médio — 120 lições, 11 idiomas, 4.770 exercícios sourceados.',
     type: 'website',
     locale: 'pt_BR',
+    alternateLocale: ['en_US', 'es_ES', 'zh_CN', 'ja_JP', 'de_DE', 'fr_FR', 'it_IT', 'ru_RU', 'ko_KR', 'pl_PL'],
+    siteName: 'Clube da Matemática',
+    url: `${SITE_ORIGIN}${BASE_PATH || ''}/`,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Clube da Matemática',
+    description: 'Curso aberto de matemática para o Ensino Médio — 120 lições, 11 idiomas.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   icons: {
     icon: [
@@ -77,6 +103,31 @@ const themeScript = `
 })();
 `
 
+/**
+ * Inline script that runs BEFORE first paint to set <html lang>
+ * from the URL path. SSG ships every page with lang="pt-BR" because the
+ * root layout's <html> is shared across all routes — this script reads
+ * the path prefix (/en/, /es/, etc.) and corrects the lang attribute
+ * for accessibility tools and Google's secondary language signal.
+ */
+const langScript = `
+(function() {
+  try {
+    var p = window.location.pathname;
+    var base = ${JSON.stringify(process.env.NEXT_PUBLIC_BASE_PATH ?? '')};
+    if (base && p.indexOf(base) === 0) p = p.slice(base.length);
+    var m = p.match(/^\\/(pt-BR|en|es|zh|ja|de|fr|it|ru|ko|pl)(?:\\/|$)/);
+    var map = {
+      'pt-BR': 'pt-BR', en: 'en-US', es: 'es-ES', zh: 'zh-CN', ja: 'ja-JP',
+      de: 'de-DE', fr: 'fr-FR', it: 'it-IT', ru: 'ru-RU', ko: 'ko-KR', pl: 'pl-PL'
+    };
+    if (m && map[m[1]]) {
+      document.documentElement.lang = map[m[1]];
+    }
+  } catch (_) {}
+})();
+`
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
@@ -96,6 +147,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/favicon.svg`}
         />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: langScript }} />
       </head>
       <body className="flex min-h-screen flex-col bg-clube-cream text-clube-ink antialiased">
         <LocaleProvider>

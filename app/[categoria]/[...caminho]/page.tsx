@@ -16,6 +16,13 @@ import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
 import { LessonPageShell } from '@/components/layout/LessonPageShell'
 import { LICOES_FLAT } from '@/content/programa-em'
 import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import { buildLessonMetadata } from '@/lib/seo/metadata'
+import {
+  buildCourseSchema,
+  buildBreadcrumbSchema,
+  lessonBreadcrumbs,
+} from '@/lib/seo/structured-data'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { DuasPortas, Porta } from '@/components/math/DuasPortas'
 import { Equation, Eq } from '@/components/math/Equation'
 import { EquacaoCanonica } from '@/components/math/EquacaoCanonica'
@@ -124,14 +131,48 @@ function slugDoCaminho(caminho: string[]): string {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { caminho } = await params
+  const { categoria: rawCategoria, caminho: rawCaminho } = await params
+  // Same locale-prefix detection logic as the page handler.
+  const localeMatch = parseLocalePrefix(rawCategoria, rawCaminho)
+  const categoria = localeMatch ? localeMatch.categoria : rawCategoria
+  const caminho = localeMatch ? localeMatch.caminho : rawCaminho
+  const localeCode = (localeMatch?.locale ?? 'pt-BR') as Locale
+
   const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
   if (!conteudo) return { title: 'Não encontrado' }
-  return {
-    title: conteudo.meta.titulo,
-    description: conteudo.meta.descricao,
+
+  // Use translated frontmatter (titulo, descricao) when a translation file
+  // exists. Falls back to PT-BR meta otherwise — but in that case the route
+  // is a PT-BR fallback, NOT a real localized translation, so we still tag
+  // canonical to PT-BR (hreflangAlternatesFor only emits hreflangs for
+  // locales whose translation file actually exists).
+  let titulo = conteudo.meta.titulo
+  let descricao = conteudo.meta.descricao
+  if (localeCode !== 'pt-BR') {
+    const info = LOCALES[localeCode]
+    const arquivo = caminhoArquivoMdx(
+      `${categoria}/${caminho.join('/')}`,
+      localeCode,
+      info.speechLang,
+    )
+    if (arquivo) {
+      try {
+        const { data } = await lerMdxSource(arquivo)
+        if (typeof data.titulo === 'string') titulo = data.titulo
+        if (typeof data.descricao === 'string') descricao = data.descricao
+      } catch {
+        // keep PT-BR meta
+      }
+    }
   }
+
+  return buildLessonMetadata({
+    caminho: `${categoria}/${caminho.join('/')}`,
+    locale: localeCode,
+    titulo,
+    descricao,
+  })
 }
 
 export default async function ConteudoPage({ params }: Props) {
@@ -221,16 +262,42 @@ export default async function ConteudoPage({ params }: Props) {
     ...(translatedFrontmatter as Partial<typeof conteudo.meta>),
   }
 
+  // ---------- JSON-LD structured data ----------
+  const ldLessonTitle =
+    (translatedFrontmatter.titulo as string | undefined) ?? conteudo.meta.titulo
+  const ldLessonDescription =
+    (translatedFrontmatter.descricao as string | undefined) ?? conteudo.meta.descricao
+  const ldTags = (translatedFrontmatter.tags as string[] | undefined) ?? conteudo.meta.tags ?? []
+  const ldPrereqs =
+    (translatedFrontmatter.prerrequisitos as string[] | undefined) ??
+    conteudo.meta.prerrequisitos ??
+    []
+  const courseSchema = buildCourseSchema({
+    caminho: completo,
+    locale: localeCode,
+    titulo: ldLessonTitle,
+    descricao: ldLessonDescription,
+    tags: ldTags,
+    prerrequisitos: ldPrereqs,
+    isAula,
+  })
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    lessonBreadcrumbs(completo, localeCode, ldLessonTitle),
+  )
+
   return (
-    <LessonPageShell
-      meta={localizedMeta}
-      isAula={isAula}
-      isFinancas={isFinancas}
-      caminho={completo}
-      prevLicao={prevLicao}
-      nextLicao={nextLicao}
-    >
-      <MDXContent />
-    </LessonPageShell>
+    <>
+      <JsonLd data={[courseSchema, breadcrumbSchema]} />
+      <LessonPageShell
+        meta={localizedMeta}
+        isAula={isAula}
+        isFinancas={isFinancas}
+        caminho={completo}
+        prevLicao={prevLicao}
+        nextLicao={nextLicao}
+      >
+        <MDXContent />
+      </LessonPageShell>
+    </>
   )
 }

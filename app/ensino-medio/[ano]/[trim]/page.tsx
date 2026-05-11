@@ -42,7 +42,13 @@ export async function generateMetadata({
   const a = PROGRAMA_EM.find((x) => x.num === anoNum)
   const t = a?.trimestres.find((x) => x.num === trimNum)
   if (!t) return { title: 'Trimestre' }
-  return { title: t.titulo, description: t.foco }
+  const { buildSectionMetadata } = await import('@/lib/seo/metadata')
+  return buildSectionMetadata({
+    path: `ensino-medio/ano-${anoNum}/trim-${trimNum}`,
+    locale: 'pt-BR',
+    titulo: t.titulo,
+    descricao: t.foco,
+  })
 }
 
 export default async function TrimPage({ params }: PageProps) {
