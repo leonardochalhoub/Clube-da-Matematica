@@ -13,6 +13,30 @@ import type { Locale } from '@/lib/i18n/locales'
 
 type LocaleMap<T = string> = Partial<Record<Locale, T>>
 
+/** Year-level descriptive blurb (`ano.resumo`). */
+export const ANO_RESUMO_I18N: Record<number, LocaleMap> = {
+  1: {
+    'pt-BR': 'Estabelece a linguagem rigorosa: conjuntos, funções, trigonometria, geometria analítica, vetores, matrizes, combinatória. A última aula de cada trimestre é workshop integrador. A aula 9 ("taxa de variação média") já planta a semente do Cálculo.',
+    en: 'Establishes rigorous language: sets, functions, trigonometry, analytic geometry, vectors, matrices, combinatorics. The last lesson of each term is an integrative workshop. Lesson 9 ("average rate of change") already plants the seed of Calculus.',
+    es: 'Establece el lenguaje riguroso: conjuntos, funciones, trigonometría, geometría analítica, vectores, matrices, combinatoria. La última lección de cada trimestre es un taller integrador. La lección 9 ("tasa de variación media") ya planta la semilla del Cálculo.',
+  },
+  2: {
+    'pt-BR': 'Aqui o aluno conhece a derivada formalmente. Junto, ganha estatística descritiva e probabilidade — fundamentos para tudo que vem em Mestrado de Engenharia, Economia, Finanças.',
+    en: 'Here the student formally meets the derivative. Alongside, they gain descriptive statistics and probability — the foundations for everything that follows in a Master\'s in Engineering, Economics, or Finance.',
+    es: 'Aquí el estudiante conoce formalmente la derivada. Junto a ello, obtiene estadística descriptiva y probabilidad — los fundamentos para todo lo que sigue en un Máster de Ingeniería, Economía o Finanzas.',
+  },
+  3: {
+    'pt-BR': 'A síntese: cálculo integral, EDOs (com a ponte para a EDP de Black-Scholes), inferência estatística e álgebra linear introdutória. Quem termina o Ano 3 está pronto para Cálculo I em qualquer engenharia de federal.',
+    en: 'The synthesis: integral calculus, ODEs (with the bridge to the Black-Scholes PDE), statistical inference, and introductory linear algebra. Whoever finishes Year 3 is ready for Calculus I in any federal-university engineering program.',
+    es: 'La síntesis: cálculo integral, EDOs (con el puente a la EDP de Black-Scholes), inferencia estadística y álgebra lineal introductoria. Quien termina el Año 3 está listo para Cálculo I en cualquier ingeniería de universidad pública.',
+  },
+}
+
+/** Helper: ano resumo. */
+export function anoResumo(num: number, locale: Locale, fallback: string): string {
+  return ANO_RESUMO_I18N[num]?.[locale] ?? ANO_RESUMO_I18N[num]?.['pt-BR'] ?? fallback
+}
+
 /** Year titles, keyed by ano number (1, 2, 3). */
 export const ANO_TITULO_I18N: Record<number, LocaleMap> = {
   1: {
@@ -266,6 +290,153 @@ export const AULA_TITULO_I18N: Record<string, LocaleMap> = {
     'pt-BR': 'Aula D — Limite de sequência + síntese',
     en: 'Class D — Limit of a sequence + synthesis',
     es: 'Clase D — Límite de sucesión + síntesis',
+  },
+  // Year 2 - Term 6
+  'derivada-conceito': {
+    'pt-BR': 'Aula A — Definição da derivada e regras básicas',
+    en: 'Class A — Definition of the derivative and basic rules',
+    es: 'Clase A — Definición de la derivada y reglas básicas',
+  },
+  'derivada-cadeia-implicita': {
+    'pt-BR': 'Aula B — Regra da cadeia e derivada implícita',
+    en: 'Class B — Chain rule and implicit differentiation',
+    es: 'Clase B — Regla de la cadena y derivada implícita',
+  },
+  'derivadas-superiores': {
+    'pt-BR': 'Aula C — Ordem superior, inversa e aproximação linear',
+    en: 'Class C — Higher order, inverse and linear approximation',
+    es: 'Clase C — Orden superior, inversa y aproximación lineal',
+  },
+  'taxas-suavidade': {
+    'pt-BR': 'Aula D — Taxas relacionadas + suavidade',
+    en: 'Class D — Related rates + smoothness',
+    es: 'Clase D — Tasas relacionadas + suavidad',
+  },
+  // Year 2 - Term 7
+  'maximos-otimizacao': {
+    'pt-BR': 'Aula A — Máximos, mínimos e otimização',
+    en: 'Class A — Maxima, minima and optimization',
+    es: 'Clase A — Máximos, mínimos y optimización',
+  },
+  'l-hopital-taylor': {
+    'pt-BR': "Aula B — L'Hôpital e Taylor",
+    en: "Class B — L'Hôpital and Taylor",
+    es: "Clase B — L'Hôpital y Taylor",
+  },
+  'aplicacoes-economia': {
+    'pt-BR': 'Aula C — Análise marginal e cinemática',
+    en: 'Class C — Marginal analysis and kinematics',
+    es: 'Clase C — Análisis marginal y cinemática',
+  },
+  'newton-sintese': {
+    'pt-BR': 'Aula D — Newton-Raphson + síntese',
+    en: 'Class D — Newton-Raphson + synthesis',
+    es: 'Clase D — Newton-Raphson + síntesis',
+  },
+  // Year 2 - Term 8
+  'estatistica-descritiva': {
+    'pt-BR': 'Aula A — Estatística descritiva',
+    en: 'Class A — Descriptive statistics',
+    es: 'Clase A — Estadística descriptiva',
+  },
+  'va-binomial': {
+    'pt-BR': 'Aula B — Variável aleatória e distribuição binomial',
+    en: 'Class B — Random variable and binomial distribution',
+    es: 'Clase B — Variable aleatoria y distribución binomial',
+  },
+  'normal-tcl': {
+    'pt-BR': 'Aula C — Normal e Teorema Central do Limite',
+    en: 'Class C — Normal distribution and the Central Limit Theorem',
+    es: 'Clase C — Distribución normal y el Teorema del Límite Central',
+  },
+  'correlacao-bayes': {
+    'pt-BR': 'Aula D — Correlação, regressão, Bayes + síntese',
+    en: 'Class D — Correlation, regression, Bayes + synthesis',
+    es: 'Clase D — Correlación, regresión, Bayes + síntesis',
+  },
+  // Year 3 - Term 9
+  'antiderivada-tfc': {
+    'pt-BR': 'Aula A — Antiderivada, integral definida e TFC',
+    en: 'Class A — Antiderivative, definite integral and FTC',
+    es: 'Clase A — Antiderivada, integral definida y TFC',
+  },
+  'tecnicas-integracao': {
+    'pt-BR': 'Aula B — Substituição, partes, frações parciais',
+    en: 'Class B — Substitution, integration by parts, partial fractions',
+    es: 'Clase B — Sustitución, integración por partes, fracciones parciales',
+  },
+  'integrais-trig': {
+    'pt-BR': 'Aula C — Integrais trigonométricas',
+    en: 'Class C — Trigonometric integrals',
+    es: 'Clase C — Integrales trigonométricas',
+  },
+  'aplicacoes-integral': {
+    'pt-BR': 'Aula D — Área, volume + síntese',
+    en: 'Class D — Area, volume + synthesis',
+    es: 'Clase D — Área, volumen + síntesis',
+  },
+  // Year 3 - Term 10
+  'edo-introducao': {
+    'pt-BR': 'Aula A — Introdução e EDOs separáveis/lineares 1ª ordem',
+    en: 'Class A — Introduction and 1st-order separable/linear ODEs',
+    es: 'Clase A — Introducción y EDOs separables/lineales de 1.er orden',
+  },
+  'edo-modelos': {
+    'pt-BR': 'Aula B — Crescimento, decaimento, Newton',
+    en: 'Class B — Growth, decay, Newton',
+    es: 'Clase B — Crecimiento, decaimiento, Newton',
+  },
+  'edo-2-ordem': {
+    'pt-BR': 'Aula C — EDOs 2ª ordem: vibrações e RLC',
+    en: 'Class C — 2nd-order ODEs: vibrations and RLC',
+    es: 'Clase C — EDOs de 2.º orden: vibraciones y RLC',
+  },
+  'numerico-sintese': {
+    'pt-BR': 'Aula D — Método de Euler + síntese',
+    en: "Class D — Euler's method + synthesis",
+    es: 'Clase D — Método de Euler + síntesis',
+  },
+  // Year 3 - Term 11
+  'amostragem-ic': {
+    'pt-BR': 'Aula A — Amostragem e intervalo de confiança',
+    en: 'Class A — Sampling and confidence interval',
+    es: 'Clase A — Muestreo e intervalo de confianza',
+  },
+  'teste-hipotese': {
+    'pt-BR': 'Aula B — Teste de hipótese (z, t)',
+    en: 'Class B — Hypothesis testing (z, t)',
+    es: 'Clase B — Prueba de hipótesis (z, t)',
+  },
+  'regressao-anova': {
+    'pt-BR': 'Aula C — Regressão linear simples e múltipla, ANOVA',
+    en: 'Class C — Simple and multiple linear regression, ANOVA',
+    es: 'Clase C — Regresión lineal simple y múltiple, ANOVA',
+  },
+  'qui-bayes-sintese': {
+    'pt-BR': 'Aula D — Qui-quadrado, Bayes intro + síntese',
+    en: 'Class D — Chi-squared, intro to Bayes + synthesis',
+    es: 'Clase D — Chi-cuadrado, introducción a Bayes + síntesis',
+  },
+  // Year 3 - Term 12
+  'espacos-vetoriais': {
+    'pt-BR': 'Aula A — Espaços vetoriais e transformações',
+    en: 'Class A — Vector spaces and transformations',
+    es: 'Clase A — Espacios vectoriales y transformaciones',
+  },
+  'autovalores-diagonalizacao': {
+    'pt-BR': 'Aula B — Autovalores, diagonalização, simétricas/ortogonais',
+    en: 'Class B — Eigenvalues, diagonalization, symmetric/orthogonal matrices',
+    es: 'Clase B — Valores propios, diagonalización, matrices simétricas/ortogonales',
+  },
+  'svd-pca': {
+    'pt-BR': 'Aula C — SVD e PCA',
+    en: 'Class C — SVD and PCA',
+    es: 'Clase C — SVD y PCA',
+  },
+  'sintese-final': {
+    'pt-BR': 'Aula D — Síntese (Black-Scholes) + Workshop final',
+    en: 'Class D — Synthesis (Black-Scholes) + Final workshop',
+    es: 'Clase D — Síntesis (Black-Scholes) + Taller final',
   },
 }
 

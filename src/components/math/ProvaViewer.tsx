@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import katex from 'katex'
 import { type Prova, PROVAS } from '@/content/provas-data'
 import { useLocale } from '@/components/layout/LocaleProvider'
+import { provaTitulo } from '@/content/provas-i18n'
 
 const macros: Record<string, string> = {
   '\\R': '\\mathbb{R}',
@@ -32,7 +33,7 @@ function renderMarkdown(text: string): string {
 }
 
 export function ProvaViewer() {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [trimFiltro, setTrimFiltro] = useState<number>(1)
   const provasDoTrim = useMemo(
     () => PROVAS.filter((p) => p.trim === trimFiltro),
@@ -131,7 +132,7 @@ export function ProvaViewer() {
         >
           {provasDoTrim.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.titulo} {p.status === 'curada' ? '✓' : `· ${t('prova.status.curating')}`}
+              {provaTitulo(p.trim, p.versao, locale, p.titulo)} {p.status === 'curada' ? '✓' : `· ${t('prova.status.curating')}`}
             </option>
           ))}
         </select>
@@ -141,7 +142,7 @@ export function ProvaViewer() {
       <header className="mb-8 rounded-2xl border-2 border-clube-gold/30 bg-gradient-to-b from-clube-cream-soft to-clube-surface p-4 sm:p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
           <h2 className="text-xl font-extrabold text-clube-teal-deep sm:text-2xl">
-            {prova.titulo}
+            {provaTitulo(prova.trim, prova.versao, locale, prova.titulo)}
           </h2>
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="rounded-full bg-clube-cream-soft px-2 py-1 font-mono text-clube-teal-deep">

@@ -1372,6 +1372,10 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '학기 {t} ({ano}학년)',
     pl: 'Trymestr {t} (rok {ano})',
   },
+  'prova.version.short': {
+    'pt-BR': 'Versão', en: 'Version', es: 'Versión', zh: '版本', ja: 'バージョン',
+    de: 'Version', fr: 'Version', it: 'Versione', ru: 'Версия', ko: '버전', pl: 'Wersja',
+  },
   'prova.version.label': {
     'pt-BR': 'Versão da prova',
     en: 'Exam version',

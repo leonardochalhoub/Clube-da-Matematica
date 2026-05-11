@@ -5,6 +5,12 @@ import type { Ano } from '@/content/programa-em'
 import { HashOpener } from './HashOpener'
 import { useLocale } from './LocaleProvider'
 import { localizedHref } from '@/lib/i18n/href'
+import {
+  anoTitulo as anoTituloI18n,
+  anoResumo as anoResumoI18n,
+  trimTitulo as trimTituloI18n,
+} from '@/content/programa-em-i18n'
+import { licaoTitulo } from '@/content/programa-em-licao-i18n.generated'
 
 /**
  * Conteúdo client-side da página /ensino-medio.
@@ -82,10 +88,10 @@ export function EnsinoMedioPageContent({
                     {t('page.ensinoMedio.year.label')} {ano.num} · {ano.idade}
                   </span>
                   <h2 className="mt-1 text-xl font-extrabold leading-tight text-clube-teal-deep group-open:text-clube-teal">
-                    {ano.titulo}
+                    {anoTituloI18n(ano.num, locale, ano.titulo)}
                   </h2>
                   <p className="mt-1 text-sm leading-snug text-clube-mist">
-                    {ano.resumo}
+                    {anoResumoI18n(ano.num, locale, ano.resumo)}
                   </p>
                   <p className="mt-2 text-[11px] text-clube-mist/80">
                     <strong className="text-clube-leaf">{publicadas}</strong>{' '}
@@ -119,7 +125,7 @@ export function EnsinoMedioPageContent({
                         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden [&::-webkit-details-marker]:hidden">
                           <div className="min-w-0 flex-1">
                             <span className="text-sm font-semibold text-clube-teal-deep">
-                              {trim.titulo}
+                              {trimTituloI18n(trim.num, locale, trim.titulo)}
                             </span>
                             <span className="ml-3 text-xs text-clube-mist">
                               {publishedCount}/{trim.aulas.length} ·{' '}
@@ -150,7 +156,7 @@ export function EnsinoMedioPageContent({
                                       L{licao.num}
                                     </span>
                                     <span className="flex-1 font-medium text-clube-ink hover:text-clube-teal">
-                                      {licao.titulo}
+                                      {licaoTitulo(licao.num, locale, licao.titulo)}
                                     </span>
                                     <span
                                       aria-hidden="true"
@@ -165,7 +171,7 @@ export function EnsinoMedioPageContent({
                                       L{licao.num}
                                     </span>
                                     <span className="flex-1 text-clube-mist">
-                                      {licao.titulo}
+                                      {licaoTitulo(licao.num, locale, licao.titulo)}
                                     </span>
                                     <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-red-700">
                                       {t('materia.status.planned')}

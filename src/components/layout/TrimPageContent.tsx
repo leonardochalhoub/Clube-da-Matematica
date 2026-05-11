@@ -9,6 +9,10 @@ import {
   trimFoco,
   aulaTitulo,
 } from '@/content/programa-em-i18n'
+import {
+  licaoTitulo,
+  licaoTopicos,
+} from '@/content/programa-em-licao-i18n.generated'
 
 export interface TrimPageContentProps {
   anoNum: number
@@ -232,16 +236,18 @@ function LicaoLinha({
   licao: Licao
   slugMap: Map<string, string>
 }) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const caminho = licao.slug ? slugMap.get(licao.slug) : undefined
+  const titulo = licaoTitulo(licao.num, locale, licao.titulo)
+  const topicos = licaoTopicos(licao.num, locale, licao.topicos)
   const Inner = (
     <div className="flex items-start gap-3 text-sm">
       <span className="mt-0.5 inline-block min-w-[3.5rem] rounded-full bg-clube-cream-soft px-2 py-0.5 text-center font-mono text-[10px] font-bold text-clube-teal-deep">
         {t('em.lesson')} {licao.num}
       </span>
       <div className="flex-1">
-        <div className="font-semibold text-clube-ink">{licao.titulo}</div>
-        <div className="text-xs text-clube-mist">{licao.topicos}</div>
+        <div className="font-semibold text-clube-ink">{titulo}</div>
+        <div className="text-xs text-clube-mist">{topicos}</div>
       </div>
       {caminho ? (
         <span className="rounded-full bg-clube-leaf/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-clube-leaf">

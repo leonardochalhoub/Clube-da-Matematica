@@ -56,9 +56,25 @@ function walkMdx(dir: string, base = dir): string[] {
 export function generateStaticParams() {
   // Pra cada locale não-PT-BR, gera os paths que TÊM tradução em
   // content/i18n/<speechLang>/. PT-BR usa rota raiz (sem prefixo).
+  //
+  // PREVIEW_LOCALES env limits which locales emit pages (saves RAM for
+  // local builds). Default: all locales. Set to e.g. "en,es" to only
+  // emit those two prefixes.
   const params: Array<{ locale: string; categoria: string; caminho: string[] }> = []
   const i18nRoot = join(ROOT, 'content', 'i18n')
   if (!existsSync(i18nRoot)) return params
+
+  // BUILD_LOCALE: matrix-build mode. When set, this route emits ONLY
+  // paths for that locale (or none if BUILD_LOCALE=pt-BR, since PT-BR
+  // uses root URLs handled by `[categoria]/[...caminho]`).
+  const buildLocale = process.env.BUILD_LOCALE ?? ''
+  if (buildLocale === 'pt-BR') return params
+
+  const previewLocales = buildLocale
+    ? new Set([buildLocale])
+    : process.env.PREVIEW_LOCALES
+      ? new Set(process.env.PREVIEW_LOCALES.split(',').map((s) => s.trim()))
+      : null
 
   for (const speechLang of readdirSync(i18nRoot)) {
     const dir = join(i18nRoot, speechLang)
@@ -68,6 +84,7 @@ export function generateStaticParams() {
     if (!localeEntry) continue
     const localeCode = localeEntry.code
     if (localeCode === 'pt-BR') continue
+    if (previewLocales && !previewLocales.has(localeCode)) continue
     for (const rel of walkMdx(dir)) {
       const partes = rel.split('/')
       const [categoria, ...rest] = partes
