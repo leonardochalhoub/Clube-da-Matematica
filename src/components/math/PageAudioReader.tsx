@@ -53,41 +53,11 @@ export function PageAudioReader({
     }
   }, [])
 
-  /**
-   * Speech language — derived from the URL's content language, NOT the
-   * user-toggled UI locale.
-   *
-   * Reason: on the canonical PT-BR URL (e.g. `/aulas/...`), the MDX
-   * content is in Portuguese. If the user toggles the locale switcher
-   * to es-ES, the UI labels translate but the lesson body and equation
-   * `audioTexto` strings remain PT-BR. Speaking PT-BR text with a
-   * Spanish voice produces garbled "Portuguese with Spanish accent".
-   *
-   * On translated routes (e.g. `/es/aulas/...`), the URL prefix
-   * matches the content, so URL-derived lang and UI locale agree.
-   *
-   * Same approach used by the inline `<AudioReader>` per-equation
-   * button: it speaks the actual content's language. We mirror it
-   * for consistency.
-   */
-  const [contentLang, setContentLang] = useState<string>(() => {
-    if (typeof document === 'undefined') return LOCALES[locale]?.speechLang ?? 'pt-BR'
-    return document.documentElement.lang || LOCALES[locale]?.speechLang || 'pt-BR'
-  })
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    const update = () => setContentLang(document.documentElement.lang || 'pt-BR')
-    update()
-    // The lang-correction inline script in layout.tsx may set lang AFTER
-    // hydration; watch for that one-shot change.
-    const observer = new MutationObserver(update)
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['lang'],
-    })
-    return () => observer.disconnect()
-  }, [])
-  const speechLang = contentLang || LOCALES[locale]?.speechLang || 'pt-BR'
+  // Speech language follows the UI locale toggle (same as <AudioReader>
+  // per-equation button). User explicitly wants page reader to switch
+  // accents when they toggle the language, matching what the equation
+  // reader already does.
+  const speechLang = LOCALES[locale]?.speechLang ?? 'pt-BR'
 
   /**
    * Extrai texto legível do article. Pula:
