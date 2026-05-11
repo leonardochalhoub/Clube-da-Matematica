@@ -1,0 +1,674 @@
+---
+titulo: "Lição 104 — Teste z e teste t de Student"
+slug: "licao-104-teste-z-t"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Teste z para média com sigma conhecido. Teste t de Student: uma amostra, duas amostras independentes (Welch e pooled), e pareado. Condições de aplicação e escolha do teste adequado."
+ordem: 104
+publicado: true
+tags: ["estatística inferencial", "teste t", "teste z", "Welch", "pareado", "ano-3", "trim-11"]
+prerrequisitos: ["licao-103-teste-hipotese"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "H2 Statistics singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="T = \frac{\bar X - \mu_0}{s/\sqrt{n}} \sim t_{n-1} \quad \text{(eine Stichprobe, } \sigma \text{ unbekannt)}"
+  legenda={<>Der <strong>t-Test von Student</strong> ersetzt die unbekannte Populationsstandardabweichung durch die Stichprobenstandardabweichung <Eq>{`s`}</Eq>, zahlt aber dafür mit schwereren Auslägern (Verteilung <Eq>{`t_{n-1}`}</Eq>). Für zwei unabhängige Stichproben verwendet man Welch (unterschiedliche Varianzen) oder gepoolte Varianz (gleiche Varianzen). Bei gepaarten Daten operiert man auf die Differenzen.</>}
+  audioTexto="T-Test von Student. Statistik T gleich Stichprobenmittelwert minus Hypothesenmittelwert, dividiert durch s über Wurzel von n. Folgt T-Verteilung mit n minus eins Freiheitsgraden, wenn Sigma unbekannt ist und die Population ungefähr normalverteilt."
+/>
+
+<aside>
+
+**Livros que cobrem esta lição**
+
+- [**OpenIntro Statistics** (4ª ed.) — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · §5.3–5.4 · CC-BY-SA · <em>Cobre teste t de uma amostra, duas amostras independentes (Welch) e pareado com exemplos aplicados; discussão de condições de aplicação.</em>
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §9.5–9.6 e §10.1–10.4 · CC-BY · <em>Desenvolve teste z, teste t de uma e duas amostras, com tabelas, exemplos numéricos detalhados e exercícios de comparação de grupos.</em>
+- [**Statistical Thinking for the 21st Century** — Russell Poldrack](https://statsthinking21.org/) · Cap. 12 · CC-BY-NC · <em>Apresenta os testes de comparação de grupos com perspectiva moderna, incluindo simulação e comparação com abordagem bayesiana.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Definição rigorosa">
+
+### z-Test — Sigma bekannt
+
+<Definicao titulo="z-Test für einen Mittelwert">
+
+Annahmen: $X_1, \ldots, X_n$ iid, $\sigma$ bekannt, Population normal oder $n \geq 30$ (Zentraler Grenzwertsatz).
+
+Unter $H_0: \mu = \mu_0$:
+
+<Equation explicacao="z-Statistik: folgt Standardnormalverteilung unter H0, wenn Sigma bekannt ist." latex="Z = \frac{\bar X - \mu_0}{\sigma / \sqrt{n}} \overset{H_0}{\sim} \mathcal{N}(0, 1)" />
+
+Praktische Anwendung: selten, denn $\sigma$ ist normalerweise unbekannt. Anwendbar, wenn $\sigma$ aus langer historischer Kalibrierung kommt.
+
+</Definicao>
+
+### t-Test — eine Stichprobe
+
+<Definicao titulo="t-Test von Student (eine Stichprobe)">
+
+Annahmen: $\sigma$ unbekannt; Population normal oder $n \geq 15$ (mäßig robust).
+
+<Equation explicacao="t-Statistik einer Stichprobe: folgt t-Verteilung mit n-1 Freiheitsgraden unter H0 und Normalität." latex="T = \frac{\bar X - \mu_0}{s / \sqrt{n}} \overset{H_0}{\sim} t_{n-1}" />
+
+Für großes $n$ gilt $t_{n-1} \to \mathcal{N}(0,1)$.
+
+</Definicao>
+
+> "Die t-Verteilung von Student ist angemessen, wenn wir die Stichprobenstandardabweichung $s$ anstelle von $\sigma$ verwenden. Die schwereren Ausläufer spiegeln die zusätzliche Unsicherheit bei der Schätzung von $\sigma$ wider." — [OpenIntro Statistics, §5.3](https://www.openintro.org/book/os/)
+
+### t-Test — zwei unabhängige Stichproben
+
+<Definicao titulo="Welch t (unterschiedliche Varianzen)">
+
+Für $X_{1,i} \overset{\text{iid}}{\sim} F_1(\mu_1, \sigma_1^2)$ und $X_{2,j} \overset{\text{iid}}{\sim} F_2(\mu_2, \sigma_2^2)$, unabhängig, testend $H_0: \mu_1 = \mu_2$:
+
+<Equation explicacao="Welch-Statistik: verwendet die Standardabweichungen jeder Gruppe separat, ohne gleiche Varianzen anzunehmen." latex="T_W = \frac{\bar X_1 - \bar X_2}{\sqrt{s_1^2/n_1 + s_2^2/n_2}} \overset{H_0}{\approx} t_\nu" />
+
+Die Freiheitsgrade $\nu$ werden durch die Welch-Satterthwaite-Formel approximiert:
+
+<Equation explicacao="Effektive Freiheitsgrade von Welch-Satterthwaite. Immer zwischen min(n1-1, n2-1) und n1+n2-2." latex="\nu = \frac{(s_1^2/n_1 + s_2^2/n_2)^2}{\frac{(s_1^2/n_1)^2}{n_1-1} + \frac{(s_2^2/n_2)^2}{n_2-1}}" />
+
+</Definicao>
+
+<Definicao titulo="Gepoolter t-Test (gleiche Varianzen)">
+
+Wenn $\sigma_1^2 = \sigma_2^2 = \sigma^2$ (Varianzen als gleich angenommen):
+
+<Equation explicacao="Gepoolte Varianz: kombinierte Schätzung der gemeinsamen Varianz unter Verwendung beider Gruppen." latex="s_p^2 = \frac{(n_1 - 1)s_1^2 + (n_2 - 1)s_2^2}{n_1 + n_2 - 2}" />
+
+<Equation explicacao="Gepoolte t-Statistik: exakte Freiheitsgrade n1+n2-2." latex="T_P = \frac{\bar X_1 - \bar X_2}{s_p\sqrt{1/n_1 + 1/n_2}} \overset{H_0}{\sim} t_{n_1 + n_2 - 2}" />
+
+**Empfehlung**: Verwenden Sie Welch standardmäßig, da er robust ist, selbst wenn $\sigma_1 = \sigma_2$. Der gepoolte t-Test ist nur gültig, wenn Gleichheit der Varianzen angemessen ist.
+
+</Definicao>
+
+### t-Test — Gepaarte Stichproben
+
+<Definicao titulo="Gepairter t-Test">
+
+Paare $(X_{1,i}, X_{2,i})$ derselben Person (oder experimentalen Einheit) in zwei Momenten oder Bedingungen. Definieren Sie $D_i = X_{1,i} - X_{2,i}$.
+
+<Equation explicacao="Reduziert das Problem auf einen t-Test einer Stichprobe auf den Differenzen D i." latex="T = \frac{\bar D - \delta_0}{s_D / \sqrt{n}} \overset{H_0: \delta = \delta_0}{\sim} t_{n-1}" />
+
+wobei $\bar D = \frac{1}{n}\sum D_i$ und $s_D^2 = \frac{1}{n-1}\sum(D_i - \bar D)^2$.
+
+**Vorteil**: eliminiert Variabilität zwischen Personen, erhöht die Power zum Erkennen realer Effekte.
+
+</Definicao>
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 540 200" className="w-full">
+<defs>
+  <marker id="arr104" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="rgb(26 77 92)"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="10" width="100" height="40" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="60" y="28" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor">sigma</text>
+  <text x="60" y="42" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor">bekannt?</text>
+</g>
+<g>
+  <line x1="110" y1="30" x2="160" y2="30" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="135" y="24" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">Ja</text>
+  <rect x="160" y="10" width="80" height="40" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="200" y="35" textAnchor="middle" fontSize="11" fontFamily="sans-serif" fill="currentColor" fontWeight="bold">z-Test</text>
+</g>
+<g>
+  <line x1="60" y1="50" x2="60" y2="90" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="70" y="75" fontSize="9" fontFamily="sans-serif" fill="currentColor">Nein</text>
+  <rect x="10" y="90" width="100" height="40" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="60" y="108" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor">Eine</text>
+  <text x="60" y="122" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor">oder zwei Stichproben?</text>
+</g>
+<g>
+  <line x1="110" y1="110" x2="160" y2="110" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="135" y="103" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">Eine</text>
+  <rect x="160" y="90" width="90" height="40" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="205" y="108" textAnchor="middle" fontSize="11" fontFamily="sans-serif" fill="currentColor" fontWeight="bold">t (n-1 frg)</text>
+  <text x="205" y="122" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">eine Stichprobe</text>
+</g>
+<g>
+  <line x1="60" y1="130" x2="60" y2="165" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="70" y="152" fontSize="9" fontFamily="sans-serif" fill="currentColor">Zwei</text>
+  <rect x="10" y="165" width="100" height="30" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="60" y="178" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">Paare</text>
+  <text x="60" y="190" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">abhängig?</text>
+</g>
+<g>
+  <line x1="110" y1="180" x2="160" y2="150" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="137" y="162" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">Ja</text>
+  <rect x="160" y="140" width="90" height="30" rx="6" fill="rgb(232 199 122 / 0.3)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="205" y="162" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor" fontWeight="bold">t gepaart</text>
+</g>
+<g>
+  <line x1="110" y1="186" x2="280" y2="186" stroke="rgb(26 77 92)" strokeWidth="1.2" markerEnd="url(#arr104)"/>
+  <text x="200" y="196" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor">Nein (unabhängig)</text>
+  <rect x="280" y="170" width="110" height="30" rx="6" fill="rgb(199 107 63 / 0.2)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="335" y="188" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor" fontWeight="bold">Welch t</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Entscheidungsbaum für Testwahl. Verwenden Sie Welch standardmäßig für zwei unabhängige Stichproben.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein 5-jähriges Kind">
+
+Sie möchten wissen, ob Ihre Klasse und die Nachbarklasse unterschiedliche Größen haben. Sie messen einige Kinder aus jeder Klasse und berechnen die Durchschnitte.
+
+Aber die Größen sind nicht genau gleich in jeder Klasse — es gibt immer ein wenig Variation. Der **t-Test** ist eine Möglichkeit zu berechnen, ob der Unterschied zwischen den Durchschnitten **groß genug** ist, um nicht nur Zufall zu sein.
+
+Und wenn Sie **dasselbe Kind vor und nach Verwendung einer orthopädischen Einlegesohle** messen, verwenden Sie den **gepaarten Test** — weil es dieselbe Person in beiden Momenten ist.
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein 10-jähriges Kind">
+
+### Wann z- oder t-Test verwenden?
+
+- **z-Test**: Sie kennen genau die Standardabweichung der Population (sehr selten!). Verwendet die Standardnormalkurve.
+- **t-Test**: Sie haben nur die aus der Stichprobe berechnete Standardabweichung (der häufige Fall). Die t-Kurve ist etwas "dicker" als die Normal — erkennt mehr Unsicherheit an.
+
+### Eine Stichprobe versus zwei Stichproben
+
+- **Eine Stichprobe**: "Ist die durchschnittliche Note meiner Klasse anders als der nationale Durchschnitt von 500?"
+- **Zwei unabhängige Stichproben**: "Ist die durchschnittliche Note der Schule A anders als die von Schule B?"
+- **Gepaart**: "Haben dieselben 30 Schüler sich nach Zusatzunterricht verbessert?" (Vorher vs. nachher)
+
+Der gepaarte Test ist "fairer", weil er die natürliche Variation zwischen Personen entfernt — jede Person dient als ihre eigene Kontrolle.
+
+</Porta>
+
+<Porta nivel="15" titulo="Für einen 15-jährigen Teenager">
+
+### z-Test versus t-Test — der praktische Unterschied
+
+| | z-Test | t-Test |
+|---|---|---|
+| $\sigma$ | bekannt | durch $s$ geschätzt |
+| Verteilung | $\mathcal{N}(0,1)$ | $t_{n-1}$ (schwerere Ausläufer) |
+| Wann verwenden | selten (kalibrierte Geräte) | fast immer |
+| Für großes $n$ | egal — $t \to z$ | — |
+
+### Faustregel für zwei Stichproben
+
+- **Unabhängige Gruppen und vermutlich unterschiedliche Varianzen**: Welch.
+- **Vorher-Nachher an derselben Person**: gepaart.
+- **Bekannt gleiche Varianzen (z.B. derselbe Produktionsprozess)**: gepoolter t.
+
+### Vollständiges Beispiel: Welch t
+
+Zwei Mathematikklassen:
+- Klasse A: $n_1 = 15$, $\bar X_1 = 72$, $s_1 = 10$.
+- Klasse B: $n_2 = 18$, $\bar X_2 = 68$, $s_2 = 15$.
+
+$H_0: \mu_1 = \mu_2$, $H_1: \mu_1 \neq \mu_2$, $\alpha = 0{,}05$.
+
+$$T_W = \frac{72 - 68}{\sqrt{100/15 + 225/18}} = \frac{4}{\sqrt{6{,}667 + 12{,}5}} = \frac{4}{\sqrt{19{,}167}} = \frac{4}{4{,}378} \approx 0{,}914$$
+
+Welch-Freiheitsgrade: $\nu \approx 28$ (berechnet nach Formel). Kritischer Wert bilateral: $t_{0{,}025,\,28} \approx 2{,}048$. Da $0{,}914 < 2{,}048$, lehnen wir $H_0$ nicht ab.
+
+</Porta>
+
+<Porta nivel="25" titulo="Für einen Engineeringstudierenden">
+
+### Warum Welch und nicht gepoolter t standardmäßig?
+
+Der gepoolte Test setzt $\sigma_1 = \sigma_2$ voraus. Wenn das falsch ist, hat der gepoolte t die Größe (reale Wahrscheinlichkeit des Typ-I-Fehlers) verzerrt — kann viel größer oder kleiner als $\alpha$ sein. Der Welch-Test ist robust: wenn die Varianzen gleich sind, verliert er wenig Power; wenn sie unterschiedlich sind, ist er korrekt. Deshalb empfehlen R, Python (scipy), SPSS und OpenIntro selbst Welch als Standard.
+
+### Exakte Verteilung vs. Welch-Satterthwaite-Approximation
+
+Der Welch-Test hat keine exakte $t$-Verteilung unter $H_0$, wenn $\sigma_1 \neq \sigma_2$ (Behrens-Fisher-Problem). Die Welch-Satterthwaite-Approximation gibt Freiheitsgrade $\nu$, die zwischen $\min(n_1-1, n_2-1)$ und $n_1+n_2-2$ interpolieren, mit guter Abdeckung in der Praxis.
+
+### Anwendungsbedingungen
+
+| Bedingung | z-Test | t-Test eine Stichprobe | Welch t | Gepaart |
+|---|---|---|---|---|
+| Mindestgröße $n$ für ZGS | 30 | 30 (oder normal) | 30 pro Gruppe (oder normal) | 30 (oder normal der Differenzen) |
+| Schwere Ausreißer | sensibel | sensibel | sensibel | sensibel |
+| Nicht-normale Daten bei kleinem $n$ | schlecht | schlecht | schlecht | Alternative: Wilcoxon |
+
+### Power des gepaarten t-Tests vs. unabhängig
+
+Der Standardfehler des gepaarten Tests ist $s_D/\sqrt{n}$, wobei $s_D^2 = s_1^2 + s_2^2 - 2\rho\,s_1\,s_2$. Für positive Korrelation $\rho > 0$ zwischen Paaren ist $s_D < \sqrt{s_1^2 + s_2^2}$ — der gepaarte Test ist stärker. Der Gewinn ist maximal, wenn $\rho \to 1$ (stark korrelierte Paare).
+
+### Nicht-parametrische Alternativen
+
+Wenn Normalität verletzt ist und $n$ klein:
+
+- **Wilcoxon signed-rank**: Alternative zum t-Test einer Stichprobe und zum gepaarten Test.
+- **Mann-Whitney U**: Alternative zum Welch t für zwei unabhängige Stichproben.
+- Robust gegenüber Ausreißern; verlieren etwas Power, wenn Normalität erfüllt ist.
+
+</Porta>
+
+<Porta nivel="40" titulo="Für einen Senior-Fachmann">
+
+### Das Behrens-Fisher-Problem und seine Lösungen
+
+Das Behrens-Fisher-Problem (1935/1939): Test $H_0: \mu_1 = \mu_2$ wenn $\sigma_1, \sigma_2$ beide unbekannt und möglicherweise unterschiedlich sind. Es gibt keine exakte frequentistische Lösung (anders als der Fall $\sigma_1 = \sigma_2$). Die Hauptansätze:
+
+1. **Welch-Satterthwaite** (1949): Approximation der Freiheitsgrade durch einen Bruchzahlenwert. Funktioniert gut in der Praxis; ist der Standard in Software.
+2. **Scheffé-Lösung** (1943): Konstruktion durch Mischung von Verteilungen. Exakt aber konservativ.
+3. **Bayesianischer Ansatz**: Mit nicht-informativen Priors ergibt es kredible Intervalle mit exakter Abdeckung ohne Approximation.
+
+### Varianzanalyse als Erweiterung
+
+Der zwei-Stichproben t-Test ist Spezialfall von ANOVA mit zwei Gruppen. Für $k$ Gruppen vergleicht der F-Test von ANOVA die Varianz zwischen Gruppen mit der Varianz innerhalb der Gruppen:
+
+$$F = \frac{\mathrm{SQTrat}/(k-1)}{\mathrm{SQRes}/(N-k)} \overset{H_0}{\sim} F_{k-1,\,N-k}$$
+
+Für $k = 2$: $F = T^2$ (gepoolter) — ANOVA und gepoolter t sind äquivalent.
+
+### Tests auf Gleichheit der Varianzen
+
+Vor der Wahl zwischen gepooltem und Welch t kann man $H_0: \sigma_1 = \sigma_2$ testen mit:
+- **F-Test**: $F = s_1^2/s_2^2 \sim F_{n_1-1, n_2-1}$. Sehr sensibel gegenüber Nicht-Normalität.
+- **Levene**: basierend auf absoluten Abweichungen, robuster.
+- **Bartlett**: leistungsfähiger aber sensibel gegenüber Nicht-Normalität.
+
+In der Praxis wird dieser Vorttest nicht empfohlen, da er selbst Varianz hat, was globale Fehlerkontrollprobleme schafft. Verwenden Sie immer Welch.
+
+### Meta-Analyse und Effektverbindung
+
+Wenn mehrere Studien $\mu_1 - \mu_2$ schätzen, kombiniert man durch Meta-Analyse mit Festeffekt (alle untersuchen dasselbe $\delta$) oder Zufallseffekt (jede Studie hat $\delta_i \sim \mathcal{N}(\delta, \tau^2)$). Der DerSimonian-Laird-Schätzer ist der Standard für Zufallseffekt. Der Index $I^2$ misst den Anteil der Gesamtvarianz durch Heterogenität zwischen Studien.
+
+### Anwendung im Finanzwesen: t-Test von abnormalen Renditen
+
+In der Event-Studie-Methodologie von Fama, Fisher, Jensen und Roll (1969) wird getestet, ob die Renditen einer Aktie um ein Ereignis herum signifikant von Null unterscheiden. Der gepaarte Test testet $D_i = R_{i,\text{event}} - R_{i,\text{expected}}$ für jedes Unternehmen im Event. Die Renditeverteilung ist typischerweise nicht-normal (schwere Ausläufer), aber mit großem $n$ garantiert der ZGS asymptotische Validität.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktische Anwendung (Deutschland)">
+
+### Vorher und nachher: Programm zur Bekämpfung von Schulabbruch
+
+Eine Schulbehörde führte intensive Überwachung der Anwesenheit durch. Sie maß die Anwesenheitsquote von 40 gefährdeten Schülern **vor** und **nach** 60 Tagen Begleitung.
+
+$H_0: \mu_D = 0$ (keine Veränderung), $H_1: \mu_D > 0$ (Anwesenheit stieg).
+
+Ergebnisse der Differenzen ($D_i = \text{nachher}_i - \text{vorher}_i$): $\bar D = +8{,}5$ pp, $s_D = 12$ pp.
+
+$$T = \frac{8{,}5}{12/\sqrt{40}} = \frac{8{,}5}{1{,}897} = 4{,}48 \quad (df = 39)$$
+
+$t_{0{,}05,\,39} = 1{,}685$ (einseitig). Da $4{,}48 > 1{,}685$, lehnen wir $H_0$ ab: Evidenz für Verbesserung der Anwesenheit.
+
+### Vergleich der Leistung zwischen Bundesländern: Schulabschlüsse
+
+Das Kultusministerium möchte überprüfen, ob Schüler aus öffentlichen Schulen in Bayern und Schleswig-Holstein durchschnittlich unterschiedliche Noten in Mathematik haben.
+
+- Bayern: $n_1 = 500$, $\bar X_1 = 512$, $s_1 = 95$.
+- Schleswig-Holstein: $n_2 = 400$, $\bar X_2 = 541$, $s_2 = 88$.
+
+Welch t:
+$$T_W = \frac{512 - 541}{\sqrt{95^2/500 + 88^2/400}} = \frac{-29}{\sqrt{18{,}05 + 19{,}36}} = \frac{-29}{6{,}116} = -4{,}74$$
+
+$\nu \approx 858$. $p\text{-wert} \approx 0{,}000003$. Hochsignifikanter Unterschied. Der Unterschied von 29 Punkten entspricht jedoch einer Effektgröße $d \approx 0{,}32$ — klein bis mittelmäßig nach Cohen.
+
+### Qualitätskontrolle: Vergleich zweier Lieferanten
+
+Ein pharmazeutisches Unternehmen vergleicht die Variabilität der Reinheit zwei verschiedener Hilfsstofflieferanten:
+
+- Lieferant A: $n_1 = 20$, $s_1 = 0{,}8$ mg/g.
+- Lieferant B: $n_2 = 15$, $s_2 = 1{,}5$ mg/g.
+
+F-Test auf Varianzgleichheit: $F = 1{,}5^2/0{,}8^2 = 2{,}25/0{,}64 = 3{,}52$, $df = (14, 19)$. Kritischer Wert $F_{0{,}025,\,14,\,19} \approx 2{,}86$. Lehnt $H_0$ ab: Varianzen unterschiedlich. Daher Welch t für Mittelwertvergleich verwenden.
+
+</Porta>
+
+</DuasPortas>
+
+## Exemplos resolvidos
+
+<Exemplo numero="104.1" titulo="t-Test einer Stichprobe (einfach)">
+
+**Problem.** Die Wartezeit in einer Notaufnahme war historisch $\mu_0 = 45$ min. Nach Implementierung digitaler Triage ergab eine Stichprobe von $n = 25$ Patienten $\bar X = 40$ min und $s = 10$ min. Bei 5%-Niveau, sank die durchschnittliche Zeit?
+
+**Strategie.** $H_0: \mu \geq 45$, $H_1: \mu < 45$ (linksseitig). t-Statistik mit $df = 24$.
+
+**Lösung.**
+
+$$T = \frac{\bar X - \mu_0}{s/\sqrt{n}} = \frac{40 - 45}{10/\sqrt{25}} = \frac{-5}{2} = -2{,}50$$
+
+Kritischer Wert einseitig: $t_{0{,}05,\,24} = -1{,}711$. Da $-2{,}50 < -1{,}711$, **lehnen wir $H_0$ ab**.
+
+p-Wert: $P(t_{24} \leq -2{,}50) \approx 0{,}010 < 0{,}05$. Bestätigt.
+
+**Überprüfung.** KI 95% einseitig: $\mu > 40 - 1{,}711 \times 2 = 36{,}58$ min. Da 45 über der unteren Grenze liegt (aber der Test auf die Überlegenheit von 45 vs dem neuen System wurde abgelehnt), konsistent.
+
+**Quelle.** [OpenStax Statistics, §9.5, Beispiel 9.9](https://openstax.org/books/statistics/pages/9-5-additional-information-and-full-hypothesis-test-examples) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="104.2" titulo="Welch t — zwei unabhängige Stichproben (mittelmäßig)">
+
+**Problem.** Vergleichen Sie den systolischen Blutdruck zweier Patientengruppen:
+- Diätgruppe: $n_1 = 12$, $\bar X_1 = 132$ mmHg, $s_1 = 18$ mmHg.
+- Medikamentengruppe: $n_2 = 15$, $\bar X_2 = 125$ mmHg, $s_2 = 10$ mmHg.
+
+Auf 5%-Niveau, unterscheiden sich die Mittelwerte?
+
+**Strategie.** $H_0: \mu_1 = \mu_2$, $H_1: \mu_1 \neq \mu_2$ (zweiseitig). Welch verwenden, da Varianzen offenbar unterschiedlich ($18^2 = 324$ vs $10^2 = 100$, Verhältnis 3,24).
+
+**Lösung.**
+
+$$\mathrm{SE} = \sqrt{\frac{18^2}{12} + \frac{10^2}{15}} = \sqrt{27 + 6{,}667} = \sqrt{33{,}667} = 5{,}803$$
+
+$$T_W = \frac{132 - 125}{5{,}803} = \frac{7}{5{,}803} = 1{,}206$$
+
+Welch-Freiheitsgrade (Approximation): $\nu \approx 17$ (nach vollständiger Formel). Kritischer Wert zweiseitig: $t_{0{,}025,\,17} = 2{,}110$. Da $1{,}206 < 2{,}110$, **lehnen wir $H_0$ nicht ab**.
+
+**Überprüfung.** p-Wert $\approx 0{,}244 > 0{,}05$. Mit $n_1 = 12$ und $n_2 = 15$ ist die Power begrenzt, um Unterschiede von 7 mmHg zu erkennen. Eine größere Studie wäre empfohlen.
+
+**Quelle.** [OpenIntro Statistics, §5.4, Beispiel 5.12](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="104.3" titulo="Gepairter t-Test — vorher und nachher (mittelmäßig)">
+
+**Problem.** Zehn Läufer hatten ihren VO2max vor und nach 8 Wochen hochintensivem Training gemessen. Die Differenzen ($D_i = \text{nachher} - \text{vorher}$) in mL/kg/min waren: 3, 1, 4, 2, 5, 0, 3, 2, 4, 2. Auf 5%-Niveau, verbesserte Training den VO2max?
+
+**Strategie.** $H_0: \mu_D = 0$, $H_1: \mu_D > 0$ (einseitig). $\bar D$ und $s_D$ aus den Differenzen berechnen.
+
+**Lösung.**
+
+$\sum D_i = 3+1+4+2+5+0+3+2+4+2 = 26$. $\bar D = 26/10 = 2{,}6$ mL/kg/min.
+
+$\sum D_i^2 = 9+1+16+4+25+0+9+4+16+4 = 88$. $s_D^2 = (88 - 10 \times 2{,}6^2)/(10-1) = (88 - 67{,}6)/9 = 20{,}4/9 = 2{,}267$. $s_D = 1{,}506$.
+
+$$T = \frac{\bar D}{s_D/\sqrt{n}} = \frac{2{,}6}{1{,}506/\sqrt{10}} = \frac{2{,}6}{0{,}4763} = 5{,}46$$
+
+Kritischer Wert $t_{0{,}05,\,9} = 1{,}833$. Da $5{,}46 > 1{,}833$, **lehnen wir $H_0$ ab**. p-Wert $< 0{,}001$.
+
+**Überprüfung.** KI 95% für $\mu_D$: $2{,}6 \pm 2{,}262 \times 0{,}476 = 2{,}6 \pm 1{,}077$, d.h. $[1{,}52;\; 3{,}68]$ mL/kg/min. Da das KI nicht 0 enthält, konsistent mit Ablehnung von $H_0$.
+
+**Quelle.** [OpenIntro Statistics, §5.4, Beispiel 5.14](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="104.4" titulo="Gepoolter t vs Welch — wann welchen verwenden (fortgeschritten)">
+
+**Problem.** Zwei Bearbeitungsprozesse erzeugen Metallteile. Prozess A: $n_1 = 20$, $\bar X_1 = 50{,}2$ mm, $s_1 = 0{,}8$ mm. Prozess B: $n_2 = 25$, $\bar X_2 = 50{,}0$ mm, $s_2 = 0{,}9$ mm. Berechnen Sie gepoolten Test und Welch. Vergleichen Sie.
+
+**Strategie.** Beide testen $H_0: \mu_1 = \mu_2$, $H_1: \mu_1 \neq \mu_2$ mit $\alpha = 0{,}05$.
+
+**Lösung.**
+
+**Gepoolter:**
+$s_p^2 = (19 \times 0{,}64 + 24 \times 0{,}81)/(20+25-2) = (12{,}16 + 19{,}44)/43 = 31{,}60/43 = 0{,}735$. $s_p = 0{,}857$.
+
+$T_P = (50{,}2 - 50{,}0)/(0{,}857\sqrt{1/20+1/25}) = 0{,}2/(0{,}857 \times 0{,}3) = 0{,}2/0{,}257 = 0{,}778$. $df = 43$.
+
+**Welch:**
+$\mathrm{SE} = \sqrt{0{,}64/20 + 0{,}81/25} = \sqrt{0{,}032 + 0{,}0324} = \sqrt{0{,}0644} = 0{,}254$.
+$T_W = 0{,}2/0{,}254 = 0{,}787$. $\nu \approx 43$ (ähnliche Varianzen).
+
+Beide: $T \approx 0{,}78$, $p \approx 0{,}44$. Wir lehnen $H_0$ nicht ab. Die beiden Tests stimmen überein, wenn Varianzen ähnlich sind.
+
+**Überprüfung.** Das Verhältnis der Varianzen ist $0{,}81/0{,}64 = 1{,}27$ — nahe bei 1. Wenn $s_1 \approx s_2$, produzieren gepoolter und Welch praktisch identische Ergebnisse.
+
+**Quelle.** [OpenStax Statistics, §10.1, Beispiel 10.1](https://openstax.org/books/statistics/pages/10-1-two-population-means-with-unknown-standard-deviations) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="104.5" titulo="Korrekte Testwahl — vollständiger Fall (fortgeschritten)">
+
+**Problem.** Eine Forscherin möchte die Schlafzeit von Jugendlichen an Ganztagsschulen versus Regelschulen vergleichen. Sie sammelte 15 Jugendliche aus jeder Schulart, unabhängig. Zusammengefasste Daten: Ganztagsschule: $\bar X_1 = 7{,}2$ h, $s_1 = 1{,}4$ h; Regelschule: $\bar X_2 = 8{,}1$ h, $s_2 = 0{,}8$ h. Auf 5%-Niveau, unterscheidet sich der Schlaf? Verwenden Sie den angemessenen Test.
+
+**Strategie.** Unabhängige Gruppen, Varianzen offenbar unterschiedlich ($s_1/s_2 = 1{,}75$). Welch t verwenden.
+
+**Lösung.**
+
+$H_0: \mu_1 = \mu_2$, $H_1: \mu_1 \neq \mu_2$ (zweiseitig).
+
+$\mathrm{SE} = \sqrt{1{,}4^2/15 + 0{,}8^2/15} = \sqrt{1{,}96/15 + 0{,}64/15} = \sqrt{0{,}1307 + 0{,}04267} = \sqrt{0{,}1733} = 0{,}4163$.
+
+$T_W = (7{,}2 - 8{,}1)/0{,}4163 = -0{,}9/0{,}4163 = -2{,}162$.
+
+Welch-Freiheitsgrade (Approximation): $\nu \approx 22$. Kritischer Wert: $t_{0{,}025,\,22} = 2{,}074$.
+
+Da $\lvert -2{,}162 \rvert = 2{,}162 > 2{,}074$, **lehnen wir $H_0$ auf 5%-Niveau ab**. p-Wert $\approx 0{,}042$.
+
+Cohens Effektgröße: $d = 0{,}9/\sqrt{(1{,}4^2 + 0{,}8^2)/2} = 0{,}9/\sqrt{1{,}3} = 0{,}9/1{,}14 = 0{,}79$ — großer Effekt.
+
+**Überprüfung.** KI 95% für $\mu_1 - \mu_2$: $-0{,}9 \pm 2{,}074 \times 0{,}4163 = -0{,}9 \pm 0{,}863$, d.h. $[-1{,}763;\; -0{,}037]$. Da nicht 0 enthalten, konsistent mit Ablehnung von $H_0$.
+
+**Quelle.** [OpenIntro Statistics, §5.4, Übung 5.17](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-104-teste-z-t">
+
+<Exercicio
+  numero="104.1"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`T = (22 - 20)/(5/\\sqrt{16}) = 2/1{,}25 = 1{,}60`}</Eq>. Kritischer Wert zweiseitig: <Eq>{`t_{0{,}025,\\,15} = 2{,}131`}</Eq>. Da <Eq>{`1{,}60 < 2{,}131`}</Eq>, lehnen wir <Eq>{`H_0`}</Eq> nicht ab. p-Wert <Eq>{`\\approx 0{,}130`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-5-additional-information-and-full-hypothesis-test-examples", secao: "§9.5", pagina: "510", exercicio: "9.17", licenca: "CC-BY" }}
+>
+$H_0: \mu = 20$, $H_1: \mu \neq 20$. Daten: $n = 16$, $\bar X = 22$, $s = 5$. t-Statistik und Schlussfolgerung mit $\alpha = 0{,}05$.
+</Exercicio>
+
+<Exercicio
+  numero="104.2"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`T = (48 - 50)/(8/\\sqrt{36}) = -2/1{,}333 = -1{,}50`}</Eq>. Einseitig links: <Eq>{`p = P(t_{35} < -1{,}50) \\approx 0{,}071`}</Eq>. Da <Eq>{`p > 0{,}05`}</Eq>, lehnen wir <Eq>{`H_0`}</Eq> nicht ab.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "221", exercicio: "5.17", licenca: "CC-BY-SA" }}
+>
+$H_0: \mu = 50$, $H_1: \mu < 50$. Daten: $n = 36$, $\bar X = 48$, $s = 8$. Berechnen Sie $T$ und p-Wert. Schlussfolgerung mit $\alpha = 0{,}05$.
+</Exercicio>
+
+<Exercicio
+  numero="104.3"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Differenzen <Eq>{`D_i = \\text{post} - \\text{pre}`}</Eq>: 2, 3, 1, 4, 2, 3, 1, 2, 3, 1.</li>
+<li><Eq>{`\\bar D = (2+3+1+4+2+3+1+2+3+1)/10 = 22/10 = 2{,}2`}</Eq>.</li>
+<li><Eq>{`\\sum D_i^2 = 4+9+1+16+4+9+1+4+9+1 = 58`}</Eq>. <Eq>{`s_D^2 = (58 - 10 \\times 4{,}84)/9 = (58-48{,}4)/9 = 1{,}067`}</Eq>. <Eq>{`s_D = 1{,}033`}</Eq>.</li>
+<li><Eq>{`T = 2{,}2/(1{,}033/\\sqrt{10}) = 2{,}2/0{,}327 = 6{,}73`}</Eq>.</li>
+<li>Kritischer Wert: <Eq>{`t_{0{,}05,\\,9} = 1{,}833`}</Eq>. Da <Eq>{`6{,}73 > 1{,}833`}</Eq>, lehnen wir <Eq>{`H_0`}</Eq> ab.</li>
+<li><em>Trick:</em> Der gepaarte Test mit 10 Paaren hat <Eq>{`df = 9`}</Eq>, wie ein t-Test einer Stichprobe mit <Eq>{`n = 10`}</Eq> — die Differenzen werden als eindeutige Daten behandelt.</li>
+</ol>
+  </>}
+  solucao={<><Eq>{`\\bar D = 2{,}2`}</Eq>, <Eq>{`s_D = 1{,}033`}</Eq>. <Eq>{`T = 6{,}73 > 1{,}833`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> ab: signifikante Verbesserung nach Intervention.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "229", exercicio: "5.21", licenca: "CC-BY-SA" }}
+>
+Blutdruck von 10 Patienten vor und nach Diät. Differenzen: 2, 3, 1, 4, 2, 3, 1, 2, 3, 1 mmHg. $H_0: \mu_D = 0$, $H_1: \mu_D > 0$. Auf 5%-Niveau, reduzierte die Diät den Blutdruck?
+</Exercicio>
+
+<Exercicio
+  numero="104.4"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sqrt{16/30 + 9/25} = \\sqrt{0{,}533 + 0{,}360} = \\sqrt{0{,}893} = 0{,}945`}</Eq>. <Eq>{`T_W = (85 - 80)/0{,}945 = 5{,}291`}</Eq>. <Eq>{`\\nu \\approx 49`}</Eq>. Kritischer Wert zweiseitig: <Eq>{`t_{0{,}025,\\,49} \\approx 2{,}010`}</Eq>. Da <Eq>{`5{,}291 > 2{,}010`}</Eq>, lehnen wir <Eq>{`H_0`}</Eq> ab. Noten unterscheiden sich signifikant.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "225", exercicio: "5.18", licenca: "CC-BY-SA" }}
+>
+Gruppe A: $n_1 = 30$, $\bar X_1 = 85$, $s_1 = 4$. Gruppe B: $n_2 = 25$, $\bar X_2 = 80$, $s_2 = 3$. Welch t zweiseitig auf 5%-Niveau.
+</Exercicio>
+
+<Exercicio
+  numero="104.5"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Gepoolten t verwenden, da er mehr Freiheitsgrade hat" },
+    { texto: "Welch t verwenden, da er robust gegen ungleiche Varianzen ist", correta: true },
+    { texto: "Erst F-Test auf Varianzgleichheit durchführen" },
+    { texto: "z-Test verwenden, wenn n groß ist" }
+  ]}
+  solucao={<>Welch t wird standardmäßig empfohlen weil: (1) robust wenn Varianzen unterschiedlich sind; (2) wenig Power verliert, wenn Varianzen gleich sind. Der Vorttest F auf Varianzgleichheit wird nicht empfohlen, da er zusätzlichen Fehler in globale Fehlerkontrolle einführt.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "224", exercicio: "5.16", licenca: "CC-BY-SA" }}
+>
+Sie möchten durchschnittliche Gehälter zwischen zwei Abteilungen eines Unternehmens vergleichen, mit möglicherweise unterschiedlichen Varianzen. Welche Strategie ist am besten?
+</Exercicio>
+
+<Exercicio
+  numero="104.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`Z = (\\bar X - \\mu_0)/(\\sigma/\\sqrt{n}) = (102 - 100)/(15/\\sqrt{64}) = 2/1{,}875 = 1{,}067`}</Eq>. p-Wert zweiseitig: <Eq>{`2 \\times P(Z > 1{,}067) = 2 \\times 0{,}143 = 0{,}286`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> nicht ab: keine Evidenz, dass die Klasse von der Population unterscheidet.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-2-outcomes-and-the-type-i-and-type-ii-errors", secao: "§9.2", pagina: "484", exercicio: "9.3", licenca: "CC-BY" }}
+>
+Durchschnitt IQ der Population: $\mu_0 = 100$, $\sigma = 15$ (bekannt). Eine Klasse von $n = 64$ hat $\bar X = 102$. Auf 5%-Niveau, hat die Klasse einen durchschnittlichen IQ, der von der Population unterscheidet?
+</Exercicio>
+
+<Exercicio
+  numero="104.7"
+  dificuldade="aplicacao"
+  solucao={<>Differenzen: 2, -1, 3, 1, 2, 0, 1, 2, -1, 2. <Eq>{`\\bar D = 11/10 = 1{,}1`}</Eq>. <Eq>{`s_D^2 = (\\sum D_i^2 - 10 \\times 1{,}21)/9 = (28 - 12{,}1)/9 = 1{,}767`}</Eq>. <Eq>{`s_D = 1{,}329`}</Eq>. <Eq>{`T = 1{,}1/(1{,}329/\\sqrt{10}) = 1{,}1/0{,}420 = 2{,}618`}</Eq>. <Eq>{`t_{0{,}025,\\,9} = 2{,}262`}</Eq>. Da <Eq>{`2{,}618 > 2{,}262`}</Eq>, lehnen wir <Eq>{`H_0`}</Eq> ab.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "230", exercicio: "5.23", licenca: "CC-BY-SA" }}
+>
+Reaktionszeit (ms) von 10 Autofahrern vor und nach einer Tasse Kaffee. Differenzen: 2, -1, 3, 1, 2, 0, 1, 2, -1, 2. Auf 5%-Niveau, veränderte Kaffee die Reaktionszeit?
+</Exercicio>
+
+<Exercicio
+  numero="104.8"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`s_p^2 = (14 \\times 100 + 19 \\times 81)/(15+20-2) = (1400+1539)/33 = 2939/33 = 89{,}06`}</Eq>. <Eq>{`s_p = 9{,}437`}</Eq>. <Eq>{`T_P = (75-70)/(9{,}437 \\times \\sqrt{1/15+1/20}) = 5/(9{,}437 \\times 0{,}2582) = 5/2{,}437 = 2{,}052`}</Eq>. <Eq>{`df = 33`}</Eq>. Kritischer Wert: <Eq>{`t_{0{,}025,\\,33} \\approx 2{,}035`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> marginal ab.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/10-1-two-population-means-with-unknown-standard-deviations", secao: "§10.1", pagina: "540", exercicio: "10.3", licenca: "CC-BY" }}
+>
+Gruppe 1: $n_1 = 15$, $\bar X_1 = 75$, $s_1 = 10$. Gruppe 2: $n_2 = 20$, $\bar X_2 = 70$, $s_2 = 9$. Gepoolter t zweiseitig auf 5%-Niveau (Varianzen als gleich angenommen).
+</Exercicio>
+
+<Exercicio
+  numero="104.9"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Welch t für zwei unabhängige Stichproben" },
+    { texto: "Gepairter t-Test", correta: true },
+    { texto: "z-Test zweiseitig" },
+    { texto: "Gepoolter t mit kombinierter Varianz" }
+  ]}
+  solucao={<>Dieselben Patienten werden in zwei Momenten gemessen — die Beobachtungen sind abhängig (ein Patient mit hohem Blutdruck vorher hat tendenziell hohen Blutdruck nachher). Der gepaarte Test ist leistungsfähiger, weil er die Variabilität zwischen Patienten eliminiert und sich auf die Variabilität der Differenzen konzentriert.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "228", exercicio: "5.19", licenca: "CC-BY-SA" }}
+>
+Ein Arzt misst den Blutdruck von 20 Patienten vor und nach einer Behandlung. Welcher Test ist am meisten angemessen?
+</Exercicio>
+
+<Exercicio
+  numero="104.10"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Hypothesen: <Eq>{`H_0: \\mu = 5`}</Eq> h, <Eq>{`H_1: \\mu \\neq 5`}</Eq> h. <Eq>{`\\alpha = 0{,}05`}</Eq>.</li>
+<li>Statistik: <Eq>{`T = (4{,}5 - 5)/(1{,}2/\\sqrt{20}) = -0{,}5/0{,}268 = -1{,}863`}</Eq>.</li>
+<li>Kritischer Wert: <Eq>{`t_{0{,}025,\\,19} = 2{,}093`}</Eq>. Da <Eq>{`|-1{,}863| = 1{,}863 < 2{,}093`}</Eq>, lehnen wir <Eq>{`H_0`}</Eq> nicht ab.</li>
+<li>p-Wert: <Eq>{`2 \\times P(t_{19} < -1{,}863) \\approx 2 \\times 0{,}039 = 0{,}078`}</Eq>. Kohärent.</li>
+<li><em>Anmerkung:</em> Das Ergebnis ist nah der Grenze. Mit <Eq>{`n = 40`}</Eq> würde derselbe Effekt <Eq>{`T = -2{,}635`}</Eq> und <Eq>{`p \\approx 0{,}012`}</Eq> geben — der Unterschied zwischen "nicht signifikant" und "signifikant" hängt oft von Stichprobengröße ab.</li>
+</ol>
+  </>}
+  solucao={<><Eq>{`T = -1{,}863`}</Eq>. p-Wert <Eq>{`\\approx 0{,}078 > 0{,}05`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> nicht ab: unzureichende Evidenz, dass Schlaf von 5 h abweicht.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-5-additional-information-and-full-hypothesis-test-examples", secao: "§9.5", pagina: "512", exercicio: "9.19", licenca: "CC-BY" }}
+>
+Lernstunden von $n = 20$ Universitätsstudierenden: $\bar X = 4{,}5$ h/Tag, $s = 1{,}2$ h. $H_0: \mu = 5$. Zweiseitig auf 5%-Niveau.
+</Exercicio>
+
+<Exercicio
+  numero="104.11"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`Z = (0{,}52 - 0{,}50)/\\sqrt{0{,}50 \\times 0{,}50/100} = 0{,}02/0{,}05 = 0{,}40`}</Eq>. p-Wert zweiseitig: <Eq>{`2 \\times P(Z > 0{,}40) = 2 \\times 0{,}345 = 0{,}689`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> nicht ab. Daten konsistent mit fairer Münze.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-3-distribution-needed-for-hypothesis-testing", secao: "§9.3", pagina: "492", exercicio: "9.6", licenca: "CC-BY" }}
+>
+Münze 100-mal geworfen: 52 Kopf. Auf 5%-Niveau, ist die Münze fair? (Verwenden Sie z-Test für Proportion mit $\sigma_{\hat p} = \sqrt{p_0(1-p_0)/n}$.)
+</Exercicio>
+
+<Exercicio
+  numero="104.12"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sqrt{49/20 + 100/30} = \\sqrt{2{,}45 + 3{,}333} = \\sqrt{5{,}783} = 2{,}405`}</Eq>. <Eq>{`T_W = (45-40)/2{,}405 = 5/2{,}405 = 2{,}079`}</Eq>. <Eq>{`\\nu \\approx 44`}</Eq>. <Eq>{`t_{0{,}025,\\,44} \\approx 2{,}015`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> ab: Mittelwerte unterscheiden sich.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "226", exercicio: "5.20", licenca: "CC-BY-SA" }}
+>
+Klassen A und B: $n_1 = 20$, $\bar X_1 = 45$, $s_1 = 7$; $n_2 = 30$, $\bar X_2 = 40$, $s_2 = 10$. Welch t auf 5%-Niveau.
+</Exercicio>
+
+<Exercicio
+  numero="104.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "z-Test ist konservativer als t-Test für gleiches n" },
+    { texto: "Für großes n produzieren z und t praktisch identische Ergebnisse", correta: true },
+    { texto: "t-Test ist immer dem z-Test vorzuziehen unabhängig davon, ob Sigma bekannt ist oder nicht" },
+    { texto: "z-Test benötigt Normalität der Population während t nicht" }
+  ]}
+  solucao={<>Für großes $n$ gilt $t_{n-1} \\to \\mathcal{N}(0,1)$. Die Quantile konvergieren: $t_{0{,}025,\\,\\infty} = z_{0{,}025} = 1{,}960$. Für $n = 120$ ist $t_{0{,}025,\\,119} = 1{,}980$ — 1% Unterschied. Beide Tests erfordern ungefähr normale Daten oder großes $n$ durch ZGS.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.3", pagina: "220", exercicio: "5.16", licenca: "CC-BY-SA" }}
+>
+Wie ist die Beziehung zwischen z-Test und t-Test für große Stichproben?
+</Exercicio>
+
+<Exercicio
+  numero="104.14"
+  dificuldade="aplicacao"
+  solucao={<>Differenzen (post-pre): 5, 3, 7, 2, 4, 6, 1, 3, 5, 4. <Eq>{`\\bar D = 40/10 = 4{,}0`}</Eq>. <Eq>{`s_D^2 = (\\sum D_i^2 - 10 \\times 16)/9`}</Eq>. <Eq>{`\\sum D_i^2 = 25+9+49+4+16+36+1+9+25+16 = 190`}</Eq>. <Eq>{`s_D^2 = (190-160)/9 = 3{,}333`}</Eq>. <Eq>{`s_D = 1{,}826`}</Eq>. <Eq>{`T = 4{,}0/(1{,}826/\\sqrt{10}) = 4{,}0/0{,}577 = 6{,}93`}</Eq>. <Eq>{`t_{0{,}05,\\,9} = 1{,}833`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> ab.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "231", exercicio: "5.25", licenca: "CC-BY-SA" }}
+>
+Tippgeschwindigkeit (wpm) von 10 Studierenden vor und nach Kurs: vorher [40, 35, 50, 45, 38, 42, 47, 36, 44, 41], nachher [45, 38, 57, 47, 42, 48, 48, 39, 49, 45]. Auf 5%-Niveau, verbesserte der Kurs die Geschwindigkeit?
+</Exercicio>
+
+<Exercicio
+  numero="104.15"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`T = (198 - 200)/(12/\\sqrt{25}) = -2/2{,}4 = -0{,}833`}</Eq>. Zweiseitig, <Eq>{`df = 24`}</Eq>: p-Wert <Eq>{`= 2 \\times P(t_{24} < -0{,}833) \\approx 0{,}413`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> nicht ab. Prozess unter Kontrolle.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/9-5-additional-information-and-full-hypothesis-test-examples", secao: "§9.5", pagina: "514", exercicio: "9.21", licenca: "CC-BY" }}
+>
+Eine Produktionslinie sollte Flaschen mit 200 mL füllen. Stichprobe von $n = 25$: $\bar X = 198$ mL, $s = 12$ mL. Auf 5%-Niveau, ist der Prozess fehlkalibriert?
+</Exercicio>
+
+<Exercicio
+  numero="104.16"
+  dificuldade="modelagem"
+  solucao={<>Gepaart: die Studierenden sind dieselben, vorher und nachher gemessen. Differenzen: 15, 8, 12, 20, 5, 10, 18, 7, 12, 13. <Eq>{`\\bar D = 120/10 = 12{,}0`}</Eq>. <Eq>{`s_D^2 = (\\sum D_i^2 - 10 \\times 144)/9`}</Eq>. <Eq>{`\\sum D_i^2 = 225+64+144+400+25+100+324+49+144+169 = 1644`}</Eq>. <Eq>{`s_D^2 = (1644-1440)/9 = 22{,}67`}</Eq>. <Eq>{`s_D = 4{,}76`}</Eq>. <Eq>{`T = 12/(4{,}76/\\sqrt{10}) = 12/1{,}506 = 7{,}97`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> ab.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "232", exercicio: "5.27", licenca: "CC-BY-SA" }}
+>
+Eine Schule führte Zusatzunterricht in Mathematik durch. Testergebnis von 10 Studierenden vorher: [60, 55, 70, 65, 58, 62, 67, 56, 64, 61]. Nachher: [75, 63, 82, 85, 63, 72, 85, 63, 76, 74]. Verwenden Sie den angemessenen Test auf 5%-Niveau.
+</Exercicio>
+
+<Exercicio
+  numero="104.17"
+  dificuldade="modelagem"
+  solucao={<>Vergleich von zwei unabhängigen Gruppen. Welch t: <Eq>{`\\mathrm{SE} = \\sqrt{400/50 + 625/60} = \\sqrt{8 + 10{,}417} = \\sqrt{18{,}417} = 4{,}291`}</Eq>. <Eq>{`T_W = (520 - 505)/4{,}291 = 15/4{,}291 = 3{,}496`}</Eq>. <Eq>{`\\nu \\approx 104`}</Eq>. p-Wert <Eq>{`\\approx 0{,}0007`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> ab: neue Methode scheint Leistung zu verbessern. Effektgröße <Eq>{`d = 15/\\sqrt{(400+625)/2} = 15/22{,}6 = 0{,}66`}</Eq> — mittlerer Effekt.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "227", exercicio: "5.22", licenca: "CC-BY-SA" }}
+>
+Ein Schulnetzwerk testete eine neue Unterrichtsmethode. Kontrollschule ($n_1 = 50$): $\bar X_1 = 505$ Punkte, $s_1 = 20$. Pilotschule ($n_2 = 60$): $\bar X_2 = 520$, $s_2 = 25$. Auf 1%-Niveau, verbesserte die Methode die Ergebnisse? Berechnen Sie auch die Effektgröße.
+</Exercicio>
+
+<Exercicio
+  numero="104.18"
+  dificuldade="modelagem"
+  solucao={<>z-Test zweiseitig: <Eq>{`Z = (31 - 30)/(8/\\sqrt{100}) = 1/0{,}8 = 1{,}25`}</Eq>. p-Wert <Eq>{`= 0{,}211`}</Eq>. Lehnen <Eq>{`H_0`}</Eq> nicht ab. Aber mit <Eq>{`n = 10000`}</Eq>: <Eq>{`Z = (31 - 30)/(8/\\sqrt{10000}) = 1/0{,}08 = 12{,}5`}</Eq>. p-Wert <Eq>{`\\approx 0`}</Eq>. Lehnen mit Sicherheit ab. Derselbe Unterschied von 1°C wird "hochsignifikant" — aber praktische Relevanz hängt davon ab, ob 1°C für den Prozess wichtig ist.</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 12", pagina: "183", exercicio: "12.3", licenca: "CC-BY-NC" }}
+>
+Temperatur eines Industrieprozesses: $\mu_0 = 30$°C, $\sigma = 8$°C. Berechnen Sie z-Test zweiseitig für $\bar X = 31$°C mit $n = 100$ und dann mit $n = 10000$. Vergleichen Sie p-Werte und diskutieren Sie den Unterschied zwischen statistischer und praktischer Signifikanz.
+</Exercicio>
+
+<Exercicio
+  numero="104.19"
+  dificuldade="desafio"
+  solucao={<>Für gepaart: <Eq>{`\\mathrm{SE}_D = s_D/\\sqrt{n}`}</Eq>, wobei <Eq>{`s_D^2 = s_1^2 + s_2^2 - 2\\rho s_1 s_2`}</Eq>. Für Welch unabhängig: <Eq>{`\\mathrm{SE}_W = \\sqrt{s_1^2/n + s_2^2/n} = \\sqrt{(s_1^2 + s_2^2)/n}`}</Eq>. Verhältnis: <Eq>{`\\mathrm{SE}_D/\\mathrm{SE}_W = \\sqrt{1 - 2\\rho s_1 s_2/(s_1^2 + s_2^2)}`}</Eq>. Für <Eq>{`\\rho > 0`}</Eq>, ist das Verhältnis kleiner als 1: gepaart hat kleineren Standardfehler und daher größere Power. Für <Eq>{`s_1 = s_2 = s`}</Eq>: <Eq>{`\\mathrm{SE}_D/\\mathrm{SE}_W = \\sqrt{1 - \\rho}`}</Eq>. Mit <Eq>{`\\rho = 0{,}7`}</Eq>: Reduktion von 45% in SE.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "233", exercicio: "5.29", licenca: "CC-BY-SA" }}
+>
+Zeigen Sie algebraisch, dass der gepaarte t-Test einen kleineren Standardfehler hat als Welch t (für gleiches $n$ pro Gruppe), wenn die Korrelation $\rho$ zwischen Paaren positiv ist. Wie viel kleiner ist der Standardfehler für $\rho = 0{,}7$ und $s_1 = s_2$?
+</Exercicio>
+
+<Exercicio
+  numero="104.20"
+  dificuldade="demonstracao"
+  solucao={<>Herleitung der Welch-Satterthwaite-Formel: sei <Eq>{`W = s_1^2/n_1 + s_2^2/n_2`}</Eq>. Jede Komponente <Eq>{`(n_k-1)s_k^2/\\sigma_k^2 \\sim \\chi^2_{n_k-1}`}</Eq>. Die Verteilung von <Eq>{`W`}</Eq> ist nicht exakt chi-quadrat wenn <Eq>{`\\sigma_1 \\neq \\sigma_2`}</Eq>. Die Satterthwaite-Approximation gleicht die ersten zwei Momente von <Eq>{`W`}</Eq> mit einer skalierten chi-quadrat-Verteilung an: <Eq>{`\\nu = W^2/[(s_1^2/n_1)^2/(n_1-1) + (s_2^2/n_2)^2/(n_2-1)]`}</Eq>. Für <Eq>{`n_1 = n_2 = n`}</Eq> und <Eq>{`s_1 = s_2`}</Eq>: <Eq>{`\\nu = (2s^2/n)^2/(2(s^2/n)^2/(n-1)) = 2(n-1)`}</Eq>, das Ergebnis des gepoolten t erhalten.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.4", pagina: "234", exercicio: "5.31", licenca: "CC-BY-SA" }}
+>
+Leiten Sie die Welch-Satterthwaite-Formel für effektive Freiheitsgrade $\nu$ des Welch-Tests her. Überprüfen Sie, dass für $n_1 = n_2$ und $s_1 = s_2$ die Formel auf $\nu = 2(n-1)$ reduziert, übereinstimmend mit gepooltem t.
+</Exercicio>
+
+</ListaExercicios>
+
+## Fontes
+
+- [**OpenIntro Statistics** (4ª ed.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA. Seções §5.3–5.4 (teste t de uma amostra, Welch, pareado; condições de aplicação).
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY. Seções §9.5–9.6 e §10.1–10.4 (testes z e t, duas amostras independentes e pareadas).
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC. Capítulo 12 (testes de comparação de grupos, simulação, perspectiva moderna).

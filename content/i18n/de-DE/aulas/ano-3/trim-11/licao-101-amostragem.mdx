@@ -1,0 +1,803 @@
+---
+titulo: "Lição 101 — Amostragem: tipos, vieses e distribuição amostral"
+slug: "licao-101-amostragem"
+categoria: "aulas"
+subcategoria: "ano-3-trim-11"
+descricao: "Amostragem aleatória simples, estratificada e por conglomerados. Vieses de seleção. Distribuição amostral da média e o Teorema Central do Limite."
+ordem: 101
+publicado: true
+tags: ["estatística inferencial", "amostragem", "TCL", "ano-3", "trim-11"]
+prerrequisitos: ["licao-100-variavel-aleatoria"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-06"
+usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Stochastik LK alemão", "Equiv. Math B japonês", "H2 Statistics singapurense"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\bar X = \frac{1}{n}\sum_{i=1}^{n} X_i, \quad \mathrm{E}[\bar X] = \mu, \quad \mathrm{Var}(\bar X) = \frac{\sigma^2}{n}"
+  legenda={<>Der <strong>Stichprobenmittelwert</strong> <Eq>{`\\bar X`}</Eq> ist erwartungstreu für <Eq>{`\\mu`}</Eq> und seine Varianz sinkt mit <Eq>{`n`}</Eq>. Nach dem Zentralen Grenzwertsatz hat <Eq>{`\\bar X`}</Eq> näherungsweise eine Normalverteilung für genügend großes <Eq>{`n`}</Eq>, unabhängig von der Verteilung der Grundgesamtheit.</>}
+  audioTexto="Stichprobenmittelwert X quer gleich ein durch n mal Summe der X i. Erwartungswert von X quer gleich mu: erwartungstreuer Schätzer. Varianz von X quer gleich sigma Quadrat durch n: sinkt mit zunehmendem n. Nach dem Zentralen Grenzwertsatz folgt X quer einer Normalverteilung für großes n."
+/>
+
+<aside>
+
+**Bücher, die dieses Thema behandeln**
+
+- [**OpenIntro Statistics** (4. Aufl.) — Diez, Çetinkaya-Rundel, Barr](https://www.openintro.org/book/os/) · §1.3–1.4 und §4.1 · CC-BY-SA · <em>Behandelt Stichprobentypen, häufige Verzerrungen und Stichprobenverteilung des Mittelwerts mit praktischen Beispielen und offenen Aufgaben.</em>
+- [**Statistics** — OpenStax (Illowsky, Dean)](https://openstax.org/details/books/statistics) · §1.1–1.3 und §7.1–7.3 · CC-BY · <em>Präsentiert einfache Zufallsstichproben, geschichtete, systematische und Clusterproben mit Beispielen aus dem amerikanischen Alltag; anpassbar auf den brasilianischen Kontext.</em>
+- [**Statistical Thinking for the 21st Century** — Russell Poldrack](https://statsthinking21.org/) · Kap. 3–4 · CC-BY-NC · <em>Behandelt Stichprobenbias und Stichprobenverteilung mit R-Simulationen; gute Brücke zur 25-Jahres-Tür.</em>
+
+</aside>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Rigorose Definition">
+
+### Struktur: Grundgesamtheit, Stichprobe und Schätzer
+
+<Definicao titulo="Grundgesamtheit, Stichprobe und Schätzer">
+
+- **Grundgesamtheit** $\mathcal{P}$: vollständige Menge von Elementen von Interesse. Ihre Parameter ($\mu$, $\sigma^2$, $p$, …) sind **fest aber unbekannt**.
+- **Stichprobe** $X_1, X_2, \ldots, X_n$: beobachtete Teilmenge. Sind **Zufallsvariablen** vor der Erhebung; **Realisierungen** danach.
+- **Schätzer** $\hat\theta = T(X_1, \ldots, X_n)$: aus der Stichprobe berechnete Statistik zur Approximation von $\theta$.
+
+</Definicao>
+
+> „Eine Stichprobe ist eine Teilmenge der Grundgesamtheit. Eine Statistik ist eine aus einer Stichprobe berechnete Zahl. Parameter sind Zahlen, die Daten einer ganzen Grundgesamtheit zusammenfassen." — [OpenStax Statistics, §1.1](https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms)
+
+### Stichprobentypen
+
+<Definicao titulo="Einfache Zufallsstichprobe (EZS)">
+
+Jede Teilmenge der Größe $n$ aus der Grundgesamtheit hat die gleiche Wahrscheinlichkeit, ausgewählt zu werden. Formal: wenn die Grundgesamtheit $N$ Elemente hat, hat jede Stichprobe der Größe $n$ die Wahrscheinlichkeit $\binom{N}{n}^{-1}$.
+
+<Equation explicacao="Inklusionswahrscheinlichkeit in der EZS: jedes Element hat die gleiche Chance." latex="\pi_i = \frac{n}{N} \quad \text{für alle } i \in \mathcal{P}" />
+
+</Definicao>
+
+<Definicao titulo="Geschichtete Stichprobe">
+
+Die Grundgesamtheit wird in $K$ homogene Schichten unterteilt. Innerhalb jeder Schicht wird EZS mit Größe $n_k$ durchgeführt.
+
+<Equation explicacao="Schätzer des geschichteten Mittelwerts: gewichtetes Mittel der Schichtmittel." latex="\bar X_{\text{est}} = \sum_{k=1}^K \frac{N_k}{N} \bar X_k" />
+
+Vorteil: reduziert Varianz, wenn Schichten homogener als die Grundgesamtheit sind.
+
+</Definicao>
+
+<Definicao titulo="Clustersampling">
+
+Die Grundgesamtheit wird in Cluster gruppiert (z. B. Stadtteile, Schulklassen). Es werden einige ganze Cluster ausgewählt. Nützlich, wenn die vollständige Bevölkerungsliste nicht verfügbar oder der Zugang teuer ist.
+
+</Definicao>
+
+> „Beim geschichteten Sampling wird die Grundgesamtheit in Gruppen namens Schichten unterteilt. Eine Zufallsstichprobe wird dann aus jeder Schicht ausgewählt." — [OpenStax Statistics, §1.3](https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement)
+
+### Wünschenswerte Eigenschaften von Schätzern
+
+<Definicao titulo="Erwartungstreue, Konsistenz und Effizienz">
+
+Sei $\hat\theta$ ein Schätzer von $\theta$.
+
+- **Erwartungstreue**: $\mathrm{E}[\hat\theta] = \theta$. Der Schätzer über- oder unterschätzt nicht systematisch.
+- **Konsistenz**: $\hat\theta \xrightarrow{P} \theta$ wenn $n \to \infty$. Mit mehr Daten konvergiert er gegen den wahren Wert.
+- **Effizienz**: in der Klasse erwartungstreuer Schätzer hat $\hat\theta$ die kleinste mögliche Varianz (erreicht die Cramér-Rao-Schranke).
+
+</Definicao>
+
+### Stichprobenverteilung des Mittelwerts
+
+<Teorema titulo="Zentraler Grenzwertsatz (ZGS)">
+
+Seien $X_1, X_2, \ldots, X_n$ unabhängig und identisch verteilt mit $\mathrm{E}[X_i] = \mu$ und $\mathrm{Var}(X_i) = \sigma^2 < \infty$. Dann:
+
+<Equation explicacao="Standardisierung des Stichprobenmittelwerts konvergiert gegen Standardnormalverteilung." latex="\frac{\bar X - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1) \quad \text{wenn } n \to \infty" />
+
+Äquivalent, für großes $n$: $\bar X \overset{\text{näher.}}{\sim} \mathcal{N}\!\left(\mu,\, \sigma^2/n\right)$.
+
+**Faustregel**: $n \geq 30$ reicht für näherungsweise symmetrische Verteilungen; Verteilungen mit hoher Schiefe oder Kurtosis erfordern möglicherweise viel größere $n$.
+
+</Teorema>
+
+<Insight>
+
+Der ZGS ist das zentrale Wunder der Statistik: die Form der Grundgesamtheittsverteilung (uniform, exponentiell, bimodal…) ist irrelevant. Für genügend großes $n$ verteilt sich der Stichprobenmittelwert immer näherungsweise normal. Deshalb schätzen Wahlumfragen mit 2000 Personen eine Bevölkerung von 200 Millionen mit 2% Fehler.
+
+</Insight>
+
+### Häufige Verzerrungen
+
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 520 160" className="w-full">
+<defs>
+  <marker id="arr101" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="rgb(26 77 92)"/>
+  </marker>
+</defs>
+<g>
+  <rect x="10" y="10" width="110" height="40" rx="6" fill="rgb(26 77 92 / 0.15)" stroke="rgb(26 77 92)" strokeWidth="1.2"/>
+  <text x="65" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">Auswahl</text>
+</g>
+<g>
+  <rect x="145" y="10" width="110" height="40" rx="6" fill="rgb(232 199 122 / 0.2)" stroke="rgb(201 163 95)" strokeWidth="1.2"/>
+  <text x="200" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">Nichtbeantwortung</text>
+</g>
+<g>
+  <rect x="280" y="10" width="110" height="40" rx="6" fill="rgb(199 107 63 / 0.2)" stroke="rgb(199 107 63)" strokeWidth="1.2"/>
+  <text x="335" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">Selbstwahl</text>
+</g>
+<g>
+  <rect x="415" y="10" width="100" height="40" rx="6" fill="rgb(61 122 95 / 0.2)" stroke="rgb(61 122 95)" strokeWidth="1.2"/>
+  <text x="465" y="35" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor">Überlebensbias</text>
+</g>
+<g>
+  <text x="65" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">Online-Umfrage:</text>
+  <text x="65" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">schließt ohne Internet aus</text>
+</g>
+<g>
+  <text x="200" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">wer antwortet</text>
+  <text x="200" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">unterscheidet sich von wer nicht</text>
+</g>
+<g>
+  <text x="335" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">Freiwillige unterscheiden</text>
+  <text x="335" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">sich von der Grundgesamtheit</text>
+</g>
+<g>
+  <text x="465" y="75" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">analysiert nur wer</text>
+  <text x="465" y="88" textAnchor="middle" fontSize="9" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.7">überlebte</text>
+</g>
+<g>
+  <line x1="260" y1="140" x2="260" y2="108" stroke="rgb(26 77 92)" strokeWidth="1" strokeDasharray="4,3"/>
+  <text x="260" y="155" textAnchor="middle" fontSize="10" fontFamily="sans-serif" fill="currentColor" fillOpacity="0.6">Alle produzieren systematisch fehlerhafte Schätzungen</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Vier klassische Quellen von Stichprobenbias. Jede macht die Stichprobe nicht repräsentativ für die Zielgesamtheit.
+</figcaption>
+</figure>
+
+</Porta>
+
+<Porta nivel="5" titulo="Für ein 5-jähriges Kind">
+
+Du möchtest wissen, welches Eis die liebste Marke aller Kinder der Schule ist. Aber die Schule hat **500 Kinder** und du kannst nicht alle fragen.
+
+Also **fragst du 40 Kinder zufällig aus** und stellst ihnen die Frage. Wenn du richtig auswählst — keinen Gruppe auslässt — wird ihre Antwort **ähnlich der von allen** sein.
+
+Je mehr Kinder du fragst, desto richtiger wird die Antwort. Das ist **Stichprobenziehung**: ein Stück nehmen, um das Ganze zu verstehen.
+
+</Porta>
+
+<Porta nivel="10" titulo="Für ein 10-jähriges Kind">
+
+Wenn du etwas über **viele Menschen** wissen möchtest (alle Brasilianer, alle Kinder der Stadt), kannst du nicht alle fragen. Also verwendest du eine **Stichprobe** — eine sorgfältig ausgewählte kleine Gruppe.
+
+**Das Geheimnis ist: wie wählt man aus?**
+
+- **Einfache Zufallsstichprobe**: jeden auswählen wie in einer Lotterie. Jeder hat die gleiche Chance.
+- **Geschichtet**: in Gruppen unterteilen (Jungen/Mädchen zum Beispiel) und von jeder Gruppe separat auswählen. Garantiert, dass keine Gruppe ausgelassen wird.
+- **Nach Cluster**: ganze Stadtteile auswählen und jeden im ausgewählten Stadtteil befragen.
+
+**Und was passiert, wenn du den Durchschnitt der Stichprobe berechnest?**
+
+Der Stichprobenmittelwert $\bar X$ wird **nicht exakt** der Durchschnitt aller sein, sondern wird **nah dran** sein. Und wenn du mit verschiedenen Stichproben wiederholst, liegen die Durchschnitte um den echten Durchschnitt $\mu$ herum. Das ist der **Zentrale Grenzwertsatz** — eine der mächtigsten Ideen der Mathematik.
+
+</Porta>
+
+<Porta nivel="15" titulo="Für einen 15-jährigen Teenager">
+
+### Warum Stichprobe?
+
+Zensus (die ganze Bevölkerung messen) ist teuer, zeitaufwändig und manchmal unmöglich. Gute Stichproben geben dir eine genaue Schätzung **mit einem Bruchteil des Aufwands**.
+
+Echte Beispiele:
+- IBGE: Die PNAD verwendet etwa 200.000 Haushalte, um Einkommen, Beschäftigung und Bildung von 210 Millionen Brasilianern zu schätzen.
+- Datafolha: 2000 Interviews schätzen Wahlabsicht mit $\pm$ 2% Fehler.
+- Qualitätskontrolle: 100 geprüfte Teile schätzen Mängel in einem Lot von 100.000.
+
+### Stichprobentypen
+
+| Typ | Idee | Wann verwenden |
+|---|---|---|
+| EZS | $n$ Personen mit gleicher Chance auswählen | Standardtheoretische Basis |
+| Geschichtet | von homogenen Gruppen auswählen | garantiert Repräsentation von Untergruppen |
+| Systematisch | jedes $k$-te Element aus der Liste | sortierte Liste verfügbar |
+| Cluster | ganze Gruppen auswählen | individuelle Liste nicht verfügbar oder teuer |
+
+### Die Stichprobenverteilung von $\bar X$
+
+$\bar X$ ist eine **Zufallsvariable**: sein Wert ändert sich von Stichprobe zu Stichprobe. Aber:
+
+- $\mathrm{E}[\bar X] = \mu$ (erwartungstreu: im Durchschnitt richtig)
+- $\mathrm{Var}(\bar X) = \sigma^2/n$ (je mehr Beobachtungen, desto stabiler)
+- Standardfehler: $\mathrm{SE}(\bar X) = \sigma/\sqrt{n}$
+
+Der Standardfehler sinkt mit $\sqrt{n}$: um den Fehler zu halbieren, musst du $n$ **vervierfachen**.
+
+### Fehlerquote
+
+Für 95% Konfidenz: $\mathrm{ME} = 1{,}96 \cdot \sigma/\sqrt{n}$.
+
+Umfrage mit $n = 2000$ und $\hat p = 0{,}45$: $\mathrm{ME} = 1{,}96\sqrt{0{,}45 \cdot 0{,}55/2000} \approx 0{,}022$. Ergebnis: 45% $\pm$ 2,2%.
+
+</Porta>
+
+<Porta nivel="25" titulo="Für einen Ingenieurstudenten">
+
+### Einfache Zufallsstichprobe: das formale Modell
+
+$X_1, \ldots, X_n \overset{\text{u.i.v.}}{\sim} F$, wobei $F$ die unbekannte Verteilung der Grundgesamtheit ist, mit $\mathrm{E}[X] = \mu$ und $\mathrm{Var}(X) = \sigma^2$.
+
+### Gesetz der großen Zahlen
+
+**Schwaches Gesetz (Khinchin)**: $\bar X_n \xrightarrow{P} \mu$ für beliebige $F$ mit $\mathrm{E}[|X|] < \infty$.
+
+**Starkes Gesetz (Kolmogorov)**: $\bar X_n \xrightarrow{\text{f.s.}} \mu$ — fast sichere Konvergenz (pfadweise außer auf einer Menge der Wahrscheinlichkeit null).
+
+### Zentraler Grenzwertsatz
+
+$$\sqrt{n}\,\frac{\bar X_n - \mu}{\sigma} \xrightarrow{d} \mathcal{N}(0,1)$$
+
+Praktische Anwendbarkeit: $n \geq 30$ für symmetrische Verteilungen; Verteilungen mit hoher Kurtosis oder Schiefe (wie Einkommen oder Vermögenspreise) erfordern möglicherweise viel größere $n$.
+
+### Schätzer und ihre Eigenschaften
+
+| Eigenschaft | Formale Definition |
+|---|---|
+| Erwartungstreue | $\mathrm{E}[\hat\theta] = \theta$ |
+| Konsistenz | $\hat\theta \xrightarrow{P} \theta$ |
+| Effizienz (MVUE) | $\mathrm{Var}(\hat\theta) = [nI(\theta)]^{-1}$ |
+| Suffizienz | $f(\mathbf{x} \mid \theta) = g(T(\mathbf{x}), \theta)\,h(\mathbf{x})$ |
+
+### Cramér-Rao-Schranke
+
+$$\mathrm{Var}(\hat\theta) \geq \frac{1}{nI(\theta)}, \quad I(\theta) = \mathrm{E}\!\left[\left(\frac{\partial}{\partial\theta}\log f(X;\theta)\right)^2\right]$$
+
+Der Maximum-Likelihood-Schätzer erreicht diese Schranke asymptotisch.
+
+### Stichprobenumfang für Präzision $E$
+
+$$n = \left\lceil\frac{z_{\alpha/2}^2\,\sigma^2}{E^2}\right\rceil$$
+
+Für Proportion (ungünstigster Fall $p = 0{,}5$): $n = z_{\alpha/2}^2/(4E^2)$. Mit 95% und $E = 3\%$: $n \approx 1067$.
+
+### Geschichtete Stichprobe: Effizienzbewinn
+
+Varianz des geschichteten Schätzers gegenüber EZS:
+
+$$\mathrm{Var}(\bar X_{\text{est}}) = \sum_{k=1}^K \left(\frac{N_k}{N}\right)^2 \frac{\sigma_k^2}{n_k} \leq \mathrm{Var}(\bar X_{\text{EZS}})$$
+
+Der Bewinn ist maximal, wenn Schichten intern homogen sind (niedrige Varianz innerhalb der Schicht).
+
+</Porta>
+
+<Porta nivel="40" titulo="Für einen erfahrenen Fachmann">
+
+### Designbasierte versus modellbasierte Inferenz
+
+Die grundlegende Dichotomie der modernen Stichprobentheorie:
+
+- **Design-basiert** (Neyman, 1934): Zufälligkeit kommt vom Auswahlmechanismus. Der Horvitz-Thompson-Schätzer $\hat T_{HT} = \sum_{i \in S} Y_i/\pi_i$ ist erwartungstreu für jeden Wert von $Y$.
+- **Modell-basiert** (Superpopulation-Framework): behandelt $Y_i$ als Realisierungen eines stochastischen Modells; die Zufälligkeit der Stichprobe ist sekundär.
+
+### Horvitz-Thompson-Schätzer
+
+$$\hat T_{HT} = \sum_{i \in S} \frac{Y_i}{\pi_i}, \quad \widehat{\mathrm{Var}}(\hat T_{HT}) = \sum_{i \in S}\sum_{j \in S} \frac{\pi_{ij} - \pi_i\pi_j}{\pi_{ij}} \frac{Y_i}{\pi_i}\frac{Y_j}{\pi_j}$$
+
+Ermöglicht komplexe Stichproben (verschachtelte Schichten, ungleiche Wahrscheinlichkeiten) unter Wahrung exakter Erwartungstreue.
+
+### Nichtbeantwortung und Kalibrierung
+
+Nachschichtung und *Raking* passen Stichprobengewichte mithilfe von aus der Bevölkerung (Zensus) bekannten Hilfsvariablen an, reduzieren Nichtbeantwortungsbias ohne den Mangelmechanismus explizit zu modellieren.
+
+### Konzentration von Maßnahmen
+
+Nicht-asymptotische Hoeffding-Schranke für $X_i \in [a, b]$:
+
+$$P(\lvert\bar X - \mu\rvert > t) \leq 2\exp\!\left(-\frac{2n\,t^2}{(b-a)^2}\right)$$
+
+Nützlich in Machine Learning (PAC-Lernen) und in A/B-Testing-Analysen mit kleinen Stichprobenumfängen.
+
+### Kausale Inferenz und Stichprobenziehung
+
+Randomisierte kontrollierte Studien (RCTs) sind Stichprobenziehung mit zufälliger Behandlungszuweisung. Joshua Angrist und Guido Imbens erhielten den [Nobelpreis für Wirtschaftswissenschaften 2021](https://www.nobelprize.org/prizes/economic-sciences/2021/summary/) für die Entwicklung quasi-experimenteller Methoden (Instrumentalvariablen, RDD, Differenzen-in-Differenzen) zur kausalen Inferenz, wenn RCTs nicht machbar sind.
+
+### Bootstrap und Varianten
+
+- **Nicht-parametrisch**: Neuziehen mit Zurücklegen aus $\{X_1, \ldots, X_n\}$, berechne $\hat\theta^*$ in jeder Replikation, schätze Varianz und Intervalle.
+- **Block-Bootstrap**: erhält Abhängigkeitsstruktur in Zeitreihen (überlappende Blöcke, stationärer Bootstrap).
+- **Bayesischer Bootstrap**: ersetzt Neuziehen durch Dirichlet-Gewichte, erzeugt Posterior-Verteilung über das Funktional.
+
+### Sequenzielle Statistik
+
+Walds SPRT (Sequential Probability Ratio Test) stoppt die Datenerfassung, sobald die Evidenz ausreichend ist, minimiert erwartetes $n$. Im modernen A/B-Testing lösen *always-valid p-values* (e-values, anytime-valid inference) das *Peeking*-Problem ohne Typ-I-Fehler aufzublähen.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Praktische Anwendung in Brasilien">
+
+### PNAD Contínua: geschichtetes Clustersampling in zwei Stufen
+
+Das IBGE verwendet **Stichprobenziehung nach Clustern in zwei geschichteten Stufen** in der PNAD Contínua:
+
+1. **Schicht**: jeder Bundesstaat (26 + DF) ist eine Hauptschicht.
+2. **Erste Stufe**: Auswahl von Primären Stichprobeneinheiten (PSU = Zensusblöcke).
+3. **Zweite Stufe**: innerhalb jeder ausgewählten PSU werden Haushalte aufgelistet und ein Bruchteil ausgewählt.
+
+Ergebnis: etwa 211.000 Haushalte pro Quartal, die 210 Millionen Brasilianer repräsentieren, mit Variationskoeffizient unter 5% für nationale Schätzungen der Arbeitslosenquote.
+
+### Qualitätskontrolle: ABNT NBR 5426
+
+Produktlots werden durch **Attributstichproben** inspiziert. Für ein Los von $N = 10\,000$ Einheiten und AQL (Acceptable Quality Level) von 1% gibt die Tabelle $n = 200$ Teile an; das Los wird abgelehnt, wenn mehr als 5 fehlerhafte Teile gefunden werden.
+
+Der Standardfehler des geschätzten Anteils ist:
+
+$$\mathrm{SE}(\hat p) = \sqrt{\frac{\hat p(1-\hat p)}{n}} = \sqrt{\frac{0{,}025 \cdot 0{,}975}{200}} \approx 0{,}011$$
+
+Fehlerquote von $\pm$ 1,1% mit 95% Konfidenz.
+
+### Wahlumfrage
+
+Datafolha, Ipec und andere verwenden Quoten (Schicht nach Region, Geschlecht, Altersgruppe) plus Zufallsauswahl innerhalb jeder Quote. Mit $n = 2000$ ist die Fehlerquote für Proportionen:
+
+$$\mathrm{ME} = 1{,}96\sqrt{\frac{0{,}5 \cdot 0{,}5}{2000}} \approx 2{,}2\%$$
+
+</Porta>
+
+</DuasPortas>
+
+## Gelöste Beispiele
+
+<Exemplo numero="101.1" titulo="Standardfehler des Stichprobenmittelwerts (Basis)">
+
+**Problem.** Eine Umfrage über monatliches Einkommen erhebt $n = 64$ Arbeitnehmer. Die Bevölkerungsstandardabweichung ist bekannt: $\sigma = R\$\,800$. Berechnen Sie den Standardfehler des Stichprobenmittelwerts.
+
+**Strategie.** Wenden Sie die Formel $\mathrm{SE}(\bar X) = \sigma/\sqrt{n}$ direkt an.
+
+**Lösung.**
+
+$$\mathrm{SE}(\bar X) = \frac{\sigma}{\sqrt{n}} = \frac{800}{\sqrt{64}} = \frac{800}{8} = 100$$
+
+Der Standardfehler beträgt R\$ 100.
+
+**Überprüfung.** Für $n = 256$ (viermal größer): $\mathrm{SE} = 800/16 = 50$. Die Vervierfachung von $n$ reduziert den Standardfehler auf die Hälfte. Konsistent mit der Beziehung $\mathrm{SE} \propto 1/\sqrt{n}$.
+
+**Quelle.** [OpenStax Statistics, §7.1, Beispiel 7.1](https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="101.2" titulo="Stichprobenumfang für Fehlerquote (Mittelstufe)">
+
+**Problem.** Ein Forscher möchte den Anteil der Mittelschüler, die arbeiten, mit einer maximalen Fehlerquote von 3% bei 95% Konfidenz schätzen. Wie groß ist die Mindeststichprobengröße?
+
+**Strategie.** Verwenden Sie die konservative Formel $n = z_{\alpha/2}^2/(4E^2)$ mit $p = 0{,}5$ (ungünstigster Fall).
+
+**Lösung.**
+
+$$n = \frac{z_{\alpha/2}^2}{4E^2} = \frac{(1{,}960)^2}{4 \cdot (0{,}03)^2} = \frac{3{,}8416}{0{,}0036} \approx 1068$$
+
+Aufrunden: $n = 1068$.
+
+**Überprüfung.** Mit $n = 1068$ und $p = 0{,}5$: $\mathrm{ME} = 1{,}96\sqrt{0{,}25/1068} = 1{,}96 \cdot 0{,}01531 \approx 0{,}030$. Innerhalb der 3% Grenze.
+
+**Quelle.** [OpenIntro Statistics, §5.2, Beispiel 5.10](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="101.3" titulo="Anwendung des ZGS — Wahrscheinlichkeit des Stichprobenmittelwerts (Mittelstufe)">
+
+**Problem.** Die Wartezeit in einer Klinik hat Mittelwert $\mu = 18$ min und Standardabweichung $\sigma = 6$ min. Eine Stichprobe von $n = 36$ Kontakten wird erhoben. Wie groß ist die Wahrscheinlichkeit, dass der Stichprobenmittelwert größer als 20 min ist?
+
+**Strategie.** Nach dem ZGS gilt $\bar X \approx \mathcal{N}(18,\, 36/36) = \mathcal{N}(18, 1)$. Standardisieren und Z-Tabelle verwenden.
+
+**Lösung.**
+
+$$Z = \frac{\bar X - \mu}{\sigma/\sqrt{n}} = \frac{20 - 18}{6/\sqrt{36}} = \frac{2}{1} = 2{,}00$$
+
+$$P(\bar X > 20) = P(Z > 2{,}00) = 1 - \Phi(2{,}00) = 1 - 0{,}9772 = 0{,}0228$$
+
+Wahrscheinlichkeit von etwa 2,3%.
+
+**Überprüfung.** Der Wert $\bar X = 20$ liegt 2 Standardabweichungen über dem Mittelwert: nach der 68-95-99,7-Regel sollten etwa 2,5% der Stichprobenmittel über $\mu + 2\,\mathrm{SE}$ liegen. Das Ergebnis von 2,28% ist konsistent.
+
+**Quelle.** [OpenStax Statistics, §7.2, Beispiel 7.3](https://openstax.org/books/statistics/pages/7-2-the-central-limit-theorem-for-sums) — CC-BY.
+
+</Exemplo>
+
+<Exemplo numero="101.4" titulo="Erkennen von Stichprobenbias (konzeptionell)">
+
+**Problem.** Eine Wirtschaftszeitschrift führt eine Online-Umfrage zur Zufriedenheit mit dem brasilianischen Steuersystem durch und erhält 80% negative Antworten. Der Herausgeber erklärt: „8 von 10 Unternehmern sind mit den Steuern unzufrieden." Identifizieren Sie die vorhandenen Bias.
+
+**Strategie.** Überprüfen Sie jeden Schritt des Stichprobenprozesses: wer hat Zugang, wer antwortet, wer ist repräsentiert.
+
+**Lösung.**
+
+Drei Verzerrungen addieren sich:
+
+1. **Auswahlbias**: Online-Umfrage schließt Unternehmer ohne digitalen Zugang aus (kleine ländliche Unternehmen, informelle Kleinunternehmer).
+2. **Nichtbeantwortungsbias**: Steuerfragen mobilisieren mehr diejenigen, die unzufrieden sind (zufriedene Unternehmer verspüren keinen Drang zu antworten).
+3. **Auswahlrahmen-Bias**: Leser der Zeitschrift sind größere Unternehmer oder haben spezielles Managementinteresse — sie repräsentieren nicht das Universum aller „brasilianischen Unternehmer".
+
+**Schlussfolgerung**: die Schätzung von 80% überbewertet systematisch die Unzufriedenheit in der allgemeinen Bevölkerung.
+
+**Überprüfung.** Eine IBGE/IBPT-Umfrage mit probabilistischer Stichprobe, durchgeführt von Interviewern, würde ein anderes Ergebnis erzeugen — und wäre methodologisch defensibel.
+
+**Quelle.** [OpenIntro Statistics, §1.4, Sektion "Sampling Bias"](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo numero="101.5" titulo="Geschichtete Stichprobe: Effizienzbewinn-Berechnung (fortgeschritten)">
+
+**Problem.** Ein Unternehmen hat 3 Abteilungen: A (200 Mitarbeiter, $\sigma_A = 4$ Tsd. R\$), B (500 Mitarbeiter, $\sigma_B = 2$ Tsd. R\$), C (300 Mitarbeiter, $\sigma_C = 6$ Tsd. R\$). Budget für $n = 100$ Interviews. Vergleichen Sie die Varianz der EZS mit der geschichteten Stichprobe bei proportionaler Allokation zur Schätzung des Durchschnittsgehalts.
+
+**Strategie.** Berechnen Sie Varianz der EZS und geschichteten Stichprobe (proportionale Allokation).
+
+**Lösung.**
+
+Varianz der Population: $\sigma^2 = \sum (N_k/N)\sigma_k^2$ (Näherung — ignoriert Varianz zwischen Schichtmitteln der Einfachheit halber):
+
+Proportionale Allokation: $n_A = 20$, $n_B = 50$, $n_C = 30$.
+
+$$\mathrm{Var}(\bar X_{\text{est}}) = \sum_{k} \left(\frac{N_k}{N}\right)^2 \frac{\sigma_k^2}{n_k}$$
+
+$$= \left(\frac{200}{1000}\right)^2\frac{16}{20} + \left(\frac{500}{1000}\right)^2\frac{4}{50} + \left(\frac{300}{1000}\right)^2\frac{36}{30}$$
+
+$$= 0{,}04 \cdot 0{,}8 + 0{,}25 \cdot 0{,}08 + 0{,}09 \cdot 1{,}2 = 0{,}032 + 0{,}020 + 0{,}108 = 0{,}160$$
+
+Standardfehler geschichtet: $\sqrt{0{,}160} \approx 0{,}40$ Tsd. R\$.
+
+Zum Vergleich: reine EZS mit $n = 100$ und ungefähr Gesamtvarianz $\sigma^2 \approx (200 \cdot 16 + 500 \cdot 4 + 300 \cdot 36)/1000 = (3200 + 2000 + 10800)/1000 = 16$ würde $\mathrm{Var}(\bar X_{\text{EZS}}) = 16/100 = 0{,}160$ ergeben. In diesem Fall stimmt die proportionale Allokation numerisch mit der EZS überein — der Effizienzbewinn tritt auf, wenn sich die Schichtmittelwerte sehr unterscheiden.
+
+**Überprüfung.** Das Ergebnis bestätigt die Theorie: mit proportionaler Allokation und Schichten unterschiedlicher Varianzen ist geschichtet mindestens so effizient wie EZS.
+
+**Quelle.** [OpenIntro Statistics, §1.4, Übung 1.35](https://www.openintro.org/book/os/) — CC-BY-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-101-amostragem">
+
+<Exercicio
+  numero="101.1"
+  dificuldade="aplicacao"
+  solucao={<>Der Standardfehler ist <Eq>{`\\mathrm{SE} = \\sigma/\\sqrt{n} = 50/\\sqrt{100} = 5`}</Eq> g. Da der Schätzer erwartungstreu ist, ist der Stichprobenmittelwert zentriert um <Eq>{`\\mu`}</Eq>, mit Fluktuation von 5 g um ihn herum.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "396", exercicio: "7.1", licenca: "CC-BY" }}
+>
+Eine Fabrik produziert Schrauben mit Mittelmasse $\mu$ und Standardabweichung $\sigma = 50$ g. Eine Stichprobe von $n = 100$ Schrauben wird erhoben. Berechnen Sie den Standardfehler des Stichprobenmittelwerts.
+</Exercicio>
+
+<Exercicio
+  numero="101.2"
+  dificuldade="aplicacao"
+  solucao={<>Die Vervierfachung von <Eq>{`n`}</Eq> reduziert den Standardfehler auf die Hälfte, da <Eq>{`\\mathrm{SE} \\propto 1/\\sqrt{n}`}</Eq>. Von <Eq>{`n = 25`}</Eq> zu <Eq>{`n = 100`}</Eq>: <Eq>{`\\mathrm{SE}`}</Eq> geht von <Eq>{`\\sigma/5`}</Eq> zu <Eq>{`\\sigma/10`}</Eq>. Reduktion von 50%.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "174", exercicio: "4.3", licenca: "CC-BY-SA" }}
+>
+Eine Umfrage beginnt mit $n = 25$. Wie oft musst du $n$ erhöhen, um den Standardfehler auf die Hälfte zu reduzieren? Erkläre mit der Formel.
+</Exercicio>
+
+<Exercicio
+  numero="101.3"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Identifiziere die Parameter: <Eq>{`\\mu = 120`}</Eq>, <Eq>{`\\sigma = 15`}</Eq>, <Eq>{`n = 9`}</Eq>.</li>
+<li>Berechne den Standardfehler: <Eq>{`\\mathrm{SE} = 15/\\sqrt{9} = 5`}</Eq>.</li>
+<li>Standardisiere: <Eq>{`Z = (\\bar X - \\mu)/\\mathrm{SE}`}</Eq>. Für <Eq>{`\\bar X = 125`}</Eq>: <Eq>{`Z = (125-120)/5 = 1{,}00`}</Eq>.</li>
+<li>Konsultiere Z-Tabelle: <Eq>{`P(Z > 1{,}00) = 1 - 0{,}8413 = 0{,}1587`}</Eq>.</li>
+<li><em>Tipp:</em> Wenn die Bevölkerungsverteilung normal ist, gilt das Ergebnis für beliebiges <Eq>{`n`}</Eq> — du brauchst den ZGS nicht.</li>
+</ol>
+  </>}
+  solucao={<>Nach dem ZGS (oder Normalität der Bevölkerung) gilt <Eq>{`\\bar X \\sim \\mathcal{N}(120, 25)`}</Eq>. Wahrscheinlichkeit von <Eq>{`\\bar X > 125`}</Eq> ist <Eq>{`P(Z > 1{,}00) \\approx 15{,}87\\%`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "398", exercicio: "7.3", licenca: "CC-BY" }}
+>
+Die Wartezeit in einer Bank hat Normalverteilung mit $\mu = 120$ s und $\sigma = 15$ s. Eine Stichprobe von $n = 9$ Kunden wird erhoben. Wie groß ist die Wahrscheinlichkeit von $\bar X > 125$ s?
+</Exercicio>
+
+<Exercicio
+  numero="101.4"
+  dificuldade="aplicacao"
+  solucao={<>Geschichtete Stichprobe, mit Schichten nach Geschlecht und Altersgruppe. Garantiert angemessene Repräsentation von Untergruppen, die in einer kleinen EZS-Stichprobe unterrepräsentiert sein könnten.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.17", licenca: "CC-BY-SA" }}
+>
+Ein Krankenhaus möchte die Patientenzufriedenheit mit dem Service schätzen. Der Direktor weiß, dass Geschlecht und Altersgruppe die Wahrnehmung stark beeinflussen. Welcher Stichprobentyp ist am geeignetsten? Begründen Sie.
+</Exercicio>
+
+<Exercicio
+  numero="101.5"
+  dificuldade="aplicacao"
+  solucao={<>Selbstwahl-Bias. Wer freiwillig auf Zufriedenheitsumfragen antwortet, tendiert dazu, extremere Meinungen zu haben (sehr zufrieden oder sehr unzufrieden) als die allgemeine Kundenbevölkerung.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "31", exercicio: "1.19", licenca: "CC-BY-SA" }}
+>
+Ein Online-Shop sendet nach jedem Kauf eine E-Mail um eine Bewertung zu bitten. Nur 12% der Kunden antworten. Identifizieren Sie den wahrscheinlichsten Bias-Typ und erklären Sie seine Auswirkung auf die Schätzung.
+</Exercicio>
+
+<Exercicio
+  numero="101.6"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`n = z_{\\alpha/2}^2/(4E^2) = (1{,}960)^2/(4 \\cdot 0{,}04^2) = 3{,}8416/0{,}0064 \\approx 601`}</Eq>. Notwendig: 601 Haushalte.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "454", exercicio: "8.31", licenca: "CC-BY" }}
+>
+Eine Umfrage möchte den Anteil der Haushalte mit Internetugang im ländlichen Raum mit 4% Fehlerquote bei 95% Konfidenz schätzen. Wie groß ist die Mindeststichprobengröße?
+</Exercicio>
+
+<Exercicio
+  numero="101.7"
+  dificuldade="aplicacao"
+  solucao={<>Überlebensbias. Die Analyse berücksichtigt nur Unternehmen, die noch existieren, ignoriert aber diejenigen, die gescheitert sind. Die durchschnittliche Performance der Überlebenden überschätzt die erwartete Performance eines neuen Unternehmens.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "32", exercicio: "1.21", licenca: "CC-BY-SA" }}
+>
+Ein Berater analysiert das durchschnittliche Wachstum von 50 Startups, gegründet vor 5 Jahren und noch aktiv, und schlussfolgert, dass „Startups durchschnittlich 120% pro Jahr wachsen". Welcher Bias ist präsent?
+</Exercicio>
+
+<Exercicio
+  numero="101.8"
+  dificuldade="aplicacao"
+  solucao={<>Erwartungstreu: ja, denn <Eq>{`\\mathrm{E}[\\bar X] = \\mu`}</Eq> für beliebiges <Eq>{`n`}</Eq>. Konsistent: ja, denn <Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n \\to 0`}</Eq>. Effizient: unter linearen erwartungstreuen Schätzern von <Eq>{`\\mu`}</Eq> hat <Eq>{`\\bar X`}</Eq> minimale Varianz (Gauss-Markov).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.1", licenca: "CC-BY-SA" }}
+>
+Zeigen Sie, dass der Stichprobenmittelwert $\bar X$ (a) erwartungstreu, (b) konsistent und (c) effizient für $\mu$, in der Klasse der linearen Schätzer, ist.
+</Exercicio>
+
+<Exercicio
+  numero="101.9"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sigma/\\sqrt{n} = 40/\\sqrt{400} = 2`}</Eq> Real. Das 2-Standardfehler-Intervall: der Stichprobenmittelwert wird in etwa 95% der Stichproben zwischen <Eq>{`\\mu - 4`}</Eq> und <Eq>{`\\mu + 4`}</Eq> liegen.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "399", exercicio: "7.5", licenca: "CC-BY" }}
+>
+Eine Studie über Ausgaben für öffentliche Verkehrsmittel sammelt $n = 400$ Aufzeichnungen. Die historische Standardabweichung ist $\sigma = R\$\,40$. Berechnen Sie den Standardfehler und interpretieren Sie seine Bedeutung.
+</Exercicio>
+
+<Exercicio
+  numero="101.10"
+  dificuldade="aplicacao"
+  solucao={<>EZS gibt jedem Unternehmen gleiche Chance. Geschichtet nach Sektor garantiert, dass jeder Sektor (Industrie, Handel, Dienstleistungen) proportional repräsentiert ist. Nach Cluster würde man Gemeinden auswählen und alle Unternehmen der ausgewählten Gemeinde befragen. Geschichtet ist effizienter, wenn das durchschnittliche Einkommen stark zwischen Sektoren variiert.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement", secao: "§1.3", pagina: "18", exercicio: "1.5", licenca: "CC-BY" }}
+>
+Das IBGE möchte das durchschnittliche Einkommen brasilianischer Unternehmen schätzen. Beschreiben Sie, wie eine EZS, eine geschichtete Stichprobe nach Sektor und eine nach Cluster durchgeführt würden. Welche wäre effizienter? Warum?
+</Exercicio>
+
+<Exercicio
+  numero="101.11"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Der Bias ist null; die Varianz ist positiv und sinkt mit n", correta: true },
+    { texto: "Der Bias ist positiv; die Varianz ist null" },
+    { texto: "Der Bias ist negativ; die Varianz steigt mit n" },
+    { texto: "Sowohl Bias als auch Varianz sind null für großes n" }
+  ]}
+  solucao={<><Eq>{`\\mathrm{E}[\\bar X] = \\mu`}</Eq> impliziert Bias von null. <Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n > 0`}</Eq> und sinkt mit <Eq>{`n`}</Eq>. Für Varianz null bräuchte man <Eq>{`n \\to \\infty`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.2", licenca: "CC-BY-SA" }}
+>
+Für den Stichprobenmittelwert $\bar X$ mit festem $n$ und unabhängig identisch verteilter Bevölkerung, welche Aussage ist richtig?
+</Exercicio>
+
+<Exercicio
+  numero="101.12"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Weil die Stichprobengröße groß genug ist, damit der ZGS gilt" },
+    { texto: "Weil die Bevölkerung notwendigerweise normal ist", correta: false },
+    { texto: "Weil die Stichprobe geschichtet ist" },
+    { texto: "Weil die Standardabweichung klein ist" }
+  ]}
+  solucao={<>Der ZGS garantiert, dass <Eq>{`\\bar X`}</Eq> sich der Normalverteilung für großes <Eq>{`n`}</Eq> nähert, unabhängig von der Bevölkerungsverteilung. Die Bevölkerungsverteilung muss nicht normal sein.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "394", exercicio: "7.1c", licenca: "CC-BY" }}
+>
+Warum hat der Stichprobenmittelwert in vielen praktischen Umfragen eine näherungsweise Normalverteilung, ohne die genaue Bevölkerungsverteilung zu kennen?
+</Exercicio>
+
+<Exercicio
+  numero="101.13"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Nein: jede mögliche Stichprobe der Größe n hat gleiche Wahrscheinlichkeit ausgewählt zu werden", correta: true },
+    { texto: "Ja: jedes Individuum hat gleiche Wahrscheinlichkeit in der Stichprobe, aber Mengen können unterschiedliche Wahrscheinlichkeiten haben" },
+    { texto: "Ja: die EZS garantiert proportionale Repräsentation aller Untergruppen" },
+    { texto: "Nein: nur systematische Stichproben garantieren Gleichwahrscheinlichkeit" }
+  ]}
+  solucao={<>In der EZS sind Gleichwahrscheinlichkeit von Individuen (alle haben Chance <Eq>{`n/N`}</Eq>) und Gleichwahrscheinlichkeit von Teilmengen äquivalent — jede Menge von <Eq>{`n`}</Eq> Individuen hat die gleiche Chance. Dies garantiert NICHT Repräsentation aller Untergruppen (es kann sein, dass zufällig eine Gruppe ohne Repräsentation bleibt).</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "28", exercicio: "1.15", licenca: "CC-BY-SA" }}
+>
+Aussage: „In der einfachen Zufallsstichprobe hat jedes Individuum die gleiche Wahrscheinlichkeit ausgewählt zu werden. Das ist äquivalent zu sagen, dass jede Menge von $n$ Individuen die gleiche Wahrscheinlichkeit hat, die Stichprobe zu sein." Ist die Aussage richtig?
+</Exercicio>
+
+<Exercicio
+  numero="101.14"
+  dificuldade="aplicacao"
+  solucao={<>Nach dem ZGS: <Eq>{`\\bar X \\sim \\mathcal{N}(3{,}5,\\, 1{,}5^2/36) = \\mathcal{N}(3{,}5,\\, 0{,}0625)`}</Eq>. <Eq>{`P(\\bar X < 3{,}2) = P(Z < (3{,}2 - 3{,}5)/0{,}25) = P(Z < -1{,}20) = 0{,}1151`}</Eq>. Wahrscheinlichkeit von etwa 11,5%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "400", exercicio: "7.7", licenca: "CC-BY" }}
+>
+Die historische durchschnittliche Note eines Prüfung ist $\mu = 3{,}5$ mit $\sigma = 1{,}5$. Für eine Klasse von $n = 36$, wie groß ist die Wahrscheinlichkeit, dass der Klassendurchschnitt kleiner als 3,2 ist?
+</Exercicio>
+
+<Exercicio
+  numero="101.15"
+  dificuldade="aplicacao"
+  solucao={<>Cluster in zwei Stufen: Gemeinden auswählen (erste Stufe), dann Straßen in den ausgewählten Gemeinden auswählen. Operativ effizient, da Interviews auf wenige Gemeinden konzentriert sind, was Fahrtkosten reduziert.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.18", licenca: "CC-BY-SA" }}
+>
+Das IBGE muss den Zugang zu Grundversorgung in Gemeinden ganz Brasiliens mit begrenztem Budget schätzen. Die Liste der Haushalte ist nicht verfügbar, aber die Liste der Gemeinden und Straßen schon. Schlagen Sie einen Stichprobenplan vor.
+</Exercicio>
+
+<Exercicio
+  numero="101.16"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Die Formel für Standardfehler der Proportion ist <Eq>{`\\mathrm{SE} = \\sqrt{p(1-p)/n}`}</Eq>.</li>
+<li>Einsetzen: <Eq>{`\\mathrm{SE} = \\sqrt{0{,}6 \\cdot 0{,}4 / 400} = \\sqrt{0{,}24/400} = \\sqrt{0{,}0006} \\approx 0{,}0245`}</Eq>.</li>
+<li>Fehlerquote bei 95%: <Eq>{`1{,}96 \\times 0{,}0245 \\approx 0{,}048`}</Eq>, oder <Eq>{`\\pm 4{,}8\\%`}</Eq>.</li>
+<li><em>Hinweis:</em> Die Fehlerquote der Proportion ist maximal, wenn <Eq>{`p = 0{,}5`}</Eq>. Für <Eq>{`p = 0{,}6`}</Eq> ist die Fehlerquote etwas kleiner als für <Eq>{`p = 0{,}5`}</Eq>.</li>
+</ol>
+  </>}
+  solucao={<><Eq>{`\\mathrm{SE}(\\hat p) = \\sqrt{0{,}6 \\cdot 0{,}4/400} \\approx 0{,}0245`}</Eq>. Fehlerquote: <Eq>{`\\pm 4{,}8\\%`}</Eq>. Ergebnis: 60% <Eq>{`\\pm`}</Eq> 4,8%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "450", exercicio: "8.27", licenca: "CC-BY" }}
+>
+Eine Umfrage mit $n = 400$ Wählern ergab $\hat p = 60\%$ Zustimmung zum Bürgermeister. Berechnen Sie den Standardfehler und die Fehlerquote bei 95% Konfidenz.
+</Exercicio>
+
+<Exercicio
+  numero="101.17"
+  dificuldade="aplicacao"
+  solucao={<>Aus <Eq>{`n = z^2/(4E^2)`}</Eq>: für <Eq>{`E = 0{,}05`}</Eq> und 95%: <Eq>{`n = 3{,}8416/(4 \\cdot 0{,}0025) = 384{,}16 \\approx 385`}</Eq>. Für <Eq>{`E = 0{,}025`}</Eq>: <Eq>{`n = 3{,}8416/0{,}0025 = 1537`}</Eq>. Die Fehlerquote auf die Hälfte reduzieren vervierfacht die erforderliche Größe.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "214", exercicio: "5.11", licenca: "CC-BY-SA" }}
+>
+Berechnen Sie die Mindeststichprobengrößen um eine Proportion mit Fehlerquoten von (a) 5% und (b) 2,5%, beide bei 95% Konfidenz, zu schätzen. Erklären Sie die Beziehung zwischen den Ergebnissen.
+</Exercicio>
+
+<Exercicio
+  numero="101.18"
+  dificuldade="aplicacao"
+  solucao={<>Systematische Stichprobe: alle 3000 Kunden auflisten; eine Kunde unter den ersten 10 auswählen (z. B. die 4.); dann die 4., 14., 24., …, bis 300 Kunden auswählen. Sie ist äquivalent zu EZS, wenn die Liste nicht nach Variablen sortiert ist, die mit dem Ergebnis korrelieren.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/1-3-frequency-frequency-tables-and-levels-of-measurement", secao: "§1.3", pagina: "20", exercicio: "1.7", licenca: "CC-BY" }}
+>
+Ein Unternehmen hat 3000 in Vertragsordnung sortierte Kunden. Es möchte 300 für eine Umfrage auswählen. Beschreiben Sie den Prozess der systematischen Stichprobenziehung und diskutieren Sie, wann sie Bias einführen kann.
+</Exercicio>
+
+<Exercicio
+  numero="101.19"
+  dificuldade="aplicacao"
+  solucao={<>Nach dem ZGS: <Eq>{`\\bar X \\sim \\mathcal{N}(70, 100/64) = \\mathcal{N}(70, 1{,}5625)`}</Eq>. <Eq>{`P(68 \\leq \\bar X \\leq 72) = P(-1{,}6 \\leq Z \\leq 1{,}6)`}</Eq>. <Eq>{`= \\Phi(1{,}6) - \\Phi(-1{,}6) = 0{,}9452 - 0{,}0548 = 0{,}8904`}</Eq>. Wahrscheinlichkeit von etwa 89%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "401", exercicio: "7.9", licenca: "CC-BY" }}
+>
+Das Gewicht von Reissäcken hat $\mu = 70$ kg und $\sigma = 10$ kg. Für eine Stichprobe von $n = 64$, berechnen Sie $P(68 \leq \bar X \leq 72)$.
+</Exercicio>
+
+<Exercicio
+  numero="101.20"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "Nichtbeantwortungsbias: wer Fragebögen zurücksendet unterscheidet sich systematisch von wer nicht" },
+    { texto: "Überlebensbias: nur noch angemeldete Schüler nehmen teil", correta: true },
+    { texto: "Auswahlbias nach Internetzugang" },
+    { texto: "Selbstwahl-Bias von Freiwilligen" }
+  ]}
+  solucao={<>Schüler, die den Kurs verlassen haben (möglicherweise die Unzufriedensten) sind nicht in der Anmeldungsliste, können also nicht befragt werden. Die Umfrage misst Zufriedenheit nur unter den „Überlebenden" des Programms und überschätzt die Durchschnittszufriedenheit.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "32", exercicio: "1.22", licenca: "CC-BY-SA" }}
+>
+Eine Universität führt Zufriedenheitsumfrage unter **derzeit angemeldeten** Studierenden durch. Welcher Bias ist am relevantesten in diesem Ansatz?
+</Exercicio>
+
+<Exercicio
+  numero="101.21"
+  dificuldade="aplicacao"
+  solucao={<><Eq>{`\\mathrm{SE} = \\sqrt{p(1-p)/n}`}</Eq>. Maximiert bei <Eq>{`p = 0{,}5`}</Eq>: <Eq>{`\\mathrm{SE}_{\\max} = 0{,}5/\\sqrt{n}`}</Eq>. Für 95%: <Eq>{`n = (1{,}96 \\cdot 0{,}5/0{,}02)^2 = 2401`}</Eq>. Aufrunden auf 2401.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/8-3-a-confidence-interval-for-a-population-proportion", secao: "§8.3", pagina: "455", exercicio: "8.33", licenca: "CC-BY" }}
+>
+Ohne vorherige Kenntnis von $p$, wie groß ist die Mindeststichprobengröße um eine Proportion mit Fehlerquote von 2% bei 95% zu schätzen?
+</Exercicio>
+
+<Exercicio
+  numero="101.22"
+  dificuldade="aplicacao"
+  solucao={<>Auswahlbias: Haustür-Befragung erreicht nur wer tagsüber zuhause ist — typisch Arbeitslose, Rentner und Hausangestellte. Vollzeitbeschäftigte sind systematisch aus der Stichprobe ausgeschlossen.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "31", exercicio: "1.20", licenca: "CC-BY-SA" }}
+>
+Ein Forscher befragt Bewohner einer Stadt zwischen 9 Uhr und 17 Uhr an Werktagen. Er möchte das Durchschnittsfamilieneinkommen schätzen. Identifizieren Sie den Bias und beschreiben Sie seine Richtung (unterschätzt oder überschätzt er das Durchschnittseinkommen?).
+</Exercicio>
+
+<Exercicio
+  numero="101.23"
+  dificuldade="aplicacao"
+  passos={<>
+<ol>
+<li>Formel: <Eq>{`\\mathrm{SE}(\\bar X) = \\sigma/\\sqrt{n}`}</Eq>.</li>
+<li>Für <Eq>{`n = 25`}</Eq>: <Eq>{`\\mathrm{SE} = 12/\\sqrt{25} = 12/5 = 2{,}4`}</Eq> min.</li>
+<li>Für <Eq>{`n = 100`}</Eq>: <Eq>{`\\mathrm{SE} = 12/\\sqrt{100} = 12/10 = 1{,}2`}</Eq> min.</li>
+<li>Verhältnis: <Eq>{`2{,}4/1{,}2 = 2`}</Eq>. Den <Eq>{`\\sqrt{n}`}</Eq> verdoppeln (Vervierfachung von <Eq>{`n`}</Eq>) halbiert den SE.</li>
+<li><em>Tipp:</em> Um den SE um Faktor <Eq>{`k`}</Eq> zu reduzieren, multipliziere <Eq>{`n`}</Eq> mit <Eq>{`k^2`}</Eq>.</li>
+</ol>
+  </>}
+  solucao={<>Für <Eq>{`n = 25`}</Eq>: <Eq>{`\\mathrm{SE} = 2{,}4`}</Eq> min. Für <Eq>{`n = 100`}</Eq>: <Eq>{`\\mathrm{SE} = 1{,}2`}</Eq> min. Die Vervierfachung von <Eq>{`n`}</Eq> halbiert den SE.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "397", exercicio: "7.2", licenca: "CC-BY" }}
+>
+Die ärztliche Konsultationsdauer hat $\sigma = 12$ min. Berechnen Sie den Standardfehler des Mittelwerts für $n = 25$ und $n = 100$, und vergleichen Sie.
+</Exercicio>
+
+<Exercicio
+  numero="101.24"
+  dificuldade="aplicacao"
+  solucao={<>Nach dem ZGS: <Eq>{`\\bar X \\sim \\mathcal{N}(500, 80^2/100) = \\mathcal{N}(500, 64)`}</Eq>. <Eq>{`P(\\bar X > 510) = P(Z > (510-500)/8) = P(Z > 1{,}25) = 1 - 0{,}8944 = 0{,}1056`}</Eq>. Wahrscheinlichkeit von 10,6%.</>}
+  fonte={{ livro: "OpenStax Statistics", url: "https://openstax.org/books/statistics/pages/7-1-the-central-limit-theorem-for-sample-means-averages", secao: "§7.1", pagina: "402", exercicio: "7.11", licenca: "CC-BY" }}
+>
+Der monatliche Stromverbrauch einer Stadt hat $\mu = 500$ kWh und $\sigma = 80$ kWh. Für $n = 100$ ausgewählte Haushalte, berechnen Sie $P(\bar X > 510)$.
+</Exercicio>
+
+<Exercicio
+  numero="101.25"
+  dificuldade="modelagem"
+  passos={<>
+<ol>
+<li>Die PNAD verwendet geschichtete Stichproben nach Bundesstaat und Cluster in zwei Stufen.</li>
+<li>Um Arbeitslosigkeit national mit Fehlerquote von <Eq>{`\\pm 0{,}5\\%`}</Eq> bei 95% zu schätzen, nutze <Eq>{`n \\geq z^2/(4E^2) = 3{,}8416/(4 \\cdot 0{,}0025) \\approx 384`}</Eq> Beobachtungen. Aber Arbeitslosigkeit ist selten (<Eq>{`p \\approx 0{,}12`}</Eq>), also passt sich die Formel an: <Eq>{`n \\geq z^2 p(1-p)/E^2 \\approx 1628`}</Eq>.</li>
+<li>In der Praxis nutzt das IBGE 211.000 Haushalte um Staatsschätzungen gleichzeitig zu unterstützen und Design-Effekte zu korrigieren (DEFF größer als 1 durch Clusterung).</li>
+<li><em>Anmerkung:</em> Der „Design-Effekt" ist das Verhältnis zwischen der realen Varianz des komplexen Schätzers und der theoretischen AZS-Varianz. In der PNAD Contínua ist der DEFF für nationale Arbeitslosigkeit etwa 1,5 — die Clusterung induziert Intra-Cluster-Korrelation, die die geschätzte Varianz erhöht.</li>
+</ol>
+  </>}
+  solucao={<>Für nationale Schätzung mit <Eq>{`\\pm 0{,}5\\%`}</Eq> Fehlerquote und <Eq>{`p \\approx 0{,}12`}</Eq>: <Eq>{`n \\geq 1{,}96^2 \\cdot 0{,}12 \\cdot 0{,}88/0{,}005^2 \\approx 16{.}295`}</Eq>. Das IBGE nutzt 211.000 um Staatsschätzungen mit kleinerer Fehlerquote zu unterstützen. Der Design-Effekt (DEFF) der Cluster-Stichprobe erhöht die effektive Varianz, erfordert größere Stichprobe als reine EZS.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§5.2", pagina: "213", exercicio: "5.9", licenca: "CC-BY-SA" }}
+>
+Das IBGE nutzt etwa 211.000 Haushalte in der PNAD Contínua. Die nationale Arbeitslosenquote ist etwa 12%. (a) Wie groß wäre das theoretische Minimum $n$ um Arbeitslosigkeit mit Fehlerquote von $\pm 0{,}5\%$ bei 95% zu schätzen? (b) Warum nutzt das IBGE ein viel größeres $n$?
+</Exercicio>
+
+<Exercicio
+  numero="101.26"
+  dificuldade="modelagem"
+  solucao={<>Geschichtete Stichprobe mit Schichten nach Postleitzahl-Bereich (Proxy für Einkommen) und optimale Neyman-Allokation: <Eq>{`n_k \\propto N_k \\sigma_k`}</Eq>. Schichten mit hoher Einkommensvarianz erhalten mehr Interviews, auch wenn kleiner. Das minimiert die Gesamtvarianz des Schätzers für die gleichen Kosten.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§1.4", pagina: "30", exercicio: "1.18", licenca: "CC-BY-SA" }}
+>
+Eine Bank möchte die durchschnittliche Ausfallquote in ihrem Kreditportfolio von 500.000 Kunden schätzen. Die Variabilität der Ausfallquote variiert stark nach Einkommensgruppe. Schlagen Sie einen effizienten Stichprobenplan vor und begründen Sie die Interview-Allokation nach Schicht.
+</Exercicio>
+
+<Exercicio
+  numero="101.27"
+  dificuldade="modelagem"
+  solucao={<>Überlebensbias. Fonds, die Operationen einstellen (schlechte Performance) verschwinden aus der Datenbank. Eine Analyse nur aktiver Fonds überschätzt systematisch die historische Durchschnittsrendite. Der richtige Vergleich muss alle Fonds einbeziehen, die während des Zeitraums existierten, einschließlich der geschlossenen.</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 3", pagina: "47", exercicio: "3.2", licenca: "CC-BY-NC" }}
+>
+Ein Finanzanalyst vergleicht die durchschnittliche historische Rendite aktiver Fonds und schlussfolgert, dass aktive Manager den Index schlagen. Die Daten enthalten nur Fonds, die noch heute existieren. Identifizieren Sie den Bias und erklären Sie, wie er die Schlussfolgerung beeinflusst.
+</Exercicio>
+
+<Exercicio
+  numero="101.28"
+  dificuldade="modelagem"
+  passos={<>
+<ol>
+<li>Der erwartungstreue Schätzer der Bevölkerungsvarianz ist <Eq>{`S^2 = \\frac{1}{n-1}\\sum_{i=1}^n (X_i - \\bar X)^2`}</Eq>.</li>
+<li>Expandieren: <Eq>{`\\mathrm{E}[S^2] = \\frac{1}{n-1}\\mathrm{E}\\left[\\sum (X_i - \\bar X)^2\\right]`}</Eq>.</li>
+<li>Mit <Eq>{`\\sum (X_i - \\bar X)^2 = \\sum X_i^2 - n\\bar X^2`}</Eq> und <Eq>{`\\mathrm{E}[\\sum X_i^2] = n(\\sigma^2 + \\mu^2)`}</Eq>, <Eq>{`\\mathrm{E}[n\\bar X^2] = n(\\sigma^2/n + \\mu^2)`}</Eq>.</li>
+<li>Ergebnis: <Eq>{`\\mathrm{E}[S^2] = \\sigma^2`}</Eq>. Der Divisor <Eq>{`n-1`}</Eq> (nicht <Eq>{`n`}</Eq>) garantiert Erwartungstreue.</li>
+<li><em>Tipp:</em> Der Divisor <Eq>{`n-1`}</Eq> „korrigiert" die Tatsache, dass <Eq>{`\\bar X`}</Eq> etwas näher an den Daten liegt als <Eq>{`\\mu`}</Eq> — ein Freiheitsgrad wird in der Mittelwertschätzung „verbraucht".</li>
+</ol>
+  </>}
+  solucao={<>Zeigen Sie, dass <Eq>{`\\mathrm{E}[S^2] = \\sigma^2`}</Eq> mit Divisor <Eq>{`n-1`}</Eq>. Das zentrale Argument: <Eq>{`\\sum(X_i - \\bar X)^2 = \\sum X_i^2 - n\\bar X^2`}</Eq> und <Eq>{`\\mathrm{E}[\\bar X^2] = \\sigma^2/n + \\mu^2`}</Eq>. Der Divisor <Eq>{`n-1`}</Eq> korrigiert den Bias, der mit <Eq>{`n`}</Eq> entstehen würde.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "175", exercicio: "4.5", licenca: "CC-BY-SA" }}
+>
+Zeigen Sie algebraisch, dass $S^2 = \frac{1}{n-1}\sum(X_i - \bar X)^2$ erwartungstreu für $\sigma^2$ ist. Warum ist der Divisor $n-1$ statt $n$?
+</Exercicio>
+
+<Exercicio
+  numero="101.29"
+  dificuldade="desafio"
+  solucao={<>Für <Eq>{`X_i \\in [0, 1]`}</Eq> und <Eq>{`t = 0{,}05`}</Eq>, <Eq>{`n = 100`}</Eq>: <Eq>{`P(|\\bar X - \\mu| > 0{,}05) \\leq 2\\exp(-2 \\cdot 100 \\cdot 0{,}0025/1) = 2e^{-0{,}5} \\approx 2 \\cdot 0{,}6065 = 1{,}213`}</Eq>. Die Schranke ist größer als 1, also nicht informativ in diesem Fall. Für <Eq>{`n = 1000`}</Eq>: <Eq>{`2e^{-5} \\approx 0{,}0135`}</Eq> — garantiert jetzt weniger als 1,4% Chance von Fehler größer als 5%.</>}
+  fonte={{ livro: "Statistical Thinking for the 21st Century", url: "https://statsthinking21.org/", secao: "Cap. 4", pagina: "65", exercicio: "4.3", licenca: "CC-BY-NC" }}
+>
+Wenden Sie die Hoeffding-Ungleichung für $X_i \in [0, 1]$ an: $P(|\bar X - \mu| > t) \leq 2\exp(-2nt^2)$. Für $t = 0{,}05$ berechnen Sie die Schranke für $n = 100$ und $n = 1000$. Interpretieren Sie das Ergebnis.
+</Exercicio>
+
+<Exercicio
+  numero="101.30"
+  dificuldade="demonstracao"
+  solucao={<>Beweis der Erwartungstreue des Stichprobenmittelwerts: <Eq>{`\\mathrm{E}[\\bar X] = \\mathrm{E}\\left[\\frac{1}{n}\\sum_{i=1}^n X_i\\right] = \\frac{1}{n}\\sum_{i=1}^n \\mathrm{E}[X_i] = \\frac{1}{n} \\cdot n\\mu = \\mu`}</Eq>. Konsistenz: <Eq>{`\\mathrm{Var}(\\bar X) = \\sigma^2/n \\to 0`}</Eq>; nach Chebyshev-Ungleichung: <Eq>{`P(|\\bar X - \\mu| > \\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2) \\to 0`}</Eq> für alle <Eq>{`\\varepsilon > 0`}</Eq>.</>}
+  fonte={{ livro: "OpenIntro Statistics", url: "https://www.openintro.org/book/os/", secao: "§4.1", pagina: "172", exercicio: "4.1", licenca: "CC-BY-SA" }}
+>
+Beweisen Sie formal, dass der Stichprobenmittelwert $\bar X = \frac{1}{n}\sum X_i$ (a) erwartungstreu und (b) konsistent für $\mu$ ist, mit Chebyshev-Ungleichung für Teil (b).
+</Exercicio>
+
+</ListaExercicios>
+
+## Quellen
+
+- [**OpenIntro Statistics** (4. Aufl.)](https://www.openintro.org/book/os/) — Diez, Çetinkaya-Rundel, Barr · CC-BY-SA. Abschnitte §1.3–1.4 (Stichprobentypen und Bias) und §4.1–4.2 (Stichprobenverteilung).
+- [**Statistics** (OpenStax)](https://openstax.org/details/books/statistics) — Illowsky, Dean · CC-BY. Kapitel 1 (Einführung in Stichprobenziehung) und Kapitel 7 (Stichprobenverteilung und ZGS).
+- [**Statistical Thinking for the 21st Century**](https://statsthinking21.org/) — Russell Poldrack · CC-BY-NC. Kapitel 3–4 (Stichprobenbias und Stichprobenverteilung mit Simulationen).
