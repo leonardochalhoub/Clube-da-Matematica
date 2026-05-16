@@ -35,15 +35,19 @@ async function obterVoicesAsync(): Promise<SpeechSynthesisVoice[]> {
 /**
  * Botão de áudio multilíngue — só Web Speech API, zero arquivos.
  *
- * Pipeline:
+ * Texto:
  *   1. Há tradução manual (`textosI18n[locale]`)? Use ela.
  *   2. Há tradução em AUDIO_TRANSLATIONS (gerado pelo Opus)? Use ela.
- *   3. Locale é PT-BR? Use texto original.
- *   4. Não há tradução? Fala texto PT-BR com voz PT-BR (sem mais "PT-BR
- *      com sotaque alemão").
+ *   3. Locale é PT-BR ou MDX já está no idioma alvo? Use texto.
+ *   4. Sem tradução? Fala texto PT-BR com voz PT-BR (fallback de texto).
  *
- * Voz: do locale alvo. Se navegador não tem voz pro idioma instalada,
- * mostra alert pedindo pro usuário instalar a voz no SO.
+ * Voz: filtra `getVoices()` pelo `speechLang` do locale. Quando nenhuma voz
+ * casa, deixa `utterance.voice` desfeito — o sintetizador do SO resolve via
+ * `utterance.lang`. Mobile (iOS Safari, Android Chrome) expõe um subconjunto
+ * minúsculo de vozes em `getVoices()` mesmo quando o engine TTS do SO
+ * pronuncia o idioma; forçar voz PT-BR aqui fazia o texto em inglês/espanhol
+ * sair com sotaque brasileiro. PageAudioReader nunca teve esse fallback e
+ * funciona em todo lugar.
  */
 export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
   const { locale, t } = useLocale()
@@ -124,26 +128,16 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     })
     const candidatas = exatas.length > 0 ? exatas : prefixo
 
-    // Sem voz pro locale: fallback silencioso pra texto+voz PT-BR.
-    // (Sem alert — usuário já vê bandeira PT-BR no botão indicando fallback.)
-    let textoFinal = textoFalado
-    let langFinal = langFalado
-    let vozesFinal = candidatas
-    if (candidatas.length === 0 && langFalado !== 'pt-BR') {
-      const fallbackVozes = vozes.filter((v) => v.lang.toLowerCase().startsWith('pt'))
-      textoFinal = texto // texto original PT-BR
-      langFinal = 'pt-BR'
-      vozesFinal = fallbackVozes
-    }
-
-    const u = new SpeechSynthesisUtterance(textoFinal)
-    u.lang = langFinal
+    const u = new SpeechSynthesisUtterance(textoFalado)
+    u.lang = langFalado
     u.rate = 0.95
     u.pitch = 1
     u.volume = 1
-    if (vozesFinal.length > 0) {
-      const random = vozesFinal[Math.floor(Math.random() * vozesFinal.length)]!
-      u.voice = random
+    // Sem voz casando, deixa `voice` desfeito: o SO escolhe via `u.lang`.
+    // Forçar PT-BR aqui quebrava mobile (ver docblock).
+    if (candidatas.length > 0) {
+      const escolhida = candidatas[Math.floor(Math.random() * candidatas.length)]!
+      u.voice = escolhida
     }
 
     u.onstart = () => setEstado('falando')
