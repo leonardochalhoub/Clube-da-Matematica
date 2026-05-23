@@ -1171,6 +1171,11 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Theorem', fr: 'Théorème', it: 'Teorema', ru: 'Теорема',
     ko: '정리', pl: 'Twierdzenie',
   },
+  'callout.corolario': {
+    'pt-BR': 'Corolário', en: 'Corollary', es: 'Corolario', zh: '推论', ja: '系',
+    de: 'Korollar', fr: 'Corollaire', it: 'Corollario', ru: 'Следствие',
+    ko: '따름정리', pl: 'Wniosek',
+  },
   'callout.exemplo': {
     'pt-BR': 'Exemplo', en: 'Example', es: 'Ejemplo', zh: '示例', ja: '例',
     de: 'Beispiel', fr: 'Exemple', it: 'Esempio', ru: 'Пример',

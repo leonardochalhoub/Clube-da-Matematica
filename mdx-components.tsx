@@ -9,6 +9,7 @@ import { VerificarPasso } from '@/components/math/VerificarPasso'
 import {
   Definicao,
   Teorema,
+  Corolario,
   Exemplo,
   Insight,
   Cuidado,
@@ -42,6 +43,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     VerificarPasso,
     Definicao,
     Teorema,
+    Corolario,
     Exemplo,
     Insight,
     Cuidado,

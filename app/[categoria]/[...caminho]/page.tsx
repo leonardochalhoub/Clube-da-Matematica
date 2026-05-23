@@ -25,6 +25,7 @@ import { VerificarPasso } from '@/components/math/VerificarPasso'
 import {
   Definicao,
   Teorema,
+  Corolario,
   Exemplo,
   Insight,
   Cuidado,
@@ -37,7 +38,7 @@ const MDX_COMPONENTS = {
   PayoffChart,
   ListaExercicios, Exercicio,
   VerificarPasso,
-  Definicao, Teorema, Exemplo, Insight, Cuidado, Leituras,
+  Definicao, Teorema, Corolario, Exemplo, Insight, Cuidado, Leituras,
 }
 
 const MDX_OPTIONS: Parameters<typeof compileMDX>[0]['options'] = {
