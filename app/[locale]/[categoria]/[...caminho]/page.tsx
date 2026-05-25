@@ -7,9 +7,9 @@ import rehypeKatex from 'rehype-katex'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import {
-  carregarTodosConteudos,
   carregarPorSlug,
 } from '@/lib/content/loader'
+import { carregarMdxLocalizado } from '@/lib/content/manifest'
 import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
 import { LessonPageShell } from '@/components/layout/LessonPageShell'
 import { LOCALES, type Locale } from '@/lib/i18n/locales'
@@ -54,19 +54,10 @@ function walkMdx(dir: string, base = dir): string[] {
 }
 
 export function generateStaticParams() {
-  // Pra cada locale não-PT-BR, gera os paths que TÊM tradução em
-  // content/i18n/<speechLang>/. PT-BR usa rota raiz (sem prefixo).
-  //
-  // PREVIEW_LOCALES env limits which locales emit pages (saves RAM for
-  // local builds). Default: all locales. Set to e.g. "en,es" to only
-  // emit those two prefixes.
   const params: Array<{ locale: string; categoria: string; caminho: string[] }> = []
   const i18nRoot = join(ROOT, 'content', 'i18n')
   if (!existsSync(i18nRoot)) return params
 
-  // BUILD_LOCALE: matrix-build mode. When set, this route emits ONLY
-  // paths for that locale (or none if BUILD_LOCALE=pt-BR, since PT-BR
-  // uses root URLs handled by `[categoria]/[...caminho]`).
   const buildLocale = process.env.BUILD_LOCALE ?? ''
   if (buildLocale === 'pt-BR') return params
 
@@ -79,7 +70,6 @@ export function generateStaticParams() {
   for (const speechLang of readdirSync(i18nRoot)) {
     const dir = join(i18nRoot, speechLang)
     if (!statSync(dir).isDirectory()) continue
-    // Achar o locale-código curto pelo speechLang
     const localeEntry = Object.values(LOCALES).find((l) => l.speechLang === speechLang)
     if (!localeEntry) continue
     const localeCode = localeEntry.code
@@ -109,9 +99,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const conteudo = carregarPorSlug(slug)
   if (!conteudo) return { title: 'Not found' }
 
-  // Read translated frontmatter so <title> and meta description match the
-  // page's locale. Falls back to PT-BR meta if the translation file or its
-  // frontmatter can't be read.
   let titulo = conteudo.meta.titulo
   let descricao = conteudo.meta.descricao
   if (locale in LOCALES && locale !== 'pt-BR') {
@@ -132,21 +119,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const MDX_COMPONENTS = {
-  DuasPortas,
-  Porta,
-  Equation,
-  Eq,
-  EquacaoCanonica,
+  DuasPortas, Porta,
+  Equation, Eq, EquacaoCanonica,
   PayoffChart,
-  ListaExercicios,
-  Exercicio,
+  ListaExercicios, Exercicio,
   VerificarPasso,
-  Definicao,
-  Teorema,
-  Exemplo,
-  Insight,
-  Cuidado,
-  Leituras,
+  Definicao, Teorema, Exemplo, Insight, Cuidado, Leituras,
+}
+
+const MDX_OPTIONS: Parameters<typeof compileMDX>[0]['options'] = {
+  mdxOptions: {
+    remarkPlugins: [remarkGfm, remarkMath],
+    rehypePlugins: [
+      rehypeKatex,
+      rehypeSlug,
+      [rehypeAutolinkHeadings, { behavior: 'wrap' }],
+    ],
+  },
 }
 
 export default async function ConteudoLocalizadoPage({ params }: Props) {
@@ -159,63 +148,71 @@ export default async function ConteudoLocalizadoPage({ params }: Props) {
   const conteudo = carregarPorSlug(slug)
   if (!conteudo || conteudo.caminho !== completo) notFound()
 
-  // Tenta carregar versão traduzida; se não existe, fallback pra PT-BR
-  let arquivo = caminhoArquivoMdx(completo, locale as Locale, localeInfo.speechLang)
-  if (!arquivo) {
-    arquivo = caminhoArquivoMdx(completo, 'pt-BR', 'pt-BR')
-  }
-  if (!arquivo) notFound()
-
-  // Tenta carregar+compilar MDX traduzido; se falhar (parse error, KaTeX),
-  // cai pra PT-BR. Garante que erros de tradução não derrubam o build.
-  const mdxOptions: Parameters<typeof compileMDX>[0]['options'] = {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm, remarkMath],
-      rehypePlugins: [
-        rehypeKatex,
-        rehypeSlug,
-        [rehypeAutolinkHeadings, { behavior: 'wrap' }],
-      ],
-    },
-  }
-
   let mdxRendered: React.ReactNode
   let translatedFrontmatter: Record<string, unknown> = {}
-  try {
-    const { content, data } = await lerMdxSource(arquivo)
-    translatedFrontmatter = data
-    const compiled = await compileMDX({
-      source: content,
-      components: MDX_COMPONENTS,
-      options: mdxOptions,
-    })
-    mdxRendered = compiled.content
-  } catch (err) {
-    // Surface the failure in build logs so we stop silently shipping
-    // PT-BR for translated pages that broke during compile.
-    console.error(
-      `[i18n-fallback] compileMDX failed for ${locale}/${completo} — serving PT-BR fallback. Reason:`,
-      err instanceof Error ? err.message : err,
-    )
-    translatedFrontmatter = {}
-    const ptArquivo = caminhoArquivoMdx(completo, 'pt-BR', 'pt-BR')
-    if (!ptArquivo) notFound()
-    const { content } = await lerMdxSource(ptArquivo)
-    const compiled = await compileMDX({
-      source: content,
-      components: MDX_COMPONENTS,
-      options: mdxOptions,
-    })
-    mdxRendered = compiled.content
+
+  // PRIMARY PATH: webpack-bundled MDX module via manifest.
+  // This is the only path that PRESERVES JSX-expression props on
+  // <Exercicio> — opcoes={[...]}, solucao={<>...</>}, passos={...},
+  // fonte={{...}}. compileMDX (next-mdx-remote/rsc) drops them, which
+  // is why locale pages were showing exercises without MC/solution
+  // buttons. Lessons must be in `includeTranslationsFor` in
+  // scripts/generate-manifest.ts to land here.
+  const mod = await carregarMdxLocalizado(completo, locale)
+  if (mod) {
+    const MDXContent: React.ComponentType = mod.default
+    mdxRendered = <MDXContent />
+    // Still read frontmatter from disk so page header (titulo, descricao,
+    // usadoEm) renders in the active locale.
+    const arquivo = caminhoArquivoMdx(completo, locale as Locale, localeInfo.speechLang)
+    if (arquivo) {
+      try {
+        const { data } = await lerMdxSource(arquivo)
+        translatedFrontmatter = data
+      } catch {
+        /* keep PT-BR frontmatter */
+      }
+    }
+  } else {
+    // FALLBACK PATH: compileMDX from disk for lessons not in the manifest
+    // allowlist. JSX-expression props will NOT render correctly here —
+    // any lesson with MC/solution/passos must be added to the manifest
+    // allowlist instead of relying on this fallback.
+    let arquivo = caminhoArquivoMdx(completo, locale as Locale, localeInfo.speechLang)
+    if (!arquivo) {
+      arquivo = caminhoArquivoMdx(completo, 'pt-BR', 'pt-BR')
+    }
+    if (!arquivo) notFound()
+    try {
+      const { content, data } = await lerMdxSource(arquivo)
+      translatedFrontmatter = data
+      const compiled = await compileMDX({
+        source: content,
+        components: MDX_COMPONENTS,
+        options: MDX_OPTIONS,
+      })
+      mdxRendered = compiled.content
+    } catch (err) {
+      console.error(
+        `[i18n-fallback] compileMDX failed for ${locale}/${completo} — serving PT-BR fallback. Reason:`,
+        err instanceof Error ? err.message : err,
+      )
+      translatedFrontmatter = {}
+      const ptArquivo = caminhoArquivoMdx(completo, 'pt-BR', 'pt-BR')
+      if (!ptArquivo) notFound()
+      const { content } = await lerMdxSource(ptArquivo)
+      const compiled = await compileMDX({
+        source: content,
+        components: MDX_COMPONENTS,
+        options: MDX_OPTIONS,
+      })
+      mdxRendered = compiled.content
+    }
   }
 
   const isAula = categoria === 'aulas'
   const isFinancas = categoria === 'financas-quantitativas'
 
-  // Merge translated frontmatter (titulo, descricao, usadoEm) over the
-  // canonical PT-BR meta so the page header renders in the page's locale.
-  // Frontmatter rule: slug / categoria / ordem / tags / prerrequisitos
-  // stay PT-BR (post-sweep), so spread-merge is safe.
   const localizedMeta = {
     ...conteudo.meta,
     ...(translatedFrontmatter as Partial<typeof conteudo.meta>),

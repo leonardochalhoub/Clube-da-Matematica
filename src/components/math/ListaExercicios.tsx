@@ -89,16 +89,22 @@ export interface OpcaoExercicio {
 export interface FonteExercicio {
   /** Nome do livro. Ex.: "OpenStax College Algebra 2e". */
   livro: string
-  /** URL deep-link à seção/página específica do livro. */
+  /** URL deep-link à seção do livro (ou ao exercício específico quando disponível). */
   url: string
   /** Seção (ex.: "§3.2"). */
   secao?: string
-  /** Página (ex.: 247). */
-  pagina?: string | number
-  /** Identificador do exercício no livro (ex.: "ex. 17"). */
-  exercicio?: string
   /** Licença (CC-BY 4.0, etc.). */
   licenca?: string
+  /**
+   * Identificador do exercício no livro (ex.: "ex. 17", "Exercise 4.271").
+   * **Invariante:** este campo só deve ser preenchido pelo pipeline de
+   * re-sourcing determinístico (`scripts/parse-*.py` → corpus JSONL →
+   * authoring CLI). NUNCA preencher à mão ou por LLM freehand — uma
+   * auditoria em 2026-05-24 confirmou que citações LLM de número de
+   * exercício são sistematicamente alucinadas. Ver
+   * `docs/sources-revalidation.md`.
+   */
+  exercicio?: string
 }
 
 interface ExercicioProps {
@@ -886,7 +892,6 @@ function ItemExercicio({
               <strong className="text-clube-ink/85">{fonte.livro}</strong>
               {fonte.secao && <span> · {fonte.secao}</span>}
               {fonte.exercicio && <span> · {fonte.exercicio}</span>}
-              {fonte.pagina && <span> · p. {fonte.pagina}</span>}
             </span>
           </a>
         )}

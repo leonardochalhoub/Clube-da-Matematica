@@ -31,7 +31,16 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE)
 
   useEffect(() => {
-    const detected = detectLocale()
+    // URL prefix wins over localStorage. If user is at /en/aulas/..., the
+    // page is serving EN translated MDX — UI chrome + cheer banner must
+    // match. Otherwise UI shows PT-BR while body shows EN (the previous
+    // bug: cheer phrase appeared in PT even when toggle showed EN).
+    const path = window.location.pathname
+    const urlMatch = path.match(/^\/([a-z]{2})(?:\/|$)/)
+    const urlLocale = urlMatch?.[1] && urlMatch[1] in LOCALES
+      ? (urlMatch[1] as Locale)
+      : null
+    const detected: Locale = urlLocale ?? detectLocale()
     if (detected !== locale) setLocaleState(detected)
     // Aplica RTL/LTR. **Não** mexe em `<html lang>` — esse atributo deve
     // refletir a língua do CONTEÚDO (pt-BR enquanto não houver traduções

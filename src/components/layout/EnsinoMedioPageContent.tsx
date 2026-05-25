@@ -85,7 +85,7 @@ export function EnsinoMedioPageContent({
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 marker:hidden [&::-webkit-details-marker]:hidden">
                 <div className="min-w-0 flex-1">
                   <span className="text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-                    {t('page.ensinoMedio.year.label')} {ano.num} · {ano.idade}
+                    {t('page.ensinoMedio.year.label')} {ano.num} · {ano.idade.replace(/\banos\b/, t('em.yearsOld'))}
                   </span>
                   <h2 className="mt-1 text-xl font-extrabold leading-tight text-clube-teal-deep group-open:text-clube-teal">
                     {anoTituloI18n(ano.num, locale, ano.titulo)}

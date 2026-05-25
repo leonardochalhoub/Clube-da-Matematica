@@ -113,8 +113,17 @@ async function main() {
   const buildLocale = process.env.BUILD_LOCALE ?? ''
   const isMatrixBuild = buildLocale !== ''
   const includeTranslationsFor = new Set<string>([
+    // Strict-mode re-sourced lessons (real exercises from OpenStax + Active
+    // Calculus, with MC + solucao + 25% passos + all 5 fonte fields).
+    // These MUST be bundled via webpack manifest so the locale route
+    // preserves the JSX-expression props (opcoes, solucao, passos, fonte) —
+    // compileMDX (next-mdx-remote/rsc) drops them and lessons render
+    // without MC/solution buttons.
     'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos',
     'aulas/ano-1/trim-1/licao-02-funcoes',
+    'aulas/ano-2/trim-5/licao-41-limite-formal',
+    'aulas/ano-2/trim-6/licao-51-derivada-definicao',
+    'aulas/ano-3/trim-9/licao-82-integral-definida',
   ])
 
   let out = `/**
@@ -160,10 +169,21 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
         }
       }
     } else {
-      // Single-build mode (dev): allowlist gating, same as before.
+      // Single-build mode (dev): allowlist gating.
+      //
+      // For lessons in the allowlist, bundle only EN+ES translations.
+      // The other 9 locales (de, fr, it, ja, ko, pl, ru, zh) fall back
+      // to PT-BR via carregarMdxLocalizado's default. Why: bundling all
+      // ~50 translation MDXs for the allowlist lessons (5 × 10 locales)
+      // pushed the webpack build past 8 GB heap on WSL. Several of those
+      // translations also have stale JSX (pre-strict-mode content) that
+      // throws webpack cache serializer warnings. EN+ES are the locales
+      // we actively maintain; others rebuild only via the matrix CI.
+      const BUNDLE_LOCALES = new Set(['en-US', 'es-ES'])
       out += `    'pt-BR': () => import('@/../content/${p}.mdx'),\n`
       if (includeTranslationsFor.has(p)) {
         for (const [locale, set] of Object.entries(localeMap)) {
+          if (!BUNDLE_LOCALES.has(locale)) continue
           if (set.has(p)) {
             out += `    '${locale}': () => import('@/../content/i18n/${locale}/${p}.mdx'),\n`
           }

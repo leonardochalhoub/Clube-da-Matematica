@@ -14,27 +14,13 @@ type MdxLoader = () => Promise<{ default: ComponentType }>
 export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> = {
   'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos': {
     'pt-BR': () => import('@/../content/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
-    'de-DE': () => import('@/../content/i18n/de-DE/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
     'en-US': () => import('@/../content/i18n/en-US/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
     'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
-    'fr-FR': () => import('@/../content/i18n/fr-FR/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
-    'it-IT': () => import('@/../content/i18n/it-IT/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
-    'ko-KR': () => import('@/../content/i18n/ko-KR/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
-    'pl-PL': () => import('@/../content/i18n/pl-PL/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
-    'ru-RU': () => import('@/../content/i18n/ru-RU/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx'),
   },
   'aulas/ano-1/trim-1/licao-02-funcoes': {
     'pt-BR': () => import('@/../content/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
-    'de-DE': () => import('@/../content/i18n/de-DE/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
     'en-US': () => import('@/../content/i18n/en-US/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
     'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
-    'fr-FR': () => import('@/../content/i18n/fr-FR/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
-    'it-IT': () => import('@/../content/i18n/it-IT/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
-    'ja-JP': () => import('@/../content/i18n/ja-JP/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
-    'ko-KR': () => import('@/../content/i18n/ko-KR/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
-    'pl-PL': () => import('@/../content/i18n/pl-PL/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
-    'ru-RU': () => import('@/../content/i18n/ru-RU/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
-    'zh-CN': () => import('@/../content/i18n/zh-CN/aulas/ano-1/trim-1/licao-02-funcoes.mdx'),
   },
   'aulas/ano-1/trim-1/licao-03-afim': {
     'pt-BR': () => import('@/../content/aulas/ano-1/trim-1/licao-03-afim.mdx'),
@@ -152,6 +138,8 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   },
   'aulas/ano-2/trim-5/licao-41-limite-formal': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-5/licao-41-limite-formal.mdx'),
+    'en-US': () => import('@/../content/i18n/en-US/aulas/ano-2/trim-5/licao-41-limite-formal.mdx'),
+    'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-2/trim-5/licao-41-limite-formal.mdx'),
   },
   'aulas/ano-2/trim-5/licao-42-propriedades-limites': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-5/licao-42-propriedades-limites.mdx'),
@@ -182,6 +170,8 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   },
   'aulas/ano-2/trim-6/licao-51-derivada-definicao': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-6/licao-51-derivada-definicao.mdx'),
+    'en-US': () => import('@/../content/i18n/en-US/aulas/ano-2/trim-6/licao-51-derivada-definicao.mdx'),
+    'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-2/trim-6/licao-51-derivada-definicao.mdx'),
   },
   'aulas/ano-2/trim-6/licao-52-regras-derivacao': {
     'pt-BR': () => import('@/../content/aulas/ano-2/trim-6/licao-52-regras-derivacao.mdx'),
@@ -365,6 +355,8 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   },
   'aulas/ano-3/trim-9/licao-82-integral-definida': {
     'pt-BR': () => import('@/../content/aulas/ano-3/trim-9/licao-82-integral-definida.mdx'),
+    'en-US': () => import('@/../content/i18n/en-US/aulas/ano-3/trim-9/licao-82-integral-definida.mdx'),
+    'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-3/trim-9/licao-82-integral-definida.mdx'),
   },
   'aulas/ano-3/trim-9/licao-83-tfc': {
     'pt-BR': () => import('@/../content/aulas/ano-3/trim-9/licao-83-tfc.mdx'),

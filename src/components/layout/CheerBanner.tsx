@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CHEERS, type Cheer } from '@/content/cheer-phrases'
+import { getCheers, type Cheer } from '@/content/cheer-phrases'
+import { useLocale } from './LocaleProvider'
 
 /**
  * Faixa fina no topo do site com uma frase aleatória de incentivo ao
@@ -18,12 +19,14 @@ import { CHEERS, type Cheer } from '@/content/cheer-phrases'
  * pequeno (text-sm sm:text-base) pra não competir com o hero abaixo.
  */
 export function CheerBanner() {
-  const [cheer, setCheer] = useState<Cheer>(CHEERS[0]!)
+  const { locale } = useLocale()
+  const cheers = getCheers(locale)
+  const [cheer, setCheer] = useState<Cheer>(cheers[0]!)
 
   useEffect(() => {
-    const idx = Math.floor(Math.random() * CHEERS.length)
-    setCheer(CHEERS[idx]!)
-  }, [])
+    const idx = Math.floor(Math.random() * cheers.length)
+    setCheer(cheers[idx]!)
+  }, [cheers])
 
   const texto = typeof cheer === 'string' ? cheer : cheer.t
   const autor = typeof cheer === 'string' ? null : cheer.a

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useLocale } from '@/components/layout/LocaleProvider'
+import { localizedHref } from '@/lib/i18n/href'
 import type { Trimestre, Licao, AulaAgrupada } from '@/content/programa-em'
 import {
   anoTitulo,
@@ -265,7 +266,7 @@ function LicaoLinha({
     <li className="rounded-lg border border-clube-mist-soft/30 bg-clube-cream-soft/30 px-3 py-2">
       {caminho ? (
         <Link
-          href={`/${caminho}/`}
+          href={localizedHref(caminho, locale)}
           className="block no-underline hover:no-underline hover:bg-clube-cream-soft -mx-3 -my-2 rounded-lg px-3 py-2"
         >
           {Inner}

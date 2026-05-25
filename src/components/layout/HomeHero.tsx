@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useLocale } from './LocaleProvider'
 import { LOCALES, NUM_LOCALES } from '@/lib/i18n/locales'
+import { anoTitulo, anoResumo } from '@/content/programa-em-i18n'
 
 interface AnoCard {
   num: number
@@ -20,7 +21,7 @@ interface HomeHeroProps {
 }
 
 export function HomeHero({ anos }: HomeHeroProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const features = t('home.stats.features').replace('{n}', String(NUM_LOCALES))
   const bandeiras = Object.values(LOCALES)
     .map((l) => l.bandeira)
@@ -92,7 +93,7 @@ export function HomeHero({ anos }: HomeHeroProps) {
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-clube-gold-deep">
-                      {yearLabel} {ano.num} · {ano.idade}
+                      {yearLabel} {ano.num} · {ano.idade.replace(/\banos\b/, t('em.yearsOld'))}
                     </p>
                     <p className="shrink-0 text-xs tabular-nums text-clube-mist">
                       <span className="font-bold text-clube-leaf">
@@ -105,10 +106,10 @@ export function HomeHero({ anos }: HomeHeroProps) {
                     </p>
                   </div>
                   <h2 className="mt-1 text-base font-extrabold leading-tight text-clube-teal-deep group-hover:text-clube-teal sm:text-lg">
-                    {ano.titulo}
+                    {anoTitulo(ano.num, locale, ano.titulo)}
                   </h2>
                   <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-clube-mist sm:text-[13px]">
-                    {ano.resumo}
+                    {anoResumo(ano.num, locale, ano.resumo)}
                   </p>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <p className="text-[10px] italic text-clube-mist/80 sm:text-[11px]">
