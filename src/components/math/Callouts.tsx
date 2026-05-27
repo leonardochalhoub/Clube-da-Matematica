@@ -48,6 +48,7 @@ function Bloco({
 const Icone = {
   D: <span className="font-mono text-sm">D</span>,
   T: <span className="font-mono text-sm">T</span>,
+  C: <span className="font-mono text-sm">C</span>,
   E: <span className="font-mono text-sm">E</span>,
   I: <span className="font-mono text-sm">i</span>,
   W: <span className="font-mono text-sm">!</span>,
@@ -61,6 +62,11 @@ export function Definicao(props: CalloutBaseProps) {
 export function Teorema(props: CalloutBaseProps) {
   const { t } = useLocale()
   return <Bloco rotulo={t('callout.teorema')} cor="#0F3540" icone={Icone.T} {...props} />
+}
+
+export function Corolario(props: CalloutBaseProps) {
+  const { t } = useLocale()
+  return <Bloco rotulo={t('callout.corolario')} cor="#2D4B6E" icone={Icone.C} {...props} />
 }
 
 export function Exemplo(props: CalloutBaseProps) {

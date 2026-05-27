@@ -189,6 +189,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Completude de ℝ, sup/inf, Axioma de Arquimedes, densidade de ℚ',
             materia: 'limites-continuidade',
             referencia: 'Guidorizzi vol. 1 §1.1–1.3 · Apostol I §I 3–4',
+            slug: 'cal1-u1-l01-numeros-reais',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l01-numeros-reais',
           },
           {
             num: 2,
@@ -197,7 +199,7 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             materia: 'limites-continuidade',
             referencia: 'Stewart §2.4 · Guidorizzi §2.1 · OpenStax Calc I §2.5',
             slug: 'cal1-u1-l02-limite-epsilon-delta',
-            caminho: 'calculo-1/unidade-1/cal1-u1-l02-limite-epsilon-delta',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l02-limite-epsilon-delta',
           },
           {
             num: 3,
@@ -205,6 +207,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Álgebra de limites, fatoração, racionalização, Teorema do Confronto',
             materia: 'limites-continuidade',
             referencia: 'Stewart §2.3 · Active Calculus §1.2 · OpenStax Calc I §2.3',
+            slug: 'cal1-u1-l03-tecnicas-limites',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l03-tecnicas-limites',
           },
           {
             num: 4,
@@ -212,6 +216,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'lim(sin x)/x = 1, lim(1+1/n)^n = e, lim(e^x−1)/x = 1',
             materia: 'limites-continuidade',
             referencia: 'Guidorizzi §2.3 · Stewart §3.3 Nota · REAMAT cap. 2',
+            slug: 'cal1-u1-l04-limites-fundamentais',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l04-limites-fundamentais',
           },
           {
             num: 5,
@@ -219,6 +225,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Comportamento assintótico, assíntotas horizontais e oblíquas',
             materia: 'limites-continuidade',
             referencia: 'Stewart §2.6 · OpenStax Calc I §4.6',
+            slug: 'cal1-u1-l05-limites-infinito-assintotas',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l05-limites-infinito-assintotas',
           },
           {
             num: 6,
@@ -226,6 +234,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Continuidade no ponto e no intervalo, descontinuidades removível/salto/essencial',
             materia: 'limites-continuidade',
             referencia: 'Stewart §2.5 · Guidorizzi §2.4 · Active Calculus §1.7',
+            slug: 'cal1-u1-l06-continuidade',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l06-continuidade',
           },
           {
             num: 7,
@@ -233,6 +243,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Enunciado, demonstração, zeros de funções contínuas, aplicações (bisseção)',
             materia: 'limites-continuidade',
             referencia: 'Stewart §2.5 · Apostol I §3.11 · OpenStax Calc I §2.4',
+            slug: 'cal1-u1-l07-tvi',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l07-tvi',
           },
           {
             num: 8,
@@ -240,6 +252,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Funções contínuas em compactos, existência de extremos globais',
             materia: 'limites-continuidade',
             referencia: 'Guidorizzi §2.5 · Apostol I §3.16',
+            slug: 'cal1-u1-l08-weierstrass',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l08-weierstrass',
           },
           {
             num: 9,
@@ -247,6 +261,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Sequências convergentes, monotona limitada, Bolzano-Weierstrass',
             materia: 'limites-continuidade',
             referencia: 'Guidorizzi §1.4–1.6 · Apostol I §10.1–10.3',
+            slug: 'cal1-u1-l09-limites-sequencias',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l09-limites-sequencias',
           },
           {
             num: 10,
@@ -254,6 +270,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Resolução de problemas integrados, estilo FUVEST/ITA/ENEM',
             materia: 'limites-continuidade',
             referencia: 'REAMAT cap. 1–2 · Guidorizzi Lista I · ITA provas 2010–2024',
+            slug: 'cal1-u1-l10-workshop',
+            caminho: 'engenharia/calculo-1/unidade-1/cal1-u1-l10-workshop',
           },
         ],
       },
@@ -271,6 +289,7 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             materia: 'derivada-1',
             referencia: 'Stewart §2.1–2.2 · Guidorizzi §3.1 · Active Calculus §1.3',
             slug: 'cal1-u2-l11-derivada-definicao',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l11-derivada-definicao',
           },
           {
             num: 12,
@@ -278,6 +297,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '(f+g)′=f′+g′, (fg)′, (f/g)′, derivada da potência x^n',
             materia: 'derivada-1',
             referencia: 'Stewart §2.3 · OpenStax Calc I §3.3 · Active Calculus §2.1',
+            slug: 'cal1-u2-l12-regras-derivacao',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l12-regras-derivacao',
           },
           {
             num: 13,
@@ -285,6 +306,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '(f∘g)′(x) = f′(g(x))·g′(x), exemplos encadeados, notação de Leibniz',
             materia: 'derivada-1',
             referencia: 'Stewart §2.5 · Guidorizzi §3.3 · Active Calculus §2.5',
+            slug: 'cal1-u2-l13-regra-cadeia',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l13-regra-cadeia',
           },
           {
             num: 14,
@@ -292,6 +315,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '(sin)′=cos, (cos)′=−sin, (tan)′=sec², (arctan)′, (arcsin)′',
             materia: 'derivada-1',
             referencia: 'Stewart §2.4 e §2.6 · Guidorizzi §3.4',
+            slug: 'cal1-u2-l14-derivadas-trig-inversas',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l14-derivadas-trig-inversas',
           },
           {
             num: 15,
@@ -299,6 +324,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '(e^x)′=e^x, (ln x)′=1/x, (a^x)′, (log_a x)′, derivação logarítmica',
             materia: 'derivada-1',
             referencia: 'Stewart §3.1–3.3 · OpenStax Calc I §3.9 · Active Calculus §2.6',
+            slug: 'cal1-u2-l15-derivadas-exp-log',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l15-derivadas-exp-log',
           },
           {
             num: 16,
@@ -306,6 +333,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'F(x,y)=0 → dy/dx, derivada de função inversa via implícita',
             materia: 'derivada-1',
             referencia: 'Stewart §2.6 · Active Calculus §2.7 · Guidorizzi §3.5',
+            slug: 'cal1-u2-l16-derivacao-implicita',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l16-derivacao-implicita',
           },
           {
             num: 17,
@@ -313,6 +342,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'f′′, f^(n), notação, aceleração, concavidade',
             materia: 'derivada-1',
             referencia: 'Stewart §2.7 · OpenStax Calc I §3.5',
+            slug: 'cal1-u2-l17-derivadas-ordem-superior',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l17-derivadas-ordem-superior',
           },
           {
             num: 18,
@@ -320,6 +351,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Diferencial dy = f′(x)dx, approximação f(x)≈f(a)+f′(a)(x−a)',
             materia: 'derivada-1',
             referencia: 'Stewart §3.10 · Active Calculus §1.8 · Guidorizzi §3.6',
+            slug: 'cal1-u2-l18-diferenciabilidade-aproximacao',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l18-diferenciabilidade-aproximacao',
           },
           {
             num: 19,
@@ -327,6 +360,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'dy/dt = f′(x)·dx/dt, problemas de engenharia e física',
             materia: 'derivada-1',
             referencia: 'Stewart §2.8 · OpenStax Calc I §4.1 · Active Calculus §3.5',
+            slug: 'cal1-u2-l19-taxas-relacionadas',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l19-taxas-relacionadas',
           },
           {
             num: 20,
@@ -334,6 +369,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas integrados, estilo ITA/USP/UNICAMP',
             materia: 'derivada-1',
             referencia: 'REAMAT cap. 3 · ITA provas 2015–2024 · Guidorizzi Lista II',
+            slug: 'cal1-u2-l20-workshop',
+            caminho: 'engenharia/calculo-1/unidade-2/cal1-u2-l20-workshop',
           },
         ],
       },
@@ -350,6 +387,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Enunciados, demonstrações, aplicações: monotonicidade, funções constantes',
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §3.2 · Guidorizzi §4.1 · Apostol I §4.1–4.3',
+            slug: 'cal1-u3-l21-tvm',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l21-tvm',
           },
           {
             num: 22,
@@ -357,6 +396,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'f′>0 → crescente, pontos críticos, extremos locais',
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §3.3 · Active Calculus §3.1 · OpenStax Calc I §4.3',
+            slug: 'cal1-u3-l22-crescimento-decrescimento',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l22-crescimento-decrescimento',
           },
           {
             num: 23,
@@ -364,6 +405,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'f′′>0 → convexa, pontos de inflexão, teste de segunda derivada',
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §3.4 · Active Calculus §3.1 · Guidorizzi §4.2',
+            slug: 'cal1-u3-l23-concavidade-inflexao',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l23-concavidade-inflexao',
           },
           {
             num: 24,
@@ -371,6 +414,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Análise completa: domínio, simetria, assíntotas, monotonia, concavidade',
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §3.5 · Guidorizzi §4.3 · OpenStax Calc I §4.5',
+            slug: 'cal1-u3-l24-esboco-graficos',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l24-esboco-graficos',
           },
           {
             num: 25,
@@ -378,6 +423,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Extremos em intervalos fechados, algoritmo de busca',
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §3.1 · Active Calculus §3.3 · OpenStax Calc I §4.2',
+            slug: 'cal1-u3-l25-maximos-minimos-globais',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l25-maximos-minimos-globais',
           },
           {
             num: 26,
@@ -386,6 +433,7 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §3.7 · Active Calculus §3.4 · REAMAT cap. 4',
             slug: 'cal1-u3-l26-otimizacao',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l26-otimizacao',
           },
           {
             num: 27,
@@ -393,6 +441,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '0/0, ∞/∞, 0·∞, ∞−∞, 0^0, 1^∞, ∞^0',
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §3.7 · Guidorizzi §4.4 · Apostol I §7.12',
+            slug: 'cal1-u3-l27-lhopital',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l27-lhopital',
           },
           {
             num: 28,
@@ -400,6 +450,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'f(x) = Σ f^(k)(a)/k! (x−a)^k, resto de Lagrange, erro de truncamento',
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §11.11 · Guidorizzi §4.5 · Apostol I §7.7',
+            slug: 'cal1-u3-l28-taylor',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l28-taylor',
           },
           {
             num: 29,
@@ -407,6 +459,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Iteração xₙ₊₁ = xₙ − f(xₙ)/f′(xₙ), convergência, implementação',
             materia: 'aplicacoes-derivada-1',
             referencia: 'Stewart §3.8 · REAMAT §5.2 · Active Calculus §3.8',
+            slug: 'cal1-u3-l29-newton-raphson',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l29-newton-raphson',
           },
           {
             num: 30,
@@ -414,6 +468,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas integrados estilo ITA/IME/vestibular de engenharia',
             materia: 'aplicacoes-derivada-1',
             referencia: 'REAMAT cap. 4 · ITA 2018–2024 · Guidorizzi Lista III',
+            slug: 'cal1-u3-l30-workshop',
+            caminho: 'engenharia/calculo-1/unidade-3/cal1-u3-l30-workshop',
           },
         ],
       },
@@ -430,6 +486,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Partições, soma inferior/superior, definição de ∫[a,b]f(x)dx',
             materia: 'integral-1',
             referencia: 'Stewart §4.1–4.2 · Guidorizzi §5.1 · Apostol I §1.7–1.10',
+            slug: 'cal1-u4-l31-somas-riemann',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l31-somas-riemann',
           },
           {
             num: 32,
@@ -437,6 +495,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Linearidade, aditividade, monotonia, módulo',
             materia: 'integral-1',
             referencia: 'Stewart §4.2 · OpenStax Calc I §5.2 · Active Calculus §4.3',
+            slug: 'cal1-u4-l32-propriedades-integral',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l32-propriedades-integral',
           },
           {
             num: 33,
@@ -444,6 +504,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'F′=f, constante de integração, primitivas imediatas',
             materia: 'integral-1',
             referencia: 'Stewart §4.4 · Guidorizzi §5.2 · Active Calculus §4.4',
+            slug: 'cal1-u4-l33-antiderivada-integral-indefinida',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l33-antiderivada-integral-indefinida',
           },
           {
             num: 34,
@@ -452,6 +514,7 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             materia: 'integral-1',
             referencia: 'Stewart §4.3–4.4 · Guidorizzi §5.3 · Apostol I §5.1',
             slug: 'cal1-u4-l34-tfc',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l34-tfc',
           },
           {
             num: 35,
@@ -459,6 +522,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'u-substitution, método geral, casos trigonométricos simples',
             materia: 'integral-1',
             referencia: 'Stewart §4.5 · Active Calculus §5.3 · OpenStax Calc I §5.5',
+            slug: 'cal1-u4-l35-substituicao',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l35-substituicao',
           },
           {
             num: 36,
@@ -466,6 +531,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'A = ∫(f−g)dx, integração em relação a y',
             materia: 'integral-1',
             referencia: 'Stewart §5.1 · Active Calculus §6.1 · OpenStax Calc I §6.1',
+            slug: 'cal1-u4-l36-area-curvas',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l36-area-curvas',
           },
           {
             num: 37,
@@ -473,6 +540,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Sólidos de revolução, método dos discos/anéis e das cascas',
             materia: 'integral-1',
             referencia: 'Stewart §5.2–5.3 · OpenStax Calc I §6.2–6.3',
+            slug: 'cal1-u4-l37-volumes',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l37-volumes',
           },
           {
             num: 38,
@@ -480,6 +549,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'ds = √(1+[f′]²)dx, área de superfície = 2π∫f·ds',
             materia: 'integral-1',
             referencia: 'Stewart §5.4 · Guidorizzi §5.5 · OpenStax Calc I §6.4',
+            slug: 'cal1-u4-l38-comprimento-arco',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l38-comprimento-arco',
           },
           {
             num: 39,
@@ -487,6 +558,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'W = ∫F dx, força hidrostática, centroides',
             materia: 'integral-1',
             referencia: 'Stewart §5.5 · REAMAT §6.4 · OpenStax Calc I §6.5',
+            slug: 'cal1-u4-l39-aplicacoes-fisicas',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l39-aplicacoes-fisicas',
           },
           {
             num: 40,
@@ -494,6 +567,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas integrados, prova-modelo estilo USP/ITA',
             materia: 'integral-1',
             referencia: 'REAMAT cap. 5–6 · Guidorizzi Lista IV · ITA provas 2010–2024',
+            slug: 'cal1-u4-l40-workshop',
+            caminho: 'engenharia/calculo-1/unidade-4/cal1-u4-l40-workshop',
           },
         ],
       },
