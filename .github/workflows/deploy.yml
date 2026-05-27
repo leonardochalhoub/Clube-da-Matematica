@@ -40,11 +40,13 @@ jobs:
         env:
           # GitHub Pages serve em /<repo-name>/
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-          # Aumenta heap pra evitar OOM com muitos MDX (i18n manifest grande).
-          # CLAUDE.md exige 8192 mínimo; GH free ubuntu-latest (público) tem 16GB RAM.
-          # Subido pra 12288 em 2026-05-27: um build limpo (sem cache .next) de 1835
-          # páginas estourou os 8GB no CI após a entrada de Cálculo 1 (PR #2, +445 págs).
-          NODE_OPTIONS: --max-old-space-size=12288
+          # NOTA: o valor efetivo do heap vem do script "build" em package.json
+          # (cross-env NODE_OPTIONS=...), que SOBRESCREVE esta env var. Mantidos
+          # iguais (13312) só pra evitar confusão — editar package.json é o que conta.
+          # Subido 8192->13312 em 2026-05-27: build limpo (sem cache .next) de 1835
+          # páginas estourou 8GB no CI após Cálculo 1 (PR #2, +445 págs). Runner
+          # público ubuntu-latest tem 16GB RAM, então 13GB de heap é folga segura.
+          NODE_OPTIONS: --max-old-space-size=13312
         run: npm run build
 
       - name: Upload Pages artifact

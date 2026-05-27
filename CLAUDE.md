@@ -29,12 +29,12 @@
 ```bash
 npm run typecheck         # tsc --noEmit
 npm run validate-content  # frontmatter + zod schema check
-npm run build             # SSG export (must use NODE_OPTIONS=--max-old-space-size=8192)
+npm run build             # SSG export (must use NODE_OPTIONS=--max-old-space-size=13312)
 npm run dev               # local server
 npm run test              # vitest
 ```
 
-**Build memory rule.** `next build` for this repo MUST run with `NODE_OPTIONS=--max-old-space-size=8192` minimum (the GH Actions workflow already sets it). Anything below 7 GB OOMs on 120 MDX × KaTeX × per-locale routes.
+**Build memory rule.** `next build` for this repo MUST run with `NODE_OPTIONS=--max-old-space-size=13312` (13 GB), set by the `build` script in `package.json` via `cross-env` — that value OVERRIDES any `NODE_OPTIONS` set in the GH Actions workflow env, so edit `package.json` to change it, not just the workflow. Raised from 8192 → 13312 on 2026-05-27: a clean CI build (no `.next` cache) of ~1,835 pages OOM'd at 8 GB after Cálculo 1 (PR #2) added ~445 pages. The public `ubuntu-latest` runner has 16 GB RAM, so 13 GB heap is safe headroom. A warm local cache can mask the OOM — always trust the clean CI build.
 
 ### Routing
 - **`/[categoria]/[...caminho]`** — root PT-BR lessons (e.g. `/aulas/ano-1/trim-1/aula-01-conjuntos-intervalos`).
@@ -284,7 +284,7 @@ Saved in `~/.claude/projects/-home-leochalhoub-Clube-da-Matematica/memory/` and 
 1. Read `content/aulas/ano-2/trim-6/aula-52-regras-derivacao.mdx` for shape.
 2. Create the MDX file under `content/aulas/ano-X/trim-Y/aula-NN-slug.mdx`.
 3. Run `npm run validate-content` to check frontmatter.
-4. Build locally: `NODE_OPTIONS=--max-old-space-size=8192 npm run build`.
+4. Build locally: `NODE_OPTIONS=--max-old-space-size=13312 npm run build`.
 5. Commit (manually). Do not auto-push if the user is testing locally.
 
 ### Translating lesson content (current playbook)
