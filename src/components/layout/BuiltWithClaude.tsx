@@ -21,7 +21,8 @@ export function BuiltWithClaude() {
       <span className="text-[10px] uppercase tracking-wider text-clube-mist/80">
         {t('footer.builtWith')}
       </span>
-      {/* Logo light (visível no tema claro) */}
+      {/* Logo light (visível no tema claro) — SVG, no benefit from next/image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`${base}/claude-code-logo.svg`}
         alt="Claude Code"
@@ -29,7 +30,8 @@ export function BuiltWithClaude() {
         height={20}
         className="h-5 w-auto dark:hidden"
       />
-      {/* Logo dark/reverse (visível no tema escuro) */}
+      {/* Logo dark/reverse (visível no tema escuro) — SVG, no benefit from next/image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`${base}/claude-code-logo-rev.svg`}
         alt="Claude Code"
