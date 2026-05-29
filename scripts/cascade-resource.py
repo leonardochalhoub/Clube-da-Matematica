@@ -88,6 +88,7 @@ LIVRO_DISPLAY = {
     "active-calculus/single": "Active Calculus",
     "beezer/first-course-linear-algebra": "A First Course in Linear Algebra (Beezer)",
     "axler/linear-algebra-done-right-4e": "Linear Algebra Done Right (Axler, 4th ed)",
+    "openstax/algebra-and-trigonometry-2e": "OpenStax Algebra and Trigonometry 2e",
 }
 
 

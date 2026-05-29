@@ -36,6 +36,7 @@ S2 = "openstax/statistics"             # OpenStax Statistics (Illowsky, Dean) �
 OI = "openintro/statistics"            # OpenIntro Statistics (Diez, Çetinkaya-Rundel) — CC-BY-SA 3.0
 BZ = "beezer/first-course-linear-algebra"  # Beezer FCLA — GFDL
 AX = "axler/linear-algebra-done-right-4e"  # Axler LADR 4e — CC-BY-NC 4.0
+AT = "openstax/algebra-and-trigonometry-2e"  # OpenStax Algebra and Trigonometry 2e — CC-BY 4.0
 
 # Per-lesson section whitelist. Curated by topic match between the lesson
 # title and the section title (using the inventory printed by aggregate-corpus
@@ -58,7 +59,7 @@ LESSON_SECTIONS: dict[int, list[tuple[str, str]]] = {
     12: [(CA2, "7.3"), (CA2, "7.4")],  # unit circle
     13: [(CA2, "8.1"), (CA2, "8.2")],  # trig functions
     14: [(CA2, "9.1"), (CA2, "9.2"), (CA2, "9.3")],  # trig equations
-    15: [(CA2, "10.1"), (CA2, "10.2")],  # laws of sines/cosines
+    15: [(AT, "10.1"), (AT, "10.2")],  # laws of sines/cosines — AlgTrig 2e parsed 2026-05-29
     16: [(CV1, "1.5")],  # sequences placeholder
     17: [(CA2, "13.2")],  # arithmetic sequences/series
     18: [(CA2, "13.3"), (CA2, "13.4")],  # geometric, binomial
