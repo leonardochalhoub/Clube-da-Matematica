@@ -52,7 +52,7 @@ const MDX_OPTIONS: Parameters<typeof compileMDX>[0]['options'] = {
   mdxOptions: {
     remarkPlugins: [remarkGfm, remarkMath],
     rehypePlugins: [
-      rehypeKatex,
+      [rehypeKatex, { output: 'htmlAndMathml', throwOnError: false, strict: false }],
       rehypeSlug,
       [rehypeAutolinkHeadings, { behavior: 'wrap' }],
     ],
