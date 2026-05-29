@@ -114,24 +114,87 @@ atualizadoEm: "2026-MM-DD"
 
 ### Cascade JSX pitfalls — READ BEFORE WRITING ANY MDX (2026-05-29)
 
-The cascade pipeline (Sonnet/Haiku/Cerebras for source + translators) has produced **1,353 corrupted props in one healing sweep** across i18n files, plus dozens of class-of-build-failures in PT-BR source. The cost has been multiple full sessions of whack-a-mole healing. The owner has paid for this and is tired of it.
+The cascade pipeline (Sonnet/Haiku/Cerebras for source + translators) has produced **1,353 corrupted props in one healing sweep** across i18n files, plus **635 files needing structural fixes** (blank-line insertions), plus dozens of class-of-build-failures in PT-BR source. The cost has been multiple full sessions of whack-a-mole healing. The owner has paid for this and is tired of it.
 
-**The 10 rules below are non-negotiable for any agent (Sonnet subagent, Haiku translator, Opus rewriter, Gemini drafter, anyone else) that writes or revises lesson MDX.**
+**The 12 rules below are non-negotiable for any agent (Sonnet subagent, Haiku translator, Opus rewriter, Gemini drafter, anyone else) that writes or revises lesson MDX. Read them before you write a single character.**
 
-1. **`<Exercicio>` MUST be multi-line form** — `<Exercicio\n  numero=...\n  ...\n>\n body \n</Exercicio>`. Compact `<Exercicio>body with $\\begin{cases}...$</Exercicio>` makes MDX parse `{cases}` as a JSX expression → ReferenceError at build. (86 i18n files had to be auto-rewritten.)
-2. **Never put bare `{Identifier}` anywhere outside `<Eq>{`...`}</Eq>` template literals or `$...$` body math.** `2\overrightarrow{PQ}` in JSX body fails with `PQ is not defined`. Wrap math: `<Eq>{`2\\overrightarrow{PQ}`}</Eq>`.
-3. **Inside `<Eq>{`...`}</Eq>`, double every backslash:** `<Eq>{`\\frac{1}{2}`}</Eq>`, not `<Eq>{`\frac{1}{2}`}</Eq>`. KaTeX consumes one `\` for the command; the template literal needs the other.
-4. **Never write `\$` inside `<Eq>{`...`}</Eq>`** — some scanners read `\` ``` as escaping the closing backtick, terminating the template literal mid-content. For currency, put it OUTSIDE the math: `R\$ 50 (<Eq>{`50`}</Eq> reais)` or simply `1250 reais`.
-5. **Never write escaped backticks `\`** inside JSX expressions. They are not valid syntax; emit literal backticks only.
-6. **Body markdown `$math$` is fragile when math contains `\command{...}`** — `$\mathcal{N}(0,1)$` failed with `N is not defined` at Next.js stringify. Prefer `<Eq>{`\\mathcal{N}(0,1)`}</Eq>` whenever math has braces.
-7. **No HTML entities in JSX content** (`&lt;`, `&gt;`, etc.) — they reach the parser as literal characters and break tags. Use the actual characters.
-8. **Count tag balance before stopping** — `<Exercicio>` opens MUST match `</Exercicio>` closes. Same for `<DuasPortas>` / `<Porta>` / `<ListaExercicios>` / `<>...</>` fragments. LLMs truncate; if you're running out of tokens, close everything FIRST then reduce content.
-9. **Inside `texto: "..."` strings, double backslashes and avoid `\$`/`\t` escapes** — `texto: "$\text{não existe}$"` puts a literal TAB in the string (`\t`). Use `texto: "$\\text{nao existe}$"` (double `\\`, ASCII inside `\text`).
-10. **Books are the ledger** — every `<Exercicio>` MUST have `fonte={{ livro, url, secao, ..., licenca }}` pointing to a real open-licensed book in `livros/CATALOG.md`. If you can't find a sourced exercise for the topic, DROP IT or reduce count. Never fabricate.
+#### Structure
 
-**Self-check before emitting any MDX:** the checklist at the bottom of memory `feedback_cascade_jsx_pitfalls.md` (in `~/.claude/projects/.../memory/`). When in doubt: use `<Eq>{`...`}</Eq>` over body `$...$` — the template-literal form is always safe; body math is fragile.
+1. **`<Exercicio>` MUST be multi-line form**:
+   ```mdx
+   <Exercicio numero="..." dificuldade="..."
+     opcoes={[...]}
+     solucao={<>...</>}
+     fonte={{...}}
+   >
 
-If you violate any of these and the build breaks, the owner will revert your work. Review is tough. Write correctly the first time.
+   Enunciado em markdown body.
+
+   </Exercicio>
+   ```
+   The closing `>` of the open tag is on its own line, then **a blank line**, then the body, then **a blank line**, then `</Exercicio>`. Compact `<Exercicio>body</Exercicio>` (single line) makes MDX parse `{cases}`/`{n}`/`{pmatrix}` as JSX expressions → ReferenceError. (86 i18n files had to be auto-rewritten to multi-line.)
+
+2. **MANDATORY blank line between any JSX block tag and its markdown body.** Without the blank line, the body is parsed as **JSX children**, not markdown. `$\begin{cases}` inside JSX children has `{cases}` evaluated as a JSX expression with undefined identifier `cases`. (635 files were missing this blank line; build crashed at `cases is not defined` on lessons like L34.)
+
+   Wrong (no blank line):
+   ```mdx
+   <Exercicio numero="34.24" dificuldade="aplicacao">
+   Resolva $\begin{cases} 2x + 3y = 7 \\ x - y = 1 \end{cases}$.
+   </Exercicio>
+   ```
+   Right:
+   ```mdx
+   <Exercicio numero="34.24" dificuldade="aplicacao">
+
+   Resolva $\begin{cases} 2x + 3y = 7 \\ x - y = 1 \end{cases}$.
+
+   </Exercicio>
+   ```
+
+3. **Count tag balance before stopping.** `<Exercicio>` opens MUST match `</Exercicio>` closes. Same for `<DuasPortas>` / `<Porta>` / `<ListaExercicios>` / `<>...</>` fragments. LLMs truncate; if you're running out of tokens, **close every open tag first**, then reduce content. The build fails with "Expected a closing tag for `<Exercicio>` (1188:1-1207:2)" when an exercise gets cut mid-body.
+
+#### Math inside JSX
+
+4. **Never put bare `{Identifier}` or `{expr-with-identifier}` anywhere outside `<Eq>{`...`}</Eq>` template literals or `$...$` body math.** Examples that broke the build:
+   - `2\overrightarrow{PQ}` in JSX body → `PQ is not defined`
+   - `(1-p)^{n-k}` in `<li>` JSX children → `n is not defined` / `k is not defined`
+   - `K*e^{-rT}*N(d_2)` in `passos={<><ol>...` → `rT is not defined`
+   - `\frac{d}{dx}` in JSX children → `d is not defined` / `dx is not defined`
+
+   Wrap in `<Eq>`: `<Eq>{`2\\overrightarrow{PQ}`}</Eq>`. Or replace braces with parens: `e^(-rT)` works as plain text in JSX children, just won't render via KaTeX (acceptable when the real math is shown via inline `<Eq>` earlier in the same exercise).
+
+5. **Inside `<Eq>{`...`}</Eq>`, double every backslash.** `<Eq>{`\\frac{1}{2}`}</Eq>`, not `<Eq>{`\frac{1}{2}`}</Eq>`. KaTeX consumes one `\` for the command; the template literal needs the other.
+
+6. **Never write `\$` inside `<Eq>{`...`}</Eq>`.** Some scanners read `\` immediately before `` ` `` as escaping the closing backtick, terminating the template literal mid-content. For currency, put it OUTSIDE math: `R\$ 50 (<Eq>{`50`}</Eq> reais)` or `1250 reais` as prose.
+
+7. **Never write escaped backticks `\``** inside JSX expressions. They are not valid syntax; emit literal `` ` `` only.
+
+8. **Body markdown `$math$` is fragile when math contains `\command{...}`.** `$\mathcal{N}(0,1)$` failed with `N is not defined` at Next.js stringify. **Prefer `<Eq>{`\\mathcal{N}(0,1)`}</Eq>` whenever math has braces.** Single-letter math (`$x$`, `$n=4$`) without braces is usually fine in body.
+
+#### Attributes and strings
+
+9. **No HTML entities in JSX content** (`&lt;`, `&gt;`, `&amp;`, etc.). They reach the parser as literal characters and break tags. Use the actual characters: `<`, `>`, `&`.
+
+10. **Inside `texto: "..."` (and any other JS string attribute), double backslashes and avoid `\$`/`\t` escapes.** `texto: "$\text{não existe}$"` puts a literal TAB in the string because `\t` is JS string escape for TAB. Use `texto: "$\\text{nao existe}$"` (double `\\`, ASCII inside `\text` to avoid KaTeX warnings).
+
+#### Sources (CLAUDE.md hard rule)
+
+11. **Books are the ledger.** Every `<Exercicio>` MUST have `fonte={{ livro, url, secao, ..., licenca }}` pointing to a real open-licensed book in `livros/CATALOG.md`. If you can't find a sourced exercise for the topic, **DROP IT** or reduce count. **Never fabricate exercises.** This rule is repeated from §3 because translator agents have ignored it twice.
+
+12. **Self-check before emitting any MDX.** Mental walkthrough:
+    - [ ] Multi-line `<Exercicio>` with blank lines around the body?
+    - [ ] Every `{ident}` inside backticks or `$math$`?
+    - [ ] Every `\` doubled inside `<Eq>{`...`}</Eq>`?
+    - [ ] No `\$` / `\``  / `\<` / `\>` inside JSX expressions?
+    - [ ] No HTML entities (`&lt;`, etc.)?
+    - [ ] All tags closed?
+    - [ ] Every `<Exercicio>` has `fonte={{ ... }}` to a real book?
+
+**When in doubt: use `<Eq>{`...`}</Eq>` over body `$...$`.** The template-literal form is always safe; body math is fragile.
+
+**Reference memory:** `~/.claude/projects/-home-leochalhoub-Clube-da-Matematica/memory/feedback_cascade_jsx_pitfalls.md` has worked examples of each failure mode.
+
+**If you violate any of these and the build breaks, the owner will revert your work.** Review is tough. Write correctly the first time.
 
 ---
 
