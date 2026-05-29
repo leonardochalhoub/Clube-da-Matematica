@@ -59,6 +59,28 @@ LESSON_SECTIONS: dict[int, list[tuple[str, str]]] = {
     18: [(CA2, "13.3"), (CA2, "13.4")],  # geometric, binomial
     19: [(AC, "1.2"), (CV1, "2.1"), (CV1, "2.2")],  # intuitive limit
     20: [(CV1, "2.1")],  # consolidacao trim-2
+    # ===== Year 1, Trim 3: Analytic geometry, conics, vectors, systems =====
+    21: [(CA2, "2.1")],                                            # Rect coord systems, distance
+    22: [(CA2, "4.1"), (CA2, "4.2")],                              # Linear functions / modeling
+    23: [(CA2, "4.1"), (CA2, "7.1")],                              # Lines + systems 2x2
+    24: [(CA2, "8.1")],                                            # Ellipse (covers circles as a=b)
+    25: [(CA2, "8.1"), (CA2, "8.2"), (CA2, "8.3")],                # Ellipse / Hyperbola / Parabola
+    26: [(CV3, "2.1")],                                            # Vectors in the Plane
+    27: [(CV3, "2.3")],                                            # The Dot Product
+    28: [(CV3, "2.1"), (CV3, "2.3")],                              # Vector applications (physics)
+    29: [(CA2, "7.1"), (CA2, "7.2")],                              # Systems 2x2 + 3x3
+    30: [(CA2, "2.1"), (CA2, "8.1"), (CV3, "2.1"), (CA2, "7.1")],  # consolidacao trim-3
+    # ===== Year 1, Trim 4: Matrices, determinants, combinatorics, probability =====
+    31: [(CA2, "7.5")],                                            # Matrices and Matrix Operations
+    32: [(CA2, "7.5")],                                            # Matrix operations
+    33: [(CA2, "7.5"), (CA2, "7.7")],                              # Transpose, identity, inverse
+    34: [(CA2, "7.8")],                                            # Cramer's Rule uses determinants
+    35: [(CA2, "7.6"), (CA2, "7.8")],                              # Gaussian + Cramer
+    36: [(CA2, "9.5")],                                            # Counting Principles (PFC)
+    37: [(CA2, "9.5")],                                            # Permutations / arrangements
+    38: [(CA2, "9.5"), (CA2, "9.6")],                              # Combinations + Binomial Theorem
+    39: [(CA2, "9.7")],                                            # Probability
+    40: [(CA2, "7.5"), (CA2, "8.1"), (CA2, "9.5"), (CA2, "9.7")],  # consolidacao anual
     # ===== Year 2, Trim 5: Limits =====
     41: [(CV1, "2.5"), (CV1, "2.2"), (CV1, "2.3"), (AC, "1.2"), (AC, "1.7")],
     42: [(CV1, "2.3"), (AC, "1.2")],  # limit laws

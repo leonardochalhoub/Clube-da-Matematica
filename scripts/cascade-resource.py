@@ -41,6 +41,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +57,24 @@ GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     f"{GEMINI_MODEL}:generateContent?key={{key}}"
 )
+
+# ---- Local Ollama (native /api/chat — supports num_ctx + streaming) ----
+OLLAMA_BASE = os.environ.get("OLLAMA_BASE", "http://localhost:11434")
+OLLAMA_CHAT_URL = f"{OLLAMA_BASE}/api/chat"
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b")
+OLLAMA_NUM_CTX = int(os.environ.get("OLLAMA_NUM_CTX", "16384"))
+# Observed on L02: each verbose exercise (body + 4 options + solucao + sometimes passos)
+# is ~350 output tokens. A 15-exercise batch ≈ 5,500 tokens; 8000 gives the model
+# ~2,500 tokens of safety + JSON close bracket overhead.
+OLLAMA_NUM_PREDICT = int(os.environ.get("OLLAMA_NUM_PREDICT", "8000"))
+
+# ---- Cerebras Cloud (OpenAI-compatible) — primary free provider, ~1000+ tok/s ----
+CEREBRAS_URL = "https://api.cerebras.ai/v1/chat/completions"
+CEREBRAS_MODEL = os.environ.get("CEREBRAS_MODEL", "gpt-oss-120b")
+
+# ---- OpenRouter (OpenAI-compatible) — fallback, free 120B models ----
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
 
 # ---- Source-id → display name (for fonte.livro) ----
 LIVRO_DISPLAY = {
@@ -122,9 +141,8 @@ def ensure_candidates(lesson_num: int) -> Path:
         info(f"reusing existing candidates: {n} rows in {out_path}")
         return out_path
     info(f"building candidates for L{lesson_num}…")
-    py = "/home/leochalhoub/miniconda3/envs/dev-env/bin/python3"
     r = subprocess.run(
-        [py, str(ROOT / "scripts" / "build-strict-candidates.py"), str(lesson_num)],
+        [sys.executable, str(ROOT / "scripts" / "build-strict-candidates.py"), str(lesson_num)],
         capture_output=True, text=True,
     )
     if r.returncode != 0:
@@ -254,8 +272,454 @@ def call_gemini_json(api_key: str, system: str, user: str, schema: dict, max_ret
     fail("Gemini API: exhausted retries")
 
 
-def build_resource_prompt(lesson_num: int, lesson_path: Path, candidates: list[dict]) -> tuple[str, str]:
-    """Build (system_prompt, user_prompt) for Gemini re-source call."""
+class ProviderError(Exception):
+    """Raised when a provider fails — cascade chain catches and tries next."""
+
+
+def _openai_compat_call(
+    url: str,
+    api_key: str,
+    model: str,
+    system: str,
+    user: str,
+    schema: dict,
+    *,
+    label: str,
+    timeout: int = 120,
+    max_tokens: int = 8000,
+    extra_headers: dict[str, str] | None = None,
+) -> dict:
+    """Single-attempt OpenAI-compatible JSON-mode call. Used for Cerebras + OpenRouter."""
+    schema_hint = (
+        "\n\nOutput a SINGLE JSON object matching this shape exactly. "
+        "Top-level keys and types are mandatory:\n"
+        + json.dumps(schema, separators=(",", ":"))[:4000]
+    )
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system + schema_hint},
+            {"role": "user", "content": user},
+        ],
+        "response_format": {"type": "json_object"},
+        "temperature": 0.3,
+        "max_tokens": max_tokens,
+    }
+    t0 = time.time()
+    info(f"{label} call — model={model}")
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+        # Cloudflare in front of Cerebras blocks `Python-urllib/3.x` (the
+        # default UA). curl works; any non-urllib UA passes.
+        "User-Agent": "cascade-resource/1.0 (Clube-da-Matematica)",
+    }
+    if extra_headers:
+        headers.update(extra_headers)
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers=headers,
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")[:300]
+        raise ProviderError(f"{label} HTTP {e.code}: {body}")
+    except urllib.error.URLError as e:
+        raise ProviderError(f"{label} network error: {e}")
+    if "choices" not in data:
+        err = data.get("error", {})
+        raise ProviderError(f"{label} bad response: {str(err)[:200] or str(data)[:200]}")
+    choice = data["choices"][0]
+    msg = choice.get("message", {})
+    text = msg.get("content")
+    finish = choice.get("finish_reason", "?")
+    if not text:
+        # gpt-oss reasoning models stuff CoT into `message.reasoning` and the
+        # answer into `message.content`. If finish_reason=length, reasoning
+        # exhausted the token budget before content started.
+        had_reasoning = bool(msg.get("reasoning"))
+        raise ProviderError(
+            f"{label} empty content (finish={finish}, reasoning_present={had_reasoning})"
+        )
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError as e:
+        raise ProviderError(f"{label} JSON parse: {e}")
+    top_keys = set(schema.get("required", []))
+    if top_keys and not top_keys.issubset(parsed.keys()):
+        missing = top_keys - parsed.keys()
+        raise ProviderError(f"{label} schema: missing {missing}")
+    u = data.get("usage", {})
+    ok(f"{label} OK: in={u.get('prompt_tokens','?')} out={u.get('completion_tokens','?')} in {time.time()-t0:.1f}s")
+    return parsed
+
+
+def call_cerebras_json(system: str, user: str, schema: dict, *, max_tokens: int = 16000) -> dict:
+    """Cerebras call with rate-limit-aware retry.
+
+    Free tier is 5 RPM / 30K TPM / 1M TPD. With 5+ parallel workers we WILL
+    trip 429. Instead of falling through to OpenRouter (slow + unreliable at
+    batch=45) or Ollama (5-11 min serial), wait the rate-limit window and
+    retry. Each lesson is ~10s success, so a few 12s waits is much faster
+    than the alternatives.
+    """
+    key = os.environ.get("CEREBRAS_API_KEY", "").strip()
+    if not key:
+        raise ProviderError("CEREBRAS_API_KEY not set")
+    # Cerebras free tier: 5 RPM / 30K TPM / 1M TPD. Rolling 60s window. On 429
+    # ("Tokens per minute limit exceeded") we MUST wait long enough for the
+    # window to clear before retrying — short retries waste both quota and time.
+    # Strategy: try, on 429 sleep N s, try again. Up to MAX_RETRIES retries.
+    sleep_between_retries = 70  # seconds; >60 ensures the TPM window has rolled
+    max_retries = 4  # so worst-case = 5 attempts × ~5s + 4 × 70s = ~305s
+    last_err: Exception | None = None
+    for attempt in range(max_retries + 1):
+        try:
+            return _openai_compat_call(
+                CEREBRAS_URL, key, CEREBRAS_MODEL, system, user, schema,
+                label=f"Cerebras({CEREBRAS_MODEL})",
+                timeout=180,
+                # gpt-oss-120b is a reasoning model: budget must cover BOTH the
+                # internal chain-of-thought AND the final JSON answer.
+                max_tokens=max_tokens,
+            )
+        except ProviderError as e:
+            last_err = e
+            msg = str(e)
+            # 429 = wait + retry. Anything else = propagate immediately.
+            if "HTTP 429" not in msg and "rate" not in msg.lower():
+                raise
+            if attempt >= max_retries:
+                raise ProviderError(f"Cerebras: 429 after {max_retries+1} attempts. Last: {e}")
+            warn(f"Cerebras 429 (attempt {attempt+1}/{max_retries+1}), sleeping {sleep_between_retries}s for TPM clear…")
+            time.sleep(sleep_between_retries)
+    # unreachable
+    raise ProviderError(f"Cerebras: unreachable retry exit. Last: {last_err}")
+
+
+def call_openrouter_json(system: str, user: str, schema: dict, *, max_tokens: int = 16000) -> dict:
+    key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    if not key:
+        raise ProviderError("OPENROUTER_API_KEY not set")
+    return _openai_compat_call(
+        OPENROUTER_URL, key, OPENROUTER_MODEL, system, user, schema,
+        label=f"OpenRouter({OPENROUTER_MODEL})", timeout=240,
+        max_tokens=max_tokens,
+        # OpenRouter convention: identify the calling project. Free-tier users
+        # get rate-pool credit on a per-Referer basis.
+        extra_headers={
+            "HTTP-Referer": "https://github.com/leonardochalhoub/Clube-da-Matematica",
+            "X-Title": "Clube da Matematica",
+        },
+    )
+
+
+SINGLE_EXERCISE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "exercise": EXERCISE_SCHEMA["properties"]["exercises"]["items"],
+    },
+    "required": ["exercise"],
+}
+
+
+def regenerate_exercise(
+    bad_ex: dict,
+    issues_for_ex: list[str],
+    candidate: dict,
+    provider_call,
+) -> dict | None:
+    """Ask the LLM to re-author ONE exercise that failed the quality check.
+
+    The retry prompt is small (~500 tokens) so it lands in <1s on Cerebras.
+    Returns the fixed exercise, or None if the retry also fails.
+    """
+    system = (
+        "You are fixing a single multiple-choice math exercise that failed quality "
+        "checks. Re-author it from the same source candidate. Output a SINGLE JSON "
+        "object: {\"exercise\": {...}} matching the same shape as before.\n\n"
+        "Hard rules:\n"
+        "- EXACTLY 4 options. All four texts MUST be distinct strings.\n"
+        "- EXACTLY ONE option marked correta=true.\n"
+        "- All LaTeX commands fully spelled (\\\\backslash, \\\\frac, \\\\times — never \\\\ackslash / \\\\rac / \\\\imes).\n"
+        "- Solução in PT-BR, 1-3 sentences, must match the correct option.\n"
+        "- Keep the same numero, candidate_index, dificuldade, body_pt, fonte.\n"
+    )
+    user = (
+        f"Original exercise (had issues: {'; '.join(issues_for_ex)}):\n"
+        f"```json\n{json.dumps(bad_ex, ensure_ascii=False)}\n```\n\n"
+        f"Source candidate:\n"
+        f"```json\n{json.dumps({k: candidate.get(k) for k in ('source_id','section_number','section_title','exercise_id','statement')}, ensure_ascii=False)}\n```\n\n"
+        f"Output: {{\"exercise\": <fixed object>}}"
+    )
+    try:
+        result = provider_call(system, user, SINGLE_EXERCISE_SCHEMA, max_tokens=4000)
+        fixed = result.get("exercise")
+        if not fixed:
+            return None
+        # Preserve original candidate_index (model sometimes shifts it)
+        fixed["candidate_index"] = bad_ex.get("candidate_index", fixed.get("candidate_index"))
+        return fixed
+    except ProviderError as e:
+        warn(f"  regen failed: {e}")
+        return None
+
+
+def issues_by_exercise(issues: list[str]) -> dict[str, list[str]]:
+    """Group flat issue list by exercise numero. Issue strings start with '<numero>: …'."""
+    by_num: dict[str, list[str]] = {}
+    for issue in issues:
+        # numero may be '?' for batch-level issues — skip those
+        m = re.match(r"^([0-9]+\.[0-9]+):\s*(.+)$", issue)
+        if m:
+            by_num.setdefault(m.group(1), []).append(m.group(2))
+    return by_num
+
+
+def validate_exercises_quality(exercises: list[dict]) -> list[str]:
+    """Cheap structural quality checks. Returns list of issues; empty = good.
+
+    Catches the failure modes we saw with Qwen 7B on L02:
+      - duplicate MC option texts (true distractors must differ)
+      - `\\ackslash` instead of `\\backslash` (model drops 'b')
+      - solucao numerical answer doesn't match labeled correct option
+      - boilerplate solucao reused verbatim across exercises
+    """
+    issues: list[str] = []
+    seen_solucoes: dict[str, list[str]] = {}
+    for ex in exercises:
+        numero = ex.get("numero", "?")
+        opts = ex.get("options", [])
+        # 1) Duplicate option texts
+        texts = [o.get("text") or o.get("texto") or "" for o in opts]
+        normalized = [re.sub(r"\s+", " ", t).strip().lower() for t in texts]
+        if len(set(normalized)) < len(normalized):
+            issues.append(f"{numero}: duplicate option texts")
+        # 2) Corrupted LaTeX (\ackslash, \rac, \imes…)
+        blob = json.dumps(ex, ensure_ascii=False)
+        if re.search(r"\\\\?ackslash|\\\\?rac\b|\\\\?imes\b", blob):
+            issues.append(f"{numero}: corrupted LaTeX command (\\ackslash / \\rac / \\imes)")
+        # 3) Boilerplate solucao reuse (tracked across the batch)
+        sol = (ex.get("solucao_pt") or "").strip()
+        if sol:
+            seen_solucoes.setdefault(sol, []).append(numero)
+        # 4) Exactly one option flagged correct
+        n_correct = sum(1 for o in opts if o.get("correct") or o.get("correta"))
+        if n_correct != 1:
+            issues.append(f"{numero}: {n_correct} options marked correct (need exactly 1)")
+    for sol, nums in seen_solucoes.items():
+        if len(nums) >= 3:
+            issues.append(f"boilerplate solucao reused across {nums}: {sol[:60]}…")
+    return issues
+
+
+def _check_nonempty_exercises(result: dict, label: str, min_count: int) -> dict:
+    """A 200 response with no usable exercises is still a provider failure."""
+    exs = result.get("exercises") if isinstance(result, dict) else None
+    if not exs:
+        raise ProviderError(f"{label} returned 0 exercises")
+    if len(exs) < min_count:
+        raise ProviderError(f"{label} returned only {len(exs)} (< {min_count} required)")
+    return result
+
+
+def call_with_chain(
+    system: str, user: str, schema: dict, providers: list[str],
+    *, max_tokens: int = 16000, min_exercises: int = 1,
+) -> tuple[dict, str]:
+    """Try providers in order; on ProviderError, fall back to the next.
+
+    Each successful API call is validated to actually contain `min_exercises`+
+    items. A 200 OK with 0 exercises (e.g. Nemotron hallucinating a stub) is
+    treated as a provider failure so the chain advances to the next provider.
+
+    Returns (result, provider_name_that_succeeded). Raises if all fail.
+    """
+    last_err: Exception | None = None
+    for p in providers:
+        try:
+            if p == "cerebras":
+                r = call_cerebras_json(system, user, schema, max_tokens=max_tokens)
+                return _check_nonempty_exercises(r, "cerebras", min_exercises), "cerebras"
+            elif p == "openrouter":
+                r = call_openrouter_json(system, user, schema, max_tokens=max_tokens)
+                return _check_nonempty_exercises(r, "openrouter", min_exercises), "openrouter"
+            elif p == "ollama":
+                r = call_ollama_json(system, user, schema)
+                return _check_nonempty_exercises(r, "ollama", min_exercises), "ollama"
+            elif p == "gemini":
+                key = os.environ.get("GEMINI_API_KEY", "").strip()
+                if not key:
+                    raise ProviderError("GEMINI_API_KEY not set")
+                r = call_gemini_json(key, system, user, schema)
+                return _check_nonempty_exercises(r, "gemini", min_exercises), "gemini"
+            else:
+                warn(f"unknown provider '{p}' in chain — skipping")
+        except ProviderError as e:
+            last_err = e
+            warn(f"provider {p} failed: {e}. Trying next…")
+            continue
+        except SystemExit as e:
+            # call_gemini_json / call_ollama_json bail via fail() — convert to ProviderError
+            last_err = ProviderError(f"{p} fatal")
+            warn(f"provider {p} bailed; trying next…")
+            continue
+    fail(f"all providers exhausted. Last error: {last_err}")
+    raise AssertionError("unreachable")  # for type-checkers
+
+
+def call_ollama_json(system: str, user: str, schema: dict, max_retries: int = 4) -> dict:
+    """Call local Ollama via /api/chat with streaming + live token counter.
+
+    Uses native API so we can pass `options.num_ctx` (default 16384 — the
+    OpenAI-compat /v1 endpoint silently truncates input to 4096, which was the
+    root cause of L02 schema failures). Streams tokens, prints a live progress
+    line to stderr every 5 s so `tail -f` shows real-time activity.
+
+    Returns the parsed top-level dict (same shape as call_gemini_json).
+    """
+    schema_hint = (
+        "\n\nOutput a SINGLE JSON object matching this shape — top-level keys "
+        "and types are mandatory:\n"
+        + json.dumps(schema, separators=(",", ":"))[:4000]
+    )
+    payload = {
+        "model": OLLAMA_MODEL,
+        "messages": [
+            {"role": "system", "content": system + schema_hint},
+            {"role": "user", "content": user},
+        ],
+        "stream": True,
+        "format": "json",
+        "options": {
+            "num_ctx": OLLAMA_NUM_CTX,
+            "num_predict": OLLAMA_NUM_PREDICT,
+            "temperature": 0.3,
+        },
+    }
+    prompt_tokens_est = (len(system) + len(user) + len(schema_hint)) // 4
+    last_err: Exception | None = None
+    for attempt in range(max_retries):
+        info(f"Ollama call (attempt {attempt+1}/{max_retries}) — model={OLLAMA_MODEL} "
+             f"ctx={OLLAMA_NUM_CTX} predict={OLLAMA_NUM_PREDICT} prompt≈{prompt_tokens_est} tok")
+        chunks: list[str] = []
+        eval_count = 0
+        prompt_eval_count = 0
+        final_event: dict = {}
+        t_start = time.time()
+        t_last_log = t_start
+        try:
+            req = urllib.request.Request(
+                OLLAMA_CHAT_URL,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=3600) as resp:
+                for raw_line in resp:
+                    if not raw_line.strip():
+                        continue
+                    try:
+                        ev = json.loads(raw_line.decode("utf-8"))
+                    except json.JSONDecodeError:
+                        continue
+                    if "message" in ev and ev["message"].get("content"):
+                        chunks.append(ev["message"]["content"])
+                    if "eval_count" in ev:
+                        eval_count = ev["eval_count"]
+                    if "prompt_eval_count" in ev:
+                        prompt_eval_count = ev["prompt_eval_count"]
+                    if ev.get("done"):
+                        # Capture final timing stats for FinOps ledger
+                        final_event = ev
+                    now = time.time()
+                    if now - t_last_log >= 5.0 or ev.get("done"):
+                        elapsed = now - t_start
+                        # rough live count: assume ~4 chars/tok if eval_count not yet reported
+                        out_tok = eval_count or sum(len(c) for c in chunks) // 4
+                        rate = out_tok / elapsed if elapsed > 0 else 0
+                        prefix = "[done] " if ev.get("done") else ""
+                        print(
+                            f"  \033[36m·\033[0m {prefix}attempt {attempt+1}  "
+                            f"elapsed={elapsed:6.1f}s  prompt_tok={prompt_eval_count or '?'}  "
+                            f"out_tok={out_tok:5d}  rate={rate:5.1f} tok/s",
+                            file=sys.stderr,
+                            flush=True,
+                        )
+                        t_last_log = now
+                    if ev.get("done"):
+                        break
+            text = "".join(chunks)
+            parsed = json.loads(text)
+            top_keys = set(schema.get("required", []))
+            if top_keys and not top_keys.issubset(parsed.keys()):
+                missing = top_keys - parsed.keys()
+                raise ValueError(f"top-level keys missing: {missing}")
+            ok(f"Ollama OK: {eval_count} output tokens in {time.time()-t_start:.1f}s")
+            # FinOps ledger: append one JSONL line per successful call.
+            # Read by pipelines/finops/bronze_ollama_state.py → ollama_runs.parquet.
+            try:
+                ledger = ROOT / "logs" / "ollama-runs.jsonl"
+                ledger.parent.mkdir(parents=True, exist_ok=True)
+                record = {
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "caller": "cascade-resource.py",
+                    "model": OLLAMA_MODEL,
+                    "endpoint": "/api/chat",
+                    "num_ctx": OLLAMA_NUM_CTX,
+                    "num_predict": OLLAMA_NUM_PREDICT,
+                    "prompt_eval_count": int(prompt_eval_count or 0),
+                    "eval_count": int(eval_count or 0),
+                    "prompt_eval_duration_ns": int(final_event.get("prompt_eval_duration") or 0),
+                    "eval_duration_ns": int(final_event.get("eval_duration") or 0),
+                    "total_duration_ns": int(final_event.get("total_duration") or 0),
+                    "load_duration_ns": int(final_event.get("load_duration") or 0),
+                    "wall_clock_s": round(time.time() - t_start, 3),
+                    "attempt": attempt + 1,
+                    "success": True,
+                }
+                with ledger.open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(record) + "\n")
+            except Exception as _ledger_err:  # pragma: no cover — never fail the cascade for a log write
+                warn(f"ollama-runs.jsonl write failed: {type(_ledger_err).__name__}: {_ledger_err}")
+            return parsed
+        except urllib.error.URLError as e:
+            last_err = e
+            if attempt < max_retries - 1:
+                warn(f"Ollama network error: {e}. Retry in {2**attempt}s…")
+                time.sleep(2 ** attempt)
+                continue
+        except (KeyError, IndexError, json.JSONDecodeError, ValueError) as e:
+            last_err = e
+            if attempt < max_retries - 1:
+                warn(f"Ollama bad output ({type(e).__name__}: {e}). Retry…")
+                time.sleep(1)
+                continue
+    fail(f"Ollama: exhausted retries. Last error: {last_err}")
+
+
+def build_resource_prompt(
+    lesson_num: int,
+    lesson_path: Path,
+    candidates: list[dict],
+    batch_size: int = 15,
+    candidate_cap: int = 40,
+    candidate_offset: int = 0,
+    exercise_start: int = 1,
+) -> tuple[str, str]:
+    """Build (system_prompt, user_prompt) for LLM re-source call.
+
+    Lessons-learned tuning for free-tier (Ollama on 8 GB VRAM, num_ctx=16384):
+    - `candidate_cap` slices the candidates list to keep prompt ≤ ~6K tokens.
+    - `batch_size` caps the ask at ~20 exercises so output stays ≤ ~5K tokens.
+    - Multiple batches per lesson (different `candidate_offset` + `exercise_start`)
+      let us reach 30-45 total exercises across 2 calls. Each call stays well
+      inside the context window.
+    """
     distractor_guide = DISTRACTOR_GUIDES.get(lesson_num, GENERIC_DISTRACTOR_GUIDE)
 
     # Read lesson topic + a few existing exercises for context
@@ -277,7 +741,7 @@ You MUST pick exercises ONLY from the candidates list provided in the user messa
 - statement (the exercise text in English, as parsed from the source book)
 
 Your output:
-- Pick 30-45 exercises, prefer variety (aplicacao/compreensao/modelagem/desafio/demonstracao mix: ~60/15/15/5/5)
+- Pick EXACTLY {batch_size} exercises (no more, no less), prefer variety (aplicacao/compreensao/modelagem/desafio/demonstracao mix: ~60/15/15/5/5)
 - Translate each English `statement` into Brazilian Portuguese (the curriculum is PT-BR source)
 - Compose a 4-option MC where exactly one option is correct
 - Distractors should reflect classic student errors for this topic:
@@ -286,24 +750,78 @@ Your output:
 - Mark EXACTLY 25% of exercises with passos (line-by-line reasoning, 4-6 steps in PT-BR)
 - Math notation: use $...$ for inline math (NOT \\(...\\)), $$...$$ for display math
 - NEVER include `pagina` field anywhere
-- Number exercises sequentially: "{lesson_num}.1", "{lesson_num}.2", ..."""
+- Number exercises sequentially starting at "{lesson_num}.{exercise_start}", "{lesson_num}.{exercise_start+1}", …
+- STOP after {batch_size} exercises. Close the JSON array and object cleanly."""
 
-    # Truncate candidate statements that are too long
+    # Pre-cull with section-balanced stratified sampling: when the candidate
+    # pool spans multiple sections (typical for consolidação lessons), naive
+    # head-slicing biases toward the first section. Instead, take roughly equal
+    # counts from EACH (source_id, section_number) bucket present in the pool.
+    sections_present = []
+    seen_sections: set[tuple[str, str]] = set()
+    for c in candidates:
+        key = (c["source_id"], c["section_number"])
+        if key not in seen_sections:
+            seen_sections.add(key)
+            sections_present.append(key)
+
+    if len(sections_present) > 1:
+        per_section_cap = max(8, candidate_cap // len(sections_present))
+        sliced: list[dict] = []
+        original_indices: list[int] = []
+        for key in sections_present:
+            count = 0
+            for orig_idx, c in enumerate(candidates):
+                if (c["source_id"], c["section_number"]) == key and count < per_section_cap:
+                    sliced.append(c)
+                    original_indices.append(orig_idx)
+                    count += 1
+            # honor overall cap
+            if len(sliced) >= candidate_cap:
+                break
+    else:
+        sliced = candidates[candidate_offset : candidate_offset + candidate_cap]
+        original_indices = list(range(candidate_offset, candidate_offset + len(sliced)))
+
     compact_candidates = []
-    for i, c in enumerate(candidates):
+    for orig_idx, c in zip(original_indices, sliced):
         compact_candidates.append({
-            "index": i,
+            "index": orig_idx,  # preserve original index so render_listaexercicios matches
             "source": c["source_id"],
             "section": c["section_number"],
             "exercise_id": c["exercise_id"],
-            "statement": c["statement"][:500],  # truncate to keep prompt size sane
+            "statement": c["statement"][:400],
         })
 
-    user_prompt = f"""Candidates pool for Lição {lesson_num} (you pick 30-45 of these):
+    # Build a per-section distribution hint for the LLM. The model defaults
+    # to picking everything from the first source unless explicitly told to
+    # spread the picks. Compute target counts per section for this batch.
+    section_breakdown_lines = []
+    if len(sections_present) > 1:
+        target_per_section = max(1, batch_size // len(sections_present))
+        leftover = batch_size - target_per_section * len(sections_present)
+        for i, (src, sec) in enumerate(sections_present):
+            extra = 1 if i < leftover else 0
+            section_breakdown_lines.append(
+                f"  • {src} §{sec}: take {target_per_section + extra} exercise(s)"
+            )
+
+    diversity_instruction = ""
+    if section_breakdown_lines:
+        diversity_instruction = (
+            "\n\nIMPORTANT — TOPIC DIVERSITY: The candidates span "
+            f"{len(sections_present)} different sections. You MUST distribute your "
+            f"{batch_size} picks proportionally across ALL sections. Target counts:\n"
+            + "\n".join(section_breakdown_lines)
+            + "\n\nDo NOT pick everything from one section. Coverage of every section "
+            "is mandatory — this is a consolidação lesson that must integrate all topics."
+        )
+
+    user_prompt = f"""Candidates pool for Lição {lesson_num} (showing {len(compact_candidates)} of {len(candidates)} candidates from {len(sections_present)} section(s); pick {batch_size} from below):
 
 ```json
 {json.dumps(compact_candidates, ensure_ascii=False)}
-```
+```{diversity_instruction}
 
 Output the JSON object matching the schema. Each exercise.candidate_index must point to one of the candidates above."""
 
@@ -541,11 +1059,29 @@ def main() -> int:
                         help="Skip manifest allowlist update")
     parser.add_argument("--keep-existing", action="store_true",
                         help="Don't replace existing <ListaExercicios> in lesson MDX (validates only)")
+    parser.add_argument("--provider",
+                        choices=["chain", "cerebras", "openrouter", "gemini", "ollama"],
+                        default="chain",
+                        help="LLM backend. 'chain' = cerebras → openrouter → ollama with fallback (recommended).")
+    parser.add_argument("--batch-size", type=int, default=30,
+                        help="Exercises per LLM call (default 30 = L1 standard floor). "
+                             "Cerebras max_tokens auto-scales with this.")
+    parser.add_argument("--candidate-cap", type=int, default=60,
+                        help="Max candidates fed to the LLM (default 60). Bigger pool = more variety, "
+                             "but inflates prompt tokens.")
     args = parser.parse_args()
 
-    key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not key and not args.dry_run:
-        fail("GEMINI_API_KEY not set — source .env.local first")
+    # `chain` doesn't need a single key — each provider checks its own.
+    # Other modes need their respective key (or daemon, for ollama).
+    if args.provider == "gemini":
+        if not os.environ.get("GEMINI_API_KEY", "").strip() and not args.dry_run:
+            fail("GEMINI_API_KEY not set — source .env.local first")
+    elif args.provider == "cerebras":
+        if not os.environ.get("CEREBRAS_API_KEY", "").strip() and not args.dry_run:
+            fail("CEREBRAS_API_KEY not set — source .env.local first")
+    elif args.provider == "openrouter":
+        if not os.environ.get("OPENROUTER_API_KEY", "").strip() and not args.dry_run:
+            fail("OPENROUTER_API_KEY not set — source .env.local first")
 
     lesson_path = find_lesson_mdx(args.lesson)
     caminho = relative_caminho(lesson_path)
@@ -560,14 +1096,92 @@ def main() -> int:
         ok(f"dry-run complete. Would re-source L{args.lesson} from {len(candidates)} candidates.")
         return 0
 
-    # Phase 3: Gemini re-source
-    info(f"calling Gemini ({GEMINI_MODEL}) to pick + author exercises…")
-    system, user = build_resource_prompt(args.lesson, lesson_path, candidates)
-    result = call_gemini_json(key, system, user, EXERCISE_SCHEMA)
+    # Phase 3: LLM re-source — provider chain with fallback
+    system, user = build_resource_prompt(
+        args.lesson, lesson_path, candidates,
+        batch_size=args.batch_size,
+        candidate_cap=args.candidate_cap,
+    )
+    # Budget: ~700 output tokens per exercise (content) + ~30% headroom for the
+    # gpt-oss-120b chain-of-thought.
+    max_tokens = max(8000, int(args.batch_size * 700 * 1.3))
+    info(f"batch_size={args.batch_size}  candidate_cap={args.candidate_cap}  "
+         f"prompt≈{(len(system)+len(user))//4} tok  max_tokens={max_tokens}")
+    if args.provider == "chain":
+        # Require at least ~half the requested batch — anything less is a sign
+        # the provider couldn't follow the prompt and we should fall through.
+        result, used = call_with_chain(
+            system, user, EXERCISE_SCHEMA,
+            providers=["cerebras", "openrouter", "ollama"],
+            max_tokens=max_tokens,
+            min_exercises=max(10, args.batch_size // 2),
+        )
+    elif args.provider == "cerebras":
+        result, used = call_cerebras_json(system, user, EXERCISE_SCHEMA, max_tokens=max_tokens), "cerebras"
+    elif args.provider == "openrouter":
+        result, used = call_openrouter_json(system, user, EXERCISE_SCHEMA, max_tokens=max_tokens), "openrouter"
+    elif args.provider == "ollama":
+        info(f"calling Ollama ({OLLAMA_MODEL}) at {OLLAMA_CHAT_URL} to pick + author exercises…")
+        result, used = call_ollama_json(system, user, EXERCISE_SCHEMA), "ollama"
+    else:  # gemini
+        info(f"calling Gemini ({GEMINI_MODEL}) to pick + author exercises…")
+        key = os.environ.get("GEMINI_API_KEY", "").strip()
+        result, used = call_gemini_json(key, system, user, EXERCISE_SCHEMA), "gemini"
     exercises = result.get("exercises", [])
     if not exercises:
-        fail("Gemini returned no exercises")
-    ok(f"Gemini returned {len(exercises)} exercises")
+        fail(f"{used} returned no exercises")
+    ok(f"{used} returned {len(exercises)} exercises")
+
+    # Phase 3b: structural quality check on the exercises themselves
+    quality_issues = validate_exercises_quality(exercises)
+    if quality_issues:
+        warn(f"quality check flagged {len(quality_issues)} issue(s) (provider={used}):")
+        for q in quality_issues:
+            print(f"  - {q}", file=sys.stderr)
+
+        # Phase 3c: auto-retry bad exercises individually with the same provider.
+        per_ex_issues = issues_by_exercise(quality_issues)
+        if per_ex_issues:
+            # Pick the right provider call (skip ollama — too slow for per-exercise fixes)
+            if used == "cerebras":
+                provider_call = call_cerebras_json
+            elif used == "openrouter":
+                provider_call = call_openrouter_json
+            else:
+                provider_call = None  # skip retry for ollama / gemini
+
+            if provider_call:
+                info(f"auto-retrying {len(per_ex_issues)} bad exercise(s) via {used}…")
+                num_to_ex = {ex.get("numero"): (i, ex) for i, ex in enumerate(exercises)}
+                fixed_count = 0
+                for numero, ex_issues in per_ex_issues.items():
+                    if numero not in num_to_ex:
+                        continue
+                    i, bad_ex = num_to_ex[numero]
+                    cand_idx = bad_ex.get("candidate_index", -1)
+                    if not (0 <= cand_idx < len(candidates)):
+                        continue
+                    fixed = regenerate_exercise(bad_ex, ex_issues, candidates[cand_idx], provider_call)
+                    if fixed is None:
+                        continue
+                    # Re-validate the single fix; only swap if it passes
+                    re_issues = validate_exercises_quality([fixed])
+                    if any(numero in (ri or "") or ri.startswith(numero + ":") for ri in re_issues):
+                        warn(f"  {numero}: regen still has issues, keeping original")
+                        continue
+                    exercises[i] = fixed
+                    fixed_count += 1
+                    ok(f"  {numero}: fixed")
+                if fixed_count:
+                    ok(f"auto-retry repaired {fixed_count}/{len(per_ex_issues)} bad exercise(s)")
+                # Final validation pass
+                quality_issues = validate_exercises_quality(exercises)
+                if not quality_issues:
+                    ok("quality check clean after auto-retry")
+                else:
+                    warn(f"quality check: {len(quality_issues)} issue(s) remain after auto-retry")
+    else:
+        ok("quality check clean")
 
     # Phase 4+5: render + replace
     if args.keep_existing:
