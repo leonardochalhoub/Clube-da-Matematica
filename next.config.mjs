@@ -70,6 +70,16 @@ const nextConfig = {
     NEXT_PUBLIC_BASE_PATH: basePath,
   },
   devIndicators: false,
+  // Webpack's infrastructure logging emits "Skipped not serializable cache
+  // item" warnings every time a vfile with KaTeX messages can't be cached.
+  // Those are noise — silence them with level: 'error'.
+  webpack: (config) => {
+    config.infrastructureLogging = {
+      ...(config.infrastructureLogging ?? {}),
+      level: 'error',
+    }
+    return config
+  },
   /**
    * Turbopack rules para `.mdx`. Usa `@mdx-js/loader` direto (não o wrapper
    * `@next/mdx`, cujas options não são serializáveis pelo Turbopack).
