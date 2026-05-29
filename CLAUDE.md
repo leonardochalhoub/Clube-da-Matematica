@@ -112,6 +112,27 @@ atualizadoEm: "2026-MM-DD"
 - `$math$` inside `legenda={<>...</>}` → MDX evaluates `{...}` as JSX expression. Use `<Eq>{`...`}</Eq>` with double-escaped backslashes.
 - Stray `</content>` from translator agents → strip before commit. There is a sweep script (search history).
 
+### Cascade JSX pitfalls — READ BEFORE WRITING ANY MDX (2026-05-29)
+
+The cascade pipeline (Sonnet/Haiku/Cerebras for source + translators) has produced **1,353 corrupted props in one healing sweep** across i18n files, plus dozens of class-of-build-failures in PT-BR source. The cost has been multiple full sessions of whack-a-mole healing. The owner has paid for this and is tired of it.
+
+**The 10 rules below are non-negotiable for any agent (Sonnet subagent, Haiku translator, Opus rewriter, Gemini drafter, anyone else) that writes or revises lesson MDX.**
+
+1. **`<Exercicio>` MUST be multi-line form** — `<Exercicio\n  numero=...\n  ...\n>\n body \n</Exercicio>`. Compact `<Exercicio>body with $\\begin{cases}...$</Exercicio>` makes MDX parse `{cases}` as a JSX expression → ReferenceError at build. (86 i18n files had to be auto-rewritten.)
+2. **Never put bare `{Identifier}` anywhere outside `<Eq>{`...`}</Eq>` template literals or `$...$` body math.** `2\overrightarrow{PQ}` in JSX body fails with `PQ is not defined`. Wrap math: `<Eq>{`2\\overrightarrow{PQ}`}</Eq>`.
+3. **Inside `<Eq>{`...`}</Eq>`, double every backslash:** `<Eq>{`\\frac{1}{2}`}</Eq>`, not `<Eq>{`\frac{1}{2}`}</Eq>`. KaTeX consumes one `\` for the command; the template literal needs the other.
+4. **Never write `\$` inside `<Eq>{`...`}</Eq>`** — some scanners read `\` ``` as escaping the closing backtick, terminating the template literal mid-content. For currency, put it OUTSIDE the math: `R\$ 50 (<Eq>{`50`}</Eq> reais)` or simply `1250 reais`.
+5. **Never write escaped backticks `\`** inside JSX expressions. They are not valid syntax; emit literal backticks only.
+6. **Body markdown `$math$` is fragile when math contains `\command{...}`** — `$\mathcal{N}(0,1)$` failed with `N is not defined` at Next.js stringify. Prefer `<Eq>{`\\mathcal{N}(0,1)`}</Eq>` whenever math has braces.
+7. **No HTML entities in JSX content** (`&lt;`, `&gt;`, etc.) — they reach the parser as literal characters and break tags. Use the actual characters.
+8. **Count tag balance before stopping** — `<Exercicio>` opens MUST match `</Exercicio>` closes. Same for `<DuasPortas>` / `<Porta>` / `<ListaExercicios>` / `<>...</>` fragments. LLMs truncate; if you're running out of tokens, close everything FIRST then reduce content.
+9. **Inside `texto: "..."` strings, double backslashes and avoid `\$`/`\t` escapes** — `texto: "$\text{não existe}$"` puts a literal TAB in the string (`\t`). Use `texto: "$\\text{nao existe}$"` (double `\\`, ASCII inside `\text`).
+10. **Books are the ledger** — every `<Exercicio>` MUST have `fonte={{ livro, url, secao, ..., licenca }}` pointing to a real open-licensed book in `livros/CATALOG.md`. If you can't find a sourced exercise for the topic, DROP IT or reduce count. Never fabricate.
+
+**Self-check before emitting any MDX:** the checklist at the bottom of memory `feedback_cascade_jsx_pitfalls.md` (in `~/.claude/projects/.../memory/`). When in doubt: use `<Eq>{`...`}</Eq>` over body `$...$` — the template-literal form is always safe; body math is fragile.
+
+If you violate any of these and the build breaks, the owner will revert your work. Review is tough. Write correctly the first time.
+
 ---
 
 ## 4. Internationalization (i18n)
