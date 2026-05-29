@@ -114,9 +114,22 @@ atualizadoEm: "2026-MM-DD"
 
 ### Cascade JSX pitfalls — READ BEFORE WRITING ANY MDX (2026-05-29)
 
-The cascade pipeline (Sonnet/Haiku/Cerebras for source + translators) has produced **1,353 corrupted props in one healing sweep** across i18n files, plus **635 files needing structural fixes** (blank-line insertions), plus dozens of class-of-build-failures in PT-BR source. The cost has been multiple full sessions of whack-a-mole healing. The owner has paid for this and is tired of it.
+The cascade pipeline (Sonnet/Haiku/Cerebras for source + translators) has cost the owner **hours of build-fix work over multiple sessions** and real LLM spend on top. Documented healing totals from a single day (2026-05-29):
 
-**The 12 rules below are non-negotiable for any agent (Sonnet subagent, Haiku translator, Opus rewriter, Gemini drafter, anyone else) that writes or revises lesson MDX. Read them before you write a single character.**
+- **1,353 corrupted props** healed across i18n files (nested `<Eq>`, escaped backticks, R\$ inside template literals)
+- **635 files** missing blank-line separator between JSX block tag and markdown body
+- **86 i18n files** had compact `<Exercicio>body</Exercicio>` (one line) that needed multi-line rewrite
+- **2,652 body `$\begin{X}…\end{X}$` spans** in 267 files needed conversion to `<Eq>` template-literal form
+- **831 `<Eq>{`...\\begin{cases}…\\end{cases}…`}</Eq>` blocks** in 200+ files needed rewrite to comma-joined inline equations (the cases environment broke the locale-route chunk)
+- **5 i18n files for L120** (en/es/de/pl/zh) and **10 i18n files for L26** had to be DELETED because they couldn't be healed safely
+- **7 PT-BR lessons** had their last `<Exercicio>` truncated mid-body (LLM ran out of tokens before closing tags) and needed manual close-tag insertion
+- Plus dozens of one-off ReferenceErrors: `n is not defined`, `PQ is not defined`, `cases is not defined`, `rT is not defined`, `HH is not defined`, `pmatrix is not defined`, `Var is not defined`, `Cov is not defined`, `d is not defined`, `dx is not defined`
+
+**Every single one of these was a Sonnet/Haiku agent emitting MDX that looked plausible but broke the Next.js prerender stringify because the model didn't internalize the JSX-children parsing rules.**
+
+**The rules below are NON-NEGOTIABLE for any agent (Sonnet subagent, Haiku translator, Opus rewriter, Gemini drafter, anyone else) that writes or revises lesson MDX. Read them before you write a single character. Run the rule-12 self-check on every single `<Exercicio>` you emit.**
+
+If you violate any of these and the build breaks, the owner reverts your work and the LLM spend is wasted. Past Sonnet agents have ignored these rules; the cost has been real. **This time, follow them.**
 
 #### Structure
 
@@ -201,6 +214,230 @@ The cascade pipeline (Sonnet/Haiku/Cerebras for source + translators) has produc
 **Reference memory:** `~/.claude/projects/-home-leochalhoub-Clube-da-Matematica/memory/feedback_cascade_jsx_pitfalls.md` has worked examples of each failure mode.
 
 **If you violate any of these and the build breaks, the owner will revert your work.** Review is tough. Write correctly the first time.
+
+### Worked-example gallery — every failure we hit, with the fix
+
+Every entry below is a real bug from cascade output that broke the build. Memorize the patterns.
+
+#### A. Compact `<Exercicio>` (no multi-line, no blank line)
+```mdx
+WRONG:
+<Exercicio numero="34.24" dificuldade="aplicacao">Löse: $\begin{cases} 2x+3y=7 \\ x-y=1 \end{cases}$.</Exercicio>
+
+RIGHT:
+<Exercicio numero="34.24" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x=2,\\,y=1$", correta: true },
+  ]}
+  solucao={<>Por Cramer: <Eq>{`x = D_x/D`}</Eq>, <Eq>{`y = D_y/D`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "...", secao: "§7.8", licenca: "CC-BY 4.0" }}
+>
+
+Resolva por Cramer: <Eq>{`2x+3y=7`}</Eq>, <Eq>{`x-y=1`}</Eq>.
+
+</Exercicio>
+```
+Failure: `ReferenceError: cases is not defined` at Next.js stringify (chunk N at col X). Reason: MDX parses single-line `<Exercicio>...</Exercicio>` body as JSX children; `{cases}` inside `$\begin{cases}$` is JSX expression with undefined identifier.
+
+#### B. `<Exercicio>` with body but no blank line
+```mdx
+WRONG:
+<Exercicio numero="34.24" dificuldade="aplicacao">
+Resolva por Cramer: $\begin{cases}2x+3y=7\\x-y=1\end{cases}$.
+</Exercicio>
+
+RIGHT:
+<Exercicio numero="34.24" dificuldade="aplicacao">
+
+Resolva por Cramer: <Eq>{`\\begin{cases}2x+3y=7\\\\x-y=1\\end{cases}`}</Eq>.
+
+</Exercicio>
+```
+Failure: same `cases is not defined`. Reason: without blank line, body still parsed as JSX children. **And** even with blank line, body `$\begin{X}…$` is unsafe because MDX expression-scanner runs before remark-math.
+
+#### C. Bare `{Identifier}` in JSX body / children
+```mdx
+WRONG:
+solucao={<>O vetor unitário de <Eq>{`\\vec v=(3,4)`}</Eq> é 2\overrightarrow{PQ}/5.</>}
+
+RIGHT (math wrapped):
+solucao={<>O vetor unitário de <Eq>{`\\vec v=(3,4)`}</Eq> é <Eq>{`2\\overrightarrow{PQ}/5`}</Eq>.</>}
+
+ALSO RIGHT (HTML entities if you really want bare text):
+solucao={<>O vetor unitário de <Eq>{`\\vec v=(3,4)`}</Eq> é 2\overrightarrow&#123;PQ&#125;/5.</>}
+```
+Failure: `ReferenceError: PQ is not defined`. Reason: `\overrightarrow` is plain text in JSX children (the `\` doesn't escape `{` in JSX); `{PQ}` is then a JSX expression.
+
+#### D. Body math with `\command{...}` braces
+```mdx
+WRONG:
+Prior $\mu \sim \mathcal{N}(0,1)$, observe $x_i$ com $n=4$.
+
+RIGHT:
+Prior <Eq>{`\\mu \\sim \\mathcal{N}(0,1)`}</Eq>, observe <Eq>{`x_i`}</Eq> com <Eq>{`n=4`}</Eq>.
+```
+Failure: `ReferenceError: N is not defined`. Reason: MDX expression-scanner grabs `{N}` from inside `\mathcal{N}` before remark-math claims `$…$` as math.
+
+#### E. Super/subscript braces in JSX children
+```mdx
+WRONG (passos= block):
+passos={<>
+  <ol>
+    <li>Aplique a fórmula: $P(X=k) = C(n,k) p^k (1-p)^{n-k}$.</li>
+  </ol>
+</>}
+
+RIGHT (math wrapped):
+passos={<>
+  <ol>
+    <li>Aplique a fórmula: <Eq>{`P(X=k) = C(n,k) p^k (1-p)^{n-k}`}</Eq>.</li>
+  </ol>
+</>}
+
+ALSO RIGHT (paren form, no math rendering but no JSX error):
+passos={<>
+  <ol>
+    <li>Aplique a fórmula: P(X=k) = C(n,k) p^k (1-p)^(n-k).</li>
+  </ol>
+</>}
+```
+Failure: `ReferenceError: n is not defined`. Reason: `^{n-k}` after `\` removal becomes `{n-k}` JSX expression; `n` and `k` undefined.
+
+#### F. Comma-separated identifiers as set notation
+```mdx
+WRONG:
+<li>Espaço amostral: {HH, HT, TH, TT}.</li>
+
+RIGHT (math wrapped):
+<li>Espaço amostral: <Eq>{`\\{HH, HT, TH, TT\\}`}</Eq>.</li>
+
+ALSO RIGHT (entity escape):
+<li>Espaço amostral: &#123;HH, HT, TH, TT&#125;.</li>
+```
+Failure: `ReferenceError: HH is not defined`. Reason: `{HH, HT, TH, TT}` is JSX expression — comma-expression of identifiers.
+
+#### G. Exponential `e^{-rT}` in JSX children
+```mdx
+WRONG (passos= block):
+passos={<><ol><li>K*e^{-rT}*N(d2) = 50*0,9418 = 47,09.</li></ol></>}
+
+RIGHT (math wrapped):
+passos={<><ol><li><Eq>{`K \\cdot e^{-rT} \\cdot N(d_2) = 50 \\cdot 0{,}9418 = 47{,}09`}</Eq>.</li></ol></>}
+
+ALSO RIGHT (paren form):
+passos={<><ol><li>K*e^(-rT)*N(d2) = 50*0,9418 = 47,09.</li></ol></>}
+```
+Failure: `ReferenceError: rT is not defined`. Same class as E.
+
+#### H. Single backslash inside `<Eq>{`...`}</Eq>` template literal
+```mdx
+WRONG:
+<Eq>{`\frac{1}{2}`}</Eq>
+
+RIGHT (double backslash):
+<Eq>{`\\frac{1}{2}`}</Eq>
+```
+Failure: KaTeX renders nothing, or MDX may complain about `\f` (form-feed JS escape). The template literal needs `\\` to deliver `\` to KaTeX.
+
+#### I. `R\$` currency inside template literal
+```mdx
+WRONG:
+solucao={<><Eq>{`\\mathrm{R\\$}\\;1250`}</Eq></>}
+solucao={<><Eq>{`Valor: R\$ 50`}</Eq></>}
+
+RIGHT (currency OUTSIDE math):
+solucao={<>Valor: R\$ 50 (<Eq>{`50`}</Eq> reais)</>}
+
+ALSO RIGHT (prose only):
+solucao={<>Valor: 50 reais</>}
+```
+Failure: cascade-output scanners read `\$` as escaping the closing `` ` `` and the template literal "leaks" into surrounding JSX, breaking everything downstream.
+
+#### J. HTML entities in JSX
+```mdx
+WRONG:
+solucao={<>Com <Eq>{`d_1=0{,}40`}</Eq>.&lt;/
+passos={&lt;&gt;
+
+RIGHT:
+solucao={<>Com <Eq>{`d_1=0{,}40`}</Eq>.</>}
+passos={<>
+```
+Failure: `Unexpected character '<' (U+003C) before attribute name` or worse. Reason: entities don't help inside JSX; emit actual characters.
+
+#### K. Escaped backticks
+```mdx
+WRONG:
+<Eq>{\`\\sin x\`}</Eq>
+
+RIGHT:
+<Eq>{`\\sin x`}</Eq>
+```
+Failure: `Could not parse expression with acorn`. Reason: `\``  is not valid JSX-expression syntax.
+
+#### L. Truncated `<Exercicio>` (LLM ran out of tokens)
+```mdx
+WRONG (file ends here):
+<Exercicio numero="75.42"
+  dificuldade="desafio"
+  opcoes={[…]}
+  solucao={<>…</>}
+>
+Sob que condição $X_1 \sim \text{Bin}(n_1, p)$
+
+RIGHT (always close before stopping):
+<Exercicio numero="75.42"
+  dificuldade="desafio"
+  opcoes={[…]}
+  solucao={<>…</>}
+>
+
+Sob que condição binomiais somam binomial? Resposta na referência.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Fontes
+- ...
+```
+Failure: `Expected a closing tag for <Exercicio> (873:1-879:2)`. Reason: LLM token budget exhausted mid-sentence; never closed the tag, the `</ListaExercicios>`, or the `## Fontes` section. **Always close ALL open tags before running out of budget; reduce body length if needed.**
+
+### Required prompt template for invoking Sonnet/Haiku agents
+
+When the owner (or main thread) spawns a Sonnet/Haiku agent to write/translate lesson MDX, the agent prompt MUST include this preamble:
+
+```
+You are writing/translating MDX content for the Clube da Matemática repo. Before
+emitting any MDX, READ CLAUDE.md §3 "Cascade JSX pitfalls" — specifically the
+12 rules and the worked-example gallery (A–L).
+
+Apply rule 12 (self-check) on EVERY single <Exercicio>, <Exemplo>, <Equation>,
+<EquacaoCanonica>, <DuasPortas>, <Porta> you emit. Do not stop until every open
+tag has a matching close tag.
+
+Hard reminders:
+- Multi-line <Exercicio> with blank line before AND after the body
+- Every {ident} inside <Eq>{`...`}</Eq> backticks or $...$ math
+- Body math with \begin{X}/\command{} → use <Eq> instead
+- Double-backslash inside template literals
+- Never bare {HH, HT, TH, TT} comma-list in JSX children
+- Books are the ledger — fonte= is mandatory; never fabricate
+
+If you can't finish a 30+ exercise list in budget, write FEWER exercises but
+CLOSE every tag. Truncated <Exercicio> blocks crash the build.
+```
+
+This preamble is non-negotiable. Agents that don't see it have a track record of producing broken output. The cost of the preamble (a few hundred tokens) is negligible compared to the cost of the build-fix iterations it prevents.
+
+### What to do if an agent already produced broken output
+
+If you discover broken MDX from a past Sonnet/Haiku run:
+
+1. **Don't try to write more** — first heal what's there. Run the local MDX-compile check (`node` script in repo: `scripts/check-mdx-compile.mjs` if available, or write a 10-line script that compiles every `.mdx` with `@mdx-js/mdx` + `remark-math` + `rehype-katex`).
+2. **Categorize the failures** by class (compact form / no blank line / body math with braces / bare {ident} in children / truncated tags). Each class has a sweep that fixes it in bulk — see the commit log around 2026-05-29 for examples.
+3. **Push and watch CI.** Don't commit-spam — heal everything you can find locally first, push once.
+4. **If a single file keeps failing across multiple builds with the same digest**, the file is likely beyond bulk-heal repair. Delete it (worst case the URL 404s) or rewrite it from scratch with a fresh agent prompted with this section.
 
 ---
 
