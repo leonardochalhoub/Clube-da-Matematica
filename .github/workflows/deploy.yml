@@ -36,6 +36,19 @@ jobs:
       - name: Validate content frontmatter
         run: npm run validate-content
 
+      # Cache .next/cache between runs. Cold compile is ~5min; warm hits drop
+      # to ~1-2min for content-only edits. Key: package-lock + all source/content
+      # files. restore-keys give a partial hit so even on a miss webpack picks
+      # up where it left off (modules whose hash didn't change are reused).
+      - name: Restore .next/cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/**/*.mdx', 'src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx', 'next.config.mjs', 'mdx-components.tsx', 'tsconfig.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-nextjs-
+
       - name: Build static site
         env:
           # GitHub Pages serve em /<repo-name>/
@@ -47,6 +60,8 @@ jobs:
           # páginas estourou 8GB no CI após Cálculo 1 (PR #2, +445 págs). Runner
           # público ubuntu-latest tem 16GB RAM, então 13GB de heap é folga segura.
           NODE_OPTIONS: --max-old-space-size=13312
+          # Silence Next.js anonymous telemetry notice in CI logs.
+          NEXT_TELEMETRY_DISABLED: '1'
         run: npm run build
 
       - name: Upload Pages artifact
