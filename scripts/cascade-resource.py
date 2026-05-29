@@ -82,12 +82,33 @@ LIVRO_DISPLAY = {
     "openstax/calculus-volume-1": "OpenStax Calculus Volume 1",
     "openstax/calculus-volume-2": "OpenStax Calculus Volume 2",
     "openstax/calculus-volume-3": "OpenStax Calculus Volume 3",
+    "openstax/statistics": "OpenStax Statistics",
     "openstax/introductory-statistics-2e": "OpenStax Introductory Statistics 2e",
+    "openintro/statistics": "OpenIntro Statistics",
     "active-calculus/single": "Active Calculus",
+    "beezer/first-course-linear-algebra": "A First Course in Linear Algebra (Beezer)",
+    "axler/linear-algebra-done-right-4e": "Linear Algebra Done Right (Axler, 4th ed)",
 }
 
 
+# ---- Live monitor (best-effort; never breaks the pipeline) -----------------
+# agent_monitor lives next to this script (scripts/ is sys.path[0] when run
+# directly). If the import fails for any reason, fall back to a no-op shim so
+# every mon.* call is a harmless pass.
+try:
+    import agent_monitor as mon  # type: ignore
+except Exception:  # noqa: BLE001
+    class _NoMon:
+        def __getattr__(self, _):
+            return lambda *a, **k: None
+    mon = _NoMon()  # type: ignore
+
+_MON_AGENT: str | None = None  # set in main(); read by provider calls + fail()
+
+
 def fail(msg: str) -> None:
+    if _MON_AGENT:
+        mon.finish_agent(_MON_AGENT, "fail", error=msg)
     print(f"\033[31mERROR\033[0m {msg}", file=sys.stderr)
     sys.exit(1)
 
@@ -247,6 +268,11 @@ def call_gemini_json(api_key: str, system: str, user: str, schema: dict, max_ret
             with urllib.request.urlopen(req, timeout=120) as resp:
                 data = json.loads(resp.read())
             text = data["candidates"][0]["content"]["parts"][0]["text"]
+            um = data.get("usageMetadata", {})
+            mon.record_usage(_MON_AGENT,
+                             tok_in=int(um.get("promptTokenCount") or 0),
+                             tok_out=int(um.get("candidatesTokenCount") or 0),
+                             model=f"gemini/{GEMINI_MODEL}")
             return json.loads(text)
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8", errors="replace")[:500]
@@ -355,6 +381,8 @@ def _openai_compat_call(
         raise ProviderError(f"{label} schema: missing {missing}")
     u = data.get("usage", {})
     ok(f"{label} OK: in={u.get('prompt_tokens','?')} out={u.get('completion_tokens','?')} in {time.time()-t0:.1f}s")
+    mon.record_usage(_MON_AGENT, tok_in=int(u.get("prompt_tokens") or 0),
+                     tok_out=int(u.get("completion_tokens") or 0), model=label)
     return parsed
 
 
@@ -660,6 +688,10 @@ def call_ollama_json(system: str, user: str, schema: dict, max_retries: int = 4)
                 missing = top_keys - parsed.keys()
                 raise ValueError(f"top-level keys missing: {missing}")
             ok(f"Ollama OK: {eval_count} output tokens in {time.time()-t_start:.1f}s")
+            mon.record_usage(_MON_AGENT,
+                             tok_in=int(prompt_eval_count or 0),
+                             tok_out=int(eval_count or 0),
+                             model=f"ollama/{OLLAMA_MODEL}")
             # FinOps ledger: append one JSONL line per successful call.
             # Read by pipelines/finops/bronze_ollama_state.py → ollama_runs.parquet.
             try:
@@ -841,6 +873,20 @@ def latex_html_to_mdx(s: str) -> str:
     return s.strip()
 
 
+def inline_math_to_eq(s: str) -> str:
+    """Convert `$math$` to `<Eq>{`math`}</Eq>` for safe JSX-expression rendering.
+
+    Inside JSX fragments (`solucao={<>...</>}`, `passos={<>...</>}`), raw
+    `$...$` breaks webpack's acorn parse when math contains `<`, `>`, `{`, `}`.
+    The L01/L41 gold-standard pattern is `<Eq>{`math`}</Eq>`. Run this on any
+    text before wrapping it in `<>...</>`.
+    """
+    def _replace(m: re.Match) -> str:
+        math = m.group(1).replace("`", r"\`")
+        return "<Eq>{`" + math + "`}</Eq>"
+    return re.sub(r"\$([^\$\n]+?)\$", _replace, s)
+
+
 def render_exercise_block(ex: dict, candidate: dict) -> str:
     """Render one exercise as MDX `<Exercicio>...` block."""
     livro = LIVRO_DISPLAY.get(candidate["source_id"], candidate["source_id"])
@@ -850,7 +896,9 @@ def render_exercise_block(ex: dict, candidate: dict) -> str:
     licenca = candidate["license"]
 
     body = latex_html_to_mdx(ex["body_pt"])
-    solucao = latex_html_to_mdx(ex["solucao_pt"])
+    # solucao goes inside `<>...</>` (JSX expression context) — convert $math$
+    # to <Eq>{`math`}</Eq> to avoid acorn parse errors on `<`, `>`, `{`, `}`.
+    solucao = inline_math_to_eq(latex_html_to_mdx(ex["solucao_pt"]))
 
     # Build opcoes block
     opcoes_lines = []
@@ -865,7 +913,8 @@ def render_exercise_block(ex: dict, candidate: dict) -> str:
     if ex.get("passos_pt"):
         passos_items = []
         for step in ex["passos_pt"]:
-            step_clean = latex_html_to_mdx(step)
+            # passos items go inside <li>...</li> JSX context — same conversion.
+            step_clean = inline_math_to_eq(latex_html_to_mdx(step))
             passos_items.append(f"      <li>{step_clean}</li>")
         passos_block = (
             "\n  passos={<>\n"
@@ -1083,16 +1132,29 @@ def main() -> int:
         if not os.environ.get("OPENROUTER_API_KEY", "").strip() and not args.dry_run:
             fail("OPENROUTER_API_KEY not set — source .env.local first")
 
+    # Register with the live monitor. Reuse the id the batch parent pre-queued
+    # (AGENT_MONITOR_ID) so the dashboard row promotes queued→running in place.
+    global _MON_AGENT
+    _MON_AGENT = mon.start_agent(
+        "cascade", f"L{args.lesson} re-source", model=args.provider,
+        parent=os.environ.get("AGENT_MONITOR_BATCH"),
+        agent_id=os.environ.get("AGENT_MONITOR_ID"),
+        meta={"lesson": args.lesson, "batch_size": args.batch_size},
+    )
+
     lesson_path = find_lesson_mdx(args.lesson)
     caminho = relative_caminho(lesson_path)
     info(f"target: {lesson_path.relative_to(ROOT)}")
     info(f"caminho: {caminho}")
+    mon.event(_MON_AGENT, f"target {lesson_path.name}", phase="locate")
 
     # Phase 1+2: candidates
     candidates_path = ensure_candidates(args.lesson)
     candidates = [json.loads(line) for line in candidates_path.open()]
+    mon.event(_MON_AGENT, f"{len(candidates)} strict candidates built", phase="candidates")
 
     if args.dry_run:
+        mon.finish_agent(_MON_AGENT, "ok")
         ok(f"dry-run complete. Would re-source L{args.lesson} from {len(candidates)} candidates.")
         return 0
 
@@ -1107,6 +1169,7 @@ def main() -> int:
     max_tokens = max(8000, int(args.batch_size * 700 * 1.3))
     info(f"batch_size={args.batch_size}  candidate_cap={args.candidate_cap}  "
          f"prompt≈{(len(system)+len(user))//4} tok  max_tokens={max_tokens}")
+    mon.event(_MON_AGENT, f"calling {args.provider} (batch={args.batch_size})", phase="re-source")
     if args.provider == "chain":
         # Require at least ~half the requested batch — anything less is a sign
         # the provider couldn't follow the prompt and we should fall through.
@@ -1131,6 +1194,8 @@ def main() -> int:
     if not exercises:
         fail(f"{used} returned no exercises")
     ok(f"{used} returned {len(exercises)} exercises")
+    mon.event(_MON_AGENT, f"{used} returned {len(exercises)} exercises",
+              level="ok", phase="re-source")
 
     # Phase 3b: structural quality check on the exercises themselves
     quality_issues = validate_exercises_quality(exercises)
@@ -1190,6 +1255,7 @@ def main() -> int:
         block = render_listaexercicios(args.lesson, exercises, candidates)
         replace_listaexercicios(lesson_path, block)
         ok(f"replaced <ListaExercicios> block in {lesson_path.relative_to(ROOT)}")
+        mon.event(_MON_AGENT, f"rendered {len(exercises)} exercises into MDX", phase="render")
 
     # Phase 6: validate
     issues = validate_lesson(lesson_path)
@@ -1197,15 +1263,18 @@ def main() -> int:
         warn(f"validation found {len(issues)} issue(s):")
         for i in issues:
             print(f"  - {i}", file=sys.stderr)
+        mon.event(_MON_AGENT, f"validation: {len(issues)} issue(s)", level="warn", phase="validate")
         if any("FORBIDDEN" in i for i in issues):
             fail("aborting cascade due to FORBIDDEN issue")
     else:
         ok("validation clean")
+        mon.event(_MON_AGENT, "validation clean", level="ok", phase="validate")
 
     # Phase 7: trigger EN/ES translation
     if args.no_translate:
         info("--no-translate: skipping translation phase")
     else:
+        mon.event(_MON_AGENT, "translating en-US + es-ES", phase="translate")
         delete_stale_translations(lesson_path)
         for locale in ("en-US", "es-ES"):
             rc = run_translate(locale)
@@ -1218,6 +1287,8 @@ def main() -> int:
     else:
         add_to_manifest_allowlist(caminho)
 
+    mon.event(_MON_AGENT, f"L{args.lesson} cascade complete", level="ok", phase="done")
+    mon.finish_agent(_MON_AGENT, "ok")
     ok(f"\nL{args.lesson} cascade complete. Next:")
     print(f"  ./node_modules/.bin/tsx scripts/generate-manifest.ts")
     print(f"  rm -rf out .next && NODE_OPTIONS=--max-old-space-size=8192 npm run build")

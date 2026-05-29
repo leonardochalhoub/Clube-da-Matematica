@@ -18,34 +18,42 @@ Live progress is printed as each lesson finishes.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Live monitor (best-effort; agent_monitor sits next to this script).
+try:
+    import agent_monitor as mon  # type: ignore
+except Exception:  # noqa: BLE001
+    class _NoMon:
+        def __getattr__(self, _):
+            return lambda *a, **k: None
+    mon = _NoMon()  # type: ignore
+
 # Lessons that build-strict-candidates.py has a section whitelist for.
 WHITELISTED = (
-    list(range(1, 21))               # 1..20  — functions, trig
+    list(range(1, 21))               # 1..20  — functions, trig (15 still broken, others OK)
     + list(range(21, 41))            # 21..40 — analytic geom, conics, vectors, matrices, prob
     + list(range(41, 71))            # 41..70 — limits, derivatives
+    + list(range(71, 81))            # 71..80 — descriptive stats (parsed 2026-05-29)
     + list(range(81, 101))           # 81..100 — integration, ODEs
-    + [111, 112, 113]                # 111..113 — vectors / planes
+    + list(range(101, 111))          # 101..110 — inferential stats (parsed 2026-05-29)
+    + list(range(111, 114))          # 111..113 — vectors / planes
+    + list(range(114, 121))          # 114..120 — linear algebra (parsed 2026-05-29)
 )
-# Lessons already at L41 gold standard — don't re-cascade.
-SKIP = {
-    # Gold-standard already shipped
-    1, 41, 51, 82,
-    # Done this session
-    2, 3, 4, 5, 6, 7, 8, 9, 12, 14, 19,
-    # Pre-existing whitelist bugs (point to nonexistent corpus sections — fix later)
-    15, 17, 18,
-}
+# L15 still has no parsed source (no trig book yet).
+SKIP_NO_SOURCE = {15}
 
 
-def cascade_one(lesson_num: int, provider: str, batch_size: int, candidate_cap: int) -> dict:
+def cascade_one(lesson_num: int, provider: str, batch_size: int, candidate_cap: int,
+                agent_id: str | None = None, batch_id: str | None = None) -> dict:
     t0 = time.time()
     cmd = [
         sys.executable, "-u", str(ROOT / "scripts" / "cascade-resource.py"),
@@ -55,7 +63,14 @@ def cascade_one(lesson_num: int, provider: str, batch_size: int, candidate_cap: 
         "--candidate-cap", str(candidate_cap),
         "--no-translate", "--no-manifest",
     ]
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+    # Hand the worker the monitor id we pre-queued so its dashboard row
+    # promotes queued→running in place (and the batch groups them together).
+    env = os.environ.copy()
+    if agent_id:
+        env["AGENT_MONITOR_ID"] = agent_id
+    if batch_id:
+        env["AGENT_MONITOR_BATCH"] = batch_id
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT, env=env)
     elapsed = time.time() - t0
     # extract exercise count + provider used from stdout
     n_ex = "?"
@@ -70,6 +85,10 @@ def cascade_one(lesson_num: int, provider: str, batch_size: int, candidate_cap: 
                 if w in ("cerebras", "openrouter", "ollama", "gemini"):
                     used = w
             break
+    # Reconcile the monitor: a worker that crashed before its own fail() hook
+    # (or ran with monitoring disabled) won't have closed its row — do it here.
+    if agent_id and r.returncode != 0:
+        mon.finish_agent(agent_id, "fail", error=(r.stderr or "")[-200:].strip())
     return {
         "lesson": lesson_num,
         "rc": r.returncode,
@@ -92,8 +111,8 @@ def main() -> int:
     p.add_argument("--provider", default="chain")
     p.add_argument("--batch-size", type=int, default=45)
     p.add_argument("--candidate-cap", type=int, default=80)
-    p.add_argument("--skip-done", action="store_true", default=True,
-                   help="skip L01/L41/L51/L82 (already at gold standard)")
+    p.add_argument("--skip-done", action="store_true", default=False,
+                   help="(deprecated; SKIP_NO_SOURCE always applies)")
     args = p.parse_args()
 
     if args.whitelisted:
@@ -104,8 +123,8 @@ def main() -> int:
     else:
         lessons = sorted(set(args.lessons))
 
-    if args.skip_done:
-        lessons = [n for n in lessons if n not in SKIP]
+    # Always skip lessons with no parsed source
+    lessons = [n for n in lessons if n not in SKIP_NO_SOURCE]
 
     if not lessons:
         print("no lessons to cascade", file=sys.stderr)
@@ -113,14 +132,24 @@ def main() -> int:
 
     print(f"cascade-batch: {len(lessons)} lesson(s), {args.workers} workers, provider={args.provider}, batch={args.batch_size}")
     print(f"lessons: {lessons}")
+    print(f"monitor: python3 scripts/agent_monitor.py serve  →  http://localhost:8770")
     print()
+
+    # Pre-queue every lesson in the live monitor so they all appear immediately
+    # (status=queued), then each worker promotes its own row to running.
+    batch_id = "batch-" + uuid.uuid4().hex[:8]
+    agent_ids = {
+        n: mon.queue_agent("cascade", f"L{n} re-source", model=args.provider, parent=batch_id)
+        for n in lessons
+    }
 
     results: list[dict] = []
     t_start = time.time()
     done = 0
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {
-            pool.submit(cascade_one, n, args.provider, args.batch_size, args.candidate_cap): n
+            pool.submit(cascade_one, n, args.provider, args.batch_size,
+                        args.candidate_cap, agent_ids.get(n), batch_id): n
             for n in lessons
         }
         for fut in as_completed(futures):
