@@ -169,7 +169,13 @@ The cascade pipeline (Sonnet/Haiku/Cerebras for source + translators) has produc
 
 7. **Never write escaped backticks `\``** inside JSX expressions. They are not valid syntax; emit literal `` ` `` only.
 
-8. **Body markdown `$math$` is fragile when math contains `\command{...}`.** `$\mathcal{N}(0,1)$` failed with `N is not defined` at Next.js stringify. **Prefer `<Eq>{`\\mathcal{N}(0,1)`}</Eq>` whenever math has braces.** Single-letter math (`$x$`, `$n=4$`) without braces is usually fine in body.
+8. **Body markdown `$math$` is fragile when math contains `\command{...}` or `\begin{X}`.** Even with proper blank lines around the body, the MDX expression-scanner grabs `{cases}` / `{pmatrix}` / `{N}` from `$\begin{cases}…$` / `$\mathcal{N}…$` BEFORE remark-math claims the `$…$` span as math. Result: `ReferenceError: cases is not defined` etc. **2,652 body math spans in 267 files had to be auto-converted.**
+
+   ALWAYS use `<Eq>` form when math has braces:
+   - WRONG: `Resolva $\begin{cases}2x+3y=7\\x-y=1\end{cases}$ via Cramer.`
+   - RIGHT: `Resolva <Eq>{`\\begin{cases}2x+3y=7\\\\x-y=1\\end{cases}`}</Eq> via Cramer.`
+
+   Single-letter math (`$x$`, `$n=4$`) without braces is usually fine in body.
 
 #### Attributes and strings
 
