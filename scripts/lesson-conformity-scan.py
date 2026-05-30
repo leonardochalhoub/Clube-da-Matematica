@@ -109,10 +109,14 @@ def check_fontes_section(text):
     return bool(re.search(r'^##\s+(Fontes|Referências|Sources)', text, re.MULTILINE))
 
 def check_books_header(text):
-    """Looks for a 3-books bibliographic header (in aside or at top)"""
-    # Count book references with "CC-BY" or similar license markers near top
-    head = text[:3000]
-    return head.count('CC-BY') + head.count('CC-PD') + head.count('GNU FDL')
+    """Looks for a 3-books bibliographic header (in <aside>...</aside> near top, or upper third)"""
+    # Find the first <aside>...</aside> block, or fall back to first 8000 chars
+    m = re.search(r'<aside[^>]*>(.*?)</aside>', text[:15000], re.DOTALL)
+    if m:
+        chunk = m.group(1)
+    else:
+        chunk = text[:8000]
+    return chunk.count('CC-BY') + chunk.count('CC-PD') + chunk.count('GNU FDL') + chunk.count('CC-PD')
 
 def analyze(path):
     text = Path(path).read_text()
