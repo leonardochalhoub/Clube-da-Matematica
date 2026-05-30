@@ -14,8 +14,8 @@ Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lin
 ## O que está pronto hoje
 
 - ✅ **120 lições** em PT-BR cobrindo o Ensino Médio inteiro (Anos 1-3 × 4 trimestres × 10 lições)
-- ✅ **~4.770 exercícios** com fonte (livro · página · licença) — nenhum inventado pela IA
-- ✅ **1.800 questões em provas** (12 trim × 10 versões × 15 q)
+- ✅ **5.313 exercícios** com fonte (livro · página · licença) — nenhum inventado pela IA (100% sourced)
+- ✅ **1.800 questões em provas** (12 trim × 10 versões × 15 q) — 100% com múltipla escolha
 - ✅ **UI traduzida em 11 idiomas** (botões, navegação, "Ouvir", breadcrumb)
 - ✅ **Acessibilidade — leitor de voz em toda página**: cada lição, exemplo e seção tem uma **caixa de áudio "Ouvir"** que narra o conteúdo via Web Speech API nativa do navegador (zero arquivos MP3, voz no idioma selecionado). Ajuda alunos com dislexia, deficiência visual, ou que aprendem melhor por audição.
 - ✅ **Build estático** em GitHub Pages — custo R$ 0,00
@@ -31,13 +31,14 @@ Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lin
 |---|---|
 | **Lições** | 120 (3 anos × 4 trimestres × 10 lições) |
 | **Portas pedagógicas por lição** | 7 (formal · 5 anos · 10 anos · 15 anos · engenharia · sênior · prática) |
-| **Exercícios reais** | ~4.770 (não placeholders) |
+| **Exercícios reais** | 5.313 (não placeholders, 100% MC) |
 | **Provas curadas** | 120 versões (12 trimestres × 10 versões) |
 | **Questões em provas** | 1.800 |
 | **Idiomas (UI + áudio)** | 11 (português, inglês, espanhol, mandarim, japonês, alemão, francês, italiano, russo, coreano, polonês) |
 | **Idiomas (lições MDX)** | 3 completos (PT-BR fonte · en-US · es-ES) + 8 parciais |
 | **Componentes interativos** | 14 (DuasPortas, ListaExercicios, AudioReader, VerificarPasso, etc.) |
 | **Linhas de código** | ~30.000 |
+| **Conformidade L1 (lições)** | 120/120 (100%) ✓ |
 | **Custo de hospedagem** | R\$ 0,00 (GitHub Pages) |
 
 ---

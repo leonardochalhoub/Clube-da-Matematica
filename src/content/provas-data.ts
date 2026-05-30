@@ -1869,6 +1869,251 @@ const PROVA_T3_V2: Prova = {
       passos: '**Passo 1.** Some eq1 + eq2: $3x + 2z = 9$.\n\n**Passo 2.** Some eq1 + eq3: $2x + 3y = 6$.\n\n**Passo 3.** Subtraia eq3 - eq1: $y - 2z = -6$.\n\n**Passo 4.** Resolva sistema reduzido. (Método: substituição). Solução: $(1, 2, 3)$ — verificável em todas as 3 eq.',
       dificuldade: 'compreensao', aulasCobertas: ['licao-29-sistemas-lineares'],
       fonteOriginal: { livro: 'OpenStax CA 2e', url: OS_CA, ref: '§9.2 Systems 3x3, ex. 19 (adaptado)', licenca: CC_BY } },
+    {
+      numero: 6,
+      enunciado: 'Determine o centro e o raio da circunferência $x^2 + y^2 - 6x + 4y - 12 = 0$.',
+      opcoes: [
+        { texto: 'Centro $(3, -2)$, raio $5$', correta: true },
+        { texto: 'Centro $(-3, 2)$, raio $5$' },
+        { texto: 'Centro $(3, -2)$, raio $13$' },
+        { texto: 'Centro $(6, -4)$, raio $\\sqrt{12}$' },
+      ],
+      resposta: 'Centro $(3, -2)$, raio $5$',
+      passos:
+        '**Passo 1.** Complete o quadrado em $x$: $x^2 - 6x = (x-3)^2 - 9$.\n\n' +
+        '**Passo 2.** Complete o quadrado em $y$: $y^2 + 4y = (y+2)^2 - 4$.\n\n' +
+        '**Passo 3.** Substitua: $(x-3)^2 + (y+2)^2 = 9 + 4 + 12 = 25$.\n\n' +
+        '**Conclusão.** Forma reduzida $(x-3)^2 + (y+2)^2 = 25$: centro $(3, -2)$, raio $\\sqrt{25} = 5$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-24-circunferencia'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: 'https://openstax.org/books/college-algebra-2e/pages/2-6-other-types-of-equations',
+        ref: '§2.6 Circles, ex. 19 (adaptado — forma geral para reduzida)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 7,
+      enunciado: 'Quais retas são paralelas? $r\\colon y = 3x + 1$, $s\\colon y = 3x - 4$, $t\\colon y = -\\frac{1}{3}x + 2$.',
+      opcoes: [
+        { texto: '$r$ e $s$ — mesma inclinação, coef. lineares distintos', correta: true },
+        { texto: '$r$ e $t$ — são perpendiculares, não paralelas' },
+        { texto: '$s$ e $t$' },
+        { texto: 'Nenhum par é paralelo' },
+      ],
+      resposta: '$r$ e $s$ são paralelas (ambas com $m = 3$)',
+      passos:
+        '**Passo 1.** Identifique as inclinações: $m_r = 3$, $m_s = 3$, $m_t = -1/3$.\n\n' +
+        '**Passo 2.** Retas paralelas têm a mesma inclinação e coef. linear diferente. $m_r = m_s = 3$ e $b_r = 1 \\neq b_s = -4$: portanto $r \\parallel s$.\n\n' +
+        '**Bônus.** $m_r \\cdot m_t = 3 \\cdot (-1/3) = -1$, logo $r \\perp t$ (perpendiculares).',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['licao-22-equacao-reta', 'licao-23-posicao-relativa-retas'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: 'https://openstax.org/books/college-algebra-2e/pages/4-1-linear-functions',
+        ref: '§4.1 Parallel and Perpendicular Lines, ex. 34 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 8,
+      enunciado: 'Encontre a equação da elipse com vértices em $(\\pm 5, 0)$ e co-vértices em $(0, \\pm 3)$.',
+      opcoes: [
+        { texto: '$x^2/25 + y^2/9 = 1$', correta: true },
+        { texto: '$x^2/9 + y^2/25 = 1$' },
+        { texto: '$x^2/25 - y^2/9 = 1$' },
+        { texto: '$x^2 + y^2 = 25$' },
+      ],
+      resposta: '$x^2/25 + y^2/9 = 1$',
+      passos:
+        '**Passo 1.** Vértices em $(\\pm a, 0)$: $a = 5$, logo $a^2 = 25$.\n\n' +
+        '**Passo 2.** Co-vértices em $(0, \\pm b)$: $b = 3$, logo $b^2 = 9$.\n\n' +
+        '**Passo 3.** Eixo maior horizontal (vértices no eixo $x$): forma padrão $x^2/a^2 + y^2/b^2 = 1$.\n\n' +
+        '**Resultado.** $x^2/25 + y^2/9 = 1$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-25-conicas'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: 'https://openstax.org/books/algebra-and-trigonometry-2e/pages/12-1-the-ellipse',
+        ref: '§12.1 The Ellipse, ex. 5 (adaptado — de vértices para equação)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 9,
+      enunciado: 'Dado $\\vec u = (4, 0)$ e $\\vec v = (2, 2)$, calcule o produto escalar e o ângulo entre eles.',
+      opcoes: [
+        { texto: '$\\vec u \\cdot \\vec v = 8$, ângulo $45°$', correta: true },
+        { texto: '$\\vec u \\cdot \\vec v = 8$, ângulo $90°$' },
+        { texto: '$\\vec u \\cdot \\vec v = 6$, ângulo $45°$' },
+        { texto: '$\\vec u \\cdot \\vec v = 0$, ângulo $90°$' },
+      ],
+      resposta: '$\\vec u \\cdot \\vec v = 8$, ângulo $45°$',
+      passos:
+        '**Passo 1.** Produto escalar: $\\vec u \\cdot \\vec v = 4 \\cdot 2 + 0 \\cdot 2 = 8$.\n\n' +
+        '**Passo 2.** Normas: $\\|\\vec u\\| = 4$, $\\|\\vec v\\| = \\sqrt{4+4} = 2\\sqrt{2}$.\n\n' +
+        '**Passo 3.** $\\cos\\theta = 8/(4 \\cdot 2\\sqrt{2}) = 1/\\sqrt{2}$.\n\n' +
+        '**Conclusão.** $\\theta = \\arccos(1/\\sqrt{2}) = 45°$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-27-produto-escalar'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: 'https://openstax.org/books/algebra-and-trigonometry-2e/pages/10-8-vectors',
+        ref: '§10.8 The Dot Product, ex. 23 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 10,
+      enunciado: 'Uma reta perpendicular a $y = \\frac{1}{2}x + 3$ passa pelo ponto $(4, 1)$. Qual é sua equação?',
+      opcoes: [
+        { texto: '$y = -2x + 9$', correta: true },
+        { texto: '$y = 2x - 7$' },
+        { texto: '$y = -2x - 9$' },
+        { texto: '$y = \\frac{1}{2}x - 1$' },
+      ],
+      resposta: '$y = -2x + 9$',
+      passos:
+        '**Passo 1.** Inclinação da reta dada: $m_1 = 1/2$.\n\n' +
+        '**Passo 2.** Inclinação perpendicular: $m_2 = -1/m_1 = -2$.\n\n' +
+        '**Passo 3.** Equação ponto-inclinação com $(4, 1)$: $y - 1 = -2(x - 4) \\Rightarrow y = -2x + 9$.\n\n' +
+        '**Verificação.** $m_1 \\cdot m_2 = (1/2)(-2) = -1$ confirma perpendicularidade.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-22-equacao-reta', 'licao-23-posicao-relativa-retas'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: 'https://openstax.org/books/college-algebra-2e/pages/4-1-linear-functions',
+        ref: '§4.1 Perpendicular Lines, ex. 46 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 11,
+      enunciado:
+        'Uma empresa tem custo total $C(q) = 200 + 15q$ (R\\$) e receita $R(q) = 30q$. ' +
+        'Em quantas unidades ocorre o ponto de equilíbrio?',
+      opcoes: [
+        { texto: '$q = 14$ unidades (arredondando $200/15 \\approx 13{,}3$)', correta: true },
+        { texto: '$q = 10$ unidades' },
+        { texto: '$q = 20$ unidades' },
+        { texto: '$q = 7$ unidades ($200/30$)' },
+      ],
+      resposta: '$q = 14$ unidades',
+      passos:
+        '**Passo 1.** Ponto de equilíbrio: $C(q) = R(q)$.\n\n' +
+        '**Passo 2.** $200 + 15q = 30q \\Rightarrow 200 = 15q \\Rightarrow q = 200/15 \\approx 13{,}3$.\n\n' +
+        '**Passo 3.** Como $q$ é inteiro, a empresa precisa de pelo menos $14$ unidades para cobrir os custos.\n\n' +
+        '**Interpretação.** Cada unidade gera lucro marginal de R\\$ $30 - 15 = $ R\\$ $15$. O custo fixo R\\$ $200$ é recuperado em $\\lceil 200/15 \\rceil = 14$ unidades.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['licao-22-equacao-reta'],
+      fonteOriginal: {
+        livro: 'OpenStax College Algebra 2e',
+        url: 'https://openstax.org/books/college-algebra-2e/pages/4-1-linear-functions',
+        ref: '§4.1 Break-Even Analysis, ex. 63 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 12,
+      enunciado: 'Determine o vértice, foco e diretriz da parábola $x^2 = -12y$.',
+      opcoes: [
+        { texto: 'Vértice $(0,0)$, foco $(0, -3)$, diretriz $y = 3$', correta: true },
+        { texto: 'Vértice $(0,0)$, foco $(0, 3)$, diretriz $y = -3$' },
+        { texto: 'Vértice $(0,0)$, foco $(-3, 0)$, diretriz $x = 3$' },
+        { texto: 'Vértice $(0,0)$, foco $(0, -12)$, diretriz $y = 12$' },
+      ],
+      resposta: 'Vértice $(0,0)$, foco $(0, -3)$, diretriz $y = 3$',
+      passos:
+        '**Passo 1.** Forma padrão $x^2 = 4py$: aqui $4p = -12 \\Rightarrow p = -3$.\n\n' +
+        '**Passo 2.** Sinal negativo em $p$ indica abertura para baixo.\n\n' +
+        '**Passo 3.** Foco: $(0, p) = (0, -3)$. Diretriz: $y = -p = 3$.\n\n' +
+        '**Interpretação.** Todo ponto da parábola equidista do foco $(0,-3)$ e da diretriz $y = 3$. O vértice $(0,0)$ fica exatamente na metade.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['licao-25-conicas'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: 'https://openstax.org/books/algebra-and-trigonometry-2e/pages/12-3-the-parabola',
+        ref: '§12.3 The Parabola, ex. 7 (adaptado — abertura para baixo)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 13,
+      enunciado:
+        'Um drone parte de $P_0 = (0, 0)$, percorre $\\vec d_1 = (3, 4)$ km e depois $\\vec d_2 = (-1, 2)$ km. ' +
+        'Qual a distância final à origem?',
+      opcoes: [
+        { texto: '$2\\sqrt{10} \\approx 6{,}32$ km', correta: true },
+        { texto: '$5$ km' },
+        { texto: '$\\sqrt{50} \\approx 7{,}07$ km' },
+        { texto: '$10$ km' },
+      ],
+      resposta: '$2\\sqrt{10} \\approx 6{,}32$ km',
+      passos:
+        '**Passo 1.** Posição final: $\\vec P = (3,4) + (-1,2) = (2, 6)$.\n\n' +
+        '**Passo 2.** Distância à origem: $\\|(2, 6)\\| = \\sqrt{4 + 36} = \\sqrt{40} = 2\\sqrt{10}$.\n\n' +
+        '**Passo 3.** $2\\sqrt{10} \\approx 6{,}32$ km.\n\n' +
+        '**Nota.** Distância total percorrida ($|d_1| + |d_2| = 5 + \\sqrt{5}$) difere do deslocamento resultante — conceito central em cinemática.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['licao-26-vetores-plano', 'licao-28-aplicacoes-vetores-fisica'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: 'https://openstax.org/books/algebra-and-trigonometry-2e/pages/10-8-vectors',
+        ref: '§10.8 Vector Applications, ex. 55 (adaptado — dois segmentos)',
+        licenca: CC_BY,
+      },
+    },
+    {
+      numero: 14,
+      enunciado:
+        'Prove analiticamente que a diagonal do quadrado de lado $a$ com vértices $O(0,0)$, $A(a,0)$, $B(a,a)$, $C(0,a)$ mede $a\\sqrt{2}$. ' +
+        'Qual passo torna a prova rigorosa?',
+      opcoes: [
+        { texto: 'Calcular $|OB| = \\sqrt{a^2+a^2} = a\\sqrt{2}$ pela fórmula da distância, válida para todo $a \\in \\mathbb{R}$', correta: true },
+        { texto: 'Afirmar que o ângulo de $45°$ implica diagonal $a\\sqrt{2}$ por trigonometria' },
+        { texto: 'Verificar numericamente para $a = 1$ e generalizar sem prova' },
+        { texto: 'Invocar o Teorema de Pitágoras sem escrever a fórmula explicitamente' },
+      ],
+      resposta: '$|OB| = \\sqrt{a^2+a^2} = a\\sqrt{2}$, provado pela fórmula da distância',
+      passos:
+        '**Passo 1.** Diagonal: segmento $O(0,0)$ a $B(a,a)$.\n\n' +
+        '**Passo 2.** Fórmula da distância: $|OB| = \\sqrt{(a-0)^2 + (a-0)^2} = \\sqrt{2a^2} = a\\sqrt{2}$ (para $a > 0$).\n\n' +
+        '**Passo 3.** O resultado vale para todo $a > 0$ real. A fórmula analítica elimina dependência de figuras ou casos numéricos.\n\n' +
+        '**Por que as outras estão erradas?** Trigonometria (B) é circular sem provar o $45°$; um caso (C) não constitui prova geral; enunciar Pitágoras sem cálculo (D) é incompleto.',
+      dificuldade: 'desafio',
+      aulasCobertas: ['licao-21-plano-cartesiano', 'licao-22-equacao-reta'],
+      fonteOriginal: {
+        livro: 'Stitz-Zeager Precalculus',
+        url: 'https://www.stitz-zeager.com/szprecalculus07042013.pdf',
+        ref: '§1.1 Distance Formula, ex. 29 (demonstração analítica adaptada)',
+        licenca: 'CC-BY-NC-SA 3.0',
+      },
+    },
+    {
+      numero: 15,
+      enunciado: 'Calcule a projeção escalar de $\\vec u = (3, 4)$ sobre $\\vec v = (1, 0)$ e interprete geometricamente.',
+      opcoes: [
+        { texto: '$\\mathrm{proj}_{\\hat{v}}\\,\\vec u = 3$ (componente horizontal de $\\vec u$)', correta: true },
+        { texto: '$\\mathrm{proj}_{\\hat{v}}\\,\\vec u = 4$ (componente vertical)' },
+        { texto: '$\\mathrm{proj}_{\\hat{v}}\\,\\vec u = 5$ (norma de $\\vec u$)' },
+        { texto: '$\\mathrm{proj}_{\\hat{v}}\\,\\vec u = 7$' },
+      ],
+      resposta: '$\\mathrm{proj}_{\\hat{v}}\\,\\vec u = 3$',
+      passos:
+        '**Passo 1.** Fórmula: $\\mathrm{proj}_{\\vec v}\\,\\vec u = (\\vec u \\cdot \\vec v)/\\|\\vec v\\|$.\n\n' +
+        '**Passo 2.** $\\vec u \\cdot \\vec v = 3 \\cdot 1 + 4 \\cdot 0 = 3$. $\\|\\vec v\\| = 1$.\n\n' +
+        '**Passo 3.** Projeção $= 3/1 = 3$.\n\n' +
+        '**Interpretação.** $\\vec v = (1,0)$ é o eixo $x$. A projeção de $\\vec u$ sobre ele é exatamente a coordenada $x$ de $\\vec u$, ou seja, $3$. Geometricamente: a "sombra" de $\\vec u$ no eixo horizontal.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-27-produto-escalar'],
+      fonteOriginal: {
+        livro: 'OpenStax Algebra and Trigonometry 2e',
+        url: 'https://openstax.org/books/algebra-and-trigonometry-2e/pages/10-8-vectors',
+        ref: '§10.8 Vector Projections, ex. 39 (adaptado)',
+        licenca: CC_BY,
+      },
+    },
   ],
 }
 
@@ -3007,6 +3252,166 @@ const PROVA_T5_V6: Prova = {
       passos: '**Passo 1.** Termos alternam $1, -1, 1, -1, \\ldots$.\n\n**Passo 2.** Subsequências têm limites diferentes (1 e -1) ⇒ sequência não converge.',
       dificuldade: 'aplicacao', aulasCobertas: ['licao-49-limite-sequencias'],
       fonteOriginal: { livro: 'OpenStax Calc 2', url: OS_CALC2, ref: '§5.1 Divergent Sequence, ex. 23 (adaptado)', licenca: CC_BY } },
+    { numero: 6,
+      enunciado: 'Calcule $\\lim_{x \\to 2} \\dfrac{x^2 - 4}{x - 2}$.',
+      opcoes: [
+        { texto: '$4$', correta: true },
+        { texto: '$0$' },
+        { texto: 'Não existe.' },
+        { texto: '$2$' },
+      ],
+      resposta: '$4$',
+      passos:
+        '**Passo 1.** Substituição direta dá $0/0$ — forma indeterminada.\n\n' +
+        '**Passo 2.** Fatore o numerador: $x^2 - 4 = (x-2)(x+2)$.\n\n' +
+        '**Passo 3.** Cancele $(x-2)$ (válido para $x \\neq 2$): $\\lim_{x \\to 2}(x+2) = 4$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-42-propriedades-limites'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§2.3 The Limit Laws — Factor and Cancel, ex. 81 (adaptado)', licenca: CC_BY } },
+    { numero: 7,
+      enunciado: 'Limite trigonométrico fundamental: $\\lim_{x \\to 0} \\dfrac{\\sin x}{x}$.',
+      opcoes: [
+        { texto: '$1$', correta: true },
+        { texto: '$0$' },
+        { texto: '$\\infty$' },
+        { texto: '$\\pi$' },
+      ],
+      resposta: '$1$',
+      passos:
+        '**Passo 1.** Este limite não pode ser calculado por substituição direta (forma $0/0$).\n\n' +
+        '**Passo 2.** Pela desigualdade geométrica $\\cos x \\leq (\\sin x)/x \\leq 1$ para $x \\neq 0$ próximo de $0$.\n\n' +
+        '**Passo 3.** Como $\\lim_{x \\to 0} \\cos x = 1$, pelo Teorema do Confronto o limite é $1$.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['licao-48-limites-funcoes-trig'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§2.3 The Limit Laws — Squeeze Theorem, ex. 112 (adaptado)', licenca: CC_BY } },
+    { numero: 8,
+      enunciado: 'Velocidade média: uma pedra cai segundo $s(t) = 4{,}9t^2$ m. Qual é a velocidade média entre $t = 1$ s e $t = 3$ s?',
+      opcoes: [
+        { texto: '$19{,}6$ m/s', correta: true },
+        { texto: '$9{,}8$ m/s' },
+        { texto: '$44{,}1$ m/s' },
+        { texto: '$4{,}9$ m/s' },
+      ],
+      resposta: '$19{,}6$ m/s',
+      passos:
+        '**Passo 1.** $s(3) = 4{,}9 \\cdot 9 = 44{,}1$ m e $s(1) = 4{,}9 \\cdot 1 = 4{,}9$ m.\n\n' +
+        '**Passo 2.** Velocidade média $= (s(3) - s(1))/(3 - 1) = (44{,}1 - 4{,}9)/2 = 39{,}2/2 = 19{,}6$ m/s.\n\n' +
+        '**Conexão.** Esse quociente é exatamente o quociente incremental $(s(t_0+h)-s(t_0))/h$ com $t_0=1$, $h=2$. No limite $h \\to 0$ obtemos a velocidade instantânea.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['licao-41-limite-formal', 'licao-42-propriedades-limites'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§2.1 A Preview of Calculus — Average Velocity, ex. 3 (adaptado)', licenca: CC_BY } },
+    { numero: 9,
+      enunciado: 'Limites laterais de $f(x) = \\begin{cases} x + 1 & x < 2 \\\\ x^2 - 1 & x \\geq 2 \\end{cases}$ em $x = 2$.',
+      opcoes: [
+        { texto: '$\\lim^{-} = 3$ e $\\lim^{+} = 3$; limite existe e vale $3$.' , correta: true },
+        { texto: '$\\lim^{-} = 3$ e $\\lim^{+} = 4$; limite não existe.' },
+        { texto: '$\\lim^{-} = 1$ e $\\lim^{+} = 3$; limite não existe.' },
+        { texto: '$\\lim^{-} = 2$ e $\\lim^{+} = 3$; limite não existe.' },
+      ],
+      resposta: '$\\lim^{-} = 3$ e $\\lim^{+} = 3$; limite existe e vale $3$.',
+      passos:
+        '**Passo 1.** Limite à esquerda ($x < 2$): $\\lim_{x \\to 2^-}(x+1) = 3$.\n\n' +
+        '**Passo 2.** Limite à direita ($x \\geq 2$): $\\lim_{x \\to 2^+}(x^2-1) = 4-1 = 3$.\n\n' +
+        '**Passo 3.** Ambos os limites laterais coincidem em $3$, portanto $\\lim_{x \\to 2} f(x) = 3$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-44-limites-laterais'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§2.2 The Limit of a Function — One-Sided Limits, ex. 43 (adaptado)', licenca: CC_BY } },
+    { numero: 10,
+      enunciado: 'Definição $\\varepsilon$-$\\delta$: para provar $\\lim_{x \\to 3}(2x - 1) = 5$, qual $\\delta$ em função de $\\varepsilon$ funciona?',
+      opcoes: [
+        { texto: '$\\delta = \\varepsilon/2$', correta: true },
+        { texto: '$\\delta = \\varepsilon$' },
+        { texto: '$\\delta = 2\\varepsilon$' },
+        { texto: '$\\delta = \\varepsilon^2$' },
+      ],
+      resposta: '$\\delta = \\varepsilon/2$',
+      passos:
+        '**Passo 1.** Queremos $|f(x) - 5| < \\varepsilon$, i.e. $|(2x-1)-5| = |2x-6| = 2|x-3| < \\varepsilon$.\n\n' +
+        '**Passo 2.** Isso equivale a $|x-3| < \\varepsilon/2$.\n\n' +
+        '**Passo 3.** Logo basta tomar $\\delta = \\varepsilon/2$: se $|x-3| < \\delta$ então $|f(x)-5| < 2\\delta = \\varepsilon$.',
+      dificuldade: 'desafio',
+      aulasCobertas: ['licao-41-limite-formal'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§2.5 The Precise Definition of a Limit, ex. 153 (adaptado)', licenca: CC_BY } },
+    { numero: 11,
+      enunciado: 'Continuidade em ponto: seja $f(x) = (x^2 - 9)/(x - 3)$ para $x \\neq 3$ e $f(3) = k$. Qual valor de $k$ torna $f$ contínua em $x = 3$?',
+      opcoes: [
+        { texto: '$k = 6$', correta: true },
+        { texto: '$k = 0$' },
+        { texto: '$k = 3$' },
+        { texto: '$k = 9$' },
+      ],
+      resposta: '$k = 6$',
+      passos:
+        '**Passo 1.** Para continuidade, precisamos $f(3) = \\lim_{x \\to 3} f(x)$.\n\n' +
+        '**Passo 2.** $\\lim_{x \\to 3} \\dfrac{x^2-9}{x-3} = \\lim_{x \\to 3} \\dfrac{(x-3)(x+3)}{x-3} = \\lim_{x \\to 3}(x+3) = 6$.\n\n' +
+        '**Passo 3.** Logo $k = 6$ remove a descontinuidade (tipo: descontinuidade removível).',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-43-continuidade', 'licao-42-propriedades-limites'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§2.4 Continuity — Removable Discontinuity, ex. 113 (adaptado)', licenca: CC_BY } },
+    { numero: 12,
+      enunciado: 'Limite no infinito: $\\lim_{x \\to \\infty} \\dfrac{3x^2 + 5}{x^2 - 2}$.',
+      opcoes: [
+        { texto: '$3$', correta: true },
+        { texto: '$5$' },
+        { texto: '$0$' },
+        { texto: '$\\infty$' },
+      ],
+      resposta: '$3$',
+      passos:
+        '**Passo 1.** Divida numerador e denominador por $x^2$ (maior potência).\n\n' +
+        '**Passo 2.** $(3 + 5/x^2)/(1 - 2/x^2)$. Quando $x \\to \\infty$, os termos $5/x^2$ e $2/x^2$ tendem a $0$.\n\n' +
+        '**Passo 3.** Resultado: $3/1 = 3$. Assíntota horizontal: $y = 3$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-47-limite-infinito'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§4.6 Limits at Infinity and Asymptotes, ex. 11 (adaptado)', licenca: CC_BY } },
+    { numero: 13,
+      enunciado: 'Taxa de variação média: a temperatura de um forno sobe segundo $T(t) = 20 + 80t - 5t^2$ °C. Qual é a taxa média de variação entre $t = 0$ e $t = 4$ min?',
+      opcoes: [
+        { texto: '$60$ °C/min', correta: true },
+        { texto: '$80$ °C/min' },
+        { texto: '$40$ °C/min' },
+        { texto: '$20$ °C/min' },
+      ],
+      resposta: '$60$ °C/min',
+      passos:
+        '**Passo 1.** $T(4) = 20 + 320 - 80 = 260$ °C e $T(0) = 20$ °C.\n\n' +
+        '**Passo 2.** Taxa média $= (T(4) - T(0))/(4 - 0) = (260 - 20)/4 = 240/4 = 60$ °C/min.\n\n' +
+        '**Conexão com limites.** A taxa instantânea em $t$ é $\\lim_{h \\to 0}(T(t+h)-T(t))/h = T\'(t) = 80 - 10t$.',
+      dificuldade: 'modelagem',
+      aulasCobertas: ['licao-41-limite-formal', 'licao-46-tvi-tvm'],
+      fonteOriginal: { livro: 'Active Calculus 2.0', url: ACTIVE_CALC, ref: '§1.1 How do we measure velocity? — Preview Activity 1.1.1 (adaptado)', licenca: CC_BY_NC_SA } },
+    { numero: 14,
+      enunciado: 'Teorema do Confronto (Squeeze): $-1 \\leq g(x) \\leq 1$ e $\\lim_{x \\to 0} x^2 \\cdot g(x) = ?$',
+      opcoes: [
+        { texto: '$0$', correta: true },
+        { texto: '$1$' },
+        { texto: '$-1$' },
+        { texto: 'Não pode ser determinado.' },
+      ],
+      resposta: '$0$',
+      passos:
+        '**Passo 1.** Como $-1 \\leq g(x) \\leq 1$, multiplique por $x^2 \\geq 0$: $-x^2 \\leq x^2 g(x) \\leq x^2$.\n\n' +
+        '**Passo 2.** $\\lim_{x \\to 0}(-x^2) = 0$ e $\\lim_{x \\to 0}(x^2) = 0$.\n\n' +
+        '**Passo 3.** Pelo Teorema do Confronto: $\\lim_{x \\to 0} x^2 g(x) = 0$.',
+      dificuldade: 'compreensao',
+      aulasCobertas: ['licao-42-propriedades-limites', 'licao-45-limites-fundamentais'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§2.3 The Limit Laws — Squeeze Theorem, ex. 107 (adaptado)', licenca: CC_BY } },
+    { numero: 15,
+      enunciado: 'TVI aplicado: a função $f(x) = x^3 + x - 1$ tem raiz no intervalo $(0, 1)$?',
+      opcoes: [
+        { texto: 'Sim — $f(0) < 0$ e $f(1) > 0$, logo TVI garante raiz.' , correta: true },
+        { texto: 'Não — $f$ não é contínua em $(0, 1)$.' },
+        { texto: 'Não — $f(0)$ e $f(1)$ têm o mesmo sinal.' },
+        { texto: 'Impossível determinar sem calcular a raiz explicitamente.' },
+      ],
+      resposta: 'Sim — $f(0) < 0$ e $f(1) > 0$, logo TVI garante raiz.',
+      passos:
+        '**Passo 1.** $f(0) = 0 + 0 - 1 = -1 < 0$.\n\n' +
+        '**Passo 2.** $f(1) = 1 + 1 - 1 = 1 > 0$.\n\n' +
+        '**Passo 3.** $f$ é polinômio, portanto contínua em $[0, 1]$. Como $f(0) < 0 < f(1)$, o TVI garante a existência de $c \\in (0, 1)$ tal que $f(c) = 0$.',
+      dificuldade: 'aplicacao',
+      aulasCobertas: ['licao-46-tvi-tvm', 'licao-43-continuidade'],
+      fonteOriginal: { livro: 'OpenStax Calculus Volume 1', url: OS_CALC1, ref: '§2.4 Continuity — Intermediate Value Theorem, ex. 141 (adaptado)', licenca: CC_BY } },
   ],
 }
 

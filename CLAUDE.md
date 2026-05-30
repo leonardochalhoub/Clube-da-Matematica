@@ -634,9 +634,10 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ## 9. Roadmap snapshot (current)
 
-- ✅ 120 lessons in PT-BR with 7 doors + ~4,770 sourced exercises.
+- ✅ **120/120 lessons CLEAN** against the L1 canonical template (100% conformity, 2026-05-30).
+- ✅ **5,313 sourced exercises** (100% with `solucao+fonte`, 99.8% with MC `opcoes`, 17.8% with `passos`).
+- ✅ **1,800 exam questions** (12 trimesters × 10 versions × 15 questions) in `provas-data.ts` — **100% with MC** `opcoes` arrays (1,800/1,800 questions have plausible distractors).
 - ✅ All 120 lessons stabilized to the Lição 1 canonical template (L14-L120 rewritten 2026-04 → 2026-05; build green).
-- ✅ 1,800 exam questions (12 trimesters × 10 versions × 15 questions) in `provas-data.ts`.
 - ✅ UI translated to 11 locales (no MDX bodies).
 - ✅ Per-locale lesson routing (1,390 static pages — incl. en/es/zh/ja/de/fr/it/ru/ko/pl prefixes that fall back to PT-BR bodies).
 - ✅ Footer with `version · commit · timestamp` (currently `0.2.0`).
