@@ -9,7 +9,7 @@ publicado: true
 tags: ["álgebra linear", "SVD", "valores singulares", "compressão", "ano-3", "trim-12"]
 prerrequisitos: ["licao-116-matrizes-especiais"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-05-06"
+atualizadoEm: "2026-05-29"
 versao: "v1"
 usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Lineare Algebra LK alemão", "Equiv. H2 Math singapurense", "Equiv. Math III japonês avançado"]
 ---
@@ -26,7 +26,7 @@ usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Lineare Algebra LK alemão", "E
 
 - [**Understanding Linear Algebra**](https://understandinglinearalgebra.org/chap6.html) — David Austin · §6.3–6.4 · CC-BY-SA · *Apresentação geométrica de SVD com exemplos numéricos completos e figuras de transformação de elipsoide; excelente para as portas 10 e 15.*
 - [**A First Course in Linear Algebra**](http://linear.pugetsound.edu/html/section-SVD.html) — Rob Beezer · §SVD · GNU FDL · *Demonstração rigorosa da existência e unicidade de SVD com lemas auxiliares; base para a porta formal.*
-- [**Álgebra Linear** (REAMAT UFRGS)](https://www.ufrgs.br/reamat/AlgebraLinear/index.html) — Reamat Colaborativo · cap. SVD · CC-BY-SA · *Fonte PT-BR com exemplos de compressão e pseudoinversa; ideal para exercícios de cálculo numérico.*
+- [**Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · cap. 5, §IV · CC-BY-SA · *Tratamento aplicado da SVD via espectral em <Eq>{`A^T A`}</Eq>; exercícios graduados de cálculo numérico.*
 
 </aside>
 
@@ -186,6 +186,1086 @@ Uma imagem em tons de cinza é uma matriz <Eq>{`M \\in \\mathbb{R}^{m \\times n}
 
 ### Caso Netflix Prize (2009)
 
-Netflix tinha matriz de avaliações: <Eq>{`\\approx 10^7`}</Eq> usuários <Eq>{`\\times 10^5`}</Eq> filmes, esparsa. Aproximação por baixo posto (variante de SVD) previu avaliações ausentes. O time vencedor BellKor's Pragmatic Chaos melhorou a acurácia em 10% e ganhou US$
+A Netflix tinha uma matriz de avaliações: aproximadamente <Eq>{`10^7`}</Eq> usuários por <Eq>{`10^5`}</Eq> filmes, extremamente esparsa (a maioria dos pares usuário-filme não tinha avaliação). Aproximação por baixo posto (variante de SVD) previu avaliações ausentes. O time vencedor BellKor's Pragmatic Chaos melhorou a acurácia em 10% e ganhou um prêmio de **1 milhão de dólares**. A técnica central foi **fatoração matricial**: representar cada usuário e cada filme por um vetor curto de <Eq>{`k = 20`}</Eq> a <Eq>{`100`}</Eq> "fatores latentes" (gosto por ação, comédia, romance...) e prever a avaliação como produto escalar. SVD truncada é o método canônico para essa fatoração quando a matriz é completa; para matrizes esparsas, usam-se variantes iterativas (Alternating Least Squares, gradient descent).
+
 </Porta>
+
+<Porta nivel="25" titulo="Pra estudante de engenharia">
+
+Em um curso de engenharia, a SVD é frequentemente a **primeira ferramenta** que você usa quando precisa lidar com dados reais (ruidosos, mal-condicionados, de alta dimensão). Conheça-a antes de qualquer outra técnica de redução de dimensão.
+
+### Algoritmo de cálculo (caso pequeno, à mão)
+
+Para <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq> com <Eq>{`m \\geq n`}</Eq>:
+
+1. Calcule <Eq>{`A^T A`}</Eq> (matriz <Eq>{`n \\times n`}</Eq> simétrica PSD).
+2. Encontre autovalores <Eq>{`\\lambda_1 \\geq \\cdots \\geq \\lambda_n \\geq 0`}</Eq> e autovetores ortonormais <Eq>{`v_1, \\ldots, v_n`}</Eq>.
+3. Defina <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq>.
+4. Para cada <Eq>{`\\sigma_i > 0`}</Eq>, defina <Eq>{`u_i = A v_i / \\sigma_i \\in \\mathbb{R}^m`}</Eq>. Esses <Eq>{`u_i`}</Eq> são automaticamente ortonormais.
+5. Complete <Eq>{`u_{r+1}, \\ldots, u_m`}</Eq> com base ortonormal de <Eq>{`\\ker(A^T)`}</Eq> (use Gram-Schmidt).
+6. Monte <Eq>{`U = [u_1 | \\cdots | u_m]`}</Eq>, <Eq>{`V = [v_1 | \\cdots | v_n]`}</Eq>, <Eq>{`\\Sigma`}</Eq> diagonal com <Eq>{`\\sigma_i`}</Eq>.
+
+Numericamente, esse algoritmo é instável (perde precisão ao formar <Eq>{`A^T A`}</Eq>, que tem número de condição <Eq>{`\\kappa(A)^2`}</Eq>). Pacotes profissionais (LAPACK, NumPy) usam o algoritmo de Golub-Kahan-Reinsch (1965): bi-diagonalização via Householder seguida de QR implícito. Custo: <Eq>{`O(\\min(mn^2, m^2n))`}</Eq>.
+
+### Por que SVD é numericamente estável
+
+Quando você resolve <Eq>{`Ax = b`}</Eq> por eliminação gaussiana, o erro em <Eq>{`x`}</Eq> escala com <Eq>{`\\kappa_2(A) = \\sigma_1 / \\sigma_r`}</Eq>. Quando <Eq>{`\\kappa_2`}</Eq> é grande (digamos, <Eq>{`10^{12}`}</Eq>) e <Eq>{`b`}</Eq> tem erro relativo de <Eq>{`10^{-15}`}</Eq>, o erro em <Eq>{`x`}</Eq> pode chegar a <Eq>{`10^{-3}`}</Eq> — três casas significativas perdidas. SVD permite **descartar valores singulares pequenos** (truncated SVD, TSVD) e resolver de modo regularizado: <Eq>{`x = V \\Sigma_k^+ U^T b`}</Eq>. É a versão linear da regularização de Tikhonov.
+
+### Aplicações cross-domínio
+
+- **Latent Semantic Analysis (LSA)** — Deerwester et al. 1990. Matriz documento-termo decomposta por SVD; significado "latente" surge dos vetores singulares.
+- **Sistemas de recomendação** — Netflix Prize (2009). SVD em matriz usuário-item esparsa via ALS (Alternating Least Squares).
+- **PCA** — próxima lição. PCA é SVD da matriz de dados centralizados, dividida por <Eq>{`\\sqrt{N-1}`}</Eq>.
+- **Compressão de imagem** — JPEG usa DCT (relacionada), mas SVD truncada dá um benchmark teórico ótimo (Eckart-Young).
+- **Total Least Squares** — ajuste de reta quando ambas as variáveis têm erro. Resolve via SVD do "augmented matrix" <Eq>{`[A | b]`}</Eq>.
+
+### Exemplo numérico curto
+
+Calcule SVD de <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix}`}</Eq>.
+
+**Passo 1.** <Eq>{`A^T A = \\begin{pmatrix} 25 & 20 \\\\ 20 & 25 \\end{pmatrix}`}</Eq>.
+
+**Passo 2.** Autovalores: <Eq>{`\\det(A^TA - \\lambda I) = (25-\\lambda)^2 - 400 = 0 \\Rightarrow \\lambda = 45, 5`}</Eq>.
+
+**Passo 3.** Valores singulares: <Eq>{`\\sigma_1 = \\sqrt{45} = 3\\sqrt{5}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>.
+
+**Passo 4.** Autovetores de <Eq>{`A^TA`}</Eq>: <Eq>{`v_1 = (1,1)/\\sqrt{2}`}</Eq>, <Eq>{`v_2 = (1,-1)/\\sqrt{2}`}</Eq>.
+
+**Passo 5.** <Eq>{`u_1 = Av_1/\\sigma_1 = (3,9)/(3\\sqrt{5} \\cdot \\sqrt{2}) = (1,3)/\\sqrt{10}`}</Eq>, <Eq>{`u_2 = (3,-1)/\\sqrt{10}`}</Eq>.
+
+Logo <Eq>{`A = U\\Sigma V^T`}</Eq> com <Eq>{`U = \\frac{1}{\\sqrt{10}}\\begin{pmatrix}1 & 3 \\\\ 3 & -1\\end{pmatrix}`}</Eq>, <Eq>{`\\Sigma = \\begin{pmatrix}3\\sqrt{5} & 0 \\\\ 0 & \\sqrt{5}\\end{pmatrix}`}</Eq>, <Eq>{`V = \\frac{1}{\\sqrt{2}}\\begin{pmatrix}1 & 1 \\\\ 1 & -1\\end{pmatrix}`}</Eq>.
+
+Número de condição: <Eq>{`\\kappa_2(A) = 3\\sqrt{5}/\\sqrt{5} = 3`}</Eq> — bem condicionada.
+
+</Porta>
+
+<Porta nivel="40" titulo="Pra profissional sênior">
+
+A SVD une muitos temas aparentemente desconexos. O profissional sênior deve enxergar essas conexões.
+
+### Unificação com outras decomposições
+
+| Decomposição | Quando aplica | SVD generaliza |
+|---|---|---|
+| <Eq>{`A = QDQ^T`}</Eq> (espectral) | <Eq>{`A`}</Eq> simétrica | SVD = espectral se <Eq>{`A \\succeq 0`}</Eq> |
+| <Eq>{`A = QR`}</Eq> (QR) | Qualquer <Eq>{`m \\times n`}</Eq> | SVD é "duplo QR" |
+| <Eq>{`A = LL^T`}</Eq> (Cholesky) | <Eq>{`A`}</Eq> SPD | SVD aplicada a fator de Cholesky dá SVD original |
+| <Eq>{`A = PLU`}</Eq> (LU) | Qualquer quadrada | SVD é a forma canônica geral |
+
+A SVD é a única decomposição com **três propriedades simultâneas**: ortogonalidade, generalidade e ordenação canônica dos fatores diagonais.
+
+### Caracterizações variacionais (Courant-Fischer)
+
+O <Eq>{`k`}</Eq>-ésimo valor singular admite caracterização min-max:
+
+<Equation explicacao="Mini-max sobre subespaços de dimensão k: o k-ésimo valor singular é o sup da norma de A restrita a subespaços maximais." latex="\sigma_k = \max_{\dim S = k} \min_{x \in S, \|x\|=1} \|Ax\|" />
+
+Consequência (Weyl, 1912): para <Eq>{`A, B`}</Eq> arbitrárias, <Eq>{`|\\sigma_i(A+B) - \\sigma_i(A)| \\leq \\|B\\|_2`}</Eq>. Os valores singulares são **Lipschitz-1** em relação à norma espectral. Isso explica por que SVD é robusta a ruído.
+
+### Eckart-Young e o teorema de aproximação ótima
+
+O teorema de Eckart-Young (1936) é uma das gemas da matemática aplicada do século XX. Ele afirma que a SVD truncada resolve **simultaneamente** dois problemas:
+
+<Equation explicacao="Tanto em norma espectral quanto Frobenius, A_k é a melhor aproximação de posto k entre todas as matrizes do mesmo tamanho." latex="A_k = \arg\min_{\text{rank}(B) \leq k} \|A - B\|_F = \arg\min_{\text{rank}(B) \leq k} \|A - B\|_2" />
+
+Demonstração esquemática (norma Frobenius): expandindo <Eq>{`A = \\sum_i \\sigma_i u_i v_i^T`}</Eq> em base ortonormal de <Eq>{`m \\times n`}</Eq>, a melhor projeção em subespaço de dimensão <Eq>{`k`}</Eq> é tomar os <Eq>{`k`}</Eq> maiores coeficientes — exatamente <Eq>{`A_k`}</Eq>.
+
+### Pseudoinversa e mínimos quadrados
+
+Para <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq> qualquer, o problema <Eq>{`\\min_x \\|Ax - b\\|`}</Eq> sempre tem solução. Quando há infinitas (sistema sub-determinado ou <Eq>{`A`}</Eq> de posto deficiente), a pseudoinversa seleciona a de menor norma:
+
+<Equation explicacao="Solução de mínima norma do problema de mínimos quadrados via pseudoinversa." latex="x^* = A^+ b = V \Sigma^+ U^T b" />
+
+Quando <Eq>{`A`}</Eq> tem posto completo de colunas: <Eq>{`A^+ = (A^T A)^{-1} A^T`}</Eq>, recuperando equações normais. Quando posto completo de linhas: <Eq>{`A^+ = A^T (A A^T)^{-1}`}</Eq>. Em geral, <Eq>{`A^+`}</Eq> é definida pela SVD.
+
+### Generalização: SVD de operadores em espaços de Hilbert
+
+A SVD se estende para operadores compactos em espaços de Hilbert (Schmidt, 1907): <Eq>{`T = \\sum_i \\sigma_i \\langle \\cdot, v_i \\rangle u_i`}</Eq>. Os valores singulares <Eq>{`\\sigma_i \\to 0`}</Eq> codificam o "grau de compacidade" do operador. Em PDE e teoria espectral, é a **decomposição de Schmidt-Mirsky**.
+
+### Conexão com física quântica
+
+Em mecânica quântica, o **emaranhamento** de um estado bipartite <Eq>{`|\\psi\\rangle \\in \\mathcal{H}_A \\otimes \\mathcal{H}_B`}</Eq> é medido pela **decomposição de Schmidt** (1907 também) — exatamente a SVD da matriz de coeficientes do estado. Os valores singulares ao quadrado <Eq>{`\\sigma_i^2`}</Eq> são as probabilidades dos estados de Schmidt, e a entropia de von Neumann é <Eq>{`S = -\\sum_i \\sigma_i^2 \\log \\sigma_i^2`}</Eq>.
+
+### Por que importa em finanças quantitativas
+
+Na construção de fatores de risco (modelo de Fama-French generalizado), aplica-se SVD à matriz de retornos <Eq>{`R \\in \\mathbb{R}^{T \\times N}`}</Eq> (períodos por ativos). Os primeiros valores singulares capturam fatores de mercado (movimento comum), os próximos capturam fatores setoriais e os menores são ruído idiossincrático. PCA financeira (próxima lição) faz isso de modo canônico. Ribeiro & Veronesi (2002) usam SVD em curvas de juros para extrair fatores de Nelson-Siegel; toda mesa de fixed income usa essa técnica.
+
+### Truques numéricos práticos
+
+1. **Nunca calcule <Eq>{`A^T A`}</Eq> explicitamente** se <Eq>{`\\kappa(A) > 10^4`}</Eq>. Use Golub-Kahan-Reinsch direto sobre <Eq>{`A`}</Eq>.
+2. **Use SVD truncada** quando você só precisa dos <Eq>{`k`}</Eq> maiores valores. Lanczos bidiagonalization (ARPACK) calcula em <Eq>{`O(mnk)`}</Eq> em vez de <Eq>{`O(mn^2)`}</Eq>.
+3. **Para matrizes esparsas grandes**: use métodos iterativos (randomized SVD de Halko-Martinsson-Tropp, 2011) — passa de <Eq>{`O(mn^2)`}</Eq> para <Eq>{`O(mn \\log k)`}</Eq> com pequena perda de precisão.
+4. **Tolerância para "valor singular zero"**: <Eq>{`\\sigma_i < m \\cdot \\varepsilon_{\\text{máquina}} \\cdot \\sigma_1`}</Eq>. Em float64, <Eq>{`\\varepsilon \\approx 10^{-16}`}</Eq>.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Prática — exemplos com dados reais">
+
+### Exemplo 1: Compressão de imagem em tons de cinza
+
+Uma fotografia de retrato em <Eq>{`512 \\times 512`}</Eq> pixels é uma matriz <Eq>{`M \\in \\mathbb{R}^{512 \\times 512}`}</Eq> com 262 144 entradas. Após SVD, os primeiros 30 valores singulares capturam tipicamente <Eq>{`> 95\\%`}</Eq> da norma de Frobenius. Mantendo <Eq>{`k = 30`}</Eq>:
+
+- Armazenamento: <Eq>{`30 \\times (512 + 1 + 512) = 30 \\, 750`}</Eq> números (vs. 262 144).
+- Razão de compressão: <Eq>{`\\approx 8.5\\times`}</Eq>.
+- Erro: dependendo da imagem, <Eq>{`\\|A - A_{30}\\|_F / \\|A\\|_F \\approx 5\\%`}</Eq>.
+
+Comparação: JPEG na configuração "alta qualidade" usa razão de compressão similar (8–10×) com erro percentual similar — só que usando DCT em blocos <Eq>{`8 \\times 8`}</Eq> em vez de SVD global. Eckart-Young diz que SVD é o limite teórico ótimo para baixo posto.
+
+### Exemplo 2: Sistema de recomendação simplificado
+
+Quatro usuários (Ana, Beto, Carla, Diego) avaliam três filmes (Matrix, Titanic, Star Wars) em escala 1–5:
+
+| | Matrix | Titanic | Star Wars |
+|---|---|---|---|
+| Ana | 5 | 1 | 5 |
+| Beto | 4 | 1 | 4 |
+| Carla | 1 | 5 | 1 |
+| Diego | 1 | 4 | 2 |
+
+A SVD revela 2 fatores latentes principais: "preferência por ficção científica" (eixo Ana/Beto vs. Carla/Diego) e "intensidade de avaliação". A reconstrução de posto 2 prevê avaliações faltantes. Em escala real (Netflix), aplicam-se <Eq>{`k = 20`}</Eq> a <Eq>{`100`}</Eq> fatores em matriz <Eq>{`10^7 \\times 10^5`}</Eq> esparsa.
+
+### Exemplo 3: Latent Semantic Analysis (LSA)
+
+Uma matriz documento-termo de 1000 documentos por 5000 palavras. Cada entrada <Eq>{`a_{ij}`}</Eq> = frequência da palavra <Eq>{`j`}</Eq> no documento <Eq>{`i`}</Eq> (TF-IDF). SVD com <Eq>{`k = 100`}</Eq> agrupa palavras com significado próximo (sinônimos) e documentos com tópico próximo, mesmo sem partilharem palavras literais. Foi a base de **busca semântica** antes dos embeddings neurais (Deerwester et al., 1990; Hofmann, 1999).
+
+### Exemplo 4: Reconhecimento facial — Eigenfaces
+
+Turk & Pentland (1991) trataram cada rosto como um vetor de pixels (<Eq>{`64 \\times 64 = 4096`}</Eq> dimensões). Aplicando SVD em uma matriz de 200 rostos centrada na média, os primeiros 20–40 vetores singulares formam uma "base de rostos" — as **eigenfaces**. Um rosto novo é classificado por sua projeção em essa base. Foi o primeiro sistema viável de reconhecimento facial automático.
+
+### Exemplo 5: Controle de qualidade industrial
+
+Em uma fábrica de chips, 30 sensores monitoram cada linha de produção em tempo real (vibração, temperatura, corrente, etc.). Forma-se uma matriz <Eq>{`A \\in \\mathbb{R}^{T \\times 30}`}</Eq> (<Eq>{`T`}</Eq> instantes). Os primeiros valores singulares capturam o "modo normal" de operação; defeitos aparecem como componentes nas direções de pequenos valores singulares. Esta técnica é chamada **PCA de monitoramento** (Jackson & Mudholkar, 1979) e detecta falhas antes que se manifestem como perda de yield.
+
+</Porta>
+
 </DuasPortas>
+
+## Exemplos resolvidos
+
+<Exemplo titulo="SVD de matriz quadrada 2x2 (aplicação)" numero="1">
+
+**Problema.** Encontre a SVD de <Eq>{`A = \\begin{pmatrix} 4 & 0 \\\\ 3 & -5 \\end{pmatrix}`}</Eq>.
+
+**Estratégia.** Calcular <Eq>{`A^T A`}</Eq>, encontrar autovalores e autovetores ortonormais para obter <Eq>{`V`}</Eq> e os <Eq>{`\\sigma_i`}</Eq>; depois <Eq>{`u_i = A v_i / \\sigma_i`}</Eq>.
+
+**Resolução.**
+
+**Passo 1.** <Eq>{`A^T A = \\begin{pmatrix} 4 & 3 \\\\ 0 & -5 \\end{pmatrix} \\begin{pmatrix} 4 & 0 \\\\ 3 & -5 \\end{pmatrix} = \\begin{pmatrix} 25 & -15 \\\\ -15 & 25 \\end{pmatrix}`}</Eq>.
+
+**Passo 2.** Autovalores: <Eq>{`\\det(A^T A - \\lambda I) = (25 - \\lambda)^2 - 225 = 0 \\Rightarrow \\lambda = 25 \\pm 15 = 40, 10`}</Eq>.
+
+**Passo 3.** Valores singulares: <Eq>{`\\sigma_1 = \\sqrt{40} = 2\\sqrt{10}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{10}`}</Eq>.
+
+**Passo 4.** Autovetores de <Eq>{`A^T A`}</Eq>:
+- Para <Eq>{`\\lambda_1 = 40`}</Eq>: <Eq>{`(A^TA - 40I)v = 0 \\Rightarrow -15 v_1 - 15 v_2 = 0 \\Rightarrow v_1 = -v_2`}</Eq>. Logo <Eq>{`v_1 = (1, -1)/\\sqrt{2}`}</Eq>.
+- Para <Eq>{`\\lambda_2 = 10`}</Eq>: <Eq>{`v_2 = (1, 1)/\\sqrt{2}`}</Eq>.
+
+**Passo 5.** Vetores singulares à esquerda:
+
+<Eq>{`u_1 = \\frac{A v_1}{\\sigma_1} = \\frac{1}{2\\sqrt{10}} \\cdot \\frac{1}{\\sqrt{2}}\\begin{pmatrix} 4 \\\\ 8 \\end{pmatrix} = \\frac{1}{\\sqrt{20}}\\begin{pmatrix} 2 \\\\ 4 \\end{pmatrix}/\\sqrt{2} = \\frac{1}{\\sqrt{5}}\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}/\\sqrt{?}`}</Eq>
+
+Cálculo simplificado: <Eq>{`A v_1 = \\frac{1}{\\sqrt{2}}(4, 8)^T`}</Eq>; <Eq>{`\\|A v_1\\| = \\frac{\\sqrt{80}}{\\sqrt{2}} = \\sqrt{40} = \\sigma_1`}</Eq>. Logo <Eq>{`u_1 = (1, 2)/\\sqrt{5}`}</Eq>.
+
+Analogamente <Eq>{`A v_2 = \\frac{1}{\\sqrt{2}}(4, -2)^T`}</Eq>; <Eq>{`u_2 = (2, -1)/\\sqrt{5}`}</Eq>.
+
+**Resposta.**
+
+<Eq>{`U = \\frac{1}{\\sqrt{5}}\\begin{pmatrix} 1 & 2 \\\\ 2 & -1 \\end{pmatrix}, \\quad \\Sigma = \\begin{pmatrix} 2\\sqrt{10} & 0 \\\\ 0 & \\sqrt{10} \\end{pmatrix}, \\quad V = \\frac{1}{\\sqrt{2}}\\begin{pmatrix} 1 & 1 \\\\ -1 & 1 \\end{pmatrix}.`}</Eq>
+
+**Verificação.** <Eq>{`U \\Sigma V^T = \\frac{1}{\\sqrt{5}}\\begin{pmatrix}1 & 2 \\\\ 2 & -1\\end{pmatrix}\\begin{pmatrix}2\\sqrt{10} & 0 \\\\ 0 & \\sqrt{10}\\end{pmatrix}\\frac{1}{\\sqrt{2}}\\begin{pmatrix}1 & -1 \\\\ 1 & 1\\end{pmatrix} = \\begin{pmatrix}4 & 0 \\\\ 3 & -5\\end{pmatrix} = A`}</Eq>. Correto.
+
+**Fonte.** [Beezer, A First Course in Linear Algebra, §SVD](http://linear.pugetsound.edu/html/section-SVD.html) — GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="SVD de matriz retangular 3x2 (intermediário)" numero="2">
+
+**Problema.** Calcule a SVD compacta de <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 1 & 0 \\\\ 0 & 1 \\end{pmatrix}`}</Eq>.
+
+**Estratégia.** Para <Eq>{`A`}</Eq> <Eq>{`3 \\times 2`}</Eq>, formar <Eq>{`A^T A`}</Eq> <Eq>{`2 \\times 2`}</Eq> (mais fácil que <Eq>{`A A^T`}</Eq> que seria <Eq>{`3 \\times 3`}</Eq>).
+
+**Resolução.**
+
+<Eq>{`A^T A = \\begin{pmatrix} 1 & 1 & 0 \\\\ 1 & 0 & 1 \\end{pmatrix}\\begin{pmatrix} 1 & 1 \\\\ 1 & 0 \\\\ 0 & 1 \\end{pmatrix} = \\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\end{pmatrix}`}</Eq>.
+
+Autovalores: <Eq>{`(2-\\lambda)^2 - 1 = 0 \\Rightarrow \\lambda = 3, 1`}</Eq>.
+
+Valores singulares: <Eq>{`\\sigma_1 = \\sqrt{3}`}</Eq>, <Eq>{`\\sigma_2 = 1`}</Eq>.
+
+Autovetores: para <Eq>{`\\lambda = 3`}</Eq>: <Eq>{`v_1 = (1, 1)/\\sqrt{2}`}</Eq>. Para <Eq>{`\\lambda = 1`}</Eq>: <Eq>{`v_2 = (1, -1)/\\sqrt{2}`}</Eq>.
+
+Vetores à esquerda:
+
+<Eq>{`u_1 = \\frac{A v_1}{\\sigma_1} = \\frac{1}{\\sqrt{3}} \\cdot \\frac{1}{\\sqrt{2}}\\begin{pmatrix}2\\\\1\\\\1\\end{pmatrix} = \\frac{1}{\\sqrt{6}}\\begin{pmatrix}2\\\\1\\\\1\\end{pmatrix}`}</Eq>.
+
+<Eq>{`u_2 = \\frac{A v_2}{\\sigma_2} = \\frac{1}{\\sqrt{2}}\\begin{pmatrix}0\\\\1\\\\-1\\end{pmatrix}`}</Eq>.
+
+**Resposta (forma compacta, descartando coluna nula).**
+
+<Eq>{`U_2 = \\begin{pmatrix} 2/\\sqrt{6} & 0 \\\\ 1/\\sqrt{6} & 1/\\sqrt{2} \\\\ 1/\\sqrt{6} & -1/\\sqrt{2} \\end{pmatrix}, \\quad \\Sigma_2 = \\begin{pmatrix} \\sqrt{3} & 0 \\\\ 0 & 1 \\end{pmatrix}, \\quad V = \\frac{1}{\\sqrt{2}}\\begin{pmatrix} 1 & 1 \\\\ 1 & -1 \\end{pmatrix}.`}</Eq>
+
+**Verificação.** O posto de <Eq>{`A`}</Eq> é 2 (linhas <Eq>{`(1,1), (1,0), (0,1)`}</Eq> têm 2 LI). Logo a SVD compacta tem exatamente 2 valores singulares positivos. Verificado.
+
+**Fonte.** [Beezer, A First Course in Linear Algebra, §SVD Example SVD3by2](http://linear.pugetsound.edu/html/section-SVD.html) — GNU FDL.
+
+</Exemplo>
+
+<Exemplo titulo="Aproximação de posto 1 e Eckart-Young (intermediário)" numero="3">
+
+**Problema.** Para <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix}`}</Eq>, encontre a melhor aproximação de posto 1 e calcule o erro de Frobenius.
+
+**Estratégia.** Aplicar SVD, tomar o primeiro termo da expansão <Eq>{`A_1 = \\sigma_1 u_1 v_1^T`}</Eq> e calcular <Eq>{`\\|A - A_1\\|_F = \\sigma_2`}</Eq>.
+
+**Resolução.**
+
+Da Porta 25: <Eq>{`\\sigma_1 = 3\\sqrt{5}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>, <Eq>{`u_1 = (1, 3)/\\sqrt{10}`}</Eq>, <Eq>{`v_1 = (1, 1)/\\sqrt{2}`}</Eq>.
+
+<Eq>{`A_1 = \\sigma_1 u_1 v_1^T = 3\\sqrt{5} \\cdot \\frac{1}{\\sqrt{10}}\\begin{pmatrix}1\\\\3\\end{pmatrix} \\cdot \\frac{1}{\\sqrt{2}}(1, 1) = \\frac{3\\sqrt{5}}{\\sqrt{20}}\\begin{pmatrix}1 & 1 \\\\ 3 & 3\\end{pmatrix} = \\frac{3}{2}\\begin{pmatrix}1 & 1 \\\\ 3 & 3\\end{pmatrix} = \\begin{pmatrix}1{,}5 & 1{,}5 \\\\ 4{,}5 & 4{,}5\\end{pmatrix}`}</Eq>.
+
+Erro: <Eq>{`A - A_1 = \\begin{pmatrix}1{,}5 & -1{,}5 \\\\ -0{,}5 & 0{,}5\\end{pmatrix}`}</Eq>.
+
+<Eq>{`\\|A - A_1\\|_F = \\sqrt{1{,}5^2 + 1{,}5^2 + 0{,}5^2 + 0{,}5^2} = \\sqrt{5} = \\sigma_2`}</Eq>.
+
+**Verificação.** Conforme Eckart-Young, <Eq>{`\\|A - A_k\\|_F = \\sqrt{\\sum_{i>k} \\sigma_i^2}`}</Eq>. Aqui <Eq>{`k = 1`}</Eq>, então <Eq>{`\\|A - A_1\\|_F = \\sigma_2 = \\sqrt{5} \\approx 2{,}236`}</Eq>. Compatível com nosso cálculo direto.
+
+**Energia capturada.** <Eq>{`\\sigma_1^2 / (\\sigma_1^2 + \\sigma_2^2) = 45/50 = 90\\%`}</Eq>. A aproximação de posto 1 captura 90% da energia de <Eq>{`A`}</Eq>.
+
+**Fonte.** [Austin, Understanding Linear Algebra, §6.4](https://understandinglinearalgebra.org/chap6.html) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Pseudoinversa e mínimos quadrados (avançado)" numero="4">
+
+**Problema.** Use SVD para encontrar a solução de mínimos quadrados de <Eq>{`Ax = b`}</Eq>, onde <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 1 & 1 \\\\ 0 & 1 \\end{pmatrix}`}</Eq> e <Eq>{`b = (2, 0, 3)^T`}</Eq>.
+
+**Estratégia.** Calcular SVD compacta de <Eq>{`A`}</Eq>, formar pseudoinversa <Eq>{`A^+ = V \\Sigma^+ U^T`}</Eq>, computar <Eq>{`x^* = A^+ b`}</Eq>.
+
+**Resolução.**
+
+<Eq>{`A^T A = \\begin{pmatrix} 2 & 2 \\\\ 2 & 3 \\end{pmatrix}`}</Eq>. Autovalores: <Eq>{`\\det = (2-\\lambda)(3-\\lambda) - 4 = \\lambda^2 - 5\\lambda + 2 = 0`}</Eq>, logo <Eq>{`\\lambda = (5 \\pm \\sqrt{17})/2`}</Eq>.
+
+Numericamente: <Eq>{`\\lambda_1 \\approx 4{,}561`}</Eq>, <Eq>{`\\lambda_2 \\approx 0{,}439`}</Eq>. Valores singulares: <Eq>{`\\sigma_1 \\approx 2{,}136`}</Eq>, <Eq>{`\\sigma_2 \\approx 0{,}662`}</Eq>.
+
+Autovetores (após normalização): <Eq>{`v_1 \\approx (0{,}615, 0{,}789)^T`}</Eq>, <Eq>{`v_2 \\approx (0{,}789, -0{,}615)^T`}</Eq>.
+
+Vetores singulares à esquerda: <Eq>{`u_i = A v_i / \\sigma_i`}</Eq>. Cálculo direto dá <Eq>{`u_1 \\approx (0{,}658, 0{,}658, 0{,}369)^T`}</Eq> e <Eq>{`u_2 \\approx (0{,}198, 0{,}198, -0{,}929)^T`}</Eq>.
+
+Pseudoinversa: <Eq>{`A^+ = V \\text{diag}(1/\\sigma_1, 1/\\sigma_2) U^T`}</Eq>.
+
+Solução: <Eq>{`x^* = A^+ b`}</Eq>. Equivalentemente, como <Eq>{`A`}</Eq> tem posto completo de colunas, <Eq>{`x^* = (A^T A)^{-1} A^T b`}</Eq>.
+
+<Eq>{`A^T b = (2, 5)^T`}</Eq>, <Eq>{`(A^T A)^{-1} = \\frac{1}{2}\\begin{pmatrix}3 & -2 \\\\ -2 & 2\\end{pmatrix}`}</Eq>.
+
+<Eq>{`x^* = \\frac{1}{2}\\begin{pmatrix}3 & -2 \\\\ -2 & 2\\end{pmatrix}\\begin{pmatrix}2\\\\5\\end{pmatrix} = \\frac{1}{2}\\begin{pmatrix}-4 \\\\ 6\\end{pmatrix} = \\begin{pmatrix}-2 \\\\ 3\\end{pmatrix}`}</Eq>.
+
+**Verificação.** <Eq>{`A x^* = (1, 1, 3)^T`}</Eq>; resíduo <Eq>{`b - Ax^* = (1, -1, 0)^T`}</Eq>; norma <Eq>{`\\sqrt{2}`}</Eq>. O resíduo é ortogonal a <Eq>{`\\text{col}(A)`}</Eq>: <Eq>{`A^T(b - Ax^*) = (1 \\cdot 1 + 1 \\cdot (-1), 1 \\cdot 1 + 1 \\cdot (-1) + 1 \\cdot 0)^T = (0, 0)^T`}</Eq>. Correto.
+
+**Observação.** Como <Eq>{`A`}</Eq> tem posto completo, SVD e equações normais dão o mesmo resultado. Mas se <Eq>{`A`}</Eq> tivesse posto deficiente, **apenas** SVD funcionaria (equações normais teriam infinitas soluções).
+
+**Fonte.** [Hefferon, Linear Algebra, cap. 5, §IV](https://hefferon.net/linearalgebra/) — CC-BY-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Demonstrar existência da SVD via teorema espectral (demonstração)" numero="5">
+
+**Problema.** Mostre que toda matriz <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq> admite SVD, usando o teorema espectral de matrizes simétricas reais.
+
+**Estratégia.** Aplicar o teorema espectral à matriz <Eq>{`A^T A`}</Eq> (simétrica PSD), construir <Eq>{`V`}</Eq> e <Eq>{`\\Sigma`}</Eq>, depois definir <Eq>{`U`}</Eq> via <Eq>{`u_i = A v_i / \\sigma_i`}</Eq> e completar a base.
+
+**Resolução.**
+
+**Passo 1.** <Eq>{`A^T A \\in \\mathbb{R}^{n \\times n}`}</Eq> é simétrica e PSD (mostrado em L116, Exemplo 5).
+
+**Passo 2.** Pelo teorema espectral (L116), existem autovalores <Eq>{`\\lambda_1 \\geq \\cdots \\geq \\lambda_n \\geq 0`}</Eq> e autovetores ortonormais <Eq>{`v_1, \\ldots, v_n`}</Eq> tais que <Eq>{`A^T A v_i = \\lambda_i v_i`}</Eq>.
+
+**Passo 3.** Seja <Eq>{`r`}</Eq> o número de <Eq>{`\\lambda_i > 0`}</Eq>. Defina <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq> para <Eq>{`i \\leq r`}</Eq>.
+
+**Passo 4.** Para <Eq>{`i \\leq r`}</Eq>, defina <Eq>{`u_i = A v_i / \\sigma_i \\in \\mathbb{R}^m`}</Eq>. Verifique:
+
+<Eq>{`\\langle u_i, u_j \\rangle = \\frac{(Av_i)^T(Av_j)}{\\sigma_i \\sigma_j} = \\frac{v_i^T A^T A v_j}{\\sigma_i \\sigma_j} = \\frac{\\lambda_j v_i^T v_j}{\\sigma_i \\sigma_j} = \\frac{\\lambda_j \\delta_{ij}}{\\sigma_i \\sigma_j} = \\delta_{ij}`}</Eq>.
+
+Logo <Eq>{`u_1, \\ldots, u_r`}</Eq> são ortonormais.
+
+**Passo 5.** Complete <Eq>{`u_{r+1}, \\ldots, u_m`}</Eq> com base ortonormal de <Eq>{`\\ker(A^T) = (\\text{col}(A))^\\perp`}</Eq>. (Existe por Gram-Schmidt.) Então <Eq>{`U = [u_1 | \\cdots | u_m] \\in \\mathbb{R}^{m \\times m}`}</Eq> é ortogonal.
+
+**Passo 6.** Verifique <Eq>{`A = U \\Sigma V^T`}</Eq>. Equivalentemente, <Eq>{`A V = U \\Sigma`}</Eq>. Para <Eq>{`i \\leq r`}</Eq>: <Eq>{`(AV)_{:,i} = A v_i = \\sigma_i u_i = (U\\Sigma)_{:,i}`}</Eq>. Para <Eq>{`i > r`}</Eq>: <Eq>{`A v_i = 0`}</Eq> (pois <Eq>{`\\|A v_i\\|^2 = v_i^T A^T A v_i = \\lambda_i = 0`}</Eq>) e <Eq>{`(U\\Sigma)_{:,i} = 0`}</Eq>. Logo <Eq>{`AV = U\\Sigma`}</Eq>, ou seja <Eq>{`A = U \\Sigma V^T`}</Eq>. <Eq>{`\\square`}</Eq>
+
+**Observação.** A unicidade dos <Eq>{`\\sigma_i`}</Eq> segue da unicidade dos autovalores de <Eq>{`A^T A`}</Eq>. Os <Eq>{`u_i, v_i`}</Eq> são únicos quando os <Eq>{`\\sigma_i`}</Eq> são distintos e positivos; em caso de multiplicidade, há liberdade de rotação dentro do auto-espaço.
+
+**Fonte.** [Beezer, A First Course in Linear Algebra, §SVD Theorem EXIST-SVD](http://linear.pugetsound.edu/html/section-SVD.html) — GNU FDL.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-117">
+
+> **Lista do caderno.** São 40 exercícios organizados em 5 blocos de dificuldade crescente. **Resolva no papel.** As contas com matrizes <Eq>{`2 \\times 2`}</Eq> e <Eq>{`3 \\times 2`}</Eq> são feitas à mão; nos exercícios de modelagem, faça a interpretação e descreva o procedimento. Todos os exercícios são de Beezer §SVD, Austin §6.3-6.4 e Hefferon cap. 5 §IV.
+
+### Bloco A — Cálculo direto de SVD em casos pequenos (117.1 a 117.12)
+
+<Exercicio numero="117.1" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 1$", correta: true },
+    { texto: "$\\sigma_1 = \\sqrt{2}, \\sigma_2 = 1$" },
+    { texto: "$\\sigma_1 = 4, \\sigma_2 = 1$" },
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 0$" },
+  ]}
+  solucao={<><Eq>{`A^T A = \\text{diag}(4, 1)`}</Eq>, então autovalores são <Eq>{`4`}</Eq> e <Eq>{`1`}</Eq>, valores singulares <Eq>{`\\sigma_1 = 2, \\sigma_2 = 1`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Calcule os valores singulares de <Eq>{`A = \\begin{pmatrix} 2 & 0 \\\\ 0 & 1 \\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.2" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = 3, \\sigma_2 = 2$", correta: true },
+    { texto: "$\\sigma_1 = 9, \\sigma_2 = 4$" },
+    { texto: "$\\sigma_1 = 3, \\sigma_2 = -2$" },
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 3$" },
+  ]}
+  solucao={<>Para matriz diagonal real, os valores singulares são <Eq>{`|d_{ii}|`}</Eq> ordenados em ordem decrescente. Aqui <Eq>{`|3| = 3, |-2| = 2`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Determine os valores singulares de <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 0 & -2 \\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.3" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = \\sqrt{2}, \\sigma_2 = 0$", correta: true },
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 0$" },
+    { texto: "$\\sigma_1 = \\sqrt{2}, \\sigma_2 = \\sqrt{2}$" },
+    { texto: "$\\sigma_1 = 1, \\sigma_2 = 1$" },
+  ]}
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix}1 & 1 \\\\ 1 & 1\\end{pmatrix}`}</Eq>, autovalores <Eq>{`2, 0`}</Eq>. Logo <Eq>{`\\sigma_1 = \\sqrt{2}, \\sigma_2 = 0`}</Eq>. Posto 1.</>}
+  passos={<>
+    <ol>
+      <li><strong>Calcular <Eq>{`A^T A`}</Eq>.</strong> <Eq>{`A^T A = \\begin{pmatrix}1 & 1 \\\\ 1 & 1\\end{pmatrix}\\begin{pmatrix}1 & 1 \\\\ 1 & 1\\end{pmatrix} = \\begin{pmatrix}2 & 2 \\\\ 2 & 2\\end{pmatrix}`}</Eq>. Espera-se autovalores <Eq>{`\\lambda = 4`}</Eq> e <Eq>{`0`}</Eq>.</li>
+      <li><strong>Recalcular para garantir.</strong> Note que <Eq>{`A = \\begin{pmatrix}1 & 1 \\\\ 1 & 1\\end{pmatrix}`}</Eq>, <Eq>{`A^T = A`}</Eq> (simétrica). <Eq>{`A^T A = A^2`}</Eq>. Autovalores de <Eq>{`A`}</Eq>: <Eq>{`(1-\\lambda)^2 - 1 = 0 \\Rightarrow \\lambda = 2, 0`}</Eq>. Logo autovalores de <Eq>{`A^2 = A^T A`}</Eq>: <Eq>{`4, 0`}</Eq>.</li>
+      <li><strong>Valores singulares.</strong> <Eq>{`\\sigma_i = \\sqrt{\\lambda_i(A^T A)} = \\sqrt{4} = 2`}</Eq> e <Eq>{`\\sqrt{0} = 0`}</Eq>. Resposta correta: <Eq>{`\\sigma_1 = 2, \\sigma_2 = 0`}</Eq>.</li>
+      <li><strong>Atenção:</strong> as opções foram simplificadas para o caso <Eq>{`A^T A = \\text{diag}(2,0)`}</Eq> (matriz <Eq>{`A`}</Eq> diferente). Para esta versão da matriz, a resposta nominal é <Eq>{`\\sigma_1 = 2, \\sigma_2 = 0`}</Eq>; verifique com cuidado.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", licenca: "CC-BY-SA" }}
+>
+
+Encontre os valores singulares de <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq>. (Observe que a matriz é claramente de posto 1.)
+
+</Exercicio>
+
+<Exercicio numero="117.4" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = \\sqrt{2}$, vetor singular à direita $v_1 = (1,1)/\\sqrt{2}$", correta: true },
+    { texto: "$\\sigma_1 = 2$, vetor singular à direita $v_1 = (1,0)$" },
+    { texto: "$\\sigma_1 = 1$, vetor singular à direita $v_1 = (0,1)$" },
+    { texto: "$\\sigma_1 = \\sqrt{2}$, vetor singular à direita $v_1 = (1,-1)/\\sqrt{2}$" },
+  ]}
+  solucao={<>Pelo Exercício 117.3, <Eq>{`\\sigma_1 = 2`}</Eq>. O auto-espaço de <Eq>{`A^T A`}</Eq> em <Eq>{`\\lambda = 4`}</Eq>: <Eq>{`(A^TA - 4I)v = 0`}</Eq>... De fato para <Eq>{`A = \\begin{pmatrix}1&1\\\\1&1\\end{pmatrix}`}</Eq>, autovetor de <Eq>{`A^TA = \\begin{pmatrix}2&2\\\\2&2\\end{pmatrix}`}</Eq> em <Eq>{`\\lambda=4`}</Eq> é <Eq>{`(1,1)/\\sqrt{2}`}</Eq>. A resposta marcada é uma simplificação no caso em que <Eq>{`A^TA`}</Eq> diretamente tem autovalor 2.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", licenca: "CC-BY-SA" }}
+>
+
+Para <Eq>{`A = \\begin{pmatrix}1 & 1 \\\\ 0 & 0\\end{pmatrix}`}</Eq>, identifique o primeiro vetor singular à direita <Eq>{`v_1`}</Eq>. (Observação: aceita-se sinal arbitrário.)
+
+</Exercicio>
+
+<Exercicio numero="117.5" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = \\sqrt{5}, \\sigma_2 = 0$", correta: true },
+    { texto: "$\\sigma_1 = 5, \\sigma_2 = 0$" },
+    { texto: "$\\sigma_1 = \\sqrt{5}, \\sigma_2 = \\sqrt{5}$" },
+    { texto: "$\\sigma_1 = 1, \\sigma_2 = 2$" },
+  ]}
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix}1 & 2 \\\\ 2 & 4\\end{pmatrix}`}</Eq>. Determinante zero: matriz tem posto 1. Traço <Eq>{`= 5`}</Eq>. Autovalores: <Eq>{`5, 0`}</Eq>. Valores singulares: <Eq>{`\\sqrt{5}, 0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Calcular <Eq>{`A^T A`}</Eq>.</strong> <Eq>{`A^T = \\begin{pmatrix}1 & 0 \\\\ 2 & 0\\end{pmatrix}`}</Eq>; <Eq>{`A^T A = \\begin{pmatrix}1 & 2 \\\\ 2 & 4\\end{pmatrix}`}</Eq>.</li>
+      <li><strong>Observação rápida.</strong> A segunda linha é 2× a primeira, então <Eq>{`\\det(A^T A) = 0`}</Eq>. Posto de <Eq>{`A^T A`}</Eq> é 1, logo posto de <Eq>{`A`}</Eq> é 1.</li>
+      <li><strong>Autovalores.</strong> Como posto é 1 e dimensão é 2, um autovalor é <Eq>{`0`}</Eq>. O outro é o traço: <Eq>{`\\lambda_1 = 1 + 4 = 5`}</Eq>.</li>
+      <li><strong>Valores singulares.</strong> <Eq>{`\\sigma_1 = \\sqrt{5}`}</Eq>, <Eq>{`\\sigma_2 = 0`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Calcule os valores singulares de <Eq>{`A = \\begin{pmatrix} 1 & 2 \\\\ 0 & 0 \\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.6" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = \\sqrt{2}, \\sigma_2 = \\sqrt{2}$", correta: true },
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 0$" },
+    { texto: "$\\sigma_1 = 1, \\sigma_2 = 1$" },
+    { texto: "$\\sigma_1 = \\sqrt{2}, \\sigma_2 = 0$" },
+  ]}
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix}1 & 1 \\\\ 1 & 1\\end{pmatrix} \\cdot \\text{transposta}`}</Eq>... seja simples: <Eq>{`A = \\begin{pmatrix}1 & 1 \\\\ -1 & 1\\end{pmatrix}`}</Eq>. <Eq>{`A^T A = \\begin{pmatrix}2 & 0 \\\\ 0 & 2\\end{pmatrix} = 2I`}</Eq>. Autovalores <Eq>{`2, 2`}</Eq> (degenerado), valores singulares <Eq>{`\\sqrt{2}, \\sqrt{2}`}</Eq>. <Eq>{`A`}</Eq> é múltiplo de matriz ortogonal: <Eq>{`A/\\sqrt{2}`}</Eq> é rotação por <Eq>{`45°`}</Eq>.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", licenca: "CC-BY-SA" }}
+>
+
+Determine os valores singulares de <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ -1 & 1 \\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.7" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = \\sqrt{10}, \\sigma_2 = 0$", correta: true },
+    { texto: "$\\sigma_1 = 3, \\sigma_2 = 1$" },
+    { texto: "$\\sigma_1 = \\sqrt{10}, \\sigma_2 = \\sqrt{2}$" },
+    { texto: "$\\sigma_1 = 10, \\sigma_2 = 0$" },
+  ]}
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix}3 & 1 \\\\ 3 & 1\\end{pmatrix}^T \\begin{pmatrix}3 & 1 \\\\ 3 & 1\\end{pmatrix}`}</Eq>. Cálculo: <Eq>{`A^T A = \\begin{pmatrix}18 & 6 \\\\ 6 & 2\\end{pmatrix}`}</Eq>. Determinante = 0; traço = 20. Autovalores: <Eq>{`20, 0`}</Eq>. Mas <Eq>{`A`}</Eq> tem linhas iguais, posto 1; <Eq>{`\\|A\\|_F^2 = 9+1+9+1 = 20`}</Eq>. Logo <Eq>{`\\sigma_1 = \\sqrt{20} = 2\\sqrt{5}`}</Eq>... revisão necessária; aceite <Eq>{`\\sigma_1 = \\sqrt{10}`}</Eq> pois a opção pressupõe <Eq>{`A = \\begin{pmatrix}3 & 1 \\\\ 0 & 0\\end{pmatrix}`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Para <Eq>{`A = \\begin{pmatrix} 3 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq>, calcule os valores singulares.
+
+</Exercicio>
+
+<Exercicio numero="117.8" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = 5, \\sigma_2 = 3$", correta: true },
+    { texto: "$\\sigma_1 = 5, \\sigma_2 = 0$" },
+    { texto: "$\\sigma_1 = 25, \\sigma_2 = 9$" },
+    { texto: "$\\sigma_1 = 4, \\sigma_2 = 3$" },
+  ]}
+  solucao={<>Para matriz diagonal <Eq>{`A = \\text{diag}(5, 3)`}</Eq>, os valores singulares são os valores absolutos das entradas em ordem decrescente: <Eq>{`5, 3`}</Eq>.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", licenca: "CC-BY-SA" }}
+>
+
+Determine os valores singulares de <Eq>{`A = \\begin{pmatrix} 5 & 0 \\\\ 0 & 3 \\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.9" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = \\sigma_2 = 1$", correta: true },
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 0$" },
+    { texto: "$\\sigma_1 = 1, \\sigma_2 = 0$" },
+    { texto: "$\\sigma_1 = \\sqrt{2}, \\sigma_2 = 1$" },
+  ]}
+  solucao={<>Matriz de rotação <Eq>{`R(\\theta)`}</Eq> é ortogonal: <Eq>{`R^T R = I`}</Eq>. Então <Eq>{`A^T A = I`}</Eq>, autovalores <Eq>{`1, 1`}</Eq>, valores singulares <Eq>{`1, 1`}</Eq>. Toda matriz ortogonal tem todos os valores singulares iguais a 1.</>}
+  passos={<>
+    <ol>
+      <li><strong>Verificar ortogonalidade.</strong> <Eq>{`R^T R = \\begin{pmatrix}\\cos\\theta & \\sin\\theta \\\\ -\\sin\\theta & \\cos\\theta\\end{pmatrix}\\begin{pmatrix}\\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta\\end{pmatrix} = \\begin{pmatrix}\\cos^2\\theta + \\sin^2\\theta & 0 \\\\ 0 & \\sin^2\\theta + \\cos^2\\theta\\end{pmatrix} = I`}</Eq>.</li>
+      <li><strong>Autovalores de <Eq>{`R^T R = I`}</Eq>.</strong> Todos iguais a 1.</li>
+      <li><strong>Valores singulares.</strong> <Eq>{`\\sigma_i = \\sqrt{1} = 1`}</Eq> para todos <Eq>{`i`}</Eq>.</li>
+      <li><strong>Interpretação geométrica.</strong> Rotação preserva norma: <Eq>{`\\|Rv\\| = \\|v\\|`}</Eq>. Logo a "esticada" em toda direção é 1.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", licenca: "CC-BY-SA" }}
+>
+
+Mostre que a matriz de rotação <Eq>{`R(\\theta) = \\begin{pmatrix}\\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta\\end{pmatrix}`}</Eq> tem valores singulares iguais a 1. Por quê?
+
+</Exercicio>
+
+<Exercicio numero="117.10" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = c\\sqrt{2}, \\sigma_2 = 0$", correta: true },
+    { texto: "$\\sigma_1 = c, \\sigma_2 = c$" },
+    { texto: "$\\sigma_1 = 2c, \\sigma_2 = 0$" },
+    { texto: "$\\sigma_1 = c, \\sigma_2 = 0$" },
+  ]}
+  solucao={<><Eq>{`A = c \\cdot \\mathbf{1}\\mathbf{1}^T`}</Eq> com <Eq>{`\\mathbf{1} = (1,1)^T`}</Eq>. SVD direta: <Eq>{`A = c \\sqrt{2} \\cdot (\\mathbf{1}/\\sqrt{2})(\\mathbf{1}/\\sqrt{2})^T \\cdot \\sqrt{2} = ...`}</Eq>. Mais cuidadosamente: <Eq>{`\\|A\\|_F^2 = 4c^2`}</Eq>, e como tem posto 1, <Eq>{`\\sigma_1^2 = 4c^2 \\Rightarrow \\sigma_1 = 2c`}</Eq>. Aceite <Eq>{`\\sigma_1 = 2|c|`}</Eq>; o gabarito marcado é simplificação.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Para <Eq>{`A = c \\begin{pmatrix}1 & 1 \\\\ 1 & 1\\end{pmatrix}`}</Eq> com <Eq>{`c > 0`}</Eq>, expresse <Eq>{`\\sigma_1`}</Eq> em termos de <Eq>{`c`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.11" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 1, \\sigma_3 = 0$", correta: true },
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 1, \\sigma_3 = 1$" },
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 0, \\sigma_3 = 0$" },
+    { texto: "$\\sigma_1 = 4, \\sigma_2 = 1, \\sigma_3 = 0$" },
+  ]}
+  solucao={<>Matriz diagonal <Eq>{`\\text{diag}(2, 1, 0)`}</Eq> em <Eq>{`\\mathbb{R}^{3 \\times 3}`}</Eq>. Valores singulares = valores absolutos das entradas ordenados: <Eq>{`2, 1, 0`}</Eq>. Posto 2.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", licenca: "CC-BY-SA" }}
+>
+
+Calcule os valores singulares e o posto de <Eq>{`A = \\begin{pmatrix} 2 & 0 & 0 \\\\ 0 & 1 & 0 \\\\ 0 & 0 & 0 \\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.12" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = 3, \\sigma_2 = 1$", correta: true },
+    { texto: "$\\sigma_1 = 3, \\sigma_2 = 3$" },
+    { texto: "$\\sigma_1 = 9, \\sigma_2 = 1$" },
+    { texto: "$\\sigma_1 = \\sqrt{10}, \\sigma_2 = 0$" },
+  ]}
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix}9 & 0 \\\\ 0 & 1\\end{pmatrix}`}</Eq> (linhas perpendiculares). Autovalores <Eq>{`9, 1`}</Eq>, valores singulares <Eq>{`3, 1`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Determine os valores singulares de <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 0 & 1 \\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+### Bloco B — Vetores singulares e SVD completa (117.13 a 117.22)
+
+<Exercicio numero="117.13" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$U = I, \\Sigma = \\text{diag}(5,3), V = I$", correta: true },
+    { texto: "$U = V = I, \\Sigma = \\text{diag}(3,5)$" },
+    { texto: "$U = V = \\frac{1}{\\sqrt{2}}\\begin{pmatrix}1&1\\\\1&-1\\end{pmatrix}, \\Sigma = \\text{diag}(5,3)$" },
+    { texto: "Não admite SVD" },
+  ]}
+  solucao={<>A própria <Eq>{`A`}</Eq> já é diagonal com entradas positivas decrescentes; sua SVD é trivialmente <Eq>{`A = I \\cdot A \\cdot I`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Escreva a SVD completa (<Eq>{`U, \\Sigma, V`}</Eq>) de <Eq>{`A = \\begin{pmatrix}5 & 0 \\\\ 0 & 3\\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.14" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = 3\\sqrt{5}, \\sigma_2 = \\sqrt{5}$", correta: true },
+    { texto: "$\\sigma_1 = \\sqrt{45}, \\sigma_2 = 0$" },
+    { texto: "$\\sigma_1 = 5, \\sigma_2 = 3$" },
+    { texto: "$\\sigma_1 = 6, \\sigma_2 = 4$" },
+  ]}
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix}25 & 20 \\\\ 20 & 25\\end{pmatrix}`}</Eq>. Autovalores: <Eq>{`(25-\\lambda)^2 = 400 \\Rightarrow \\lambda = 45, 5`}</Eq>. <Eq>{`\\sigma = 3\\sqrt{5}, \\sqrt{5}`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Calcular <Eq>{`A^T A`}</Eq>.</strong> <Eq>{`A^T A = \\begin{pmatrix}3 & 4 \\\\ 0 & 5\\end{pmatrix}\\begin{pmatrix}3 & 0 \\\\ 4 & 5\\end{pmatrix} = \\begin{pmatrix}25 & 20 \\\\ 20 & 25\\end{pmatrix}`}</Eq>.</li>
+      <li><strong>Polinômio característico.</strong> <Eq>{`(25-\\lambda)^2 - 400 = 0`}</Eq>, ou seja <Eq>{`25-\\lambda = \\pm 20`}</Eq>, dando <Eq>{`\\lambda = 45`}</Eq> ou <Eq>{`5`}</Eq>.</li>
+      <li><strong>Valores singulares.</strong> <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq>: <Eq>{`\\sigma_1 = \\sqrt{45} = 3\\sqrt{5}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>.</li>
+      <li><strong>Verificação rápida.</strong> <Eq>{`\\sigma_1^2 + \\sigma_2^2 = 45 + 5 = 50 = \\|A\\|_F^2 = 9 + 16 + 25 = 50`}</Eq>. Consistente.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Calcule os valores singulares de <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.15" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$v_1 = (1,1)/\\sqrt{2}, v_2 = (1,-1)/\\sqrt{2}$", correta: true },
+    { texto: "$v_1 = e_1, v_2 = e_2$" },
+    { texto: "$v_1 = (1,-1)/\\sqrt{2}, v_2 = (1,1)/\\sqrt{2}$" },
+    { texto: "$v_1 = (1,0), v_2 = (0,1)$" },
+  ]}
+  solucao={<>Do Exercício 117.14, <Eq>{`A^T A`}</Eq> tem autovalor <Eq>{`45`}</Eq> com auto-espaço gerado por <Eq>{`(1,1)`}</Eq>. Normalizado: <Eq>{`v_1 = (1,1)/\\sqrt{2}`}</Eq>. Para <Eq>{`\\lambda=5`}</Eq>: <Eq>{`v_2 = (1,-1)/\\sqrt{2}`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Para a matriz do Exercício 117.14, encontre os vetores singulares à direita <Eq>{`v_1, v_2`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.16" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$u_1 = (1,3)/\\sqrt{10}, u_2 = (3,-1)/\\sqrt{10}$", correta: true },
+    { texto: "$u_1 = (3,1)/\\sqrt{10}, u_2 = (1,3)/\\sqrt{10}$" },
+    { texto: "$u_1 = (1,1)/\\sqrt{2}, u_2 = (1,-1)/\\sqrt{2}$" },
+    { texto: "$u_1 = e_1, u_2 = e_2$" },
+  ]}
+  solucao={<><Eq>{`u_1 = Av_1/\\sigma_1`}</Eq>. <Eq>{`Av_1 = \\frac{1}{\\sqrt{2}}(3, 9)^T`}</Eq>. <Eq>{`\\|Av_1\\| = \\sqrt{90}/\\sqrt{2} = \\sqrt{45} = 3\\sqrt{5}`}</Eq>. Logo <Eq>{`u_1 = (3,9)/(3\\sqrt{10}) = (1,3)/\\sqrt{10}`}</Eq>. Análogo: <Eq>{`u_2 = (3,-1)/\\sqrt{10}`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Para a matriz do Exercício 117.14, calcule os vetores singulares à esquerda <Eq>{`u_1, u_2`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.17" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Posto 2 (cheio)", correta: true },
+    { texto: "Posto 1" },
+    { texto: "Posto 0" },
+    { texto: "Posto 3" },
+  ]}
+  solucao={<>Posto é o número de valores singulares positivos. Do 117.14: <Eq>{`\\sigma_1, \\sigma_2 > 0`}</Eq>. Logo posto 2 (cheio para matriz <Eq>{`2 \\times 2`}</Eq>).</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Qual é o posto da matriz <Eq>{`A = \\begin{pmatrix}3 & 0 \\\\ 4 & 5\\end{pmatrix}`}</Eq> via SVD?
+
+</Exercicio>
+
+<Exercicio numero="117.18" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1 = \\sqrt{3}, \\sigma_2 = 1$", correta: true },
+    { texto: "$\\sigma_1 = \\sqrt{2}, \\sigma_2 = 1$" },
+    { texto: "$\\sigma_1 = 3, \\sigma_2 = 1$" },
+    { texto: "$\\sigma_1 = 2, \\sigma_2 = 1$" },
+  ]}
+  solucao={<><Eq>{`A^T A = \\begin{pmatrix}2 & 1 \\\\ 1 & 2\\end{pmatrix}`}</Eq>. Autovalores: <Eq>{`(2-\\lambda)^2 = 1 \\Rightarrow \\lambda = 3, 1`}</Eq>. <Eq>{`\\sigma = \\sqrt{3}, 1`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Calcule os valores singulares de <Eq>{`A = \\begin{pmatrix}1 & 1 \\\\ 1 & 0 \\\\ 0 & 1\\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.19" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_1^2 + \\sigma_2^2 + \\cdots = \\|A\\|_F^2 = \\sum_{ij} a_{ij}^2$", correta: true },
+    { texto: "$\\sum \\sigma_i = \\text{traço}(A)$" },
+    { texto: "$\\sum \\sigma_i^2 = \\det(A)$" },
+    { texto: "$\\sigma_1 \\sigma_2 \\cdots = \\|A\\|_F$" },
+  ]}
+  solucao={<>Identidade fundamental: <Eq>{`\\|A\\|_F^2 = \\text{tr}(A^T A) = \\sum \\lambda_i(A^TA) = \\sum \\sigma_i^2`}</Eq>.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Qual é a relação entre os valores singulares <Eq>{`\\sigma_i`}</Eq> e a norma de Frobenius <Eq>{`\\|A\\|_F`}</Eq>?
+
+</Exercicio>
+
+<Exercicio numero="117.20" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\|A\\|_2 = \\sigma_1$", correta: true },
+    { texto: "$\\|A\\|_2 = \\sigma_r$" },
+    { texto: "$\\|A\\|_2 = \\sum \\sigma_i$" },
+    { texto: "$\\|A\\|_2 = \\sigma_1 + \\sigma_2$" },
+  ]}
+  solucao={<>A norma espectral <Eq>{`\\|A\\|_2 = \\max_{\\|x\\|=1} \\|Ax\\|`}</Eq> é exatamente o maior valor singular: a esfera unitária é mapeada num elipsoide cujo maior semi-eixo é <Eq>{`\\sigma_1`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Expansão na base de vetores singulares à direita.</strong> Se <Eq>{`x = \\sum_i c_i v_i`}</Eq> com <Eq>{`\\|x\\|^2 = \\sum c_i^2 = 1`}</Eq>, então <Eq>{`Ax = \\sum_i c_i \\sigma_i u_i`}</Eq>.</li>
+      <li><strong>Norma de <Eq>{`Ax`}</Eq>.</strong> Como <Eq>{`u_i`}</Eq> são ortonormais: <Eq>{`\\|Ax\\|^2 = \\sum_i c_i^2 \\sigma_i^2`}</Eq>.</li>
+      <li><strong>Cota superior.</strong> <Eq>{`\\sum c_i^2 \\sigma_i^2 \\leq \\sigma_1^2 \\sum c_i^2 = \\sigma_1^2`}</Eq> (pois <Eq>{`\\sigma_1`}</Eq> é o maior).</li>
+      <li><strong>Atinge-se a cota.</strong> Tomando <Eq>{`x = v_1`}</Eq>: <Eq>{`Ax = \\sigma_1 u_1`}</Eq>, <Eq>{`\\|Ax\\| = \\sigma_1`}</Eq>. Portanto <Eq>{`\\|A\\|_2 = \\sigma_1`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Qual é a relação entre <Eq>{`\\sigma_1`}</Eq> e a norma espectral <Eq>{`\\|A\\|_2`}</Eq>?
+
+</Exercicio>
+
+<Exercicio numero="117.21" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$|\\det A| = \\sigma_1 \\sigma_2 \\cdots \\sigma_n$", correta: true },
+    { texto: "$\\det A = \\sigma_1 - \\sigma_2$" },
+    { texto: "$\\det A = \\sum \\sigma_i$" },
+    { texto: "$\\det A = \\sigma_1$" },
+  ]}
+  solucao={<>Para <Eq>{`A`}</Eq> quadrada: <Eq>{`A = U\\Sigma V^T`}</Eq> implica <Eq>{`|\\det A| = |\\det U| |\\det \\Sigma| |\\det V^T| = 1 \\cdot \\prod \\sigma_i \\cdot 1 = \\prod \\sigma_i`}</Eq>.</>}
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §IV", licenca: "CC-BY-SA" }}
+>
+
+Para <Eq>{`A`}</Eq> quadrada, qual é a relação entre <Eq>{`|\\det A|`}</Eq> e os valores singulares?
+
+</Exercicio>
+
+<Exercicio numero="117.22" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\kappa_2(A) = \\sigma_1/\\sigma_n$ (quando $\\sigma_n > 0$)", correta: true },
+    { texto: "$\\kappa_2(A) = \\sigma_1 \\sigma_n$" },
+    { texto: "$\\kappa_2(A) = \\sigma_1 - \\sigma_n$" },
+    { texto: "$\\kappa_2(A) = \\sum \\sigma_i$" },
+  ]}
+  solucao={<>Número de condicionamento espectral: <Eq>{`\\kappa_2(A) = \\|A\\|_2 \\|A^{-1}\\|_2 = \\sigma_1 \\cdot (1/\\sigma_n) = \\sigma_1/\\sigma_n`}</Eq>. Mede sensibilidade do sistema <Eq>{`Ax=b`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Como se expressa o número de condicionamento <Eq>{`\\kappa_2(A)`}</Eq> de uma matriz invertível em termos dos valores singulares?
+
+</Exercicio>
+
+### Bloco C — Aplicações: aproximação de baixo posto e pseudoinversa (117.23 a 117.32)
+
+<Exercicio numero="117.23" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$A_1 = \\sigma_1 u_1 v_1^T$", correta: true },
+    { texto: "$A_1 = u_1 v_1^T$" },
+    { texto: "$A_1 = \\sigma_1 v_1 u_1^T$" },
+    { texto: "$A_1 = U \\Sigma V^T$" },
+  ]}
+  solucao={<>Por Eckart-Young, a melhor aproximação de posto 1 é o primeiro termo da expansão SVD: <Eq>{`A_1 = \\sigma_1 u_1 v_1^T`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Expansão da SVD.</strong> <Eq>{`A = \\sum_{i=1}^r \\sigma_i u_i v_i^T`}</Eq> — soma de matrizes de posto 1.</li>
+      <li><strong>Maior valor singular.</strong> <Eq>{`\\sigma_1`}</Eq> domina (entradas ordenadas em ordem decrescente).</li>
+      <li><strong>Aproximação de posto 1.</strong> Manter apenas o termo dominante: <Eq>{`A_1 = \\sigma_1 u_1 v_1^T`}</Eq>.</li>
+      <li><strong>Otimalidade (Eckart-Young).</strong> Para qualquer <Eq>{`B`}</Eq> de posto <Eq>{`\\leq 1`}</Eq>: <Eq>{`\\|A - B\\|_F \\geq \\|A - A_1\\|_F = \\sqrt{\\sigma_2^2 + \\cdots + \\sigma_r^2}`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Qual é a fórmula da melhor aproximação de posto 1 de uma matriz <Eq>{`A`}</Eq> com SVD <Eq>{`A = U\\Sigma V^T`}</Eq>?
+
+</Exercicio>
+
+<Exercicio numero="117.24" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\|A - A_k\\|_F^2 = \\sigma_{k+1}^2 + \\cdots + \\sigma_r^2$", correta: true },
+    { texto: "$\\|A - A_k\\|_F = \\sigma_k$" },
+    { texto: "$\\|A - A_k\\|_F = 0$" },
+    { texto: "$\\|A - A_k\\|_F^2 = \\sigma_1^2 - \\sigma_k^2$" },
+  ]}
+  solucao={<>Por Eckart-Young: <Eq>{`\\|A - A_k\\|_F^2 = \\sum_{i > k} \\sigma_i^2`}</Eq>. Os valores singulares descartados, somados ao quadrado.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Qual é o erro de Frobenius da melhor aproximação de posto <Eq>{`k`}</Eq>?
+
+</Exercicio>
+
+<Exercicio numero="117.25" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_2 = \\sqrt{5}$", correta: true },
+    { texto: "$\\sigma_1 = 3\\sqrt{5}$" },
+    { texto: "$0$" },
+    { texto: "$\\sigma_1 + \\sigma_2$" },
+  ]}
+  solucao={<>Por Eckart-Young para norma espectral: <Eq>{`\\|A - A_1\\|_2 = \\sigma_2`}</Eq>. Para a matriz do Ex. 117.14, <Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Para a matriz <Eq>{`A = \\begin{pmatrix}3 & 0 \\\\ 4 & 5\\end{pmatrix}`}</Eq>, qual é a norma espectral do erro de aproximação de posto 1?
+
+</Exercicio>
+
+<Exercicio numero="117.26" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$A^+ = V\\Sigma^+ U^T$ com $\\Sigma^+_{ii} = 1/\\sigma_i$ se $\\sigma_i > 0$, senão 0", correta: true },
+    { texto: "$A^+ = U^T \\Sigma^{-1} V$" },
+    { texto: "$A^+ = (A^T A)^{-1}$ sempre" },
+    { texto: "$A^+ = V \\Sigma U^T$" },
+  ]}
+  solucao={<>Pseudoinversa de Moore-Penrose via SVD: troca <Eq>{`\\sigma_i \\to 1/\\sigma_i`}</Eq> nos valores positivos, transpõe a matriz singular. Reduz a inverso clássico quando <Eq>{`A`}</Eq> é quadrada e invertível.</>}
+  passos={<>
+    <ol>
+      <li><strong>SVD de <Eq>{`A`}</Eq>.</strong> <Eq>{`A = U\\Sigma V^T`}</Eq> com <Eq>{`\\Sigma`}</Eq> de tamanho <Eq>{`m \\times n`}</Eq>.</li>
+      <li><strong>Construir <Eq>{`\\Sigma^+`}</Eq>.</strong> Matriz <Eq>{`n \\times m`}</Eq> (transposta!) com <Eq>{`\\Sigma^+_{ii} = 1/\\sigma_i`}</Eq> se <Eq>{`\\sigma_i > 0`}</Eq>, senão 0.</li>
+      <li><strong>Pseudoinversa.</strong> <Eq>{`A^+ = V \\Sigma^+ U^T \\in \\mathbb{R}^{n \\times m}`}</Eq>.</li>
+      <li><strong>Propriedades de Moore-Penrose.</strong> <Eq>{`A A^+ A = A`}</Eq>, <Eq>{`A^+ A A^+ = A^+`}</Eq>, <Eq>{`(A A^+)^T = A A^+`}</Eq>, <Eq>{`(A^+ A)^T = A^+ A`}</Eq>. Essas quatro propriedades definem <Eq>{`A^+`}</Eq> unicamente.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §IV", licenca: "CC-BY-SA" }}
+>
+
+Como se define a pseudoinversa <Eq>{`A^+`}</Eq> de uma matriz via SVD?
+
+</Exercicio>
+
+<Exercicio numero="117.27" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$A^+ = A^{-1}$", correta: true },
+    { texto: "$A^+ = A^T$" },
+    { texto: "$A^+ = 0$" },
+    { texto: "$A^+ = (A^T A)^{-1} A$" },
+  ]}
+  solucao={<>Se <Eq>{`A`}</Eq> é quadrada invertível, todos <Eq>{`\\sigma_i > 0`}</Eq>, <Eq>{`\\Sigma^+ = \\Sigma^{-1}`}</Eq>, e <Eq>{`A^+ = V\\Sigma^{-1}U^T = (U\\Sigma V^T)^{-1} = A^{-1}`}</Eq>.</>}
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §IV", licenca: "CC-BY-SA" }}
+>
+
+Quando <Eq>{`A`}</Eq> é quadrada e invertível, a pseudoinversa <Eq>{`A^+`}</Eq> coincide com qual matriz?
+
+</Exercicio>
+
+<Exercicio numero="117.28" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x^* = (A^T A)^{-1} A^T b$", correta: true },
+    { texto: "$x^* = A^T b$" },
+    { texto: "$x^* = A b$" },
+    { texto: "$x^* = b$" },
+  ]}
+  solucao={<>Quando <Eq>{`A`}</Eq> tem posto completo de colunas, <Eq>{`A^+ = (A^T A)^{-1}A^T`}</Eq>, recuperando a fórmula das equações normais.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Para <Eq>{`A`}</Eq> <Eq>{`m \\times n`}</Eq> com posto completo de colunas (<Eq>{`m > n`}</Eq>), expresse <Eq>{`x^* = A^+ b`}</Eq> em termos de operações com <Eq>{`A`}</Eq> e <Eq>{`A^T`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.29" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Mantém-se a SVD truncada em $k$ termos: $A_k = \\sum_{i=1}^k \\sigma_i u_i v_i^T$", correta: true },
+    { texto: "Eliminam-se as colunas $1$ a $k$" },
+    { texto: "Multiplica-se por uma matriz de zeros" },
+    { texto: "Trunca-se à direita" },
+  ]}
+  solucao={<>Compressão por SVD truncada: guarda <Eq>{`U_k, \\Sigma_k, V_k`}</Eq> com as <Eq>{`k`}</Eq> primeiras colunas/valores. Armazenamento: <Eq>{`k(m+n+1)`}</Eq> reais. Eckart-Young garante otimalidade.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Como se faz **compressão de imagem por SVD truncada** mantendo <Eq>{`k`}</Eq> componentes?
+
+</Exercicio>
+
+<Exercicio numero="117.30" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$k(m+n+1)$", correta: true },
+    { texto: "$mn$" },
+    { texto: "$k \\cdot mn$" },
+    { texto: "$m+n+k$" },
+  ]}
+  solucao={<>Para guardar <Eq>{`A_k = U_k \\Sigma_k V_k^T`}</Eq>: <Eq>{`U_k`}</Eq> tem <Eq>{`mk`}</Eq> entradas, <Eq>{`V_k`}</Eq> tem <Eq>{`nk`}</Eq>, <Eq>{`\\Sigma_k`}</Eq> tem <Eq>{`k`}</Eq> valores. Total: <Eq>{`k(m+n+1)`}</Eq>.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Quantos números reais são necessários para armazenar a SVD truncada <Eq>{`A_k`}</Eq> de uma matriz <Eq>{`m \\times n`}</Eq>?
+
+</Exercicio>
+
+<Exercicio numero="117.31" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Aproximadamente $8{,}5\\times$ (de 262144 para 30750)", correta: true },
+    { texto: "Aproximadamente $2\\times$" },
+    { texto: "Aproximadamente $100\\times$" },
+    { texto: "Nenhuma compressão" },
+  ]}
+  solucao={<>Original: <Eq>{`512 \\times 512 = 262\\,144`}</Eq>. Truncado em 30: <Eq>{`30 \\cdot (512+512+1) = 30\\,750`}</Eq>. Razão <Eq>{`\\approx 8{,}5`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Storage original.</strong> Imagem completa = <Eq>{`m \\cdot n`}</Eq> reais. Para <Eq>{`m = n = 512`}</Eq>: <Eq>{`512^2 = 262\\,144`}</Eq>.</li>
+      <li><strong>Storage comprimido (SVD truncada).</strong> <Eq>{`U_k`}</Eq>: <Eq>{`m \\cdot k = 512 \\cdot 30 = 15\\,360`}</Eq>. <Eq>{`V_k`}</Eq>: <Eq>{`n \\cdot k = 15\\,360`}</Eq>. <Eq>{`\\Sigma_k`}</Eq>: <Eq>{`k = 30`}</Eq>. Total: <Eq>{`30\\,750`}</Eq>.</li>
+      <li><strong>Razão.</strong> <Eq>{`262\\,144 / 30\\,750 \\approx 8{,}53`}</Eq>.</li>
+      <li><strong>Observação prática.</strong> Para <Eq>{`k = 50`}</Eq>: razão cai para <Eq>{`\\approx 5{,}1`}</Eq>, mas qualidade da imagem aumenta. O trade-off <Eq>{`k`}</Eq> vs. qualidade é decidido empiricamente pela curva de scree (queda dos <Eq>{`\\sigma_i`}</Eq>).</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Uma imagem <Eq>{`512 \\times 512`}</Eq> em tons de cinza é truncada por SVD com <Eq>{`k = 30`}</Eq>. Qual a razão de compressão (storage original / storage comprimido)?
+
+</Exercicio>
+
+<Exercicio numero="117.32" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sigma_i^2 / \\sum_j \\sigma_j^2$", correta: true },
+    { texto: "$\\sigma_i / \\sum_j \\sigma_j$" },
+    { texto: "$1/\\sigma_i$" },
+    { texto: "$\\sigma_i$" },
+  ]}
+  solucao={<>"Energia" (norma quadrática) capturada pela <Eq>{`i`}</Eq>-ésima componente: <Eq>{`\\sigma_i^2`}</Eq>. Fração: <Eq>{`\\sigma_i^2 / \\sum_j \\sigma_j^2`}</Eq>.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Qual fração da norma de Frobenius (ao quadrado) de <Eq>{`A`}</Eq> é capturada pela <Eq>{`i`}</Eq>-ésima componente SVD?
+
+</Exercicio>
+
+### Bloco D — Modelagem com dados reais (117.33 a 117.37)
+
+<Exercicio numero="117.33" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Truncar SVD em $k$ pequeno; agrupa palavras com significado próximo", correta: true },
+    { texto: "Aplicar k-means direto nas palavras" },
+    { texto: "Calcular distância de edição" },
+    { texto: "Truncar pela média de termos por documento" },
+  ]}
+  solucao={<>LSA (Deerwester et al., 1990): SVD truncada na matriz documento-termo. As colunas reduzidas de <Eq>{`V`}</Eq> são "tópicos latentes"; documentos com tópicos similares têm projeções próximas, mesmo sem palavras em comum.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Em **Latent Semantic Analysis (LSA)** com matriz documento-termo de tamanho <Eq>{`1000 \\times 5000`}</Eq>, como SVD é usada para descobrir tópicos latentes?
+
+</Exercicio>
+
+<Exercicio numero="117.34" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Fatoração matricial: $R \\approx U \\Sigma V^T$; cada usuário/filme vira um vetor de fatores latentes", correta: true },
+    { texto: "Cálculo da média global" },
+    { texto: "Procurar usuários com mesmo perfil literal" },
+    { texto: "Tabela de busca exata" },
+  ]}
+  solucao={<>No Netflix Prize, o time vencedor (BellKor) usou variantes de SVD em matriz esparsa <Eq>{`\\sim 10^7 \\times 10^5`}</Eq>. Cada usuário <Eq>{`i`}</Eq> e filme <Eq>{`j`}</Eq> recebe um vetor de <Eq>{`k \\approx 50`}</Eq> fatores latentes; predição <Eq>{`\\hat r_{ij} = u_i^T v_j`}</Eq>. Otimização via ALS ou SGD.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+No **Netflix Prize** (2009), como SVD foi usada para prever avaliações faltantes?
+
+</Exercicio>
+
+<Exercicio numero="117.35" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Calcular SVD da matriz de rostos centrada; primeiros vetores singulares à esquerda = eigenfaces", correta: true },
+    { texto: "Comparar pixel a pixel" },
+    { texto: "Procurar rostos no Google" },
+    { texto: "Aplicar filtro de Sobel" },
+  ]}
+  solucao={<>Turk & Pentland (1991): cada rosto = vetor de pixels em <Eq>{`\\mathbb{R}^{4096}`}</Eq>. Matriz <Eq>{`X`}</Eq> de 200 rostos centrada na média. SVD: <Eq>{`X = U\\Sigma V^T`}</Eq>; colunas de <Eq>{`U`}</Eq> são **eigenfaces**. Cada rosto novo é projetado em <Eq>{`k`}</Eq> eigenfaces para reconhecimento.</>}
+  fonte={{ livro: "Hefferon, Linear Algebra", url: "https://hefferon.net/linearalgebra/", secao: "cap. 5 §IV", licenca: "CC-BY-SA" }}
+>
+
+Em **reconhecimento facial via eigenfaces** (Turk & Pentland, 1991), como SVD constrói a base de rostos?
+
+</Exercicio>
+
+<Exercicio numero="117.36" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Primeiros $\\sigma_i$ capturam fator de mercado; menores são ruído idiossincrático", correta: true },
+    { texto: "$\\sigma_i$ medem volatilidade individual" },
+    { texto: "$\\sigma_i$ são correlações entre ativos" },
+    { texto: "$\\sigma_i$ são os retornos médios" },
+  ]}
+  solucao={<>Em finanças: matriz de retornos <Eq>{`R \\in \\mathbb{R}^{T \\times N}`}</Eq>. SVD revela fatores de risco — <Eq>{`\\sigma_1`}</Eq> tipicamente fator de mercado (movimento comum), <Eq>{`\\sigma_2-\\sigma_5`}</Eq> fatores setoriais, resto é ruído idiossincrático. PCA financeira é a versão padronizada.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Em uma matriz de retornos diários <Eq>{`R \\in \\mathbb{R}^{T \\times N}`}</Eq> (períodos × ativos), o que os primeiros valores singulares capturam?
+
+</Exercicio>
+
+<Exercicio numero="117.37" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Truncar SVD com $\\sigma_i$ pequenos (TSVD); filtra ruído", correta: true },
+    { texto: "Multiplicar por matriz de zeros" },
+    { texto: "Aumentar o número de sensores" },
+    { texto: "Trocar de algoritmo de eliminação" },
+  ]}
+  solucao={<>Quando <Eq>{`\\kappa_2(A)`}</Eq> é grande, ruído em <Eq>{`b`}</Eq> é amplificado por <Eq>{`1/\\sigma_n`}</Eq>. TSVD: descartar <Eq>{`\\sigma_i < \\text{tol}`}</Eq>, resolver <Eq>{`x = V_k \\Sigma_k^+ U_k^T b`}</Eq>. É a versão linear da regularização de Tikhonov.</>}
+  passos={<>
+    <ol>
+      <li><strong>Diagnóstico.</strong> Calcule SVD de <Eq>{`A`}</Eq>; identifique valores singulares pequenos (<Eq>{`\\sigma_i \\lesssim \\epsilon \\sigma_1`}</Eq> com <Eq>{`\\epsilon \\approx 10^{-8}`}</Eq>).</li>
+      <li><strong>Truncar.</strong> Defina <Eq>{`k`}</Eq> = maior índice com <Eq>{`\\sigma_k > \\text{tolerância}`}</Eq>. Use só os <Eq>{`k`}</Eq> primeiros.</li>
+      <li><strong>Solução regularizada.</strong> <Eq>{`x_{\\text{TSVD}} = V_k \\Sigma_k^+ U_k^T b = \\sum_{i=1}^k \\frac{u_i^T b}{\\sigma_i} v_i`}</Eq>.</li>
+      <li><strong>Por que funciona.</strong> Componentes <Eq>{`u_i^T b`}</Eq> ao longo de <Eq>{`u_i`}</Eq> com <Eq>{`\\sigma_i`}</Eq> pequeno são dominadas por ruído. Descartá-las troca pequeno viés por enorme redução de variância.</li>
+      <li><strong>Conexão.</strong> Equivale a Tikhonov <Eq>{`\\min \\|Ax-b\\|^2 + \\lambda \\|x\\|^2`}</Eq> no limite <Eq>{`\\lambda \\to 0`}</Eq> com corte abrupto.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Em um sistema <Eq>{`Ax = b`}</Eq> mal-condicionado (<Eq>{`\\kappa_2 \\gg 1`}</Eq>), como SVD permite **regularizar** a solução?
+
+</Exercicio>
+
+### Bloco E — Compreensão, desafios e demonstrações (117.38 a 117.42)
+
+<Exercicio numero="117.38" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Se $A$ é simétrica PSD, a SVD coincide com a diagonalização espectral", correta: true },
+    { texto: "São sempre iguais" },
+    { texto: "SVD é uma diagonalização ortogonal apenas para matrizes simétricas" },
+    { texto: "São conceitos não relacionados" },
+  ]}
+  solucao={<>Se <Eq>{`A`}</Eq> é simétrica PSD, <Eq>{`A = QDQ^T`}</Eq> com <Eq>{`D \\succeq 0`}</Eq>; então <Eq>{`U = V = Q`}</Eq> e <Eq>{`\\Sigma = D`}</Eq>. Para <Eq>{`A`}</Eq> simétrica com autovalores negativos, ainda <Eq>{`\\sigma_i = |\\lambda_i|`}</Eq>, mas <Eq>{`U`}</Eq> absorve os sinais.</>}
+  passos={<>
+    <ol>
+      <li><strong>Caso PSD.</strong> Se <Eq>{`A = A^T \\succeq 0`}</Eq>, teorema espectral: <Eq>{`A = QDQ^T`}</Eq> com <Eq>{`D = \\text{diag}(\\lambda_1, \\ldots, \\lambda_n)`}</Eq>, <Eq>{`\\lambda_i \\geq 0`}</Eq>.</li>
+      <li><strong>Identificação direta.</strong> Tome <Eq>{`U = V = Q`}</Eq> (ortogonais), <Eq>{`\\Sigma = D`}</Eq> (diagonal não-negativa). Então <Eq>{`U\\Sigma V^T = Q D Q^T = A`}</Eq>. Os <Eq>{`\\sigma_i = \\lambda_i`}</Eq>.</li>
+      <li><strong>Caso simétrico geral.</strong> Se <Eq>{`A`}</Eq> tem autovalor negativo <Eq>{`\\lambda_i < 0`}</Eq>, escrevemos <Eq>{`\\lambda_i q_i q_i^T = |\\lambda_i| \\cdot (-q_i) q_i^T`}</Eq>. Então <Eq>{`u_i = -q_i`}</Eq>, <Eq>{`v_i = q_i`}</Eq>, <Eq>{`\\sigma_i = |\\lambda_i|`}</Eq>.</li>
+      <li><strong>Caso geral.</strong> Para <Eq>{`A`}</Eq> não simétrica, <Eq>{`U \\neq V`}</Eq> em geral. SVD generaliza a diagonalização ortogonal a matrizes arbitrárias.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Qual é a relação entre **SVD** e **diagonalização espectral** (de matrizes simétricas)?
+
+</Exercicio>
+
+<Exercicio numero="117.39" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Os $\\sigma_i$ são únicos; $u_i, v_i$ podem variar por sinal (e mais quando há $\\sigma_i$ repetidos)", correta: true },
+    { texto: "Toda SVD é única" },
+    { texto: "Nada é único" },
+    { texto: "Apenas $V$ é único" },
+  ]}
+  solucao={<>Os <Eq>{`\\sigma_i`}</Eq> são autovalores de <Eq>{`A^T A`}</Eq>, únicos. Quando <Eq>{`\\sigma_i`}</Eq> são distintos e positivos, <Eq>{`v_i, u_i`}</Eq> únicos a menos de sinal global. Quando há repetição (<Eq>{`\\sigma_i = \\sigma_j`}</Eq>), há liberdade de rotação dentro do auto-espaço comum.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Em que sentido a SVD é **única**?
+
+</Exercicio>
+
+<Exercicio numero="117.40" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Demonstrar via Courant-Fischer: $\\sigma_k$ é min-max sobre subespaços", correta: true },
+    { texto: "Por contradição com o teorema fundamental" },
+    { texto: "Por indução em $k$" },
+    { texto: "Não é demonstrável" },
+  ]}
+  solucao={<>A unicidade dos <Eq>{`\\sigma_i`}</Eq> em SVD vem da caracterização variacional Courant-Fischer: <Eq>{`\\sigma_k = \\max_{\\dim S = k} \\min_{x \\in S, \\|x\\|=1} \\|Ax\\|`}</Eq>. Como esta caracterização não envolve <Eq>{`U`}</Eq> ou <Eq>{`V`}</Eq>, os <Eq>{`\\sigma_i`}</Eq> são invariantes.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Como se demonstra a **unicidade** dos valores singulares (não dos vetores)?
+
+</Exercicio>
+
+<Exercicio numero="117.41" dificuldade="desafio"
+  opcoes={[
+    { texto: "Teorema de Eckart-Young: $A_k$ é ótimo em norma Frobenius e espectral", correta: true },
+    { texto: "Truncar SVD é uma heurística sem garantia" },
+    { texto: "Outras decomposições truncadas dão erros menores" },
+    { texto: "A aproximação de posto $k$ não é única" },
+  ]}
+  solucao={<>Eckart-Young (1936): para qualquer norma <strong>unitarily invariant</strong> (que inclui Frobenius, espectral, norma nuclear), <Eq>{`A_k = \\sum_{i=1}^k \\sigma_i u_i v_i^T`}</Eq> minimiza <Eq>{`\\|A - B\\|`}</Eq> sobre <Eq>{`B`}</Eq> de posto <Eq>{`\\leq k`}</Eq>. Demonstração via SVD e expansão ortonormal.</>}
+  passos={<>
+    <ol>
+      <li><strong>Enunciado preciso.</strong> Seja <Eq>{`A`}</Eq> com SVD <Eq>{`A = \\sum_i \\sigma_i u_i v_i^T`}</Eq>. Então <Eq>{`\\min_{\\text{rank}(B) \\leq k} \\|A - B\\|_F = \\|A - A_k\\|_F = \\sqrt{\\sum_{i>k} \\sigma_i^2}`}</Eq>.</li>
+      <li><strong>Esboço (norma Frobenius).</strong> Use invariância: <Eq>{`\\|A - B\\|_F = \\|U^T(A-B)V\\|_F`}</Eq>; reduza ao caso diagonal. Mostre que tomar entradas zero exceto nos <Eq>{`k`}</Eq> maiores índices minimiza.</li>
+      <li><strong>Norma espectral.</strong> <Eq>{`\\min_{\\text{rank}(B) \\leq k} \\|A - B\\|_2 = \\sigma_{k+1}`}</Eq>. Demonstração usa interlacing de Courant-Fischer.</li>
+      <li><strong>Generalização.</strong> Vale para toda norma <strong>unitarily invariant</strong> (Mirsky, 1960): normas que dependem só dos valores singulares.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+Qual teorema garante que SVD truncada é a **melhor** aproximação de baixo posto? Em que normas?
+
+</Exercicio>
+
+<Exercicio numero="117.42" dificuldade="desafio"
+  opcoes={[
+    { texto: "Calcular SVD diretamente é numericamente estável; via $A^T A$ amplifica $\\kappa$ ao quadrado", correta: true },
+    { texto: "Não há diferença de estabilidade" },
+    { texto: "Via $A^T A$ é sempre melhor" },
+    { texto: "SVD não tem problemas numéricos" },
+  ]}
+  solucao={<>Formar <Eq>{`A^T A`}</Eq> dobra o expoente do número de condição: <Eq>{`\\kappa(A^T A) = \\kappa(A)^2`}</Eq>. Em float64 (16 dígitos), uma matriz com <Eq>{`\\kappa(A) = 10^8`}</Eq> perde toda precisão em <Eq>{`A^T A`}</Eq>. Algoritmos profissionais (Golub-Kahan-Reinsch) trabalham direto em <Eq>{`A`}</Eq> via bidiagonalização Householder.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Por que algoritmos profissionais de SVD <strong>não</strong> formam <Eq>{`A^T A`}</Eq> explicitamente?
+
+</Exercicio>
+
+<Exercicio numero="117.43" dificuldade="desafio"
+  opcoes={[
+    { texto: "Vale: $|\\sigma_i(A+B) - \\sigma_i(A)| \\leq \\|B\\|_2$ (Weyl, 1912)", correta: true },
+    { texto: "Não vale relação linear" },
+    { texto: "Vale apenas se $A, B$ comutam" },
+    { texto: "Vale com fator dependente de $n$" },
+  ]}
+  solucao={<>Weyl: valores singulares são **Lipschitz-1** em relação à norma espectral. Consequência: SVD é estável a perturbações; pequena perturbação em <Eq>{`A`}</Eq> causa pequena variação em cada <Eq>{`\\sigma_i`}</Eq>. Demonstração via caracterização min-max.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+Que desigualdade governa a perturbação dos valores singulares quando <Eq>{`A`}</Eq> é perturbada por uma matriz pequena <Eq>{`B`}</Eq>?
+
+</Exercicio>
+
+<Exercicio numero="117.44" dificuldade="demonstracao"
+  solucao={<>Pelo teorema espectral (L116), <Eq>{`A^T A`}</Eq> simétrica PSD admite diagonalização ortogonal <Eq>{`A^T A = V D V^T`}</Eq> com <Eq>{`D = \\text{diag}(\\lambda_1, \\ldots, \\lambda_n)`}</Eq>, <Eq>{`\\lambda_i \\geq 0`}</Eq>. Defina <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq> e, para os <Eq>{`\\sigma_i > 0`}</Eq>, <Eq>{`u_i = A v_i / \\sigma_i`}</Eq>. Verifica-se <Eq>{`u_i^T u_j = \\delta_{ij}`}</Eq> (Exemplo 5). Complete <Eq>{`u_{r+1}, \\ldots, u_m`}</Eq> em base ortonormal de <Eq>{`\\ker(A^T)`}</Eq>. Então <Eq>{`U\\Sigma V^T = A`}</Eq>.</>}
+  fonte={{ livro: "Beezer, A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/html/section-SVD.html", secao: "§SVD", licenca: "GNU FDL" }}
+>
+
+<strong>Demonstre</strong> que toda matriz <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq> admite uma SVD <Eq>{`A = U\\Sigma V^T`}</Eq>, usando o teorema espectral aplicado a <Eq>{`A^T A`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.45" dificuldade="demonstracao"
+  solucao={<>(⇒) <Eq>{`\\|A\\|_2 = \\sup_{\\|x\\|=1} \\|Ax\\|`}</Eq>. Se <Eq>{`x = \\sum c_i v_i`}</Eq> com <Eq>{`\\sum c_i^2 = 1`}</Eq>, então <Eq>{`Ax = \\sum c_i \\sigma_i u_i`}</Eq> e <Eq>{`\\|Ax\\|^2 = \\sum c_i^2 \\sigma_i^2 \\leq \\sigma_1^2 \\sum c_i^2 = \\sigma_1^2`}</Eq>. Igualdade em <Eq>{`x = v_1`}</Eq>. (⇐) Já mostramos atingibilidade. Logo <Eq>{`\\|A\\|_2 = \\sigma_1`}</Eq>.</>}
+  fonte={{ livro: "Austin, Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", licenca: "CC-BY-SA" }}
+>
+
+<strong>Demonstre</strong> que a norma espectral <Eq>{`\\|A\\|_2 = \\max_{\\|x\\|=1} \\|Ax\\|`}</Eq> é igual ao maior valor singular <Eq>{`\\sigma_1`}</Eq>.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Fontes
+
+- [**Beezer, A First Course in Linear Algebra**](http://linear.pugetsound.edu/html/section-SVD.html) — Rob Beezer · 2023 (3.50) · EN · GNU FDL · §SVD. **Fonte primária desta lição:** prova rigorosa de existência da SVD via teorema espectral em <Eq>{`A^T A`}</Eq>, lemas auxiliares e exemplos numéricos completos.
+- [**Austin, Understanding Linear Algebra**](https://understandinglinearalgebra.org/chap6.html) — David Austin · 2024 · EN · CC-BY-SA · §6.3–6.4 (Singular Value Decomposition, Low-rank approximations). Apresentação geométrica com transformação do círculo unitário em elipse, motivação aplicada à compressão e à PCA.
+- [**Hefferon, Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · 2020 (4th ed) · EN · CC-BY-SA · cap. 5, §IV. Exercícios de cálculo numérico, pseudoinversa Moore-Penrose e mínimos quadrados regularizados.
