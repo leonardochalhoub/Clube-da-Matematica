@@ -1,0 +1,349 @@
+---
+titulo: "DFT e FFT — Análise Espectral Discreta"
+slug: "cal4-u2-l13-dft-fft-analise-espectral"
+categoria: "calculo-4"
+subcategoria: "calculo-4"
+descricao: "Transformada Discreta de Fourier (DFT): definição, propriedades, convolução circular. Algoritmo FFT de Cooley-Tukey. Análise espectral, janelamento e resolução em frequência."
+ordem: 13
+publicado: true
+tags: ["dft", "fft", "espectro", "convolucao-circular", "janelamento", "cooley-tukey"]
+prerrequisitos: ["cal4-u2-l12-transformada-z-sistemas-discretos"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-28"
+usadoEm: ["engenharia"]
+versao: "v1"
+---
+
+
+<DuasPortas>
+<Porta nivel="5anos">
+
+# DFT: Fourier para Computadores
+
+A Transformada Discreta de Fourier (DFT) analisa o conteúdo espectral de uma sequência finita de <Eq>{"N"}</Eq> amostras. A FFT (Fast Fourier Transform) é o algoritmo que calcula a DFT em <Eq>{"O(N\\log N)"}</Eq> operações em vez de <Eq>{"O(N^2)"}</Eq> — tornando-a viável em computadores para sinais de áudio, imagens e comunicações.
+
+</Porta>
+<Porta nivel="10anos">
+
+# Transformada Discreta de Fourier (DFT)
+
+**Definição:** Para <Eq>{"x[n]"}</Eq>, <Eq>{"n = 0, \\ldots, N-1"}</Eq>:
+
+<EquacaoCanonica
+  formula="X[k] = \sum_{n=0}^{N-1} x[n]\, W_N^{kn}, \quad W_N = e^{-2\pi i/N}, \quad k = 0,1,\ldots,N-1"
+  legenda="DFT de N pontos — amostra a DTFT em N frequências igualmente espaçadas"
+  audioTexto="X de k é a soma de n de 0 a N menos 1 de x de n vezes W N elevado a kn, onde W N é e elevado a menos 2 pi i sobre N."
+/>
+
+**Inversa (IDFT):**
+
+<EquacaoCanonica
+  formula="x[n] = \frac{1}{N}\sum_{k=0}^{N-1} X[k]\, W_N^{-kn}"
+  legenda="Inversão exata — sem erro para N amostras"
+  audioTexto="x de n é 1 sobre N vezes a soma de k de 0 a N menos 1 de X de k vezes W N elevado a menos kn."
+/>
+
+**Propriedades principais:**
+- Linearidade; periodicidade com período N
+- Convolução circular: <Eq>{"\\text{DFT}\\{x \\circledast y\\} = X[k] \\cdot Y[k]"}</Eq>
+- Parseval: <Eq>{"\\sum_{n=0}^{N-1}|x[n]|^2 = \\frac{1}{N}\\sum_{k=0}^{N-1}|X[k]|^2"}</Eq>
+- Simetria hermitiana: se <Eq>{"x"}</Eq> real, então <Eq>{"X[N-k] = X^*[k]"}</Eq>
+
+</Porta>
+<Porta nivel="15anos">
+
+# DFT como Transformação Unitária
+
+## Estrutura Matricial
+
+A DFT pode ser escrita como produto matricial <Eq>{"\\mathbf{X} = W_N \\mathbf{x}"}</Eq>, onde:
+
+<EquacaoCanonica
+  formula="(W_N)_{kn} = W_N^{kn} = e^{-2\pi i kn/N}, \quad k,n = 0,\ldots,N-1"
+  legenda="W_N é matriz de Vandermonde avaliada nas raízes N-ésimas da unidade"
+  audioTexto="A entrada k n da matriz W N é e elevado a menos 2 pi i kn sobre N."
+/>
+
+**Unitariedade:** <Eq>{"\\frac{1}{\\sqrt{N}}W_N"}</Eq> é matriz unitária: <Eq>{"W_N^* W_N = N I"}</Eq>. Logo <Eq>{"W_N^{-1} = \\frac{1}{N}W_N^*"}</Eq> (IDFT é <Eq>{"W_N^*/N"}</Eq>).
+
+**Parseval matricial:** <Eq>{"\\|\\mathbf{X}\\|^2 = N\\|\\mathbf{x}\\|^2"}</Eq>.
+
+## Convolução Circular e Relação com Convolução Linear
+
+**Convolução circular:** <Eq>{"(x \\circledast_N y)[n] = \\sum_{k=0}^{N-1} x[k] y[(n-k) \\bmod N]"}</Eq>.
+
+**Para computar convolução linear** de sequências de comprimentos <Eq>{"L"}</Eq> e <Eq>{"M"}</Eq> usando DFT:
+1. Tomar DFT de tamanho <Eq>{"N \\geq L + M - 1"}</Eq> (zero-padding ambas)
+2. Multiplicar ponto a ponto: <Eq>{"Y[k] = X[k] \\cdot H[k]"}</Eq>
+3. IDFT de <Eq>{"Y[k]"}</Eq>
+
+**Complexidade:** <Eq>{"O(N\\log N)"}</Eq> vs. <Eq>{"O(LM)"}</Eq> por convolução direta.
+
+</Porta>
+<Porta nivel="25anos">
+
+# Algoritmo FFT de Cooley-Tukey
+
+## Ideia de Divisão-e-Conquista (DIT-FFT)
+
+Para <Eq>{"N = 2^m"}</Eq>, divida a sequência em sub-sequências par/ímpar:
+
+<Eq>{"X[k] = \\underbrace{\\sum_{n \\text{ par}} x[n]W_N^{kn}}_{E[k]} + W_N^k \\underbrace{\\sum_{n \\text{ ímpar}} x[n]W_N^{kn}}_{O[k]}"}</Eq>
+
+Notando que <Eq>{"W_N^{2kn} = W_{N/2}^{kn}"}</Eq>:
+
+<EquacaoCanonica
+  formula="X[k] = E[k] + W_N^k O[k], \quad X[k+N/2] = E[k] - W_N^k O[k]"
+  legenda="Borboleta FFT — combina DFTs de N/2 pontos com custo O(N)"
+  audioTexto="X de k é E de k mais W N elevado a k vezes O de k; X de k mais N sobre 2 é E de k menos W N elevado a k vezes O de k."
+/>
+
+**Recursão:** aplica-se recursivamente até <Eq>{"N=1"}</Eq> (DFT trivial). Total de <Eq>{"\\log_2 N"}</Eq> estágios, cada um com <Eq>{"N/2"}</Eq> borboletas → complexidade <Eq>{"O(N\\log_2 N)"}</Eq>.
+
+**Comparação de custo:**
+
+| N | DFT direta (mult. complexas) | FFT |
+|---|---|---|
+| 64 | 4096 | 192 |
+| 1024 | ~10⁶ | 5120 |
+| 4096 | ~16·10⁶ | 24576 |
+
+## Análise Espectral e Resolução
+
+**Resolução em frequência:** com <Eq>{"N"}</Eq> amostras e taxa de amostragem <Eq>{"f_s"}</Eq>, a DFT resolve frequências separadas por <Eq>{"\\Delta f = f_s/N"}</Eq>.
+
+**Vazamento espectral (leakage):** truncar um sinal periódico em ponto não-inteiro multiplica por janela retangular no tempo → convolve com <Eq>{"\\text{sinc}"}</Eq> no espectro → "vaza" energia para frequências adjacentes.
+
+**Janelamento:** multiplicar por <Eq>{"w[n]"}</Eq> antes da DFT. Trade-off resolução vs. supressão de lóbulos laterais:
+
+| Janela | Lóbulo principal | Atenuação lóbulos laterais |
+|---|---|---|
+| Retangular | <Eq>{"4\\pi/N"}</Eq> | 13 dB |
+| Hann | <Eq>{"8\\pi/N"}</Eq> | 32 dB |
+| Blackman | <Eq>{"12\\pi/N"}</Eq> | 58 dB |
+| Kaiser (<Eq>{"\\beta"}</Eq>) | variável | controlável |
+
+</Porta>
+<Porta nivel="40anos">
+
+# DFT em Espaços de Hilbert e Teoria de Grupos
+
+## DFT como Isomorfismo de Álgebras de Convolução
+
+Seja <Eq>{"\\mathbb{C}^N"}</Eq> com a álgebra de convolução circular <Eq>{"(\\ell^1(\\mathbb{Z}/N\\mathbb{Z}), \\circledast_N)"}</Eq>. A DFT é o **isomorfismo de álgebras de Banach**:
+
+<Eq>{"\\mathcal{F}_N : (\\mathbb{C}^N, \\circledast_N) \\xrightarrow{\\sim} (\\mathbb{C}^N, \\cdot)"}</Eq>
+
+onde <Eq>{"\\cdot"}</Eq> é multiplicação ponto-a-ponto. Isso generaliza para qualquer grupo abeliano finito (DFT sobre <Eq>{"\\mathbb{Z}/N\\mathbb{Z}"}</Eq>), e é o ponto de partida da **Análise Harmônica em Grupos**.
+
+## Conexão com a Transformada de Fourier Contínua
+
+**Amostragem periódica:** para <Eq>{"x_c(t)"}</Eq> periódico com período <Eq>{"T"}</Eq> e limitado em banda com <Eq>{"N"}</Eq> harmônicas, as <Eq>{"N"}</Eq> amostras <Eq>{"x[n] = x_c(nT/N)"}</Eq> determinam a DFT que coincide com os coeficientes de Fourier:
+
+<Eq>{"X[k] = \\sum_{n=0}^{N-1} x[n] e^{-2\\pi ikn/N} = \\frac{N}{T}\\hat{x}_c(k/T)"}</Eq>
+
+**Relação DFT-DTFT:** a DFT de <Eq>{"N"}</Eq> pontos amostra a DTFT em <Eq>{"\\omega_k = 2\\pi k/N"}</Eq>:
+
+<EquacaoCanonica
+  formula="X[k] = X(e^{i\omega})\big|_{\omega = 2\pi k/N}"
+  legenda="DFT amostra a DTFT — resolução em frequência Δω = 2π/N"
+  audioTexto="X de k é a DTFT de x avaliada em omega igual a 2 pi k sobre N."
+/>
+
+## Transformada de Hartley e Hadamard
+
+A **Transformada de Hartley** <Eq>{"H_N[k] = \\sum_n x[n](\\cos(2\\pi kn/N) + \\sin(2\\pi kn/N))"}</Eq> é uma alternativa real à DFT (auto-inversa, até fator N).
+
+A **Transformada de Walsh-Hadamard** usa a matriz de Hadamard <Eq>{"H_N \\in \\{\\pm 1\\}^{N\\times N}"}</Eq> — equivalente à DFT para o grupo <Eq>{"(\\mathbb{Z}/2\\mathbb{Z})^m"}</Eq>.
+
+</Porta>
+<Porta nivel="pratica">
+
+# FFT em Engenharia e Processamento de Sinais
+
+## Análise Espectral de Vibração
+
+Para monitoramento de máquinas rotativas, a FFT das vibrações revela:
+
+- Frequência fundamental de rotação e harmônicas
+- Frequências de falha de rolamentos (<Eq>{"BPFO, BPFI, BSF"}</Eq>)
+- Ressonâncias estruturais
+
+```python
+import numpy as np
+from scipy.fft import fft, fftfreq
+
+# Simular sinal de vibração com 2 frequências e ruído
+fs = 1000          # taxa de amostragem [Hz]
+N  = 2048          # número de amostras
+t  = np.arange(N) / fs
+
+x = 1.0*np.sin(2*np.pi*50*t) + 0.5*np.sin(2*np.pi*120*t) + 0.1*np.random.randn(N)
+
+# FFT com janela Hann (reduz leakage)
+window = np.hanning(N)
+X = fft(x * window)
+freqs = fftfreq(N, 1/fs)
+
+# Espectro unilateral (frequências positivas)
+idx = freqs >= 0
+magnitude = 2 * np.abs(X[idx]) / N  # normalização pela janela
+
+# Picos principais
+from scipy.signal import find_peaks
+peaks, _ = find_peaks(magnitude, height=0.1)
+print("Frequências dominantes [Hz]:", freqs[idx][peaks])
+```
+
+## Convolução Eficiente via FFT
+
+```python
+def fft_convolve(x, h):
+    """Convolução linear via FFT (equivalente a np.convolve mas O(N log N))."""
+    N = len(x) + len(h) - 1
+    N_fft = 2**int(np.ceil(np.log2(N)))  # próxima potência de 2
+    X = fft(x, n=N_fft)
+    H = fft(h, n=N_fft)
+    y = np.real(np.fft.ifft(X * H))
+    return y[:N]
+
+# Verificar contra np.convolve
+x = np.random.randn(500)
+h = np.array([0.25, 0.5, 0.25])  # filtro média simples
+y_fft = fft_convolve(x, h)
+y_ref = np.convolve(x, h)
+print(f"Erro máximo: {np.max(np.abs(y_fft - y_ref)):.2e}")
+```
+
+**Referência:** Cooley & Tukey (1965) "An Algorithm for the Machine Calculation of Complex Fourier Series", *Mathematics of Computation* 19:297–301 (artigo original da FFT); Oppenheim & Schafer, *Discrete-Time Signal Processing*, Cap. 9.
+
+</Porta>
+</DuasPortas>
+
+<Exemplo>
+
+## Exemplo 1 — DFT de 4 Pontos
+
+**Calcular** a DFT de <Eq>{"x = [1, 0, -1, 0]"}</Eq> com <Eq>{"N = 4"}</Eq>.
+
+**Fator:** <Eq>{"W_4 = e^{-2\\pi i/4} = e^{-i\\pi/2} = -i"}</Eq>.
+
+**Cálculo:**
+
+<Eq>{"X[0] = 1 + 0 + (-1) + 0 = 0"}</Eq>
+
+<Eq>{"X[1] = 1 + 0 \\cdot(-i) + (-1)(-i)^2 + 0 \\cdot(-i)^3 = 1 + 0 + (-1)(1) + 0 = 0"}</Eq>
+
+Aguarde: <Eq>{"(-i)^2 = -1"}</Eq>, logo <Eq>{"X[1] = 1 - (-1) = 2"}</Eq>.
+
+Recalcular com <Eq>{"W_4^{kn}"}</Eq>:
+
+<Eq>{"X[1] = 1\\cdot W_4^0 + 0\\cdot W_4^1 + (-1)\\cdot W_4^2 + 0\\cdot W_4^3 = 1 + 0 + (-1)(-1) + 0 = 1+1 = 2"}</Eq>
+
+<Eq>{"X[2] = 1 + 0 + (-1)(-1)^2 + 0 = 1 + (-1)(1) = 0"}</Eq>
+
+Corrigir: <Eq>{"W_4^{2\\cdot 2} = W_4^4 = 1"}</Eq>, <Eq>{"W_4^{2\\cdot 0} = 1"}</Eq>:
+
+<Eq>{"X[2] = 1\\cdot 1 + 0\\cdot(-1)^2 + (-1)\\cdot 1 + 0\\cdot(-1) = 1 - 1 = 0"}</Eq>
+
+<Eq>{"X[3] = 1 + 0 + (-1)W_4^6 + 0 = 1 + (-1)W_4^2 = 1 - (-1) = 2"}</Eq>
+
+(pois <Eq>{"W_4^6 = W_4^2 = e^{-i\\pi} = -1"}</Eq>).
+
+**Resultado:** <Eq>{"X = [0, 2, 0, 2]"}</Eq>.
+
+**Verificação** (Parseval): <Eq>{"\\sum|x[n]|^2 = 1+0+1+0 = 2"}</Eq>; <Eq>{"\\frac{1}{4}\\sum|X[k]|^2 = \\frac{1}{4}(0+4+0+4) = 2 \\checkmark"}</Eq>.
+
+**Referência:** Oppenheim & Schafer, *Discrete-Time Signal Processing*, 3ª ed., §8.1.
+
+</Exemplo>
+
+<Exemplo>
+
+## Exemplo 2 — Borboleta FFT para N=8
+
+**Estrutura DIT-FFT de 8 pontos:** 3 estágios, cada com 4 borboletas.
+
+**Estágio 1** (combina pares): <Eq>{"a_0 = x[0]+x[4]"}</Eq>, <Eq>{"a_1 = x[0]-x[4]"}</Eq>, etc.
+
+**Contagem de operações:**
+- DFT direta: <Eq>{"N^2 = 64"}</Eq> multiplicações complexas
+- FFT: <Eq>{"\\frac{N}{2}\\log_2 N = 4 \\cdot 3 = 12"}</Eq> multiplicações complexas
+
+**Ganho:** fator 64/12 ≈ 5,3. Para <Eq>{"N=1024"}</Eq>: fator <Eq>{"1024^2/(512 \\cdot 10) \\approx 205"}</Eq>.
+
+**Referência:** Cooley & Tukey (1965); Oppenheim & Schafer, §9.2.
+
+</Exemplo>
+
+<Exercicio>
+
+## Bloco A — Exercícios Fundamentais
+
+**A1.** Calcule a DFT de 4 pontos de <Eq>{"x = [1, 1, 1, 1]"}</Eq> e de <Eq>{"x = [1, 0, 0, 0]"}</Eq>. Interprete os resultados espectralmente.
+
+*(Fonte: Oppenheim & Schafer, Discrete-Time Signal Processing, 3ª ed., §8.1)*
+
+**A2.** Verifique a propriedade de convolução circular: calcule <Eq>{"x \\circledast_4 y"}</Eq> para <Eq>{"x = [1,2,3,4]"}</Eq> e <Eq>{"y = [1,0,-1,0]"}</Eq> diretamente e via DFT (multiplicação ponto a ponto seguida de IDFT).
+
+*(Fonte: Oppenheim & Schafer, §8.3)*
+
+**A3.** Para <Eq>{"x[n] = \\cos(2\\pi f_0 n/N)"}</Eq> com <Eq>{"f_0"}</Eq> inteiro, calcule a DFT analiticamente e mostre que <Eq>{"X[k] = N/2 \\cdot (\\delta[k-f_0] + \\delta[k-(N-f_0)])"}</Eq>.
+
+*(Fonte: Proakis & Manolakis, Digital Signal Processing, §5.2)*
+
+</Exercicio>
+
+<Exercicio>
+
+## Bloco B — Exercícios Intermediários
+
+**B1.** **Resolução espectral e zero-padding:** Um sinal contém dois cossenos em <Eq>{"50"}</Eq> Hz e <Eq>{"52"}</Eq> Hz com taxa de amostragem <Eq>{"f_s = 200"}</Eq> Hz.
+
+(a) Quantas amostras <Eq>{"N"}</Eq> são necessárias para resolver as duas frequências?
+
+(b) Se <Eq>{"N = 128"}</Eq>, o zero-padding para <Eq>{"M = 1024"}</Eq> melhora a resolução? Explique.
+
+*(Fonte: Oppenheim & Schafer, §8.5)*
+
+**B2.** Derive a propriedade de deslocamento temporal da DFT: se <Eq>{"Y[k] = W_N^{k n_0} X[k]"}</Eq>, então <Eq>{"y[n] = x[(n-n_0) \\bmod N]"}</Eq>. Use isso para mostrar que o espectro de amplitude <Eq>{"|Y[k]| = |X[k]|"}</Eq> é invariante a deslocamentos circulares.
+
+*(Fonte: Oppenheim & Schafer, §8.2)*
+
+**B3.** **Algoritmo FFT:** Implemente a FFT recursiva (Cooley-Tukey decimação no tempo) para <Eq>{"N = 2^m"}</Eq> em pseudocódigo ou Python. Verifique contra `numpy.fft.fft` e meça o tempo de execução para <Eq>{"N = 2^{10}, 2^{16}, 2^{20}"}</Eq>.
+
+*(Fonte: Oppenheim & Schafer, §9.2; Numerical Recipes, §12.2)*
+
+</Exercicio>
+
+<Exercicio>
+
+## Bloco C — Exercícios Avançados (Nível USP/ITA)
+
+**C1.** **(DFT como álgebra)** Mostre que a DFT diagonaliza qualquer operador de convolução circular: se <Eq>{"C_h"}</Eq> é a matriz de convolução circular por <Eq>{"h"}</Eq> (circulante), então <Eq>{"C_h = W_N^{-1}\\text{diag}(H[0],\\ldots,H[N-1])W_N"}</Eq>. Use isso para mostrar que os autovetores de qualquer matriz circulante são as colunas de <Eq>{"W_N^*"}</Eq>.
+
+*(Fonte: Strang, Introduction to Linear Algebra, 5ª ed., §8.3; Horn & Johnson, Matrix Analysis, §2.2)*
+
+**C2.** **(Erro de truncamento e janelamento)** Seja <Eq>{"x(t) = \\cos(2\\pi f_0 t)"}</Eq> com <Eq>{"f_0 = 3{,}3f_s/N"}</Eq> (frequência não-inteira). Calcule analiticamente o vazamento espectral (leakage) da DFT com janela retangular, expresse como convolução com o kernel de Dirichlet <Eq>{"D_N(\\omega) = \\sin(N\\omega/2)/\\sin(\\omega/2)"}</Eq>, e compare a atenuação máxima do lóbulo lateral com a janela Hann.
+
+*(Fonte: Harris, "On the Use of Windows for Harmonic Analysis with the DFT", Proc. IEEE, 1978)*
+
+**C3.** **(FFT de ponto flutuante — análise de erro)** A FFT com ponto flutuante de precisão <Eq>{"\\epsilon_{\\text{mach}}"}</Eq> acumula erro numérico da ordem de <Eq>{"O(\\epsilon_{\\text{mach}} \\log_2 N)"}</Eq>, enquanto a DFT direta acumula <Eq>{"O(N\\epsilon_{\\text{mach}})"}</Eq>. Derive esse fato a partir da estrutura de borboleta, onde cada estágio contribui com erro relativo <Eq>{"O(\\epsilon_{\\text{mach}})"}</Eq>.
+
+*(Fonte: Higham, Accuracy and Stability of Numerical Algorithms, 2ª ed., §3.11)*
+
+</Exercicio>
+
+<Leituras>
+
+## Referências Bibliográficas
+
+- **Oppenheim, A.V.; Schafer, R.W.** *Discrete-Time Signal Processing*, 3ª ed. Prentice Hall, 2009. Caps. 8–9 (DFT, propriedades, FFT). Referência central.
+- **Cooley, J.W.; Tukey, J.W.** "An Algorithm for the Machine Calculation of Complex Fourier Series." *Mathematics of Computation*, 19(90):297–301, 1965. (Artigo original da FFT.)
+- **Proakis, J.G.; Manolakis, D.G.** *Digital Signal Processing*, 4ª ed. Prentice Hall, 2007. Caps. 5–6 (DFT e implementação FFT).
+- **Harris, F.J.** "On the Use of Windows for Harmonic Analysis with the Discrete Fourier Transform." *Proceedings of the IEEE*, 66(1):51–83, 1978. (Referência clássica de janelamento.)
+- **Strang, G.** *Introduction to Linear Algebra*, 5ª ed. Wellesley-Cambridge Press, 2016. §8.3 (DFT e matrizes circulantes).
+- **Higham, N.J.** *Accuracy and Stability of Numerical Algorithms*, 2ª ed. SIAM, 2002. §3.11 (análise de erro da FFT).
+- **Numerical Recipes in C**, 2ª ed. Cambridge Univ. Press, 1992. §12 (FFT e aplicações práticas).
+
+</Leituras>

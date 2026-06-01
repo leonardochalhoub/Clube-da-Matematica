@@ -602,6 +602,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∫u dv = uv − ∫v du, tabela, integrais cíclicas, fórmula de redução',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §7.1 · Guidorizzi §6.1 · Active Calculus §5.4',
+            slug: 'cal2-u1-l01-integracao-partes',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l01-integracao-partes',
           },
           {
             num: 2,
@@ -609,6 +611,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∫sinⁿx cosᵐx, ∫tanⁿx, ∫secⁿx, identidades de Pitágoras',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §7.2 · Guidorizzi §6.2 · OpenStax Calc II §3.2',
+            slug: 'cal2-u1-l02-integrais-trigonometricas',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l02-integrais-trigonometricas',
           },
           {
             num: 3,
@@ -616,6 +620,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '√(a²−x²), √(a²+x²), √(x²−a²) — escolha de substituição',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §7.3 · Guidorizzi §6.3 · OpenStax Calc II §3.3',
+            slug: 'cal2-u1-l03-substituicao-trigonometrica',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l03-substituicao-trigonometrica',
           },
           {
             num: 4,
@@ -623,6 +629,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Decomposição racional (fatores simples, repetidos, irredutíveis)',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §7.4 · Guidorizzi §6.4 · Active Calculus §5.5',
+            slug: 'cal2-u1-l04-fracoes-parciais',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l04-fracoes-parciais',
           },
           {
             num: 5,
@@ -630,6 +638,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'sinh, cosh, tanh e suas integrais; ∫1/√(x²±a²)',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §6.7 · Guidorizzi §6.5',
+            slug: 'cal2-u1-l05-funcoes-hiperbolicas',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l05-funcoes-hiperbolicas',
           },
           {
             num: 6,
@@ -637,6 +647,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Seleção de técnica, uso de tabelas, CAS como verificação',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §7.5 · OpenStax Calc II §3.5',
+            slug: 'cal2-u1-l06-estrategias-integracao',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l06-estrategias-integracao',
           },
           {
             num: 7,
@@ -644,6 +656,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∫[a,+∞)f, ∫(−∞,b]f, ∫(−∞,+∞)f — convergência e divergência',
             materia: 'integrais-impróprias-series',
             referencia: 'Stewart §7.8 · Guidorizzi §7.1 · Active Calculus §6.5',
+            slug: 'cal2-u1-l07-integrais-improprias-tipo1',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l07-integrais-improprias-tipo1',
           },
           {
             num: 8,
@@ -651,6 +665,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Integrando com singularidade, teste de comparação',
             materia: 'integrais-impróprias-series',
             referencia: 'Stewart §7.8 · Guidorizzi §7.2',
+            slug: 'cal2-u1-l08-integrais-improprias-tipo2',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l08-integrais-improprias-tipo2',
           },
           {
             num: 9,
@@ -658,6 +674,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Função densidade, E[X], Var[X], distribuição exponencial, gaussiana',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §7.9 (aplicação) · REAMAT §6.5',
+            slug: 'cal2-u1-l09-probabilidade-continua',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l09-probabilidade-continua',
           },
           {
             num: 10,
@@ -665,6 +683,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Banco de 40 integrais de nível USP/ITA/UNICAMP',
             materia: 'tecnicas-integracao',
             referencia: 'REAMAT cap. 6 · Guidorizzi Lista V · Stewart cap. 7 exercícios',
+            slug: 'cal2-u1-l10-workshop',
+            caminho: 'engenharia/calculo-2/unidade-1/cal2-u1-l10-workshop',
           },
         ],
       },
@@ -681,6 +701,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Definição ε-N, sequências monótonas e limitadas, Bolzano-Weierstrass',
             materia: 'integrais-impróprias-series',
             referencia: 'Stewart §11.1 · Guidorizzi §8.1 · Apostol I §10.1–10.4',
+            slug: 'cal2-u2-l11-sequencias',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l11-sequencias',
           },
           {
             num: 12,
@@ -688,6 +710,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Sequência de somas parciais, série geométrica, série harmônica',
             materia: 'integrais-impróprias-series',
             referencia: 'Stewart §11.2 · Guidorizzi §8.2 · Apostol I §10.5',
+            slug: 'cal2-u2-l12-series-convergencia',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l12-series-convergencia',
           },
           {
             num: 13,
@@ -695,6 +719,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Teste da integral (Cauchy), comparação direta e limite',
             materia: 'integrais-impróprias-series',
             referencia: 'Stewart §11.3–11.4 · Guidorizzi §8.3',
+            slug: 'cal2-u2-l13-teste-integral-series-p',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l13-teste-integral-series-p',
           },
           {
             num: 14,
@@ -702,6 +728,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Teste da razão (D\'Alembert), raiz (Cauchy), séries alternadas (Leibniz)',
             materia: 'integrais-impróprias-series',
             referencia: 'Stewart §11.5–11.6 · Guidorizzi §8.4',
+            slug: 'cal2-u2-l14-testes-comparacao',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l14-testes-comparacao',
           },
           {
             num: 15,
@@ -709,6 +737,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Séries absolutamente convergentes, Teorema de Riemann sobre rearranjos',
             materia: 'integrais-impróprias-series',
             referencia: 'Stewart §11.6 · Apostol I §10.14–10.16',
+            slug: 'cal2-u2-l15-series-alternadas',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l15-series-alternadas',
           },
           {
             num: 16,
@@ -716,6 +746,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Σ aₙ(x−c)ⁿ, raio via fórmula de Hadamard, derivação e integração termo a termo',
             materia: 'series-taylor',
             referencia: 'Stewart §11.8–11.9 · Guidorizzi §8.6 · Apostol I §11.1–11.5',
+            slug: 'cal2-u2-l16-series-potencias',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l16-series-potencias',
           },
           {
             num: 17,
@@ -723,7 +755,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'f(x) = Σf^(n)(a)/n! (x−a)ⁿ, desenvolvimentos clássicos (eˣ, sin, cos, ln, ...)',
             materia: 'series-taylor',
             referencia: 'Stewart §11.10 · Guidorizzi §8.7 · Active Calculus §8.5',
-            slug: 'cal2-u2-l17-series-taylor',
+            slug: 'cal2-u2-l17-series-taylor-maclaurin',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l17-series-taylor-maclaurin',
           },
           {
             num: 18,
@@ -731,6 +764,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Resto de Lagrange, grau necessário para precisão ε',
             materia: 'series-taylor',
             referencia: 'Stewart §11.11 · Guidorizzi §8.8',
+            slug: 'cal2-u2-l18-series-fourier',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l18-series-fourier',
           },
           {
             num: 19,
@@ -738,6 +773,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Limite via expansão, ∫sin(x²)dx, ∫e^(−x²)dx, soma de séries conhecidas',
             materia: 'series-taylor',
             referencia: 'Stewart §11.11 · REAMAT §9.5',
+            slug: 'cal2-u2-l19-estrategias-series',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l19-estrategias-series',
           },
           {
             num: 20,
@@ -745,6 +782,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas de convergência e aplicações estilo USP/ITA',
             materia: 'series-taylor',
             referencia: 'REAMAT cap. 9 · Guidorizzi Lista VII · Apostol I cap. 10',
+            slug: 'cal2-u2-l20-workshop',
+            caminho: 'engenharia/calculo-2/unidade-2/cal2-u2-l20-workshop',
           },
         ],
       },
@@ -760,6 +799,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Ordem, grau, tipo (linear/não-linear), campo de direções',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §1.1–1.3 · Stewart §9.1 · REAMAT §10.1',
+            slug: 'cal2-u3-l21-edo-introducao',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l21-edo-introducao',
           },
           {
             num: 22,
@@ -767,6 +808,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'dy/dx = g(x)h(y), separação de variáveis, soluções implícitas e explícitas',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §2.2 · Stewart §9.3 · OpenStax Calc II §4.3',
+            slug: 'cal2-u3-l22-edo-separaveis',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l22-edo-separaveis',
           },
           {
             num: 23,
@@ -774,7 +817,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'y′+P(x)y = Q(x), fator integrante μ(x) = e^∫P(x)dx',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §2.1 · Stewart §9.5 · Active Calculus §7.4',
-            slug: 'cal2-u3-l23-edo-linear-1',
+            slug: 'cal2-u3-l23-edo-lineares-1a-ordem',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l23-edo-lineares-1a-ordem',
           },
           {
             num: 24,
@@ -782,6 +826,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'y′+P(x)y = Q(x)yⁿ, substituição v=y^(1−n)',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §2.4 · Guidorizzi vol. 2 §11.3',
+            slug: 'cal2-u3-l24-edo-2a-ordem-homogenea',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l24-edo-2a-ordem-homogenea',
           },
           {
             num: 25,
@@ -789,6 +835,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'M dx + N dy = 0, ∂M/∂y = ∂N/∂x, determinação de fator integrante',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §2.6 · Guidorizzi §11.2',
+            slug: 'cal2-u3-l25-edo-2a-ordem-nao-homogenea',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l25-edo-2a-ordem-nao-homogenea',
           },
           {
             num: 26,
@@ -796,6 +844,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Teorema de Picard, iterações de Picard, exemplos e contra-exemplos',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §2.8 · Apostol I §8.3',
+            slug: 'cal2-u3-l26-transformada-laplace',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l26-transformada-laplace',
           },
           {
             num: 27,
@@ -803,6 +853,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'y′=ry(1−y/K), diagrama de fase 1D, pontos de equilíbrio, estabilidade',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §2.5 · Stewart §9.4 · Active Calculus §7.5',
+            slug: 'cal2-u3-l27-sistemas-edo',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l27-sistemas-edo',
           },
           {
             num: 28,
@@ -810,6 +862,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Euler explícito, Euler melhorado, Runge-Kutta 4ª ordem (esboço)',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §8.1 · REAMAT §10.4',
+            slug: 'cal2-u3-l28-metodos-numericos-edo',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l28-metodos-numericos-edo',
           },
           {
             num: 29,
@@ -817,6 +871,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Circuito RC, lei de Newton de resfriamento, mistura de soluções, queda livre com arrasto',
             materia: 'equacoes-diferenciais-1',
             referencia: 'Boyce & DiPrima §2.3 · REAMAT §10.3 · Stewart §9.4',
+            slug: 'cal2-u3-l29-edo-series-potencias',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l29-edo-series-potencias',
           },
           {
             num: 30,
@@ -824,6 +880,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas integrados: técnicas, séries e EDOs',
             materia: 'equacoes-diferenciais-1',
             referencia: 'REAMAT cap. 10 · Boyce & DiPrima cap. 2 · ITA provas',
+            slug: 'cal2-u3-l30-workshop',
+            caminho: 'engenharia/calculo-2/unidade-3/cal2-u3-l30-workshop',
           },
         ],
       },
@@ -840,6 +898,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'x=f(t), y=g(t), tangente, comprimento de arco paramétrico',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §10.1–10.2 · Guidorizzi §9.1',
+            slug: 'cal2-u4-l31-integrais-duplas',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l31-integrais-duplas',
           },
           {
             num: 32,
@@ -847,6 +907,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'r=f(θ), área em polares A = ½∫r²dθ, comprimento de arco polar',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §10.3–10.4 · Guidorizzi §9.2',
+            slug: 'cal2-u4-l32-integrais-duplas-polares',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l32-integrais-duplas-polares',
           },
           {
             num: 33,
@@ -854,6 +916,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'r = ed/(1+e cosθ), excentricidade, órbitas kepleranas',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §10.6 · Apostol I §13.8',
+            slug: 'cal2-u4-l33-aplicacoes-integrais-duplas',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l33-aplicacoes-integrais-duplas',
           },
           {
             num: 34,
@@ -861,6 +925,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'cosh, sinh, tanh — integrais, equação da catenária',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §6.7 · Guidorizzi §6.6',
+            slug: 'cal2-u4-l34-integrais-triplas',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l34-integrais-triplas',
           },
           {
             num: 35,
@@ -868,6 +934,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Coeficientes de Fourier, convergência pontual, fenômeno de Gibbs',
             materia: 'series-taylor',
             referencia: 'Boyce & DiPrima §10.2 · REAMAT §9.6',
+            slug: 'cal2-u4-l35-coordenadas-cilindricas-esfericas',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l35-coordenadas-cilindricas-esfericas',
           },
           {
             num: 36,
@@ -875,6 +943,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Expansão de potencial elétrico, aproximações de pequenas oscilações',
             materia: 'series-taylor',
             referencia: 'Stewart §11.11 · REAMAT §9.5',
+            slug: 'cal2-u4-l36-mudanca-variaveis-jacobiano',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l36-mudanca-variaveis-jacobiano',
           },
           {
             num: 37,
@@ -882,6 +952,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Regras de trapézio, Simpson 1/3, erro, quadratura de Gauss',
             materia: 'tecnicas-integracao',
             referencia: 'Stewart §7.7 · REAMAT §6.6 · OpenStax Calc II §3.6',
+            slug: 'cal2-u4-l37-campos-vetoriais-integrais-linha',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l37-campos-vetoriais-integrais-linha',
           },
           {
             num: 38,
@@ -889,6 +961,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Regra de Leibniz: d/dα ∫f(x,α)dx = ∫∂f/∂α dx',
             materia: 'tecnicas-integracao',
             referencia: 'Apostol I §12.1 · Guidorizzi §7.4',
+            slug: 'cal2-u4-l38-teorema-green',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l38-teorema-green',
           },
           {
             num: 39,
@@ -896,6 +970,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∫e^(−x²)dx (função erro), ∫sin(x²)dx (Fresnel), liouvillianos',
             materia: 'tecnicas-integracao',
             referencia: 'REAMAT §6.7 · Apostol I §11.6',
+            slug: 'cal2-u4-l39-stokes-gauss',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l39-stokes-gauss',
           },
           {
             num: 40,
@@ -903,6 +979,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Prova simulada completa: 20 questões nível USP/ITA',
             materia: 'tecnicas-integracao',
             referencia: 'REAMAT · ITA provas 2010–2024 · Guidorizzi Listas V–VIII',
+            slug: 'cal2-u4-l40-workshop',
+            caminho: 'engenharia/calculo-2/unidade-4/cal2-u4-l40-workshop',
           },
         ],
       },
@@ -937,6 +1015,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'u×v, [u,v,w], área de paralelogramo, volume de paralelepípedo',
             materia: 'funcoes-varias-variaveis',
             referencia: 'Stewart §12.4–12.5 · Guidorizzi vol. 2 §1.3–1.4',
+            slug: 'cal3-u1-l01-funcoes-varias-variaveis',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l01-funcoes-varias-variaveis',
           },
           {
             num: 2,
@@ -944,6 +1024,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Equações de reta/plano, quádricas (elipsóide, parabolóide, hiperbolóide)',
             materia: 'funcoes-varias-variaveis',
             referencia: 'Stewart §12.5–12.6 · Guidorizzi §1.5–1.6',
+            slug: 'cal3-u1-l02-limites-continuidade-rn',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l02-limites-continuidade-rn',
           },
           {
             num: 3,
@@ -951,6 +1033,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'r(t), tangente, comprimento de arco, curvatura, vetor normal',
             materia: 'funcoes-varias-variaveis',
             referencia: 'Stewart §13.1–13.3 · Guidorizzi §2.1–2.3',
+            slug: 'cal3-u1-l03-derivadas-parciais',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l03-derivadas-parciais',
           },
           {
             num: 4,
@@ -958,6 +1042,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Superfícies de nível, contornos, visualização de f(x,y)',
             materia: 'funcoes-varias-variaveis',
             referencia: 'Stewart §14.1 · Guidorizzi §3.1 · OpenStax Calc III §4.1',
+            slug: 'cal3-u1-l04-diferenciabilidade-plano-tangente',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l04-diferenciabilidade-plano-tangente',
           },
           {
             num: 5,
@@ -965,6 +1051,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Definição ε-δ em ℝⁿ, caminhos de aproximação, descontinuidades',
             materia: 'funcoes-varias-variaveis',
             referencia: 'Stewart §14.2 · Guidorizzi §3.2 · Apostol II §12.1',
+            slug: 'cal3-u1-l05-regra-cadeia-variaveis',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l05-regra-cadeia-variaveis',
           },
           {
             num: 6,
@@ -972,6 +1060,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∂f/∂x, ∂f/∂y via limite, interpretação geométrica, regras algébricas',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §14.3 · Guidorizzi §3.3 · OpenStax Calc III §4.3',
+            slug: 'cal3-u1-l06-derivadas-direcionais-gradiente',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l06-derivadas-direcionais-gradiente',
           },
           {
             num: 7,
@@ -979,6 +1069,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∂²f/∂x², ∂²f/∂x∂y, Hessiana, fxy=fyx (condições Schwarz)',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §14.3 · Guidorizzi §3.4',
+            slug: 'cal3-u1-l07-derivadas-ordem-superior-clairaut',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l07-derivadas-ordem-superior-clairaut',
           },
           {
             num: 8,
@@ -986,6 +1078,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'z−z₀ = fx(x₀,y₀)(x−x₀)+fy(x₀,y₀)(y−y₀), diferenciabilidade',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §14.4 · Active Calculus §10.4 · Guidorizzi §3.5',
+            slug: 'cal3-u1-l08-funcoes-rn-rm-jacobiano',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l08-funcoes-rn-rm-jacobiano',
           },
           {
             num: 9,
@@ -993,6 +1087,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'df/dt = ∂f/∂x·dx/dt+..., F(x,y,z)=0 → ∂z/∂x implícita',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §14.5 · Guidorizzi §3.6 · OpenStax Calc III §4.5',
+            slug: 'cal3-u1-l09-funcoes-implicitas-tfi',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l09-funcoes-implicitas-tfi',
           },
           {
             num: 10,
@@ -1000,6 +1096,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas integrados, estilo USP/UNICAMP',
             materia: 'funcoes-varias-variaveis',
             referencia: 'REAMAT cap. 11 · Guidorizzi Lista IX',
+            slug: 'cal3-u1-l10-workshop',
+            caminho: 'engenharia/calculo-3/unidade-1/cal3-u1-l10-workshop',
           },
         ],
       },
@@ -1014,7 +1112,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∇f, derivada direcional Dᵤf = ∇f·u, direção de máximo crescimento',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §14.6 · Guidorizzi §3.7 · OpenStax Calc III §4.6',
-            slug: 'cal3-u2-l11-gradiente',
+            slug: 'cal3-u2-l11-extremos-livres-hessiana',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l11-extremos-livres-hessiana',
           },
           {
             num: 12,
@@ -1022,6 +1121,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∇F normal à superfície, plano tangente a F(x,y,z)=c',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §14.6 · Apostol II §12.7',
+            slug: 'cal3-u2-l12-extremos-globais-compactos',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l12-extremos-globais-compactos',
           },
           {
             num: 13,
@@ -1029,6 +1130,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Condições de 1ª e 2ª ordem, classificação via det(H), selas',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §14.7 · Guidorizzi §4.1 · OpenStax Calc III §4.7',
+            slug: 'cal3-u2-l13-lagrange-uma-restricao',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l13-lagrange-uma-restricao',
           },
           {
             num: 14,
@@ -1036,6 +1139,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∇f = λ∇g, restrição g(x,y,z)=c, casos com duas restrições',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §14.8 · Guidorizzi §4.2 · Active Calculus §10.8',
+            slug: 'cal3-u2-l14-lagrange-multiplas-restricoes',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l14-lagrange-multiplas-restricoes',
           },
           {
             num: 15,
@@ -1043,6 +1148,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'OLS como problema de otimização, gradiente igualado a zero',
             materia: 'derivadas-parciais',
             referencia: 'Apostol II §12.13 · REAMAT §11.5',
+            slug: 'cal3-u2-l15-teorema-funcao-implicita-completo',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l15-teorema-funcao-implicita-completo',
           },
           {
             num: 16,
@@ -1050,6 +1157,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Condições para resolver F(x,y)=0 localmente, Jacobiano',
             materia: 'derivadas-parciais',
             referencia: 'Apostol II §13.1 · Guidorizzi §4.3',
+            slug: 'cal3-u2-l16-teorema-funcao-inversa',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l16-teorema-funcao-inversa',
           },
           {
             num: 17,
@@ -1057,6 +1166,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'J(u,v)→(x,y), mudança de variáveis em integrais duplas via Jacobiano',
             materia: 'derivadas-parciais',
             referencia: 'Stewart §15.9 · Guidorizzi §5.4',
+            slug: 'cal3-u2-l17-curvas-frenet-serret',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l17-curvas-frenet-serret',
           },
           {
             num: 18,
@@ -1064,6 +1175,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Polinômio de Taylor de 2ª ordem em ℝⁿ, forma quadrática Hessiana',
             materia: 'derivadas-parciais',
             referencia: 'Apostol II §12.10 · Guidorizzi §4.4',
+            slug: 'cal3-u2-l18-superficies-area',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l18-superficies-area',
           },
           {
             num: 19,
@@ -1071,6 +1184,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Relações de Maxwell, potencial elétrico, análise de sensibilidade',
             materia: 'derivadas-parciais',
             referencia: 'REAMAT §11.6 · Stewart §14 (exemplos)',
+            slug: 'cal3-u2-l19-taylor-rn-forma-quadratica',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l19-taylor-rn-forma-quadratica',
           },
           {
             num: 20,
@@ -1078,6 +1193,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas de Lagrange e otimização irrestrita estilo USP/ITA',
             materia: 'derivadas-parciais',
             referencia: 'REAMAT cap. 11 · Guidorizzi Lista X · Apostol II cap. 12',
+            slug: 'cal3-u2-l20-workshop',
+            caminho: 'engenharia/calculo-3/unidade-2/cal3-u2-l20-workshop',
           },
         ],
       },
@@ -1092,6 +1209,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Sumas duplas de Riemann, Teorema de Fubini, iteração de integrais',
             materia: 'integrais-multiplas',
             referencia: 'Stewart §15.1–15.2 · Guidorizzi §5.1 · OpenStax Calc III §5.1',
+            slug: 'cal3-u3-l21-introducao-edps',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l21-introducao-edps',
           },
           {
             num: 22,
@@ -1099,6 +1218,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Limites variáveis de integração, trocar ordem',
             materia: 'integrais-multiplas',
             referencia: 'Stewart §15.3 · Active Calculus §11.1 · Guidorizzi §5.2',
+            slug: 'cal3-u3-l22-equacao-onda-dalembert',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l22-equacao-onda-dalembert',
           },
           {
             num: 23,
@@ -1106,7 +1227,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∬f(r,θ) r dr dθ, região polar, aplicação em distribuição gaussiana',
             materia: 'integrais-multiplas',
             referencia: 'Stewart §15.4 · Guidorizzi §5.3 · OpenStax Calc III §5.3',
-            slug: 'cal3-u3-l23-integrais-polares',
+            slug: 'cal3-u3-l23-equacao-calor-separacao',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l23-equacao-calor-separacao',
           },
           {
             num: 24,
@@ -1114,6 +1236,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Área, massa com densidade variável, centro de massa, momento de inércia',
             materia: 'integrais-multiplas',
             referencia: 'Stewart §15.5–15.6 · Active Calculus §11.4',
+            slug: 'cal3-u3-l24-laplace-harmonicas-dirichlet',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l24-laplace-harmonicas-dirichlet',
           },
           {
             num: 25,
@@ -1121,6 +1245,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∭f dV, iteração, troca de ordem, volume de sólidos',
             materia: 'integrais-multiplas',
             referencia: 'Stewart §15.7 · Guidorizzi §5.5 · OpenStax Calc III §5.4',
+            slug: 'cal3-u3-l25-fourier-edps',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l25-fourier-edps',
           },
           {
             num: 26,
@@ -1128,6 +1254,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '(r,θ,z), elemento de volume r dr dθ dz, aplicação em sólidos de revolução',
             materia: 'integrais-multiplas',
             referencia: 'Stewart §15.8 · Guidorizzi §5.6 · Active Calculus §11.6',
+            slug: 'cal3-u3-l26-transformada-fourier',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l26-transformada-fourier',
           },
           {
             num: 27,
@@ -1135,6 +1263,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '(ρ,θ,φ), elemento de volume ρ² sin φ dρ dθ dφ, esferas e cones',
             materia: 'integrais-multiplas',
             referencia: 'Stewart §15.9 · Guidorizzi §5.7 · OpenStax Calc III §5.5',
+            slug: 'cal3-u3-l27-fourier-edps-dominio-inteiro',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l27-fourier-edps-dominio-inteiro',
           },
           {
             num: 28,
@@ -1142,6 +1272,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∭f dV = ∭f(T)·|J| du dv dw, exemplos gerais',
             materia: 'integrais-multiplas',
             referencia: 'Stewart §15.10 · Apostol II §11.4',
+            slug: 'cal3-u3-l28-metodo-caracteristicas',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l28-metodo-caracteristicas',
           },
           {
             num: 29,
@@ -1149,6 +1281,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Densidade de carga elétrica, função de distribuição conjunta',
             materia: 'integrais-multiplas',
             referencia: 'REAMAT §12.5 · Stewart §15.6',
+            slug: 'cal3-u3-l29-classificacao-edps-2a-ordem',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l29-classificacao-edps-2a-ordem',
           },
           {
             num: 30,
@@ -1156,6 +1290,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas integrados em coordenadas variadas, estilo USP/UNICAMP',
             materia: 'integrais-multiplas',
             referencia: 'REAMAT cap. 12 · Guidorizzi Lista XI',
+            slug: 'cal3-u3-l30-workshop',
+            caminho: 'engenharia/calculo-3/unidade-3/cal3-u3-l30-workshop',
           },
         ],
       },
@@ -1171,6 +1307,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'F: ℝⁿ→ℝⁿ, campo conservativo, potencial escalar',
             materia: 'calculo-vetorial',
             referencia: 'Stewart §16.1 · Guidorizzi §6.1 · OpenStax Calc III §6.1',
+            slug: 'cal3-u4-l31-numeros-complexos-funcoes',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l31-numeros-complexos-funcoes',
           },
           {
             num: 32,
@@ -1178,6 +1316,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∫_C F·dr, independência do caminho, campos conservativos',
             materia: 'calculo-vetorial',
             referencia: 'Stewart §16.2–16.3 · Guidorizzi §6.2',
+            slug: 'cal3-u4-l32-funcoes-analiticas-cauchy-riemann',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l32-funcoes-analiticas-cauchy-riemann',
           },
           {
             num: 33,
@@ -1185,7 +1325,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∮_C F·dr = ∬_D (∂Q/∂x−∂P/∂y)dA, área via Green, forma de fluxo',
             materia: 'calculo-vetorial',
             referencia: 'Stewart §16.4 · Guidorizzi §6.3 · Apostol II §10.7',
-            slug: 'cal3-u4-l33-teorema-green',
+            slug: 'cal3-u4-l33-funcoes-elementares-complexas',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l33-funcoes-elementares-complexas',
           },
           {
             num: 34,
@@ -1193,6 +1334,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'curl F = ∇×F, div F = ∇·F, interpretações físicas',
             materia: 'calculo-vetorial',
             referencia: 'Stewart §16.5 · Guidorizzi §6.4 · OpenStax Calc III §6.5',
+            slug: 'cal3-u4-l34-integracao-complexa-cauchy',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l34-integracao-complexa-cauchy',
           },
           {
             num: 35,
@@ -1200,6 +1343,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'r(u,v), elemento de área dS, ∬_S f dS',
             materia: 'calculo-vetorial',
             referencia: 'Stewart §16.6–16.7 · Guidorizzi §6.5',
+            slug: 'cal3-u4-l35-series-taylor-laurent',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l35-series-taylor-laurent',
           },
           {
             num: 36,
@@ -1207,6 +1352,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∬_S F·dS = ∬_S F·n dS, fluxo elétrico e magnético',
             materia: 'calculo-vetorial',
             referencia: 'Stewart §16.7 · Guidorizzi §6.6',
+            slug: 'cal3-u4-l36-singularidades-isoladas',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l36-singularidades-isoladas',
           },
           {
             num: 37,
@@ -1214,6 +1361,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∮_C F·dr = ∬_S (∇×F)·dS, interpretação como generalização de Green',
             materia: 'calculo-vetorial',
             referencia: 'Stewart §16.8 · Guidorizzi §6.7 · Apostol II §11.6',
+            slug: 'cal3-u4-l37-teorema-residuos',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l37-teorema-residuos',
           },
           {
             num: 38,
@@ -1221,6 +1370,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∬_S F·dS = ∭_V div F dV, lei de Gauss, equações de Maxwell',
             materia: 'calculo-vetorial',
             referencia: 'Stewart §16.9 · Guidorizzi §6.8 · Apostol II §11.7',
+            slug: 'cal3-u4-l38-aplicacoes-integrais-reais',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l38-aplicacoes-integrais-reais',
           },
           {
             num: 39,
@@ -1228,6 +1379,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∇·E=ρ/ε₀, ∇×B=μ₀J, ∇·B=0, ∇×E=−∂B/∂t',
             materia: 'calculo-vetorial',
             referencia: 'REAMAT §13.5 · Apostol II §11.8',
+            slug: 'cal3-u4-l39-mapeamentos-conformes',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l39-mapeamentos-conformes',
           },
           {
             num: 40,
@@ -1235,6 +1388,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Prova simulada completa: integrais múltiplas e cálculo vetorial',
             materia: 'calculo-vetorial',
             referencia: 'REAMAT cap. 13 · Guidorizzi Lista XII · ITA provas',
+            slug: 'cal3-u4-l40-workshop',
+            caminho: 'engenharia/calculo-3/unidade-4/cal3-u4-l40-workshop',
           },
         ],
       },
@@ -1270,7 +1425,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'ay″+by′+cy=0, raízes reais distintas, repetidas e complexas',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §3.1–3.4 · Guidorizzi vol. 2 §12.1',
-            slug: 'cal4-u1-l01-edo-2-ordem',
+            slug: 'cal4-u1-l01-espacos-vetoriais',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l01-espacos-vetoriais',
           },
           {
             num: 2,
@@ -1278,6 +1434,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'ay″+by′+cy=g(x), g polinomial/exponencial/trig, ressonância',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §3.5 · Stewart §17.2 · Guidorizzi §12.2',
+            slug: 'cal4-u1-l02-transformacoes-lineares',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l02-transformacoes-lineares',
           },
           {
             num: 3,
@@ -1285,6 +1443,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Wronskiano, W₁, W₂, u₁′ e u₂′, solução geral com g(x) arbitrário',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §3.6 · Stewart §17.3 · Guidorizzi §12.3',
+            slug: 'cal4-u1-l03-autovalores-autovetores',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l03-autovalores-autovetores',
           },
           {
             num: 4,
@@ -1292,6 +1452,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Oscilação livre amortecida/subamortecida/criticamente amortecida, ressonância',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §3.7–3.8 · REAMAT §14.2',
+            slug: 'cal4-u1-l04-produto-interno-ortogonalidade',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l04-produto-interno-ortogonalidade',
           },
           {
             num: 5,
@@ -1299,6 +1461,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'L q″+Rq′+q/C = E(t), analogia com massa-mola, filtros',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §3.8 · REAMAT §14.3',
+            slug: 'cal4-u1-l05-teorema-espectral',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l05-teorema-espectral',
           },
           {
             num: 6,
@@ -1306,6 +1470,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'x′ = Ax, solução via autovalores, espaço de fase',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §7.1–7.5 · Guidorizzi §13.1',
+            slug: 'cal4-u1-l06-svd-decomposicao-singular',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l06-svd-decomposicao-singular',
           },
           {
             num: 7,
@@ -1313,6 +1479,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Espirais, centros, nós, selas — classificação de pontos de equilíbrio',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §7.6–7.8 · Strogatz §5.2',
+            slug: 'cal4-u1-l07-minimos-quadrados-regressao',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l07-minimos-quadrados-regressao',
           },
           {
             num: 8,
@@ -1320,6 +1488,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'e^(At), fórmula de Cayley-Hamilton, implementação',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §7.7 · Apostol II §11.11',
+            slug: 'cal4-u1-l08-espacos-hilbert-completude',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l08-espacos-hilbert-completude',
           },
           {
             num: 9,
@@ -1327,6 +1497,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Ponto de equilíbrio, Jacobiano, estabilidade de Lyapunov',
             materia: 'edo-avancado',
             referencia: 'Boyce & DiPrima §9.1–9.3 · Strogatz §6.1–6.3',
+            slug: 'cal4-u1-l09-sturm-liouville',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l09-sturm-liouville',
           },
           {
             num: 10,
@@ -1334,6 +1506,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Problemas de vibrações, circuitos e espaço de fase estilo USP/ITA',
             materia: 'edo-avancado',
             referencia: 'REAMAT cap. 14 · Boyce & DiPrima Listas 3 e 7',
+            slug: 'cal4-u1-l10-workshop',
+            caminho: 'engenharia/calculo-4/unidade-1/cal4-u1-l10-workshop',
           },
         ],
       },
@@ -1350,7 +1524,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'ℒ{f}(s) = ∫₀^∞ e^(−st)f(t)dt, transformadas elementares, linearidade',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §6.1 · REAMAT §15.1',
-            slug: 'cal4-u2-l11-laplace',
+            slug: 'cal4-u2-l11-transformada-laplace-avancada',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l11-transformada-laplace-avancada',
           },
           {
             num: 12,
@@ -1358,6 +1533,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'ℒ{f′}=sF−f(0), ℒ{e^(at)f}=F(s−a), translação no tempo',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §6.2–6.3 · REAMAT §15.2',
+            slug: 'cal4-u2-l12-transformada-z-sistemas-discretos',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l12-transformada-z-sistemas-discretos',
           },
           {
             num: 13,
@@ -1365,6 +1542,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'ℒ⁻¹, decomposição em frações parciais, Heaviside',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §6.2 · REAMAT §15.3',
+            slug: 'cal4-u2-l13-dft-fft-analise-espectral',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l13-dft-fft-analise-espectral',
           },
           {
             num: 14,
@@ -1372,6 +1551,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Aplicação a y″+by′+cy=g(t) com CI, circuito RLC',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §6.4 · REAMAT §15.4',
+            slug: 'cal4-u2-l14-distribuicoes-schwartz',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l14-distribuicoes-schwartz',
           },
           {
             num: 15,
@@ -1379,6 +1560,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'u_c(t), ℒ{u_c}, δ(t−c), resposta impulsiva',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §6.3–6.5 · REAMAT §15.5',
+            slug: 'cal4-u2-l15-fourier-distribuicoes',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l15-fourier-distribuicoes',
           },
           {
             num: 16,
@@ -1386,6 +1569,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '(f*g)(t) = ∫₀ᵗ f(τ)g(t−τ)dτ, ℒ{f*g}=F·G, função de transferência',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §6.6 · REAMAT §15.6',
+            slug: 'cal4-u2-l16-wavelets',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l16-wavelets',
           },
           {
             num: 17,
@@ -1393,6 +1578,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Coeficientes aₙ, bₙ, série complexa, convergência pontual',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §10.2–10.3 · REAMAT §9.6',
+            slug: 'cal4-u2-l17-funcoes-green-odos',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l17-funcoes-green-odos',
           },
           {
             num: 18,
@@ -1400,6 +1587,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Série de seno e cosseno em [0,L], forma exponencial, parseval',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §10.4 · REAMAT §9.7',
+            slug: 'cal4-u2-l18-funcoes-green-edps',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l18-funcoes-green-edps',
           },
           {
             num: 19,
@@ -1407,6 +1596,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'ℱ{f}(ω), inversa, propriedades, convolução, análise espectral',
             materia: 'transformadas',
             referencia: 'Boyce & DiPrima §10.6 · REAMAT §9.8',
+            slug: 'cal4-u2-l19-serie-autofuncoes-expansao-espectral',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l19-serie-autofuncoes-expansao-espectral',
           },
           {
             num: 20,
@@ -1414,6 +1605,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Resolução de EDOs e sistemas via Laplace; análise de sinais periódicos',
             materia: 'transformadas',
             referencia: 'REAMAT cap. 15 · Boyce & DiPrima Listas 6 e 10',
+            slug: 'cal4-u2-l20-workshop',
+            caminho: 'engenharia/calculo-4/unidade-2/cal4-u2-l20-workshop',
           },
         ],
       },
@@ -1428,6 +1621,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'IEEE 754, erro de representação, cancelamento catastrófico, propagação',
             materia: 'analise-numerica',
             referencia: 'REAMAT §2.1 · Burden & Faires §1.2',
+            slug: 'cal4-u3-l21-introducao-calculo-variacional',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l21-introducao-calculo-variacional',
           },
           {
             num: 22,
@@ -1435,6 +1630,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Convergência de bisseção, teorema do ponto fixo de Banach',
             materia: 'analise-numerica',
             referencia: 'REAMAT §5.1 · Burden & Faires §2.1–2.2',
+            slug: 'cal4-u3-l22-equacao-euler-lagrange-avancada',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l22-equacao-euler-lagrange-avancada',
           },
           {
             num: 23,
@@ -1442,6 +1639,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Sistema F(x)=0, Jacobiano, taxa de convergência quadrática',
             materia: 'analise-numerica',
             referencia: 'REAMAT §5.2–5.3 · Burden & Faires §2.3',
+            slug: 'cal4-u3-l23-mecanica-lagrangiana',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l23-mecanica-lagrangiana',
           },
           {
             num: 24,
@@ -1449,6 +1648,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Polinômio de Lagrange, diferenças divididas, erro de interpolação',
             materia: 'analise-numerica',
             referencia: 'REAMAT §7.1–7.2 · Burden & Faires §3.1–3.3',
+            slug: 'cal4-u3-l24-mecanica-hamiltoniana',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l24-mecanica-hamiltoniana',
           },
           {
             num: 25,
@@ -1456,6 +1657,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Splines naturais e not-a-knot, sistema tridiagonal, suavidade C²',
             materia: 'analise-numerica',
             referencia: 'REAMAT §7.3 · Burden & Faires §3.5',
+            slug: 'cal4-u3-l25-controle-otimo-pontryagin',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l25-controle-otimo-pontryagin',
           },
           {
             num: 26,
@@ -1463,7 +1666,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Fórmulas de Newton-Cotes, erro, quadratura de Gauss-Legendre',
             materia: 'analise-numerica',
             referencia: 'REAMAT §6.6 · Burden & Faires §4.1–4.3',
-            slug: 'cal4-u3-l26-integracao-numerica',
+            slug: 'cal4-u3-l26-problemas-isoperimetricos',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l26-problemas-isoperimetricos',
           },
           {
             num: 27,
@@ -1471,6 +1675,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Pivoteamento parcial, fatoração PA=LU, condicionamento, norma de matriz',
             materia: 'analise-numerica',
             referencia: 'REAMAT §8.1–8.2 · Burden & Faires §6.1–6.4',
+            slug: 'cal4-u3-l27-calculo-variacional-sobolev',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l27-calculo-variacional-sobolev',
           },
           {
             num: 28,
@@ -1478,6 +1684,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Convergência (raio espectral), critério de parada, SOR',
             materia: 'analise-numerica',
             referencia: 'REAMAT §8.3 · Burden & Faires §7.1–7.3',
+            slug: 'cal4-u3-l28-metodos-variacionais-edps',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l28-metodos-variacionais-edps',
           },
           {
             num: 29,
@@ -1485,6 +1693,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'RK4, métodos multipasso Adams-Bashforth, controle de passo',
             materia: 'analise-numerica',
             referencia: 'REAMAT §10.4–10.5 · Burden & Faires §5.1–5.4',
+            slug: 'cal4-u3-l29-aplicacoes-fisica-engenharia',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l29-aplicacoes-fisica-engenharia',
           },
           {
             num: 30,
@@ -1492,6 +1702,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Implementação em Python: bisseção, LU, RK4; interpretação de erros',
             materia: 'analise-numerica',
             referencia: 'REAMAT · Burden & Faires selecionados',
+            slug: 'cal4-u3-l30-workshop',
+            caminho: 'engenharia/calculo-4/unidade-3/cal4-u3-l30-workshop',
           },
         ],
       },
@@ -1508,6 +1720,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Elíptica, parabólica, hiperbólica — exemplos físicos canônicos',
             materia: 'topicos-avancados',
             referencia: 'Boyce & DiPrima §10.1 · REAMAT §16.1',
+            slug: 'cal4-u4-l31-tensores-notacao-indices',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l31-tensores-notacao-indices',
           },
           {
             num: 32,
@@ -1515,6 +1729,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'u_tt = c²u_xx, modos normais, problema de valor inicial',
             materia: 'topicos-avancados',
             referencia: 'Boyce & DiPrima §10.7 · REAMAT §16.2',
+            slug: 'cal4-u4-l32-formas-diferenciais',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l32-formas-diferenciais',
           },
           {
             num: 33,
@@ -1522,6 +1738,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'u_t = αu_xx, solução por Fourier, estado estacionário',
             materia: 'topicos-avancados',
             referencia: 'Boyce & DiPrima §10.5 · REAMAT §16.3',
+            slug: 'cal4-u4-l33-variedades-diferenciaveis',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l33-variedades-diferenciaveis',
           },
           {
             num: 34,
@@ -1529,6 +1747,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∇²u=0, harmônicas, solução via separação em retângulo e disco',
             materia: 'topicos-avancados',
             referencia: 'Boyce & DiPrima §10.8 · REAMAT §16.4',
+            slug: 'cal4-u4-l34-geometria-riemanniana',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l34-geometria-riemanniana',
           },
           {
             num: 35,
@@ -1536,6 +1756,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Discretização, estabilidade (von Neumann), implementação Laplace 2D',
             materia: 'topicos-avancados',
             referencia: 'Burden & Faires §12.1–12.2 · REAMAT §16.5',
+            slug: 'cal4-u4-l35-curvatura-geodesicas',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l35-curvatura-geodesicas',
           },
           {
             num: 36,
@@ -1543,6 +1765,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Equação de Bessel, Jₙ(x), equação de Legendre, Pₙ(x)',
             materia: 'topicos-avancados',
             referencia: 'Boyce & DiPrima §11.4–11.5',
+            slug: 'cal4-u4-l36-teorema-gauss-bonnet',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l36-teorema-gauss-bonnet',
           },
           {
             num: 37,
@@ -1550,6 +1774,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'ℂ, funções holomorfas, equações de Cauchy-Riemann',
             materia: 'topicos-avancados',
             referencia: 'Guidorizzi vol. 4 §1.1–1.3 · Churchill §1–2',
+            slug: 'cal4-u4-l37-stokes-aplicacoes',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l37-stokes-aplicacoes',
           },
           {
             num: 38,
@@ -1557,6 +1783,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∮_C f dz, fórmula integral de Cauchy, pólos, cálculo de integrais reais',
             materia: 'topicos-avancados',
             referencia: 'Guidorizzi vol. 4 §2 · Churchill §4–6',
+            slug: 'cal4-u4-l38-fibrados-vetoriais',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l38-fibrados-vetoriais',
           },
           {
             num: 39,
@@ -1564,6 +1792,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: '∂V/∂t + ½σ²S²∂²V/∂S² + rS∂V/∂S − rV = 0, substituição para equação do calor',
             materia: 'topicos-avancados',
             referencia: 'Wilmott §5 · REAMAT §16.6',
+            slug: 'cal4-u4-l39-relatividade-geral',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l39-relatividade-geral',
           },
           {
             num: 40,
@@ -1571,6 +1801,8 @@ export const PROGRAMA_ENG: DisciplinaEngData[] = [
             topicos: 'Prova simulada completa: 25 questões cobrindo Cálculo 1–4',
             materia: 'topicos-avancados',
             referencia: 'REAMAT · ITA/USP provas históricas · Boyce & DiPrima revisão geral',
+            slug: 'cal4-u4-l40-workshop',
+            caminho: 'engenharia/calculo-4/unidade-4/cal4-u4-l40-workshop',
           },
         ],
       },

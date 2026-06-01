@@ -1,0 +1,229 @@
+---
+titulo: "Lição 28 — Métodos Numéricos para EDOs"
+slug: "cal2-u3-l28-metodos-numericos-edo"
+categoria: "calculo-2"
+subcategoria: "unidade-3"
+descricao: "Métodos numéricos para EDOs: Euler, Euler melhorado (Heun), Runge-Kutta de 4ª ordem. Análise de erro de truncamento local e global. Stiffness."
+ordem: 28
+publicado: true
+tags: ["calculo-2", "metodos-numericos", "euler", "runge-kutta", "edo", "engenharia"]
+prerrequisitos:
+  - "Lição 27 — Sistemas de EDOs"
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-28"
+usadoEm: ["Cálculo 2 — Unidade 3", "USP MAT0112", "ITA MA-012"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\text{Euler: }y_{n+1}=y_n+hf(x_n,y_n);\quad \text{RK4: }y_{n+1}=y_n+\tfrac{h}{6}(k_1+2k_2+2k_3+k_4)"
+  legenda={<>Euler tem erro global <Eq>{`O(h)`}</Eq>; RK4 tem erro <Eq>{`O(h^4)`}</Eq>. Dobrar o passo de Euler diminui o erro pela metade; dobrar o passo de RK4 diminui 16 vezes.</>}
+  audioTexto="Método de Euler: y sub n mais 1 igual a y sub n mais h vezes f de x sub n e y sub n. Runge-Kutta de 4ª ordem: y sub n mais 1 igual a y sub n mais h sobre 6 vezes k1 mais 2 k2 mais 2 k3 mais k4."
+/>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Métodos e análise de erro">
+
+### Método de Euler
+
+Para $y' = f(x,y)$, $y(x_0) = y_0$, com passo $h = (b-a)/N$:
+$$y_{n+1} = y_n + hf(x_n, y_n), \quad x_{n+1} = x_n + h$$
+
+**Erro de truncamento local (ETL):** $O(h^2)$.
+**Erro global:** $O(h)$.
+
+### Método de Euler Melhorado (Heun)
+
+$$k_1 = f(x_n, y_n), \quad k_2 = f(x_n+h, y_n+hk_1)$$
+$$y_{n+1} = y_n + \frac{h}{2}(k_1+k_2)$$
+
+**Erro global:** $O(h^2)$.
+
+### Runge-Kutta de 4ª Ordem (RK4)
+
+$$k_1 = f(x_n, y_n)$$
+$$k_2 = f\!\left(x_n+\frac{h}{2},\, y_n+\frac{h}{2}k_1\right)$$
+$$k_3 = f\!\left(x_n+\frac{h}{2},\, y_n+\frac{h}{2}k_2\right)$$
+$$k_4 = f(x_n+h,\, y_n+hk_3)$$
+$$y_{n+1} = y_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)$$
+
+**Erro global:** $O(h^4)$ — padrão industrial para EDOs suaves.
+
+### Controle de passo adaptativo
+
+Compara soluções com passo $h$ e $h/2$; ajusta $h$ para manter o erro dentro de tolerância. Implementado em `ode45` (MATLAB) e `scipy.integrate.solve_ivp`.
+
+### Equações stiff
+
+EDOs com múltiplos escalas de tempo muito diferentes (e.g., $y' = -1000y + \sin t$). Métodos explícitos requerem $h$ muito pequeno; métodos implícitos (Euler implícito, Trapezoidal) são mais eficientes.
+
+</Porta>
+
+<Porta nivel="5anos" titulo="Euler: dar um passo por vez">
+
+Para resolver $y' = y$, $y(0) = 1$:
+
+Com $h = 0{,}1$:
+- $y_1 = 1 + 0{,}1\cdot 1 = 1{,}1$
+- $y_2 = 1{,}1 + 0{,}1\cdot 1{,}1 = 1{,}21$
+- ...
+
+Cada passo usa a inclinação atual para prever o próximo ponto — como navegar olhando só para baixo dos pés!
+
+</Porta>
+
+<Porta nivel="10anos" titulo="RK4 — usar inclinações no meio">
+
+O método de Euler usa só a inclinação no começo do passo. O RK4 calcula quatro inclinações (começo, meio, meio de novo com melhor estimativa, e fim) e faz uma média ponderada:
+
+$k_1, k_2, k_3, k_4$ são quatro "passos de exploração". A média $\frac{k_1+2k_2+2k_3+k_4}{6}$ usa os pontos do meio duas vezes — mais peso no centro do intervalo (semelhante à regra de Simpson!).
+
+</Porta>
+
+<Porta nivel="15anos" titulo="Análise de erro — por que RK4 é melhor">
+
+Expansão de Taylor da solução exata: $y(x_{n+1}) = y(x_n) + hy'(x_n) + \frac{h^2}{2}y''(x_n) + O(h^3)$.
+
+Euler usa apenas os dois primeiros termos → ETL $\propto h^2/2$.
+
+RK4 reproduz exatamente os termos de Taylor até $h^4$ → ETL $\propto h^5/120$.
+
+Ao somar $N = (b-a)/h$ passos:
+- Euler: erro acumulado $\propto Nh^2 = (b-a)h$ → $O(h)$.
+- RK4: erro acumulado $\propto Nh^5 = (b-a)h^4$ → $O(h^4)$.
+
+</Porta>
+
+<Porta nivel="25anos" titulo="Métodos implícitos e estabilidade">
+
+**Euler implícito:** $y_{n+1} = y_n + hf(x_{n+1}, y_{n+1})$ — requer resolver equação (possivelmente não-linear) a cada passo.
+
+**Região de estabilidade:** Euler explícito é estável para $|1+h\lambda| \leq 1$ (disco de raio 1 centrado em $-1$ no plano $h\lambda$). Para $\lambda = -1000$ (stiff), precisa $h < 0{,}002$.
+
+Euler implícito é estável para $|h\lambda| < \infty$ — **A-estável**, adequado para stiff.
+
+**Fórmulas BDF (Backward Differentiation Formulas):** usadas em `ode15s` do MATLAB para sistemas stiff de alta ordem.
+
+</Porta>
+
+<Porta nivel="40anos" titulo="Aplicações em engenharia">
+
+**Dinâmica orbital:** integração numérica de $\ddot{\mathbf{r}} = -GM\mathbf{r}/r^3$ — simulação de satélites e missões interplanetárias usa RK4 ou métodos simpléticos (Störmer-Verlet) que conservam energia.
+
+**Simulação de circuitos (SPICE):** equações de estado de circuitos são integradas por métodos de passo variável baseados em trapézio (trapezoidal rule — TR/BDF2).
+
+**Dinâmica de fluidos computacional:** equações de Navier-Stokes em diferenças finitas geram sistemas stiff — integração por métodos semi-implícitos.
+
+**Simulink (MathWorks):** implementa RK45, RK23, ode15s e outros no backend de simulações de controle e sistemas dinâmicos.
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Passo a passo — RK4">
+
+Dado $y' = f(x,y)$, $y(x_0)=y_0$, passo $h$:
+
+1. $k_1 = h\cdot f(x_n, y_n)$
+2. $k_2 = h\cdot f(x_n+h/2,\; y_n+k_1/2)$
+3. $k_3 = h\cdot f(x_n+h/2,\; y_n+k_2/2)$
+4. $k_4 = h\cdot f(x_n+h,\; y_n+k_3)$
+5. $y_{n+1} = y_n + (k_1+2k_2+2k_3+k_4)/6$
+6. $x_{n+1} = x_n + h$
+
+Repita até $x = b$.
+
+</Porta>
+
+</DuasPortas>
+
+## Exemplos resolvidos
+
+<Exemplo titulo="Ex. 1 — Euler para y' = y" numero={1} fonte="REAMAT §7.1; Boyce-DiPrima §8.1, Ex. 1">
+
+Aproxime $y(1)$ para $y' = y$, $y(0) = 1$ com $h = 0{,}5$ (dois passos).
+
+$y_1 = 1 + 0{,}5\cdot 1 = 1{,}5$. $y_2 = 1{,}5 + 0{,}5\cdot 1{,}5 = 2{,}25$.
+
+Valor exato: $e^1 \approx 2{,}718$. Erro: $|2{,}718 - 2{,}25| = 0{,}468$.
+
+Com $h = 0{,}1$ (10 passos): $y_{10} = 1{,}1^{10} \approx 2{,}594$. Erro $\approx 0{,}124$ (menor).
+
+</Exemplo>
+
+<Exemplo titulo="Ex. 2 — RK4 para y' = y" numero={2} fonte="REAMAT §7.3; Boyce-DiPrima §8.3, Ex. 3">
+
+Um passo de RK4 para $y'=y$, $y(0)=1$, $h=0{,}5$:
+
+$k_1 = 0{,}5\cdot 1 = 0{,}5$. $k_2 = 0{,}5\cdot(1+0{,}25) = 0{,}625$. $k_3 = 0{,}5\cdot(1+0{,}3125) = 0{,}65625$. $k_4 = 0{,}5\cdot(1+0{,}65625) = 0{,}828125$.
+
+$y_1 = 1 + (0{,}5+2\times0{,}625+2\times0{,}65625+0{,}828125)/6 = 1 + 0{,}64844... \approx 1{,}6487$.
+
+Valor exato: $e^{0.5} \approx 1{,}6487$. Erro $< 10^{-4}$ com apenas 1 passo.
+
+</Exemplo>
+
+<Exemplo titulo="Ex. 3 — Comparação Euler vs RK4" numero={3} fonte="REAMAT §7.3; Zill §9.1, Ex. 5">
+
+Para $y' = -2y + 4$, $y(0) = 0$ (solução exata: $y = 2-2e^{-2t}$):
+
+| $t$ | Euler ($h=0{,}1$) | RK4 ($h=0{,}1$) | Exata |
+|-----|------------------|----------------|-------|
+| 0.5 | 1.6409 | 1.7293 | 1.7293 |
+| 1.0 | 1.8337 | 1.8647 | 1.8647 |
+
+Euler com 5 passos tem erro $\sim 8\%$; RK4 é preciso até 4 casas decimais.
+
+</Exemplo>
+
+---
+
+## Exercícios
+
+### Bloco A — Euler e Heun
+
+<Exercicio numero={1} fonte="REAMAT §7.1–7.2; Boyce-DiPrima §8.1, Ex. 1–10">
+**(a)** Aplique Euler com $h=0{,}1$ para aproximar $y(0.5)$ dado $y'=xy$, $y(0)=1$. Compare com $e^{x^2/2}$.
+
+**(b)** Aplique Euler melhorado (Heun) ao mesmo problema com $h=0{,}25$ e compare o erro.
+
+**(c)** Mostre numericamente que dobrar $N$ (dimidiar $h$) divide o erro de Euler por $\sim 2$ e o erro de Heun por $\sim 4$.
+</Exercicio>
+
+### Bloco B — RK4
+
+<Exercicio numero={2} fonte="REAMAT §7.3; Zill §9.2, Ex. 1–10">
+Use RK4 com $h=0{,}1$ para aproximar a solução de:
+
+**(a)** $y' = y - x^2 + 1$, $y(0) = 0{,}5$. Calcule $y(0.5)$ e compare com $y = (x+1)^2 - 0{,}5e^x$.
+
+**(b)** $y'' + y = \cos t$, $y(0)=0$, $y'(0)=0$. Reduza a sistema e aplique RK4 para $t\in[0,\pi]$.
+</Exercicio>
+
+### Bloco C — Nível ITA/USP
+
+<Exercicio numero={3} fonte="REAMAT §7.4; Boyce-DiPrima §8.4">
+**Equação stiff:** $y' = -100y + 100\sin t$, $y(0) = 1$.
+
+**(a)** Mostre que Euler explícito requer $h < 0{,}02$ para estabilidade.
+
+**(b)** Aplique Euler implícito com $h=0{,}1$ (resolva a equação resultante).
+
+**(c)** Calcule o erro para ambos e compare a eficiência.
+</Exercicio>
+
+<Exercicio numero={4} fonte="ITA MA-012; REAMAT §7.5">
+**Controle de erro adaptativo:** para $y' = y^2$, $y(0) = 1$ (solução: $y = 1/(1-t)$, singularidade em $t=1$):
+
+**(a)** Aplique RK4 com $h=0{,}1$ e monitore o erro em cada passo.
+
+**(b)** Implemente passo adaptativo: reduza $h$ a metade quando o erro estimado exceder $10^{-4}$.
+
+**(c)** Mostre que o método detecta a singularidade quando $h$ tende a 0.
+</Exercicio>
+
+<Leituras>
+- **REAMAT** — *Cálculo Numérico*, §7.1–7.5 — UFRGS (reamat.ufrgs.br)
+- **Boyce**, W. & DiPrima, R. — *Equações Diferenciais Elementares*, §8.1–8.4 — LTC, 10ª ed.
+- **Zill**, D.G. — *Equações Diferenciais*, §9.1–9.2 — Cengage, 10ª ed.
+- **Burden, R.L. & Faires, J.D.** — *Análise Numérica*, §5.1–5.4 — Cengage, 10ª ed.
+</Leituras>

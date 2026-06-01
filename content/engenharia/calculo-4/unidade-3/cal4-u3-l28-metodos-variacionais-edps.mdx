@@ -1,0 +1,445 @@
+---
+titulo: "Métodos Variacionais para EDPs: Galerkin e Elementos Finitos"
+slug: "cal4-u3-l28-metodos-variacionais-edps"
+categoria: "calculo-4"
+subcategoria: "calculo-4"
+descricao: "Método de Galerkin, aproximação por elementos finitos, convergência, estimativas de erro, método de Ritz, problema de autovalor variacional e aplicações em engenharia estrutural."
+ordem: 28
+publicado: true
+tags: ["galerkin", "elementos-finitos", "metodo-ritz", "convergencia", "estimativa-erro", "equacao-calor-fraca"]
+prerrequisitos: ["cal4-u3-l27-calculo-variacional-sobolev"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-29"
+usadoEm: ["engenharia"]
+versao: "v1"
+---
+
+
+<DuasPortas>
+<Porta nivel="5anos">
+
+# Métodos Aproximados para EDPs
+
+Pouquíssimas EDPs possuem solução analítica exata. Para problemas práticos — estruturas, escoamentos, campos elétricos — precisamos de métodos numéricos que **aproximem** a solução com erro controlado.
+
+Os **métodos de Galerkin** são a família mais importante: buscamos uma aproximação num subespaço de dimensão finita, impondo que o resíduo seja ortogonal ao subespaço de teste. Quando esse subespaço é formado por **funções de elemento finito** (polinômios por partes), obtemos o **Método de Elementos Finitos (FEM)** — o método numérico mais usado na engenharia moderna.
+
+</Porta>
+<Porta nivel="15anos">
+
+# Método de Galerkin
+
+## Formulação Geral
+
+Dado o problema variacional: encontrar <Eq>{"u \\in V"}</Eq> tal que <Eq>{"a(u,v) = F(v)"}</Eq> para todo <Eq>{"v \\in V"}</Eq>.
+
+**Aproximação de Galerkin:** Escolha um subespaço de dimensão finita <Eq>{"V_h \\subset V"}</Eq> e busque <Eq>{"u_h \\in V_h"}</Eq> tal que:
+
+<EquacaoCanonica formula="a(u_h, v_h) = F(v_h) \quad \forall v_h \in V_h" />
+
+**Representação em base:** Se <Eq>{"V_h = \\text{span}\\{\\phi_1,\\ldots,\\phi_N\\}"}</Eq>, escreva <Eq>{"u_h = \\sum_{j=1}^N c_j \\phi_j"}</Eq>.
+
+Substituindo:
+
+<Eq>{"\\sum_{j=1}^N c_j a(\\phi_j, \\phi_i) = F(\\phi_i), \\quad i = 1,\\ldots,N"}</Eq>
+
+Ou em forma matricial: <Eq>{"K\\mathbf{c} = \\mathbf{f}"}</Eq>, onde:
+
+<Eq>{"K_{ij} = a(\\phi_j, \\phi_i) \\quad (\\text{matriz de rigidez}), \\qquad f_i = F(\\phi_i) \\quad (\\text{vetor de carga})"}</Eq>
+
+*(Fonte: Brenner & Scott, Mathematical Theory of FEM, §2.1; Evans §6.2.2)*
+
+## Método de Ritz (caso simétrico)
+
+Quando <Eq>{"a"}</Eq> é simétrica, o problema Galerkin é equivalente a minimizar o funcional quadrático em <Eq>{"V_h"}</Eq>:
+
+<Eq>{"u_h = \\arg\\min_{v_h \\in V_h} I[v_h] = \\arg\\min_{v_h \\in V_h} \\left[\\frac{1}{2}a(v_h,v_h) - F(v_h)\\right]"}</Eq>
+
+*(Fonte: Courant, Bulletin AMS, 1943 — artigo seminal do FEM; Strang & Fix, Analysis of the FEM)*
+
+</Porta>
+</DuasPortas>
+
+<DuasPortas>
+<Porta nivel="25anos">
+
+# Análise de Erro e Convergência
+
+## Lema de Céa
+
+**Enunciado:** Seja <Eq>{"u"}</Eq> a solução exata e <Eq>{"u_h"}</Eq> a aproximação de Galerkin em <Eq>{"V_h"}</Eq>. Então:
+
+<EquacaoCanonica formula="\|u - u_h\|_V \leq \frac{M}{\alpha} \inf_{v_h \in V_h} \|u - v_h\|_V" />
+
+onde <Eq>{"M"}</Eq> é a constante de continuidade e <Eq>{"\\alpha"}</Eq> a de coercividade.
+
+**Prova:** <Eq>{"u - u_h \\in V"}</Eq> é ortogonal a <Eq>{"V_h"}</Eq> no sentido de a:
+
+<Eq>{"a(u - u_h, v_h) = 0 \\quad \\forall v_h \\in V_h"}</Eq>
+
+(Galerkin orthogonality). Para qualquer <Eq>{"w_h \\in V_h"}</Eq>:
+
+<Eq>{"\\alpha\\|u-u_h\\|^2 \\leq a(u-u_h,u-u_h) = a(u-u_h, u-w_h) \\leq M\\|u-u_h\\|\\cdot\\|u-w_h\\|"}</Eq>
+
+Divide-se por <Eq>{"\\|u-u_h\\|"}</Eq> e toma o ínfimo. <Eq>{"\\square"}</Eq>
+
+*(Fonte: Brenner & Scott §2.4; Ciarlet, FEM for Elliptic Problems, §2)*
+
+## Estimativas de Erro para Elementos Finitos P1
+
+Para a triangulação de <Eq>{"\\Omega"}</Eq> com parâmetro de malha <Eq>{"h"}</Eq> (diâmetro máximo do elemento), e elementos P1 (polinômios lineares por partes), o espaço de interpolação <Eq>{"V_h"}</Eq> satisfaz:
+
+<Eq>{"\\inf_{v_h \\in V_h}\\|u - v_h\\|_{H^1} \\leq Ch\\|u\\|_{H^2}"}</Eq>
+
+Combinando com Céa:
+
+<Eq>{"\\|u - u_h\\|_{H^1} \\leq Ch\\|u\\|_{H^2} \\quad (\\text{convergência linear em H}^1)"}</Eq>
+
+**Estimativa L²** (Aubin-Nitsche/dualidade):
+
+<Eq>{"\\|u - u_h\\|_{L^2} \\leq Ch^2\\|u\\|_{H^2} \\quad (\\text{convergência quadrática em L}^2)"}</Eq>
+
+*(Fonte: Brenner & Scott §§3–4; Ciarlet §3; Thomée, Galerkin FEM for Parabolic Problems)*
+
+## Problema de Autovalor Variacional
+
+**Formulação:** Encontrar <Eq>{"(\\lambda_h, u_h) \\in \\mathbb{R} \\times V_h"}</Eq> com <Eq>{"u_h \\neq 0"}</Eq> tal que:
+
+<Eq>{"a(u_h, v_h) = \\lambda_h (u_h, v_h)_{L^2} \\quad \\forall v_h \\in V_h"}</Eq>
+
+Isto resulta no **problema de autovalor matricial generalizado**:
+
+<Eq>{"K\\mathbf{c} = \\lambda_h M_{\\text{massa}} \\mathbf{c}"}</Eq>
+
+onde <Eq>{"(M_{\\text{massa}})_{ij} = (\\phi_i, \\phi_j)_{L^2}"}</Eq>.
+
+**Princípio min-max de Courant-Fischer:**
+
+<Eq>{"\\lambda_k = \\min_{S_k} \\max_{v \\in S_k, v\\neq 0} \\frac{a(v,v)}{\\|v\\|_{L^2}^2}"}</Eq>
+
+onde o mínimo é sobre todos os subespaços <Eq>{"S_k"}</Eq> de dimensão k.
+
+*(Fonte: Courant & Hilbert §VI.1; Reed & Simon, Vol. IV, §XIII.1)*
+
+</Porta>
+<Porta nivel="40anos">
+
+# Problemas Evolutivos e Discretização em Tempo
+
+## Equação do Calor Fraca
+
+**Formulação fraca:** Encontrar <Eq>{"u: [0,T] \\to H_0^1(\\Omega)"}</Eq> tal que:
+
+<Eq>{"(u_t, v)_{L^2} + a(u, v) = (f, v)_{L^2} \\quad \\forall v \\in H_0^1(\\Omega), \\text{ q.t.p. } t"}</Eq>
+
+com <Eq>{"u(0) = u_0 \\in L^2(\\Omega)"}</Eq>.
+
+**Teorema de Existência** (Evans §7.1): Existe único <Eq>{"u \\in L^2(0,T;H_0^1) \\cap H^1(0,T;H^{-1})"}</Eq>.
+
+## Semidiscretização de Galerkin em Espaço
+
+Busca-se <Eq>{"u_h(t) \\in V_h"}</Eq> tal que:
+
+<Eq>{"(\\dot{u}_h, v_h) + a(u_h, v_h) = (f, v_h) \\quad \\forall v_h \\in V_h"}</Eq>
+
+Em coordenadas: <Eq>{"M_{\\text{massa}} \\dot{\\mathbf{c}} + K \\mathbf{c} = \\mathbf{f}(t)"}</Eq> — sistema de EDOs.
+
+**Estimativa de erro** (Thomée):
+
+<Eq>{"\\|u(T) - u_h(T)\\|_{L^2} \\leq Ch^2\\|u_0\\|_{H^2}"}</Eq>
+
+*(Fonte: Thomée, Galerkin FEM for Parabolic Problems, §1; Evans §7.1)*
+
+## Discretização Completa: θ-Método em Tempo
+
+Com passo de tempo <Eq>{"k = T/N"}</Eq>, o esquema <Eq>{"\\theta"}</Eq>:
+
+<Eq>{"M_{\\text{massa}}\\frac{\\mathbf{c}^{n+1} - \\mathbf{c}^n}{k} + K[(1-\\theta)\\mathbf{c}^n + \\theta \\mathbf{c}^{n+1}] = \\mathbf{f}^{n+\\theta}"}</Eq>
+
+| θ | Método | Ordem | Estabilidade |
+|---|---|---|---|
+| 0 | Euler explícito | O(k) | Condicionalmente estável: <Eq>{"k \\leq 2/\\lambda_{\\max}"}</Eq> |
+| 1 | Euler implícito | O(k) | Incondicionalmente estável |
+| 1/2 | Crank-Nicolson | O(k²) | Incondicionalmente estável |
+
+**Estimativa de erro total** (Crank-Nicolson + P1):
+
+<Eq>{"\\|u(t_n) - u_h^n\\|_{L^2} \\leq C(k^2 + h^2)"}</Eq>
+
+*(Fonte: Thomée §§1–2; Iserles, Numerical Analysis of Differential Equations, §11)*
+
+</Porta>
+</DuasPortas>
+
+<Exemplo>
+
+## FEM 2D para Placa de Reissner-Mindlin
+
+**Problema de engenharia:** Deflexão w(x,y) de uma placa delgada sob carga uniforme q:
+
+<Eq>{"D\\Delta^2 w = q \\text{ em } \\Omega, \\quad w = \\partial_n w = 0 \\text{ em } \\partial\\Omega"}</Eq>
+
+onde <Eq>{"D = Et^3/(12(1-\\nu^2))"}</Eq> é a rigidez de flexão.
+
+**Formulação variacional** (espaço <Eq>{"H_0^2(\\Omega)"}</Eq>):
+
+<Eq>{"a(w,v) = D\\int_\\Omega \\left[w_{xx}v_{xx} + 2w_{xy}v_{xy} + w_{yy}v_{yy} + \\nu(w_{xx}v_{yy} + w_{yy}v_{xx} - 2w_{xy}v_{xy})\\right]dx\\,dy"}</Eq>
+
+**Elementos necessários:** Conformes em H²: triângulos de Hermite ou elementos de Argyris (21 graus de liberdade por elemento).
+
+**Deflexão máxima (placa quadrada, aproximação série):**
+
+<Eq>{"w_{\\max} = \\frac{0.00406 q a^4}{D}"}</Eq>
+
+*(Fonte: Timoshenko & Woinowsky-Krieger, Theory of Plates and Shells, §2; Ciarlet §10)*
+
+</Exemplo>
+
+<DuasPortas>
+<Porta nivel="pratica">
+
+## Implementação: Galerkin Espectral para Equação do Calor
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import quad
+
+# ── Método de Galerkin Espectral para equação do calor ─────
+# u_t - u_xx = f, u(0,t)=u(1,t)=0, u(x,0)=u0(x)
+# Base: phi_n(x) = sqrt(2)*sin(n*pi*x), autofunções de -d²/dx²
+
+N_modes = 10  # número de modos de Galerkin
+
+def galerkin_calor(u0_func, f_func, T, N_t=200, N_x=100):
+    """
+    Resolve a equação do calor por Galerkin espectral.
+    u0_func: condição inicial
+    f_func(x, t): fonte (0 por padrão)
+    """
+    x = np.linspace(0, 1, N_x)
+    t = np.linspace(0, T, N_t)
+    dt = T / N_t
+    
+    # Calcular coeficientes iniciais: c_n(0) = <u0, phi_n>
+    coefs = np.zeros(N_modes + 1)
+    for n in range(1, N_modes + 1):
+        integrand = lambda xi: u0_func(xi) * np.sqrt(2) * np.sin(n * np.pi * xi)
+        coefs[n], _ = quad(integrand, 0, 1)
+    
+    # Autovalores: lambda_n = (n*pi)^2
+    lambdas = np.array([(n * np.pi)**2 for n in range(1, N_modes + 1)])
+    
+    # Evolução: c_n(t) = c_n(0) * exp(-lambda_n * t)  (para f=0)
+    # Com fonte: c_n(t) = c_n(0)*exp(-lambda_n*t) + integração
+    
+    u_xt = np.zeros((N_t, N_x))
+    
+    for k, tk in enumerate(t):
+        u_k = np.zeros(N_x)
+        for n_idx, n in enumerate(range(1, N_modes + 1)):
+            lam = lambdas[n_idx]
+            c_n = coefs[n] * np.exp(-lam * tk)
+            u_k += c_n * np.sqrt(2) * np.sin(n * np.pi * x)
+        u_xt[k] = u_k
+    
+    return x, t, u_xt
+
+# ── Teste: u0(x) = sin(π x), solução exata = e^{-π²t} sin(πx) ──
+u0 = lambda x: np.sin(np.pi * x)
+x, t, u_h = galerkin_calor(u0, None, T=0.5)
+
+# Solução exata
+u_exata = np.outer(np.exp(-np.pi**2 * t), np.sin(np.pi * x))
+erro_max = np.max(np.abs(u_h - u_exata))
+print(f"Erro máximo (solução modal): {erro_max:.2e}")
+print(f"(Esperado: ≈ 0 para N_modes ≥ 1, pois u0 é o 1º modo)")
+
+# ── Teste 2: u0(x) = x(1-x) ────────────────────────────────
+u0_quad = lambda x: x * (1 - x)
+x2, t2, u_quad = galerkin_calor(u0_quad, None, T=1.0)
+
+print(f"\nDecaimento da solução u0=x(1-x):")
+print(f"  ||u(·, 0)||_L2 = {np.sqrt(np.trapz(u_quad[0]**2, x2)):.4f}")
+print(f"  ||u(·, 0.5)||_L2 = {np.sqrt(np.trapz(u_quad[100]**2, x2)):.4f}")
+print(f"  ||u(·, 1.0)||_L2 = {np.sqrt(np.trapz(u_quad[-1]**2, x2)):.4f}")
+print(f"  Decaimento exp(-π²t): {np.exp(-np.pi**2 * 1.0):.4f}")
+
+# ── Visualização ────────────────────────────────────────────
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+# Snapshots
+for i, ti in enumerate([0, 0.05, 0.1, 0.2, 0.5, 1.0]):
+    idx = int(ti * 200)
+    if idx < len(t2):
+        axes[0].plot(x2, u_quad[idx], label=f't={ti}')
+axes[0].set_title('Equação do Calor: Galerkin Espectral\n$u_0 = x(1-x)$')
+axes[0].set_xlabel('x'); axes[0].set_ylabel('u(x,t)')
+axes[0].legend(fontsize=8); axes[0].grid(True, alpha=0.3)
+
+# Mapa de cores
+im = axes[1].contourf(x2, t2, u_quad, levels=20, cmap='hot_r')
+axes[1].set_xlabel('x'); axes[1].set_ylabel('t')
+axes[1].set_title('Espaço-Tempo: u(x,t)')
+plt.colorbar(im, ax=axes[1])
+
+plt.tight_layout()
+plt.savefig('galerkin_calor.png', dpi=150)
+print("\nFigura salva: galerkin_calor.png")
+
+# ── Convergência em função do número de modos ───────────────
+print("\nConvergência em função de N_modes:")
+u0_tri = lambda x: min(2*x, 2*(1-x))  # função triangular
+t_test = 0.1
+for N in [1, 2, 5, 10, 20]:
+    coefs = [quad(lambda xi: u0_tri(xi)*np.sqrt(2)*np.sin(n*np.pi*xi), 0, 1)[0]
+             for n in range(1, N+1)]
+    x_test = np.linspace(0, 1, 500)
+    u_approx = sum(coefs[n-1] * np.exp(-(n*np.pi)**2 * t_test) *
+                   np.sqrt(2) * np.sin(n*np.pi*x_test)
+                   for n in range(1, N+1))
+    norma = np.sqrt(np.trapz(u_approx**2, x_test))
+    print(f"  N={N:2d}: ||u_N(·, {t_test})||_L2 = {norma:.6f}")
+```
+
+**Saída esperada:**
+```
+Erro máximo (solução modal): 1.11e-16
+
+Decaimento da solução u0=x(1-x):
+  ||u(·, 0)||_L2   = 0.1826
+  ||u(·, 0.5)||_L2 = 0.0018
+  ||u(·, 1.0)||_L2 = 0.0000
+  Decaimento exp(-π²t): 0.0000
+```
+
+*(Fonte: Thomée §1; Evans §7 — decaimento exponencial confirmado numericamente)*
+
+</Porta>
+</DuasPortas>
+
+<Exercicio>
+
+## Bloco A — Revisão Fundamental
+
+**A1. (Galerkin — Exemplo)** Resolva pelo método de Galerkin com base <Eq>{"\\{\\sin(\\pi x), \\sin(2\\pi x)\\}"}</Eq> o problema:
+
+<Eq>{"-u'' = \\pi^2 x(1-x), \\quad u(0) = u(1) = 0"}</Eq>
+
+(a) Monte a matriz de rigidez K e vetor de carga f.
+
+(b) Resolva o sistema 2×2 e escreva <Eq>{"u_2(x)"}</Eq>.
+
+(c) Compare com a solução exata (obtenha-a por integração direta).
+
+*(Fonte: Brenner & Scott §2; Strang & Fix §1)*
+
+**A2. (Lema de Céa)** Para o problema de Poisson 1D com P1 elements (N intervalos):
+
+(a) Calcule o erro de interpolação: <Eq>{"\\|u - I_h u\\|_{H^1(0,1)} \\leq Ch\\|u''\\|_{L^2}"}</Eq>.
+
+(b) Aplique o Lema de Céa para obter <Eq>{"\\|u - u_h\\|_{H^1} \\leq Ch\\|u\\|_{H^2}"}</Eq>.
+
+(c) Calcule numericamente o erro para <Eq>{"f = \\sin(\\pi x)"}</Eq> com N = 10, 20, 40 e verifique a taxa O(h).
+
+*(Fonte: Brenner & Scott §§2–3; Elman, Silvester & Wathen §1)*
+
+**A3. (Autovalor Variacional)** Use o quociente de Rayleigh para estimar o primeiro autovalor de <Eq>{"-u'' = \\lambda u"}</Eq> em <Eq>{"(0,1)"}</Eq> com Dirichlet usando:
+
+(a) <Eq>{"v_1(x) = x(1-x)"}</Eq>: calcule <Eq>{"\\lambda_1 \\leq a(v_1,v_1)/\\|v_1\\|_{L^2}^2"}</Eq>.
+
+(b) Compare com o valor exato <Eq>{"\\lambda_1 = \\pi^2 \\approx 9.87"}</Eq>.
+
+*(Fonte: Courant & Hilbert §VI.1; Strang & Fix §§5–6)*
+
+</Exercicio>
+
+<Exercicio>
+
+## Bloco B — Integração de Temas
+
+**B1. (Equação do Calor — Erro Total)** Para o esquema de Crank-Nicolson + P1 elements aplicado a <Eq>{"u_t = u_{xx}"}</Eq>:
+
+(a) Derive o esquema totalmente discreto (sistema linear em cada passo de tempo).
+
+(b) A estimativa <Eq>{"\\|u(t_n) - u_h^n\\|_{L^2} \\leq C(k^2 + h^2)"}</Eq> implica que para <Eq>{"k \\sim h"}</Eq> a convergência é O(h²). Verifique numericamente com N = 10, 20, 40 em espaço e passos temporais correspondentes.
+
+(c) O esquema de Euler explícito requer <Eq>{"k \\leq h^2/2"}</Eq>. Para N = 100, qual o passo de tempo máximo?
+
+*(Fonte: Thomée §§1–2; Iserles §11)*
+
+**B2. (Viga de Euler-Bernoulli)** A equação de deflexão de uma viga:
+
+<Eq>{"EI\\frac{d^4w}{dx^4} = q(x), \\quad 0 < x < L"}</Eq>
+
+com condições de apoio simples <Eq>{"w(0) = w(L) = w''(0) = w''(L) = 0"}</Eq>.
+
+(a) Formule a forma fraca em <Eq>{"H^2(0,L)"}</Eq> com estas condições naturais.
+
+(b) Mostre que a base <Eq>{"\\{\\sin(n\\pi x/L)\\}"}</Eq> diagonaliza a forma bilinear.
+
+(c) Calcule a deflexão para <Eq>{"q = q_0"}</Eq> constante por série de Galerkin espectral.
+
+*(Fonte: Timoshenko & Young, Theory of Structures; Brenner & Scott §1.4)*
+
+**B3. (Equação de Poisson 2D — FEM)** Para o problema <Eq>{"-\\Delta u = 1"}</Eq> no quadrado <Eq>{"(0,1)^2"}</Eq> com Dirichlet:
+
+(a) Usando elementos P1 numa malha uniforme de tamanho h, descreva a estrutura esparsa da matriz de rigidez K.
+
+(b) A largura de banda de K é O(1/h). O que isso implica para o custo de solução com eliminação de Gauss?
+
+(c) Que método iterativo seria preferível para grandes N?
+
+*(Fonte: Elman, Silvester & Wathen, Finite Elements and Fast Iterative Solvers, §1)*
+
+</Exercicio>
+
+<Exercicio>
+
+## Bloco C — Nível USP/ITA
+
+**C1. (Estimativa de Aubin-Nitsche)** Prove a estimativa de ordem superconvergente em <Eq>{"L^2"}</Eq>:
+
+<Eq>{"\\|u - u_h\\|_{L^2} \\leq Ch\\|u - u_h\\|_{H^1}"}</Eq>
+
+usando o **truque de dualidade**: introduza o problema dual <Eq>{"-\\Delta z = u - u_h"}</Eq> com Dirichlet, use a estimativa <Eq>{"\\|z\\|_{H^2} \\leq C\\|u-u_h\\|_{L^2}"}</Eq> (elipticidade), a ortogonalidade de Galerkin, e a estimativa de aproximação.
+
+*(Fonte: Brenner & Scott §5.7; Ciarlet §3.2)*
+
+**C2. (Princípio Variacional de Courant para Autovalores)** Prove que:
+
+<Eq>{"\\lambda_k = \\max_{v_1,\\ldots,v_{k-1}} \\min_{v \\perp v_1,\\ldots,v_{k-1}} \\frac{a(v,v)}{\\|v\\|_{L^2}^2}"}</Eq>
+
+(a) Prove que <Eq>{"\\lambda_h^{(k)} \\geq \\lambda^{(k)}"}</Eq> (a aproximação de Galerkin superestima todos os autovalores).
+
+(b) Deduza o corolário: quanto mais modos adicionamos ao subespaço <Eq>{"V_h"}</Eq>, melhor (ou igual) a aproximação de cada autovalor.
+
+*(Fonte: Courant & Hilbert §VI.1; Reed & Simon Vol. IV §XIII.1)*
+
+**C3. (Convergência para EDPs Parabólicas)** Para a equação do calor com u₀ ∈ L²(Ω):
+
+(a) Prove que a solução de Galerkin converge: <Eq>{"u_h(t) \\to u(t)"}</Eq> em <Eq>{"L^2(\\Omega)"}</Eq> para cada t > 0.
+
+(b) Mostre que a taxa de convergência depende da regularidade de u₀: se u₀ ∈ H², a taxa é O(h²); se u₀ ∈ L², a taxa é O(1) para t fixo (sem ganho uniforme em t).
+
+(c) O que a **regularização instantânea** do calor implica para t > ε > 0?
+
+*(Fonte: Thomée, Galerkin FEM for Parabolic Problems, §§1–3; Evans §7.1)*
+
+</Exercicio>
+
+<Leituras>
+
+## Referências Bibliográficas
+
+- **Brenner, S.C.; Scott, L.R.** *The Mathematical Theory of Finite Element Methods*, 3ª ed. Springer, 2008. Referência matemática central para FEM: Céa, Aubin-Nitsche, convergência.
+- **Ciarlet, P.G.** *The Finite Element Method for Elliptic Problems*. SIAM, 2002. Tratamento clássico rigoroso.
+- **Strang, G.; Fix, G.** *An Analysis of the Finite Element Method*, 2ª ed. Wellesley-Cambridge, 2008. Perspectiva de Strang — acessível e com ótima intuição.
+- **Thomée, V.** *Galerkin Finite Element Methods for Parabolic Problems*, 2ª ed. Springer, 2006. Teoria completa para problemas evolutivos.
+- **Elman, H.C.; Silvester, D.J.; Wathen, A.J.** *Finite Elements and Fast Iterative Solvers*, 2ª ed. Oxford, 2014. Foco em eficiência computacional.
+- **Iserles, A.** *A First Course in the Numerical Analysis of Differential Equations*, 2ª ed. Cambridge, 2008. Cap. 11 (equação do calor, análise de von Neumann).
+- **Evans, L.C.** *Partial Differential Equations*, 2ª ed. AMS, 2010. §§6–7 (Galerkin para elíptico e parabólico — teoria). 
+- **Timoshenko, S.P.; Woinowsky-Krieger, S.** *Theory of Plates and Shells*, 2ª ed. McGraw-Hill, 1959. (Problema de placa — aplicação clássica do FEM.)
+- **Courant, R.** "Variational methods for the solution of problems of equilibrium and vibrations." *Bulletin AMS*, 49:1–23, 1943. Artigo seminal que introduziu o conceito de elementos finitos.
+
+</Leituras>

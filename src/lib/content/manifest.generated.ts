@@ -505,6 +505,366 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   'engenharia/calculo-1/unidade-4/cal1-u4-l40-workshop': {
     'pt-BR': () => import('@/../content/engenharia/calculo-1/unidade-4/cal1-u4-l40-workshop.mdx'),
   },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l01-integracao-partes': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l01-integracao-partes.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l02-integrais-trigonometricas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l02-integrais-trigonometricas.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l03-substituicao-trigonometrica': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l03-substituicao-trigonometrica.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l04-fracoes-parciais': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l04-fracoes-parciais.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l05-funcoes-hiperbolicas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l05-funcoes-hiperbolicas.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l06-estrategias-integracao': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l06-estrategias-integracao.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l07-integrais-improprias-tipo1': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l07-integrais-improprias-tipo1.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l08-integrais-improprias-tipo2': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l08-integrais-improprias-tipo2.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l09-probabilidade-continua': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l09-probabilidade-continua.mdx'),
+  },
+  'engenharia/calculo-2/unidade-1/cal2-u1-l10-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-1/cal2-u1-l10-workshop.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l11-sequencias': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l11-sequencias.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l12-series-convergencia': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l12-series-convergencia.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l13-teste-integral-series-p': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l13-teste-integral-series-p.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l14-testes-comparacao': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l14-testes-comparacao.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l15-series-alternadas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l15-series-alternadas.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l16-series-potencias': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l16-series-potencias.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l17-series-taylor-maclaurin': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l17-series-taylor-maclaurin.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l18-series-fourier': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l18-series-fourier.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l19-estrategias-series': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l19-estrategias-series.mdx'),
+  },
+  'engenharia/calculo-2/unidade-2/cal2-u2-l20-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-2/cal2-u2-l20-workshop.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l21-edo-introducao': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l21-edo-introducao.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l22-edo-separaveis': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l22-edo-separaveis.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l23-edo-lineares-1a-ordem': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l23-edo-lineares-1a-ordem.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l24-edo-2a-ordem-homogenea': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l24-edo-2a-ordem-homogenea.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l25-edo-2a-ordem-nao-homogenea': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l25-edo-2a-ordem-nao-homogenea.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l26-transformada-laplace': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l26-transformada-laplace.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l27-sistemas-edo': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l27-sistemas-edo.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l28-metodos-numericos-edo': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l28-metodos-numericos-edo.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l29-edo-series-potencias': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l29-edo-series-potencias.mdx'),
+  },
+  'engenharia/calculo-2/unidade-3/cal2-u3-l30-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-3/cal2-u3-l30-workshop.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l31-integrais-duplas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l31-integrais-duplas.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l32-integrais-duplas-polares': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l32-integrais-duplas-polares.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l33-aplicacoes-integrais-duplas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l33-aplicacoes-integrais-duplas.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l34-integrais-triplas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l34-integrais-triplas.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l35-coordenadas-cilindricas-esfericas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l35-coordenadas-cilindricas-esfericas.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l36-mudanca-variaveis-jacobiano': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l36-mudanca-variaveis-jacobiano.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l37-campos-vetoriais-integrais-linha': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l37-campos-vetoriais-integrais-linha.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l38-teorema-green': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l38-teorema-green.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l39-stokes-gauss': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l39-stokes-gauss.mdx'),
+  },
+  'engenharia/calculo-2/unidade-4/cal2-u4-l40-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-2/unidade-4/cal2-u4-l40-workshop.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l01-funcoes-varias-variaveis': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l01-funcoes-varias-variaveis.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l02-limites-continuidade-rn': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l02-limites-continuidade-rn.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l03-derivadas-parciais': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l03-derivadas-parciais.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l04-diferenciabilidade-plano-tangente': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l04-diferenciabilidade-plano-tangente.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l05-regra-cadeia-variaveis': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l05-regra-cadeia-variaveis.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l06-derivadas-direcionais-gradiente': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l06-derivadas-direcionais-gradiente.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l07-derivadas-ordem-superior-clairaut': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l07-derivadas-ordem-superior-clairaut.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l08-funcoes-rn-rm-jacobiano': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l08-funcoes-rn-rm-jacobiano.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l09-funcoes-implicitas-tfi': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l09-funcoes-implicitas-tfi.mdx'),
+  },
+  'engenharia/calculo-3/unidade-1/cal3-u1-l10-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-1/cal3-u1-l10-workshop.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l11-extremos-livres-hessiana': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l11-extremos-livres-hessiana.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l12-extremos-globais-compactos': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l12-extremos-globais-compactos.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l13-lagrange-uma-restricao': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l13-lagrange-uma-restricao.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l14-lagrange-multiplas-restricoes': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l14-lagrange-multiplas-restricoes.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l15-teorema-funcao-implicita-completo': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l15-teorema-funcao-implicita-completo.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l16-teorema-funcao-inversa': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l16-teorema-funcao-inversa.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l17-curvas-frenet-serret': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l17-curvas-frenet-serret.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l18-superficies-area': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l18-superficies-area.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l19-taylor-rn-forma-quadratica': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l19-taylor-rn-forma-quadratica.mdx'),
+  },
+  'engenharia/calculo-3/unidade-2/cal3-u2-l20-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-2/cal3-u2-l20-workshop.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l21-introducao-edps': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l21-introducao-edps.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l22-equacao-onda-dalembert': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l22-equacao-onda-dalembert.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l23-equacao-calor-separacao': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l23-equacao-calor-separacao.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l24-laplace-harmonicas-dirichlet': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l24-laplace-harmonicas-dirichlet.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l25-fourier-edps': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l25-fourier-edps.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l26-transformada-fourier': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l26-transformada-fourier.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l27-fourier-edps-dominio-inteiro': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l27-fourier-edps-dominio-inteiro.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l28-metodo-caracteristicas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l28-metodo-caracteristicas.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l29-classificacao-edps-2a-ordem': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l29-classificacao-edps-2a-ordem.mdx'),
+  },
+  'engenharia/calculo-3/unidade-3/cal3-u3-l30-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-3/cal3-u3-l30-workshop.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l31-numeros-complexos-funcoes': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l31-numeros-complexos-funcoes.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l32-funcoes-analiticas-cauchy-riemann': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l32-funcoes-analiticas-cauchy-riemann.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l33-funcoes-elementares-complexas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l33-funcoes-elementares-complexas.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l34-integracao-complexa-cauchy': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l34-integracao-complexa-cauchy.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l35-series-taylor-laurent': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l35-series-taylor-laurent.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l36-singularidades-isoladas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l36-singularidades-isoladas.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l37-teorema-residuos': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l37-teorema-residuos.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l38-aplicacoes-integrais-reais': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l38-aplicacoes-integrais-reais.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l39-mapeamentos-conformes': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l39-mapeamentos-conformes.mdx'),
+  },
+  'engenharia/calculo-3/unidade-4/cal3-u4-l40-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-3/unidade-4/cal3-u4-l40-workshop.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l01-espacos-vetoriais': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l01-espacos-vetoriais.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l02-transformacoes-lineares': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l02-transformacoes-lineares.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l03-autovalores-autovetores': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l03-autovalores-autovetores.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l04-produto-interno-ortogonalidade': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l04-produto-interno-ortogonalidade.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l05-teorema-espectral': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l05-teorema-espectral.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l06-svd-decomposicao-singular': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l06-svd-decomposicao-singular.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l07-minimos-quadrados-regressao': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l07-minimos-quadrados-regressao.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l08-espacos-hilbert-completude': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l08-espacos-hilbert-completude.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l09-sturm-liouville': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l09-sturm-liouville.mdx'),
+  },
+  'engenharia/calculo-4/unidade-1/cal4-u1-l10-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-1/cal4-u1-l10-workshop.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l11-transformada-laplace-avancada': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l11-transformada-laplace-avancada.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l12-transformada-z-sistemas-discretos': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l12-transformada-z-sistemas-discretos.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l13-dft-fft-analise-espectral': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l13-dft-fft-analise-espectral.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l14-distribuicoes-schwartz': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l14-distribuicoes-schwartz.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l15-fourier-distribuicoes': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l15-fourier-distribuicoes.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l16-wavelets': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l16-wavelets.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l17-funcoes-green-odos': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l17-funcoes-green-odos.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l18-funcoes-green-edps': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l18-funcoes-green-edps.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l19-serie-autofuncoes-expansao-espectral': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l19-serie-autofuncoes-expansao-espectral.mdx'),
+  },
+  'engenharia/calculo-4/unidade-2/cal4-u2-l20-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-2/cal4-u2-l20-workshop.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l21-introducao-calculo-variacional': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l21-introducao-calculo-variacional.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l22-equacao-euler-lagrange-avancada': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l22-equacao-euler-lagrange-avancada.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l23-mecanica-lagrangiana': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l23-mecanica-lagrangiana.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l24-mecanica-hamiltoniana': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l24-mecanica-hamiltoniana.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l25-controle-otimo-pontryagin': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l25-controle-otimo-pontryagin.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l26-problemas-isoperimetricos': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l26-problemas-isoperimetricos.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l27-calculo-variacional-sobolev': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l27-calculo-variacional-sobolev.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l28-metodos-variacionais-edps': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l28-metodos-variacionais-edps.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l29-aplicacoes-fisica-engenharia': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l29-aplicacoes-fisica-engenharia.mdx'),
+  },
+  'engenharia/calculo-4/unidade-3/cal4-u3-l30-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-3/cal4-u3-l30-workshop.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l31-tensores-notacao-indices': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l31-tensores-notacao-indices.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l32-formas-diferenciais': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l32-formas-diferenciais.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l33-variedades-diferenciaveis': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l33-variedades-diferenciaveis.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l34-geometria-riemanniana': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l34-geometria-riemanniana.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l35-curvatura-geodesicas': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l35-curvatura-geodesicas.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l36-teorema-gauss-bonnet': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l36-teorema-gauss-bonnet.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l37-stokes-aplicacoes': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l37-stokes-aplicacoes.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l38-fibrados-vetoriais': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l38-fibrados-vetoriais.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l39-relatividade-geral': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l39-relatividade-geral.mdx'),
+  },
+  'engenharia/calculo-4/unidade-4/cal4-u4-l40-workshop': {
+    'pt-BR': () => import('@/../content/engenharia/calculo-4/unidade-4/cal4-u4-l40-workshop.mdx'),
+  },
   'financas-quantitativas/opcoes/black-scholes': {
     'pt-BR': () => import('@/../content/financas-quantitativas/opcoes/black-scholes.mdx'),
   },

@@ -1,0 +1,362 @@
+---
+titulo: "Transformada Z e Sistemas Discretos"
+slug: "cal4-u2-l12-transformada-z-sistemas-discretos"
+categoria: "calculo-4"
+subcategoria: "calculo-4"
+descricao: "Transformada Z bilateral e unilateral, região de convergência, inversão por frações parciais e resíduos, equações de diferenças, estabilidade no plano-z e projeto de filtros digitais."
+ordem: 12
+publicado: true
+tags: ["transformada-z", "sistemas-discretos", "equacoes-diferenca", "plano-z", "filtros-digitais"]
+prerrequisitos: ["cal4-u2-l11-transformada-laplace-avancada"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-28"
+usadoEm: ["engenharia"]
+versao: "v1"
+---
+
+
+<DuasPortas>
+<Porta nivel="5anos">
+
+# Transformada Z: O Equivalente Discreto da Laplace
+
+Para sequências <Eq>{"x[n]"}</Eq> (sinais discretos), a Transformada Z é o análogo da Transformada de Laplace:
+
+<Eq>{"X(z) = \\sum_{n=-\\infty}^{\\infty} x[n] z^{-n}"}</Eq>
+
+Ela transforma equações de diferença em equações algébricas em <Eq>{"z"}</Eq>, tornando a análise de filtros digitais e sistemas de controle discreto tratável.
+
+</Porta>
+<Porta nivel="10anos">
+
+# Transformada Z
+
+**Definição bilateral:**
+
+<EquacaoCanonica
+  formula="X(z) = \mathcal{Z}\{x[n]\} = \sum_{n=-\infty}^{\infty} x[n] z^{-n}, \quad z \in \mathbb{C}"
+  legenda="Série de Laurent em z⁻¹ — generalização da função geratriz"
+  audioTexto="X de z é a soma de n de menos infinito a infinito de x de n vezes z elevado a menos n."
+/>
+
+**Propriedades fundamentais:**
+- Deslocamento: <Eq>{"\\mathcal{Z}\\{x[n-k]\\} = z^{-k}X(z)"}</Eq>
+- Deslocamento em z: <Eq>{"\\mathcal{Z}\\{a^n x[n]\\} = X(z/a)"}</Eq>
+- Convolução: <Eq>{"\\mathcal{Z}\\{x * y\\} = X(z)Y(z)"}</Eq>
+- Derivada em z: <Eq>{"\\mathcal{Z}\\{nx[n]\\} = -z\\frac{dX}{dz}"}</Eq>
+
+**Tabela básica** (sequências causais, <Eq>{"n \\geq 0"}</Eq>):
+
+| <Eq>{"x[n]"}</Eq> | <Eq>{"X(z)"}</Eq> | ROC |
+|---|---|---|
+| <Eq>{"\\delta[n]"}</Eq> | <Eq>{"1"}</Eq> | todo <Eq>{"z"}</Eq> |
+| <Eq>{"u[n]"}</Eq> | <Eq>{"\\frac{z}{z-1}"}</Eq> | <Eq>{"\\lVert z\\rVert>1"}</Eq> |
+| <Eq>{"a^n u[n]"}</Eq> | <Eq>{"\\frac{z}{z-a}"}</Eq> | <Eq>{"\\lVert z\\rVert>\\lVert a\\rVert"}</Eq> |
+| <Eq>{"n a^n u[n]"}</Eq> | <Eq>{"\\frac{az}{(z-a)^2}"}</Eq> | <Eq>{"\\lVert z\\rVert>\\lVert a\\rVert"}</Eq> |
+
+</Porta>
+<Porta nivel="15anos">
+
+# Região de Convergência e Inversão
+
+## Região de Convergência (ROC)
+
+A série <Eq>{"X(z) = \\sum_{n} x[n] z^{-n}"}</Eq> converge em uma **coroa circular** <Eq>{"R_- < |z| < R_+"}</Eq>:
+
+<EquacaoCanonica
+  formula="R_- = \limsup_{n\to\infty} |x[n]|^{1/n}, \quad R_+ = \frac{1}{\limsup_{n\to-\infty} |x[n]|^{1/n}}"
+  legenda="Raios da ROC — análogo ao raio de convergência de séries de Laurent"
+  audioTexto="R menos é o limsup de x de n elevado a 1 sobre n; R mais é o inverso do limsup para n indo a menos infinito."
+/>
+
+**Tipos de sinal e ROC:**
+- Causal (<Eq>{"x[n] = 0"}</Eq> para <Eq>{"n < 0"}</Eq>): ROC = <Eq>{"\\{|z| > R_-\\}"}</Eq> (exterior de disco)
+- Anti-causal (<Eq>{"x[n] = 0"}</Eq> para <Eq>{"n > 0"}</Eq>): ROC = <Eq>{"\\{|z| < R_+\\}"}</Eq> (interior de disco)
+- Bilateral: ROC = coroa <Eq>{"R_- < |z| < R_+"}</Eq>
+
+## Inversão por Resíduos
+
+Para <Eq>{"X(z)"}</Eq> racional, a sequência é:
+
+<EquacaoCanonica
+  formula="x[n] = \frac{1}{2\pi i} \oint_C z^{n-1} X(z)\,dz = \sum_k \text{Res}\left[z^{n-1}X(z),\; z_k\right]"
+  legenda="Contorno C dentro da ROC — resíduos dos polos de z^{n-1}X(z)"
+  audioTexto="x de n é a integral de contorno de z elevado a n menos 1 vezes X de z, igual à soma dos resíduos."
+/>
+
+**Método prático — frações parciais:** Escrever <Eq>{"X(z)/z = \\sum A_k/(z-z_k)"}</Eq>, logo <Eq>{"X(z) = \\sum A_k z/(z-z_k)"}</Eq> e inverter usando a tabela.
+
+## Equações de Diferença e Função de Transferência
+
+Sistema LTI causal: <Eq>{"\\sum_{k=0}^N a_k y[n-k] = \\sum_{k=0}^M b_k x[n-k]"}</Eq>.
+
+Aplicando Z (condições iniciais nulas):
+
+<EquacaoCanonica
+  formula="H(z) = \frac{Y(z)}{X(z)} = \frac{\sum_{k=0}^M b_k z^{-k}}{\sum_{k=0}^N a_k z^{-k}} = \frac{b_0 + b_1 z^{-1} + \cdots + b_M z^{-M}}{a_0 + a_1 z^{-1} + \cdots + a_N z^{-N}}"
+  legenda="Função de transferência discreta — zeros e polos no plano-z"
+  audioTexto="H de z é a razão entre as somas dos coeficientes b e a multiplicados pelas potências de z inverso."
+/>
+
+</Porta>
+<Porta nivel="25anos">
+
+# Estabilidade e Projeto de Filtros Digitais
+
+## Estabilidade no Plano-z
+
+**Sistema BIBO-estável:** se e somente se todos os polos de <Eq>{"H(z)"}</Eq> estão **dentro** do círculo unitário: <Eq>{"|z_k| < 1"}</Eq> para todo polo.
+
+**Comparação com Laplace:** o eixo imaginário <Eq>{"\\text{Re}(s) = 0"}</Eq> mapeia em <Eq>{"|z| = 1"}</Eq> via <Eq>{"z = e^{sT}"}</Eq> (onde <Eq>{"T"}</Eq> é o período de amostragem). Interior do círculo unitário ↔ semiplano esquerdo.
+
+**Critério de Jury:** análogo discreto do Routh-Hurwitz — determina se todos os polos estão em <Eq>{"\\{|z|<1\\}"}</Eq> sem calcular as raízes explicitamente.
+
+## Resposta em Frequência Discreta
+
+Para sistema estável, a resposta em frequência é:
+
+<EquacaoCanonica
+  formula="H(e^{i\omega}) = H(z)\big|_{z=e^{i\omega}} = \sum_{n=-\infty}^{\infty} h[n] e^{-i\omega n}"
+  legenda="DTFT da resposta ao impulso — definida sobre o círculo unitário"
+  audioTexto="H de e elevado a i omega é a transformada de Fourier discreta de h de n."
+/>
+
+**Periodicidade:** <Eq>{"H(e^{i\\omega})"}</Eq> é <Eq>{"2\\pi"}</Eq>-periódica em <Eq>{"\\omega"}</Eq>. Frequências <Eq>{"\\omega \\in [-\\pi, \\pi]"}</Eq> cobrem toda a informação (critério de Nyquist: <Eq>{"f_s > 2 f_{\\max}"}</Eq>).
+
+## Filtros FIR e IIR
+
+**FIR** (Finite Impulse Response): <Eq>{"H(z) = \\sum_{k=0}^M b_k z^{-k}"}</Eq> — apenas zeros, sempre estável, fase linear possível.
+
+**IIR** (Infinite Impulse Response): <Eq>{"H(z) = B(z)/A(z)"}</Eq> com <Eq>{"\\deg A > 0"}</Eq> — polos presentes, ordem mais baixa para mesma especificação.
+
+**Projeto de filtro Butterworth (IIR):** dado <Eq>{"N"}</Eq> e frequência de corte <Eq>{"\\omega_c"}</Eq>, os polos do protótipo analógico são <Eq>{"s_k = e^{i\\pi(2k+N-1)/(2N)}"}</Eq> para <Eq>{"k = 1,\\ldots,N"}</Eq>. Transforma-se para discreto via bilinear: <Eq>{"s = \\frac{2}{T}\\frac{z-1}{z+1}"}</Eq>.
+
+</Porta>
+<Porta nivel="40anos">
+
+# Conexão com Fourier e Análise Espectral
+
+## DTFT como Caso Particular da Z
+
+Para <Eq>{"h \\in \\ell^1"}</Eq> (sequência absolutamente somável), a ROC inclui o círculo unitário e:
+
+<Eq>{"H(e^{i\\omega}) = \\sum_{n=-\\infty}^\\infty h[n] e^{-i\\omega n} \\in L^\\infty([-\\pi,\\pi])"}</Eq>
+
+Para <Eq>{"h \\in \\ell^2"}</Eq>, <Eq>{"H(e^{i\\omega}) \\in L^2([-\\pi,\\pi])"}</Eq> (por Riesz-Fischer).
+
+## Relação entre Z e Laplace via Amostragem
+
+Se <Eq>{"x_c(t)"}</Eq> é sinal contínuo amostrado com período <Eq>{"T"}</Eq>, obtendo <Eq>{"x[n] = x_c(nT)"}</Eq>, então:
+
+<EquacaoCanonica
+  formula="X(z)\big|_{z = e^{sT}} = \sum_{k=-\infty}^{\infty} X_c\!\left(s + \frac{2\pi i k}{T}\right)"
+  legenda="Relação espectral — aliasing surge das cópias deslocadas de X_c"
+  audioTexto="X de z avaliado em z igual a e elevado a sT é a soma de cópias de X c deslocadas de 2 pi i k sobre T."
+/>
+
+**Critério de Nyquist:** Se <Eq>{"X_c(i\\omega) = 0"}</Eq> para <Eq>{"|\\omega| > \\pi/T"}</Eq>, então não há aliasing e <Eq>{"x_c"}</Eq> pode ser reconstruída exatamente de <Eq>{"x[n]"}</Eq> (Teorema de Shannon-Whittaker-Nyquist).
+
+## Transformada Z em Espaços de Hilbert
+
+A transformada Z é um isomorfismo de espaços de Hilbert:
+
+<Eq>{"\\mathcal{Z} : \\ell^2(\\mathbb{Z}) \\xrightarrow{\\sim} L^2(\\mathbb{T}), \\quad \\mathbb{T} = \\{z \\in \\mathbb{C} : |z| = 1\\}"}</Eq>
+
+onde <Eq>{"L^2(\\mathbb{T})"}</Eq> tem produto interno <Eq>{"\\langle F, G \\rangle = \\frac{1}{2\\pi}\\int_{-\\pi}^{\\pi} F(e^{i\\omega})\\overline{G(e^{i\\omega})}\\,d\\omega"}</Eq>.
+
+**Parseval discreta:** <Eq>{"\\sum_n |x[n]|^2 = \\frac{1}{2\\pi}\\int_{-\\pi}^{\\pi} |X(e^{i\\omega})|^2\\,d\\omega"}</Eq>.
+
+</Porta>
+<Porta nivel="pratica">
+
+# Implementação de Filtros Digitais
+
+## Filtro de Média Móvel (FIR Simples)
+
+<Eq>{"y[n] = \\frac{1}{M}\\sum_{k=0}^{M-1} x[n-k]"}</Eq>
+
+**Função de transferência:** <Eq>{"H(z) = \\frac{1}{M}(1 + z^{-1} + \\cdots + z^{-(M-1)}) = \\frac{1}{M}\\frac{1 - z^{-M}}{1 - z^{-1}}"}</Eq>.
+
+**Zeros:** em <Eq>{"z = e^{2\\pi i k/M}"}</Eq> para <Eq>{"k = 1,\\ldots,M-1"}</Eq> (raízes da unidade diferentes de 1).
+
+## Código Python — Análise de Filtros
+
+```python
+import numpy as np
+from scipy import signal
+import matplotlib.pyplot as plt
+
+# Filtro Butterworth IIR de 4ª ordem, passa-baixas, corte em 0.3π
+N = 4
+Wn = 0.3  # freq. normalizada (0 a 1, onde 1 = π rad/amostra)
+b, a = signal.butter(N, Wn, btype='low')
+
+# Zeros e polos
+z, p, k = signal.tf2zpk(b, a)
+print("Zeros:", np.round(z, 4))
+print("Polos:", np.round(p, 4))
+print("Todos polos dentro do círculo unit.?", all(np.abs(p) < 1))
+
+# Resposta em frequência
+w, H = signal.freqz(b, a, worN=1024)
+freq = w / np.pi  # normalizada [0, 1]
+
+# Verificar Parseval
+h = signal.impulse2(signal.dlti(b, a))[1]
+energia_tempo = np.sum(np.abs(h)**2)
+energia_freq  = np.trapz(np.abs(H)**2, w) / (2*np.pi)
+print(f"Parseval check — tempo: {energia_tempo:.4f}, freq: {energia_freq:.4f}")
+```
+
+## Equação de Diferença — Implementação Recursiva
+
+```python
+def iir_filter(b, a, x):
+    """Implementar filtro IIR diretamente pela equação de diferenças."""
+    M, N = len(b), len(a)
+    y = np.zeros(len(x))
+    for n in range(len(x)):
+        y[n] = sum(b[k]*x[n-k] for k in range(min(M, n+1)))
+        y[n] -= sum(a[k]*y[n-k] for k in range(1, min(N, n+1)))
+        y[n] /= a[0]
+    return y
+
+# Testar vs scipy.signal.lfilter
+x = np.random.randn(100)
+y_manual = iir_filter(b, a, x)
+y_scipy  = signal.lfilter(b, a, x)
+print(f"Erro máximo: {np.max(np.abs(y_manual - y_scipy)):.2e}")
+```
+
+**Referência:** Oppenheim & Schafer, *Discrete-Time Signal Processing*, 3ª ed., §§5–7; Oppenheim & Willsky, §§10–11.
+
+</Porta>
+</DuasPortas>
+
+<Exemplo>
+
+## Exemplo 1 — Inversão por Frações Parciais
+
+**Calcular** <Eq>{"x[n] = \\mathcal{Z}^{-1}\\left\\{\\frac{z^2}{(z-1)(z-0{,}5)}\\right\\}"}</Eq> (sequência causal).
+
+**Frações parciais** (escrever <Eq>{"X(z)/z"}</Eq>):
+
+<Eq>{"\\frac{X(z)}{z} = \\frac{z}{(z-1)(z-0{,}5)} = \\frac{A}{z-1} + \\frac{B}{z-0{,}5}"}</Eq>
+
+<Eq>{"A = \\frac{z}{z-0{,}5}\\bigg|_{z=1} = \\frac{1}{0{,}5} = 2, \\quad B = \\frac{z}{z-1}\\bigg|_{z=0{,}5} = \\frac{0{,}5}{-0{,}5} = -1"}</Eq>
+
+Logo <Eq>{"X(z) = \\frac{2z}{z-1} - \\frac{z}{z-0{,}5}"}</Eq>.
+
+**Inversão:** <Eq>{"x[n] = [2(1)^n - (0{,}5)^n]u[n] = [2 - (0{,}5)^n]u[n]"}</Eq>.
+
+**Verificação:** <Eq>{"x[0] = 2 - 1 = 1"}</Eq>, <Eq>{"x[1] = 2 - 0{,}5 = 1{,}5"}</Eq>, <Eq>{"x[n] \\to 2"}</Eq> quando <Eq>{"n \\to \\infty"}</Eq> (polo em <Eq>{"z=1"}</Eq> gera constante; polo em <Eq>{"z=0{,}5"}</Eq> decai).
+
+**Referência:** Oppenheim & Willsky, *Signals and Systems*, §10.5.
+
+</Exemplo>
+
+<Exemplo>
+
+## Exemplo 2 — Estabilidade de Equação de Diferenças
+
+**Sistema:** <Eq>{"y[n] - 1{,}5y[n-1] + 0{,}5y[n-2] = x[n]"}</Eq>.
+
+**Função de transferência:** <Eq>{"H(z) = \\frac{1}{1 - 1{,}5z^{-1} + 0{,}5z^{-2}} = \\frac{z^2}{z^2 - 1{,}5z + 0{,}5} = \\frac{z^2}{(z-1)(z-0{,}5)}"}</Eq>.
+
+**Polos:** <Eq>{"z_1 = 1"}</Eq> e <Eq>{"z_2 = 0{,}5"}</Eq>.
+
+**Análise:** <Eq>{"z_1 = 1"}</Eq> está **no** círculo unitário → sistema **marginalmente estável** (não BIBO). Para entrada limitada <Eq>{"x[n] = u[n]"}</Eq>, a saída cresce sem limite (polo em 1 gera resposta tipo rampa).
+
+**Conclusão:** para BIBO-estabilidade são necessários todos os polos estritamente dentro de <Eq>{"\\{|z|<1\\}"}</Eq>.
+
+**Referência:** Oppenheim & Schafer, *Discrete-Time Signal Processing*, §5.2.
+
+</Exemplo>
+
+<Exercicio>
+
+## Bloco A — Exercícios Fundamentais
+
+**A1.** Calcule a Transformada Z das sequências e indique a ROC:
+
+(a) <Eq>{"x[n] = (1/3)^n u[n]"}</Eq> &emsp; (b) <Eq>{"x[n] = -(1/3)^n u[-n-1]"}</Eq> &emsp; (c) <Eq>{"x[n] = (1/2)^{|n|}"}</Eq>
+
+Por que (a) e (b) têm a mesma <Eq>{"X(z)"}</Eq> mas ROCs diferentes?
+
+*(Fonte: Oppenheim & Willsky, Signals and Systems, 2ª ed., §10.2)*
+
+**A2.** Resolva a equação de diferenças usando a Transformada Z:
+
+<Eq>{"y[n] - \\frac{3}{4}y[n-1] + \\frac{1}{8}y[n-2] = \\delta[n], \\quad y[-1] = y[-2] = 0"}</Eq>
+
+*(Fonte: Oppenheim & Schafer, Discrete-Time Signal Processing, 3ª ed., §5.1)*
+
+**A3.** Para <Eq>{"H(z) = \\frac{1}{1 - az^{-1}}"}</Eq> com <Eq>{"|a| < 1"}</Eq> (causal):
+
+(a) Calcule <Eq>{"H(e^{i\\omega})"}</Eq> e esboce <Eq>{"20\\log|H(e^{i\\omega})|"}</Eq> em função de <Eq>{"\\omega"}</Eq>.
+
+(b) Mostre que é filtro passa-baixas se <Eq>{"a > 0"}</Eq> e passa-altas se <Eq>{"a < 0"}</Eq>.
+
+*(Fonte: Oppenheim & Schafer, §5.6)*
+
+</Exercicio>
+
+<Exercicio>
+
+## Bloco B — Exercícios Intermediários
+
+**B1.** Projete um filtro FIR de fase linear de ordem 4 com janela retangular e frequência de corte <Eq>{"\\omega_c = \\pi/2"}</Eq> usando a técnica de amostragem da resposta ideal:
+
+<Eq>{"h_d[n] = \\frac{\\sin(\\omega_c(n-N/2))}{\\pi(n-N/2)}"}</Eq>
+
+Calcule os coeficientes para <Eq>{"N=4"}</Eq> e verifique a simetria <Eq>{"h[n] = h[N-n]"}</Eq> (fase linear).
+
+*(Fonte: Oppenheim & Schafer, Discrete-Time Signal Processing, §7.2)*
+
+**B2.** Prove que um filtro FIR de comprimento <Eq>{"M"}</Eq> com coeficientes simétricos (<Eq>{"h[n] = h[M-1-n]"}</Eq>) tem resposta em frequência da forma <Eq>{"H(e^{i\\omega}) = e^{-i\\omega(M-1)/2} A(e^{i\\omega})"}</Eq>, onde <Eq>{"A"}</Eq> é real — portanto fase linear.
+
+*(Fonte: Oppenheim & Schafer, §5.7)*
+
+**B3.** Obtenha o filtro IIR equivalente ao filtro analógico de Butterworth de 2ª ordem <Eq>{"H_a(s) = \\frac{1}{s^2+\\sqrt{2}s+1}"}</Eq> usando a transformação bilinear <Eq>{"s = \\frac{2}{T}\\frac{z-1}{z+1}"}</Eq> com <Eq>{"T=1"}</Eq>. Verifique que os polos estão dentro do círculo unitário.
+
+*(Fonte: Oppenheim & Schafer, §7.1)*
+
+</Exercicio>
+
+<Exercicio>
+
+## Bloco C — Exercícios Avançados (Nível USP/ITA)
+
+**C1.** **(Critério de Jury)** Enuncia o critério de Jury para o polinômio <Eq>{"D(z) = a_n z^n + \\cdots + a_0"}</Eq> e aplique para verificar se todos os zeros de <Eq>{"D(z) = z^3 - 1{,}2z^2 + 0{,}5z - 0{,}1"}</Eq> estão dentro do círculo unitário.
+
+*(Fonte: Ogata, Discrete-Time Control Systems, 2ª ed., §5.3)*
+
+**C2.** **(Parseval discreta e Densidade Espectral)** Prove a identidade de Parseval:
+
+<Eq>{"\\sum_{n=-\\infty}^\\infty |x[n]|^2 = \\frac{1}{2\\pi}\\int_{-\\pi}^\\pi |X(e^{i\\omega})|^2\\,d\\omega"}</Eq>
+
+usando o fato de que <Eq>{"\\{e^{in\\omega}\\}_{n\\in\\mathbb{Z}}"}</Eq> é base ortonormal de <Eq>{"L^2[-\\pi,\\pi]"}</Eq>. Interprete cada lado como energia total do sinal.
+
+*(Fonte: Oppenheim & Willsky, Signals and Systems, 2ª ed., §10.7; Oppenheim & Schafer, §2.6)*
+
+**C3.** **(Teorema de Shannon)** Seja <Eq>{"x_c(t)"}</Eq> limitado em banda com <Eq>{"X_c(i\\omega) = 0"}</Eq> para <Eq>{"\\omega > \\Omega_N"}</Eq>. Mostre que se <Eq>{"T < \\pi/\\Omega_N"}</Eq> (taxa de Nyquist satisfeita), então:
+
+<Eq>{"x_c(t) = \\sum_{n=-\\infty}^\\infty x_c(nT)\\,\\text{sinc}\\left(\\frac{t - nT}{T}\\right)"}</Eq>
+
+Prove que a reconstrução é exata e que ela equivale à inversão da transformada Z avaliada no círculo unitário.
+
+*(Fonte: Oppenheim & Willsky, §7.4; Oppenheim & Schafer, §4.1)*
+
+</Exercicio>
+
+<Leituras>
+
+## Referências Bibliográficas
+
+- **Oppenheim, A.V.; Willsky, A.S.** *Signals and Systems*, 2ª ed. Prentice Hall, 1997. Caps. 10–11 (transformada Z, sistemas discretos). Referência principal.
+- **Oppenheim, A.V.; Schafer, R.W.** *Discrete-Time Signal Processing*, 3ª ed. Prentice Hall, 2009. Caps. 2–7 (DTFT, Z, filtros FIR/IIR). Referência completa de DSP.
+- **Ogata, K.** *Discrete-Time Control Systems*, 2ª ed. Prentice Hall, 1995. Caps. 2–5 (transformada Z, projeto de controladores discretos, critério de Jury).
+- **Proakis, J.G.; Manolakis, D.G.** *Digital Signal Processing*, 4ª ed. Prentice Hall, 2007. Caps. 3–5 (Z, filtros digitais, estruturas).
+- **Kreyszig, E.** *Advanced Engineering Mathematics*, 10ª ed. Wiley, 2011. §21 (transformada Z e sistemas discretos).
+
+</Leituras>

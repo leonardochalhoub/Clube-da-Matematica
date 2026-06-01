@@ -1,0 +1,449 @@
+---
+titulo: "Mínimos Quadrados e Regressão"
+slug: "cal4-u1-l07-minimos-quadrados-regressao"
+categoria: "calculo-4"
+subcategoria: "calculo-4"
+descricao: "Equações normais, fatoração QR, mínimos quadrados ponderados, regularização de Tikhonov (ridge), regressão polinomial e aplicações em ajuste de curvas."
+ordem: 7
+publicado: true
+tags: ["minimos-quadrados", "regressao", "equacoes-normais", "regularizacao", "qr"]
+prerrequisitos: ["cal4-u1-l06-svd-decomposicao-singular"]
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-28"
+usadoEm: ["engenharia"]
+versao: "v1"
+---
+
+
+<DuasPortas>
+<Porta nivel="5anos">
+
+# A Melhor Aproximação Quando o Sistema Não Tem Solução
+
+Quando temos mais equações do que incógnitas, o sistema <Eq>{"Ax = b"}</Eq> geralmente não tem solução exata. Mínimos quadrados encontra o <Eq>{"\\hat{x}"}</Eq> que minimiza o erro <Eq>{"\\|Ax - b\\|^2"}</Eq> — a distância ao quadrado entre <Eq>{"A\\hat{x}"}</Eq> e <Eq>{"b"}</Eq>.
+
+Isso é a base da regressão linear: encontrar a reta que melhor passa por uma nuvem de pontos!
+
+</Porta>
+<Porta nivel="10anos">
+
+# Mínimos Quadrados
+
+**Problema:** dado <Eq>{"A \\in M_{m\\times n}"}</Eq> com <Eq>{"m > n"}</Eq> e <Eq>{"b \\in \\mathbb{R}^m"}</Eq>, encontrar <Eq>{"\\hat{x}"}</Eq> que minimiza <Eq>{"\\|Ax - b\\|^2"}</Eq>.
+
+**Equações normais:** <Eq>{"A^TA\\hat{x} = A^Tb"}</Eq>.
+
+**Via QR:** se <Eq>{"A = QR"}</Eq> (R invertível), então <Eq>{"\\hat{x} = R^{-1}Q^Tb"}</Eq>.
+
+**Via SVD:** <Eq>{"\\hat{x} = A^+b = V\\Sigma^+U^Tb"}</Eq> (solução de norma mínima).
+
+**Regressão linear:** ajustar <Eq>{"y = a_0 + a_1 x"}</Eq> a <Eq>{"m"}</Eq> pontos <Eq>{"(x_i, y_i)"}</Eq> é exatamente um problema de mínimos quadrados com <Eq>{"A_{ij} = x_i^{j-1}"}</Eq>.
+
+</Porta>
+<Porta nivel="15anos">
+
+# Mínimos Quadrados: Equações Normais e QR
+
+## Formulação Geométrica
+
+Dado sistema sobredeterminado <Eq>{"Ax = b"}</Eq> (<Eq>{"A \\in M_{m\\times n}"}</Eq>, <Eq>{"m > n"}</Eq>, <Eq>{"\\text{posto}(A) = n"}</Eq>):
+
+<EquacaoCanonica
+  formula="\hat{x} = \arg\min_{x \in \mathbb{R}^n} \|Ax - b\|^2"
+  legenda="O resíduo ótimo é perpendicular ao espaço coluna de A"
+  audioTexto="x chapéu é o argmin sobre x em R n de norma de A x menos b ao quadrado."
+/>
+
+**Interpretação:** <Eq>{"A\\hat{x} = P_{\\mathcal{C}(A)} b"}</Eq> é a projeção ortogonal de <Eq>{"b"}</Eq> sobre <Eq>{"\\mathcal{C}(A)"}</Eq>. Portanto <Eq>{"b - A\\hat{x} \\perp \\mathcal{C}(A)"}</Eq>, o que dá:
+
+<EquacaoCanonica
+  formula="A^T(b - A\hat{x}) = 0 \implies A^TA\hat{x} = A^Tb"
+  legenda="Equações normais — condição de otimalidade de primeira ordem"
+  audioTexto="A transposto vezes b menos A x chapéu igual a zero, logo A transposto A x chapéu igual a A transposto b."
+/>
+
+**Unicidade:** <Eq>{"A^TA"}</Eq> é invertível se e somente se <Eq>{"A"}</Eq> tem posto completo por colunas, e então <Eq>{"\\hat{x} = (A^TA)^{-1}A^Tb"}</Eq>.
+
+## Solução via Fatoração QR
+
+A decomposição <Eq>{"A = QR"}</Eq> (com <Eq>{"Q \\in M_{m\\times n}"}</Eq> de colunas ortonormais e <Eq>{"R \\in M_{n\\times n}"}</Eq> triangular superior invertível) fornece o método numericamente mais estável:
+
+**Derivação:** As equações normais tornam-se <Eq>{"(QR)^T(QR)\\hat{x} = (QR)^Tb"}</Eq>, ou seja:
+
+<Eq>{"R^TQ^TQR\\hat{x} = R^TQ^Tb \\implies R^TR\\hat{x} = R^TQ^Tb \\implies R\\hat{x} = Q^Tb"}</Eq>
+
+Logo resolve-se o sistema triangular:
+
+<EquacaoCanonica
+  formula="R\hat{x} = Q^Tb"
+  legenda="Sistema triangular superior — estável por substituição retroativa"
+  audioTexto="R x chapéu igual a Q transposto b."
+/>
+
+**Vantagem:** Evita formar <Eq>{"A^TA"}</Eq>, que eleva ao quadrado o número de condição.
+
+## Solução via SVD e Norma Mínima
+
+Quando <Eq>{"\\text{posto}(A) < n"}</Eq>, as equações normais têm infinitas soluções. A **solução de norma mínima** é:
+
+<EquacaoCanonica
+  formula="\hat{x} = A^+b = V\Sigma^+U^Tb"
+  legenda="Pseudoinversa de Moore-Penrose seleciona a solução de menor norma"
+  audioTexto="x chapéu igual a A mais b igual a V sigma mais U transposto b."
+/>
+
+onde <Eq>{"\\Sigma^+ = \\text{diag}(1/\\sigma_1, \\ldots, 1/\\sigma_r, 0, \\ldots, 0)"}</Eq>.
+
+**Propriedades da solução <Eq>{"\\hat{x} = A^+b"}</Eq>:**
+- Minimiza <Eq>{"\\|Ax - b\\|"}</Eq>
+- Dentre todos os minimizadores, tem menor <Eq>{"\\|x\\|"}</Eq>
+- <Eq>{"\\hat{x} \\in \\mathcal{C}(A^T) = \\mathcal{N}(A)^\\perp"}</Eq> (pertence ao complemento ortogonal do núcleo)
+
+</Porta>
+<Porta nivel="25anos">
+
+# Mínimos Quadrados Ponderados e Regularização
+
+## Mínimos Quadrados Ponderados
+
+Quando as observações têm confiabilidades distintas (variâncias <Eq>{"\\sigma_i^2"}</Eq>), define-se a **matriz de pesos** <Eq>{"W = \\text{diag}(w_1, \\ldots, w_m)"}</Eq> com <Eq>{"w_i = 1/\\sigma_i^2"}</Eq> e minimiza-se:
+
+<EquacaoCanonica
+  formula="\hat{x}_W = \arg\min_{x} (Ax - b)^T W (Ax - b)"
+  legenda="Estimador de mínimos quadrados generalizados (GLS)"
+  audioTexto="x chapéu W é o argmin de A x menos b transposto W A x menos b."
+/>
+
+**Equações normais ponderadas:** <Eq>{"A^TWA\\hat{x}_W = A^TWb"}</Eq>.
+
+**Interpretação estatística:** se <Eq>{"b = Ax_* + \\varepsilon"}</Eq> com <Eq>{"\\mathbb{E}[\\varepsilon] = 0"}</Eq> e <Eq>{"\\text{Cov}(\\varepsilon) = \\sigma^2 W^{-1}"}</Eq>, então <Eq>{"\\hat{x}_W"}</Eq> é o **BLUE** (Best Linear Unbiased Estimator) pelo **Teorema de Gauss-Markov**.
+
+## Regularização de Tikhonov (Ridge Regression)
+
+Quando <Eq>{"A^TA"}</Eq> está mal condicionada (singular ou quase-singular), adiciona-se um termo de penalidade:
+
+<EquacaoCanonica
+  formula="\hat{x}_\lambda = \arg\min_{x} \left(\|Ax - b\|^2 + \lambda \|x\|^2\right)"
+  legenda="Regularização L2 — penaliza soluções de grande norma"
+  audioTexto="x chapéu lambda minimiza norma de A x menos b ao quadrado mais lambda norma de x ao quadrado."
+/>
+
+**Equações normais regularizadas:**
+
+<EquacaoCanonica
+  formula="(A^TA + \lambda I)\hat{x}_\lambda = A^Tb"
+  legenda="A matriz A^TA + λI é sempre invertível para λ > 0"
+  audioTexto="A transposto A mais lambda I vezes x chapéu lambda igual a A transposto b."
+/>
+
+**Análise via SVD:** se <Eq>{"A = U\\Sigma V^T"}</Eq>, então:
+
+<Eq>{"\\hat{x}_\\lambda = V\\text{diag}\\!\\left(\\frac{\\sigma_i}{\\sigma_i^2 + \\lambda}\\right)U^Tb"}</Eq>
+
+Os fatores <Eq>{"\\sigma_i/(\\sigma_i^2 + \\lambda)"}</Eq> são os **filtros de Tikhonov**: atenuam contribuições de valores singulares pequenos (que amplificam ruído).
+
+**Escolha de <Eq>{"\\lambda"}</Eq>:** curva-L (balança ajuste vs. norma da solução), validação cruzada, ou GCV (Generalized Cross-Validation).
+
+## Regressão Polinomial e Matrizes de Vandermonde
+
+Ajustar <Eq>{"p(x) = c_0 + c_1 x + \\cdots + c_k x^k"}</Eq> aos dados <Eq>{"(x_1, y_1), \\ldots, (x_m, y_m)"}</Eq>:
+
+<EquacaoCanonica
+  formula="V\mathbf{c} = \mathbf{y}, \quad V_{ij} = x_i^{j-1}"
+  legenda="Matriz de Vandermonde — mal condicionada para grau alto"
+  audioTexto="V c igual a y, onde V i j é x i elevado a j menos 1."
+/>
+
+**Problema de Runge:** polinômios de grau alto oscilam violentamente. Alternativas: base de Chebyshev, splines, ou regressão regularizada.
+
+**Interpolação vs. Regressão:** para <Eq>{"k = m-1"}</Eq> obtém-se interpolação exata (V quadrada); para <Eq>{"k < m-1"}</Eq> obtém-se regressão (V retangular, sistema sobredeterminado).
+
+## Relação com Análise de Componentes Principais (PCA)
+
+Dada matriz de dados <Eq>{"X \\in M_{m\\times n}"}</Eq> (centralizada), a **regressão de componentes principais** usa:
+
+<Eq>{"\\hat{y} = XV_k(V_k^TX^TXV_k)^{-1}V_k^TX^T y"}</Eq>
+
+onde <Eq>{"V_k"}</Eq> são os <Eq>{"k"}</Eq> primeiros vetores singulares à direita de <Eq>{"X"}</Eq>. Isso combina redução de dimensionalidade com regressão.
+
+</Porta>
+<Porta nivel="40anos">
+
+# Teoria de Mínimos Quadrados: Aspectos Avançados
+
+## Análise de Perturbações e Número de Condição
+
+**Teorema (sensibilidade dos mínimos quadrados):** Seja <Eq>{"A"}</Eq> de posto completo e <Eq>{"\\hat{x}"}</Eq> a solução de mínimos quadrados. Para perturbações <Eq>{"\\delta A"}</Eq>, <Eq>{"\\delta b"}</Eq>:
+
+<EquacaoCanonica
+  formula="\frac{\|\delta\hat{x}\|}{\|\hat{x}\|} \leq \kappa_2(A)\left(\frac{\|\delta b\|}{\|b\|} + \frac{\|\delta A\|}{\|A\|}\right) + \kappa_2^2(A)\frac{\|\delta A\|}{\|A\|}\sin\theta"
+  legenda="θ = ângulo entre b e C(A); κ₂(A) = σ₁/σᵣ é o número de condição"
+  audioTexto="Sensibilidade relativa de x chapéu é limitada por kappa dois de A vezes perturbações relativas, mais kappa dois ao quadrado vezes sin theta."
+/>
+
+**Implicação:** o erro é amplificado por <Eq>{"\\kappa_2^2(A)"}</Eq> quando <Eq>{"\\sin\\theta"}</Eq> é grande (resíduo grande), justificando a necessidade de regularização.
+
+## Mínimos Quadrados Totais (TLS)
+
+O TLS (Total Least Squares) trata erros tanto em <Eq>{"A"}</Eq> quanto em <Eq>{"b"}</Eq>:
+
+<EquacaoCanonica
+  formula="\min_{E, r} \|[E \;\; r]\|_F \quad \text{s.t.} \quad (A+E)\hat{x} = b + r"
+  legenda="Minimiza a perturbação da matriz aumentada [A | b]"
+  audioTexto="Minimiza norma de Frobenius de E e r, sujeito a A mais E vezes x igual a b mais r."
+/>
+
+**Solução:** se <Eq>{"[A \\;\\; b] = U\\Sigma V^T"}</Eq> e <Eq>{"v = V_{:,n+1}"}</Eq> é o último vetor singular à direita, então:
+
+<Eq>{"\\hat{x}_{\\text{TLS}} = -v_{1:n}/v_{n+1}"}</Eq>
+
+(válido quando <Eq>{"v_{n+1} \\neq 0"}</Eq>; referência: Golub & Van Loan §12.3).
+
+## Mínimos Quadrados Recursivos (RLS)
+
+Para atualização on-line ao chegar a observação <Eq>{"(a_{m+1}^T, b_{m+1})"}</Eq>:
+
+<EquacaoCanonica
+  formula="\hat{x}_{m+1} = \hat{x}_m + K_{m+1}(b_{m+1} - a_{m+1}^T\hat{x}_m)"
+  legenda="Fórmula de atualização RLS — equivalente ao filtro de Kalman estático"
+  audioTexto="x chapéu m mais 1 é igual a x chapéu m mais K m mais 1 vezes b m mais 1 menos a m mais 1 transposto x chapéu m."
+/>
+
+com ganho <Eq>{"K_{m+1} = P_m a_{m+1}(1 + a_{m+1}^T P_m a_{m+1})^{-1}"}</Eq> e atualização de covariância <Eq>{"P_{m+1} = (I - K_{m+1}a_{m+1}^T)P_m"}</Eq>.
+
+**Fórmula de Sherman-Morrison-Woodbury:** a atualização de <Eq>{"P"}</Eq> usa <Eq>{"(P^{-1} + a a^T)^{-1} = P - Pa(1 + a^TPa)^{-1}a^TP"}</Eq>.
+
+## Regularização L1 e LASSO
+
+O **LASSO** (Least Absolute Shrinkage and Selection Operator) substitui a penalidade L2 por L1:
+
+<EquacaoCanonica
+  formula="\hat{x}_{\text{LASSO}} = \arg\min_{x} \frac{1}{2}\|Ax - b\|^2 + \lambda\|x\|_1"
+  legenda="A penalidade L1 induz esparsidade — alguns coeficientes tornam-se exatamente zero"
+  audioTexto="x chapéu LASSO minimiza metade norma de Ax menos b ao quadrado mais lambda norma L1 de x."
+/>
+
+A solução não tem forma fechada mas é obtida por **descida por coordenadas** (coordinate descent) com operador de limiarização suave (<em>soft-thresholding</em>):
+
+<Eq>{"S_\\lambda(t) = \\text{sgn}(t)\\max(|t| - \\lambda, 0)"}</Eq>
+
+**Elastic Net:** combina L1 e L2: <Eq>{"\\lambda_1 \\|x\\|_1 + \\lambda_2 \\|x\\|_2^2"}</Eq>.
+
+</Porta>
+<Porta nivel="pratica">
+
+# Aplicações de Mínimos Quadrados em Engenharia
+
+## Ajuste de Curva e Calibração de Sensores
+
+**Problema:** calibrar um termopar medindo pares <Eq>{"(T_i, V_i)"}</Eq> (temperatura, tensão). Modelo quadrático: <Eq>{"V = a_0 + a_1 T + a_2 T^2"}</Eq>.
+
+**Configuração:**
+
+<Eq>{"A = \\begin{pmatrix} 1 & T_1 & T_1^2 \\\\ \\vdots & \\vdots & \\vdots \\\\ 1 & T_m & T_m^2 \\end{pmatrix}, \\quad b = \\begin{pmatrix} V_1 \\\\ \\vdots \\\\ V_m \\end{pmatrix}"}</Eq>
+
+**Código Python:**
+```python
+import numpy as np
+
+# Dados de calibração
+T = np.array([0, 25, 50, 75, 100, 125, 150])
+V = np.array([0.0, 1.02, 2.05, 3.10, 4.13, 5.17, 6.18])
+
+# Montar matriz de Vandermonde grau 2
+A = np.column_stack([np.ones_like(T), T, T**2])
+
+# Resolver via equações normais (ou np.linalg.lstsq)
+c, residuals, rank, sv = np.linalg.lstsq(A, V, rcond=None)
+print(f"Coeficientes: a0={c[0]:.4f}, a1={c[1]:.4f}, a2={c[2]:.6f}")
+```
+
+## Ridge Regression — Controle de Multicolinearidade
+
+```python
+from numpy.linalg import solve, norm
+
+def ridge_regression(A, b, lam):
+    n = A.shape[1]
+    ATA = A.T @ A
+    ATb = A.T @ b
+    return solve(ATA + lam * np.eye(n), ATb)
+
+# Comparar condicionamento
+lambdas = [0, 0.01, 0.1, 1.0]
+for lam in lambdas:
+    M = A.T @ A + lam * np.eye(3)
+    print(f"λ={lam:.2f}: cond(A^TA+λI) = {np.linalg.cond(M):.1f}")
+```
+
+## Sistema de Controle — Identificação de Parâmetros
+
+Identificar parâmetros <Eq>{"a, b, c"}</Eq> do sistema <Eq>{"y[k] = a\\, y[k-1] + b\\, y[k-2] + c\\, u[k-1]"}</Eq> via mínimos quadrados: montar o regresor <Eq>{"\\phi[k] = (y[k-1], y[k-2], u[k-1])^T"}</Eq> e empilhar observações.
+
+**Referências:** Strang (2016) §4.3; Kay (1993) Cap. 8 (estimação de parâmetros).
+
+</Porta>
+</DuasPortas>
+
+<Exemplo>
+
+## Exemplo 1 — Regressão Linear Simples
+
+**Dados:** 4 pontos <Eq>{"(1,1), (2,2), (3,2), (4,3)"}</Eq>. Ajustar reta <Eq>{"y = c_0 + c_1 x"}</Eq>.
+
+**Configuração:**
+
+<Eq>{"A = \\begin{pmatrix} 1 & 1 \\\\ 1 & 2 \\\\ 1 & 3 \\\\ 1 & 4 \\end{pmatrix}, \\quad b = \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\\\ 3 \\end{pmatrix}"}</Eq>
+
+**Equações normais** <Eq>{"A^TA\\hat{c} = A^Tb"}</Eq>:
+
+<Eq>{"A^TA = \\begin{pmatrix} 4 & 10 \\\\ 10 & 30 \\end{pmatrix}, \\quad A^Tb = \\begin{pmatrix} 8 \\\\ 22 \\end{pmatrix}"}</Eq>
+
+**Solução:** <Eq>{"\\det(A^TA) = 120 - 100 = 20"}</Eq>.
+
+<Eq>{"\\hat{c} = \\frac{1}{20}\\begin{pmatrix} 30 & -10 \\\\ -10 & 4 \\end{pmatrix}\\begin{pmatrix} 8 \\\\ 22 \\end{pmatrix} = \\frac{1}{20}\\begin{pmatrix} 20 \\\\ 8 \\end{pmatrix} = \\begin{pmatrix} 1.0 \\\\ 0.4 \\end{pmatrix}"}</Eq>
+
+**Reta ajustada:** <Eq>{"y = 1{,}0 + 0{,}4x"}</Eq>.
+
+**Resíduo:** <Eq>{"\\|b - A\\hat{c}\\|^2 = (1 - 1{,}4)^2 + (2 - 1{,}8)^2 + (2 - 2{,}2)^2 + (3 - 2{,}6)^2 = 0{,}4"}</Eq>.
+
+**Referência:** Strang, *Introduction to Linear Algebra*, 5ª ed., §4.3.
+
+</Exemplo>
+
+<Exemplo>
+
+## Exemplo 2 — Mínimos Quadrados via QR
+
+**Dados do Exemplo 1.** Fatorar <Eq>{"A = QR"}</Eq> via Gram-Schmidt:
+
+**Passo 1:** Ortogonalizar colunas de <Eq>{"A"}</Eq>:
+
+<Eq>{"a_1 = (1,1,1,1)^T \\Rightarrow e_1 = \\frac{a_1}{\\|a_1\\|} = \\frac{1}{2}(1,1,1,1)^T"}</Eq>
+
+<Eq>{"a_2 = (1,2,3,4)^T, \\quad a_2' = a_2 - \\langle a_2, e_1\\rangle e_1 = (1,2,3,4)^T - \\frac{10}{4}(1,1,1,1)^T = (-\\tfrac{3}{2},-\\tfrac{1}{2},\\tfrac{1}{2},\\tfrac{3}{2})^T"}</Eq>
+
+<Eq>{"\\|a_2'\\| = \\sqrt{9/4 + 1/4 + 1/4 + 9/4} = \\sqrt{5}, \\quad e_2 = \\frac{a_2'}{\\sqrt{5}}"}</Eq>
+
+**Passo 2:** Montar <Eq>{"Q = [e_1 \\; e_2]"}</Eq> e <Eq>{"R = Q^TA"}</Eq> (triangular superior).
+
+**Passo 3:** Resolver <Eq>{"R\\hat{c} = Q^Tb"}</Eq> por substituição retroativa. O resultado coincide com o Exemplo 1.
+
+**Vantagem numérica:** <Eq>{"\\kappa_2(Q^TA) = \\kappa_2(R) = \\kappa_2(A)"}</Eq>, enquanto <Eq>{"\\kappa_2(A^TA) = \\kappa_2(A)^2"}</Eq>.
+
+**Referência:** Strang, *Linear Algebra and Its Applications*, 4ª ed., §4.4; Golub & Van Loan, *Matrix Computations*, 4ª ed., §5.3.
+
+</Exemplo>
+
+<Exemplo>
+
+## Exemplo 3 — Regularização Ridge
+
+**Problema:** ajustar polinômio de grau 5 a 7 pontos igualmente espaçados em <Eq>{"[-1,1]"}</Eq> com ruído. Sem regularização, <Eq>{"\\kappa_2(A^TA) \\approx 10^{10}"}</Eq>; com <Eq>{"\\lambda = 0{,}01"}</Eq> reduz para <Eq>{"\\approx 10^4"}</Eq>.
+
+**Filtros de Tikhonov via SVD:**
+
+| <Eq>{"\\sigma_i"}</Eq> | <Eq>{"1/\\sigma_i"}</Eq> (MQ) | <Eq>{"\\sigma_i/(\\sigma_i^2+0{,}01)"}</Eq> (Ridge) |
+|---|---|---|
+| 2.45 | 0.41 | 0.40 |
+| 1.10 | 0.91 | 0.85 |
+| 0.30 | 3.33 | 2.73 |
+| 0.05 | 20.0 | 4.76 |
+| 0.01 | 100. | 5.00 |
+
+A regularização atenua drasticamente os fatores de amplificação para valores singulares pequenos, estabilizando a solução.
+
+**Referência:** Tikhonov & Arsenin, *Solutions of Ill-Posed Problems* (1977); Hansen, *Rank-Deficient and Discrete Ill-Posed Problems* (1998), §2.
+
+</Exemplo>
+
+<Exercicio>
+
+## Bloco A — Exercícios Fundamentais
+
+**A1.** Ajuste a reta <Eq>{"y = c_0 + c_1 t"}</Eq> aos pontos <Eq>{"(0,1),(1,0),(2,1),(3,0),(4,1)"}</Eq>. Resolva pelas equações normais e calcule o resíduo <Eq>{"\\|b - A\\hat{c}\\|"}</Eq>.
+
+*(Fonte: Strang, Introduction to Linear Algebra, 5ª ed., Problem 4.3.1)*
+
+**A2.** Seja <Eq>{"A = \\begin{pmatrix} 1 & 1 \\\\ 0 & 1 \\\\ 1 & 0 \\end{pmatrix}"}</Eq>, <Eq>{"b = \\begin{pmatrix} 2 \\\\ 1 \\\\ 1 \\end{pmatrix}"}</Eq>. Calcule <Eq>{"\\hat{x} = (A^TA)^{-1}A^Tb"}</Eq> e a projeção <Eq>{"p = A\\hat{x}"}</Eq>. Verifique que <Eq>{"b - p \\perp \\mathcal{C}(A)"}</Eq>.
+
+*(Fonte: Lay, Linear Algebra and Its Applications, 5ª ed., §6.5)*
+
+**A3.** Para <Eq>{"b = (1,2,3)^T"}</Eq> e <Eq>{"A = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}"}</Eq>, encontre a solução de mínimos quadrados (que é um escalar). Interprete geometricamente.
+
+*(Fonte: Strang, ibidem, §4.2)*
+
+</Exercicio>
+
+<Exercicio>
+
+## Bloco B — Exercícios Intermediários
+
+**B1.** Dado o sistema sobredeterminado com <Eq>{"A \\in M_{6\\times 3}"}</Eq> de posto 3 e SVD <Eq>{"A = U\\Sigma V^T"}</Eq> com <Eq>{"\\sigma_1 = 10, \\sigma_2 = 2, \\sigma_3 = 0{,}1"}</Eq>:
+
+(a) Calcule <Eq>{"\\kappa_2(A)"}</Eq> e <Eq>{"\\kappa_2(A^TA)"}</Eq>.
+
+(b) Com <Eq>{"\\lambda = 0{,}01"}</Eq>, calcule os filtros de Tikhonov <Eq>{"f_i = \\sigma_i^2/(\\sigma_i^2 + \\lambda)"}</Eq> para cada valor singular.
+
+(c) Explique por que a regularização ridge melhora numericamente o problema.
+
+*(Fonte: Hansen, Rank-Deficient and Discrete Ill-Posed Problems, §2.2)*
+
+**B2.** Prove que a solução da regressão ridge satisfaz:
+
+<Eq>{"\\hat{x}_\\lambda = (A^TA + \\lambda I)^{-1}A^Tb = A^T(AA^T + \\lambda I)^{-1}b"}</Eq>
+
+e que as duas expressões são equivalentes (identidade de Woodbury). Para qual regime (<Eq>{"m \\gg n"}</Eq> ou <Eq>{"n \\gg m"}</Eq>) cada forma é computacionalmente preferível?
+
+*(Fonte: Kay, Fundamentals of Statistical Signal Processing, Vol. I, §8.5)*
+
+**B3.** Ajuste uma parábola <Eq>{"y = a + bx + cx^2"}</Eq> aos pontos <Eq>{"(-2,5),(-1,2),(0,1),(1,2),(2,5)"}</Eq>. Mostre que as equações normais se desacoplam (por simetria dos pontos) e resolva analiticamente. Compare com mínimos quadrados linear.
+
+*(Fonte: Strang, Introduction to Linear Algebra, 5ª ed., §4.3)*
+
+</Exercicio>
+
+<Exercicio>
+
+## Bloco C — Exercícios Avançados (Nível USP/ITA)
+
+**C1.** **(Problema de regularização)** Mostre que o problema de Tikhonov:
+
+<Eq>{"\\min_x \\|Ax - b\\|^2 + \\lambda\\|x\\|^2"}</Eq>
+
+é equivalente ao problema de mínimos quadrados aumentado:
+
+<Eq>{"\\min_x \\left\\|\\begin{pmatrix} A \\\\ \\sqrt{\\lambda}I \\end{pmatrix} x - \\begin{pmatrix} b \\\\ 0 \\end{pmatrix}\\right\\|^2"}</Eq>
+
+Use essa equivalência para mostrar que a matriz aumentada sempre tem posto completo por colunas (para qualquer <Eq>{"\\lambda > 0"}</Eq>).
+
+*(Fonte: Golub & Van Loan, Matrix Computations, 4ª ed., §12.1)*
+
+**C2.** **(Mínimos quadrados recursivos)** Prove a fórmula de atualização RLS usando a identidade de Sherman-Morrison-Woodbury:
+
+<Eq>{"(B + uv^T)^{-1} = B^{-1} - \\frac{B^{-1}uv^TB^{-1}}{1 + v^TB^{-1}u}"}</Eq>
+
+Aplique para mostrar que <Eq>{"P_{m+1}^{-1} = P_m^{-1} + a_{m+1}a_{m+1}^T"}</Eq> implica a forma recursiva para <Eq>{"P_{m+1}"}</Eq> dada na teoria.
+
+*(Fonte: Kay, Fundamentals of Statistical Signal Processing, Vol. I, §12.6)*
+
+**C3.** **(Teorema de Gauss-Markov)** Prove que, no modelo linear <Eq>{"b = Ax_* + \\varepsilon"}</Eq> com <Eq>{"\\mathbb{E}[\\varepsilon] = 0"}</Eq> e <Eq>{"\\text{Cov}(\\varepsilon) = \\sigma^2 I"}</Eq>, o estimador de mínimos quadrados <Eq>{"\\hat{x} = (A^TA)^{-1}A^Tb"}</Eq> é BLUE: para qualquer estimador linear não-viesado <Eq>{"\\tilde{x} = Cb"}</Eq>, tem-se <Eq>{"\\text{Cov}(\\tilde{x}) - \\text{Cov}(\\hat{x}) \\succeq 0"}</Eq> (semidefinida positiva).
+
+*(Fonte: Lay, Linear Algebra and Its Applications, 5ª ed., §6.5 nota; referência completa: Rao, Linear Statistical Inference, §4)*
+
+</Exercicio>
+
+<Leituras>
+
+## Referências Bibliográficas
+
+- **Strang, G.** *Introduction to Linear Algebra*, 5ª ed. Wellesley-Cambridge Press, 2016. §§4.2–4.4 (projeções e mínimos quadrados), §4.5 (pseudo-inversa).
+- **Strang, G.** *Linear Algebra and Its Applications*, 4ª ed. Thomson Brooks/Cole, 2006. §4.3–4.4 (fatoração QR).
+- **Lay, D.C.; Lay, S.R.; McDonald, J.J.** *Linear Algebra and Its Applications*, 5ª ed. Pearson, 2016. §§6.5–6.6 (mínimos quadrados e equações normais).
+- **Golub, G.H.; Van Loan, C.F.** *Matrix Computations*, 4ª ed. Johns Hopkins Univ. Press, 2013. §5.3 (QR), §12.1 (regularização), §12.3 (TLS).
+- **Kay, S.M.** *Fundamentals of Statistical Signal Processing, Volume I: Estimation Theory*. Prentice Hall, 1993. §§8–12 (estimação de mínimos quadrados e RLS).
+- **Hansen, P.C.** *Rank-Deficient and Discrete Ill-Posed Problems*. SIAM, 1998. §§2–3 (SVD e regularização de Tikhonov).
+- **Tikhonov, A.N.; Arsenin, V.Y.** *Solutions of Ill-Posed Problems*. Wiley, 1977. (referência clássica para regularização).
+- **Horn, R.A.; Johnson, C.R.** *Matrix Analysis*, 2ª ed. Cambridge Univ. Press, 2013. §§2–3 (normas matriciais e pseudoinversa).
+
+</Leituras>
