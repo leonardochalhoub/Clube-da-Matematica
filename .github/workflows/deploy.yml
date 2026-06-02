@@ -77,6 +77,12 @@ jobs:
           BUILD_LOCALE: ${{ matrix.url }}
         run: npx tsx scripts/generate-manifest.ts
 
+      # Fail fast on render-time MDX errors (e.g. "R is not defined" from
+      # $\mathbb{R}$ inside a JSX fragment) BEFORE the 4-min next build. acorn
+      # parsing alone can't catch these — this actually renders each lesson.
+      - name: Render-check content (build-accurate)
+        run: node scripts/check-mdx-render.mjs content
+
       - name: Build static site (locale ${{ matrix.url }})
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}

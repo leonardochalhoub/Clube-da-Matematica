@@ -458,6 +458,7 @@ A full en-US translation pass (Haiku + Sonnet + Opus 4.8) produced files that **
 
 - **`scripts/check-rsc-all.mjs` uses `next-mdx-remote` and is LENIENT — it passes files the build rejects. NEVER trust it as proof a file compiles.**
 - **`next build` uses `@mdx-js/mdx` + acorn (STRICT).** The build-accurate validator is **`scripts/check-mdx-build.mjs`** (added 2026-06-02). **Always verify translations with `node scripts/check-mdx-build.mjs <file>` — it must print `fail=0`.** A file is not "done" until it passes THIS checker, not the lenient one.
+- **Acorn parsing is NOT enough either.** `$\\mathbb{R}$` / `$\\mathcal{N}$` / `$\\bar{C}$` inside a JSX fragment (a `<Porta>` body, `solucao={<>…</>}`, `<li>`, …) PARSES fine but throws `R is not defined` / `N is not defined` at PRERENDER — which is what crashed the en deploy. Verify with **`node scripts/check-mdx-render.mjs <file>`** (it actually renders each lesson; `fail=0` required). Fix by wrapping the brace-math in `<Eq>{`…`}</Eq>` (doubled backslashes). CI runs this render-check before `next build`.
 - Acorn reports **one error at a time** and often without a useful line number ("Could not parse expression with acorn"). Fix, re-run, repeat until `fail=0`.
 
 #### The five defect classes that broke the build (with exact fix)
