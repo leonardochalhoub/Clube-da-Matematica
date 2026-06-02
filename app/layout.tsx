@@ -116,9 +116,9 @@ const langScript = `
     var p = window.location.pathname;
     var base = ${JSON.stringify(process.env.NEXT_PUBLIC_BASE_PATH ?? '')};
     if (base && p.indexOf(base) === 0) p = p.slice(base.length);
-    var m = p.match(/^\\/(pt-BR|en|es|zh|ja|de|fr|it|ru|ko|pl)(?:\\/|$)/);
+    var m = p.match(/^\\/(pt-br|en|es|zh|ja|de|fr|it|ru|ko|pl)(?:\\/|$)/);
     var map = {
-      'pt-BR': 'pt-BR', en: 'en-US', es: 'es-ES', zh: 'zh-CN', ja: 'ja-JP',
+      'pt-br': 'pt-BR', en: 'en-US', es: 'es-ES', zh: 'zh-CN', ja: 'ja-JP',
       de: 'de-DE', fr: 'fr-FR', it: 'it-IT', ru: 'ru-RU', ko: 'ko-KR', pl: 'pl-PL'
     };
     if (m && map[m[1]]) {

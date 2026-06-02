@@ -8,11 +8,12 @@ import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import {
   carregarPorSlug,
+  publicadosApenas,
 } from '@/lib/content/loader'
 import { carregarMdxLocalizado } from '@/lib/content/manifest'
 import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
 import { LessonPageShell } from '@/components/layout/LessonPageShell'
-import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import { LOCALES, localeToUrl, urlToLocale, type Locale } from '@/lib/i18n/locales'
 import { DuasPortas, Porta } from '@/components/math/DuasPortas'
 import { Equation, Eq } from '@/components/math/Equation'
 import { EquacaoCanonica } from '@/components/math/EquacaoCanonica'
@@ -36,14 +37,6 @@ interface Props {
 
 const ROOT = process.cwd()
 
-// With `output: export`, a dynamic route must enumerate ALL its pages via
-// generateStaticParams and serve nothing on-demand. dynamicParams=false makes
-// that explicit (anything not pre-generated 404s) AND makes an EMPTY param
-// list legal — which is exactly the pt-BR matrix job, where this locale route
-// generates zero pages (BUILD_LOCALE=pt-BR → generateStaticParams returns []).
-// Without this, `next build` errors: "is missing generateStaticParams()".
-export const dynamicParams = false
-
 /**
  * Walks a directory recursively, returning relative paths to .mdx files.
  */
@@ -62,32 +55,49 @@ function walkMdx(dir: string, base = dir): string[] {
 }
 
 export function generateStaticParams() {
+  // Emits one route per (locale, lesson). The `locale` param is the URL code
+  // (`pt-br`, `en`, …). ALL locales route here, including pt-BR.
+  //
+  // BUILD_LOCALE / PREVIEW_LOCALES carry URL codes (e.g. "pt-br", "en") and
+  // restrict the build to those locales (per-locale CI matrix). When neither
+  // is set (local dev / single build), every locale present on disk is built.
   const params: Array<{ locale: string; categoria: string; caminho: string[] }> = []
-  const i18nRoot = join(ROOT, 'content', 'i18n')
-  if (!existsSync(i18nRoot)) return params
 
   const buildLocale = process.env.BUILD_LOCALE ?? ''
-  if (buildLocale === 'pt-BR') return params
-
   const previewLocales = buildLocale
     ? new Set([buildLocale])
     : process.env.PREVIEW_LOCALES
       ? new Set(process.env.PREVIEW_LOCALES.split(',').map((s) => s.trim()))
       : null
 
-  for (const speechLang of readdirSync(i18nRoot)) {
-    const dir = join(i18nRoot, speechLang)
-    if (!statSync(dir).isDirectory()) continue
-    const localeEntry = Object.values(LOCALES).find((l) => l.speechLang === speechLang)
-    if (!localeEntry) continue
-    const localeCode = localeEntry.code
-    if (localeCode === 'pt-BR') continue
-    if (previewLocales && !previewLocales.has(localeCode)) continue
-    for (const rel of walkMdx(dir)) {
-      const partes = rel.split('/')
-      const [categoria, ...rest] = partes
+  const wants = (urlCode: string) => !previewLocales || previewLocales.has(urlCode)
+
+  // pt-BR — source lessons live in content/ (not content/i18n). Use the
+  // published-content loader so we only emit publicado:true lessons.
+  if (wants(localeToUrl('pt-BR'))) {
+    for (const { caminho } of publicadosApenas()) {
+      const [categoria, ...rest] = caminho.split('/')
       if (!categoria || rest.length === 0) continue
-      params.push({ locale: localeCode, categoria, caminho: rest })
+      params.push({ locale: localeToUrl('pt-BR'), categoria, caminho: rest })
+    }
+  }
+
+  // Translated locales — walk content/i18n/<speechLang>.
+  const i18nRoot = join(ROOT, 'content', 'i18n')
+  if (existsSync(i18nRoot)) {
+    for (const speechLang of readdirSync(i18nRoot)) {
+      const dir = join(i18nRoot, speechLang)
+      if (!statSync(dir).isDirectory()) continue
+      const localeEntry = Object.values(LOCALES).find((l) => l.speechLang === speechLang)
+      if (!localeEntry || localeEntry.code === 'pt-BR') continue
+      const urlCode = localeEntry.urlCode
+      if (!wants(urlCode)) continue
+      for (const rel of walkMdx(dir)) {
+        const partes = rel.split('/')
+        const [categoria, ...rest] = partes
+        if (!categoria || rest.length === 0) continue
+        params.push({ locale: urlCode, categoria, caminho: rest })
+      }
     }
   }
   return params
@@ -102,25 +112,26 @@ function slugDoCaminho(caminho: string[]): string {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale, categoria, caminho } = await params
+  const { locale: urlCode, categoria, caminho } = await params
+  const locale = urlToLocale(urlCode)
   const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
-  if (!conteudo) return { title: 'Not found' }
+  if (!conteudo || !locale) return { title: 'Not found' }
 
   let titulo = conteudo.meta.titulo
   let descricao = conteudo.meta.descricao
-  if (locale in LOCALES && locale !== 'pt-BR') {
-    const info = LOCALES[locale as Locale]
-    const completo = caminhoCompleto(categoria, caminho)
-    const arquivo = caminhoArquivoMdx(completo, locale as Locale, info.speechLang)
-    if (arquivo) {
-      try {
-        const { data } = await lerMdxSource(arquivo)
-        if (typeof data.titulo === 'string') titulo = data.titulo
-        if (typeof data.descricao === 'string') descricao = data.descricao
-      } catch {
-        /* keep PT-BR meta */
-      }
+  // Read locale-specific frontmatter from disk. pt-BR reads from content/ and
+  // others from content/i18n/<speechLang> — caminhoArquivoMdx handles both.
+  const info = LOCALES[locale]
+  const completo = caminhoCompleto(categoria, caminho)
+  const arquivo = caminhoArquivoMdx(completo, locale, info.speechLang)
+  if (arquivo) {
+    try {
+      const { data } = await lerMdxSource(arquivo)
+      if (typeof data.titulo === 'string') titulo = data.titulo
+      if (typeof data.descricao === 'string') descricao = data.descricao
+    } catch {
+      /* keep PT-BR meta */
     }
   }
   return { title: titulo, description: descricao }
@@ -147,9 +158,10 @@ const MDX_OPTIONS: Parameters<typeof compileMDX>[0]['options'] = {
 }
 
 export default async function ConteudoLocalizadoPage({ params }: Props) {
-  const { locale, categoria, caminho } = await params
-  if (!(locale in LOCALES)) notFound()
-  const localeInfo = LOCALES[locale as Locale]
+  const { locale: urlCode, categoria, caminho } = await params
+  const locale = urlToLocale(urlCode)
+  if (!locale) notFound()
+  const localeInfo = LOCALES[locale]
 
   const completo = caminhoCompleto(categoria, caminho)
   const slug = slugDoCaminho(caminho)

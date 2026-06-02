@@ -17,17 +17,22 @@ concurrency:
 # ─────────────────────────────────────────────────────────────────────────────
 # PER-LOCALE MATRIX BUILD
 #
-# Why: bundling all 11 locales' lesson MDX into ONE webpack process OOMs — the
-# module graph (120 lessons × N locales) does not fit any heap. Instead each
-# locale builds in its OWN runner job via BUILD_LOCALE:
-#   - generate-manifest.ts emits ONLY that locale's modules (matrix mode)
-#   - generateStaticParams() emits ONLY that locale's pages (honors BUILD_LOCALE)
-# Per-job memory stays flat no matter how many locales exist, so this scales to
-# all 11 (and beyond) linearly in CI time. Artifacts merge into one ./out.
+# pt-BR is now a normal URL locale (/pt-br/…) served by the unified
+# app/[locale]/[categoria]/[...caminho] route — there is no root lesson route.
+# Each locale builds in its OWN job via BUILD_LOCALE=<urlcode>:
+#   - generate-manifest.ts emits only that locale's modules (matrix mode)
+#   - generateStaticParams() emits only that locale's /<urlcode>/… pages
+# So PT-BR is built exactly once (the pt-br job), no per-job duplication, and
+# per-job memory stays flat regardless of how many locales exist → scales to 11.
 #
-# The pt-BR job builds the canonical root routes (/aulas/…) + every non-locale
-# page (finance, exams, manifesto, …). Each locale job builds only /<loc>/…
-# Add a locale to the matrix once it is exercise-synced (see generate-manifest).
+# Add a locale to `matrix.url` once it is exercise-synced AND acorn-clean (the
+# generate-manifest gate decides whether its files bundle or fall back to PT-BR).
+# Each job uploads its ./out slice; the `merge` job overlays all slices into one
+# site (slices are disjoint per /<urlcode>/ subtree; shared root pages —
+# homepage, sitemap, robots — are byte-identical across slices).
+#
+# The pt-br job also emits backward-compat redirect stubs at the OLD root URLs
+# (/aulas/… → /pt-br/aulas/…) via scripts/gen-redirect-stubs.mjs.
 # ─────────────────────────────────────────────────────────────────────────────
 
 jobs:
@@ -36,12 +41,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # url = BUILD_LOCALE (URL prefix, what generateStaticParams + manifest
-        # gate on); fsdir = the content/i18n/<dir> long code for cache scoping.
-        # pt-BR has no i18n dir (canonical source) — fsdir '' makes its i18n
-        # hash empty, which is correct.
+        # URL codes. fsdir = content/i18n/<dir> for per-locale cache scoping
+        # ('' for pt-BR, whose source lives in content/).
         include:
-          - { url: pt-BR, fsdir: '' }
+          - { url: pt-br, fsdir: '' }
           - { url: en, fsdir: en-US }
     steps:
       - name: Checkout
@@ -59,12 +62,8 @@ jobs:
       - name: Validate content frontmatter
         run: npm run validate-content
 
-      # Cache key is scoped per-locale so editing one locale's lessons does not
-      # cold-build the others. It hashes: shared source/config + the canonical
-      # PT-BR content (every job builds the root tree) + ONLY this locale's i18n
-      # dir. An en-US lesson edit busts the `en` job's key but not `pt-BR`'s.
-      # restore-keys give a partial hit (webpack reuses unchanged modules) even
-      # when the exact key misses.
+      # Per-locale cache key: shared source + canonical PT-BR content + ONLY this
+      # locale's i18n dir. An en-US edit busts the en job's cache, not pt-br's.
       - name: Restore .next/cache
         uses: actions/cache@v4
         with:
@@ -82,21 +81,25 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
           BUILD_LOCALE: ${{ matrix.url }}
-          # Heap headroom on the 16 GB ubuntu-latest runner. Per-locale build is
-          # far lighter than the old all-in-one, but keep the headroom.
+          # Effective heap comes from package.json's build script (cross-env).
+          # 13 GB headroom on the 16 GB ubuntu-latest runner; per-locale build
+          # is far lighter than the old all-in-one.
           NODE_OPTIONS: --max-old-space-size=13312
           NEXT_TELEMETRY_DISABLED: '1'
         run: npm run build
 
-      # Sanitize the matrix key for use as an artifact name (no slashes).
-      - name: Compute artifact name
-        id: art
-        run: echo "name=site-${{ matrix.url }}" | tr '/' '-' >> "$GITHUB_OUTPUT"
+      # Backward-compat: old root /aulas/… URLs → /pt-br/aulas/… (pt-br job only,
+      # since it owns the root tree in ./out).
+      - name: Emit root→/pt-br redirect stubs
+        if: matrix.url == 'pt-br'
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: node scripts/gen-redirect-stubs.mjs
 
       - name: Upload locale slice
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.art.outputs.name }}
+          name: site-${{ matrix.url }}
           path: ./out
           retention-days: 1
           if-no-files-found: error
@@ -111,10 +114,6 @@ jobs:
           pattern: site-*
           path: slices
 
-      # Merge every slice into one ./out. The pt-BR slice carries the root +
-      # shared pages; each locale slice carries its /<loc>/… subtree. Slices are
-      # disjoint except for shared static assets (_next, images) which are
-      # byte-identical, so a plain overlay copy is safe.
       - name: Merge slices into ./out
         run: |
           set -euo pipefail
@@ -123,8 +122,8 @@ jobs:
             echo "merging $d"
             cp -a "$d". out/
           done
-          echo "=== merged tree summary ==="
-          find out -maxdepth 2 -type d | sort | head -40
+          echo "=== merged tree (depth 2) ==="
+          find out -maxdepth 2 -type d | sort | head -50
           echo "total html files: $(find out -name '*.html' | wc -l)"
 
       - name: Upload Pages artifact

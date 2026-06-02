@@ -27,6 +27,14 @@ export type Locale =
 
 export interface LocaleInfo {
   code: Locale
+  /**
+   * URL path segment for this locale. Equals `code` for every locale EXCEPT
+   * pt-BR, whose internal key is `pt-BR` (BCP-47-ish, used as manifest key)
+   * but whose URL segment is the lowercase `pt-br` — consistent with the other
+   * short codes (en, es, …). Use `localeToUrl()`/`urlToLocale()` at the URL
+   * boundary; never build URLs from `code` directly.
+   */
+  urlCode: string
   /** Nome no próprio idioma. */
   nome: string
   /** Bandeira oficial em emoji unicode. */
@@ -38,18 +46,38 @@ export interface LocaleInfo {
 }
 
 export const LOCALES: Record<Locale, LocaleInfo> = {
-  'pt-BR': { code: 'pt-BR', nome: 'Português (Brasil)', bandeira: '🇧🇷', speechLang: 'pt-BR', dir: 'ltr' },
-  en:      { code: 'en',    nome: 'English',             bandeira: '🇺🇸', speechLang: 'en-US', dir: 'ltr' },
-  es:      { code: 'es',    nome: 'Español',             bandeira: '🇪🇸', speechLang: 'es-ES', dir: 'ltr' },
-  zh:      { code: 'zh',    nome: '中文',                  bandeira: '🇨🇳', speechLang: 'zh-CN', dir: 'ltr' },
-  ja:      { code: 'ja',    nome: '日本語',                 bandeira: '🇯🇵', speechLang: 'ja-JP', dir: 'ltr' },
-  de:      { code: 'de',    nome: 'Deutsch',             bandeira: '🇩🇪', speechLang: 'de-DE', dir: 'ltr' },
-  fr:      { code: 'fr',    nome: 'Français',            bandeira: '🇫🇷', speechLang: 'fr-FR', dir: 'ltr' },
-  it:      { code: 'it',    nome: 'Italiano',            bandeira: '🇮🇹', speechLang: 'it-IT', dir: 'ltr' },
-  ru:      { code: 'ru',    nome: 'Русский',             bandeira: '🇷🇺', speechLang: 'ru-RU', dir: 'ltr' },
-  ko:      { code: 'ko',    nome: '한국어',                 bandeira: '🇰🇷', speechLang: 'ko-KR', dir: 'ltr' },
-  pl:      { code: 'pl',    nome: 'Polski',              bandeira: '🇵🇱', speechLang: 'pl-PL', dir: 'ltr' },
+  'pt-BR': { code: 'pt-BR', urlCode: 'pt-br', nome: 'Português (Brasil)', bandeira: '🇧🇷', speechLang: 'pt-BR', dir: 'ltr' },
+  en:      { code: 'en',    urlCode: 'en',    nome: 'English',             bandeira: '🇺🇸', speechLang: 'en-US', dir: 'ltr' },
+  es:      { code: 'es',    urlCode: 'es',    nome: 'Español',             bandeira: '🇪🇸', speechLang: 'es-ES', dir: 'ltr' },
+  zh:      { code: 'zh',    urlCode: 'zh',    nome: '中文',                  bandeira: '🇨🇳', speechLang: 'zh-CN', dir: 'ltr' },
+  ja:      { code: 'ja',    urlCode: 'ja',    nome: '日本語',                 bandeira: '🇯🇵', speechLang: 'ja-JP', dir: 'ltr' },
+  de:      { code: 'de',    urlCode: 'de',    nome: 'Deutsch',             bandeira: '🇩🇪', speechLang: 'de-DE', dir: 'ltr' },
+  fr:      { code: 'fr',    urlCode: 'fr',    nome: 'Français',            bandeira: '🇫🇷', speechLang: 'fr-FR', dir: 'ltr' },
+  it:      { code: 'it',    urlCode: 'it',    nome: 'Italiano',            bandeira: '🇮🇹', speechLang: 'it-IT', dir: 'ltr' },
+  ru:      { code: 'ru',    urlCode: 'ru',    nome: 'Русский',             bandeira: '🇷🇺', speechLang: 'ru-RU', dir: 'ltr' },
+  ko:      { code: 'ko',    urlCode: 'ko',    nome: '한국어',                 bandeira: '🇰🇷', speechLang: 'ko-KR', dir: 'ltr' },
+  pl:      { code: 'pl',    urlCode: 'pl',    nome: 'Polski',              bandeira: '🇵🇱', speechLang: 'pl-PL', dir: 'ltr' },
 }
+
+/** URL segment for a locale (`pt-BR` → `pt-br`, `en` → `en`). */
+export function localeToUrl(locale: Locale): string {
+  return LOCALES[locale].urlCode
+}
+
+/** Build once: reverse map urlCode → Locale. */
+const URL_TO_LOCALE: Record<string, Locale> = Object.fromEntries(
+  (Object.keys(LOCALES) as Locale[]).map((l) => [LOCALES[l].urlCode, l]),
+)
+
+/** Resolve a URL segment back to a Locale (`pt-br` → `pt-BR`). null if unknown. */
+export function urlToLocale(segment: string): Locale | null {
+  return URL_TO_LOCALE[segment] ?? null
+}
+
+/** All URL segments (for stripping/detecting locale prefixes). */
+export const LOCALE_URL_CODES: string[] = (Object.keys(LOCALES) as Locale[]).map(
+  (l) => LOCALES[l].urlCode,
+)
 
 /**
  * Total de idiomas suportados — derivado de LOCALES pra evitar

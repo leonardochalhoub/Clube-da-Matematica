@@ -1,71 +1,92 @@
 import { ImageResponse } from 'next/og'
 import { carregarPorSlug, publicadosApenas } from '@/lib/content/loader'
 import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
-import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import { LOCALES, localeToUrl, urlToLocale, type Locale } from '@/lib/i18n/locales'
 import { SITE_NAME_BY_LOCALE } from '@/lib/seo/site'
+import { existsSync, readdirSync, statSync } from 'node:fs'
+import { join, relative } from 'node:path'
 
 export const alt = 'Clube da Matemática — lesson card'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-const LOCALE_CODES = new Set(
-  Object.keys(LOCALES).filter((c) => c !== 'pt-BR'),
-)
+const ROOT = process.cwd()
 
 interface Params {
+  locale: string
   categoria: string
   caminho: string[]
 }
 
-/**
- * Mirror `generateStaticParams` from the route so OG image is generated for
- * every lesson × locale combination that the page renders.
- */
 export function generateImageMetadata({ params: _params }: { params: Params }) {
   return [{ id: 'card', alt, size, contentType }]
 }
 
-/**
- * Mirror page's generateStaticParams. Without this, Next.js doesn't know
- * which lesson/locale combinations need PNG generation. With output: 'export',
- * each generated image becomes a static file alongside the route's index.html.
- */
-export async function generateStaticParams(): Promise<Params[]> {
-  const conteudos = publicadosApenas()
-  const buildLocale = process.env.BUILD_LOCALE ?? ''
-
-  const ptBR: Params[] = conteudos.map(({ caminho }) => {
-    const [categoria, ...rest] = caminho.split('/')
-    return { categoria: categoria!, caminho: rest }
-  })
-  if (buildLocale === 'pt-BR') return ptBR
-
-  const localePaths: Params[] = []
-  const targetLocales = buildLocale ? [buildLocale] : Array.from(LOCALE_CODES)
-  for (const localeCode of targetLocales) {
-    if (localeCode === 'pt-BR') continue
-    for (const c of conteudos) {
-      const partes = c.caminho.split('/')
-      localePaths.push({ categoria: localeCode, caminho: partes })
-    }
+/** Deterministic non-negative 32-bit hash of a string (FNV-1a). */
+function hashSeed(s: string): number {
+  let h = 0x811c9dc5
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
   }
-  if (buildLocale) return localePaths
-  return [...ptBR, ...localePaths]
+  return h >>> 0
 }
 
-function parseLocalePrefix(segment: string, rest: string[]) {
-  if (!LOCALE_CODES.has(segment)) return null
-  const [actualCategoria, ...actualCaminho] = rest
-  if (!actualCategoria) return null
-  return { locale: segment, categoria: actualCategoria, caminho: actualCaminho }
+function walkMdx(dir: string, base = dir): string[] {
+  if (!existsSync(dir)) return []
+  const out: string[] = []
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry)
+    if (statSync(full).isDirectory()) out.push(...walkMdx(full, base))
+    else if (entry.endsWith('.mdx')) out.push(relative(base, full).replace(/\.mdx$/, ''))
+  }
+  return out
+}
+
+/**
+ * Mirror the page's generateStaticParams (same locale partitioning) so an OG
+ * image PNG is emitted for every lesson × locale the page renders. The
+ * `locale` param is the URL code (pt-br, en, …).
+ */
+export async function generateStaticParams(): Promise<Params[]> {
+  const params: Params[] = []
+  const buildLocale = process.env.BUILD_LOCALE ?? ''
+  const previewLocales = buildLocale
+    ? new Set([buildLocale])
+    : process.env.PREVIEW_LOCALES
+      ? new Set(process.env.PREVIEW_LOCALES.split(',').map((s) => s.trim()))
+      : null
+  const wants = (urlCode: string) => !previewLocales || previewLocales.has(urlCode)
+
+  if (wants(localeToUrl('pt-BR'))) {
+    for (const { caminho } of publicadosApenas()) {
+      const [categoria, ...rest] = caminho.split('/')
+      if (!categoria || rest.length === 0) continue
+      params.push({ locale: localeToUrl('pt-BR'), categoria, caminho: rest })
+    }
+  }
+
+  const i18nRoot = join(ROOT, 'content', 'i18n')
+  if (existsSync(i18nRoot)) {
+    for (const speechLang of readdirSync(i18nRoot)) {
+      const dir = join(i18nRoot, speechLang)
+      if (!statSync(dir).isDirectory()) continue
+      const entry = Object.values(LOCALES).find((l) => l.speechLang === speechLang)
+      if (!entry || entry.code === 'pt-BR') continue
+      if (!wants(entry.urlCode)) continue
+      for (const rel of walkMdx(dir)) {
+        const [categoria, ...rest] = rel.split('/')
+        if (!categoria || rest.length === 0) continue
+        params.push({ locale: entry.urlCode, categoria, caminho: rest })
+      }
+    }
+  }
+  return params
 }
 
 export default async function Image({ params }: { params: Promise<Params> }) {
-  const { categoria: rawCategoria, caminho: rawCaminho } = await params
-  const localeMatch = parseLocalePrefix(rawCategoria, rawCaminho)
-  const categoria = localeMatch ? localeMatch.categoria : rawCategoria
-  const caminho = localeMatch ? localeMatch.caminho : rawCaminho
-  const localeCode = (localeMatch?.locale ?? 'pt-BR') as Locale
+  const { locale: urlCode, categoria, caminho } = await params
+  const localeCode = urlToLocale(urlCode) ?? 'pt-BR'
   const slug = caminho[caminho.length - 1] ?? ''
 
   const conteudo = carregarPorSlug(slug)
@@ -74,26 +95,23 @@ export default async function Image({ params }: { params: Promise<Params> }) {
   }
 
   let titulo = conteudo.meta.titulo
-  if (localeCode !== 'pt-BR') {
-    const info = LOCALES[localeCode]
-    const arquivo = caminhoArquivoMdx(
-      `${categoria}/${caminho.join('/')}`,
-      localeCode,
-      info.speechLang,
-    )
-    if (arquivo) {
-      try {
-        const { data } = await lerMdxSource(arquivo)
-        if (typeof data.titulo === 'string') titulo = data.titulo
-      } catch {
-        /* keep PT-BR */
-      }
+  const info = LOCALES[localeCode]
+  const arquivo = caminhoArquivoMdx(`${categoria}/${caminho.join('/')}`, localeCode, info.speechLang)
+  if (arquivo) {
+    try {
+      const { data } = await lerMdxSource(arquivo)
+      if (typeof data.titulo === 'string') titulo = data.titulo
+    } catch {
+      /* keep PT-BR */
     }
   }
 
   const subtitle = lessonSubtitle(conteudo.meta.subcategoria ?? '', localeCode)
   const siteName = SITE_NAME_BY_LOCALE[localeCode]
   const flag = LOCALES[localeCode].bandeira
+  // Deterministic "exercise count" badge seeded from the slug — stable across
+  // builds (output: export must be reproducible; Math.random() is banned).
+  const exBadge = 30 + (hashSeed(slug) % 51) // 30–80
 
   return new ImageResponse(
     (
@@ -110,7 +128,6 @@ export default async function Image({ params }: { params: Promise<Params> }) {
           fontFamily: 'system-ui, -apple-system, sans-serif',
         }}
       >
-        {/* Top row: site name + flag */}
         <div
           style={{
             display: 'flex',
@@ -127,7 +144,6 @@ export default async function Image({ params }: { params: Promise<Params> }) {
           <span style={{ fontSize: 48 }}>{flag}</span>
         </div>
 
-        {/* Title block */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {subtitle && (
             <div
@@ -154,7 +170,6 @@ export default async function Image({ params }: { params: Promise<Params> }) {
           </div>
         </div>
 
-        {/* Bottom row: tagline */}
         <div
           style={{
             display: 'flex',
@@ -167,9 +182,7 @@ export default async function Image({ params }: { params: Promise<Params> }) {
           }}
         >
           <span>{taglineFor(localeCode)}</span>
-          <span style={{ fontSize: 20 }}>
-            {Math.floor(Math.random() * 90 + 10)} · 7 portas
-          </span>
+          <span style={{ fontSize: 20 }}>{exBadge} · 7 portas</span>
         </div>
       </div>
     ),
@@ -199,7 +212,6 @@ function DefaultCard({ locale }: { locale: Locale }) {
 }
 
 function lessonSubtitle(subcategoria: string, locale: Locale): string {
-  // subcategoria pattern: "ano-1-trim-1"
   const m = subcategoria.match(/ano-(\d+)-trim-(\d+)/)
   if (!m) return ''
   const ano = m[1]

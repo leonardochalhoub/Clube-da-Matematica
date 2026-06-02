@@ -3,13 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useLocale } from './LocaleProvider'
-import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import { LOCALES, LOCALE_URL_CODES, localeToUrl, type Locale } from '@/lib/i18n/locales'
 import { Flag } from './Flag'
 
-/** Lista dos códigos curtos de locale não-PT-BR (rotas /<locale>/...). */
-const LOCALE_PREFIXES = Object.keys(LOCALES).filter((c) => c !== 'pt-BR')
+/** URL segments of ALL locales (pt-br, en, es, …) — every lesson route is prefixed. */
+const LOCALE_PREFIXES = LOCALE_URL_CODES
 
-/** Remove o prefixo de locale do path, devolvendo o path "canônico" PT-BR. */
+/** Remove o prefixo de locale do path, devolvendo o path sem prefixo. */
 function pathSemLocale(path: string): string {
   for (const code of LOCALE_PREFIXES) {
     if (path === `/${code}` || path.startsWith(`/${code}/`)) {
@@ -19,11 +19,11 @@ function pathSemLocale(path: string): string {
   return path
 }
 
-/** Constrói o path para o novo locale. PT-BR não usa prefixo. */
+/** Constrói o path para o novo locale. Todos os locais usam prefixo /<urlCode>/. */
 function pathParaLocale(currentPath: string, novoLocale: Locale): string {
-  const canonical = pathSemLocale(currentPath)
-  if (novoLocale === 'pt-BR') return canonical
-  return canonical === '/' ? `/${novoLocale}` : `/${novoLocale}${canonical}`
+  const semPrefixo = pathSemLocale(currentPath)
+  const url = localeToUrl(novoLocale)
+  return semPrefixo === '/' ? `/${url}` : `/${url}${semPrefixo}`
 }
 
 /**
@@ -99,17 +99,18 @@ export function LocaleSwitcher() {
                 onClick={() => {
                   setLocale(info.code as Locale)
                   setOpen(false)
-                  // Navega pra rota localizada se a página suporta
-                  // (apenas lições; outras pages traduzem via useLocale).
+                  // Navega pra rota localizada se a página é uma lição
+                  // (toda lição agora é /<urlCode>/aulas|financas-quantitativas|...;
+                  // outras pages traduzem via useLocale, sem navegação).
                   const isLessonRoute =
-                    pathname &&
-                    (pathname.startsWith('/aulas') ||
-                      pathname.startsWith('/financas-quantitativas') ||
-                      LOCALE_PREFIXES.some(
-                        (c) =>
-                          pathname.startsWith(`/${c}/aulas`) ||
-                          pathname.startsWith(`/${c}/financas-quantitativas`),
-                      ))
+                    pathname != null &&
+                    LOCALE_PREFIXES.some(
+                      (c) =>
+                        pathname.startsWith(`/${c}/aulas`) ||
+                        pathname.startsWith(`/${c}/financas-quantitativas`) ||
+                        pathname.startsWith(`/${c}/metodos-numericos`) ||
+                        pathname.startsWith(`/${c}/calculo-1`),
+                    )
                   if (isLessonRoute && pathname) {
                     router.push(pathParaLocale(pathname, info.code as Locale))
                   }

@@ -26,14 +26,22 @@ const CONTENT_DIR = path.join(ROOT, 'content')
 const I18N_DIR = path.join(CONTENT_DIR, 'i18n')
 const OUT = path.join(ROOT, 'src/lib/content/manifest.generated.ts')
 
-// Maps URL prefix locale codes (used as BUILD_LOCALE values) to
-// filesystem directory names under content/i18n/. Filesystem uses
-// long codes (en-US); URL uses short codes (en). 'pt-BR' is special
-// — it has no URL prefix and reads from content/ directly.
-const LOCALE_TO_FS_DIR: Record<string, string> = {
+// BUILD_LOCALE is a URL code (pt-br, en, es, …). Maps:
+//   urlCode -> filesystem dir under content/i18n/ (long code: en-US, …)
+//   urlCode -> manifest KEY consumed by carregarMdxLocalizado (manifest.ts):
+//              pt-BR uses key 'pt-BR' and reads from content/ directly;
+//              others use their speechLang (en-US, …) as both dir AND key.
+// pt-br is a normal URL locale now (served at /pt-br/), but its SOURCE files
+// live in content/ (not content/i18n/pt-BR) and its manifest key stays 'pt-BR'.
+const URL_TO_FS_DIR: Record<string, string> = {
   'en': 'en-US', 'es': 'es-ES', 'zh': 'zh-CN', 'ja': 'ja-JP',
   'de': 'de-DE', 'fr': 'fr-FR', 'it': 'it-IT', 'ru': 'ru-RU',
   'ko': 'ko-KR', 'pl': 'pl-PL',
+}
+// Manifest key per URL code (what carregarMdxLocalizado looks up).
+const URL_TO_MANIFEST_KEY: Record<string, string> = {
+  'pt-br': 'pt-BR', 'en': 'en-US', 'es': 'es-ES', 'zh': 'zh-CN', 'ja': 'ja-JP',
+  'de': 'de-DE', 'fr': 'fr-FR', 'it': 'it-IT', 'ru': 'ru-RU', 'ko': 'ko-KR', 'pl': 'pl-PL',
 }
 
 async function* walkMdx(dir: string, prefix = ''): AsyncGenerator<string> {
@@ -183,27 +191,25 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   for (const p of sortedPaths) {
     out += `  '${p}': {\n`
     if (isMatrixBuild) {
-      // Matrix mode: emit a single entry for the target locale.
-      // For PT-BR, use the canonical source. For other locales, use the
-      // translation file if it exists, else fall back to the PT-BR file
-      // (the locale URL still gets a route — just with PT-BR content).
-      if (buildLocale === 'pt-BR') {
-        out += `    'pt-BR': () => import('@/../content/${p}.mdx'),\n`
+      // Matrix mode: BUILD_LOCALE is a URL code (pt-br, en, …). Emit a single
+      // entry keyed by the MANIFEST KEY that carregarMdxLocalizado looks up
+      // (pt-BR uses 'pt-BR'; others use their speechLang, e.g. 'en-US').
+      const manifestKey = URL_TO_MANIFEST_KEY[buildLocale] ?? buildLocale
+      if (buildLocale === 'pt-br') {
+        // pt-BR source lives in content/ (not content/i18n).
+        out += `    '${manifestKey}': () => import('@/../content/${p}.mdx'),\n`
       } else {
-        // BUILD_LOCALE is the URL prefix (en, de, etc.). The filesystem
-        // directory uses the long code (en-US, de-DE) — translate.
-        const fsDir = LOCALE_TO_FS_DIR[buildLocale]
-        const localeSet = fsDir ? localeMap[fsDir] : undefined
-        const fileExists = !!localeSet?.has(p)
-        const allowlisted = includeTranslationsFor.has(p)
-        if (fileExists && allowlisted && fsDir) {
-          // Translation is aligned with current canonical PT-BR.
-          out += `    '${buildLocale}': () => import('@/../content/i18n/${fsDir}/${p}.mdx'),\n`
+        const fsDir = URL_TO_FS_DIR[buildLocale]
+        // Bundle only if THIS locale's file is exercise-synced + compiles
+        // (per-locale gate). syncedByLocale is computed for MAINTAINED_LOCALES;
+        // a locale not yet maintained has no synced set → always falls back.
+        const synced = !!(fsDir && syncedByLocale[fsDir]?.has(p))
+        if (synced && fsDir) {
+          out += `    '${manifestKey}': () => import('@/../content/i18n/${fsDir}/${p}.mdx'),\n`
         } else {
-          // Either no translation file, OR file exists but is stale (lesson
-          // was rewritten and translation hasn't been regenerated yet).
-          // Route is served from PT-BR module under the locale URL.
-          out += `    '${buildLocale}': () => import('@/../content/${p}.mdx'),\n`
+          // No translation OR stale/broken → serve PT-BR content under the
+          // locale URL (the route still exists; content falls back).
+          out += `    '${manifestKey}': () => import('@/../content/${p}.mdx'),\n`
         }
       }
     } else {
