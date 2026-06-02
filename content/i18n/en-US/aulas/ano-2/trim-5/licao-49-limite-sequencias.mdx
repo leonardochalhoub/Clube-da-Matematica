@@ -1,388 +1,1261 @@
 ---
-titulo: "Lesson 49 — Limit of Sequences (Formalized)"
+titulo: "Lesson 49 — Limit of sequences (formalized)"
 slug: "licao-49-limite-sequencias"
 categoria: "aulas"
 subcategoria: "ano-2-trim-5"
-descricao: "Rigorous definition of sequence limit. Convergence, divergence. Bolzano-Weierstrass, Cauchy, monotone bounded."
+descricao: "Rigorous epsilon-N definition of convergence. Fundamental theorems: uniqueness, algebra of limits, squeeze, monotone bounded, Bolzano-Weierstrass. Applications in iterative algorithms and finance."
 ordem: 49
 publicado: true
 tags: ["limite", "sequência", "convergência", "épsilon-N", "ano-2", "trim-5"]
 prerrequisitos: ["licao-19-limite-intuitivo", "licao-48-intro-series"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-usadoEm: ["2.º ano do programa (17 anos)", "Equiv. Math III japonês cap. 6", "Equiv. Klasse 12 LK Análise alemã", "Equiv. H2 Math singapurense — Sequences & Series"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["2.º year of the program (17 years)", "Equiv. Math III Japanese ch. 6", "Equiv. Klasse 12 LK Analysis German", "Equiv. H2 Math Singaporean — Sequences & Series"]
 versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="\lim_{n \to \infty} a_n = L \iff \forall \varepsilon > 0, \exists N \in \mathbb{N} : n \geq N \Rightarrow |a_n - L| < \varepsilon"
-  legenda={<><strong>Rigorous definition</strong> of a sequence limit. Discrete version of the ε-δ definition. Basis for series, integrals, and measure theory.</>}
-  audioTexto="Sequence limit. For every positive epsilon, there exists a natural number N such that if n is greater than or equal to N, then the absolute value of a sub n minus L is less than epsilon. Discrete special case of the epsilon-delta definition."
+  formula="\lim_{n \to \infty} a_n = L \iff \forall\,\varepsilon > 0,\; \exists N \in \mathbb{N} : n > N \Rightarrow |a_n - L| < \varepsilon"
+  legenda={<>The sequence <Eq>{`(a_n)`}</Eq> <strong>converges to</strong> <Eq>{`L`}</Eq> if, for any tolerance <Eq>{`\\varepsilon > 0`}</Eq> chosen, all terms beyond index <Eq>{`N`}</Eq> are already within <Eq>{`\\varepsilon`}</Eq> distance of <Eq>{`L`}</Eq>. This is the discrete version of the <Eq>{`\\varepsilon`}</Eq>-<Eq>{`\\delta`}</Eq> definition — the "N" replaces "delta" because the domain is now <Eq>{`\\mathbb{N}`}</Eq>, not <Eq>{`\\mathbb{R}`}</Eq>.</>}
+  audioTexto="The limit of a sub n, as n tends to infinity, equals L, if and only if for every epsilon positive there exists N natural such that, if n is greater than N, then absolute value of a sub n minus L is less than epsilon. Epsilon-N definition of sequence convergence."
 />
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books covering this lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://www.jirka.org/ra/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Lebl — Basic Analysis: Introduction to Real Analysis
+      </a>
+      <span className="text-clube-mist"> · §2.1–2.3 Sequences · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Rigorous epsilon-N definition, uniqueness, monotone bounded, Bolzano-Weierstrass and completeness of ℝ via Cauchy. Primary reference for formal and 25-year-old doors.</em>
+    </li>
+    <li>
+      <a href="https://activecalculus.org/single/sec-8-3-geometric.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus
+      </a>
+      <span className="text-clube-mist"> · §8.1 Sequences · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Activity-based approach — recursive sequences, Fibonacci ratio, Heron's algorithm. Basis for all modeling and recursion exercises.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/calculus-volume-2/pages/5-1-sequences" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 2
+      </a>
+      <span className="text-clube-mist"> · §5.1 Sequences · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Notable limits, growth hierarchy, examples with $(1+1/n)^n \to e$ and drill exercises with complete solutions.</em>
+    </li>
+  </ul>
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="Sequences, convergence, and theorems">
+<Porta nivel="formal" titulo="Rigorous definition and fundamental theorems">
 
-<Definicao titulo="Sequence limit (ε-N)">
-$(a_n) \to L$ if: $\forall \eps > 0, \exists N \in \mathbb{N} : n \geq N \Rightarrow |a_n - L| < \eps$.
+### Epsilon-N definition
+
+<Definicao titulo="Convergence of a sequence">
+
+Let <Eq>{`(a_n)_{n \\geq 1}`}</Eq> be a sequence of real numbers. We say that <Eq>{`(a_n)`}</Eq> **converges to** <Eq>{`L \\in \\mathbb{R}`}</Eq> and write <Eq>{`\\lim_{n \\to \\infty} a_n = L`}</Eq> (or <Eq>{`a_n \\to L`}</Eq>) if:
+
+$$\forall\, \varepsilon > 0,\; \exists N \in \mathbb{N} : n > N \Rightarrow \lvert a_n - L \rvert < \varepsilon.$$
+
+When no such $L$ exists, the sequence is **divergent**.
+
 </Definicao>
 
-### Key theorems
-
-| Theorem | Statement |
-|---|---|
-| **Uniqueness** | The limit, if it exists, is unique |
-| **Arithmetic** | $\lim(a_n \pm b_n) = \lim a_n \pm \lim b_n$, etc. |
-| **Squeeze** | $a_n \leq b_n \leq c_n$, $\lim a_n = \lim c_n = L \Rightarrow \lim b_n = L$ |
-| **Monotone bounded** | Increasing bounded above converges |
-| **Bolzano-Weierstrass** | A bounded sequence has a convergent subsequence |
-| **Cauchy** | $a_n$ converges $\iff$ it is Cauchy |
-
-### Cauchy
+> "We say the sequence $(x_n)$ converges to a number $L$ if for every $\varepsilon > 0$, there exists an $M \in \mathbb{N}$ such that $|x_n - L| < \varepsilon$ for all $n \geq M$." — [Lebl, Basic Analysis Vol. I, §2.1](https://www.jirka.org/ra/)
 
 <Definicao titulo="Cauchy sequence">
-$(a_n)$ is **Cauchy** if $\forall \eps > 0, \exists N : m, n \geq N \Rightarrow |a_m - a_n| < \eps$.
+
+$(a_n)$ is **Cauchy** if $\forall\, \varepsilon > 0,\; \exists N \in \mathbb{N} : m, n > N \Rightarrow |a_m - a_n| < \varepsilon$.
+
 </Definicao>
 
-**In $\mathbb{R}$**: Cauchy $\iff$ convergent (completeness).
-**In $\mathbb{Q}$**: not every Cauchy converges ($a_n$ approximating $\sqrt 2$).
+> "A sequence $(x_n)$ is a Cauchy sequence if for every $\varepsilon > 0$ there exists an $M \in \mathbb{N}$ such that for all $n, k \geq M$ we have $|x_n - x_k| < \varepsilon$." — [Lebl, Basic Analysis Vol. I, §2.4](https://www.jirka.org/ra/)
 
-### Monotonicity + boundedness
+### Geometric interpretation
 
-- $(a_n)$ increasing and bounded above $\Rightarrow$ converges to $\sup a_n$.
-- $(a_n)$ decreasing and bounded below $\Rightarrow$ converges to $\inf a_n$.
+<figure className="not-prose my-5 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 480 160" className="w-full">
+<defs>
+  <marker id="arr49" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<g>
+  <line x1="40" y1="80" x2="460" y2="80" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr49)"/>
+  <line x1="60" y1="20" x2="60" y2="140" stroke="currentColor" strokeOpacity="0.2" strokeWidth="1"/>
+  <text x="455" y="75" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">n</text>
+  <text x="62" y="15" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">a_n</text>
+  <rect x="60" y="55" width="400" height="50" fill="rgb(232 199 122 / 0.15)" stroke="rgb(232 199 122)" strokeWidth="1" strokeDasharray="4 3"/>
+  <text x="465" y="58" fontSize="9" fill="rgb(232 199 122)" fillOpacity="0.8">L+ε</text>
+  <text x="465" y="112" fontSize="9" fill="rgb(232 199 122)" fillOpacity="0.8">L-ε</text>
+  <line x1="60" y1="80" x2="460" y2="80" stroke="rgb(26 77 92)" strokeWidth="1.5" strokeDasharray="6 3"/>
+  <text x="10" y="83" fontSize="10" fontFamily="serif" fontStyle="italic" fill="rgb(26 77 92)">L</text>
+  <circle cx="90" cy="30" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="120" cy="115" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="155" cy="45" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="195" cy="100" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="240" cy="65" r="3" fill="rgb(199 107 63)"/>
+  <circle cx="290" cy="92" r="3" fill="rgb(61 122 95)"/>
+  <circle cx="340" cy="74" r="3" fill="rgb(61 122 95)"/>
+  <circle cx="390" cy="83" r="3" fill="rgb(61 122 95)"/>
+  <circle cx="435" cy="79" r="3" fill="rgb(61 122 95)"/>
+  <line x1="260" y1="20" x2="260" y2="140" stroke="rgb(201 163 95)" strokeWidth="1.5" strokeDasharray="3 2"/>
+  <text x="263" y="150" fontSize="9" fill="rgb(201 163 95)">N</text>
+  <text x="130" y="150" fontSize="9" fill="rgb(199 107 63)" fillOpacity="0.8">terms outside the band</text>
+  <text x="300" y="150" fontSize="9" fill="rgb(61 122 95)" fillOpacity="0.8">all inside</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+The horizontal band $(L - \varepsilon, L + \varepsilon)$ captures all terms with $n > N$. For any band you choose (no matter how narrow), there exists an $N$ that works.
+</figcaption>
+</figure>
 
-### Subsequences
+### Fundamental theorems
 
-$(a_{n_k})$ is a subsequence of $(a_n)$ if $n_1 < n_2 < \ldots$.
-$\lim a_n = L \Rightarrow \lim a_{n_k} = L$ for every subsequence.
+<Teorema titulo="Uniqueness of limit">
 
-### Divergent sequences
+If $(a_n)$ converges, the limit is unique.
 
-- $a_n = (-1)^n$: oscillates between $-1$ and $1$. Subsequences converge (to $\pm 1$), but $a_n$ does not.
-- $a_n = n$: grows without bound ($\to +\infty$).
-- $a_n = n \sin(n)$: irregular behavior, no limit.
+**Proof.** Suppose $a_n \to L$ and $a_n \to M$ with $L \neq M$. Take $\varepsilon = |L - M|/2 > 0$. Then there exist $N_1, N_2$ such that $n > N_1 \Rightarrow |a_n - L| < \varepsilon$ and $n > N_2 \Rightarrow |a_n - M| < \varepsilon$. For $n > \max(N_1, N_2)$:
 
-### Recursive sequences
+$$|L - M| \leq |a_n - L| + |a_n - M| < 2\varepsilon = |L - M|,$$
 
-$a_{n+1} = f(a_n)$, $a_0$ given. The limit, if it exists, is a **fixed point** of $f$: $L = f(L)$.
+contradiction. Thus $L = M$. $\blacksquare$
+
+</Teorema>
+
+<Teorema titulo="Monotone bounded theorem">
+
+Every increasing sequence bounded above converges. Every decreasing sequence bounded below converges.
+
+**Proof (increasing case).** Let $L = \sup\{a_n : n \geq 1\}$ (exists by completeness of $\mathbb{R}$). Given $\varepsilon > 0$, $L - \varepsilon$ is not an upper bound, so there exists $N$ with $a_N > L - \varepsilon$. For $n > N$: $a_n \geq a_N > L - \varepsilon$ and $a_n \leq L$, so $|a_n - L| < \varepsilon$. $\blacksquare$
+
+</Teorema>
+
+| Theorem | Brief statement |
+|---|---|
+| **Algebra of limits** | $\lim(a_n \pm b_n) = \lim a_n \pm \lim b_n$; analogous for product and quotient (denominator $\neq 0$) |
+| **Squeeze theorem** | $a_n \leq b_n \leq c_n$ and $\lim a_n = \lim c_n = L$ implies $\lim b_n = L$ |
+| **Bolzano-Weierstrass** | Every bounded sequence has a convergent subsequence |
+| **Cauchy $\iff$ convergent** | In $\mathbb{R}$: every Cauchy sequence converges (equivalence defining completeness) |
+
+### Notable limits
+
+<Equation explicacao="Fundamental sequences whose limits should be memorized." latex="\lim_{n\to\infty}\frac{1}{n^p} = 0\;(p>0),\quad \lim_{n\to\infty}r^n = 0\;(|r|<1),\quad \lim_{n\to\infty}n^{1/n} = 1,\quad \lim_{n\to\infty}\left(1+\frac{1}{n}\right)^n = e." />
+
+### Growth hierarchy
+
+<Equation explicacao="Any function on the left grows much more slowly than any function on the right." latex="\ln n \ll n^a \ll b^n \ll n! \ll n^n \quad (a > 0,\; b > 1)." />
+
+<Insight>
+
+**Recursive sequences.** If $a_{n+1} = f(a_n)$ and the sequence converges to $L$, then $L = f(L)$ (fixed point of $f$). The existence of convergence must be established separately — via monotone bounded or contraction — before solving the fixed-point equation. Solving $L = f(L)$ without proving convergence is a fallacy.
+
+</Insight>
 
 </Porta>
 
 <Porta nivel="5" titulo="For a 5-year-old">
 
-Imagine a line of numbers: $1, 1/2, 1/3, 1/4, \ldots$ — they keep **getting smaller** and approaching **zero**.
+Imagine you are walking toward a wall. Each step is half the length of the previous one.
 
-The limit is the "**where it's going**" of the line. If the line goes somewhere, that place is the limit.
+First step: 1 meter. Second: half a meter. Third: a quarter meter. And so on.
 
-Some lines don't go anywhere (they keep jumping), and then there's no limit.
+You will never crash into the wall all at once, but you will get **closer and closer**. The place you are getting closer to — the wall — is the **limit** of the sequence.
+
+Some numbers keep getting closer to a point. That point is the limit. Others keep bouncing around without reaching anywhere — and then they have no limit.
 
 </Porta>
 
 <Porta nivel="10" titulo="For a 10-year-old">
 
-**Sequence** = list of numbers: $a_1, a_2, a_3, \ldots$
+A **sequence** is a list of numbers in order: $a_1, a_2, a_3, \ldots$
 
-**Limit** $L$: the number the sequence **arrives at infinity**. For example:
-- $1, 1/2, 1/3, \ldots$ → goes to **zero**.
-- $1, 4, 9, 16, \ldots$ → goes to **$\infty$** (grows).
-- $1, -1, 1, -1, \ldots$ → doesn't go anywhere (alternating).
+The **limit** is the number the list is "heading toward" when the indices get huge.
 
-**Rigorous definition**: $a_n \to L$ if you can stay **as close to $L$ as you want**, just go far enough in the sequence. For any "bubble" $\eps$ around $L$, there's an $N$ such that **all** terms after $a_N$ lie in the bubble.
+Examples:
+- $1,\; \tfrac{1}{2},\; \tfrac{1}{3},\; \tfrac{1}{4},\ldots$ — keeps getting smaller, heading toward zero. Limit = **0**.
+- $1,\; \tfrac{3}{2},\; \tfrac{5}{3},\; \tfrac{7}{4},\ldots$ — approaches 2. Limit = **2**.
+- $1,\; -1,\; 1,\; -1,\ldots$ — keeps oscillating, never arrives anywhere. **No limit**.
 
-**Useful trick**: if $a_n$ is always **growing** and has a **ceiling**, it **converges**! (Monotone bounded.) You don't even need to know the limit — just that it exists.
+The precise definition says: the sequence has limit $L$ if you can make the terms **as close to $L$ as you want**, provided you wait long enough in the list.
+
+**Practical trick**: if a sequence keeps growing but has a ceiling, it converges. You don't need to know where — just know it will stop somewhere.
 
 </Porta>
 
-<Porta nivel="15" titulo="For a 15-year-old teen">
+<Porta nivel="15" titulo="For a 15-year-old">
 
-Sequences are **functions with domain $\mathbb{N}$**. The limit theory is the same as the ε-δ in Lesson 41, but we use $N$ instead of $\delta$.
+Sequences are **functions with domain in $\mathbb{N}$**: $a : \mathbb{N} \to \mathbb{R}$, $n \mapsto a_n$. The definition of limit is the same as in Lesson 41 (epsilon-delta), but the "$\delta$" became "$N$" because the domain is discrete.
 
-### Why sequences matter
+### Why sequences matter now
 
-- **Newton iteration** for roots: $a_{n+1} = a_n - f(a_n)/f'(a_n)$.
-- **Series** = limit of partial sums: $\sum a_n = \lim s_N$.
-- **Integral** = limit of Riemann sums.
-- **Probability**: law of large numbers $\bar X_n \to E[X]$.
+Everything you will learn in the next two trimesters depends on sequences:
 
-### Notable sequence limits
+- **Series** $\sum a_n$ are limits of partial sums.
+- **Riemann integrals** are limits of rectangular sums.
+- **Newton's method** for roots: $a_{n+1} = a_n - f(a_n)/f'(a_n)$.
+- **Probability**: law of large numbers says $\bar X_n \to E[X]$.
 
-| Sequence | Limit |
-|---|---|
-| $1/n$ | $0$ |
-| $(1 + 1/n)^n$ | $e$ |
-| $n^{1/n}$ | $1$ |
-| $n!/n^n$ | $0$ |
-| $a^n$ ($|a| < 1$) | $0$ |
-| $a^n$ ($a > 1$) | $\infty$ |
-| $(-1)^n$ | doesn't exist |
+### Notable limits — reference table
 
-### Growth hierarchy (important!)
+| Sequence | Limit | Condition |
+|---|---|---|
+| $1/n$ | $0$ | — |
+| $1/n^p$ | $0$ | $p > 0$ |
+| $r^n$ | $0$ | $\|r\| < 1$ |
+| $(1 + 1/n)^n$ | $e \approx 2.718$ | — |
+| $n^{1/n}$ | $1$ | — |
+| $a^n/n!$ | $0$ | any $a > 0$ |
+| $(-1)^n$ | does not exist | oscillates |
 
-$$\log n \ll n^a \ll a^n \ll n! \ll n^n.$$
+### How to calculate limits in practice
 
-Each grows **much slower** than the next. A tool used all the time in algorithm complexity.
+1. **Divide everything by the highest power of $n$** when you have a ratio of polynomials.
+2. **Squeeze**: if $-b_n \leq a_n \leq b_n$ and $b_n \to 0$, then $a_n \to 0$.
+3. **Algebra**: $\lim (a_n + b_n) = \lim a_n + \lim b_n$ (if both exist).
+4. **Monotone bounded**: prove the sequence grows and has a ceiling; convergence is guaranteed, even if you don't find the exact value.
 
-### Operational theorems
+<Insight>
 
-**Squeeze**: pinch $b_n$ between $a_n$ and $c_n$ that go to the same place.
+The epsilon-$N$ definition has a simple geometric interpretation: place the "horizontal band" $(L - \varepsilon, L + \varepsilon)$ on the graph of $a_n$ vs. $n$. The limit exists if, for any band you choose (no matter how narrow), there exists an $N$ such that all graph points with $n > N$ lie inside the band.
 
-**Example**: $\lim_{n \to \infty} \sin n / n$. $-1/n \leq \sin n / n \leq 1/n$. By squeeze, $\to 0$.
-
-**Monotone bounded**: an increasing and bounded sequence converges — you don't need to find the limit, just know it exists!
-
-**Example**: $a_1 = 1$, $a_{n+1} = (a_n + 2/a_n)/2$. Show that $a_n$ is decreasing after $a_1$, bounded below by $\sqrt 2$. Then it converges. The limit $L$ satisfies $L = (L + 2/L)/2$, that is, $L = \sqrt 2$.
-
-### Bolzano-Weierstrass
-
-**Every bounded sequence has a convergent subsequence**. Useful for existence arguments (compactness).
+</Insight>
 
 </Porta>
 
 <Porta nivel="25" titulo="For an engineering student">
 
-Sequences are **the basis of iterative algorithms** — Newton, gradient descent, EM, MCMC.
+Sequences are the mathematical foundation of **iterative algorithms** — Newton, gradient descent, MCMC, power iteration for eigenvalues.
 
-### ε-N proof: $\lim 1/n = 0$
+### Demonstration: $\lim 1/n = 0$ via epsilon-$N$
 
-Given $\eps > 0$, choose $N = \lceil 1/\eps \rceil + 1$. Then $n \geq N \Rightarrow 1/n \leq 1/N < \eps$. ∎
+Given $\varepsilon > 0$, choose $N = \lceil 1/\varepsilon \rceil$. Then for $n > N$:
 
-### Proof: monotone bounded converges
+$$|a_n - 0| = \frac{1}{n} < \frac{1}{N} \leq \varepsilon. \quad \blacksquare$$
 
-Let $(a_n)$ be increasing, bounded above. Take $L = \sup\{a_n\}$ (exists by completeness). For $\eps > 0$, $L - \eps$ is not an upper bound, so $\exists N : a_N > L - \eps$. Since increasing, $a_n \geq a_N > L - \eps$ for $n \geq N$. Since $a_n \leq L$, $|a_n - L| < \eps$. ∎
+### Demonstration: squeeze theorem
 
-### Proof: Bolzano-Weierstrass (sketch)
+Given $a_n \leq b_n \leq c_n$ with $a_n \to L$ and $c_n \to L$. Given $\varepsilon > 0$, there exists $N$ such that $n > N \Rightarrow |a_n - L| < \varepsilon$ and $|c_n - L| < \varepsilon$. Thus $L - \varepsilon < a_n \leq b_n \leq c_n < L + \varepsilon$, i.e., $|b_n - L| < \varepsilon$. $\blacksquare$
 
-Bounded sequence $(a_n) \subseteq [a, b]$. Bisect: some half contains infinitely many terms. Repeat. Construct subsequence $(a_{n_k})$ with $a_{n_k}$ in the $k$-th half, interval of length $(b-a)/2^k$. Cauchy, hence convergent. ∎
+### Applications in algorithms
 
-### Proof: Cauchy ⇔ convergent in $\mathbb{R}$
+- **Heron's method** (square root): $a_{n+1} = \tfrac{1}{2}(a_n + N/a_n)$. **Quadratic** convergence to $\sqrt N$ — number of correct digits doubles each iteration.
+- **Gradient descent**: $w_{n+1} = w_n - \eta \nabla f(w_n)$. Converges (for $f$ convex with Lipschitz constant $L$) if step $\eta < 2/L$.
+- **Power iteration**: $v_{n+1} = A v_n / \|A v_n\|$ converges to eigenvector of largest eigenvalue when there is spectral gap.
 
-$(\Rightarrow)$ Convergent is Cauchy: $|a_m - a_n| \leq |a_m - L| + |L - a_n| < \eps$.
+### Geometric series — financial application
 
-$(\Leftarrow)$ Cauchy is convergent: Cauchy $\Rightarrow$ bounded $\Rightarrow$ has convergent subsequence (Bolzano-Weierstrass) $\Rightarrow$ the whole sequence converges to the same limit (because it's Cauchy).
+Monthly payments $P$ for $n$ months at rate $r$ per month. Present value:
 
-### Cauchy sequences in $\mathbb{Q}$
+$$V = P \sum_{k=1}^n \frac{1}{(1+r)^k} = P \cdot \frac{1 - (1+r)^{-n}}{r}.$$
 
-$(a_n)$ approximating $\sqrt 2$ by bisection is Cauchy in $\mathbb{Q}$, but **does not converge** in $\mathbb{Q}$ (limit is irrational). $\mathbb{R}$ is the **completion** of $\mathbb{Q}$ under the metric $|\cdot|$.
+When $n \to \infty$ and $r > 0$: $V \to P/r$ (perpetuity).
 
-### Algorithm applications
+### Cauchy convergence in $\mathbb{Q}$
 
-- **Gradient descent**: $w_{n+1} = w_n - \eta \nabla f(w_n)$. Converges if $\eta < 2/L$ (Lipschitz constant), $f$ convex.
-- **Newton**: $x_{n+1} = x_n - f(x_n)/f'(x_n)$. **Quadratic** convergence near a simple root.
-- **Heron** (square root): $a_{n+1} = (a_n + N/a_n)/2$. Quadratic for $\sqrt N$. Comes from Newton on $f(x) = x^2 - N$.
-- **EM**: monotonically increases the likelihood. Converges to a critical point (not necessarily global max).
-
-### Series convergence
-
-$\sum a_n$ converges $\iff$ partial sums $s_N = \sum_{n=1}^N a_n$ form a convergent sequence.
-
-**Tests**:
-- Cauchy: $\forall \eps, \exists N : m > n \geq N \Rightarrow |s_m - s_n| < \eps$.
-- Ratio (D'Alembert): $\lim |a_{n+1}/a_n| = L < 1 \Rightarrow$ converges.
-- Root (Cauchy): $\lim |a_n|^{1/n} = L < 1 \Rightarrow$ converges.
-
-### Law of large numbers
-
-$X_1, X_2, \ldots$ iid with $E[X] = \mu$, $V[X] < \infty$. Then $\bar X_n = (1/n) \sum X_i \to \mu$ (in probability — weak; a.s. — strong).
-
-### Applications in dynamic systems
-
-Discrete system $x_{n+1} = T(x_n)$. Behavior: fixed point, cycle, strange attractor (chaos). **Logistic map** $x_{n+1} = r x_n (1 - x_n)$ exhibits transition to chaos at $r \approx 3.57$.
-
-### Sequences in $\mathbb{R}^n$
-
-Componentwise convergence. In norm: $\|x_n - L\| \to 0$. Equivalent in $\mathbb{R}^n$ (but not in infinite dimension).
+The sequence $a_n = \lfloor \sqrt 2 \cdot 10^n \rfloor / 10^n$ (decimal approximations to $\sqrt 2$) is Cauchy in $\mathbb{Q}$, but **does not converge in $\mathbb{Q}$** — the limit is $\sqrt 2 \notin \mathbb{Q}$. This motivated the construction of $\mathbb{R}$ as **completion** of $\mathbb{Q}$.
 
 </Porta>
 
 <Porta nivel="40" titulo="For a senior professional">
 
-Sequences are central in **functional analysis**, **metric spaces**, **topology**.
+### Spaces of sequences
 
-### Sequence spaces
+- $\ell^p = \{(a_n) : \sum |a_n|^p < \infty\}$, Banach with norm $\|(a_n)\|_p = (\sum |a_n|^p)^{1/p}$ for $p \geq 1$.
+- $\ell^{\infty} = \{(a_n) : \sup|a_n| < \infty\}$, Banach with sup norm.
+- $c_0 = \{(a_n) : a_n \to 0\}$, closed subspace of $\ell^{\infty}$; dual is $\ell^1$.
 
-- $\ell^p$ = sequences with $\sum |a_n|^p < \infty$. Banach with norm $\|a\|_p = (\sum |a_n|^p)^{1/p}$.
-- $\ell^\infty$ = bounded sequences. Banach with $\|a\|_\infty = \sup |a_n|$.
-- $c_0$ = sequences $a_n \to 0$. Closed subspace of $\ell^\infty$.
+### Weak vs. strong convergence in $\ell^2$
 
-### Weak vs strong convergence
+The canonical basis $e_n$ (vector with 1 in position $n$, rest 0) converges **weakly** to 0 in $\ell^2$ (since $\langle e_n, f \rangle \to 0$ for all $f \in \ell^2$), but **not strongly** ($\|e_n\| = 1$ for all $n$). In finite dimension, weak and strong are equivalent.
 
-- **Strong**: $\|x_n - x\| \to 0$.
-- **Weak**: $f(x_n) \to f(x)$ for every $f \in X^*$ (dual).
+### Completion and construction of $\mathbb{R}$
 
-In finite dimension, equivalent. In $\ell^2$: orthonormal basis $e_n$ converges weakly to 0 but not strongly ($\|e_n\| = 1$).
+Every metric space has a unique completion (up to isometry). $\mathbb{R}$ is the completion of $\mathbb{Q}$ via equivalence classes of Cauchy sequences. The same principle produces $L^2[a,b]$ as completion of $C[a,b]$ under the $L^2$ norm.
 
-### Cauchy in metric spaces
+### Sequential compactness
 
-$(X, d)$ is **complete** if every Cauchy converges. Banach = complete normed space. Hilbert = complete inner product space.
-
-**Completion**: every metric space has a unique completion. $\mathbb{R}$ is the completion of $\mathbb{Q}$. $L^2$ is the completion of $C[a,b]$ in the $L^2$ norm.
-
-### Compactness
-
-In metric spaces: **sequentially compact** = every sequence has a convergent subsequence. In $\mathbb{R}^n$, equivalent to closed and bounded (Heine-Borel). **In infinite dimension**, equivalent to closed, bounded **and** totally bounded (Riesz).
-
-### Topology
-
-Sequential characterization of continuity holds in **metric spaces** (Heine). In general, requires nets or filters.
-
-### Compact operators
-
-$T : X \to Y$ is **compact** if it maps the unit ball to a precompact set. Convergent subsequences are key in proofs.
-
-### Spectral theory
-
-Sequence of eigenvalues $\lambda_n$ of a compact self-adjoint operator: either finite, or $\lambda_n \to 0$. Spectral theorem decomposes via eigenvector basis.
+In $\mathbb{R}^n$: compactness $\iff$ closed and bounded (Heine-Borel) $\iff$ sequential compactness (Bolzano-Weierstrass). In infinite dimension, closed and bounded does not imply sequential compactness (counterexample: unit ball of $\ell^2$). Compactness in infinite dimension requires **total boundedness**.
 
 ### Advanced iterative methods
 
-- **Aitken acceleration**: $\hat a_n = a_n - (a_{n+1} - a_n)^2/(a_{n+2} - 2 a_{n+1} + a_n)$. Accelerates linear convergence.
-- **Romberg integration**: Richardson extrapolation in integration.
-- **GMRES, Krylov subspaces**: for large linear systems.
-
-### Applications in ML / RL
-
-- **Q-learning convergence**: $Q_n \to Q^*$ under appropriate $\epsilon$-greedy exploration.
-- **Policy gradient convergence**: analysis via stochastic approximation (Robbins-Monro).
-- **MCMC**: state sequence $\to$ stationary distribution. Convergence via ergodic theorems.
-
-### Categories
-
-Limits in categories generalize sequence limits. Direct/inverse limit, colimit, etc. Same algebraic structure.
+- **Aitken acceleration** ($\Delta^2$): $\hat a_n = a_n - (a_{n+1} - a_n)^2/(a_{n+2} - 2a_{n+1} + a_n)$. Transforms linear convergence into superlinear.
+- **MCMC and mixing time**: sequence of states of Markov process converges to stationary distribution at rate $\rho^n$, where $\rho = |\lambda_2|/|\lambda_1|$ (spectral gap).
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Practical application">
+<Porta nivel="pratica" titulo="Practice — how to calculate and verify limits">
 
-**Recipe: how to compute a sequence limit.**
+### Calculation recipe
 
-### Algorithm
+**Step 1 — Ratio of polynomials.** Divide numerator and denominator by the highest power of $n$:
 
-1. **Direct substitution**: if $a_n = f(n)$ for a function $f$, compute $\lim_{x \to \infty} f(x)$.
-2. **Recursive**: assume limit $L$, solve $L = f(L)$.
-3. **Arithmetic**: split into known parts.
-4. **Squeeze**: pinch between knowns.
-5. **Monotone bounded**: prove existence, compute later (or don't).
+$$\lim_{n \to \infty} \frac{3n^2 + 2n}{5n^2 - 1} = \lim_{n \to \infty} \frac{3 + 2/n}{5 - 1/n^2} = \frac{3}{5}.$$
 
-### SymPy
+**Step 2 — Recognize notable limits.** $(1 + x/n)^n \to e^x$; $n^{1/n} \to 1$; $r^n \to 0$ for $|r| < 1$.
 
-```python
-import sympy as sp
-n = sp.symbols('n', positive=True, integer=True)
-print(sp.limit(1/n, n, sp.oo))                # 0
-print(sp.limit((1 + 1/n)**n, n, sp.oo))       # E
-print(sp.limit(n**(1/n), n, sp.oo))           # 1
-print(sp.limit(sp.factorial(n)/n**n, n, sp.oo))  # 0
-```
+**Step 3 — Squeeze.** If $|a_n| \leq b_n$ and $b_n \to 0$, then $a_n \to 0$. Example: $|\sin(n)/n| \leq 1/n \to 0$.
 
-### Growth hierarchy (at the tip of your tongue)
+**Step 4 — Recursive.** Assume $a_n \to L$ and derive $L = f(L)$. Caution: existence of convergence must be proved separately.
 
-$$\log n \ll n^a \ll a^n \ll n! \ll n^n.$$
+### Financial application — compound interest
 
-Use it to solve ratios: $\lim n!/2^n = \infty$, $\lim 2^n/n! = 0$, $\lim n^{100}/2^n = 0$.
+Investment of 1000 at annual rate $r$ compounded $n$ times per year:
 
-### Recursive sequences
+$$A_n = 1000 \cdot \left(1 + \frac{r}{n}\right)^n \to 1000 \cdot e^r \quad (n \to \infty).$$
 
-For $a_{n+1} = f(a_n)$:
+For $r = 10\%$: $A_{12} \approx 1104.71$ (monthly); $A_{\infty} = 1000 e^r \approx 1105.17$ (continuous). The difference between monthly and continuous compounding is less than $0.50 per year — but scales with principal and time horizon.
 
-1. Verify convergence (monotonicity + boundedness, or contraction via Banach).
-2. If it converges to $L$, then $L = f(L)$.
+### Fibonacci ratio and golden section
 
-```python
-import numpy as np
-def heron(N, a0=1, n_iter=10):
-    a = a0
-    for _ in range(n_iter):
-        a = (a + N/a)/2
-    return a
-print(heron(2))   # ~1.41421356 (sqrt 2)
-```
+$F_1 = 1$, $F_2 = 1$, $F_{n+1} = F_n + F_{n-1}$. The ratio $F_{n+1}/F_n$ converges to:
 
-### When the limit DOES NOT exist
+$$\varphi = \frac{1 + \sqrt 5}{2} \approx 1.618 \quad \text{(golden section)}.$$
 
-- **Oscillation**: $(-1)^n$, $\sin n$.
-- **Divergence**: $a_n \to \pm \infty$.
-- **Non-monotone and non-Cauchy**: chaos.
+Demonstration: if $r_n = F_{n+1}/F_n \to L$, then $L = 1 + 1/L$, so $L^2 - L - 1 = 0$, positive root $\varphi$.
 
-### Numerical verification
+### Common pitfalls
 
-Implementing and plotting $a_n$ vs $n$ is the fastest way to **conjecture** the limit. Then prove it.
-
-### Care
-
-- Recursive limits assume **existence**. Without proof, it can be fallacious.
-- $(1 + 1/n)^n \neq 1$ at infinity! Indeterminate $1^\infty$.
-- An **eventually increasing** sequence may not be monotone — be careful in proofs.
-
-### Mandatory exercises
-
-49.1, 49.7, 49.10, 49.11, 49.20, 49.30 — they test everything.
+- **Indeterminate form $1^{\infty}$**: $(1 + 1/n)^n$ **does not** converge to 1. Use $e$ instead.
+- **Existence before calculation**: in recursive sequence, calculating $L = f(L)$ without proving convergence is a fallacy.
+- **Oscillation vs. divergence**: $(-1)^n$ oscillates but is bounded; $n$ diverges to $+\infty$. Both are "divergent" in the technical sense.
 
 </Porta>
 
 </DuasPortas>
 
-<ListaExercicios seed="licao-49">
+## Worked examples
 
-### Block A — Direct computation (49.1 to 49.20)
+<Exemplo titulo="Limit of rational sequence by power division" numero="1">
 
-<Exercicio numero="49.1" dificuldade="aplicacao">$\lim 1/n$. Prove via ε-N: for $\eps$, $N = \lceil 1/\eps \rceil$.</Exercicio>
-<Exercicio numero="49.2" dificuldade="aplicacao">$\lim (n+1)/n$. (Ans: 1.)</Exercicio>
-<Exercicio numero="49.3" dificuldade="aplicacao">$\lim (2n^2)/(n^2 + 1)$. (Ans: 2.)</Exercicio>
-<Exercicio numero="49.4" dificuldade="aplicacao">$\lim (-1)^n$ — converges?</Exercicio>
-<Exercicio numero="49.5" dificuldade="aplicacao">$\lim (-1)^n/n$.</Exercicio>
-<Exercicio numero="49.6" dificuldade="aplicacao">$\lim \sin(n)/n$ via squeeze.</Exercicio>
-<Exercicio numero="49.7" dificuldade="aplicacao">$\lim (1 + 1/n)^n = e$.</Exercicio>
-<Exercicio numero="49.8" dificuldade="aplicacao">$\lim n^k / a^n$ for $a > 1$. (Ans: 0.)</Exercicio>
-<Exercicio numero="49.9" dificuldade="aplicacao">$\lim a^n/n!$ for $a > 0$. (Ans: 0.)</Exercicio>
-<Exercicio numero="49.10" dificuldade="aplicacao">$\lim n^{1/n}$. (Ans: 1.)</Exercicio>
-<Exercicio numero="49.11" dificuldade="aplicacao">$a_1 = 1, a_{n+1} = (a_n + 2/a_n)/2$. $\lim a_n = ?$ (Ans: $\sqrt 2$.)</Exercicio>
-<Exercicio numero="49.12" dificuldade="aplicacao">Harmonic sequence $H_n = 1 + 1/2 + \ldots + 1/n$ — converges?</Exercicio>
-<Exercicio numero="49.13" dificuldade="aplicacao">$\lim \cos(n\pi)/n$. (Ans: 0.)</Exercicio>
-<Exercicio numero="49.14" dificuldade="aplicacao">$\lim n!/n^n$. (Ans: 0.)</Exercicio>
-<Exercicio numero="49.15" dificuldade="aplicacao">$\lim (n!)^{1/n}/n$. (Ans: $1/e$, via Stirling.)</Exercicio>
-<Exercicio numero="49.16" dificuldade="aplicacao">$\lim (3^n + 4^n)^{1/n}$. (Ans: 4.)</Exercicio>
-<Exercicio numero="49.17" dificuldade="aplicacao">$\lim n \sin(1/n)$. (Ans: 1.)</Exercicio>
-<Exercicio numero="49.18" dificuldade="aplicacao">$\lim (\ln n)/n$.</Exercicio>
-<Exercicio numero="49.19" dificuldade="aplicacao">$\lim (\sqrt{n+1} - \sqrt n)$. (Ans: 0.)</Exercicio>
-<Exercicio numero="49.20" dificuldade="aplicacao">$\lim n(\sqrt{n+1} - \sqrt n)$. (Ans: $1/2$.)</Exercicio>
+**Problem.** Calculate $\displaystyle\lim_{n \to \infty} \frac{2n^2 - 3n + 1}{n^2 + 5}$.
 
-### Block B — Recursive sequences and theorems (49.21 to 49.30)
+**Strategy.** Divide numerator and denominator by the highest power of $n$ that appears ($n^2$). After this, each term with $n$ in the denominator goes to zero.
 
-<Exercicio numero="49.21" dificuldade="aplicacao">$a_{n+1} = \sqrt{2 + a_n}$, $a_0 = 1$. Show convergence and compute $L$. (Ans: 2.)</Exercicio>
-<Exercicio numero="49.22" dificuldade="aplicacao">$a_{n+1} = (a_n + 3)/2$, $a_0 = 0$. Compute $L$. (Ans: 3.)</Exercicio>
-<Exercicio numero="49.23" dificuldade="aplicacao">$a_{n+1} = a_n^2/2$, $a_0 = 1$. Converges?</Exercicio>
-<Exercicio numero="49.24" dificuldade="aplicacao">Normalized Fibonacci: $f_{n+1}/f_n \to \varphi = (1+\sqrt 5)/2$. Show.</Exercicio>
-<Exercicio numero="49.25" dificuldade="aplicacao">$a_n = \sum_{k=1}^n 1/k^2$. Converges? (Ans: Yes, to $\pi^2/6$.)</Exercicio>
-<Exercicio numero="49.26" dificuldade="aplicacao">$a_n = \sum_{k=1}^n 1/k$. Converges? (Ans: No — harmonic diverges.)</Exercicio>
-<Exercicio numero="49.27" dificuldade="aplicacao">Show that an increasing bounded-above sequence is Cauchy.</Exercicio>
-<Exercicio numero="49.28" dificuldade="aplicacao">Show that $a_n = n$ is not Cauchy.</Exercicio>
-<Exercicio numero="49.29" dificuldade="aplicacao">Show that $a_n = (-1)^n$ has two convergent subsequences (to $1$ and $-1$).</Exercicio>
-<Exercicio numero="49.30" dificuldade="aplicacao">$a_n = (1 + 1/n)^{n+1}$ — limit? Difference from $(1 + 1/n)^n$?</Exercicio>
+**Solution.**
 
-### Block C — Modeling (49.31 to 49.36)
+1. Divide numerator and denominator by $n^2$:
 
-<Exercicio numero="49.31" dificuldade="modelagem">Newton iteration for $\sqrt 5$: $a_{n+1} = (a_n + 5/a_n)/2$. Compute $a_5$ from $a_0 = 2$.</Exercicio>
-<Exercicio numero="49.32" dificuldade="modelagem">In ML, gradient descent: $\mathbf{w}_{n+1} = \mathbf{w}_n - \alpha \nabla f$. Converges if $\alpha < 2/L$, $L$ Lipschitz constant.</Exercicio>
-<Exercicio numero="49.33" dificuldade="modelagem">Continuous compounding: $V_n = V_0 (1 + r/n)^n$, $V_n \to V_0 e^r$ — fundamental limit.</Exercicio>
-<Exercicio numero="49.34" dificuldade="modelagem">Discrete radioactive decay: $N_{n+1} = N_n (1 - \lambda \Delta t)$. Continuous limit.</Exercicio>
-<Exercicio numero="49.35" dificuldade="modelagem">Binomial $\to$ Poisson distribution: $\binom{n}{k} p^k (1-p)^{n-k}$ with $np = \lambda$ fixed, $n \to \infty$. Result.</Exercicio>
-<Exercicio numero="49.36" dificuldade="modelagem">Logistic map $x_{n+1} = r x_n (1 - x_n)$. For $r = 2$, compute the limit. For $r = 3.5$? (Ans: cycle of 4.)</Exercicio>
+$$\frac{2n^2 - 3n + 1}{n^2 + 5} = \frac{2 - 3/n + 1/n^2}{1 + 5/n^2}.$$
 
-### Block D — Comprehension and proofs (49.37 to 49.42)
+2. Apply the limit using algebra of limits. Each fraction $c/n^k \to 0$:
 
-<Exercicio numero="49.37" dificuldade="compreensao">Prove $\lim 1/n = 0$ via ε-N.</Exercicio>
-<Exercicio numero="49.38" dificuldade="compreensao">Show that monotone increasing and bounded converges.</Exercicio>
-<Exercicio numero="49.39" dificuldade="compreensao">Show that every Cauchy is bounded.</Exercicio>
-<Exercicio numero="49.40" dificuldade="demonstracao">Prove uniqueness of the limit.</Exercicio>
-<Exercicio numero="49.41" dificuldade="demonstracao">Prove the squeeze theorem for sequences.</Exercicio>
-<Exercicio numero="49.42" dificuldade="demonstracao">Prove Bolzano-Weierstrass: a bounded sequence in $\mathbb{R}$ has a convergent subsequence.</Exercicio>
+$$\lim_{n \to \infty} \frac{2 - 3/n + 1/n^2}{1 + 5/n^2} = \frac{2 - 0 + 0}{1 + 0} = 2.$$
+
+**Verification.** For $n = 100$: $(20000 - 300 + 1)/(10000 + 5) = 19701/10005 \approx 1.969$. For $n = 10000$: $(2 \cdot 10^8 - 30000 + 1)/(10^8 + 5) \approx 2.0003$. Converging to 2.
+
+**Source.** [OpenStax Calculus Volume 2, §5.1](https://openstax.org/books/calculus-volume-2/pages/5-1-sequences) — CC-BY-NC-SA 4.0.
+
+</Exemplo>
+
+<Exemplo titulo="Squeeze theorem: oscillating sequence divided by n" numero="2">
+
+**Problem.** Calculate $\displaystyle\lim_{n \to \infty} \frac{\sin n}{n}$.
+
+**Strategy.** The function $\sin n$ oscillates without converging, but is always between $-1$ and $1$. We use the squeeze theorem by sandwiching the sequence between $-1/n$ and $1/n$.
+
+**Solution.**
+
+1. Use the fundamental inequality $-1 \leq \sin n \leq 1$:
+
+$$-\frac{1}{n} \leq \frac{\sin n}{n} \leq \frac{1}{n} \quad \text{for all } n \geq 1.$$
+
+2. Calculate the limits of the bounding sequences:
+
+$$\lim_{n \to \infty} \left(-\frac{1}{n}\right) = 0 \quad \text{and} \quad \lim_{n \to \infty} \frac{1}{n} = 0.$$
+
+3. By the squeeze theorem, the middle sequence also goes to 0:
+
+$$\lim_{n \to \infty} \frac{\sin n}{n} = 0.$$
+
+**Verification.** For $n = 100$: $\sin(100)/100 \approx -0.00506$. For $n = 1000$: $\sin(1000)/1000 \approx 0.000827$. Both near zero.
+
+**Source.** [OpenStax Calculus Volume 2, §5.1, Example 5.7](https://openstax.org/books/calculus-volume-2/pages/5-1-sequences) — CC-BY-NC-SA 4.0.
+
+</Exemplo>
+
+<Exemplo titulo="Monotone bounded sequence: convergence of (1+1/n)^n" numero="3">
+
+**Problem.** Show that the sequence $a_n = (1 + 1/n)^n$ is increasing and bounded above by 3, hence converges. Identify the limit.
+
+**Strategy.** Binomial expansion to show growth; comparison with geometric series for upper bound.
+
+**Solution.**
+
+1. **Binomial expansion:**
+
+$$a_n = \sum_{k=0}^{n} \binom{n}{k} \frac{1}{n^k} = \sum_{k=0}^{n} \frac{1}{k!} \cdot \prod_{j=0}^{k-1}\left(1 - \frac{j}{n}\right).$$
+
+2. **Each term increases in $n$:** the product $\prod_{j=0}^{k-1}(1 - j/n)$ increases when $n$ increases. Thus $a_n$ is increasing.
+
+3. **Upper bound:** each term is at most $1/k!$, so:
+
+$$a_n \leq \sum_{k=0}^{n} \frac{1}{k!} \leq 1 + 1 + \frac{1}{2} + \frac{1}{4} + \frac{1}{8} + \cdots = 1 + \frac{1}{1 - 1/2} = 3.$$
+
+4. **By the monotone bounded theorem**, $(a_n)$ converges. By definition, its limit is $e \approx 2.71828$.
+
+**Verification.** $a_{10} \approx 2.5937$, $a_{100} \approx 2.7048$, $a_{1000} \approx 2.7169$. Growing toward $e$.
+
+**Source.** [OpenStax Calculus Volume 2, §5.1, Example 5.9](https://openstax.org/books/calculus-volume-2/pages/5-1-sequences) — CC-BY-NC-SA 4.0.
+
+</Exemplo>
+
+<Exemplo titulo="Recursive sequence: fixed point and golden section" numero="4">
+
+**Problem.** Let $F_n$ be the Fibonacci sequence with $F_1 = F_2 = 1$ and $F_{n+2} = F_{n+1} + F_n$. Determine $\displaystyle\lim_{n \to \infty} \frac{F_{n+1}}{F_n}$.
+
+**Strategy.** Define $r_n = F_{n+1}/F_n$ and derive a recurrence for $r_n$. If the sequence $r_n$ converges, its limit satisfies a fixed-point equation.
+
+**Solution.**
+
+1. **Recurrence for $r_n$:** From the identity $F_{n+2} = F_{n+1} + F_n$, dividing by $F_{n+1}$:
+
+$$r_{n+1} = \frac{F_{n+2}}{F_{n+1}} = 1 + \frac{F_n}{F_{n+1}} = 1 + \frac{1}{r_n}.$$
+
+2. **Initial values:** $r_1 = 1$, $r_2 = 2$, $r_3 = 3/2 = 1.5$, $r_4 = 5/3 \approx 1.667$, $r_5 = 8/5 = 1.6$, $r_6 = 13/8 = 1.625$. The sequence oscillates while converging.
+
+3. **Fixed-point equation:** If $r_n \to L$, taking the limit in the recurrence:
+
+$$L = 1 + \frac{1}{L} \implies L^2 - L - 1 = 0 \implies L = \frac{1 + \sqrt 5}{2} = \varphi \approx 1.618.$$
+
+(Negative root discarded since $L > 0$.)
+
+**Verification.** $r_{10} = 89/55 \approx 1.6182$, $r_{15} = 987/610 \approx 1.6180$. Converging to $\varphi$.
+
+**Source.** [Active Calculus, §8.1, Activity 8.1.6](https://activecalculus.org/single/sec-8-3-geometric.html) — Boelkins · CC-BY-NC-SA 4.0.
+
+</Ejemplo>
+
+<Ejemplo titulo="Compound interest and the limit e^r (financial modeling)" numero="5">
+
+**Problem.** A bank offers 12% per year with compounding $n$ times per year. What is the final amount on 1000 when $n \to \infty$? Compare with annual compounding ($n = 1$) and monthly ($n = 12$).
+
+**Strategy.** Express the amount as $A_n = 1000 \cdot (1 + r/n)^n$ and calculate the limit using the fundamental limit $(1 + x/n)^n \to e^x$.
+
+**Solution.**
+
+1. Identify $r = 0.12$. The amount after 1 year with $n$ compoundings is:
+
+$$A_n = 1000 \cdot \left(1 + \frac{0.12}{n}\right)^n.$$
+
+2. Use the limit: $(1 + r/n)^n \to e^r$ when $n \to \infty$:
+
+$$A_\infty = 1000 \cdot e^{0.12} = 1000 \cdot 1.12749\ldots \approx 1127.50 \text{ dollars.}$$
+
+3. Compare the three situations:
+
+| Compounding | Formula | Amount |
+|---|---|---|
+| Annual ($n=1$) | $1000 \cdot (1.12)^1$ | $1,120.00 |
+| Monthly ($n=12$) | $1000 \cdot (1.01)^{12}$ | $1,126.83 |
+| Continuous ($n \to \infty$) | $1000 \cdot e^{0.12}$ | $1,127.50 |
+
+4. The difference between continuous and monthly compounding is only $0.67 per year.
+
+**Verification.** $e^{0.12} = 1.12749...$. For $n = 365$ (daily): $(1 + 0.12/365)^{365} \approx 1.12747$ — practically equal to continuous.
+
+**Source.** [Active Calculus, §8.1, Preview Activity 8.1](https://activecalculus.org/single/sec-8-3-geometric.html) — Boelkins · CC-BY-NC-SA 4.0.
+
+</Ejemplo>
+
+<ListaExercicios seed="licao-49-limite-sequencias">
+
+### Block A — Direct convergence and rational limits (49.1 to 49.12)
+
+<Exercicio
+  numero="49.1"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$\\infty$" },
+    { texto: "$\\text{diverges}$" },
+  ]}
+  solucao={<>Divide numerator and denominator by <Eq>{`n`}</Eq>: <Eq>{`\\frac{1}{n+1} \\leq \\frac{1}{n} \\to 0`}</Eq>. Limit = 0.</>}
+  passos={<>
+    <ol>
+      <li><strong>Rewrite.</strong> <Eq>{`a_n = 1/(n+1)`}</Eq>. The denominator grows without bound as <Eq>{`n \\to \\infty`}</Eq>.</li>
+      <li><strong>Apply the hierarchy.</strong> <Eq>{`1/(n+1) \\leq 1/n \\to 0`}</Eq> by the fundamental limit <Eq>{`1/n^p \\to 0`}</Eq> with <Eq>{`p=1`}</Eq>.</li>
+      <li><strong>Verify numerically.</strong> For <Eq>{`n = 100`}</Eq>: <Eq>{`1/101 \\approx 0.0099`}</Eq>. For <Eq>{`n = 10000`}</Eq>: <Eq>{`1/10001 \\approx 0.0001`}</Eq>.</li>
+      <li><em>Shortcut:</em> any sequence of the form <Eq>{`c/(n+k)`}</Eq> with <Eq>{`c, k`}</Eq> constant converges to 0.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Determine $\displaystyle\lim_{n \to \infty} \frac{1}{n+1}$. Solve in your notebook and verify for $n = 100$ and $n = 10000$.
+</Exercicio>
+
+<Exercicio
+  numero="49.2"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$3$", correta: true },
+    { texto: "$\\infty$" },
+    { texto: "$1$" },
+    { texto: "$0$" },
+  ]}
+  solucao={<>Divide by <Eq>{`n^2`}</Eq>: <Eq>{`\\frac{3n^2 + n}{n^2 + 2} = \\frac{3 + 1/n}{1 + 2/n^2} \\to 3/1 = 3`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{3n^2 + n}{n^2 + 2}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.3"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$\\infty$" },
+    { texto: "$\\tfrac{1}{2}$" },
+  ]}
+  solucao={<>Divide by <Eq>{`n^2`}</Eq>: <Eq>{`\\frac{n}{n^2 + 1} = \\frac{1/n}{1 + 1/n^2} \\to 0/1 = 0`}</Eq>. The denominator grows faster than the numerator.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{n}{n^2 + 1}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.4"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$-1$" },
+    { texto: "$\\text{diverges}$" },
+  ]}
+  solucao={<>By the squeeze theorem: <Eq>{`-1/n \\leq (-1)^n/n \\leq 1/n`}</Eq>. Since <Eq>{`1/n \\to 0`}</Eq>, squeeze guarantees <Eq>{`(-1)^n/n \\to 0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Identify the difficulty.</strong> <Eq>{`(-1)^n`}</Eq> alternates between +1 and -1, so the sequence oscillates. Direct limit doesn't work.</li>
+      <li><strong>Use the absolute value.</strong> <Eq>{`|(-1)^n/n| = 1/n`}</Eq>, so <Eq>{`-1/n \\leq (-1)^n/n \\leq 1/n`}</Eq>.</li>
+      <li><strong>Squeeze.</strong> <Eq>{`\\lim(-1/n) = 0`}</Eq> and <Eq>{`\\lim(1/n) = 0`}</Eq>, so by the squeeze theorem, <Eq>{`\\lim (-1)^n/n = 0`}</Eq>.</li>
+      <li><em>Shortcut:</em> when a sequence oscillates but is "squeezed" by sequences going to zero, it also goes to zero.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{(-1)^n}{n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.5"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$\\infty$" },
+    { texto: "$-1$" },
+  ]}
+  solucao={<>Use that <Eq>{`0 \\leq \\cos^2(n)/n \\leq 1/n \\to 0`}</Eq>. By squeeze, the limit is 0.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{\cos^2 n}{n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.6"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$1$", correta: true },
+    { texto: "$0$" },
+    { texto: "$\\infty$" },
+    { texto: "$2$" },
+  ]}
+  solucao={<>Write <Eq>{`\\frac{n+1}{n} = 1 + 1/n \\to 1`}</Eq>. Simple algebra of limits.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{n+1}{n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.7"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$\\tfrac{1}{2}$" },
+    { texto: "$\\infty$" },
+  ]}
+  solucao={<>For any fixed <Eq>{`|r| < 1`}</Eq>, <Eq>{`r^n \\to 0`}</Eq>. Here <Eq>{`r = 1/2`}</Eq>, so <Eq>{`(1/2)^n \\to 0`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \left(\frac{1}{2}\right)^n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.8"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$e$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "$\\infty$" },
+  ]}
+  solucao={<>By definition, <Eq>{`\\lim_{n\\to\\infty}(1 + 1/n)^n = e \\approx 2.71828`}</Eq>. This is one of the fundamental limits of calculus. See Example 3 of this lesson for the complete proof.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \left(1 + \frac{1}{n}\right)^n$. Sketch the first 10 terms in your notebook and trace the approximation to $e$.
+</Exercicio>
+
+<Exercicio
+  numero="49.9"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$e^2$", correta: true },
+    { texto: "$1$" },
+    { texto: "$e$" },
+    { texto: "$\\infty$" },
+  ]}
+  solucao={<>Write <Eq>{`(1 + 2/n)^n = ((1 + 2/n)^{n/2})^2`}</Eq>. Since <Eq>{`(1 + 2/n)^{n/2} \\to e`}</Eq> (substitution <Eq>{`m = n/2 \\to \\infty`}</Eq>), the limit is <Eq>{`e^2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \left(1 + \frac{2}{n}\right)^n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.10"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$1$", correta: true },
+    { texto: "$\\tfrac{4}{3}$" },
+    { texto: "$0$" },
+    { texto: "$\\infty$" },
+  ]}
+  solucao={<>Write <Eq>{`n^{1/n} = e^{(\\ln n)/n}`}</Eq>. Since <Eq>{`(\\ln n)/n \\to 0`}</Eq> (hierarchy: <Eq>{`\\ln n \\ll n`}</Eq>), we have <Eq>{`e^0 = 1`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Rewrite using exponential.</strong> <Eq>{`n^{1/n} = e^{(1/n)\\ln n} = e^{(\\ln n)/n}`}</Eq>.</li>
+      <li><strong>Calculate the exponent.</strong> <Eq>{`\\lim (\\ln n)/n`}</Eq>. By the hierarchy, <Eq>{`\\ln n`}</Eq> grows much more slowly than <Eq>{`n`}</Eq>, so <Eq>{`(\\ln n)/n \\to 0`}</Eq>.</li>
+      <li><strong>Use continuity of <Eq>{`e^x`}</Eq>.</strong> <Eq>{`\\lim e^{(\\ln n)/n} = e^{\\lim(\\ln n)/n} = e^0 = 1`}</Eq>.</li>
+      <li><em>Curiosity:</em> this limit appears in the root test (Cauchy) for series convergence.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} n^{1/n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.11"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$\\infty$" },
+    { texto: "$\\tfrac{1}{3}$" },
+  ]}
+  solucao={<>For any fixed <Eq>{`a > 0`}</Eq>, <Eq>{`a^n/n! \\to 0`}</Eq>. Follows from the hierarchy <Eq>{`a^n \\ll n!`}</Eq>. For <Eq>{`a = 3`}</Eq>, already for <Eq>{`n = 10`}</Eq>: <Eq>{`3^{10}/10! \\approx 0.016`}</Eq>, and continues decreasing.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{3^n}{n!}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.12"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$2$", correta: true },
+    { texto: "$1$" },
+    { texto: "$\\infty$" },
+    { texto: "$0$" },
+  ]}
+  solucao={<>See the reference indicated in <em>source</em> for the detailed solution.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{\ln n}{n}$.
+</Exercicio>
+
+### Block B — Squeeze and oscillating sequences (49.13 to 49.20)
+
+<Exercicio
+  numero="49.13"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$-1$" },
+    { texto: "$\\text{diverges}$" },
+  ]}
+  solucao={<>Since <Eq>{`|\\sin n| \\leq 1`}</Eq>, we have <Eq>{`|\\sin(n)/n| \\leq 1/n \\to 0`}</Eq>. By squeeze, limit is 0.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{\sin n}{n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.14"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$-1$" },
+    { texto: "$\\text{diverges}$" },
+  ]}
+  solucao={<>Rationalize: <Eq>{`\\sqrt{n+1} - \\sqrt{n} = \\frac{1}{\\sqrt{n+1}+\\sqrt{n}}`}</Eq>. The denominator grows as <Eq>{`2\\sqrt{n} \\to \\infty`}</Eq>, so the limit is 0.</>}
+  passos={<>
+    <ol>
+      <li><strong>Rationalize.</strong> Multiply by the conjugate: <Eq>{`(\\sqrt{n+1}-\\sqrt{n})\\cdot\\frac{\\sqrt{n+1}+\\sqrt{n}}{\\sqrt{n+1}+\\sqrt{n}} = \\frac{(n+1)-n}{\\sqrt{n+1}+\\sqrt{n}} = \\frac{1}{\\sqrt{n+1}+\\sqrt{n}}`}</Eq>.</li>
+      <li><strong>Estimate the denominator.</strong> <Eq>{`\\sqrt{n+1}+\\sqrt{n} \\geq 2\\sqrt{n} \\to \\infty`}</Eq>.</li>
+      <li><strong>Conclude.</strong> <Eq>{`0 \\leq \\frac{1}{\\sqrt{n+1}+\\sqrt{n}} \\leq \\frac{1}{2\\sqrt{n}} \\to 0`}</Eq>. Thus the limit is 0.</li>
+      <li><em>Mental shortcut:</em> difference of consecutive roots — the conjugate technique transforms into a fraction and reveals the growing denominator.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} (\sqrt{n+1} - \sqrt{n})$.
+</Exercicio>
+
+<Exercicio
+  numero="49.15"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\tfrac{1}{2}$", correta: true },
+    { texto: "$1$" },
+    { texto: "$0$" },
+    { texto: "$\\infty$" },
+  ]}
+  solucao={<>Using the previous result: <Eq>{`n(\\sqrt{n+1}-\\sqrt{n}) = \\frac{n}{\\sqrt{n+1}+\\sqrt{n}} = \\frac{1}{\\sqrt{1+1/n}+1} \\to \\frac{1}{1+1} = \\frac{1}{2}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} n(\sqrt{n+1} - \sqrt{n})$.
+</Exercicio>
+
+<Exercicio
+  numero="49.16"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$4$", correta: true },
+    { texto: "$1$" },
+    { texto: "$e$" },
+    { texto: "$\\infty$" },
+  ]}
+  solucao={<>Factor <Eq>{`4^n`}</Eq>: <Eq>{`(3^n + 4^n)^{1/n} = 4(1 + (3/4)^n)^{1/n}`}</Eq>. Since <Eq>{`(3/4)^n \\to 0`}</Eq> and <Eq>{`(1+0)^{1/n} \\to 1`}</Eq>, the limit is <Eq>{`4`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} (3^n + 4^n)^{1/n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.17"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$1$", correta: true },
+    { texto: "$0$" },
+    { texto: "$e$" },
+    { texto: "$\\infty$" },
+  ]}
+  solucao={<>Write <Eq>{`n\\sin(1/n) = \\sin(1/n)/(1/n)`}</Eq>. Letting <Eq>{`t = 1/n \\to 0^+`}</Eq>, this is <Eq>{`\\sin(t)/t \\to 1`}</Eq> (fundamental limit).</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} n \sin\!\left(\frac{1}{n}\right)$.
+</Exercicio>
+
+<Exercicio
+  numero="49.18"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$\\infty$", correta: true },
+    { texto: "$1$" },
+    { texto: "$e$" },
+    { texto: "$0$" },
+  ]}
+  solucao={<>The harmonic series <Eq>{`H_n = \\sum_{k=1}^n 1/k`}</Eq> diverges. Proof by grouping: <Eq>{`H_{2^m} \\geq 1 + m/2`}</Eq> since each block of <Eq>{`2^{k-1}`}</Eq> terms sums to at least <Eq>{`1/2`}</Eq>. Thus <Eq>{`H_n \\to \\infty`}</Eq>. Distractors B and C are finite values that seem plausible — <Eq>{`\\ln 2`}</Eq> appears in the alternating series <Eq>{`\\sum (-1)^{n+1}/n`}</Eq>, not in the harmonic one.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+The sequence of partial sums $H_n = 1 + \tfrac{1}{2} + \tfrac{1}{3} + \cdots + \tfrac{1}{n}$ (harmonic series): does it converge or diverge?
+</Exercicio>
+
+<Exercicio
+  numero="49.19"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$\\pi^2/6$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "$\\infty$" },
+  ]}
+  solucao={<>The series <Eq>{`\\sum 1/n^2`}</Eq> converges (p-series with <Eq>{`p = 2 > 1`}</Eq>). Euler (1734) calculated its exact value: <Eq>{`\\pi^2/6 \\approx 1.6449`}</Eq>. Distractor B confuses it with the harmonic series (<Eq>{`p=1`}</Eq>, which diverges). The p-series criterion: <Eq>{`\\sum 1/n^p`}</Eq> converges if and only if <Eq>{`p > 1`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+The sequence of partial sums $S_n = \sum_{k=1}^n \frac{1}{k^2}$: does it converge? If so, to what value?
+</Exercicio>
+
+<Exercicio
+  numero="49.20"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\text{diverges}$", correta: true },
+    { texto: "$\\tfrac{1}{2}$" },
+    { texto: "$1$" },
+    { texto: "$0$" },
+  ]}
+  solucao={<>The sequence <Eq>{`(-1)^n`}</Eq> alternates between <Eq>{`+1`}</Eq> (even terms) and <Eq>{`-1`}</Eq> (odd terms). It has two convergent subsequences with distinct limits (1 and -1), so by the uniqueness theorem, it does not converge. Formally: for any candidate <Eq>{`L`}</Eq>, choose <Eq>{`\\varepsilon = 1/2`}</Eq> and show that the epsilon-N condition fails.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Determine if $a_n = (-1)^n$ converges or diverges. Justify using the epsilon-$N$ definition or uniqueness argument.
+</Exercicio>
+
+### Block C — Recursive sequences and fixed point (49.21 to 49.30)
+
+<Exercicio
+  numero="49.21"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$a_4 \\approx 1.4142$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>Heron's method: <Eq>{`a_{n+1} = (a_n + 2/a_n)/2`}</Eq> with <Eq>{`a_1 = 1`}</Eq>. If it converges to <Eq>{`L`}</Eq>, then <Eq>{`L = (L + 2/L)/2`}</Eq>, so <Eq>{`L^2 = 2`}</Eq>, thus <Eq>{`L = \\sqrt{2}`}</Eq>. Numerically: <Eq>{`a_1=1`}</Eq>, <Eq>{`a_2=1.5`}</Eq>, <Eq>{`a_3 \\approx 1.4167`}</Eq>, <Eq>{`a_4 \\approx 1.4142`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Calculate the first terms.</strong> <Eq>{`a_1 = 1`}</Eq>, <Eq>{`a_2 = (1 + 2/1)/2 = 1.5`}</Eq>, <Eq>{`a_3 = (1.5 + 2/1.5)/2 = (1.5 + 1.3\\overline{3})/2 \\approx 1.4167`}</Eq>.</li>
+      <li><strong>Assume convergence to L.</strong> Taking the limit in the recurrence: <Eq>{`L = (L + 2/L)/2`}</Eq>, so <Eq>{`2L = L + 2/L`}</Eq>, thus <Eq>{`L^2 = 2`}</Eq>.</li>
+      <li><strong>Positive root.</strong> <Eq>{`L = \\sqrt{2} \\approx 1.4142`}</Eq>. (Existence of convergence can be proved by showing the sequence is decreasing and bounded below by <Eq>{`\\sqrt{2}`}</Eq>.)</li>
+      <li><em>Curiosity:</em> quadratic convergence — each iteration doubles the number of correct digits. Babylonians used this method 2000 years before Heron.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Let $a_1 = 1$ and $a_{n+1} = \dfrac{1}{2}\!\left(a_n + \dfrac{2}{a_n}\right)$ (Heron's method for $\sqrt{2}$). Calculate $\lim a_n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.22"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$L = 2$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>The sequence <Eq>{`a_{n+1} = \\sqrt{2 + a_n}`}</Eq> with <Eq>{`a_1 = 1`}</Eq> is increasing and bounded by 2 (by induction). Thus it converges to <Eq>{`L`}</Eq> satisfying <Eq>{`L = \\sqrt{2 + L}`}</Eq>, i.e., <Eq>{`L^2 - L - 2 = 0`}</Eq>, roots <Eq>{`L = 2`}</Eq> or <Eq>{`L = -1`}</Eq>. Since <Eq>{`L > 0`}</Eq>, the limit is <Eq>{`L = 2`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Let $a_1 = 1$ and $a_{n+1} = \sqrt{2 + a_n}$. Determine $\lim_{n \to \infty} a_n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.23"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$L = 3$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>If <Eq>{`L`}</Eq> is the limit, then <Eq>{`L = (L + 3)/2`}</Eq>, so <Eq>{`2L = L + 3`}</Eq>, thus <Eq>{`L = 3`}</Eq>. The sequence is increasing (for <Eq>{`a_0 = 0 < 3`}</Eq>) and bounded above by 3 (verifiable by induction).</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Let $a_0 = 0$ and $a_{n+1} = \dfrac{a_n + 3}{2}$. Determine $\lim a_n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.24"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\varphi = (1+\\sqrt{5})/2 \\approx 1.618$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>Let <Eq>{`r_n = F_{n+1}/F_n`}</Eq>. From the recurrence <Eq>{`F_{n+2} = F_{n+1} + F_n`}</Eq>, we have <Eq>{`r_{n+1} = 1 + 1/r_n`}</Eq>. If <Eq>{`r_n \\to L`}</Eq>, then <Eq>{`L = 1 + 1/L`}</Eq>, so <Eq>{`L^2 - L - 1 = 0`}</Eq>, positive root <Eq>{`\\varphi = (1+\\sqrt{5})/2 \\approx 1.618`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Ratio of consecutive terms.</strong> <Eq>{`r_1 = 1`}</Eq>, <Eq>{`r_2 = 2`}</Eq>, <Eq>{`r_3 = 1.5`}</Eq>, <Eq>{`r_4 \\approx 1.667`}</Eq>, <Eq>{`r_5 = 1.6`}</Eq>.</li>
+      <li><strong>Recurrence.</strong> <Eq>{`r_{n+1} = F_{n+2}/F_{n+1} = (F_{n+1}+F_n)/F_{n+1} = 1 + 1/r_n`}</Eq>.</li>
+      <li><strong>Fixed point.</strong> <Eq>{`L = 1 + 1/L \\Rightarrow L^2 - L - 1 = 0 \\Rightarrow L = (1+\\sqrt{5})/2 = \\varphi`}</Eq>.</li>
+      <li><em>Curiosity:</em> the golden section <Eq>{`\\varphi`}</Eq> appears in plant leaves (phyllotaxis), Nautilus spiral, and regular pentagon. Fibonacci didn't know about it.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Let $F_n$ be the Fibonacci sequence. Determine $\displaystyle\lim_{n \to \infty} \frac{F_{n+1}}{F_n}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.25"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$0$", correta: true },
+    { texto: "$1$" },
+    { texto: "$a > 0$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>For <Eq>{`n > 2 \\cdot 2`}</Eq>, the factors of <Eq>{`2^n/n!`}</Eq> from <Eq>{`n=5`}</Eq> onward are less than <Eq>{`1/2`}</Eq>. Thus <Eq>{`0 \\leq 2^n/n! \\leq (2^4/4!) \\cdot (1/2)^{n-4} \\to 0`}</Eq>. Hierarchy: <Eq>{`a^n \\ll n!`}</Eq> for any fixed <Eq>{`a > 0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \frac{2^n}{n!}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.26"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$e^3$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>Write <Eq>{`(1 + 3/n)^n = ((1 + 3/n)^{n/3})^3 \\to e^3`}</Eq>, since <Eq>{`(1 + x/m)^m \\to e^x`}</Eq> with <Eq>{`m = n/3 \\to \\infty`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \left(1 + \frac{3}{n}\right)^n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.27"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$e^{-1}$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<><Eq>{`(1 - 1/n)^n = (1 + (-1)/n)^n \\to e^{-1}`}</Eq> by the fundamental limit <Eq>{`(1 + x/n)^n \\to e^x`}</Eq> with <Eq>{`x = -1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \left(1 - \frac{1}{n}\right)^n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.28"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$e$", correta: true },
+    { texto: "$1$" },
+    { texto: "$0$" },
+    { texto: "$2$" },
+  ]}
+  solucao={<>Write <Eq>{`(1 + 1/n)^{n+1} = (1+1/n)^n \\cdot (1+1/n) \\to e \\cdot 1 = e`}</Eq>, by the algebra of limits.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\lim_{n \to \infty} \left(1 + \frac{1}{n}\right)^{n+1}$.
+</Exercicio>
+
+<Exercicio
+  numero="49.29"
+  dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$L = (-1+\\sqrt{5})/2 \\approx 0.618$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>The sequence <Eq>{`a_{n+1} = 1/(1 + a_n)`}</Eq> with <Eq>{`a_1 = 1`}</Eq>. If it converges to <Eq>{`L`}</Eq>: <Eq>{`L = 1/(1+L) \\Rightarrow L^2 + L - 1 = 0 \\Rightarrow L = (-1+\\sqrt{5})/2 \\approx 0.618`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Let $a_1 = 1$ and $a_{n+1} = \dfrac{1}{1 + a_n}$. Calculate $\lim a_n$.
+</Exercicio>
+
+<Exercicio
+  numero="49.30"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$1/(1-r)$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>For <Eq>{`0 < r < 1`}</Eq>, the partial sum <Eq>{`S_n = \\sum_{k=0}^n r^k = (1-r^{n+1})/(1-r)`}</Eq> is increasing (each term <Eq>{`r^k > 0`}</Eq> is added) and bounded above by <Eq>{`1/(1-r)`}</Eq>. By the monotone bounded theorem, it converges. The limit is exactly <Eq>{`1/(1-r)`}</Eq> (geometric series).</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+For $0 < r < 1$, the sequence of partial sums $S_n = \sum_{k=0}^n r^k$: show that it is increasing and bounded above, hence convergent. To what value?
+</Exercicio>
+
+### Block D — Modeling and financial applications (49.31 to 49.38)
+
+<Exercicio
+  numero="49.31"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "$1000 e^{0.06} \\approx 1061.84$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>With compounding <Eq>{`n`}</Eq> times per year: <Eq>{`A_n = 1000(1+0.06/n)^n \\to 1000 e^{0.06} \\approx 1061.84`}</Eq>. Annual compounding yields \$1,060.00. Difference: \$1.84 in favor of continuous compounding.</>}
+  passos={<>See the reference indicated in <em>source</em> for the step-by-step.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+$1,000 invested for 1 year at 6% per year compounded $n$ times per year. What is the amount when $n \to \infty$?
+</Exercicio>
+
+<Exercicio
+  numero="49.32"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "$1250$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<><Eq>{`V = P/r = 10/0.05 = 200`}</Eq>. This is the present value of a perpetuity of 10 per month at 5% per month. For 0.8% per month: <Eq>{`V = 10/0.008 = 1250`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+An asset pays $10 per month indefinitely (perpetuity). With interest rate of 5% per month, what is the present value of this cash flow? Use the geometric series formula.
+</Exercicio>
+
+<Exercicio
+  numero="49.33"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "$2$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>Geometric series: <Eq>{`\\sum_{n=0}^{\\infty} (1/2)^n = 1/(1-1/2) = 2`}</Eq>. Geometric series with <Eq>{`r = 1/2 < 1`}</Eq>, first term 1. The sum is 2.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+The series $\displaystyle\sum_{n=0}^{\infty} \left(\frac{1}{2}\right)^n$ converges? If so, calculate the sum.
+</Exercicio>
+
+<Exercicio
+  numero="49.34"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "$95$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>The ball rises <Eq>{`5 \\cdot 0.9 = 4.5`}</Eq> m, falls 4.5 m, rises <Eq>{`4.05`}</Eq> m, etc. Total distance: <Eq>{`5 + 2 \\sum_{n=1}^{\\infty} 5 \\cdot (0.9)^n = 5 + 2 \\cdot \\frac{4.5}{1-0.9} = 5 + 90 = 95`}</Eq> meters.</>}
+  passos={<>
+    <ol>
+      <li><strong>Initial fall.</strong> Ball drops 5 m.</li>
+      <li><strong>Sequence of bounces.</strong> Each bounce has up and down. The <Eq>{`k`}</Eq>-th bounce covers <Eq>{`2 \\cdot 5 \\cdot (0.9)^k`}</Eq> meters.</li>
+      <li><strong>Total sum.</strong> <Eq>{`D = 5 + 2\\sum_{k=1}^{\\infty} 5(0.9)^k = 5 + 10 \\cdot \\frac{0.9}{1-0.9} = 5 + 90 = 95`}</Eq> meters.</li>
+      <li><em>Observation:</em> despite infinitely many bounces, the total distance is finite. This is exactly what it means for the geometric series to converge.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+A ball is dropped from 5 meters and each bounce reaches 90% of the previous height. What is the total distance traveled?
+</Exercicio>
+
+<Exercicio
+  numero="49.35"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "$10{,}000$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>See the reference indicated in <em>source</em> for the detailed solution.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+A company pays dividends of $100 per month indefinitely. With discount rate of 1% per month, what is the fair value of the company today?
+</Exercicio>
+
+<Exercicio
+  numero="49.36"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "$1120.00$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>See the reference indicated in <em>source</em> for the detailed solution.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+$1,000 invested at 12% per year with continuous compounding earns how much after 1 year? Compare with annual compounding.
+</Exercicio>
+
+<Exercicio
+  numero="49.37"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "$3$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>See the reference indicated in <em>source</em> for the detailed solution.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+In economics, each dollar of income is spent at rate $2/3$ and saved at rate $1/3$ (marginal propensity to consume $c = 2/3$). What is the total effect (Keynesian multiplier) of an initial $1 increase in income?
+</Exercicio>
+
+<Exercicio
+  numero="49.38"
+  dificuldade="modelagem"
+  opcoes={[
+    { texto: "$50{,}000$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>For <Eq>{`n`}</Eq> monthly payments <Eq>{`P`}</Eq> at monthly rate <Eq>{`r`}</Eq>, the present value is: <Eq>{`VP_n = P \\sum_{k=1}^n (1+r)^{-k} = P \\cdot \\frac{1-(1+r)^{-n}}{r}`}</Eq>. When <Eq>{`n \\to \\infty`}</Eq>: <Eq>{`VP = P/r`}</Eq> (perpetuity). For <Eq>{`P = 500`}</Eq>, <Eq>{`r = 0.01`}</Eq>: <Eq>{`VP = 500/0.01 = 50{,}000`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+A financing pays $500 per month indefinitely at 1% per month. Calculate the total present value using the limit of the geometric series.
+</Exercicio>
+
+### Block E — Proofs and challenges (49.39 to 49.44)
+
+<Exercicio
+  numero="49.39"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$\\text{diverges}$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>The sequence <Eq>{`a_n = n`}</Eq> is increasing and unbounded. For any candidate <Eq>{`L`}</Eq>, take <Eq>{`\\varepsilon = 1`}</Eq>: for <Eq>{`n > L + 1`}</Eq> we have <Eq>{`|a_n - L| = n - L > 1 = \\varepsilon`}</Eq>. The epsilon-N definition cannot be satisfied for any <Eq>{`L`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Is the sequence $a_n = n$ convergent? Justify using the epsilon-$N$ definition.
+</Exercicio>
+
+<Exercicio
+  numero="49.40"
+  dificuldade="compreensao"
+  opcoes={[
+    { texto: "$2$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>The sequence of partial sums <Eq>{`S_n = \\sum_{k=0}^n (1/2)^k`}</Eq> satisfies: (i) <Eq>{`S_{n+1} = S_n + (1/2)^{n+1} > S_n`}</Eq> (increasing); (ii) <Eq>{`S_n < \\sum_{k=0}^{\\infty} (1/2)^k = 2`}</Eq> (bounded). Thus it converges by the monotone bounded theorem. The limit is <Eq>{`2`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Prove that the sequence of partial sums $S_n = \sum_{k=0}^n (1/2)^k$ is increasing and bounded above, hence converges by the monotone bounded theorem.
+</Exercicio>
+
+<Exercicio
+  numero="49.41"
+  dificuldade="desafio"
+  opcoes={[
+    { texto: "$S_{10} \\approx 2.97$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>Geometric series <Eq>{`\\sum_{n=0}^{\\infty} (2/3)^n`}</Eq>: ratio <Eq>{`r = 2/3`}</Eq>, <Eq>{`|r| < 1`}</Eq>. Sum: <Eq>{`1/(1 - 2/3) = 1/(1/3) = 3`}</Eq>. Partial sums: <Eq>{`S_0=1`}</Eq>, <Eq>{`S_1=5/3`}</Eq>, <Eq>{`S_2=19/9 \\approx 2.11`}</Eq>, <Eq>{`S_5 \\approx 2.74`}</Eq>, <Eq>{`S_{10} \\approx 2.97`}</Eq>. Converging to 3.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Calculate $\displaystyle\sum_{n=0}^{\infty} \left(\frac{2}{3}\right)^n$. Compute the first 5 partial sums in your notebook to confirm convergence.
+</Exercicio>
+
+<Exercicio
+  numero="49.42"
+  dificuldade="desafio"
+  opcoes={[
+    { texto: "$\\pi^2/6$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>The series <Eq>{`\\sum_{n=1}^{\\infty} 1/n^2`}</Eq> converges (p-series, <Eq>{`p=2>1`}</Eq>). Compare: <Eq>{`1/n^2 \\leq 1/(n(n-1)) = 1/(n-1) - 1/n`}</Eq> (telescoping sum that converges). Euler (1734) calculated <Eq>{`\\pi^2/6 \\approx 1.6449`}</Eq>. Compute <Eq>{`S_{10} = 1 + 1/4 + 1/9 + \\cdots + 1/100 \\approx 1.5498`}</Eq> — already close to <Eq>{`\\pi^2/6`}</Eq>.</>}
+  fonte={{ livro: "Active Calculus", url: "https://activecalculus.org/single/sec-8-3-geometric.html", secao: "§8.2", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Show that $\displaystyle\sum_{n=1}^{\infty} \frac{1}{n^2}$ converges. Calculate $S_{10}$ and compare with $\pi^2/6$.
+</Exercicio>
+
+<Exercicio
+  numero="49.43"
+  dificuldade="demonstracao"
+  opcoes={[
+    { texto: "$\\lim 1/n = 0$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>Given <Eq>{`\\varepsilon > 0`}</Eq>, choose <Eq>{`N = \\lceil 1/\\varepsilon \\rceil`}</Eq>. For <Eq>{`n > N`}</Eq>: <Eq>{`|1/n - 0| = 1/n \\leq 1/N \\leq 1/(1/\\varepsilon) = \\varepsilon`}</Eq>. Since <Eq>{`\\varepsilon`}</Eq> was arbitrary, it follows <Eq>{`\\lim 1/n = 0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Write the goal.</strong> We want: <Eq>{`\\forall \\varepsilon > 0, \\exists N : n > N \\Rightarrow |1/n - 0| < \\varepsilon`}</Eq>.</li>
+      <li><strong>Simplify.</strong> <Eq>{`|1/n - 0| = 1/n`}</Eq>. We need <Eq>{`1/n < \\varepsilon`}</Eq>, i.e., <Eq>{`n > 1/\\varepsilon`}</Eq>.</li>
+      <li><strong>Choose N.</strong> Take <Eq>{`N = \\lceil 1/\\varepsilon \\rceil`}</Eq>. Then <Eq>{`N \\geq 1/\\varepsilon`}</Eq>.</li>
+      <li><strong>Verify.</strong> For <Eq>{`n > N \\geq 1/\\varepsilon`}</Eq>, we have <Eq>{`n > 1/\\varepsilon`}</Eq>, so <Eq>{`1/n < \\varepsilon`}</Eq>. QED.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Rigorously demonstrate via epsilon-$N$ that $\displaystyle\lim_{n \to \infty} \frac{1}{n} = 0$.
+</Exercicio>
+
+<Exercicio
+  numero="49.44"
+  dificuldade="demonstracao"
+  opcoes={[
+    { texto: "$\\lim(a_n + b_n) = L + M$", correta: true },
+    { texto: "$0$" },
+    { texto: "$1$" },
+    { texto: "does not exist" },
+  ]}
+  solucao={<>Given <Eq>{`\\varepsilon > 0`}</Eq>: there exist <Eq>{`N_1, N_2`}</Eq> such that <Eq>{`n > N_1 \\Rightarrow |a_n - L| < \\varepsilon/2`}</Eq> and <Eq>{`n > N_2 \\Rightarrow |b_n - M| < \\varepsilon/2`}</Eq>. For <Eq>{`n > N = \\max(N_1, N_2)`}</Eq>: <Eq>{`|(a_n + b_n) - (L+M)| \\leq |a_n - L| + |b_n - M| < \\varepsilon/2 + \\varepsilon/2 = \\varepsilon`}</Eq>. Thus <Eq>{`\\lim(a_n + b_n) = L + M`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Hypotheses.</strong> <Eq>{`\\lim a_n = L`}</Eq> and <Eq>{`\\lim b_n = M`}</Eq>.</li>
+      <li><strong>Goal.</strong> Given <Eq>{`\\varepsilon > 0`}</Eq>, find <Eq>{`N`}</Eq> such that <Eq>{`n > N \\Rightarrow |(a_n+b_n)-(L+M)| < \\varepsilon`}</Eq>.</li>
+      <li><strong>Use the hypotheses with <Eq>{`\\varepsilon/2`}</Eq>.</strong> There exist <Eq>{`N_1, N_2`}</Eq> with the conditions above.</li>
+      <li><strong>Take <Eq>{`N = \\max(N_1, N_2)`}</Eq>.</strong> By the triangle inequality: <Eq>{`|(a_n+b_n)-(L+M)| \\leq |a_n-L| + |b_n-M| < \\varepsilon/2 + \\varepsilon/2 = \\varepsilon`}</Eq>. QED.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 2", url: "https://openstax.org/books/calculus-volume-2/pages/5-1-sequences", secao: "§5.1", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Prove the algebra of limits theorem: if $\lim a_n = L$ and $\lim b_n = M$, then $\lim (a_n + b_n) = L + M$.
+</Exercicio>
 
 </ListaExercicios>
 
 ## Sources
 
-- [**Basic Analysis**](https://www.jirka.org/ra/) — Lebl · 2024 · §2.1-2.4. **Primary source.**
-- [**Mathematical Analysis I**](http://www.trillia.com/zakon-analysisI.html) — Zakon · 2004 · ch. 3.
-- [**Active Calculus**](https://activecalculus.org/single/) — Boelkins · 2024 · §8.1.
+- [**Lebl — Basic Analysis: Introduction to Real Analysis**](https://www.jirka.org/ra/) — Jiří Lebl · CC-BY-NC-SA · §2.1–2.4 (Sequences). Epsilon-N definition, uniqueness, Cauchy, Bolzano-Weierstrass. **Primary reference for rigor.**
+- [**Active Calculus**](https://activecalculus.org/single/sec-8-3-geometric.html) — Matt Boelkins · 2024 · CC-BY-NC-SA · §8.1 (Sequences) and §8.2 (Geometric Series). Activities with recursive sequences, Fibonacci, financial applications.
+- [**OpenStax Calculus Volume 2**](https://openstax.org/books/calculus-volume-2/pages/5-1-sequences) — Strang et al. · CC-BY-NC-SA 4.0 · §5.1 (Sequences). Notable limits, drill of exercises with complete solutions.

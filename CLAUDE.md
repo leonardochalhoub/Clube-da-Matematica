@@ -469,7 +469,7 @@ Removed: `ar`, `hi`, `he` — gTTS quality bad, Edge-TTS neural blocked by corp 
 |-------|-------|--------|------|
 | UI strings (buttons, headings, navigation) | `src/lib/i18n/translations.ts` | 100% in 11 locales | Claude (already done) |
 | Audio narration text (TTS) | `src/content/audio-translations.generated.ts` | 100% in 11 locales | Claude (already done) |
-| Lesson MDX bodies | `content/i18n/<speechLang>/aulas/...` | **en-US ✅ · es-ES ✅ · 8 locales partial (24–52%)** | **Claude subagents** — Haiku primary, Sonnet for oversized, Opus rarely |
+| Lesson MDX bodies | `content/i18n/<speechLang>/aulas/...` | **en-US ✅ 120/120 (re-synced 2026-05-31) · 9 locales stale vs new PT-BR** | **Claude subagents** — Haiku primary, Sonnet for oversized, Opus 4.8 for the few 1257–1575-line files that truncate |
 
 ### Translation pipeline — Claude-based (as of 2026-05-11)
 
@@ -635,13 +635,20 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 ## 9. Roadmap snapshot (current)
 
 - ✅ **120/120 lessons CLEAN** against the L1 canonical template (100% conformity, 2026-05-30).
-- ✅ **5,313 sourced exercises** (100% with `solucao+fonte`, 99.8% with MC `opcoes`, 17.8% with `passos`).
+- ✅ **PT-BR source perfected (2026-05-31).** Full-corpus copy-edit + math-correctness audit:
+  - **932 language fixes** (accents/diacritics, grammar, crase, agreement, awkward phrasing, stray editorial artifacts, English-in-prose).
+  - **819 exercise math-correctness fixes** (wrong `correta` flags re-pointed, missing answers added to option sets, body/solução/option mismatches reconciled, duplicates de-duped).
+  - **5 cascade-shuffled banks regenerated** (lessons whose entire `<ListaExercicios>` was the wrong topic): **L13** funções trig (was ellipses), **L14** equações trig (was sequences), **L16** sequências (was exp/log), **L112** transformações lineares (was dot/cross products), **L113** núcleo e imagem (was lines/planes) — ~200 new on-topic, book-sourced MC exercises (Beezer, Hefferon, OpenStax A&T, Stitz–Zeager).
+  - **Verified:** 120/120 compile (0 FAIL via `scripts/check-rsc-all.mjs`), **5,319 MC exercises with exactly one `correta:true` (0 violations)**.
+  - Residual per-exercise oddities (a few corrupt source enunciados, intentional `Confirme` duplicate pairs, textbook-figure exercises) are individually self-consistent and logged; not blocking.
+- ✅ **5,319 sourced exercises** (100% with `solucao+fonte`, 100% with MC `opcoes` + single `correta`, ~25% with `passos`).
 - ✅ **1,800 exam questions** (12 trimesters × 10 versions × 15 questions) in `provas-data.ts` — **100% with MC** `opcoes` arrays (1,800/1,800 questions have plausible distractors).
 - ✅ All 120 lessons stabilized to the Lição 1 canonical template (L14-L120 rewritten 2026-04 → 2026-05; build green).
 - ✅ UI translated to 11 locales (no MDX bodies).
 - ✅ Per-locale lesson routing (1,390 static pages — incl. en/es/zh/ja/de/fr/it/ru/ko/pl prefixes that fall back to PT-BR bodies).
 - ✅ Footer with `version · commit · timestamp` (currently `0.2.0`).
-- 🟡 **MDX lesson translations in progress**: en-US ✅ (124/124) · es-ES ✅ (124/124) · 8 locales partial (24–52%). Executed via Haiku subagents (primary) with `scripts/fix-translated-frontmatter.py` post-sweep.
+- 🟡 **MDX lesson translations**: **en-US ✅ 120/120 re-synced to the perfected PT-BR (2026-05-31)** · es-ES 119/120 (stale vs new PT-BR — needs re-sync) · zh-CN 115 · pl-PL 104 · de-DE 94 · fr-FR 80 · it-IT 76 · ko-KR 64 · ru-RU 55 · ja-JP 53. Executed via Haiku subagents (primary); the 6 largest en-US files (1257–1575 lines, where Haiku's 32k cap truncates) were finished with **Opus 4.8 one-at-a-time** after Sonnet's structured-output step kept failing on them. Always `scripts/fix-translated-frontmatter.py --only <locale>` post-sweep.
+  - **NOTE:** every non-en locale is now STALE vs the 2026-05-31 PT-BR (exercise counts changed via the math + regen passes). Re-sync each by comparing per-file `<Exercicio` count to the PT-BR source and re-translating mismatches.
 - ⏳ Provas i18n → TO-DO.
 - ⏳ Wolfram Alpha exercise links must use clean symbolic queries. Lesson-1 audit pending.
 - 🔜 Future modules: Physics (high-school), Engineering intro.
@@ -672,4 +679,4 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ---
 
-> **Last update:** 2026-05-11. Translation pipeline reframed as Claude-based (Haiku primary, Sonnet for oversized, Opus rare); Gemini free demoted to fallback. en-US and es-ES brought to 100% lesson MDX coverage. If you change a convention, edit this file in the same commit.
+> **Last update:** 2026-05-31. PT-BR source perfected: 932 language fixes + 819 exercise math-correctness fixes + 5 cascade-shuffled exercise banks regenerated (L13/14/16/112/113); 120/120 compile, 5,319 MC exercises with 0 `correta` violations. en-US re-synced 120/120 to the new PT-BR (last 6 oversized files via Opus 4.8 one-at-a-time). All other locales are now STALE vs the updated PT-BR and need re-sync (compare per-file `<Exercicio` counts). **Orchestration note:** translation/audit waves run as Workflow subagents — they DIE if the launching turn is interrupted, so verify journal *freshness* (mtime), not just result counts, and resume on the remaining set. If you change a convention, edit this file in the same commit.

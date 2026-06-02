@@ -1,455 +1,1208 @@
 ---
-titulo: "Lesson 33 — Transpose, Identity, Inverse Matrix"
+titulo: "Lição 33 — Transposed, identity, and inverse matrices"
 slug: "licao-33-transposta-inversa"
 categoria: "aulas"
 subcategoria: "ano-1-trim-4"
-descricao: "The transpose mirrors the matrix. The inverse undoes multiplication — exists only when the determinant is non-zero."
+descricao: "The transpose mirrors a matrix. The inverse undoes multiplication — it exists only when the determinant is nonzero."
 ordem: 33
 publicado: true
 tags: ["matrizes", "inversa", "transposta", "ano-1", "trim-4"]
 prerrequisitos: ["licao-32-operacoes-matrizes"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
+atualizadoEm: "2026-05-05"
 usadoEm: ["1.º ano do EM (16 anos)", "Math I japonês cap. matrizes", "Klasse 11 alemã Lineare Algebra"]
 versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="A A^{-1} = A^{-1} A = I, \qquad (A^T)_{ij} = a_{ji}"
-  legenda={<>The <strong>inverse</strong> <em>A⁻¹</em> of a square matrix satisfies <em>AA⁻¹ = I</em>. It exists only if <em>det A ≠ 0</em>. The <strong>transpose</strong> <em>Aᵀ</em> swaps rows for columns — a simple but ubiquitous operation in linear algebra.</>}
-  audioTexto="Inverse of A satisfies, A times A inverse equals A inverse times A, equals the identity matrix. The inverse exists only if the determinant of A is non-zero. The transpose of A has, as element i j, the j i element of the original matrix — it mirrors the matrix across the diagonal."
+  formula="A^{-1} = \frac{1}{ad - bc}\begin{pmatrix} d & {-b} \\ {-c} & a \end{pmatrix}"
+  legenda={<>The <strong>inverse of a 2×2 matrix</strong> <Eq>{`A = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}`}</Eq>: swap the elements of the main diagonal, negate the off-diagonal elements, and divide everything by the <strong>determinant</strong> <Eq>{`ad - bc`}</Eq>. If <Eq>{`ad - bc = 0`}</Eq>, the inverse does not exist — the matrix is singular.</>}
+  audioTexto="The inverse of a two by two matrix with entries a, b, c, d is one divided by a d minus b c, times the matrix that has d in position one one, minus b in position one two, minus c in position two one, and a in position two two. If the determinant a d minus b c equals zero, the inverse does not exist."
 />
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books covering this lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="http://linear.pugetsound.edu/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Beezer — A First Course in Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · §MO, §MI, §MISLE · GNU FDL · </span>
+      <em className="text-clube-mist">Rigorous definitions of transpose and inverse, properties with complete proofs, detailed Gauss-Jordan method.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — College Algebra 2e
+      </a>
+      <span className="text-clube-mist"> · §9.7 · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Direct formula for 2×2 inverse and system solving via inverse — with numbered examples and sourced exercises.</em>
+    </li>
+    <li>
+      <a href="https://hefferon.net/linearalgebra/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hefferon — Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · cap. 3 §1–3 · CC-BY-SA · </span>
+      <em className="text-clube-mist">Geometric approach to invertibility; proof exercises on symmetry and algebraic properties of the inverse.</em>
+    </li>
+  </ul>
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="Transpose and inverse">
+<Porta nivel="formal" titulo="Rigorous definition">
 
 ### Transpose
 
-$(A^T)_{ij} = a_{ji}$. Rows are swapped for columns. Properties:
+<Definicao titulo="Transposed matrix">
+
+Given $A \in M_{m \times n}(\mathbb{R})$, the **transpose** $A^T \in M_{n \times m}(\mathbb{R})$ is defined by
+
+<Equation explicacao="The element in row i, column j of A transpose is the element in row j, column i of A. Rows become columns and columns become rows." latex="(A^T)_{ij} = a_{ji}, \quad 1 \leq i \leq n,\ 1 \leq j \leq m." />
+
+</Definicao>
+
+**Properties of the transpose** — for compatible $A, B$ and $\alpha \in \mathbb{R}$:
 
 | Property | Formula |
 |---|---|
 | Involution | $(A^T)^T = A$ |
-| Sum | $(A + B)^T = A^T + B^T$ |
-| Scalar | $(\alpha A)^T = \alpha A^T$ |
-| Product | $(AB)^T = B^T A^T$ (reverses order) |
-| Inverse-transpose | $(A^T)^{-1} = (A^{-1})^T$ |
+| Linearity (sum) | $(A + B)^T = A^T + B^T$ |
+| Linearity (scalar) | $(\alpha A)^T = \alpha A^T$ |
+| Product (order reverses) | $(AB)^T = B^T A^T$ |
+| Inverse-transpose | $(A^{-1})^T = (A^T)^{-1}$ |
 
-**Symmetric** matrix: $A^T = A$. **Orthogonal** matrix: $A^T A = I$ ⟺ $A^{-1} = A^T$.
+**Symmetric matrix**: $A = A^T$ (implies $A$ is square). **Skew-symmetric matrix**: $A^T = -A$ (implies main diagonal is zero).
 
-### Identity
+> "For matrices $A$ and $B$, the transpose of the product satisfies $(AB)^T = B^T A^T$. The order is reversed, as also happens with the inverse." — [Beezer, A First Course in Linear Algebra, §MO](http://linear.pugetsound.edu/html/section-MO.html)
 
-$I_n$: $n \times n$ square matrix with 1's on the diagonal and 0 off. For every $A_{n \times n}$:
-$$AI = IA = A$$
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 480 160" className="w-full max-w-[520px] mx-auto block">
+<defs>
+  <marker id="arr33" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="rgb(26 77 92)"/>
+  </marker>
+</defs>
+<g>
+  <rect x="20" y="20" width="130" height="90" rx="6" fill="rgb(26 77 92 / 0.12)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="85" y="12" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">A (2×3)</text>
+  <text x="50" y="55" fontSize="13" fontFamily="serif" fill="rgb(26 77 92)">a</text>
+  <text x="85" y="55" fontSize="13" fontFamily="serif" fill="rgb(26 77 92)">b</text>
+  <text x="120" y="55" fontSize="13" fontFamily="serif" fill="rgb(26 77 92)">c</text>
+  <text x="50" y="95" fontSize="13" fontFamily="serif" fill="rgb(232 199 122 / 0.9)">d</text>
+  <text x="85" y="95" fontSize="13" fontFamily="serif" fill="rgb(232 199 122 / 0.9)">e</text>
+  <text x="120" y="95" fontSize="13" fontFamily="serif" fill="rgb(232 199 122 / 0.9)">f</text>
+</g>
+<g>
+  <line x1="165" y1="65" x2="295" y2="65" stroke="rgb(26 77 92)" strokeWidth="1.5" markerEnd="url(#arr33)"/>
+  <text x="228" y="58" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.6">transpose</text>
+  <text x="228" y="78" textAnchor="middle" fontSize="11" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">(·)ᵀ</text>
+</g>
+<g>
+  <rect x="310" y="10" width="90" height="130" rx="6" fill="rgb(26 77 92 / 0.12)" stroke="rgb(26 77 92)" strokeWidth="1.5"/>
+  <text x="355" y="6" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.7">Aᵀ (3×2)</text>
+  <text x="335" y="45" fontSize="13" fontFamily="serif" fill="rgb(26 77 92)">a</text>
+  <text x="375" y="45" fontSize="13" fontFamily="serif" fill="rgb(232 199 122 / 0.9)">d</text>
+  <text x="335" y="80" fontSize="13" fontFamily="serif" fill="rgb(26 77 92)">b</text>
+  <text x="375" y="80" fontSize="13" fontFamily="serif" fill="rgb(232 199 122 / 0.9)">e</text>
+  <text x="335" y="115" fontSize="13" fontFamily="serif" fill="rgb(26 77 92)">c</text>
+  <text x="375" y="115" fontSize="13" fontFamily="serif" fill="rgb(232 199 122 / 0.9)">f</text>
+</g>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+Transpose of a 2×3 matrix: each row of <em>A</em> becomes a column of <em>A</em><sup>T</sup>. Format reverses from m×n to n×m.
+</figcaption>
+</figure>
 
-### Inverse
+### Identity matrix
 
-$A_{n \times n}$ is **invertible** (non-singular) if there exists $A^{-1}$ such that $AA^{-1} = A^{-1}A = I$. **Equivalence theorem** — for square $A$, the following are equivalent:
+<Definicao titulo="Identity matrix">
+
+$I_n$ is the $n \times n$ matrix with Kronecker delta as entries:
+
+<Equation explicacao="The Kronecker delta equals 1 if i = j (main diagonal) and 0 if i ≠ j (off-diagonal). It is the multiplicative identity element for matrix multiplication." latex="(I_n)_{ij} = \delta_{ij} = \begin{cases} 1 & i = j \\ 0 & i \neq j \end{cases}" />
+
+Central property: $A I_n = I_m A = A$ for $A \in M_{m \times n}$.
+
+</Definicao>
+
+### Inverse matrix
+
+<Definicao titulo="Invertibility">
+
+A square matrix $A \in M_{n \times n}(\mathbb{R})$ is **invertible** (or nonsingular) if there exists $A^{-1} \in M_{n \times n}(\mathbb{R})$ such that
+
+<Equation explicacao="The inverse satisfies both equalities — left and right multiplication yields the identity. If such a matrix exists, it is unique." latex="A A^{-1} = A^{-1} A = I_n." />
+
+</Definicao>
+
+> "A square matrix $A$ has an inverse if and only if its columns are linearly independent — equivalently, if and only if $\det A \neq 0$." — [Beezer, FCLA, §MI](http://linear.pugetsound.edu/html/section-MI.html)
+
+<Teorema titulo="Equivalence Theorem (square matrices)">
+
+For $A \in M_{n \times n}(\mathbb{R})$, the following statements are equivalent:
 
 1. $A$ is invertible.
 2. $\det A \neq 0$.
-3. $A\mathbf{x} = \mathbf{0}$ has only $\mathbf{x} = \mathbf{0}$.
+3. $A\mathbf{x} = \mathbf{0}$ has only the solution $\mathbf{x} = \mathbf{0}$.
 4. The columns of $A$ are linearly independent.
-5. The rows of $A$ are linearly independent.
-6. $A$ has full rank: $\text{rank}(A) = n$.
-7. $A$ is a product of elementary matrices.
+5. $\text{rank}(A) = n$.
+6. $A$ is a product of elementary matrices.
 
-### 2x2 inverse
+</Teorema>
 
-$<Eq>{`A = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}, \\quad A^{-1} = \\frac{1}{ad - bc} \\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}`}</Eq>$
+### Explicit formula for $2 \times 2$
 
-(Valid if $ad - bc \neq 0$.)
+<Equation explicacao="For A = [[a,b],[c,d]]: swap the main diagonal elements, negate the off-diagonal elements, divide by the determinant. Valid only if ad - bc ≠ 0." latex="A = \begin{pmatrix} a & b \\ c & d \end{pmatrix} \implies A^{-1} = \frac{1}{ad - bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}" />
 
-### Inverse properties
+### Gauss-Jordan method for $n \times n$
 
-- $(A^{-1})^{-1} = A$
-- $(AB)^{-1} = B^{-1} A^{-1}$ (**reverses order!**)
-- $(A^T)^{-1} = (A^{-1})^T$
-- $(\alpha A)^{-1} = (1/\alpha) A^{-1}$
-- $\det(A^{-1}) = 1/\det(A)$
+Form the augmented matrix $[A \mid I_n]$ and apply elementary row operations until you obtain $[I_n \mid A^{-1}]$. If $A$ is singular, the left side will not reach $I_n$ — the inverse does not exist.
 
-### Computation via Gauss-Jordan
+### Properties of the inverse
 
-Form $[A | I]$ → row-reduce until $[I | A^{-1}]$. Cost $O(n^3)$.
+<Equation explicacao="Five fundamental identities involving the inverse. The reversal of order in the product is analogous to the reversal in the transpose." latex="(A^{-1})^{-1} = A, \quad (AB)^{-1} = B^{-1}A^{-1}, \quad (A^T)^{-1} = (A^{-1})^T, \quad (\alpha A)^{-1} = \tfrac{1}{\alpha}A^{-1}, \quad \det(A^{-1}) = \tfrac{1}{\det A}" />
+
+> "If $A$ and $B$ are invertible matrices of the same order, then $AB$ is invertible and $(AB)^{-1} = B^{-1} A^{-1}$." — [Hefferon, Linear Algebra, cap. 3 §1](https://hefferon.net/linearalgebra/)
+
+<Insight>
+
+**Transpose and inverse commute.** The identity $(A^{-1})^T = (A^T)^{-1}$ says it does not matter: you can transpose and then invert, or invert and then transpose — you end up at the same place. This makes the notation $A^{-T}$ well-defined and widely used in statistics (least squares) and computer graphics.
+
+</Insight>
 
 </Porta>
 
 <Porta nivel="5" titulo="For a 5-year-old">
 
-The **transpose** is like flipping the matrix on its side: what was standing up lies down, what was lying down stands up. Rows become columns.
+**Transpose** is flipping the matrix on its side. What was in a horizontal row becomes a vertical column. It is like tilting a book sideways: the rows become columns.
 
-The **inverse** is like **undoing**. If matrix $A$ is "putting on a coat", the inverse $A^{-1}$ is "taking off the coat". Putting it on then taking it off goes back to the start: $A \cdot A^{-1} = I$ (identity = nothing changed).
+**Inverse** is like **undoing** something. If you put on a jacket, the inverse is taking off the jacket. Put on and take off: back to the beginning. For matrices, multiplying $A$ by $A^{-1}$ gives the identity — which is like the "nothing" of matrix multiplication.
 
-But careful: not every matrix has an inverse! Some matrices **flatten** things and you can't unflatten them.
+But be careful: not every matrix has an inverse. Some matrices "squash" information in a way that cannot be unsquashed — like crushing a sheet of paper: you can fold it again, but the creases stay.
 
 </Porta>
 
 <Porta nivel="10" titulo="For a 10-year-old">
 
-**Transpose**: swaps rows and columns. If $A$ has 2 rows and 3 columns, $A^T$ will have 3 rows and 2 columns.
+**Transpose**: swap rows for columns. A matrix with 2 rows and 3 columns becomes one with 3 rows and 2 columns:
 
-$<Eq>{`\\begin{pmatrix} 1 & 2 & 3 \\\\ 4 & 5 & 6 \\end{pmatrix}^T = \\begin{pmatrix} 1 & 4 \\\\ 2 & 5 \\\\ 3 & 6 \\end{pmatrix}`}</Eq>$
+$$\begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{pmatrix}^T = \begin{pmatrix} 1 & 4 \\ 2 & 5 \\ 3 & 6 \end{pmatrix}$$
 
-The **inverse** is the "undo": $A \cdot A^{-1} = I$ (identity). Like dividing, but for matrices.
+**Inverse**: it is the matrix that "undoes" another. If $A$ scrambles a set of information, $A^{-1}$ unscrambles it. $A \cdot A^{-1} = I$ (the identity — the matrix that changes nothing, like multiplying by 1).
 
-Think of it this way:
-- You multiplied something by $A$ and want to reverse it. How? Multiply by the inverse $A^{-1}$.
-- In an equation $A\mathbf x = \mathbf b$, the "solution" is $\mathbf x = A^{-1} \mathbf b$ — just like dividing by $A$.
+For a $2 \times 2$ matrix: swap the diagonal elements ($a$ and $d$ trade places), put negative signs on the others ($b$ and $c$ become $-b$ and $-c$), and divide everything by $ad - bc$.
 
-**But careful**: not every matrix has an inverse! Those with "zero determinant" (we'll see this in the next lesson) do not have an inverse because they lose information.
-
-**Trick for 2×2**: <Eq>{`\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}^{-1} = \\frac{1}{ad-bc}\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}`}</Eq>. Swap the diagonal entries, flip the sign of the others, divide by $ad - bc$.
+If $ad - bc = 0$, there is no inverse. That matrix lost information and cannot be recovered.
 
 </Porta>
 
 <Porta nivel="15" titulo="For a 15-year-old teen">
 
-**Transpose** is simple: swap rows for columns.
+**Transpose** is simple: $(A^T)_{ij} = a_{ji}$. Row $i$, column $j$ of $A^T$ picks the element row $j$, column $i$ of $A$.
 
-$<Eq>{`A = \\begin{pmatrix} 1 & 2 & 3 \\\\ 4 & 5 & 6 \\end{pmatrix}, \\quad A^T = \\begin{pmatrix} 1 & 4 \\\\ 2 & 5 \\\\ 3 & 6 \\end{pmatrix}`}</Eq>$
+The most important — and counterintuitive — property is $(AB)^T = B^T A^T$. The order reverses. The same with inverse: $(AB)^{-1} = B^{-1} A^{-1}$.
 
-The most important and counterintuitive rule: $(AB)^T = B^T A^T$ — **reverses the order**. Same thing for inverse: $(AB)^{-1} = B^{-1}A^{-1}$. Memorize this.
+**Symmetric matrix**: $A = A^T$. The diagonal is the axis of symmetry. Example: <Eq>{`\\begin{pmatrix} 3 & 7 \\\\ 7 & 5 \\end{pmatrix}`}</Eq>.
 
-**Identity** is the matrix with 1's on the diagonal and zeros off. Behaves like the "1" in multiplication: $AI = A$.
+**2×2 inverse**: given <Eq>{`A = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}`}</Eq> with $\det A = ad - bc \neq 0$:
 
-**Inverse** $A^{-1}$ is the matrix that "undoes" $A$. $AA^{-1} = I$. But careful: not every matrix has an inverse! Only **square ones with non-zero determinant**.
+$$A^{-1} = \frac{1}{ad - bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}$$
 
-For 2x2: <Eq>{`A^{-1} = \\frac{1}{ad - bc}\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}`}</Eq>.
+**Example**: <Eq>{`A = \\begin{pmatrix} 3 & 1 \\\\ 5 & 2 \\end{pmatrix}`}</Eq>. $\det A = 6 - 5 = 1$. <Eq>{`A^{-1} = \\begin{pmatrix} 2 & -1 \\\\ -5 & 3 \\end{pmatrix}`}</Eq>.
 
-Example: <Eq>{`A = \\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}`}</Eq>. $\det = 1\cdot 4 - 2\cdot 3 = -2$. <Eq>{`A^{-1} = -\\frac{1}{2}\\begin{pmatrix} 4 & -2 \\\\ -3 & 1 \\end{pmatrix} = \\begin{pmatrix} -2 & 1 \\\\ 3/2 & -1/2 \\end{pmatrix}`}</Eq>.
+Verification: <Eq>{`\\begin{pmatrix} 3 & 1 \\\\ 5 & 2 \\end{pmatrix}\\begin{pmatrix} 2 & -1 \\\\ -5 & 3 \\end{pmatrix} = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}`}</Eq>. Correct.
 
-**Where it appears?** Solving the system $A\mathbf{x} = \mathbf{b}$ is equivalent to $\mathbf{x} = A^{-1}\mathbf{b}$. In practice, row reduction is used (more efficient than computing the inverse).
+**Immediate application**: system $A\mathbf{x} = \mathbf{b}$ has solution $\mathbf{x} = A^{-1}\mathbf{b}$ — as long as $A$ is invertible.
 
-**Quick criterion to have an inverse**: $\det A \neq 0$. If $\det A = 0$, the matrix is **singular** — it compresses space, loses dimension, can't be undone.
+<Insight>
+
+**Why does order reverse in $(AB)^{-1} = B^{-1}A^{-1}$?** Think of getting dressed: $A$ = socks, $B$ = shoes. To undo, you first remove the shoes ($B^{-1}$) and then the socks ($A^{-1}$). Reversing the order of composed actions always requires reversing the order to undo them.
+
+</Insight>
 
 </Porta>
 
 <Porta nivel="25" titulo="For an engineering student">
 
-The inverse is rarely computed **explicitly** in numerical practice — row reduction is more stable and cheaper. But the theory of the inverse is central to understanding when systems have solutions.
+### Numerical computation of the inverse — methods
+
+**1. Closed form via adjugate**: $A^{-1} = \frac{1}{\det A} \text{adj}(A)$. Cost $O(n!)$ — pedagogical only for $n \leq 3$.
+
+**2. Gauss-Jordan on $[A \mid I]$** — cost $O(n^3)$, standard for hand and pedagogical work.
+
+**3. LU factorization**: $A = LU$ — solve $L\mathbf{y} = \mathbf{e}_j$ (forward substitution) and then $U\mathbf{x}_j = \mathbf{y}$ (back substitution) for each column $j$ of $I$. Total cost $O(n^3)$, but reuses the factorization for multiple systems.
+
+**Computational golden rule**: `np.linalg.solve(A, b)` is preferable to `np.linalg.inv(A) @ b` — numerically more stable and faster.
+
+### Conditioning
+
+The **condition number** $\kappa(A) = \|A\| \cdot \|A^{-1}\|$ measures solution sensitivity to perturbations in $\mathbf{b}$:
+
+$$\frac{\|\delta \mathbf{x}\|}{\|\mathbf{x}\|} \leq \kappa(A) \cdot \frac{\|\delta \mathbf{b}\|}{\|\mathbf{b}\|}$$
+
+If $\kappa(A) = 10^k$, approximately $k$ significant digits are lost. Poorly conditioned matrix: $\kappa \gg 1$.
+
+### Cross-domain applications
+
+- **Cryptography (Hill cipher)**: encrypt $\mathbf{c} = A\mathbf{m} \pmod{26}$; decrypt $\mathbf{m} = A^{-1}\mathbf{c} \pmod{26}$.
+- **Computer graphics**: View-Projection transformation; moving the camera is equivalent to applying the inverse to the objects.
+- **Economics (Leontief)**: total production $\mathbf{x} = (I - L)^{-1}\mathbf{d}$ for final demand $\mathbf{d}$.
+- **Statistics**: normal equation for least squares $\hat{\beta} = (X^T X)^{-1} X^T \mathbf{y}$.
 
 ### Proof: $(AB)^{-1} = B^{-1}A^{-1}$
 
-Show that $(AB)(B^{-1}A^{-1}) = I$:
-$$(AB)(B^{-1}A^{-1}) = A(BB^{-1})A^{-1} = AIA^{-1} = AA^{-1} = I.$$
-
-By uniqueness of the inverse (in an associative algebra with identity), this proves it.
-
-### Computation of $A^{-1}$ — methods
-
-1. **Adjugate**: $A^{-1} = \frac{1}{\det A} \text{adj}(A)$ — $O(n!)$, didactic but useless for $n > 3$.
-2. **Gauss-Jordan on $[A | I]$**: $O(n^3)$, standard.
-3. **LU**: decompose $A = LU$, then solve $LUx_j = e_j$ for each column. Same $O(n^3)$ but reuses the factorization.
-
-### Numerical stability
-
-**Conditioning**: $\kappa(A) = \|A\| \|A^{-1}\|$. If $\kappa$ is large, small errors in $\mathbf b$ are amplified in $\mathbf x = A^{-1}\mathbf b$. Criterion: $\kappa = 10^k$ ⟹ loss of $\approx k$ significant digits.
-
-### Cross-domain
-
-- **Cryptography**: matrix ciphers (Hill cipher) use $\mathbf c = A\mathbf m \mod 26$. Decryption: $\mathbf m = A^{-1}\mathbf c$.
-- **Computer graphics**: applying a transformation to the camera = applying the inverse to objects. View-Projection model.
-- **Economics (Leontief)**: technology matrix $A$. For final demand $\mathbf d$, total production $\mathbf x = (I-A)^{-1}\mathbf d$.
-- **Statistics**: $\hat\beta = (X^T X)^{-1} X^T \mathbf y$ — least-squares normal equation.
-- **Filters (Kalman)**: gain $K = P H^T (H P H^T + R)^{-1}$.
-
-### Block inverse
-
-$<Eq>{`\\begin{pmatrix} A & B \\\\ C & D \\end{pmatrix}^{-1} = \\begin{pmatrix} A^{-1} + A^{-1}B(D - CA^{-1}B)^{-1}CA^{-1} & \\cdots \\\\ \\cdots & \\cdots \\end{pmatrix}`}</Eq>$
-
-(Schur complement). Useful in optimization and Bayesian statistics.
-
-### Moore-Penrose pseudoinverse
-
-When $A$ is not square or is singular: $A^+ = (A^TA)^{-1}A^T$ (overdetermined) or $A^+ = A^T(AA^T)^{-1}$ (underdetermined). Generalizes the inverse via SVD.
+$(AB)(B^{-1}A^{-1}) = A(BB^{-1})A^{-1} = AIA^{-1} = AA^{-1} = I$. By uniqueness of the inverse, we are done. $\square$
 
 </Porta>
 
 <Porta nivel="40" titulo="For a senior professional">
 
-Invertibility characterizes the **general linear group** $GL_n(\mathbb R) = \{A \in M_n : \det A \neq 0\}$. It is the central object of **Lie theory** — every continuous matrix group is a subgroup of $GL_n$.
+The class of invertible matrices $GL_n(\mathbb{R}) = \{A \in M_n(\mathbb{R}) : \det A \neq 0\}$ forms the **general linear group** — a central object in Lie theory. Every continuous group of matrices is a closed subgroup of $GL_n(\mathbb{R})$.
 
-### Wolfram tour
+### Decompositions and inverse
 
-```mathematica
-A = {{1, 2}, {3, 4}};
-Inverse[A]
-PseudoInverse[A]
-ConditionNumber[A]
-LinearSolve[A, {5, 7}]
-```
+- **LU**: $A = LU \Rightarrow A^{-1} = U^{-1}L^{-1}$. Triangular matrices inverted by back-substitution.
+- **QR**: $A = QR \Rightarrow A^{-1} = R^{-1}Q^T$ (stable in least squares).
+- **SVD**: $A = U\Sigma V^T \Rightarrow A^{-1} = V\Sigma^{-1}U^T$ ($A$ square nonsingular).
+- **Cholesky** ($A$ SPD): $A = LL^T \Rightarrow A^{-1} = L^{-T}L^{-1}$, twice as fast as LU.
 
-### Decompositions and the inverse
+### Sherman-Morrison-Woodbury
 
-- **LU**: $A = LU$ ⟹ $A^{-1} = U^{-1} L^{-1}$. Triangulars are easy to invert.
-- **QR**: $A = QR$ ⟹ $A^{-1} = R^{-1}Q^T$.
-- **SVD**: $A = U\Sigma V^T$ ⟹ $A^{-1} = V\Sigma^{-1}U^T$ ($A$ square non-singular).
-- **Cholesky** ($A$ SPD): $A = LL^T$ ⟹ $A^{-1} = L^{-T}L^{-1}$.
+Rank-1 inverse update (Sherman-Morrison):
 
-### Sherman-Morrison
+$$(A + \mathbf{u}\mathbf{v}^T)^{-1} = A^{-1} - \frac{A^{-1}\mathbf{u}\mathbf{v}^T A^{-1}}{1 + \mathbf{v}^T A^{-1}\mathbf{u}}$$
 
-Inverse update when $A$ changes by rank-1:
-$$(A + \mathbf u \mathbf v^T)^{-1} = A^{-1} - \frac{A^{-1}\mathbf u \mathbf v^T A^{-1}}{1 + \mathbf v^T A^{-1}\mathbf u}$$
+Critical in RLS filters, online learning, sequential optimization.
 
-Critical in recursive filters, RLS adaptive filtering, online ML.
+### Moore-Penrose pseudo-inverse
 
-### Pseudoinverse via SVD
+For any $A \in M_{m \times n}$ (rectangular or singular): $A = U\Sigma V^T \Rightarrow A^+ = V\Sigma^+ U^T$ where $\Sigma^+$ inverts nonzero singular values. Minimum-norm solution: $\mathbf{x}^* = A^+\mathbf{b}$.
 
-For any $A \in M_{m\times n}$ (even rectangular or singular): $A = U\Sigma V^T$, then $A^+ = V\Sigma^+ U^T$ where $\Sigma^+$ inverts the non-zero singular values.
+### Markowitz — quantitative finance
 
-Least-squares solution: $\mathbf x = A^+\mathbf b$.
+Optimal weight of minimum-variance portfolio:
 
-### Quant/finance — Markowitz
+$$\mathbf{w}^* = \frac{\Sigma^{-1}(\boldsymbol{\mu} - r_f \mathbf{1})}{\mathbf{1}^T \Sigma^{-1}(\boldsymbol{\mu} - r_f \mathbf{1})}$$
 
-$$\mathbf w^* = \frac{\Sigma^{-1}(\boldsymbol \mu - r_f \mathbf 1)}{\mathbf 1^T \Sigma^{-1}(\boldsymbol \mu - r_f \mathbf 1)}$$
-
-Minimum-variance portfolio uses $\Sigma^{-1}$. Estimating $\Sigma^{-1}$ is ill-conditioned — hence robust estimators (graphical lasso, shrinkage).
-
-### Unbounded operators
-
-In infinite dim, $A^{-1}$ may be unbounded even with $A$ bounded. Spectrum vs eigenvalues diverge. Functional analysis takes over.
-
-### Current research
-
-- **Approximate matrix inversion** via random projections (Halko-Martinsson-Tropp).
-- **Low-rank updates**: for $A^{-1}$ in online ML, incremental updates with reduced complexity.
+Estimation of $\Sigma^{-1}$ in high dimension is poorly conditioned — robust estimators (graphical lasso, Ledoit-Wolf shrinkage) are necessary in production.
 
 </Porta>
 
 <Porta nivel="pratica" titulo="Practical application">
 
-**Recipe: never invert a matrix if you can avoid it.**
+### Golden rule
 
-The golden rule of computational linear algebra: **solve the system, don't invert**. `np.linalg.solve(A, b)` is faster and more stable than `np.linalg.inv(A) @ b`.
+**Never invert a matrix if you can avoid it.** `np.linalg.solve(A, b)` is faster and more stable than `np.linalg.inv(A) @ b`. Computing $A^{-1}$ explicitly is worthwhile only when you will reuse it for many vectors $\mathbf{b}$.
 
-### NumPy recipe
+### NumPy
 
 ```python
 import numpy as np
 
-A = np.array([[1, 2], [3, 4]], dtype=float)
+A = np.array([[3., 1.], [5., 2.]])
+b = np.array([7., 11.])
 
-# Transpose (free, just a view)
+# Transpose (no copy — just a view of the array)
 print(A.T)
 
-# Inverse (EXPENSIVE AND UNSTABLE — avoid if possible)
-A_inv = np.linalg.inv(A)
-
-# Solve Ax = b — preferred!
-b = np.array([5, 6])
+# Solve Ax = b (preferred over inverse)
 x = np.linalg.solve(A, b)
 
-# Pseudoinverse for singular or rectangular matrices
-A_pinv = np.linalg.pinv(A)
+# Explicit inverse (use only when needed)
+A_inv = np.linalg.inv(A)
 
-# Conditioning — alert if it's large
-print(np.linalg.cond(A))   # if > 1e10, careful
+# Conditioning — if > 1e10, beware numerical error
+print(np.linalg.cond(A))
+
+# Pseudo-inverse for singular or rectangular matrices
+A_pinv = np.linalg.pinv(A)
 ```
 
-### Symbolic SymPy
+### SymPy (exact form)
 
 ```python
 import sympy as sp
-A = sp.Matrix([[1, 2], [3, 4]])
+A = sp.Matrix([[3, 1], [5, 2]])
 print(A.T)
-print(A.inv())             # closed form
+print(A.inv())   # exact form — fractions, not floats
 print(A.det())
 ```
 
-### Check
+### When you really need $A^{-1}$
 
-```python
-def is_inverse(A, B, tol=1e-9):
-    n = A.shape[0]
-    return np.allclose(A @ B, np.eye(n), atol=tol)
-```
+1. Apply the same inverse transformation to many vectors — compute once, reuse.
+2. Symbolic derivation of closed-form formulas (least squares, Kalman filter).
+3. Numerical verification of algebraic identities.
 
-### Common pitfalls
+In all other cases: use `solve`, LU, or Cholesky.
 
-- **Inverse does not exist** if $\det A = 0$. Always check (or handle the `LinAlgError` exception).
-- **`np.linalg.inv` on an ill-conditioned matrix** gives numerical garbage even without an error — check `cond`.
-- **For LSQ or regression**: never compute $(X^TX)^{-1}$. Use `np.linalg.lstsq` or QR.
-- **For SPD systems**: use Cholesky (`scipy.linalg.cho_solve`) — twice as fast as LU.
+### Brazilian context: SISU and seat allocation
 
-### Recommended workflow
-
-1. Want $A^{-1}$? What for?
-2. To solve $A\mathbf x = \mathbf b$? Use `solve`.
-3. To solve several systems with the same $A$? Do LU once, reuse.
-4. For theory/derivation? Use SymPy or do it by hand.
-5. The case where you **really** need the explicit inverse is rare.
-
-### Essential task
-
-Solve every exercise. **Fluency** with the 2×2 inverse is fundamental — you'll use it a thousand times.
+SISU uses a linear system $A\mathbf{x} = \mathbf{b}$ to calculate cutoffs: $A$ encodes the relationship between candidate scores, seats per course, and bonuses (quotas, income). The "inverse" of that transformation recovers the optimal distribution of seats — although in production the MEC uses iteration, not direct inversion.
 
 </Porta>
 
 </DuasPortas>
 
+## Worked examples
+
+<Exemplo titulo="Computing the transpose of a 2×3 matrix" numero="1">
+
+**Problem:** Given <Eq>{`A = \\begin{pmatrix} 1 & -2 & 0 \\\\ 3 & 4 & -1 \\end{pmatrix}`}</Eq>, compute $A^T$ and verify that $(A^T)^T = A$.
+
+**Strategy:** Apply $(A^T)_{ij} = a_{ji}$: each row of $A$ becomes a column of $A^T$.
+
+**Solution:**
+
+$A$ has format $2 \times 3$, so $A^T$ will have format $3 \times 2$.
+
+1. Row 1 of $A$ = $(1, -2, 0)$ becomes column 1 of $A^T$.
+2. Row 2 of $A$ = $(3, 4, -1)$ becomes column 2 of $A^T$.
+
+$$A^T = \begin{pmatrix} 1 & 3 \\ -2 & 4 \\ 0 & -1 \end{pmatrix}$$
+
+**Verification of $(A^T)^T = A$:** Transposing $A^T$, the rows $(1,3)$, $(-2,4)$, $(0,-1)$ become columns, recovering exactly $A$. The involution is confirmed.
+
+**Source.** [Beezer, A First Course in Linear Algebra, §MO](http://linear.pugetsound.edu/html/section-MO.html) — GNU FDL license.
+
+</Exemplo>
+
+<Exemplo titulo="Computing the 2×2 inverse by direct formula" numero="2">
+
+**Problem:** Compute $A^{-1}$ for <Eq>{`A = \\begin{pmatrix} 4 & 7 \\\\ 2 & 6 \\end{pmatrix}`}</Eq> and verify $AA^{-1} = I$.
+
+**Strategy:** Apply the formula <Eq>{`A^{-1} = \\frac{1}{\\det A}\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}`}</Eq>.
+
+**Solution:**
+
+**Step 1 — Compute the determinant:**
+$$\det A = 4 \cdot 6 - 7 \cdot 2 = 24 - 14 = 10$$
+
+Since $\det A = 10 \neq 0$, the inverse exists.
+
+**Step 2 — Apply the formula:**
+$$A^{-1} = \frac{1}{10}\begin{pmatrix} 6 & -7 \\ -2 & 4 \end{pmatrix} = \begin{pmatrix} 0.6 & -0.7 \\ -0.2 & 0.4 \end{pmatrix}$$
+
+**Step 3 — Verify $AA^{-1} = I$:**
+$$\begin{pmatrix} 4 & 7 \\ 2 & 6 \end{pmatrix}\begin{pmatrix} 0.6 & -0.7 \\ -0.2 & 0.4 \end{pmatrix} = \begin{pmatrix} 2.4 - 1.4 & -2.8 + 2.8 \\ 1.2 - 1.2 & -1.4 + 2.4 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$$
+
+Verified.
+
+**Source.** [OpenStax College Algebra 2e, §9.7](https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses) — CC-BY 4.0 license.
+
+</Exemplo>
+
+<Exemplo titulo="3×3 inverse by Gauss-Jordan method" numero="3">
+
+**Problem:** Compute $A^{-1}$ for <Eq>{`A = \\begin{pmatrix} 1 & 2 & 1 \\\\ 0 & 1 & 3 \\\\ 2 & 3 & 0 \\end{pmatrix}`}</Eq> using Gauss-Jordan.
+
+**Strategy:** Form $[A \mid I_3]$ and apply elementary row operations until you obtain $[I_3 \mid A^{-1}]$.
+
+**Solution:**
+
+Augmented matrix initially:
+<Eq>{`\\left[\\begin{array}{ccc|ccc} 1 & 2 & 1 & 1 & 0 & 0 \\\\ 0 & 1 & 3 & 0 & 1 & 0 \\\\ 2 & 3 & 0 & 0 & 0 & 1 \\end{array}\\right]`}</Eq>
+
+**R3 ← R3 − 2·R1:**
+<Eq>{`\\left[\\begin{array}{ccc|ccc} 1 & 2 & 1 & 1 & 0 & 0 \\\\ 0 & 1 & 3 & 0 & 1 & 0 \\\\ 0 & -1 & -2 & -2 & 0 & 1 \\end{array}\\right]`}</Eq>
+
+**R3 ← R3 + R2:**
+<Eq>{`\\left[\\begin{array}{ccc|ccc} 1 & 2 & 1 & 1 & 0 & 0 \\\\ 0 & 1 & 3 & 0 & 1 & 0 \\\\ 0 & 0 & 1 & -2 & 1 & 1 \\end{array}\\right]`}</Eq>
+
+**R2 ← R2 − 3·R3; R1 ← R1 − R3:**
+<Eq>{`\\left[\\begin{array}{ccc|ccc} 1 & 2 & 0 & 3 & -1 & -1 \\\\ 0 & 1 & 0 & 6 & -2 & -3 \\\\ 0 & 0 & 1 & -2 & 1 & 1 \\end{array}\\right]`}</Eq>
+
+**R1 ← R1 − 2·R2:**
+<Eq>{`\\left[\\begin{array}{ccc|ccc} 1 & 0 & 0 & -9 & 3 & 5 \\\\ 0 & 1 & 0 & 6 & -2 & -3 \\\\ 0 & 0 & 1 & -2 & 1 & 1 \\end{array}\\right]`}</Eq>
+
+Therefore:
+$$A^{-1} = \begin{pmatrix} -9 & 3 & 5 \\ 6 & -2 & -3 \\ -2 & 1 & 1 \end{pmatrix}$$
+
+**Verification (first column of $AA^{-1}$):**
+$$\begin{pmatrix} 1 & 2 & 1 \\ 0 & 1 & 3 \\ 2 & 3 & 0 \end{pmatrix}\begin{pmatrix} -9 \\ 6 \\ -2 \end{pmatrix} = \begin{pmatrix} -9+12-2 \\ 0+6-6 \\ -18+18+0 \end{pmatrix} = \begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}\ \checkmark$$
+
+**Source.** [Beezer, A First Course in Linear Algebra, §MISLE](http://linear.pugetsound.edu/html/section-MISLE.html) — GNU FDL license.
+
+</Exemplo>
+
+<Exemplo titulo="System solution via inverse (modeling)" numero="4">
+
+**Problem:** A security company uses a 2×2 Hill cipher with key <Eq>{`K = \\begin{pmatrix} 3 & 2 \\\\ 5 & 4 \\end{pmatrix}`}</Eq>. The received ciphertext vector is <Eq>{`\\mathbf{c} = \\begin{pmatrix} 17 \\\\ 31 \\end{pmatrix}`}</Eq>. Recover the original message $\mathbf{m}$ by solving $K\mathbf{m} = \mathbf{c}$.
+
+**Strategy:** Compute $K^{-1}$ and multiply $\mathbf{m} = K^{-1}\mathbf{c}$.
+
+**Solution:**
+
+**Step 1 — Determinant:**
+$$\det K = 3 \cdot 4 - 2 \cdot 5 = 12 - 10 = 2$$
+
+**Step 2 — Inverse:**
+$$K^{-1} = \frac{1}{2}\begin{pmatrix} 4 & -2 \\ -5 & 3 \end{pmatrix} = \begin{pmatrix} 2 & -1 \\ -5/2 & 3/2 \end{pmatrix}$$
+
+**Step 3 — Recover $\mathbf{m}$:**
+$$\mathbf{m} = K^{-1}\mathbf{c} = \begin{pmatrix} 2 & -1 \\ -5/2 & 3/2 \end{pmatrix}\begin{pmatrix} 17 \\ 31 \end{pmatrix} = \begin{pmatrix} 34 - 31 \\ -85/2 + 93/2 \end{pmatrix} = \begin{pmatrix} 3 \\ 4 \end{pmatrix}$$
+
+The original message is $\mathbf{m} = (3, 4)^T$.
+
+**Verification:** <Eq>{`K\\mathbf{m} = \\begin{pmatrix} 3 & 2 \\\\ 5 & 4 \\end{pmatrix}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix} = \\begin{pmatrix} 9+8 \\\\ 15+16 \\end{pmatrix} = \\begin{pmatrix} 17 \\\\ 31 \\end{pmatrix} = \\mathbf{c}`}</Eq>. Correct.
+
+**Source.** [OpenStax College Algebra 2e, §9.7](https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses) — CC-BY 4.0 license.
+
+</Exemplo>
+
+<Exemplo titulo="Proof: $(A^{-1})^T = (A^T)^{-1}$" numero="5">
+
+**Problem:** Prove that for every invertible matrix $A$, we have $(A^{-1})^T = (A^T)^{-1}$.
+
+**Strategy:** Start from the definition $AA^{-1} = I$, transpose both sides, and use $(AB)^T = B^T A^T$.
+
+**Solution:**
+
+**Step 1.** From $AA^{-1} = I$, take the transpose of both sides:
+$$(AA^{-1})^T = I^T$$
+
+**Step 2.** Apply $(AB)^T = B^T A^T$ and use $I^T = I$:
+$$(A^{-1})^T A^T = I$$
+
+**Step 3.** The equation $(A^{-1})^T \cdot A^T = I$ says that $(A^{-1})^T$ is the left inverse of $A^T$. By uniqueness of the inverse:
+$$(A^{-1})^T = (A^T)^{-1}\ \square$$
+
+**Verification with example:** Take <Eq>{`A = \\begin{pmatrix} 3 & 1 \\\\ 5 & 2 \\end{pmatrix}`}</Eq>, <Eq>{`A^{-1} = \\begin{pmatrix} 2 & -1 \\\\ -5 & 3 \\end{pmatrix}`}</Eq> (det = 1). Then <Eq>{`(A^{-1})^T = \\begin{pmatrix} 2 & -5 \\\\ -1 & 3 \\end{pmatrix}`}</Eq>. And <Eq>{`A^T = \\begin{pmatrix} 3 & 5 \\\\ 1 & 2 \\end{pmatrix}`}</Eq>, <Eq>{`(A^T)^{-1} = \\frac{1}{1}\\begin{pmatrix} 2 & -5 \\\\ -1 & 3 \\end{pmatrix}`}</Eq>. Equal.
+
+**Source.** [Beezer, A First Course in Linear Algebra, §MI](http://linear.pugetsound.edu/html/section-MI.html) — GNU FDL license.
+
+</Exemplo>
+
 <ListaExercicios seed="licao-33">
 
-### Block A — Transpose and basic inverse (33.1 to 33.20)
+<Exercicio numero="33.1" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Yes, any two matrices can be added as long as they have the same dimensions.", correta: true },
+    { texto: "No, matrices can never be added." },
+    { texto: "Yes, but only if both are square." },
+    { texto: "Yes, but only if their determinants are equal." },
+  ]}
+  solucao={<>Matrix addition is defined only when matrices have the same number of rows and columns; thus any pair with matching dimensions can be added.</>}
+  passos={<>
+    <ol>
+      <li>1. Check the number of rows and columns of each matrix.</li>
+      <li>2. If the dimensions match, add the corresponding elements.</li>
+      <li>3. Otherwise, the operation is undefined.</li>
+      <li>4. Example: A (2×3) + B (2×3) is possible; A (2×3) + C (3×2) is not.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="33.1" dificuldade="aplicacao">
-
-Transpose of <Eq>{`\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}`}</Eq>. (Ans: <Eq>{`\\begin{pmatrix} 1 & 3 \\\\ 2 & 4 \\end{pmatrix}`}</Eq>.)
-</Exercicio>
-<Exercicio numero="33.2" dificuldade="aplicacao">
-
-Transpose of <Eq>{`\\begin{pmatrix} 1 & 2 & 3 \\\\ 4 & 5 & 6 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.3" dificuldade="aplicacao">
-
-Inverse of <Eq>{`\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}`}</Eq>. (Ans: <Eq>{`\\begin{pmatrix} -2 & 1 \\\\ 3/2 & -1/2 \\end{pmatrix}`}</Eq>.)
-</Exercicio>
-<Exercicio numero="33.4" dificuldade="aplicacao">
-
-Inverse of <Eq>{`\\begin{pmatrix} 2 & 0 \\\\ 0 & 3 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.5" dificuldade="aplicacao">
-
-Inverse of <Eq>{`\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.6" dificuldade="aplicacao">
-
-Does <Eq>{`\\begin{pmatrix} 1 & 2 \\\\ 2 & 4 \\end{pmatrix}`}</Eq> have an inverse? Justify. (Ans: no, $\det = 0$.)
-</Exercicio>
-<Exercicio numero="33.7" dificuldade="aplicacao">
-
-Verify that $A \cdot A^{-1} = I$ for <Eq>{`A = \\begin{pmatrix} 3 & 1 \\\\ 5 & 2 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.8" dificuldade="aplicacao">
-
-Inverse of <Eq>{`\\begin{pmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{pmatrix}`}</Eq>. (Ans: rotation by $-\theta$.)
-</Exercicio>
-<Exercicio numero="33.9" dificuldade="aplicacao">
-
-Solve $A\mathbf{x} = \mathbf{b}$ via the inverse: <Eq>{`A = \\begin{pmatrix} 2 & 1 \\\\ 1 & 3 \\end{pmatrix}`}</Eq>, $\mathbf{b} = (5, 7)^T$.
-</Exercicio>
-<Exercicio numero="33.10" dificuldade="aplicacao">
-
-Verify whether <Eq>{`\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}`}</Eq> is symmetric. (Ans: no — $a_{12} \neq a_{21}$.)
-</Exercicio>
-<Exercicio numero="33.11" dificuldade="aplicacao">
-
-Verify $(AB)^T = B^T A^T$ for <Eq>{`A = \\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}`}</Eq> and <Eq>{`B = \\begin{pmatrix} 0 & 1 \\\\ 1 & 0 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.12" dificuldade="aplicacao">
-
-For which $k$ does the matrix <Eq>{`\\begin{pmatrix} 1 & k \\\\ 2 & 4 \\end{pmatrix}`}</Eq> fail to have an inverse? (Ans: $k = 2$.)
-</Exercicio>
-<Exercicio numero="33.13" dificuldade="aplicacao">
-
-Inverse of <Eq>{`\\begin{pmatrix} 1 & -1 \\\\ 1 & 1 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.14" dificuldade="aplicacao">
-
-Numerically show that $A + A^T$ is symmetric for <Eq>{`A = \\begin{pmatrix} 1 & 4 \\\\ 2 & 5 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.15" dificuldade="aplicacao">Numerically show that $A - A^T$ is skew-symmetric.</Exercicio>
-<Exercicio numero="33.16" dificuldade="aplicacao">
-
-$(A^{-1})^{-1} = A$ — verify for <Eq>{`A = \\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.17" dificuldade="aplicacao">
-
-For which diagonal <Eq>{`\\begin{pmatrix} a & 0 \\\\ 0 & b \\end{pmatrix}`}</Eq> is invertible? (Ans: $ab \neq 0$.)
-</Exercicio>
-<Exercicio numero="33.18" dificuldade="aplicacao">
-
-Inverse of <Eq>{`\\begin{pmatrix} a & b \\\\ 0 & d \\end{pmatrix}`}</Eq> (triangular, $ad \neq 0$).
-</Exercicio>
-<Exercicio numero="33.19" dificuldade="aplicacao">
-
-<Eq>{`A = \\begin{pmatrix} 0 & 1 \\\\ -1 & 0 \\end{pmatrix}`}</Eq>. Compute $A^4$ and $A^{-1}$.
-</Exercicio>
-<Exercicio numero="33.20" dificuldade="aplicacao">
-
-Decompose <Eq>{`\\begin{pmatrix} 1 & 4 \\\\ 2 & 5 \\end{pmatrix}`}</Eq> as symmetric + skew-symmetric.
+Can we add any two matrices? If yes, explain why; if no, explain why and give an example of two matrices that cannot be added.
 </Exercicio>
 
-### Block B — 3x3 inverse and Gauss-Jordan (33.21 to 33.30)
+<Exercicio numero="33.2" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Yes, as long as the number of columns of the first equals the number of rows of the second.", correta: true },
+    { texto: "No, it is never possible to multiply a column by a row." },
+    { texto: "Yes, but only when both are square." },
+    { texto: "Yes, regardless of the dimensions." },
+  ]}
+  solucao={<>Multiplying a column matrix (m×1) by a row matrix (1×n) produces an m×n matrix; the condition is that the number of columns of the first (1) matches the number of rows of the second (1).</>}
+  passos={<>
+    <ol>
+      <li>1. Identify the dimensions of the column matrix (m×1).</li>
+      <li>2. Identify the dimensions of the row matrix (1×n).</li>
+      <li>3. Check that the column has 1 column and the row has 1 row — condition satisfied.</li>
+      <li>4. Compute the product to get the m×n matrix.</li>
+      <li>5. Conclude that the operation is always possible under this condition.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="33.21" dificuldade="aplicacao">
-
-Compute $A^{-1}$ of <Eq>{`A = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 2 & 0 \\\\ 0 & 0 & 5 \\end{pmatrix}`}</Eq> (diagonal).
-</Exercicio>
-<Exercicio numero="33.22" dificuldade="aplicacao">
-
-Compute $A^{-1}$ of <Eq>{`A = \\begin{pmatrix} 1 & 1 & 1 \\\\ 0 & 1 & 1 \\\\ 0 & 0 & 1 \\end{pmatrix}`}</Eq> (triangular).
-</Exercicio>
-<Exercicio numero="33.23" dificuldade="aplicacao">
-
-Apply Gauss-Jordan to $[A|I]$ for <Eq>{`A = \\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.24" dificuldade="aplicacao">
-
-Verify that <Eq>{`\\begin{pmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 4 \\\\ 5 & 6 & 0 \\end{pmatrix}`}</Eq> has an inverse (compute $\det$).
-</Exercicio>
-<Exercicio numero="33.25" dificuldade="aplicacao">
-
-Solve $A\mathbf x = \mathbf b$ with <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 2 & 3 \\end{pmatrix}`}</Eq>, $\mathbf b = (3, 8)^T$, via $A^{-1}$.
-</Exercicio>
-<Exercicio numero="33.26" dificuldade="aplicacao">
-
-Inverse of the permutation matrix <Eq>{`P = \\begin{pmatrix} 0 & 1 & 0 \\\\ 1 & 0 & 0 \\\\ 0 & 0 & 1 \\end{pmatrix}`}</Eq>. (Ans: $P^T = P^{-1}$.)
-</Exercicio>
-<Exercicio numero="33.27" dificuldade="aplicacao">
-
-Compute $A^{-1}$ for <Eq>{`A = \\begin{pmatrix} 1 & 2 \\\\ -1 & 1 \\end{pmatrix}`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.28" dificuldade="aplicacao">
-
-Use $A^{-1}$ to solve <Eq>{`x + 2y = 5`}</Eq>, <Eq>{`-x + y = 1`}</Eq>.
-</Exercicio>
-<Exercicio numero="33.29" dificuldade="aplicacao">Verify that if $A^T = A^{-1}$, then $A^TA = I$ (orthogonal matrix).</Exercicio>
-<Exercicio numero="33.30" dificuldade="aplicacao">
-
-Verify whether <Eq>{`\\begin{pmatrix} 1/\\sqrt 2 & 1/\\sqrt 2 \\\\ -1/\\sqrt 2 & 1/\\sqrt 2 \\end{pmatrix}`}</Eq> is orthogonal.
+Can we multiply any column matrix by any row matrix? Explain why or why not.
 </Exercicio>
 
-### Block C — Comprehension and properties (33.31 to 33.38)
+<Exercicio numero="33.3" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Yes, both are defined when A and B have dimensions compatible for multiplication in both orders.", correta: true },
+    { texto: "No, it is never possible to define both products simultaneously." },
+    { texto: "Yes, but only if A and B are square of the same order." },
+    { texto: "No, because matrix multiplication is not associative." },
+  ]}
+  solucao={<>For A B and B A to exist, the dimensions of A and B must allow both multiplications; then A B A B and B A B A are defined.</>}
+  passos={<>
+    <ol>
+      <li>1. Let A have dimension m×n and B have dimension n×p.</li>
+      <li>2. The product A B has dimension m×p, so B A exists only if p = m.</li>
+      <li>3. This imposes n = p and p = m, hence m = n = p.</li>
+      <li>4. Thus A and B must be square of the same order.</li>
+      <li>5. Under this condition, both products are well-defined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="33.31" dificuldade="compreensao">Show that if $A$ is symmetric and invertible, $A^{-1}$ is also symmetric.</Exercicio>
-<Exercicio numero="33.32" dificuldade="compreensao">Show that if $A^2 = I$, then $A = A^{-1}$.</Exercicio>
-<Exercicio numero="33.33" dificuldade="compreensao">Show that an orthogonal matrix ($A^T A = I$) has $A^{-1} = A^T$.</Exercicio>
-<Exercicio numero="33.34" dificuldade="compreensao">Show that if $A, B$ invertible, $AB$ is invertible.</Exercicio>
-<Exercicio numero="33.35" dificuldade="compreensao">Show that $(A^T)^{-1} = (A^{-1})^T$.</Exercicio>
-<Exercicio numero="33.36" dificuldade="compreensao">Show that if $A$ is invertible triangular, $A^{-1}$ is also triangular of the same type.</Exercicio>
-<Exercicio numero="33.37" dificuldade="compreensao">Show that the product of orthogonal matrices is orthogonal.</Exercicio>
-<Exercicio numero="33.38" dificuldade="compreensao">Show that $\det(A^{-1}) = 1/\det(A)$.</Exercicio>
-
-### Block D — Modeling (33.39 to 33.44)
-
-<Exercicio numero="33.39" dificuldade="modelagem">
-
-Use the inverse to solve: <Eq>{`2x + y = 7`}</Eq>, <Eq>{`x - 3y = -2`}</Eq>.
+Can both products A B A B and B A B A be defined? If yes, explain how; if no, explain why.
 </Exercicio>
-<Exercicio numero="33.40" dificuldade="modelagem">In matrix cryptography (Hill cipher), encrypt the message as a vector $\mathbf{m}$ via $A\mathbf{m}$. Decrypt = $A^{-1}(A\mathbf{m})$. Model with $A_{2\times 2}$.</Exercicio>
-<Exercicio numero="33.41" dificuldade="modelagem">In CG, the inverse transformation is fundamental: applying a transformation to the camera is applying the inverse to objects. Explain why.</Exercicio>
-<Exercicio numero="33.42" dificuldade="modelagem">
 
-In economics, the Leontief matrix $L$ relates production to demand. Solution: $\mathbf{x} = (I - L)^{-1} \mathbf{d}$. For <Eq>{`L = \\begin{pmatrix} 0.2 & 0.1 \\\\ 0.3 & 0.4 \\end{pmatrix}`}</Eq>, $\mathbf d = (10, 20)^T$, compute $\mathbf x$.
+<Exercicio numero="33.4" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "No, having the same size does not guarantee the multiplication is defined; internal dimensions must match.", correta: true },
+    { texto: "Yes, whenever matrices have the same number of rows and columns." },
+    { texto: "Yes, as long as both are square." },
+    { texto: "No, no matrix can be multiplied by another." },
+  ]}
+  solucao={<>To multiply A (m×n) by B (p×q) requires n = p; having m = p and n = q (same size) is not enough.</>}
+  passos={<>
+    <ol>
+      <li>1. Consider A of dimension m×n and B of dimension m×n.</li>
+      <li>2. For A B, the number of columns of A (n) must equal the number of rows of B (m).</li>
+      <li>3. In general n ≠ m, so the multiplication is not possible.</li>
+      <li>4. Example: A (2×3) and B (2×3) cannot be multiplied because 3 ≠ 2.</li>
+      <li>5. Conclude that the same size does not guarantee definability.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Can any two matrices of the same size be multiplied? If yes, explain why; if no, explain why and give an example of two matrices of the same size that cannot be multiplied.
 </Exercicio>
-<Exercicio numero="33.43" dificuldade="modelagem">
 
-Identify whether <Eq>{`\\begin{pmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 4 \\\\ 0 & 0 & 1 \\end{pmatrix}`}</Eq> is upper-triangular. Is the inverse also upper-triangular?
+<Exercicio numero="33.5" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "No, in general A B ≠ B A; commutativity occurs only in special cases.", correta: true },
+    { texto: "Yes, matrix multiplication always commutes." },
+    { texto: "Yes, as long as both matrices are diagonal." },
+    { texto: "No, because matrix addition does not commute." },
+  ]}
+  solucao={<>Matrix multiplication is not commutative; only when A and B are simultaneously diagonal or scalar multiples does A B = B A occur.</>}
+  passos={<>
+    <ol>
+      <li>1. Consider A = [[1,2],[3,4]] and B = [[0,1],[1,0]].</li>
+      <li>2. Compute A B = [[2,1],[4,3]].</li>
+      <li>3. Compute B A = [[3,4],[1,2]].</li>
+      <li>4. Observe that A B ≠ B A, showing non-commutativity.</li>
+      <li>5. Conclude that equality occurs only in special cases.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Does matrix multiplication commute? That is, does A B = B A? If yes, prove why it commutes; if no, explain why it does not.
 </Exercicio>
-<Exercicio numero="33.44" dificuldade="modelagem">In statistics, regression $\hat\beta = (X^TX)^{-1}X^T\mathbf y$. Why is row reduction preferable to direct inversion?</Exercicio>
 
-### Block E — Challenges (33.45 to 33.48)
+<Exercicio numero="33.6" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "A + B is defined because A and B have the same dimensions.", correta: true },
+    { texto: "A + B is undefined because the matrices have different sizes." },
+    { texto: "A + B is defined only if both are square." },
+    { texto: "A + B is undefined because matrix addition is never allowed." },
+  ]}
+  solucao={<>Addition of matrices is possible only when the two matrices have exactly the same number of rows and columns.</>}
+  passos={<>
+    <ol>
+      <li>1. Check the dimensions of A.</li>
+      <li>2. Check the dimensions of B.</li>
+      <li>3. Compare the dimensions; if equal, addition is allowed.</li>
+      <li>4. Otherwise, declare the operation undefined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="33.45" dificuldade="desafio">Find a matrix $A$ with $A^3 = I$ but $A \neq I$. (Hint: rotation by $120°$.)</Exercicio>
-<Exercicio numero="33.46" dificuldade="desafio">Show that if $AB = I$ for $A, B \in M_n$, then $BA = I$ (non-trivial).</Exercicio>
-<Exercicio numero="33.47" dificuldade="desafio">Compute $A^{-1}$ for $A = I + \mathbf u \mathbf v^T$ with $\mathbf u, \mathbf v \in \mathbb R^n$ and $1 + \mathbf v^T\mathbf u \neq 0$ (Sherman-Morrison).</Exercicio>
-<Exercicio numero="33.48" dificuldade="demonstracao">Prove $(AB)^{-1} = B^{-1}A^{-1}$ via $(AB)(B^{-1}A^{-1}) = I$.</Exercicio>
+For the matrices below, perform the addition A + B. Indicate if the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="33.7" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "The sum is undefined because C and D have different dimensions.", correta: true },
+    { texto: "The sum is defined because both are square." },
+    { texto: "The sum is defined because the matrices have the same number of rows." },
+    { texto: "The sum is undefined because there is no matrix addition operation." },
+  ]}
+  solucao={<>Since C and D do not have the same number of rows and columns, the sum cannot be performed.</>}
+  passos={<>
+    <ol>
+      <li>1. Identify the dimensions of C.</li>
+      <li>2. Identify the dimensions of D.</li>
+      <li>3. Note that the dimensions do not match.</li>
+      <li>4. Conclude that the sum is undefined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+For the matrices below, perform the addition C + D. Indicate if the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="33.8" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "The sum is undefined because A and C have different sizes.", correta: true },
+    { texto: "The sum is defined because both are square." },
+    { texto: "The sum is defined because A has more rows than C." },
+    { texto: "The sum is undefined because matrix addition is not allowed." },
+  ]}
+  solucao={<>The operation would be possible only if A and C had the same dimensions, which is not the case.</>}
+  passos={<>
+    <ol>
+      <li>1. Check the dimensions of A.</li>
+      <li>2. Check the dimensions of C.</li>
+      <li>3. Compare; the dimensions are different.</li>
+      <li>4. Declare the sum undefined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+For the matrices below, perform the addition A + C. Indicate if the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="33.9" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "The subtraction is undefined because B and E have different dimensions.", correta: true },
+    { texto: "The subtraction is defined because both are square." },
+    { texto: "The subtraction is defined because B has more columns than E." },
+    { texto: "The subtraction is undefined because you cannot subtract matrices." },
+  ]}
+  solucao={<>To subtract, matrices must have the same dimensions; since B and E do not match, the operation is undefined.</>}
+  passos={<>
+    <ol>
+      <li>1. Observe the dimensions of B.</li>
+      <li>2. Observe the dimensions of E.</li>
+      <li>3. Check the incompatibility.</li>
+      <li>4. Conclude that B − E cannot be calculated.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+For the matrices below, perform the subtraction B − E. Indicate if the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="33.10" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "The sum is undefined because C and F have different sizes.", correta: true },
+    { texto: "The sum is defined because both are square." },
+    { texto: "The sum is defined because C has more rows than F." },
+    { texto: "The sum is undefined because matrix addition does not exist." },
+  ]}
+  solucao={<>Since the dimensions of C and F do not match, the sum cannot be performed.</>}
+  passos={<>
+    <ol>
+      <li>1. Check the dimensions of C.</li>
+      <li>2. Check the dimensions of F.</li>
+      <li>3. A difference in dimensions is noted.</li>
+      <li>4. Declaration of operation undefined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+For the matrices below, perform the addition C + F. Indicate if the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="33.11" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "The subtraction is undefined because D and B have different dimensions.", correta: true },
+    { texto: "The subtraction is defined because both are square." },
+    { texto: "The subtraction is defined because D has more rows than B." },
+    { texto: "The subtraction is undefined because you cannot subtract matrices." },
+  ]}
+  solucao={<>The operation would be possible only if D and B had the same dimensions, which is not the case.</>}
+  passos={<>
+    <ol>
+      <li>1. Identify the dimensions of D.</li>
+      <li>2. Identify the dimensions of B.</li>
+      <li>3. Compare; they are different.</li>
+      <li>4. Conclude that D − B is undefined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+For the matrices below, perform the subtraction D − B. Indicate if the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="33.12" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply each entry of A by 5.", correta: true },
+    { texto: "Add 5 to each entry of A." },
+    { texto: "Divide each entry of A by 5." },
+    { texto: "Raise each entry of A to the second power." },
+  ]}
+  solucao={<>Scalar multiplication consists of multiplying each element of the matrix by the given scalar.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Perform the scalar multiplication 5 A.
+</Exercicio>
+
+<Exercicio numero="33.13" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply each entry of B by 3.", correta: true },
+    { texto: "Add 3 to each entry of B." },
+    { texto: "Divide each entry of B by 3." },
+    { texto: "Raise each entry of B to the third power." },
+  ]}
+  solucao={<>We multiply each element of matrix B by 3.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Perform the scalar multiplication 3 B.
+</Exercicio>
+
+<Exercicio numero="33.14" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply each entry of B by −2.", correta: true },
+    { texto: "Add −2 to each entry of B." },
+    { texto: "Divide each entry of B by −2." },
+    { texto: "Raise each entry of B to the second power and change the sign." },
+  ]}
+  solucao={<>Scalar multiplication by −2 reverses the sign of each element and multiplies by 2.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Perform the scalar multiplication −2 B.
+</Exercicio>
+
+<Exercicio numero="33.15" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply each entry of C by −4.", correta: true },
+    { texto: "Add −4 to each entry of C." },
+    { texto: "Divide each entry of C by −4." },
+    { texto: "Raise each entry of C to the second power and change the sign." },
+  ]}
+  solucao={<>We multiply each element of matrix C by −4, reversing the sign and increasing the magnitude.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Perform the scalar multiplication −4 C.
+</Exercicio>
+
+<Exercicio numero="33.16" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply each entry of C by 1/2.", correta: true },
+    { texto: "Multiply each entry of C by 2." },
+    { texto: "Add 1/2 to each entry of C." },
+    { texto: "Divide each entry of C by 2 and then multiply by 1." },
+  ]}
+  solucao={<>Scalar multiplication by 1/2 reduces each element of matrix C to half.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Perform the scalar multiplication (1/2) C.
+</Exercicio>
+
+<Exercicio numero="33.17" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply each entry of D by 100.", correta: true },
+    { texto: "Add 100 to each entry of D." },
+    { texto: "Divide each entry of D by 100." },
+    { texto: "Raise each entry of D to the second power." },
+  ]}
+  solucao={<>Each element of matrix D is multiplied by 100.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Perform the scalar multiplication 100 D.
+</Exercicio>
+
+<Exercicio numero="33.18" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "The product is obtained by summing the row-column products.", correta: true },
+    { texto: "The product is the sum of the two matrices." },
+    { texto: "The product is the difference of the two matrices." },
+    { texto: "The product does not exist because A and B have incompatible dimensions." },
+  ]}
+  solucao={<>To multiply A by B, compute the sum of products of elements from the row of A with elements from the column of B.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product A B.
+</Exercicio>
+
+<Exercicio numero="33.19" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply row of B by column of C and sum the results.", correta: true },
+    { texto: "Add B and C." },
+    { texto: "Subtract C from B." },
+    { texto: "The operation is undefined because B and C have different sizes." },
+  ]}
+  solucao={<>The product B C is obtained by the row-column rule, provided the dimensions are compatible.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product B C.
+</Exercicio>
+
+<Exercicio numero="33.20" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply row of C by column of A and sum.", correta: true },
+    { texto: "Add C and A." },
+    { texto: "Subtract A from C." },
+    { texto: "The operation is undefined because the dimensions do not match." },
+  ]}
+  solucao={<>Use the row-column multiplication rule, first checking dimension compatibility.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product C A.
+</Exercicio>
+
+<Exercicio numero="33.21" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply row of B by column of D and sum.", correta: true },
+    { texto: "Add B and D." },
+    { texto: "Subtract D from B." },
+    { texto: "Operation undefined due to dimension incompatibility." },
+  ]}
+  solucao={<>The product B D follows the row-column rule, provided the number of columns of B matches the number of rows of D.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product B D.
+</Exercicio>
+
+<Exercicio numero="33.22" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply row of D by column of C and sum.", correta: true },
+    { texto: "Add D and C." },
+    { texto: "Subtract C from D." },
+    { texto: "Operation undefined because the dimensions are not compatible." },
+  ]}
+  solucao={<>By applying the row-column rule, you get D C when dimensions allow.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product D C.
+</Exercicio>
+
+<Exercicio numero="33.23" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply row of C by column of B and sum.", correta: true },
+    { texto: "Add C and B." },
+    { texto: "Subtract B from C." },
+    { texto: "Operation undefined due to dimension incompatibility." },
+  ]}
+  solucao={<>The product C B is obtained by row-column multiplication, if dimensions are compatible.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product C B.
+</Exercicio>
+
+<Exercicio numero="33.24" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "The expression is possible if A, B, and C have the same dimensions.", correta: true },
+    { texto: "The expression is impossible because addition and subtraction can never be combined." },
+    { texto: "The expression is possible only if A is square." },
+    { texto: "The expression is impossible because B and C have different dimensions." },
+  ]}
+  solucao={<>For A + B − C to be defined, all three matrices must have exactly the same dimensions.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression A + B − C, if possible. Otherwise, explain why it cannot be performed.
+</Exercicio>
+
+<Exercicio numero="33.25" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "It is possible if A and D have the same dimensions.", correta: true },
+    { texto: "It is impossible because you cannot add matrices of different sizes." },
+    { texto: "It is possible only if A and D are square." },
+    { texto: "It is impossible because scalar multiplication is not permitted." },
+  ]}
+  solucao={<>The combination 4 A + 5 D can be done only when A and D have equal dimensions, allowing addition after scalar multiplication.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the linear combination 4 A + 5 D, if possible. Otherwise, explain why it cannot be performed.
+</Exercicio>
+
+<Exercicio numero="33.26" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "It is possible if C and B have the same dimensions.", correta: true },
+    { texto: "It is impossible because C and B have different dimensions." },
+    { texto: "It is possible only if C is square." },
+    { texto: "It is impossible because matrix addition does not exist." },
+  ]}
+  solucao={<>The sum 2 C + B requires C and B to have the same number of rows and columns.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the linear combination 2 C + B, if possible. Otherwise, explain why it cannot be performed.
+</Exercicio>
+
+<Exercicio numero="33.27" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "It is possible if D and E have the same dimensions.", correta: true },
+    { texto: "It is impossible because D and E have different dimensions." },
+    { texto: "It is possible only if D is square." },
+    { texto: "It is impossible because scalar multiplication cannot be applied to D." },
+  ]}
+  solucao={<>For 3 D + 4 E to be defined, D and E must have identical dimensions.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the linear combination 3 D + 4 E, if possible. Otherwise, explain why it cannot be performed.
+</Exercicio>
+
+<Exercicio numero="33.28" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "It is possible if C and D have the same dimensions.", correta: true },
+    { texto: "It is impossible because you cannot subtract fractions of matrices." },
+    { texto: "It is possible only if C is square." },
+    { texto: "It is impossible because D cannot be multiplied by 0.5." },
+  ]}
+  solucao={<>The operation C − 0.5 D requires C and D to have the same dimensions for subtraction to be valid.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the linear combination C − 0.5 D, if possible. Otherwise, explain why it cannot be performed.
+</Exercicio>
+
+<Exercicio numero="33.29" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "It is possible if D and E have the same dimensions.", correta: true },
+    { texto: "It is impossible because 100 D and 10 E cannot be subtracted." },
+    { texto: "It is possible only if D is square." },
+    { texto: "It is impossible because scalar multiplication by 100 is not permitted." },
+  ]}
+  solucao={<>The subtraction 100 D − 10 E requires D and E to have identical dimensions.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the linear combination 100 D − 10 E, if possible. Otherwise, explain why it cannot be performed.
+</Exercicio>
+
+<Exercicio numero="33.30" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply A by itself, obtaining A·A.", correta: true },
+    { texto: "Add A to itself." },
+    { texto: "Subtract A from itself." },
+    { texto: "The operation is undefined if A is not square." },
+  ]}
+  solucao={<>The power A² corresponds to the matrix product A·A, which exists only if A is square.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute A² (that is, A·A).
+</Exercicio>
+
+<Exercicio numero="33.31" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply B by itself, obtaining B·B.", correta: true },
+    { texto: "Add B to itself." },
+    { texto: "Subtract B from itself." },
+    { texto: "The operation is undefined if B is not square." },
+  ]}
+  solucao={<>B² represents the product B·B, defined only when B is square.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute B² (that is, B·B).
+</Exercicio>
+
+<Exercicio numero="33.32" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply C by itself, obtaining C·C.", correta: true },
+    { texto: "Add C to itself." },
+    { texto: "Subtract C from itself." },
+    { texto: "The operation is undefined if C is not square." },
+  ]}
+  solucao={<>C² corresponds to the matrix product C·C, which requires C to be square.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute C² (that is, C·C).
+</Exercicio>
+
+<Exercicio numero="33.33" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply B by C using the row-column rule.", correta: true },
+    { texto: "Add B and C." },
+    { texto: "Subtract C from B." },
+    { texto: "The operation is undefined if the dimensions do not match." },
+  ]}
+  solucao={<>The product B·C is obtained by multiplying each row of B by the corresponding columns of C, provided dimensions are compatible.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute B·C.
+</Exercicio>
+
+<Exercicio numero="33.34" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Multiply A by itself.", correta: true },
+    { texto: "Add A to itself." },
+    { texto: "Subtract A from itself." },
+    { texto: "The operation is undefined if A is not square." },
+  ]}
+  solucao={<>A² is the matrix product A·A, defined only when A is square.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute A² (that is, A·A).
+</Exercicio>
+
+<Exercicio numero="33.35" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Because A⁻¹ A and A A⁻¹ both equal the identity, regardless of order.", correta: true },
+    { texto: "Because all matrices commute when they are invertible." },
+    { texto: "Because the definition of inverse forces commutativity." },
+    { texto: "Because matrix multiplication always commutes for square matrices." },
+  ]}
+  solucao={<>A⁻¹ A and A A⁻¹ both yield the identity matrix, so the order does not change the result; this does not hold for arbitrary matrices.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Explain why matrix multiplication is not commutative, but multiplication of inverses is commutative (A⁻¹ A = A A⁻¹).
+</Exercicio>
+
+<Exercicio numero="33.36" dificuldade="compreensao"
+  opcoes={[
+    { texto: "An inverse exists only if the determinant is nonzero.", correta: true },
+    { texto: "Every 2×2 has an inverse, regardless of the determinant." },
+    { texto: "The inverse exists only if the matrix is symmetric." },
+    { texto: "The inverse exists only if the matrix is diagonal." },
+  ]}
+  solucao={<>A 2×2 matrix has an inverse exactly when its determinant ≠ 0; otherwise the inverse does not exist.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Does every 2×2 have an inverse? Explain why or why not, indicating the necessary condition for the inverse to exist.
+</Exercicio>
+
+<Exercicio numero="33.37" dificuldade="compreensao"
+  opcoes={[
+    { texto: "No, because the determinant will be zero.", correta: true },
+    { texto: "Yes, if the other row is nonzero." },
+    { texto: "Yes, as long as the corresponding column is nonzero." },
+    { texto: "No, because matrices with a zero row are never square." },
+  ]}
+  solucao={<>An entire row of zeros makes the determinant zero, preventing the inverse from existing.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Can a 2×2 with an entire row of zeros have an inverse? Justify.
+</Exercicio>
+
+<Exercicio numero="33.38" dificuldade="compreensao"
+  opcoes={[
+    { texto: "No, because the determinant will be zero.", correta: true },
+    { texto: "Yes, if the other columns are independent." },
+    { texto: "Yes, as long as the matrix is diagonal." },
+    { texto: "No, because zero columns prevent the identity from being defined." },
+  ]}
+  solucao={<>A zero column makes the determinant zero, so the matrix has no inverse.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Can a matrix with an entire zero column have an inverse? Explain why or why not.
+</Exercicio>
+
+<Exercicio numero="33.39" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes, for example [[0,1],[1,0]] has an inverse.", correta: true },
+    { texto: "No, because zeros on the diagonal always annul the determinant." },
+    { texto: "Yes, as long as the sum of the rows is nonzero." },
+    { texto: "No, because matrices with a zero diagonal are never invertible." },
+  ]}
+  solucao={<>An example of a 2×2 matrix with zeros on the diagonal that has an inverse is [[0,1],[1,0]], whose determinant is −1 ≠ 0.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Can a matrix with zeros on the diagonal have an inverse? If yes, give an example; if no, prove why not. Consider 2×2.
+</Exercicio>
+
+<Exercicio numero="33.40" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Multiplying A by B yields the identity.", correta: true },
+    { texto: "Adding A and B yields the identity." },
+    { texto: "Subtracting B from A yields the identity." },
+    { texto: "A and B are not inverses because they have different determinants." },
+  ]}
+  solucao={<>Computing A·B = [[1·1+0·1, 1·0+0·1],[-1·1+1·1, -1·0+1·1]] = [[1,0],[0,1]], we confirm that A is the inverse of B.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Show that matrix A is the inverse of matrix B, where A = [[1,0],[-1,1]] and B = [[1,0],[1,1]].
+</Exercicio>
+
+<Exercicio numero="33.41" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Multiplying A by B results in the identity.", correta: true },
+    { texto: "Adding A and B results in the identity." },
+    { texto: "A and B are not inverses because B has a typo." },
+    { texto: "A·B cannot be computed due to dimension incompatibility." },
+  ]}
+  solucao={<>When we multiply A·B we obtain the identity matrix, confirming that A is the inverse of B.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Show that matrix A is the inverse of matrix B, where A = [[1,2],[3,4]] and B = [[-2,1],[3/2,-1/2]].
+</Exercicio>
+
+<Exercicio numero="33.42" dificuldade="modelagem"
+  opcoes={[
+    { texto: "A·B = I, so they are inverses.", correta: true },
+    { texto: "A+B = I, so they are inverses." },
+    { texto: "A−B = I, so they are inverses." },
+    { texto: "They are not inverses because the determinants are different." },
+  ]}
+  solucao={<>Computing A·B we verify that the result is the identity matrix, showing that A is the inverse of B.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Show that matrix A is the inverse of matrix B, where A = [[4,5],[7,0]] and B = [[0,1/7],[1/5,-4/35]].
+</Exercicio>
+
+<Exercicio numero="33.43" dificuldade="desafio"
+  opcoes={[
+    { texto: "A·B = I, so they are inverses.", correta: true },
+    { texto: "A+B = I, so they are inverses." },
+    { texto: "A·B ≠ I, so they are not inverses." },
+    { texto: "A and B cannot be multiplied." },
+  ]}
+  solucao={<>When we compute the product A·B we obtain the identity, confirming that A is the inverse of B.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Show that matrix A is the inverse of matrix B, where A = [[-2,1],[2/3,-1]] and B = [[-2,-1],[-6,-4]].
+</Exercicio>
+
+<Exercicio numero="33.44" dificuldade="desafio"
+  opcoes={[
+    { texto: "A·B = I, so they are inverses.", correta: true },
+    { texto: "A+B = I, so they are inverses." },
+    { texto: "A·B ≠ I, so they are not inverses." },
+    { texto: "A and B cannot be multiplied because they have different dimensions." },
+  ]}
+  solucao={<>The product A·B yields the identity matrix, demonstrating that A is the inverse of B.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Show that matrix A is the inverse of matrix B, where A = [[1,0,1],[0,1,-1],[0,1,1]] and B = (1/2)·[[2,1,-1],[0,1,1],[0,-1,1]].
+</Exercicio>
+
+<Exercicio numero="33.45" dificuldade="demonstracao"
+  opcoes={[
+    { texto: "A·B = I, so they are inverses.", correta: true },
+    { texto: "A+B = I, so they are inverses." },
+    { texto: "A·B ≠ I, so they are not inverses." },
+    { texto: "A and B cannot be multiplied because they are not square." },
+  ]}
+  solucao={<>Computing the product A·B yields the identity matrix, proving that A is the inverse of B.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Show that matrix A is the inverse of matrix B, where A = [[1,2,3],[4,5,6],[7,8,9]] and B = (1/4)·[[6,0,-2],[17,-3,-5],[-12,2,4]].
+</Exercicio>
 
 </ListaExercicios>
 
-## Sources
+## Sources for this lesson
 
-- [**Linear Algebra Done Right**](https://linear.axler.net/) — Sheldon Axler · 2024, 4th ed · EN · CC-BY-NC · ch. 3, 7. **Primary source.**
-- [**A First Course in Linear Algebra**](http://linear.ups.edu/) — Robert A. Beezer · 2022 · EN · GFDL · ch. MISLE.
-- [**Álgebra linear**](https://pt.wikibooks.org/wiki/%C3%81lgebra_linear) — Wikibooks · alive · PT-BR · CC-BY-SA.
+- [**A First Course in Linear Algebra**](http://linear.pugetsound.edu/) — Robert A. Beezer · version 3.50 · GNU FDL · §MO (Matrix Operations), §MI (Matrix Inverses), §MISLE (Matrix Inverses and Systems of Linear Equations). **Primary source for theory and proof exercises.**
+- [**OpenStax College Algebra 2e**](https://openstax.org/details/books/college-algebra-2e) — Jay Abramson et al. · 2021 · CC-BY 4.0 · §9.7 (Solving Systems with Inverses). **Primary source for computation and modeling exercises.**
+- [**Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · 4th ed. · CC-BY-SA · cap. 3 §1–3. **Geometric approach and abstract matrix algebra exercises.**
