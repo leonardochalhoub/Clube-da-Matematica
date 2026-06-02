@@ -423,9 +423,18 @@ Hard reminders:
 - Double-backslash inside template literals
 - Never bare {HH, HT, TH, TT} comma-list in JSX children
 - Books are the ledger — fonte= is mandatory; never fabricate
+- Close every <Eq>: `}</Eq> NOT `</Eq> (missing-brace = #1 build break)
+- NEVER translate component tag names (Exemplo/Exercicio/etc. stay verbatim — no Ejemplo/Ejercicio)
+- No bare < or > operators in JSX text — wrap in <Eq> or write in words
+- Books are the ledger — fonte= is mandatory; never fabricate
 
 If you can't finish a 30+ exercise list in budget, write FEWER exercises but
 CLOSE every tag. Truncated <Exercicio> blocks crash the build.
+
+VERIFY before finishing (REQUIRED): node scripts/check-mdx-build.mjs <file>
+must print fail=0. Do NOT use check-rsc-all.mjs — it is lenient and passes
+files the real build rejects. See §3 "Translator mistakes that broke the
+build (2026-06-02)" for the full checklist.
 ```
 
 This preamble is non-negotiable. Agents that don't see it have a track record of producing broken output. The cost of the preamble (a few hundred tokens) is negligible compared to the cost of the build-fix iterations it prevents.
@@ -434,10 +443,57 @@ This preamble is non-negotiable. Agents that don't see it have a track record of
 
 If you discover broken MDX from a past Sonnet/Haiku run:
 
-1. **Don't try to write more** — first heal what's there. Run the local MDX-compile check (`node` script in repo: `scripts/check-mdx-compile.mjs` if available, or write a 10-line script that compiles every `.mdx` with `@mdx-js/mdx` + `remark-math` + `rehype-katex`).
+1. **Don't try to write more** — first heal what's there. Run the **build-accurate** check: `node scripts/check-mdx-build.mjs <dir-or-file>` (acorn/`@mdx-js/mdx`, matches `next build`). Do NOT rely on `scripts/check-rsc-all.mjs` — it is lenient and hid 30 broken files in the 2026-06-02 pass.
 2. **Categorize the failures** by class (compact form / no blank line / body math with braces / bare {ident} in children / truncated tags). Each class has a sweep that fixes it in bulk — see the commit log around 2026-05-29 for examples.
 3. **Push and watch CI.** Don't commit-spam — heal everything you can find locally first, push once.
 4. **If a single file keeps failing across multiple builds with the same digest**, the file is likely beyond bulk-heal repair. Delete it (worst case the URL 404s) or rewrite it from scratch with a fresh agent prompted with this section.
+
+---
+
+### ⛔ Translator mistakes that broke the build (2026-06-02) — DO NOT REPEAT
+
+A full en-US translation pass (Haiku + Sonnet + Opus 4.8) produced files that **passed `scripts/check-rsc-all.mjs` but broke `next build`** — 30 of 120 files failed the real compiler. Root cause and the exact recurring defects are below. **Every translator/rewriter agent MUST read this and self-check against it before finishing.**
+
+#### THE VERIFIER TRAP (most important)
+
+- **`scripts/check-rsc-all.mjs` uses `next-mdx-remote` and is LENIENT — it passes files the build rejects. NEVER trust it as proof a file compiles.**
+- **`next build` uses `@mdx-js/mdx` + acorn (STRICT).** The build-accurate validator is **`scripts/check-mdx-build.mjs`** (added 2026-06-02). **Always verify translations with `node scripts/check-mdx-build.mjs <file>` — it must print `fail=0`.** A file is not "done" until it passes THIS checker, not the lenient one.
+- Acorn reports **one error at a time** and often without a useful line number ("Could not parse expression with acorn"). Fix, re-run, repeat until `fail=0`.
+
+#### The five defect classes that broke the build (with exact fix)
+
+1. **Missing closing brace on inline math — 244 occurrences across 10 files.**
+   The single most common defect. A `<Eq>` was written as `` <Eq>{`...`</Eq> `` — the `}` before `</Eq>` is missing.
+   - WRONG: `` <Eq>{`|7| = 7 \\leq 13`</Eq> ``
+   - RIGHT: `` <Eq>{`|7| = 7 \\leq 13`}</Eq> ``
+   - Sweep to detect: `grep -rn '`</Eq>' content/i18n/<locale>` — any hit (backtick directly before `</Eq>`) is ALWAYS this bug. Fix: `perl -i -pe 's/`<\/Eq>/`}<\/Eq>/g'`.
+
+2. **Translated JSX component tag names — 38 occurrences across 19 files.**
+   Translators "translated" component names into the target language (Spanish forms leaked into en-US): `</Exemplo>`→`</Ejemplo>`, `</Exercicio>`→`</Ejercicio>`. **Component names are CODE, never translate them.** The real component set (from `mdx-components.tsx`): `Exemplo, Exercicio, Definicao, Teorema, Insight, Cuidado, DuasPortas, Porta, ListaExercicios, Eq, Equation, EquacaoCanonica`. (Note `Teorema`/`Insight` ARE real — don't "fix" those.) Detect: `grep -rnoE '</?(Ejemplo|Ejercicio|Ejercicios|Definición|DosPuertas|Puerta|ListaEjercicios)\b' content/i18n/<locale>`.
+
+3. **Bare `<` or `>` operators in JSX children / props.**
+   A `<` or `>` used as a math/comparison operator inside JSX text makes acorn try to parse a tag.
+   - WRONG: `<em>a > 1</em>`, `0 < a < 1`, `(DEFF > 1 due to clustering)`, `Since 12.4% < 25%`, `p-value > 0.05`
+   - RIGHT: wrap the math — `` <Eq>{`a > 1`}</Eq> `` — or write it in words ("greater than 1", "is less than 25%"), or as a JSX string expression `{'>'}`. This bites hardest inside `legenda={<>...</>}`, `solucao={<>...</>}`, `passos={<>...</>}`, and `<li>` children.
+
+4. **Truncated files (LLM ran out of tokens) — several files.**
+   The agent stopped mid-exercise; the file ended without closing `</Exercicio>`, `</ListaExercicios>`, and the `## Fontes`/`## Sources` section. **Always close every open tag before finishing; if low on budget, write SHORTER exercises but NEVER stop mid-tag.** Verify the file ends with the Sources section (`tail -n 5`) and that `<Exercicio` open-count == close-count.
+
+5. **Orphaned / unbalanced structural tags + tool-call artifacts.**
+   Missing `<ListaExercicios>` open tag (only the close existed), a duplicate `</ListaExercicios>` + Sources block mid-file leaving later exercises orphaned, and once a literal `</invoke>` tool-call artifact pasted into the MDX. Detect: count `<ListaExercicios` vs `</ListaExercicios` (must be 1 each), `<Exercicio` vs `</Exercicio>` (must match), and `grep -n 'invoke\|antml' <file>` for stray tool tags.
+
+#### Mandatory self-check for ANY agent writing/translating a lesson file
+
+Before declaring a file done, run and confirm ALL of:
+```
+node scripts/check-mdx-build.mjs <file>          # MUST print fail=0  (NOT check-rsc-all.mjs)
+grep -c '<Exercicio' <file>                       # MUST equal the PT-BR source count
+grep -c '<Exercicio' <file> == grep -c '</Exercicio>' <file>   # opens == closes
+grep -n '`</Eq>' <file>                           # MUST be empty (missing-brace bug)
+grep -noE '</?(Ejemplo|Ejercicio)\b' <file>       # MUST be empty (translated tag names)
+tail -n 5 <file>                                  # MUST show ## Fontes/## Sources, not a cut-off tag
+```
+Translators get **`Read` + `Write` + `Bash`** for this verification loop (Bash is required to run the checker; the old "Read+Write only" rule was for blind Haiku bulk runs — for build-critical work the agent MUST verify with Bash).
 
 ---
 
@@ -680,4 +736,4 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ---
 
-> **Last update:** 2026-05-31. PT-BR source perfected: 932 language fixes + 819 exercise math-correctness fixes + 5 cascade-shuffled exercise banks regenerated (L13/14/16/112/113); 120/120 compile, 5,319 MC exercises with 0 `correta` violations. en-US re-synced 120/120 to the new PT-BR (last 6 oversized files via Opus 4.8 one-at-a-time). All other locales are now STALE vs the updated PT-BR and need re-sync (compare per-file `<Exercicio` counts). **Orchestration note:** translation/audit waves run as Workflow subagents — they DIE if the launching turn is interrupted, so verify journal *freshness* (mtime), not just result counts, and resume on the remaining set. If you change a convention, edit this file in the same commit.
+> **Last update:** 2026-06-02. en-US 120/120 made BUILD-clean (acorn): fixed 30 files the lenient check-rsc-all.mjs had passed but `next build` rejected — 244 missing-brace `<Eq>{`...`}</Eq>`, 38 translated component tags (Ejemplo/Ejercicio), bare </> operators in JSX, truncated/orphaned tags. Added scripts/check-mdx-build.mjs (acorn, build-accurate) as the authoritative verifier; documented all defect classes in §3 "Translator mistakes that broke the build". Earlier 2026-05-31: PT-BR source perfected: 932 language fixes + 819 exercise math-correctness fixes + 5 cascade-shuffled exercise banks regenerated (L13/14/16/112/113); 120/120 compile, 5,319 MC exercises with 0 `correta` violations. en-US re-synced 120/120 to the new PT-BR (last 6 oversized files via Opus 4.8 one-at-a-time). All other locales are now STALE vs the updated PT-BR and need re-sync (compare per-file `<Exercicio` counts). **Orchestration note:** translation/audit waves run as Workflow subagents — they DIE if the launching turn is interrupted, so verify journal *freshness* (mtime), not just result counts, and resume on the remaining set. If you change a convention, edit this file in the same commit.
