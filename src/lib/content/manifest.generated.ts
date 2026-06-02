@@ -468,7 +468,6 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   'aulas/ano-3/trim-12/licao-119-bs-sintese': {
     'pt-BR': () => import('@/../content/aulas/ano-3/trim-12/licao-119-bs-sintese.mdx'),
     'en-US': () => import('@/../content/i18n/en-US/aulas/ano-3/trim-12/licao-119-bs-sintese.mdx'),
-    'es-ES': () => import('@/../content/i18n/es-ES/aulas/ano-3/trim-12/licao-119-bs-sintese.mdx'),
   },
   'aulas/ano-3/trim-12/licao-120-workshop-final': {
     'pt-BR': () => import('@/../content/aulas/ano-3/trim-12/licao-120-workshop-final.mdx'),
@@ -645,12 +644,10 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   'financas-quantitativas/opcoes/black-scholes': {
     'pt-BR': () => import('@/../content/financas-quantitativas/opcoes/black-scholes.mdx'),
     'en-US': () => import('@/../content/i18n/en-US/financas-quantitativas/opcoes/black-scholes.mdx'),
-    'es-ES': () => import('@/../content/i18n/es-ES/financas-quantitativas/opcoes/black-scholes.mdx'),
   },
   'metodos-numericos/zero-de-funcoes/bissecao': {
     'pt-BR': () => import('@/../content/metodos-numericos/zero-de-funcoes/bissecao.mdx'),
     'en-US': () => import('@/../content/i18n/en-US/metodos-numericos/zero-de-funcoes/bissecao.mdx'),
-    'es-ES': () => import('@/../content/i18n/es-ES/metodos-numericos/zero-de-funcoes/bissecao.mdx'),
   },
   'metodos-numericos/zero-de-funcoes/newton-raphson': {
     'pt-BR': () => import('@/../content/metodos-numericos/zero-de-funcoes/newton-raphson.mdx'),

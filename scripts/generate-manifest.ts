@@ -113,25 +113,35 @@ async function main() {
   const buildLocale = process.env.BUILD_LOCALE ?? ''
   const isMatrixBuild = buildLocale !== ''
 
-  // includeTranslationsFor: lessons whose EN/ES translation MUST be bundled
-  // via the webpack manifest so the locale route preserves the JSX-expression
-  // props on <Exercicio> (opcoes, solucao, passos, fonte) — compileMDX
-  // (next-mdx-remote/rsc) drops them, which is why un-bundled lessons rendered
-  // without MC/solution buttons OR fell back to PT-BR entirely.
-  //
-  // Auto-computed (2026-06-02): every translation that is EXERCISE-SYNCED to
-  // the canonical PT-BR (same `<Exercicio` count) is included. Stale
-  // translations (count mismatch) are intentionally excluded — they fall back
-  // to PT-BR under the locale URL until re-synced, rather than shipping a
-  // half-translated lesson. Re-synced locales auto-include on the next
-  // manifest regen, no hardcoded list to maintain.
-  // Maintained locales eligible for single-build bundling. A locale's file is
-  // bundled ONLY if it is exercise-synced (same `<Exercicio` count as the
-  // canonical PT-BR) — stale translations fall back to PT-BR under the locale
-  // URL rather than shipping a half-translated lesson. Per-locale, per-lesson.
+  // A maintained-locale translation is BUNDLED into the webpack manifest only
+  // if it passes BOTH gates:
+  //   (1) EXERCISE-SYNCED   — same `<Exercicio` count as the canonical PT-BR
+  //                           (else it's a stale, half-translated lesson), and
+  //   (2) BUILD-COMPILES    — `@mdx-js/mdx` (acorn, what `next build` runs)
+  //                           parses it without error.
+  // A file that fails either gate falls back to PT-BR under the locale URL —
+  // which is correct: better the source language than a broken page that
+  // crashes the whole build. Gate (2) is essential because exercise-count
+  // parity does NOT imply the JSX/MDX is valid; on 2026-06-02 three es-ES
+  // files were count-synced but had unclosed tags / acorn errors, and bundling
+  // them broke `next build`. Bundling the manifest is what preserves the
+  // JSX-expression props (opcoes, solucao, passos, fonte) that compileMDX
+  // (next-mdx-remote/rsc) silently drops. Re-synced+fixed locales auto-include
+  // on the next manifest regen — no hardcoded list to maintain.
   const MAINTAINED_LOCALES = ['en-US', 'es-ES']
   const countExercicios = (txt: string) => (txt.match(/<Exercicio\b/g) ?? []).length
-  // syncedByLocale[fsDir] = Set of paths where that locale matches PT-BR count.
+  const compilesMdx = async (file: string): Promise<boolean> => {
+    try {
+      const { compile } = await import('@mdx-js/mdx')
+      const remarkGfm = (await import('remark-gfm')).default
+      const remarkMath = (await import('remark-math')).default
+      const raw = await fs.readFile(file, 'utf-8')
+      const body = raw.replace(/^---[\s\S]*?---\n/, '')
+      await compile(body, { remarkPlugins: [remarkGfm, remarkMath] })
+      return true
+    } catch { return false }
+  }
+  // syncedByLocale[fsDir] = Set of paths where that locale is synced AND compiles.
   const syncedByLocale: Record<string, Set<string>> = {}
   for (const fsDir of MAINTAINED_LOCALES) syncedByLocale[fsDir] = new Set()
   for (const p of ptPaths) {
@@ -141,15 +151,17 @@ async function main() {
     for (const fsDir of MAINTAINED_LOCALES) {
       const tgt = path.join(I18N_DIR, fsDir, `${p}.mdx`)
       try {
-        if (countExercicios(await fs.readFile(tgt, 'utf-8')) === src) syncedByLocale[fsDir]!.add(p)
+        if (countExercicios(await fs.readFile(tgt, 'utf-8')) !== src) continue  // gate 1
+        if (!(await compilesMdx(tgt))) continue                                  // gate 2
+        syncedByLocale[fsDir]!.add(p)
       } catch { /* no translation file */ }
     }
   }
-  // A lesson is in the allowlist if ANY maintained locale is synced for it.
+  // A lesson is in the allowlist if ANY maintained locale is bundled for it.
   const includeTranslationsFor = new Set<string>()
   for (const fsDir of MAINTAINED_LOCALES) for (const p of syncedByLocale[fsDir]!) includeTranslationsFor.add(p)
   for (const fsDir of MAINTAINED_LOCALES) {
-    console.log(`   ${fsDir}: ${syncedByLocale[fsDir]!.size} lessons exercise-synced → bundled`)
+    console.log(`   ${fsDir}: ${syncedByLocale[fsDir]!.size} lessons synced+compiling → bundled`)
   }
 
   let out = `/**
