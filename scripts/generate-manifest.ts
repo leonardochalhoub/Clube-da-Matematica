@@ -112,19 +112,45 @@ async function main() {
   //   /<locale>/... URLs only. Artifacts merge after.
   const buildLocale = process.env.BUILD_LOCALE ?? ''
   const isMatrixBuild = buildLocale !== ''
-  const includeTranslationsFor = new Set<string>([
-    // Strict-mode re-sourced lessons (real exercises from OpenStax + Active
-    // Calculus, with MC + solucao + 25% passos + all 5 fonte fields).
-    // These MUST be bundled via webpack manifest so the locale route
-    // preserves the JSX-expression props (opcoes, solucao, passos, fonte) —
-    // compileMDX (next-mdx-remote/rsc) drops them and lessons render
-    // without MC/solution buttons.
-    'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos',
-    'aulas/ano-1/trim-1/licao-02-funcoes',
-    'aulas/ano-2/trim-5/licao-41-limite-formal',
-    'aulas/ano-2/trim-6/licao-51-derivada-definicao',
-    'aulas/ano-3/trim-9/licao-82-integral-definida',
-  ])
+
+  // includeTranslationsFor: lessons whose EN/ES translation MUST be bundled
+  // via the webpack manifest so the locale route preserves the JSX-expression
+  // props on <Exercicio> (opcoes, solucao, passos, fonte) — compileMDX
+  // (next-mdx-remote/rsc) drops them, which is why un-bundled lessons rendered
+  // without MC/solution buttons OR fell back to PT-BR entirely.
+  //
+  // Auto-computed (2026-06-02): every translation that is EXERCISE-SYNCED to
+  // the canonical PT-BR (same `<Exercicio` count) is included. Stale
+  // translations (count mismatch) are intentionally excluded — they fall back
+  // to PT-BR under the locale URL until re-synced, rather than shipping a
+  // half-translated lesson. Re-synced locales auto-include on the next
+  // manifest regen, no hardcoded list to maintain.
+  // Maintained locales eligible for single-build bundling. A locale's file is
+  // bundled ONLY if it is exercise-synced (same `<Exercicio` count as the
+  // canonical PT-BR) — stale translations fall back to PT-BR under the locale
+  // URL rather than shipping a half-translated lesson. Per-locale, per-lesson.
+  const MAINTAINED_LOCALES = ['en-US', 'es-ES']
+  const countExercicios = (txt: string) => (txt.match(/<Exercicio\b/g) ?? []).length
+  // syncedByLocale[fsDir] = Set of paths where that locale matches PT-BR count.
+  const syncedByLocale: Record<string, Set<string>> = {}
+  for (const fsDir of MAINTAINED_LOCALES) syncedByLocale[fsDir] = new Set()
+  for (const p of ptPaths) {
+    let src: number
+    try { src = countExercicios(await fs.readFile(path.join(CONTENT_DIR, `${p}.mdx`), 'utf-8')) }
+    catch { continue }
+    for (const fsDir of MAINTAINED_LOCALES) {
+      const tgt = path.join(I18N_DIR, fsDir, `${p}.mdx`)
+      try {
+        if (countExercicios(await fs.readFile(tgt, 'utf-8')) === src) syncedByLocale[fsDir]!.add(p)
+      } catch { /* no translation file */ }
+    }
+  }
+  // A lesson is in the allowlist if ANY maintained locale is synced for it.
+  const includeTranslationsFor = new Set<string>()
+  for (const fsDir of MAINTAINED_LOCALES) for (const p of syncedByLocale[fsDir]!) includeTranslationsFor.add(p)
+  for (const fsDir of MAINTAINED_LOCALES) {
+    console.log(`   ${fsDir}: ${syncedByLocale[fsDir]!.size} lessons exercise-synced → bundled`)
+  }
 
   let out = `/**
  * GERADO AUTOMATICAMENTE por scripts/generate-manifest.ts
@@ -179,14 +205,14 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
       // translations also have stale JSX (pre-strict-mode content) that
       // throws webpack cache serializer warnings. EN+ES are the locales
       // we actively maintain; others rebuild only via the matrix CI.
-      const BUNDLE_LOCALES = new Set(['en-US', 'es-ES'])
       out += `    'pt-BR': () => import('@/../content/${p}.mdx'),\n`
-      if (includeTranslationsFor.has(p)) {
-        for (const [locale, set] of Object.entries(localeMap)) {
-          if (!BUNDLE_LOCALES.has(locale)) continue
-          if (set.has(p)) {
-            out += `    '${locale}': () => import('@/../content/i18n/${locale}/${p}.mdx'),\n`
-          }
+      // Bundle a maintained locale's file ONLY if it is exercise-synced for
+      // this lesson (per-locale gate). Stale translations are skipped → the
+      // locale URL falls back to PT-BR rather than shipping a half-translated
+      // lesson with the wrong exercise count.
+      for (const fsDir of MAINTAINED_LOCALES) {
+        if (syncedByLocale[fsDir]!.has(p)) {
+          out += `    '${fsDir}': () => import('@/../content/i18n/${fsDir}/${p}.mdx'),\n`
         }
       }
     }

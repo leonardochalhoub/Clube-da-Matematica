@@ -5,21 +5,38 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Permissões necessárias para o deploy automático em GH Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Garante que apenas um deploy roda por vez; o mais novo cancela qualquer
-# pendente que não esteja em produção ainda.
 concurrency:
   group: 'pages'
   cancel-in-progress: false
 
+# ─────────────────────────────────────────────────────────────────────────────
+# PER-LOCALE MATRIX BUILD
+#
+# Why: bundling all 11 locales' lesson MDX into ONE webpack process OOMs — the
+# module graph (120 lessons × N locales) does not fit any heap. Instead each
+# locale builds in its OWN runner job via BUILD_LOCALE:
+#   - generate-manifest.ts emits ONLY that locale's modules (matrix mode)
+#   - generateStaticParams() emits ONLY that locale's pages (honors BUILD_LOCALE)
+# Per-job memory stays flat no matter how many locales exist, so this scales to
+# all 11 (and beyond) linearly in CI time. Artifacts merge into one ./out.
+#
+# The pt-BR job builds the canonical root routes (/aulas/…) + every non-locale
+# page (finance, exams, manifesto, …). Each locale job builds only /<loc>/…
+# Add a locale to the matrix once it is exercise-synced (see generate-manifest).
+# ─────────────────────────────────────────────────────────────────────────────
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        locale: [pt-BR, en]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,33 +53,68 @@ jobs:
       - name: Validate content frontmatter
         run: npm run validate-content
 
-      # Cache .next/cache between runs. Cold compile is ~5min; warm hits drop
-      # to ~1-2min for content-only edits. Key: package-lock + all source/content
-      # files. restore-keys give a partial hit so even on a miss webpack picks
-      # up where it left off (modules whose hash didn't change are reused).
       - name: Restore .next/cache
         uses: actions/cache@v4
         with:
           path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/**/*.mdx', 'src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx', 'next.config.mjs', 'mdx-components.tsx', 'tsconfig.json') }}
+          key: ${{ runner.os }}-nextjs-${{ matrix.locale }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/**/*.mdx', 'src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx', 'next.config.mjs', 'mdx-components.tsx', 'tsconfig.json') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
-            ${{ runner.os }}-nextjs-
+            ${{ runner.os }}-nextjs-${{ matrix.locale }}-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-nextjs-${{ matrix.locale }}-
 
-      - name: Build static site
+      - name: Generate per-locale manifest
         env:
-          # GitHub Pages serve em /<repo-name>/
+          BUILD_LOCALE: ${{ matrix.locale }}
+        run: npx tsx scripts/generate-manifest.ts
+
+      - name: Build static site (locale ${{ matrix.locale }})
+        env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-          # NOTA: o valor efetivo do heap vem do script "build" em package.json
-          # (cross-env NODE_OPTIONS=...), que SOBRESCREVE esta env var. Mantidos
-          # iguais (13312) só pra evitar confusão — editar package.json é o que conta.
-          # Subido 8192->13312 em 2026-05-27: build limpo (sem cache .next) de 1835
-          # páginas estourou 8GB no CI após Cálculo 1 (PR #2, +445 págs). Runner
-          # público ubuntu-latest tem 16GB RAM, então 13GB de heap é folga segura.
+          BUILD_LOCALE: ${{ matrix.locale }}
+          # Heap headroom on the 16 GB ubuntu-latest runner. Per-locale build is
+          # far lighter than the old all-in-one, but keep the headroom.
           NODE_OPTIONS: --max-old-space-size=13312
-          # Silence Next.js anonymous telemetry notice in CI logs.
           NEXT_TELEMETRY_DISABLED: '1'
         run: npm run build
+
+      # Sanitize the matrix key for use as an artifact name (no slashes).
+      - name: Compute artifact name
+        id: art
+        run: echo "name=site-${{ matrix.locale }}" | tr '/' '-' >> "$GITHUB_OUTPUT"
+
+      - name: Upload locale slice
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.art.outputs.name }}
+          path: ./out
+          retention-days: 1
+          if-no-files-found: error
+
+  merge:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all locale slices
+        uses: actions/download-artifact@v4
+        with:
+          pattern: site-*
+          path: slices
+
+      # Merge every slice into one ./out. The pt-BR slice carries the root +
+      # shared pages; each locale slice carries its /<loc>/… subtree. Slices are
+      # disjoint except for shared static assets (_next, images) which are
+      # byte-identical, so a plain overlay copy is safe.
+      - name: Merge slices into ./out
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          for d in slices/*/; do
+            echo "merging $d"
+            cp -a "$d". out/
+          done
+          echo "=== merged tree summary ==="
+          find out -maxdepth 2 -type d | sort | head -40
+          echo "total html files: $(find out -name '*.html' | wc -l)"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -70,7 +122,7 @@ jobs:
           path: ./out
 
   deploy:
-    needs: build
+    needs: merge
     runs-on: ubuntu-latest
     environment:
       name: github-pages
