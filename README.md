@@ -118,21 +118,21 @@ Pipeline de tradução: **baseada em Claude** (agentes via Claude Code) — **Ha
 
 Idiomas atualmente removidos: árabe, hebraico e hindi — saíram temporariamente porque o TTS gratuito não rendia bem; voltarão quando tivermos uma solução de voz neural.
 
-| Idioma | UI | TTS | Lições MDX |
+| Idioma | UI | TTS | Lições MDX (sincronizadas*) |
 |---|---|---|---|
-| 🇧🇷 Português (Brasil) | 100% | 100% | **100% (fonte, revisada)** |
-| 🇺🇸 English | 100% | 100% | **100% (re-sincronizado)** |
-| 🇪🇸 Español | 100% | 100% | 99% · defasado* |
-| 🇨🇳 中文 (简体) | 100% | 100% | 96% · defasado* |
-| 🇵🇱 Polski | 100% | 100% | 87% · defasado* |
-| 🇩🇪 Deutsch | 100% | 100% | 78% · defasado* |
-| 🇫🇷 Français | 100% | 100% | 67% · defasado* |
-| 🇮🇹 Italiano | 100% | 100% | 63% · defasado* |
-| 🇰🇷 한국어 | 100% | 100% | 53% · defasado* |
-| 🇷🇺 Русский | 100% | 100% | 46% · defasado* |
-| 🇯🇵 日本語 | 100% | 100% | 44% · defasado* |
+| 🇧🇷 Português (Brasil) | 100% | 100% | **120/120 (fonte, revisada)** |
+| 🇺🇸 English | 100% | 100% | **120/120 ✅** |
+| 🇪🇸 Español | 100% | 100% | 25/120 — re-sincronização pendente |
+| 🇨🇳 中文 (简体) | 100% | 100% | 28/120 — re-sincronização pendente |
+| 🇵🇱 Polski | 100% | 100% | 25/120 — re-sincronização pendente |
+| 🇩🇪 Deutsch | 100% | 100% | 22/120 — re-sincronização pendente |
+| 🇫🇷 Français | 100% | 100% | 21/120 — re-sincronização pendente |
+| 🇮🇹 Italiano | 100% | 100% | 19/120 — re-sincronização pendente |
+| 🇰🇷 한국어 | 100% | 100% | 9/120 — re-sincronização pendente |
+| 🇷🇺 Русский | 100% | 100% | 10/120 — re-sincronização pendente |
+| 🇯🇵 日本語 | 100% | 100% | 9/120 — re-sincronização pendente |
 
-<sub>*Defasado = traduzido contra uma versão anterior da fonte PT-BR; precisa de re-sincronização após a revisão de 2026-05-31 (que alterou contagens de exercícios em várias lições).</sub>
+<sub>*Sincronizada = a lição traduzida tem **exatamente os mesmos exercícios** da fonte PT-BR atual. **Só PT-BR e en-US estão 100%.** Os demais idiomas têm arquivos traduzidos, mas contra uma versão anterior da fonte — após a revisão de 2026-05-31 (932 correções de linguagem + 819 de correção matemática + 5 bancos de exercícios regenerados), as contagens de exercícios mudaram, então cada lição precisa ser re-traduzida para incluir os exercícios novos/corrigidos. Espanhol inclusive.</sub>
 
 ---
 
@@ -242,8 +242,8 @@ Fontes externas mantêm suas próprias licenças (OpenStax CC-BY, Active Calculu
 - [x] **UI traduzida** em 11 idiomas
 - [x] **Áudio TTS / leitor de voz acessível** em 11 idiomas (Web Speech API)
 - [x] **Lições L1-L120 padronizadas no template canônico** (Lição 1 standard)
-- [x] **MDX das lições traduzido**: en-US ✅ · es-ES ✅
-- [ ] **MDX das lições — 8 idiomas restantes** (zh-CN, ja-JP, de-DE, fr-FR, it-IT, ru-RU, ko-KR, pl-PL) — cobertura parcial 24–52%, em andamento
+- [x] **MDX das lições traduzido + sincronizado**: en-US ✅ (120/120)
+- [ ] **MDX das lições — 9 idiomas restantes** (es-ES, zh-CN, pl-PL, de-DE, fr-FR, it-IT, ko-KR, ru-RU, ja-JP) — todos precisam de re-sincronização de exercícios com a fonte PT-BR revisada (2026-05-31); contagem sincronizada hoje: es 25, zh 28, pl 25, de 22, fr 21, it 19, ko 9, ru 10, ja 9 (de 120)
 - [ ] **Provas i18n** (1.800 questões × 10 idiomas) — TO-DO
 - [ ] **Retorno de árabe / hebraico / hindi** quando houver TTS neural decente
 - [ ] **Próximo módulo: Física Ensino Médio** (mecânica, ondas, eletromagnetismo)
