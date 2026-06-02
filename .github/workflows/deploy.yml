@@ -36,7 +36,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        locale: [pt-BR, en]
+        # url = BUILD_LOCALE (URL prefix, what generateStaticParams + manifest
+        # gate on); fsdir = the content/i18n/<dir> long code for cache scoping.
+        # pt-BR has no i18n dir (canonical source) — fsdir '' makes its i18n
+        # hash empty, which is correct.
+        include:
+          - { url: pt-BR, fsdir: '' }
+          - { url: en, fsdir: en-US }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,24 +59,29 @@ jobs:
       - name: Validate content frontmatter
         run: npm run validate-content
 
+      # Cache key is scoped per-locale so editing one locale's lessons does not
+      # cold-build the others. It hashes: shared source/config + the canonical
+      # PT-BR content (every job builds the root tree) + ONLY this locale's i18n
+      # dir. An en-US lesson edit busts the `en` job's key but not `pt-BR`'s.
+      # restore-keys give a partial hit (webpack reuses unchanged modules) even
+      # when the exact key misses.
       - name: Restore .next/cache
         uses: actions/cache@v4
         with:
           path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ matrix.locale }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/**/*.mdx', 'src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx', 'next.config.mjs', 'mdx-components.tsx', 'tsconfig.json') }}
+          key: ${{ runner.os }}-nextjs-${{ matrix.url }}-${{ hashFiles('package-lock.json', 'src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx', 'next.config.mjs', 'mdx-components.tsx', 'tsconfig.json', 'content/aulas/**/*.mdx', 'content/financas-quantitativas/**/*.mdx', 'content/metodos-numericos/**/*.mdx', 'content/calculo-1/**/*.mdx') }}-${{ hashFiles(format('content/i18n/{0}/**/*.mdx', matrix.fsdir)) }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ matrix.locale }}-${{ hashFiles('package-lock.json') }}-
-            ${{ runner.os }}-nextjs-${{ matrix.locale }}-
+            ${{ runner.os }}-nextjs-${{ matrix.url }}-
 
       - name: Generate per-locale manifest
         env:
-          BUILD_LOCALE: ${{ matrix.locale }}
+          BUILD_LOCALE: ${{ matrix.url }}
         run: npx tsx scripts/generate-manifest.ts
 
-      - name: Build static site (locale ${{ matrix.locale }})
+      - name: Build static site (locale ${{ matrix.url }})
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-          BUILD_LOCALE: ${{ matrix.locale }}
+          BUILD_LOCALE: ${{ matrix.url }}
           # Heap headroom on the 16 GB ubuntu-latest runner. Per-locale build is
           # far lighter than the old all-in-one, but keep the headroom.
           NODE_OPTIONS: --max-old-space-size=13312
@@ -80,7 +91,7 @@ jobs:
       # Sanitize the matrix key for use as an artifact name (no slashes).
       - name: Compute artifact name
         id: art
-        run: echo "name=site-${{ matrix.locale }}" | tr '/' '-' >> "$GITHUB_OUTPUT"
+        run: echo "name=site-${{ matrix.url }}" | tr '/' '-' >> "$GITHUB_OUTPUT"
 
       - name: Upload locale slice
         uses: actions/upload-artifact@v4

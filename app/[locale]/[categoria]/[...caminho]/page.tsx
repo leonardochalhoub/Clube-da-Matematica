@@ -36,6 +36,14 @@ interface Props {
 
 const ROOT = process.cwd()
 
+// With `output: export`, a dynamic route must enumerate ALL its pages via
+// generateStaticParams and serve nothing on-demand. dynamicParams=false makes
+// that explicit (anything not pre-generated 404s) AND makes an EMPTY param
+// list legal — which is exactly the pt-BR matrix job, where this locale route
+// generates zero pages (BUILD_LOCALE=pt-BR → generateStaticParams returns []).
+// Without this, `next build` errors: "is missing generateStaticParams()".
+export const dynamicParams = false
+
 /**
  * Walks a directory recursively, returning relative paths to .mdx files.
  */
