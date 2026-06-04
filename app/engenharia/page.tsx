@@ -12,7 +12,7 @@ import { PROGRAMA_ENG, type DisciplinaEngData } from '@/content/programa-engenha
 
 // Metadata estática em PT-BR (padrão do projeto)
 export const metadata: Metadata = {
-  title: 'Engenharia — Cálculo 1 a 4',
+  title: 'Ensino Superior — Cálculo 1 a 4',
   description:
     'Cálculo 1, 2, 3 e 4 com rigor USP/ITA — limites, derivadas, integrais, EDOs, ' +
     'transformadas de Laplace e cálculo vetorial. Open source, gratuito, exercícios de fontes reais.',
@@ -121,10 +121,10 @@ export default function EngenhariaPage() {
       {/* Hero */}
       <header className="mb-14 max-w-3xl">
         <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-clube-teal">
-          Programa de Engenharia
+          Programa de Ensino Superior
         </p>
         <h1 className="mb-4 font-sans text-4xl font-bold leading-tight text-clube-ink md:text-5xl">
-          Engenharia
+          Ensino Superior
         </h1>
         <p className="text-lg text-clube-ink/70 leading-relaxed">
           Cálculo 1 a 4 com rigor de engenharia — exercícios extraídos de Stewart,

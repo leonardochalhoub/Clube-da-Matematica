@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const disc = PROGRAMA_ENG.find((d) => d.id === disciplina)
   if (!disc) return { title: 'Não encontrado' }
   return {
-    title: `${disc.titulo} — Engenharia`,
+    title: `${disc.titulo} — Ensino Superior`,
     description: disc.resumo,
   }
 }
@@ -137,7 +137,7 @@ export default async function DisciplinaPage({ params }: Props) {
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-2 text-sm text-clube-mist">
         <Link href="/engenharia" className="hover:text-clube-teal transition-colors">
-          Engenharia
+          Ensino Superior
         </Link>
         <span>/</span>
         <span className="text-clube-ink font-medium">

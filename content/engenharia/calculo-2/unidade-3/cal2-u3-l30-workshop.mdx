@@ -1,0 +1,168 @@
+---
+titulo: "Workshop U3 — Equações Diferenciais"
+slug: "cal2-u3-l30-workshop"
+categoria: "calculo-2"
+subcategoria: "unidade-3"
+descricao: "Workshop de EDOs: problemas desafiadores de modelagem, sistemas, transformada de Laplace, análise de estabilidade e aplicações em engenharia mecânica, elétrica e civil."
+ordem: 30
+publicado: true
+tags: ["calculo-2", "workshop", "edo", "modelagem", "laplace", "sistemas", "engenharia"]
+prerrequisitos:
+  - "Lição 29 — EDOs em Séries de Potências"
+autores: ["Clube da Matemática"]
+atualizadoEm: "2026-05-28"
+usadoEm: ["Cálculo 2 — Unidade 3", "USP MAT0112", "ITA MA-012"]
+versao: "v1"
+---
+
+<EquacaoCanonica
+  formula="\mathcal{L}\{y''\}+p\mathcal{L}\{y'\}+q\mathcal{L}\{y\}=\mathcal{L}\{g\}\;\Rightarrow\;Y(s)\;\Rightarrow\;\mathcal{L}^{-1}\{Y\}=y(t)"
+  legenda={<>O workshop integra todas as técnicas da Unidade 3: separáveis, lineares, 2ª ordem, Laplace, sistemas e métodos numéricos. Cada problema é uma combinação de múltiplas ferramentas.</>}
+  audioTexto="Workshop de equações diferenciais. Laplace converte a EDO em equação algébrica, resolve-se para Y de s, e aplica-se a transformada inversa."
+/>
+
+<DuasPortas>
+
+<Porta nivel="formal" titulo="Resumo das ferramentas da Unidade 3">
+
+| Tipo de EDO | Técnica | Resultado |
+|------------|---------|-----------|
+| Separável $y' = g(x)h(y)$ | Separa e integra | $\int dy/h = \int g\,dx + C$ |
+| Linear 1ª ordem $y'+py=q$ | Fator integrante $\mu = e^{\int p}$ | $y = (\int\mu q + C)/\mu$ |
+| 2ª ordem homogênea (ctes. ctes.) | Eq. característica | $e^{r_1 x}, e^{r_2 x}$; 3 casos |
+| 2ª ordem não-homogênea | Coef. indeterminados / Var. parâmetros | $y = y_h + y_p$ |
+| PVI geral | Laplace | $Y(s)$, frações parciais, tabela |
+| Sistema $\mathbf{x}' = A\mathbf{x}$ | Autovalores/autovetores | Modos $e^{\lambda_k t}\mathbf{v}_k$ |
+| EDO com coefs. variáveis | Séries de potências / Frobenius | Recorrência para $a_n$ |
+| Qualquer PVI (numérico) | RK4 | Erro $O(h^4)$ |
+
+</Porta>
+
+<Porta nivel="pratica" titulo="Estratégia de reconhecimento">
+
+1. **Linear de 1ª ordem?** → Fator integrante.
+2. **Separável?** → Separar e integrar.
+3. **2ª ordem com ctes. ctes.?** → Eq. característica + particular (se não-homogênea).
+4. **PVI com Heaviside ou $\delta$?** → Laplace é mais eficiente.
+5. **Sistema acoplado?** → Autovalores.
+6. **Ponto singular ou coefs. variáveis?** → Frobenius ou série de potências.
+7. **Impossível analiticamente?** → RK4 numérico.
+
+</Porta>
+
+</DuasPortas>
+
+## Problemas do Workshop
+
+<Exemplo titulo="W1 — Oscilador com amortecimento e forçamento" numero={1} fonte="Boyce-DiPrima §3.8; Zill §5.1–5.2">
+
+Um circuito RLC tem $R=20\,\Omega$, $L=5\,H$, $C=0{,}02\,F$, $E(t)=100\cos(2t)$ V.
+
+A carga $q$ satisfaz $5q'' + 20q' + 50q = 100\cos 2t$.
+
+Simplificando: $q'' + 4q' + 10q = 20\cos 2t$.
+
+Equação característica: $r^2+4r+10=0$, $r = -2\pm i\sqrt{6}$.
+
+$q_h = e^{-2t}(c_1\cos\sqrt{6}t + c_2\sin\sqrt{6}t)$.
+
+Particular: $q_p = A\cos 2t + B\sin 2t$, substituindo:
+
+$(10-4)A + 4\cdot 2B = 20 \Rightarrow 6A+8B = 20$; $(10-4)B - 8A = 0 \Rightarrow -8A+6B = 0$.
+
+$A = 30/25 = 6/5$, $B = 8/5$.
+
+$q = e^{-2t}(c_1\cos\sqrt{6}t + c_2\sin\sqrt{6}t) + \frac{6}{5}\cos 2t + \frac{8}{5}\sin 2t$.
+
+</Exemplo>
+
+<Exemplo titulo="W2 — Sistema não-linear linearizado" numero={2} fonte="Boyce-DiPrima §9.3; Zill §10.3">
+
+O pêndulo não-linear: $\theta'' + (g/L)\sin\theta = 0$.
+
+Para $\theta$ pequeno: $\sin\theta \approx \theta$, logo $\theta'' + \omega^2\theta = 0$ ($\omega = \sqrt{g/L}$).
+
+**Período aproximado:** $T = 2\pi/\omega = 2\pi\sqrt{L/g}$.
+
+**Equilíbrio instável** em $\theta = \pi$: linearizando com $\phi = \theta - \pi$:
+
+$\phi'' + (g/L)\sin(\pi+\phi) = \phi'' - (g/L)\sin\phi \approx \phi'' - \omega^2\phi = 0$.
+
+Eq. característica: $r^2 - \omega^2 = 0$, $r = \pm\omega$. Solução: $\phi = c_1 e^{\omega t} + c_2 e^{-\omega t}$ — ponto de sela (instável).
+
+</Exemplo>
+
+<Exemplo titulo="W3 — Laplace com delta de Dirac" numero={3} fonte="Boyce-DiPrima §6.4; Zill §7.4, Ex. 10">
+
+Resolva $y'' + 4y = \delta(t-\pi)$, $y(0) = 0$, $y'(0) = 0$.
+
+$\mathcal{L}$: $(s^2+4)Y = e^{-\pi s}$.
+
+$Y = \dfrac{e^{-\pi s}}{s^2+4}$.
+
+$\mathcal{L}^{-1}$: $y = u(t-\pi)\cdot\dfrac{\sin(2(t-\pi))}{2} = \begin{cases}0 & t < \pi \\ \frac{\sin(2(t-\pi))}{2} & t \geq \pi\end{cases}$.
+
+O sistema estava em repouso e, no instante $t=\pi$, recebeu um impulso que o fez oscilar.
+
+</Exemplo>
+
+---
+
+## Exercícios do Workshop
+
+### Série A — Problemas clássicos de modelagem
+
+<Exercicio numero={1} fonte="Boyce-DiPrima §2.3, §3.7–3.8; Zill §3.1–3.3, §5.1">
+**(a)** Um tanque (200 L) com concentração inicial 0,5 kg/L recebe solução 0,1 kg/L a 10 L/min e drena 10 L/min. Encontre $Q(t)$ e o tempo para $Q = 30$ kg.
+
+**(b)** Massa $m=1$ kg, mola $k=4$ N/m, amortecedor $c=4$ N$\cdot$s/m. Em $t=0$: $x=1$, $\dot{x}=0$. Classifique o amortecimento e resolva.
+
+**(c)** Circuito RL com $L=1$ H, $R=3\,\Omega$, $E(t) = 10u(t-1)$ V, $i(0)=0$. Use Laplace.
+</Exercicio>
+
+### Série B — Análise de sistemas
+
+<Exercicio numero={2} fonte="Boyce-DiPrima §7.3–7.6; Zill §8.1–8.2">
+**(a)** Classifique o equilíbrio de $\mathbf{x}' = \begin{pmatrix}2&-5\\1&-2\end{pmatrix}\mathbf{x}$ e esboce o retrato de fase.
+
+**(b)** Resolva $\mathbf{x}' = \begin{pmatrix}4&-3\\2&-1\end{pmatrix}\mathbf{x}$, $\mathbf{x}(0) = (1,0)^T$.
+
+**(c)** Para $\mathbf{x}' = A\mathbf{x}+\mathbf{g}$ com $A = \begin{pmatrix}-1&0\\0&-2\end{pmatrix}$, $\mathbf{g} = \begin{pmatrix}e^t\\1\end{pmatrix}$, encontre a solução particular por variação de parâmetros vetorial.
+</Exercicio>
+
+### Série C — Problemas de nível ITA/USP
+
+<Exercicio numero={3} fonte="ITA — provas 2016–2023; USP MAT0112">
+**(a)** Resolva a equação de Bernoulli $xy' + y = xy^2$ com $y(1) = 1/2$.
+
+**(b)** Encontre a solução da EDO exata $\left(\frac{y}{x^2+y^2}-1\right)dx + \frac{x}{x^2+y^2}\,dy = 0$.
+
+**(c)** Resolva via Laplace: $y'' - 3y' + 2y = e^t\cos t$, $y(0)=0$, $y'(0)=0$.
+</Exercicio>
+
+<Exercicio numero={4} fonte="ITA 2022; Boyce-DiPrima §9.4">
+**Plano de fase do Lotka-Volterra:** para o sistema presa-predador $\dot{x} = \alpha x - \beta xy$, $\dot{y} = -\gamma y + \delta xy$:
+
+**(a)** Encontre os pontos de equilíbrio.
+
+**(b)** Linearize ao redor do equilíbrio não-trivial e classifique a estabilidade.
+
+**(c)** Mostre que $H = \delta x - \gamma\ln x + \beta y - \alpha\ln y$ é constante ao longo das órbitas (integral primeira).
+</Exercicio>
+
+<Exercicio numero={5} fonte="USP MAT0112 — prova final 2023; Boyce-DiPrima §10.4">
+**Equação do calor — solução completa:** resolva $u_t = u_{xx}$, $0<x<\pi$, $t>0$, com $u(0,t)=u(\pi,t)=0$ e $u(x,0)=\sin x + \frac{1}{2}\sin 3x$:
+
+**(a)** Por separação de variáveis, mostre que $u(x,t) = \sum b_n\sin(nx)e^{-n^2 t}$.
+
+**(b)** Use a condição inicial para encontrar $b_1 = 1$, $b_3 = 1/2$, demais $= 0$.
+
+**(c)** Interprete fisicamente o decaimento diferencial das harmônicas.
+</Exercicio>
+
+<Leituras>
+- **Boyce**, W. & DiPrima, R. — *Equações Diferenciais Elementares*, §2–10 — LTC, 10ª ed.
+- **Zill**, D.G. — *Equações Diferenciais com Aplicações em Modelagem*, §2–10 — Cengage, 10ª ed.
+- **Stewart**, J. — *Cálculo*, vol. 2, §9, §17 — Cengage, 8ª ed.
+- **REAMAT** — *Cálculo Numérico*, §7 — UFRGS (reamat.ufrgs.br)
+</Leituras>
