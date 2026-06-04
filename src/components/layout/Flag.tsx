@@ -20,6 +20,9 @@ export function Flag({
     .join('-')
   const url = `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${codepoint}.svg`
   return (
+    // External Twemoji SVG from CDN; next/image would require remotePatterns
+    // and brings no optimization for an already-optimized SVG.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={url}
       alt=""

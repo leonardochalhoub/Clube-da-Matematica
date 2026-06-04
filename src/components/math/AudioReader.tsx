@@ -121,6 +121,9 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     window.speechSynthesis.cancel()
 
     const vozes = await obterVoicesAsync()
+    // Se a utterance anterior foi descartada em silêncio (bug do Chrome no
+    // cancel()→speak()), o onend nunca dispara e o estado fica preso em
+    // 'falando'; já resetamos acima ao re-entrar, mas garantimos idle aqui.
     const exatas = vozes.filter((v) => v.lang === langFalado)
     const prefixo = vozes.filter((v) => {
       const head = langFalado.split('-')[0]
@@ -145,7 +148,19 @@ export function AudioReader({ texto, textosI18n, label }: AudioReaderProps) {
     u.onerror = () => setEstado('idle')
 
     utterRef.current = u
-    window.speechSynthesis.speak(u)
+    // Chrome bug: chamar speak() logo após cancel() (ainda mais com um await
+    // no meio) às vezes descarta a utterance em silêncio — e como onstart pode
+    // ter disparado, o botão trava em 'falando' e o próximo clique só cancela
+    // (= "às vezes não acontece nada"). Deferir o speak() deixa o cancel()
+    // assentar; resume() limpa qualquer estado pausado herdado de outro player.
+    setTimeout(() => {
+      try {
+        window.speechSynthesis.resume()
+        window.speechSynthesis.speak(u)
+      } catch {
+        setEstado('idle')
+      }
+    }, 60)
   }
 
   if (estado === 'indisponivel') return null

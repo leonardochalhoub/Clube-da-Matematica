@@ -2,7 +2,8 @@ import type { MetadataRoute } from 'next'
 import { publicadosApenas } from '@/lib/content/loader'
 import { LOCALES, type Locale } from '@/lib/i18n/locales'
 import { caminhoArquivoMdx } from '@/lib/content/loader-i18n'
-import { canonicalUrlFor, homeUrlFor } from '@/lib/seo/urls'
+import { canonicalUrlFor } from '@/lib/seo/urls'
+import { SITE_ORIGIN, BASE_PATH } from '@/lib/seo/site'
 
 // Required for `output: 'export'`
 export const dynamic = 'force-static'
@@ -33,19 +34,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const locales = Object.keys(LOCALES) as Locale[]
 
-  for (const loc of locales) {
-    for (const { path, priority } of STATIC_PATHS) {
-      const url =
-        path === ''
-          ? homeUrlFor(loc)
-          : canonicalUrlFor(path, loc)
-      entries.push({
-        url,
-        lastModified: new Date('2026-05-11'),
-        changeFrequency: 'monthly',
-        priority,
-      })
-    }
+  // Home + static section pages live at ROOT (/, /financas, …) and translate
+  // client-side — they are NOT per-locale routes, so emit each once (no locale
+  // prefix). Only lesson URLs are per-locale (handled below).
+  const prefix = BASE_PATH ? `${BASE_PATH}/` : '/'
+  for (const { path, priority } of STATIC_PATHS) {
+    entries.push({
+      url: path === '' ? `${SITE_ORIGIN}${BASE_PATH || ''}/` : `${SITE_ORIGIN}${prefix}${path}/`,
+      lastModified: new Date('2026-05-11'),
+      changeFrequency: 'monthly',
+      priority,
+    })
   }
 
   // --- Lessons + other content (filesystem-driven) -------------------

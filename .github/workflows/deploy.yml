@@ -5,21 +5,47 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Permissões necessárias para o deploy automático em GH Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Garante que apenas um deploy roda por vez; o mais novo cancela qualquer
-# pendente que não esteja em produção ainda.
 concurrency:
   group: 'pages'
   cancel-in-progress: false
 
+# ─────────────────────────────────────────────────────────────────────────────
+# PER-LOCALE MATRIX BUILD
+#
+# pt-BR is now a normal URL locale (/pt-br/…) served by the unified
+# app/[locale]/[categoria]/[...caminho] route — there is no root lesson route.
+# Each locale builds in its OWN job via BUILD_LOCALE=<urlcode>:
+#   - generate-manifest.ts emits only that locale's modules (matrix mode)
+#   - generateStaticParams() emits only that locale's /<urlcode>/… pages
+# So PT-BR is built exactly once (the pt-br job), no per-job duplication, and
+# per-job memory stays flat regardless of how many locales exist → scales to 11.
+#
+# Add a locale to `matrix.url` once it is exercise-synced AND acorn-clean (the
+# generate-manifest gate decides whether its files bundle or fall back to PT-BR).
+# Each job uploads its ./out slice; the `merge` job overlays all slices into one
+# site (slices are disjoint per /<urlcode>/ subtree; shared root pages —
+# homepage, sitemap, robots — are byte-identical across slices).
+#
+# The pt-br job also emits backward-compat redirect stubs at the OLD root URLs
+# (/aulas/… → /pt-br/aulas/…) via scripts/gen-redirect-stubs.mjs.
+# ─────────────────────────────────────────────────────────────────────────────
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # URL codes. fsdir = content/i18n/<dir> for per-locale cache scoping
+        # ('' for pt-BR, whose source lives in content/).
+        include:
+          - { url: pt-br, fsdir: '' }
+          - { url: en, fsdir: en-US }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,18 +62,77 @@ jobs:
       - name: Validate content frontmatter
         run: npm run validate-content
 
-      - name: Build static site
+      # Per-locale cache key: shared source + canonical PT-BR content + ONLY this
+      # locale's i18n dir. An en-US edit busts the en job's cache, not pt-br's.
+      - name: Restore .next/cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ matrix.url }}-${{ hashFiles('package-lock.json', 'src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx', 'next.config.mjs', 'mdx-components.tsx', 'tsconfig.json', 'content/aulas/**/*.mdx', 'content/financas-quantitativas/**/*.mdx', 'content/metodos-numericos/**/*.mdx', 'content/calculo-1/**/*.mdx') }}-${{ hashFiles(format('content/i18n/{0}/**/*.mdx', matrix.fsdir)) }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ matrix.url }}-
+
+      - name: Generate per-locale manifest
         env:
-          # GitHub Pages serve em /<repo-name>/
+          BUILD_LOCALE: ${{ matrix.url }}
+        run: npx tsx scripts/generate-manifest.ts
+
+      # Fail fast on render-time MDX errors (e.g. "R is not defined" from
+      # $\mathbb{R}$ inside a JSX fragment) BEFORE the 4-min next build. acorn
+      # parsing alone can't catch these — this actually renders each lesson.
+      # Scoped to what THIS job builds (pt-BR base + this locale's i18n dir) so
+      # broken files in not-yet-built locales don't block the matrix.
+      - name: Render-check content (build-accurate, this locale)
+        run: node scripts/check-mdx-render.mjs --build-locale=${{ matrix.url }}
+
+      - name: Build static site (locale ${{ matrix.url }})
+        env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-          # NOTA: o valor efetivo do heap vem do script "build" em package.json
-          # (cross-env NODE_OPTIONS=...), que SOBRESCREVE esta env var. Mantidos
-          # iguais (13312) só pra evitar confusão — editar package.json é o que conta.
-          # Subido 8192->13312 em 2026-05-27: build limpo (sem cache .next) de 1835
-          # páginas estourou 8GB no CI após Cálculo 1 (PR #2, +445 págs). Runner
-          # público ubuntu-latest tem 16GB RAM, então 13GB de heap é folga segura.
+          BUILD_LOCALE: ${{ matrix.url }}
+          # Effective heap comes from package.json's build script (cross-env).
+          # 13 GB headroom on the 16 GB ubuntu-latest runner; per-locale build
+          # is far lighter than the old all-in-one.
           NODE_OPTIONS: --max-old-space-size=13312
+          NEXT_TELEMETRY_DISABLED: '1'
         run: npm run build
+
+      # Backward-compat: old root /aulas/… URLs → /pt-br/aulas/… (pt-br job only,
+      # since it owns the root tree in ./out).
+      - name: Emit root→/pt-br redirect stubs
+        if: matrix.url == 'pt-br'
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: node scripts/gen-redirect-stubs.mjs
+
+      - name: Upload locale slice
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-${{ matrix.url }}
+          path: ./out
+          retention-days: 1
+          if-no-files-found: error
+
+  merge:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all locale slices
+        uses: actions/download-artifact@v4
+        with:
+          pattern: site-*
+          path: slices
+
+      - name: Merge slices into ./out
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          for d in slices/*/; do
+            echo "merging $d"
+            cp -a "$d". out/
+          done
+          echo "=== merged tree (depth 2) ==="
+          find out -maxdepth 2 -type d | sort | head -50
+          echo "total html files: $(find out -name '*.html' | wc -l)"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -55,7 +140,7 @@ jobs:
           path: ./out
 
   deploy:
-    needs: build
+    needs: merge
     runs-on: ubuntu-latest
     environment:
       name: github-pages

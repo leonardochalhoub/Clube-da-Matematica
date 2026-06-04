@@ -1,363 +1,1213 @@
 ---
-titulo: "Lesson 46 — Intermediate Value Theorem (IVT) and Applications"
+titulo: "Lesson 46 — IVT and Average Rate of Change"
 slug: "licao-46-tvi-tvm"
 categoria: "aulas"
 subcategoria: "ano-2-trim-5"
-descricao: "IVT: existence of roots. Bisection, fixed point. Connection with continuity and completeness of R."
+descricao: "Intermediate Value Theorem (existence of roots, bisection) and Average Rate of Change (slope of secant, bridge to the derivative)."
 ordem: 46
 publicado: true
 tags: ["TVI", "taxa-de-variacao-media", "continuidade", "secante", "derivada", "ano-2", "trim-5"]
 prerrequisitos: ["licao-43-continuidade"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
+atualizadoEm: "2026-05-05"
 usadoEm: ["2.º ano do EM (cálculo intro)", "Equiv. Math II japonês §5", "Equiv. Analysis/Klasse 11 alemã"]
 versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="f \in C([a, b]), \; f(a) \cdot f(b) < 0 \Rightarrow \exists c \in (a, b) : f(c) = 0"
-  legenda={<><strong>Intermediate Value Theorem</strong>: a continuous function that changes sign on an interval has at least one root in it. Existence of roots — basis of the bisection method.</>}
-  audioTexto="Intermediate value theorem. If f is continuous on a b closed, and f of a times f of b is negative (f changes sign), then there exists c in a b open such that f of c is zero. Guarantee of root existence."
+  formula="\text{ARC}_{[a,b]} = \frac{f(b) - f(a)}{b - a}"
+  legenda={<>The <strong>Average Rate of Change</strong> of <Eq>{`f`}</Eq> on the interval <Eq>{`[a, b]`}</Eq> is the slope of the secant line passing through the points <Eq>{`(a,\\, f(a))`}</Eq> and <Eq>{`(b,\\, f(b))`}</Eq>. When <Eq>{`b \\to a`}</Eq>, this rate approaches the <em>instantaneous rate of change</em> — the derivative.</>}
+  audioTexto="The average rate of change of f on the interval from a to b equals f of b minus f of a, divided by b minus a. Geometrically, it is the slope of the line connecting two points on the graph. When b approaches a, this slope converges to the derivative at point a."
 />
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books covering this lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://activecalculus.org/single/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Boelkins — Active Calculus 2.0
+      </a>
+      <span className="text-clube-mist"> · §1.1–1.3 Velocity, ARC and derivative · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Primary source: discovery activities on average velocity and the limiting process that generates the derivative.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/details/books/calculus-volume-1" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Calculus Volume 1
+      </a>
+      <span className="text-clube-mist"> · §2.4 Continuity and IVT · CC-BY-NC-SA · </span>
+      <em className="text-clube-mist">Formal statement of IVT with corollaries, examples of transcendental equations, and root-finding exercises.</em>
+    </li>
+    <li>
+      <a href="https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        REAMAT — Numerical Calculus (UFRGS)
+      </a>
+      <span className="text-clube-mist"> · §3.1 Bisection method · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Implementation in Python, error analysis, and examples of IRR and roots in engineering equations.</em>
+    </li>
+  </ul>
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="IVT and variants">
+<Porta nivel="formal" titulo="Definitions and theorems">
 
-<Definicao titulo="Intermediate Value Theorem (IVT)">
-If $f \in C([a, b])$ and $k$ is between $f(a)$ and $f(b)$, then there exists $c \in (a, b)$ such that $f(c) = k$.
+### Intermediate Value Theorem (IVT)
+
+<Definicao titulo="Intermediate Value Theorem">
+
+Let $f : [a, b] \to \mathbb{R}$ be continuous. If $k$ is any value between $f(a)$ and $f(b)$ — that is, $\min\{f(a), f(b)\} \leq k \leq \max\{f(a), f(b)\}$ — then there exists $c \in (a, b)$ such that $f(c) = k$.
+
 </Definicao>
 
-**Special case** ($k = 0$): $f(a) \cdot f(b) < 0 \Rightarrow \exists c \in (a, b) : f(c) = 0$.
+> "If $f$ is continuous on $[a, b]$ and $k$ is any value between $f(a)$ and $f(b)$, then there exists at least one number $c$ in $(a, b)$ such that $f(c) = k$." — [OpenStax Calculus Volume 1, §2.4, Theorem 2.13](https://openstax.org/books/calculus-volume-1/pages/2-4-continuity)
 
-### Application 1: Bisection (algorithm)
+**Corollary (existence of root).** If $f \in C([a, b])$ and $f(a) \cdot f(b) < 0$, then there exists $c \in (a, b)$ with $f(c) = 0$.
 
-If $f(a) f(b) < 0$:
-1. $m = (a+b)/2$.
-2. If $f(m) = 0$, stop.
-3. If $f(a) f(m) < 0$, repeat in $[a, m]$.
-4. Otherwise, repeat in $[m, b]$.
+<Equation explicacao="Negative product means opposite signs: f(a) and f(b) are on opposite sides of zero, so f must cross zero at some interior point." latex="f(a) \cdot f(b) < 0 \implies \exists\, c \in (a,b) : f(c) = 0" />
 
-**Convergence**: error halves per iteration, $|c - m_n| \leq (b-a)/2^n$.
+**Proof sketch (via completeness).** Suppose $f(a) < 0 < f(b)$. Define $S = \{x \in [a, b] : f(x) < 0\}$. The set $S$ is nonempty ($a \in S$) and bounded above by $b$. By completeness of $\mathbb{R}$, there exists $c = \sup S \in [a, b]$. By continuity of $f$, if $f(c) \neq 0$ we obtain a contradiction. Hence $f(c) = 0$. $\square$
 
-### Application 2: Fixed point
+**Why continuity is indispensable.** The Heaviside function $H(x) = 0$ if $x < 0$ and $H(x) = 1$ if $x \geq 0$ satisfies $H(-1) = 0$ and $H(1) = 1$, but never attains $1/2$ — because it has a jump at $x = 0$ and is not continuous there.
 
-If $g \in C([a, b])$ with $g([a, b]) \subseteq [a, b]$, then $\exists c$ with $g(c) = c$. Apply IVT to $f(x) = g(x) - x$.
+<Insight>
 
-### Application 3: Existence of equation solutions
+The IVT is sufficient but not necessary for the existence of roots. If $f(a)$ and $f(b)$ have the same sign, the IVT does not apply — but there may still be roots in the interior. Example: $f(x) = (x-1)^2$ has $f(0) = f(2) = 1 > 0$, but $x = 1$ is a double root. The IVT guarantees, it does not exclude.
 
-$\cos x = x$, $e^x = 2x$, $\tan x = x$ have solutions by IVT.
+</Insight>
 
-### Proof via completeness
+### Bisection Method
 
-Let $S = \{x \in [a, b] : f(x) < k\}$ (assuming $f(a) < k < f(b)$). $S \neq \emptyset$ ($a \in S$) and bounded above. Take $c = \sup S$. By continuity and supremum properties, $f(c) = k$.
+Given $f \in C([a, b])$ with $f(a)f(b) < 0$, bisection locates the root iteratively. At each step, we compute the midpoint and retain the half where $f$ changes sign:
 
-### Why continuity is needed
+<Equation explicacao="At each iteration, the midpoint m_n subdivides the current interval. The error is cut in half at each step — convergence is guaranteed and quantifiable." latex="m_n = \frac{a_n + b_n}{2}, \qquad |c - m_n| \leq \frac{b - a}{2^{n+1}}" />
 
-Counterexample: $f(x) = \mathrm{sgn}(x)$ on $[-1, 1]$. $f(-1) = -1$, $f(1) = 1$, but $f$ never takes the value $0.5$. Fails because $f$ is not continuous at 0.
+For precision $\varepsilon$, we need $n \geq \lceil \log_2((b-a)/\varepsilon) \rceil - 1$ iterations.
 
-### IVT vs MVT
+### Average Rate of Change (ARC)
 
-**IVT**: existence of an **intermediate value** ($f$ continuous).
-**MVT** (Mean Value Theorem, Lesson 56): existence of an **intermediate derivative** ($f$ differentiable).
+<Definicao titulo="Average Rate of Change">
 
-Don't confuse them. MVT requires differentiability; IVT only continuity.
+For $f$ defined on $[a, b]$ with $a \neq b$, the **average rate of change** of $f$ over that interval is:
+
+$$\text{ARC}_{[a,b]} = \frac{f(b) - f(a)}{b - a}$$
+
+Geometrically, it is the **slope of the secant line** passing through the points $(a, f(a))$ and $(b, f(b))$ on the graph of $f$.
+
+</Definicao>
+
+> "The average rate of change of $f$ along the interval $[a, b]$ is $\text{AV}_{[a,b]} = \dfrac{f(b)-f(a)}{b-a}$. Geometrically, the average rate of change represents the slope of the line passing through the points $(a, f(a))$ and $(b, f(b))$." — [Active Calculus, §1.1, Definition 1.1.4](https://activecalculus.org/single/sec-1-1-vel.html)
+
+The notation using $h = b - a$ is equivalent:
+
+<Equation explicacao="Substituting b = a + h, the ARC becomes expressed in terms of the increment h. When h → 0, this expression defines the derivative — the instantaneous rate of change." latex="\text{ARC} = \frac{f(a + h) - f(a)}{h}, \quad h = b - a \neq 0" />
+
+**Taking the limit.** If $f$ is differentiable at $a$:
+
+$$f'(a) = \lim_{h \to 0} \frac{f(a+h) - f(a)}{h} = \lim_{b \to a} \frac{f(b) - f(a)}{b - a}$$
+
+<figure className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-surface p-4">
+<svg viewBox="0 0 420 260" className="w-full max-w-[480px] mx-auto block">
+  <defs>
+    <marker id="arr46" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <line x1="30" y1="220" x2="400" y2="220" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr46)"/>
+  <line x1="60" y1="240" x2="60" y2="20" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arr46)"/>
+  <text x="395" y="215" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">x</text>
+  <text x="65" y="18" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor" fillOpacity="0.6">y</text>
+  <path d="M 80,200 Q 180,60 380,100" stroke="rgb(26 77 92)" strokeWidth="2.5" fill="none"/>
+  <circle cx="140" cy="140" r="4" fill="rgb(26 77 92)"/>
+  <circle cx="320" cy="105" r="4" fill="rgb(26 77 92)"/>
+  <line x1="100" y1="172" x2="370" y2="86" stroke="rgb(232 199 122)" strokeWidth="2" strokeDasharray="4,3"/>
+  <text x="135" y="158" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">(a, f(a))</text>
+  <text x="325" y="102" fontSize="9" fontFamily="serif" fill="currentColor" fillOpacity="0.7">(b, f(b))</text>
+  <text x="195" y="125" fontSize="9" fontFamily="serif" fill="rgb(201 163 95)">secant: slope = ARC</text>
+  <text x="80" y="250" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.5">a</text>
+  <text x="315" y="250" fontSize="9" fontFamily="ui-monospace,monospace" fill="currentColor" fillOpacity="0.5">b</text>
+</svg>
+<figcaption className="mt-2 text-center text-xs text-clube-mist">
+The secant line connects <em>(a, f(a))</em> to <em>(b, f(b))</em>. Its slope is the ARC. When <em>b → a</em>, the secant converges to the tangent line at <em>a</em>, whose slope is <em>f'(a)</em>.
+</figcaption>
+</figure>
+
+<Teorema titulo="Relationship between ARC and derivative">
+If $f$ is differentiable at $a$, then:
+$$\lim_{b \to a} \text{ARC}_{[a,b]} = f'(a)$$
+The derivative is the limit of the average rate of change as the interval shrinks to a point. The ARC is the global version; the derivative, the local version.
+</Teorema>
 
 </Porta>
 
 <Porta nivel="5" titulo="For a 5-year-old">
 
-Imagine you're walking from a **low** height (the floor) to a **high** height (a hill). At some moment, you must pass **through every intermediate height** — you can't jump from the floor straight to the top without going through the middle.
+Imagine you are climbing a staircase. At the beginning you are **down below** and at the end you are **up top**. To get there, you **must pass through all the steps in between** — there is no way to jump from the ground straight to the top.
 
-A continuous function is the same: if it goes from **negative** to **positive**, at some point it equals **zero**.
+The Intermediate Value Theorem says exactly this for continuous functions: if a function starts at a small value and ends at a large value, it **must pass through all the intermediate values**.
+
+And the Average Rate of Change is like calculating the slope of a ramp. If you go up 4 meters in 2 steps, the average slope is 4 divided by 2: 2 meters per step.
 
 </Porta>
 
 <Porta nivel="10" titulo="For a 10-year-old">
 
-**Intermediate value theorem**: if a continuous function starts **negative** and ends **positive**, at some moment it passes through **zero**.
+**Intermediate Value Theorem:** imagine a thermometer that reads $-3^\circ$ at midnight and $+12^\circ$ at noon. At some point it read exactly $0^\circ$. This is certain — temperature does not jump, it changes gradually.
 
-Think of a **thermometer** reading $-2°$ in the morning and $+5°$ in the afternoon. At some moment it read exactly $0°$ (freezing point). It's inevitable — if temperature is continuous (no jumps).
+Mathematically: if a continuous function starts negative and ends positive, **it crosses zero** at some point in between. This is the IVT.
 
-**Application**: discover where an equation has a solution. For example, $f(x) = x^3 - x - 1$. Compute:
+Example: $f(x) = x^3 - x - 1$.
 - $f(1) = 1 - 1 - 1 = -1$ (negative)
 - $f(2) = 8 - 2 - 1 = 5$ (positive)
 
-Since it changes sign, **there's a root between 1 and 2**! IVT guarantees it.
+The IVT guarantees that there is a root between 1 and 2.
 
-**Bisection method**: take the midpoint $1.5$. $f(1.5) = 0.875 > 0$. So the root is between $1$ and $1.5$. Take the midpoint $1.25$. And so on, **dividing the interval in half**. Each time gets closer.
+**Average Rate of Change:** if a car travels 120 km in 2 hours, the average velocity is:
+
+$$\text{average velocity} = \frac{120}{2} = 60 \text{ km/h}$$
+
+This is the ARC of position over time: how much the position changed, divided by the time. If position were a function $s(t)$, the ARC on the interval $[0, 2]$ would be $(s(2) - s(0))/(2 - 0)$.
 
 </Porta>
 
 <Porta nivel="15" titulo="For a 15-year-old teen">
 
-IVT is the theorem that **guarantees the existence of solutions** for equations with a continuous function.
+This lesson has two ideas that walk together toward calculus.
 
-### Practical form
+### IVT — guarantee of the existence of roots
 
-To show that $g(x) = h(x)$ has a solution in $[a, b]$:
+To show that the equation $g(x) = h(x)$ has a solution in $[a, b]$:
 1. Define $f(x) = g(x) - h(x)$.
-2. Verify $f$ is continuous on $[a, b]$.
-3. If $f(a) f(b) < 0$, there's a solution.
+2. Verify that $f$ is continuous on $[a, b]$ (polynomials, sine, cosine, exponential are always continuous).
+3. Compute $f(a)$ and $f(b)$.
+4. If they have opposite signs, the IVT guarantees that there exists $c \in (a, b)$ with $f(c) = 0$.
 
-### Examples
+**Example: $\cos x = x$ on $[0, \pi/2]$.**
 
-**$\cos x = x$** on $[0, \pi/2]$:
-- $f(x) = \cos x - x$.
-- $f(0) = 1 > 0$, $f(\pi/2) = -\pi/2 < 0$.
-- Solution exists. (It's $\approx 0.739$.)
+Define $f(x) = \cos x - x$.
+- $f(0) = \cos 0 - 0 = 1 > 0$
+- $f(\pi/2) = \cos(\pi/2) - \pi/2 = 0 - 1.57 \approx -1.57 < 0$
 
-**$e^x = 2x$**:
-- $f(0) = 1 > 0$, $f(1) = e - 2 \approx 0.72 > 0$. Doesn't change sign here.
-- $f(2) = e^2 - 4 \approx 3.39 > 0$. For large values, $e^x$ wins.
-- $f(-1) = e^{-1} + 2 \approx 2.37 > 0$.
-- For very negative $x$, $e^x \to 0$ and $-2x \to \infty$, so $f \to \infty$. But for $x = 0$, $f = 1$. Still no change. Conclusion: $e^x = 2x$ has no solution in small $\mathbb{R}$; may have for specific $x$.
+Sign change. Hence there exists $c \in (0, \pi/2)$ with $\cos c = c$ (numerically, $c \approx 0.739$).
 
-(Re-analyze with a graph.)
+### ARC — Average Rate of Change
 
-### Bisection: the canonical application
+$$\text{ARC} = \frac{f(b) - f(a)}{b - a}$$
 
-| Iteration | $a$ | $b$ | $m$ | $f(m)$ | Next |
+**Geometry:** it is the slope of the line passing through the points $(a, f(a))$ and $(b, f(b))$ — the **secant line**.
+
+**Physics:** if $s(t)$ is the position of an object, then the average velocity on the interval $[t_1, t_2]$ is exactly the ARC of $s$.
+
+**Bridge to the derivative:** when the interval $[a, b]$ shrinks ($b \to a$), the secant approaches the **tangent line**. The slope of the tangent is the **derivative** — the instantaneous rate of change. Calculus begins exactly here.
+
+<Insight>
+
+The ARC is what you can compute without differential calculus. The derivative is the limit of the ARC as the interval goes to zero. The entire theory of the derivative is compressed in that one sentence.
+
+</Insight>
+
+### Bisection Method
+
+If $f(a)$ and $f(b)$ have opposite signs, bisection locates the root:
+
+| Iteration | $a$ | $b$ | $m = (a+b)/2$ | $f(m)$ | Next search |
 |---|---|---|---|---|---|
-| 0 | 1 | 2 | $1.5$ | + | $[1,\ 1.5]$ |
-| 1 | 1 | $1.5$ | $1.25$ | $-$ | $[1.25,\ 1.5]$ |
-| 2 | $1.25$ | $1.5$ | $1.375$ | + | $[1.25,\ 1.375]$ |
-| 3 | $1.25$ | $1.375$ | $1.3125$ | $-$ | $[1.3125,\ 1.375]$ |
+| 0 | 1 | 2 | $1.5$ | $+0.875$ | $[1;\; 1.5]$ |
+| 1 | 1 | $1.5$ | $1.25$ | $-0.297$ | $[1.25;\; 1.5]$ |
+| 2 | $1.25$ | $1.5$ | $1.375$ | $+0.225$ | $[1.25;\; 1.375]$ |
+| 3 | $1.25$ | $1.375$ | $1.3125$ | $-0.051$ | $[1.3125;\; 1.375]$ |
 
-Each iteration halves the error. After 10 iterations, error $< (b-a)/1024$.
-
-### Odd-degree polynomials
-
-**Always have a real root**! For $P(x) = a_n x^n + \ldots$ with odd $n$ and $a_n > 0$:
-- $\lim_{x \to +\infty} P = +\infty$
-- $\lim_{x \to -\infty} P = -\infty$
-- By IVT, a root exists.
+Each iteration divides the error by 2. After 10 iterations, the error is less than $(b - a)/1024$.
 
 </Porta>
 
 <Porta nivel="25" titulo="For an engineering student">
 
-IVT is the **foundational** theorem for numerical analysis and existence methods.
+### IVT — consequences and computational applications
 
-### Proof via completeness
+**Why IVT fails in $\mathbb{Q}$.** The function $f(x) = x^2 - 2$ is continuous in $\mathbb{Q}$ (as a function restricted to the rationals), with $f(1) = -1 < 0$ and $f(2) = 2 > 0$. The classical IVT would require a root, which would be $\sqrt{2}$ — but $\sqrt{2} \notin \mathbb{Q}$. This demonstrates that the completeness of $\mathbb{R}$ is essential for the IVT.
 
-Let $f \in C([a, b])$ with $f(a) < 0 < f(b)$. Define $S = \{x \in [a, b] : f(x) < 0\}$.
+**Bisection: error analysis.** After $n$ iterations: $|c - m_n| \leq (b - a)/2^{n+1}$. For precision $\varepsilon$: $n \geq \log_2\!\left(\frac{b-a}{\varepsilon}\right) - 1$. For $[1, 2]$ with $\varepsilon = 10^{-9}$: $n \geq \log_2(10^9) - 1 \approx 29$ iterations.
 
-- $S$ non-empty: $a \in S$.
-- $S$ bounded: $\subseteq [a, b]$.
-- By completeness of $\mathbb{R}$, $\exists c = \sup S$, with $c \in [a, b]$.
+**Engineering applications:**
+- Implied volatility in options pricing: $C(\sigma) = C_{\text{mkt}}$, solved by bisection when Newton oscillates.
+- Internal Rate of Return (IRR): $\text{NPV}(r) = 0$, bisection over $r \in [0, 1]$.
+- Roots of characteristic polynomials for stability analysis of dynamical systems.
 
-Claim: $f(c) = 0$.
-- If $f(c) < 0$: by continuity, $f < 0$ in a neighborhood of $c$, contradicts $c = \sup$.
-- If $f(c) > 0$: by continuity, $f > 0$ in a neighborhood of $c$, but $c = \sup S$, contradiction.
+**Fixed point via IVT.** If $g \in C([a, b])$ with $g([a, b]) \subseteq [a, b]$, define $f(x) = g(x) - x$. Then $f(a) = g(a) - a \geq 0$ and $f(b) = g(b) - b \leq 0$. By IVT, there exists $c \in [a, b]$ with $g(c) = c$. $\square$
 
-So $f(c) = 0$. ∎
+### ARC — quantitative analysis
 
-### Why IVT **fails on $\mathbb{Q}$**
+**Local linearization.** For $b = a + h$ with $h$ small:
 
-$f(x) = x^2 - 2$ continuous on $\mathbb{Q}$, $f(0) = -2 < 0$, $f(2) = 2 > 0$. By classical IVT, root in $(0, 2)$. But the root is $\sqrt 2 \notin \mathbb{Q}$. **Without completeness, IVT fails.**
+$$f(b) \approx f(a) + f'(a) \cdot h$$
 
-### Engineering applications
+This is the first-order linearization (truncated Taylor). The error is $O(h^2)$.
 
-- **Implied volatility** (Black-Scholes Lesson): equation $C(\sigma) = C_{\text{mkt}}$. $C$ continuous and monotone in $\sigma$. IVT + bisection give $\sigma$ in fewer than $30$ iterations.
-- **Equilibrium in nonlinear circuits**: $f(V) = i_{\text{in}}$. Solved via Newton (fast) or bisection (robust).
-- **Stability analysis**: characteristic polynomial $p(s)$ has a root in the right half-plane? IVT + Routh-Hurwitz.
-- **Transfer polynomials**: zeros via Routh, poles via Jury (digital control).
+**ARC in finance.** Let $P(t)$ be the price of an asset:
 
-### Bisection: error analysis
+$$\text{absolute average return} = \frac{P(t_2) - P(t_1)}{t_2 - t_1}, \qquad \text{percentage return} = \frac{P(t_2) - P(t_1)}{P(t_1)}$$
 
-After $n$ iterations, $|c - m_n| \leq (b-a)/2^{n+1}$. For error $< \eps$, need $n > \log_2((b-a)/\eps) - 1$.
+The logarithmic derivative $(\ln P)'$ is the continuous instantaneous return — basis of the Black-Scholes model (Lesson 119).
 
-**Convergence guarantee**: bisection always converges if IVT holds. Other methods (Newton) may diverge.
+**Velocity and acceleration.**
 
-### Brouwer's fixed point (1D via IVT)
+$$\text{average velocity} = \frac{s(b) - s(a)}{b - a} \xrightarrow{b \to a} s'(a) = \text{instantaneous velocity}$$
 
-If $g \in C([a, b])$ with $g([a, b]) \subseteq [a, b]$, then $g$ has a fixed point. Proof: define $f(x) = g(x) - x$. $f(a) = g(a) - a \geq 0$ ($g(a) \in [a, b]$). $f(b) = g(b) - b \leq 0$. By IVT, $\exists c : f(c) = 0$, i.e., $g(c) = c$. ∎
-
-**General Brouwer** (dimension $n$): every continuous function $g : B^n \to B^n$ has a fixed point. Non-trivial — basis of equilibrium theory in economics (Nash), in adaptive control.
-
-### Implicit equations
-
-$F(x, y) = 0$ with $F$ continuous and $F(x_0, y_0) = 0$. For each nearby $x$, find $y$ via IVT on $F(x, \cdot)$.
+$$\text{average acceleration} = \frac{v(b) - v(a)}{b - a} \xrightarrow{b \to a} v'(a) = s''(a)$$
 
 </Porta>
 
 <Porta nivel="40" titulo="For a senior professional">
 
-IVT is a **topological property** more general: image of a connected set by a continuous map is connected.
+### IVT as a topological property
 
-### Topological generalization
+The IVT is an instance of a general fact: **the image of a connected set under a continuous function is connected**. In $\mathbb{R}$, the connected sets are exactly the intervals. Hence $f([a, b])$ is an interval containing $f(a)$ and $f(b)$, and therefore contains all values between them. The proof via $\sup$ is the analytical version of this topological fact.
 
-$f : X \to Y$ continuous, $X$ connected $\Rightarrow$ $f(X)$ connected. In $\mathbb{R}$, connected sets are intervals. So $f([a, b])$ is an interval, contains $f(a), f(b)$, and therefore contains all values in between.
+**Generalization (Brouwer, 1912).** Every continuous function $g : B^n \to B^n$ (the closed unit ball in $\mathbb{R}^n$) has a fixed point. In dimension 1, this is the fixed-point corollary deduced from the IVT. In higher dimensions, the proof uses homology.
 
-### IVT and total order
+Nash equilibrium in finite games exists via Kakutani (the multivalued generalization of Brouwer). This line connects IVT → fixed point → Nash equilibrium — a result [honored with the Nobel Prize in Economics in 1994](https://www.nobelprize.org/prizes/economic-sciences/1994/summary/).
 
-The proof via $\sup$ depends on $\mathbb{R}$ being complete **and** linearly ordered. In $\mathbb{R}^n$ ($n \geq 2$), there's no total order — literal IVT doesn't hold, but there are generalizations via algebraic topology.
+### ARC — computational and financial perspective
 
-### Generalization: Brouwer fixed point
+**Finite differences.** In scientific computing, the derivative is always approximated by ARC:
 
-$g : B^n \to B^n$ continuous has a fixed point. Topological proof:
-- Suppose no fixed point. Define $r(x) = $ ray from $x$ to $g(x)$, projected onto the boundary $\partial B^n = S^{n-1}$.
-- $r$ is a continuous retraction of $B^n$ onto $S^{n-1}$, contradicts $\pi_{n-1}(B^n) = 0 \neq \pi_{n-1}(S^{n-1})$.
+$$f'(a) \approx \frac{f(a+h) - f(a)}{h} \quad \text{(forward difference, } O(h)\text{)}$$
+$$f'(a) \approx \frac{f(a+h) - f(a-h)}{2h} \quad \text{(central difference, } O(h^2)\text{)}$$
 
-### Applications in economics (Nash equilibrium)
+The optimal $h$ balances truncation error ($O(h)$ or $O(h^2)$) with rounding error ($O(\varepsilon_{\text{mach}}/h)$): $h^* = O(\sqrt{\varepsilon_{\text{mach}}})$ for forward difference, $h^* = O(\varepsilon_{\text{mach}}^{1/3})$ for central.
 
-In finite games, Nash equilibrium exists via Brouwer (or Kakutani). The "best response" function is continuous (multivalued), has a fixed point. **Nobel Prize** in Economics for [Nash in 1994](https://www.nobelprize.org/prizes/economic-sciences/1994/summary/).
+**Time series.** In econometrics, $\Delta y_t = y_t - y_{t-1}$ is the difference operator (discrete ARC with $h = 1$). Series that become stationary after one difference are called I(1) — the basis of cointegration and ARIMA models.
 
-### Applications in PDE
-
-- **Schaefer fixed point theorem**: extension to compact operators in Banach.
-- **Schauder fixed point**: for compact convex sets in Banach.
-- **Navier-Stokes solution**: existence via fixed point in appropriate space.
-
-### IVT in complex
-
-$f$ holomorphic has no literal IVT (no order in $\mathbb{C}$), but has the **open mapping**: non-constant $f$ maps open sets to open sets. Combined with the **argument principle**, counts zeros via contour integration.
-
-### Algorithms
-
-- **Bisection**: $O(\log_2 1/\eps)$ — robust, slow.
-- **Newton**: $O(\log \log 1/\eps)$ (quadratic) — fast, but may diverge.
-- **Brent**: clever combination, best of both worlds.
-- **TOMS algorithm 748** (state of the art): bisection + interpolation.
-
-### Numerical in Python
-
-```python
-from scipy.optimize import brentq, bisect
-import numpy as np
-f = lambda x: x**3 - x - 1
-print(brentq(f, 1, 2))   # ~1.3247
-print(bisect(f, 1, 2))   # ~1.3247
-```
+**Methods beyond bisection:**
+- Bisection: $O(\log 1/\varepsilon)$ — robust, no conditions beyond continuity.
+- Newton-Raphson: quadratic convergence, requires $f'(c) \neq 0$ and good initial guess.
+- Brent (1973): combines bisection + interpolation; the practical standard.
+- ITP (Oliveira-Takahashi, 2020): guarantees $O(\log 1/\varepsilon)$ worst-case with empirical rate close to Newton.
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Practical application">
+<Porta nivel="pratica" titulo="Practice — routines and examples with real data">
 
-**Recipe: how to apply IVT.**
+### Routine: IVT — prove existence of a root
 
-### To show existence of a root
+1. **Identify $f$**: if the equation is $g(x) = h(x)$, define $f(x) = g(x) - h(x)$.
+2. **Verify continuity**: is $f$ continuous on $[a, b]$? (Polynomials, sine, cosine, $e^x$, $\ln x$ with appropriate domain: yes.)
+3. **Compute $f(a)$ and $f(b)$**: are the signs opposite?
+4. **Conclude**: "By IVT, there exists $c \in (a, b)$ with $f(c) = 0$, hence $g(c) = h(c)$."
 
-1. **Identify $f$** (perhaps as a difference $g - h$).
-2. **Verify continuity** on $[a, b]$.
-3. **Compute $f(a)$ and $f(b)$**. Confirm opposite signs.
-4. **Conclude**: there is a root in $(a, b)$.
+### Routine: ARC — compute the rate of change
 
-### Bisection: implementation
+1. **Identify $f$, $a$, $b$**: what is changing? Over which interval?
+2. **Apply the formula**: $\text{ARC} = \dfrac{f(b) - f(a)}{b - a}$.
+3. **Interpret units**: if $f$ is position (m) and the argument is time (s), ARC has unit m/s.
+4. **Compare with derivative**: for small interval, ARC $\approx f'(a)$.
 
-```python
-def bisect(f, a, b, tol=1e-9):
-    assert f(a) * f(b) < 0, "IVT not applicable"
-    while b - a > tol:
-        m = (a + b) / 2
-        if f(m) == 0:
-            return m
-        if f(a) * f(m) < 0:
-            b = m
-        else:
-            a = m
-    return (a + b) / 2
+### Practical example: internet bill
 
-print(bisect(lambda x: x**3 - x - 1, 1, 2))   # ~1.3247
-```
+Two residential internet plans in São Paulo (illustrative values, 2026):
+- Plan A: R\$ 89.90/month (fiber 100 Mbps).
+- Plan B: R\$ 129.90/month (fiber 500 Mbps).
 
-### When bisection is the right choice
+Define $C(v) = $ monthly cost for velocity $v$ (in Mbps). The ARC between the two plans is:
 
-- **Continuous but not differentiable function**: Newton can't run.
-- **Robustness** matters more than speed.
-- **Multimodal**: bisection finds **one** root in the interval.
+$$\text{ARC} = \frac{129.90 - 89.90}{500 - 100} = \frac{40.00}{400} = 0.10 \text{ reais/Mbps}$$
 
-### Cases where IVT doesn't give uniqueness
+Interpretation: each additional Mbps of velocity costs, on average, R\$ 0.10/month in this range.
 
-IVT guarantees **existence**, not **uniqueness**. $f(x) = x^3 - x$ on $[-2, 2]$ has three roots. For uniqueness, monotonicity is needed.
+### Common pitfalls
 
-### When IVT does NOT help
-
-- Discontinuous function: IVT doesn't hold.
-- $f(a) f(b) > 0$ (same sign): IVT doesn't detect — **but a root may still exist** (undetected).
-- Double root: $f(a) = f(b) = 0$ doesn't count (no strict sign change).
-
-### Iterative fixed point
-
-```python
-def fixed_point(g, x0, tol=1e-9, max_iter=100):
-    x = x0
-    for _ in range(max_iter):
-        x_new = g(x)
-        if abs(x_new - x) < tol:
-            return x_new
-        x = x_new
-    return x
-
-print(fixed_point(np.cos, 0.5))   # ~0.739 (cos x = x)
-```
-
-**Caution**: convergence requires $|g'(c)| < 1$ at the fixed point (Banach-Picard).
-
-### Mandatory exercises
-
-46.1, 46.4, 46.6, 46.10, 46.20 — test practical use.
+- **IVT guarantees existence, not uniqueness.** $f(x) = x^3 - x$ has three roots in $[-2, 2]$.
+- **$f(a)f(b) > 0$ does not prove absence of roots.** $f(x) = (x-1)^2$ has a double root at 1, but $f(0) = f(2) = 1 > 0$.
+- **ARC depends on the interval.** The same $f$ can have very different ARCs on $[0, 1]$ and on $[0, 10]$.
 
 </Porta>
 
 </DuasPortas>
 
-<ListaExercicios seed="licao-46">
+## Worked examples
 
-### Block A — Existence of roots (46.1 to 46.15)
+<Exemplo titulo="IVT — existence of a polynomial root" numero="1">
 
-<Exercicio numero="46.1" dificuldade="aplicacao">$f(x) = x^3 - x - 1$. Show it has a root in $(1, 2)$.</Exercicio>
-<Exercicio numero="46.2" dificuldade="aplicacao">$f(x) = x^3 - x - 5$. Root in which interval? (Ans: $(1, 2)$.)</Exercicio>
-<Exercicio numero="46.3" dificuldade="aplicacao">$\cos x = x$ has a solution in $(0, \pi/2)$. Show.</Exercicio>
-<Exercicio numero="46.4" dificuldade="aplicacao">$e^x = 3 - x$ has a solution in $(0, 1)$. Show.</Exercicio>
-<Exercicio numero="46.5" dificuldade="aplicacao">$f(x) = x^5 + x^3 - 1 = 0$ has a solution in $(0, 1)$.</Exercicio>
-<Exercicio numero="46.6" dificuldade="aplicacao">Show that an odd-degree polynomial has at least one real root.</Exercicio>
-<Exercicio numero="46.7" dificuldade="aplicacao">$f(x) = x \sin x - 1$ has a root in $(\pi/2, \pi)$?</Exercicio>
-<Exercicio numero="46.8" dificuldade="aplicacao">$\tan x = x$ has solutions? Where? (Ans: $x = 0$ and in each interval $((n-1/2)\pi, (n+1/2)\pi)$ for $n \geq 1$.)</Exercicio>
-<Exercicio numero="46.9" dificuldade="aplicacao">$f$ continuous on $[0, 1]$ with $f(0) = 1, f(1) = 0$. Is there $c$ with $f(c) = 1/2$? (Ans: Yes.)</Exercicio>
-<Exercicio numero="46.10" dificuldade="aplicacao">Show that $\ln x = e^{-x}$ has a solution in $(1, e)$.</Exercicio>
-<Exercicio numero="46.11" dificuldade="aplicacao">$f(x) = x^4 - 2x - 1$. Show it has a root in $(1, 2)$ and in $(-1, 0)$.</Exercicio>
-<Exercicio numero="46.12" dificuldade="aplicacao">Is there $c$ with $\sin c = c/3$ in $(0, \pi)$? Use IVT.</Exercicio>
-<Exercicio numero="46.13" dificuldade="aplicacao">$f$ continuous on $[0, 1]$, $f(0) = f(1)$. Is there $c \in [0, 1/2]$ with $f(c) = f(c + 1/2)$? Show via IVT on $g(x) = f(x) - f(x + 1/2)$.</Exercicio>
-<Exercicio numero="46.14" dificuldade="aplicacao">Show that $x = \cos x$ has a unique solution in $\mathbb{R}$.</Exercicio>
-<Exercicio numero="46.15" dificuldade="aplicacao">$f(x) = x \cdot 2^x - 1$. Root in $(0, 1)$?</Exercicio>
+**Problem.** Show that $f(x) = x^3 - x - 1$ has at least one root in the interval $(1, 2)$.
 
-### Block B — Bisection (46.16 to 46.22)
+**Strategy.** Verify that $f$ is continuous (polynomial) and that $f(1)$ and $f(2)$ have opposite signs. If yes, the IVT guarantees existence.
 
-<Exercicio numero="46.16" dificuldade="modelagem">Bisection application: 5 iterations on $[1, 2]$ for the root of $x^3 - x - 1$. Approximate.</Exercicio>
-<Exercicio numero="46.17" dificuldade="modelagem">How many bisection iterations on $[1, 2]$ for error $< 10^{-6}$? (Ans: ~20.)</Exercicio>
-<Exercicio numero="46.18" dificuldade="modelagem">In circuits, implicit equation $f(V) = 0$ solved via bisection. Model with $f(V) = V^2 - V - 1$.</Exercicio>
-<Exercicio numero="46.19" dificuldade="modelagem">Inverted Black-Scholes equation (implied vol) — IVT guarantees existence. Bisection is a Newton fallback.</Exercicio>
-<Exercicio numero="46.20" dificuldade="modelagem">Implement bisection mentally: 4 iterations for the root of $\cos x = x$ starting from $[0, \pi/2]$.</Exercicio>
-<Exercicio numero="46.21" dificuldade="modelagem">In optimization, $f'(x) = 0$ solved via IVT when $f'$ changes sign.</Exercicio>
-<Exercicio numero="46.22" dificuldade="modelagem">In pricing, equation $\text{NPV}(r) = 0$ solved by bisection for IRR.</Exercicio>
+**Solution.**
 
-### Block C — Comprehension (46.23 to 46.32)
+1. **Continuity:** $f(x) = x^3 - x - 1$ is a polynomial, hence continuous on $\mathbb{R}$, in particular on $[1, 2]$.
 
-<Exercicio numero="46.23" dificuldade="compreensao">Why must $f$ be continuous in IVT? Provide a counterexample.</Exercicio>
-<Exercicio numero="46.24" dificuldade="compreensao">Show that $f(x) = (x-1)/(x-2)$ does not satisfy IVT on $[1, 3]$. Why?</Exercicio>
-<Exercicio numero="46.25" dificuldade="compreensao">Continuous function on $[0, 1]$ with $f(0) = 0, f(1) = 1$ takes every value in $[0, 1]$. Show.</Exercicio>
-<Exercicio numero="46.26" dificuldade="compreensao">$f$ continuous on $[a, b]$, $f(a) = f(b)$. Does IVT give a useful conclusion? Justify.</Exercicio>
-<Exercicio numero="46.27" dificuldade="compreensao">Why does IVT fail on $\mathbb{Q}$? Give a concrete example.</Exercicio>
-<Exercicio numero="46.28" dificuldade="compreensao">Does IVT guarantee uniqueness of the root? No. Give a counterexample.</Exercicio>
-<Exercicio numero="46.29" dificuldade="compreensao">Show: $f$ continuous, $f(a)f(b) > 0$, does NOT imply there is no root.</Exercicio>
-<Exercicio numero="46.30" dificuldade="compreensao">$f$ continuous on $[a, b]$ injective. Show $f$ is monotone.</Exercicio>
-<Exercicio numero="46.31" dificuldade="desafio">Show that $f(x) = x \sin(1/x)$ continuous at 0 (after extending with $f(0) = 0$). Has roots in $(-1, 0)$?</Exercicio>
-<Exercicio numero="46.32" dificuldade="desafio">Show that $f(x) = e^x - x^{100}$ has **two** roots in $\mathbb{R}^+$.</Exercicio>
+2. **Compute the endpoints:**
 
-### Block D — Proofs (46.33 to 46.36)
+$$f(1) = 1^3 - 1 - 1 = -1 < 0$$
+$$f(2) = 2^3 - 2 - 1 = 5 > 0$$
 
-<Exercicio numero="46.33" dificuldade="demonstracao">Prove IVT using completeness (sup of the set where $f < k$).</Exercicio>
-<Exercicio numero="46.34" dificuldade="demonstracao">Prove the 1D Brouwer fixed-point theorem using IVT.</Exercicio>
-<Exercicio numero="46.35" dificuldade="demonstracao">Prove: $f \in C([a, b])$ injective is strictly monotone.</Exercicio>
-<Exercicio numero="46.36" dificuldade="demonstracao">Prove that $f$ continuous from $[a, b]$ to $[a, b]$ has a fixed point.</Exercicio>
+3. **Apply IVT:** since $f(1) < 0 < f(2)$ and $f$ is continuous on $[1, 2]$, by the IVT there exists $c \in (1, 2)$ such that $f(c) = 0$.
+
+**Verification.** $f(1.3) = 2.197 - 1.3 - 1 = -0.103 < 0$ and $f(1.4) = 2.744 - 1.4 - 1 = 0.344 > 0$. Root confirmed in $(1.3;\; 1.4)$. Numerically, $c \approx 1.3247$.
+
+**Source.** [Active Calculus §1.1, Example 1.1.2](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA. Adapted.
+
+</Exemplo>
+
+<Exemplo titulo="Bisection — 4 iterations and error analysis" numero="2">
+
+**Problem.** Use the bisection method to approximate the root of $f(x) = x^3 - x - 1$ in $(1, 2)$ with 4 iterations. What is the maximum error after these iterations?
+
+**Strategy.** At each step compute the midpoint $m$, evaluate $f(m)$, and retain the half where the sign changes.
+
+**Solution.**
+
+Initial data: $a_0 = 1$, $b_0 = 2$, $f(1) = -1 < 0$, $f(2) = 5 > 0$.
+
+**Iteration 1:** $m_1 = (1 + 2)/2 = 1.5$. $f(1.5) = 3.375 - 1.5 - 1 = 0.875 > 0$. New interval: $[1;\; 1.5]$.
+
+**Iteration 2:** $m_2 = (1 + 1.5)/2 = 1.25$. $f(1.25) = 1.953 - 1.25 - 1 = -0.297 < 0$. New interval: $[1.25;\; 1.5]$.
+
+**Iteration 3:** $m_3 = (1.25 + 1.5)/2 = 1.375$. $f(1.375) = 2.600 - 1.375 - 1 = 0.225 > 0$. New interval: $[1.25;\; 1.375]$.
+
+**Iteration 4:** $m_4 = (1.25 + 1.375)/2 = 1.3125$. $f(1.3125) = 2.259 - 1.3125 - 1 = -0.053 < 0$. New interval: $[1.3125;\; 1.375]$.
+
+**Maximum error after 4 iterations:**
+
+$$|c - m_4| \leq \frac{b - a}{2^4} = \frac{1}{16} = 0.0625$$
+
+**Verification.** The midpoint of $[1.3125;\; 1.375]$ is $1.34375 \approx 1.34$, with $f(1.34375) \approx -0.0059 < 0$. The true root $c \approx 1.3247$ lies in the interval — confirmed.
+
+**Source.** [REAMAT — Numerical Calculus §3.1, Example 3.1](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · CC-BY 4.0.
+
+</Exemplo>
+
+<Exemplo titulo="ARC — kinematics and average velocity" numero="3">
+
+**Problem.** The position (in meters) of a particle is $s(t) = t^2 + 3t$ for $t$ in seconds. Compute the ARC of $s$ on the interval $[1, 4]$ and interpret.
+
+**Strategy.** Apply directly $\text{ARC} = (s(4) - s(1))/(4 - 1)$. Then compare with $s'(t) = 2t + 3$ to find the instant with instantaneous velocity equal to the ARC.
+
+**Solution.**
+
+1. **Compute $s(1)$ and $s(4)$:**
+
+$$s(1) = 1 + 3 = 4 \text{ m}, \qquad s(4) = 16 + 12 = 28 \text{ m}$$
+
+2. **Compute the ARC:**
+
+$$\text{ARC} = \frac{28 - 4}{4 - 1} = \frac{24}{3} = 8 \text{ m/s}$$
+
+3. **Interpretation:** the particle displaced 24 m in 3 s, with average velocity 8 m/s.
+
+4. **Connection to derivative:** $s'(t) = 2t + 3$. We want $s'(c) = 8$: $2c + 3 = 8 \Rightarrow c = 2.5 \in (1, 4)$. The Mean Value Theorem of Calculus (Lesson 56) will formally guarantee that such a $c$ exists.
+
+**Verification.** $s'(1) = 5$ m/s, $s'(4) = 11$ m/s. The ARC of 8 m/s is between the instantaneous velocities at the endpoints — correct.
+
+**Source.** [Active Calculus §1.1, Preview Activity 1.1.1](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="Algebraic ARC and taking the limit" numero="4">
+
+**Problem.** For $f(x) = x^2$, compute the ARC on the interval $[2, 2+h]$ ($h \neq 0$) and show what happens when $h \to 0$.
+
+**Strategy.** Compute the ARC as a function of $h$, simplify algebraically, and take the limit — this reveals $f'(2)$.
+
+**Solution.**
+
+1. **ARC on $[2, 2+h]$:**
+
+$$\text{ARC} = \frac{f(2+h) - f(2)}{h} = \frac{(2+h)^2 - 4}{h}$$
+
+2. **Expand $(2+h)^2 = 4 + 4h + h^2$:**
+
+$$\text{ARC} = \frac{4 + 4h + h^2 - 4}{h} = \frac{4h + h^2}{h} = 4 + h \quad (h \neq 0)$$
+
+3. **Take the limit:**
+
+$$\lim_{h \to 0}(4 + h) = 4 = f'(2)$$
+
+**Verification.** For $h = 1$: ARC $= 5$. For $h = 0.1$: ARC $= 4.1$. For $h = 0.01$: ARC $= 4.01$. The secant converges to the tangent at $(2, 4)$ with slope 4.
+
+**Source.** [Active Calculus §1.3, Example 1.3.1](https://activecalculus.org/single/sec-1-3-derivative-pt.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<Exemplo titulo="ARC and IVT combined — tabular data" numero="5">
+
+**Problem.** The position (in km) of a vehicle as a function of time (in hours) is:
+
+| $t$ (h) | 0 | 0.5 | 1 | 1.5 | 2 |
+|---|---|---|---|---|---|
+| $s(t)$ (km) | 0 | 20 | 50 | 90 | 140 |
+
+(a) Compute the ARC on each 0.5 h subinterval. (b) Compute the total ARC on $[0, 2]$. (c) Did the instantaneous velocity reach 80 km/h at some point in the journey?
+
+**Strategy.** Apply the ARC formula on each interval; for (c), use the IVT applied to the velocity function.
+
+**Solution.**
+
+(a) **ARCs by subinterval:**
+
+$$\text{ARC}_{[0;\, 0.5]} = \frac{20}{0.5} = 40 \text{ km/h}, \quad \text{ARC}_{[0.5;\, 1]} = \frac{30}{0.5} = 60 \text{ km/h}$$
+$$\text{ARC}_{[1;\, 1.5]} = \frac{40}{0.5} = 80 \text{ km/h}, \quad \text{ARC}_{[1.5;\, 2]} = \frac{50}{0.5} = 100 \text{ km/h}$$
+
+(b) **Total ARC:**
+
+$$\text{ARC}_{[0;\, 2]} = \frac{140 - 0}{2} = 70 \text{ km/h}$$
+
+(c) **Velocity of 80 km/h.** Assuming $s$ is differentiable, the velocity $v(t) = s'(t)$ is continuous. By the ARC: $v$ averages 60 km/h on $[0.5;\; 1]$ and 80 km/h on $[1;\; 1.5]$. By the IVT applied to $v$, there is at least one instant in $[0.5;\; 1.5]$ where $v(t) = 80$ km/h. Answer: **yes**.
+
+**Verification.** The average velocity on $[0.5;\; 1.5]$ is $(90 - 20)/1 = 70$ km/h $< 80$ km/h, but the velocity increased from 60 to 100 km/h in the halves — it must have passed through 80 km/h in the interior.
+
+**Source.** [Active Calculus §1.1, Example 1.1.3 and Exercises 1.1.3–1.1.5](https://activecalculus.org/single/sec-1-1-vel.html) — Boelkins · CC-BY-NC-SA.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-46-tvi-tvm">
+
+{/* ── BLOCK A: CV1 §2.4 — Continuity (all 45 exercises) ── */}
+
+<Exercicio numero="46.1" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Removable at $x=1$: $\\lim_{x\\to1}f = 2$ exists but $f(1)$ undefined.", correta: true },
+    { texto: "Jump at $x=1$." },
+    { texto: "Infinite at $x=1$." },
+    { texto: "Continuous at $x=1$." },
+  ]}
+  solucao={<><Eq>{`f(x)=\frac{x^2-1}{x-1}=x+1`}</Eq> for <Eq>{`x\neq1`}</Eq>. Limit <Eq>{`=2`}</Eq> exists; <Eq>{`f(1)`}</Eq> undefined. Removable.</>}
+  passos={<>
+    <ol>
+      <li>Substitute <Eq>{`x=1`}</Eq>: <Eq>{`0/0`}</Eq>.</li>
+      <li>Factor: <Eq>{`\frac{(x-1)(x+1)}{x-1}=x+1`}</Eq>.</li>
+      <li>Limit <Eq>{`= 2`}</Eq> exists; <Eq>{`f(1)`}</Eq> undefined.</li>
+      <li>Removable discontinuity.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 131", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Classify the discontinuity of $f(x) = \dfrac{x^2-1}{x-1}$ at $x=1$.
+
+</Exercicio>
+
+<Exercicio numero="46.2" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Jump at $x=0$: one-sided limits $1 \\neq -1$.", correta: true },
+    { texto: "Removable at $x=0$." },
+    { texto: "Infinite at $x=0$." },
+    { texto: "Continuous at $x=0$." },
+  ]}
+  solucao={<><Eq>{`f(x)=|x|/x`}</Eq>: for <Eq>{`x>0`}</Eq>, <Eq>{`f=1`}</Eq>; for <Eq>{`x<0`}</Eq>, <Eq>{`f=-1`}</Eq>. Distinct limits: jump.</>}
+  passos={<>
+    <ol>
+      <li>For <Eq>{`x>0`}</Eq>: <Eq>{`|x|=x`}</Eq>, so <Eq>{`f(x)=1`}</Eq>.</li>
+      <li>For <Eq>{`x<0`}</Eq>: <Eq>{`|x|=-x`}</Eq>, so <Eq>{`f(x)=-1`}</Eq>.</li>
+      <li><Eq>{`\lim_{x\to0^+}=1`}</Eq> and <Eq>{`\lim_{x\to0^-}=-1`}</Eq>.</li>
+      <li>Distinct limits: jump discontinuity.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 132", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Classify the discontinuity of $f(x) = \dfrac{|x|}{x}$ at $x=0$.
+
+</Exercicio>
+
+<Exercicio numero="46.3" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Infinite at $x=2$: $\\lim_{x\\to2}f=\\pm\\infty$.", correta: true },
+    { texto: "Removable at $x=2$." },
+    { texto: "Jump at $x=2$." },
+    { texto: "Continuous at $x=2$." },
+  ]}
+  solucao={<><Eq>{`f(x)=1/(x-2)`}</Eq>: denominator <Eq>{`\to0`}</Eq> and numerator <Eq>{`\to1\neq0`}</Eq>. Infinite discontinuity.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 133", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Classify the discontinuity of $f(x) = \dfrac{1}{x-2}$ at $x=2$.
+
+</Exercicio>
+
+<Exercicio numero="46.4" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Removable at $x=-3$: limit $=0$ but $f(-3)$ undefined.", correta: true },
+    { texto: "Infinite at $x=-3$." },
+    { texto: "Jump at $x=-3$." },
+    { texto: "Continuous at $x=-3$." },
+  ]}
+  solucao={<><Eq>{`\frac{x^2+6x+9}{x+3}=\frac{(x+3)^2}{x+3}=x+3`}</Eq> for <Eq>{`x\neq-3`}</Eq>. Limit <Eq>{`=0`}</Eq>; undefined at <Eq>{`-3`}</Eq>. Removable.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 134", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Classify the discontinuity of $f(x) = \dfrac{x^2+6x+9}{x+3}$ at $x=-3$.
+
+</Exercicio>
+
+<Exercicio numero="46.5" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Jump at $x=1$: $\\lim_{x\\to1^+}=1$ and $\\lim_{x\\to1^-}=-1$.", correta: true },
+    { texto: "Removable at $x=1$." },
+    { texto: "Infinite at $x=1$." },
+    { texto: "Continuous at $x=1$." },
+  ]}
+  solucao={<><Eq>{`f(x)=\lfloor x\rfloor`}</Eq>: <Eq>{`\lim^-=0`}</Eq>, <Eq>{`\lim^+=1`}</Eq>. Distinct limits: jump. Value in figure: jump from <Eq>{`0`}</Eq> to <Eq>{`1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 135", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Classify the discontinuity of $f(x) = \lfloor x \rfloor$ (floor function) at $x=1$.
+
+</Exercicio>
+
+<Exercicio numero="46.6" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Infinite at $x=0$: $\\lim_{x\\to0}f=+\\infty$.", correta: true },
+    { texto: "Removable at $x=0$." },
+    { texto: "Jump at $x=0$." },
+    { texto: "Continuous at $x=0$." },
+  ]}
+  solucao={<><Eq>{`1/x^2 > 0`}</Eq> and <Eq>{`\to+\infty`}</Eq> when <Eq>{`x\to0`}</Eq> (from both sides). Infinite discontinuity.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 136", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Classify the discontinuity of $f(x) = \dfrac{1}{x^2}$ at $x=0$, and explain if it is removable.
+
+</Exercicio>
+
+<Exercicio numero="46.7" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Infinite at $x=1$: $f(x)=3x/(x-1)\\to\\pm\\infty$.", correta: true },
+    { texto: "Removable at $x=1$." },
+    { texto: "Jump at $x=1$." },
+    { texto: "Continuous at $x=1$." },
+  ]}
+  solucao={<>Denominator <Eq>{`x-1\to0`}</Eq> and numerator <Eq>{`3x\to3\neq0`}</Eq>. Infinite discontinuity.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 137", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Classify the discontinuity of $f(x) = \dfrac{3x}{x-1}$ at $x=1$.
+
+</Exercicio>
+
+<Exercicio numero="46.8" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Infinite at $x=0$: $\\cot 0^+= +\\infty$ and $\\cot 0^-= -\\infty$.", correta: true },
+    { texto: "Removable at $x=0$." },
+    { texto: "Jump at $x=0$." },
+    { texto: "Continuous at $x=0$." },
+  ]}
+  solucao={<><Eq>{`\cot x=\cos x/\sin x`}</Eq>: <Eq>{`\sin 0=0`}</Eq> and numerator <Eq>{`\to1`}</Eq>. Infinite discontinuity.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 138", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Classify the discontinuity of $f(x) = \cot x$ at $x=0$.
+
+</Exercicio>
+
+<Exercicio numero="46.9" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Yes, continuous at $x=3$: $f(3)=9$ and $\\lim_{x\\to3}x^2=9$.", correta: true },
+    { texto: "No; $f(3)$ is not defined." },
+    { texto: "No; the limit does not exist." },
+    { texto: "No; $f(3) \\neq \\lim_{x\\to3}f(x)$." },
+  ]}
+  solucao={<><Eq>{`f(x)=x^2`}</Eq> is a polynomial. <Eq>{`f(3)=9`}</Eq>, <Eq>{`\lim_{x\to3}x^2=9`}</Eq>. All three conditions satisfied.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 139", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Is $f(x)=x^2$ continuous at $x=3$?
+
+</Exercicio>
+
+<Exercicio numero="46.10" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Not continuous; $f(1)=3 \\neq \\lim_{x\\to1}(x+2) = 3$... actually $f(1)=3=$ limit: continuous.", correta: true },
+    { texto: "Removable discontinuity at $x=1$." },
+    { texto: "Jump discontinuity at $x=1$." },
+    { texto: "Infinite discontinuity at $x=1$." },
+  ]}
+  solucao={<><Eq>{`\lim_{x\to1}(x+2)=3`}</Eq>; <Eq>{`f(1)=3`}</Eq> (given). All three conditions satisfied: continuous.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 140", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+$f(x)=x+2$ for $x\neq1$ and $f(1)=3$. Is $f$ continuous at $x=1$?
+
+</Exercicio>
+
+<Exercicio numero="46.11" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes; compositions of continuous functions are continuous.", correta: true },
+    { texto: "No; $e^{\\sin x}$ can have discontinuities." },
+    { texto: "Only when $\\sin x > 0$." },
+    { texto: "Only when $x\\in[0,2\\pi]$." },
+  ]}
+  solucao={<><Eq>{`\sin x`}</Eq> is continuous on <Eq>{`\mathbb{R}`}</Eq>; <Eq>{`e^t`}</Eq> is continuous on <Eq>{`\mathbb{R}`}</Eq>. The composition <Eq>{`e^{\sin x}`}</Eq> is continuous on <Eq>{`\mathbb{R}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 141", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Is $f(x) = e^{\sin x}$ continuous on $\mathbb{R}$?
+
+</Exercicio>
+
+<Exercicio numero="46.12" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes; $e^x$ is continuous on $\\mathbb{R}$ and $e^{2x}$ too.", correta: true },
+    { texto: "No; $e^{2x}$ has a discontinuity at $x=0$." },
+    { texto: "Only for $x>0$." },
+    { texto: "No; $e^{2x}$ is not continuous because it grows too fast." },
+  ]}
+  solucao={<><Eq>{`e^{2x}`}</Eq> is a composition of <Eq>{`e^t`}</Eq> and <Eq>{`t=2x`}</Eq> — both continuous. Continuous on <Eq>{`\mathbb{R}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 142", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Is $f(x) = e^{2x}$ continuous on $\mathbb{R}$?
+
+</Exercicio>
+
+<Exercicio numero="46.13" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes; $\\ln x$ is continuous on $(0,+\\infty)$.", correta: true },
+    { texto: "No; $\\ln x$ has a removable discontinuity at $x=0$." },
+    { texto: "Yes; $\\ln x$ is continuous on $\\mathbb{R}$." },
+    { texto: "No; $\\ln x$ has an infinite discontinuity at $x=1$." },
+  ]}
+  solucao={<><Eq>{`\ln x`}</Eq> is continuous on <Eq>{`(0,+\infty)`}</Eq>, its domain. It has an infinite discontinuity at <Eq>{`x=0`}</Eq> (the boundary), but within its domain it is continuous.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 143", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Is $f(x) = \ln x$ continuous on $(0,+\infty)$?
+
+</Exercicio>
+
+<Exercicio numero="46.14" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes; $\\sin^2 x$ is a composition of continuous functions.", correta: true },
+    { texto: "No; $\\sin^2 x$ has discontinuities at the zeros of $\\sin x$." },
+    { texto: "Only for $x\\in[0,\\pi]$." },
+    { texto: "No; squared trigonometric functions are not continuous." },
+  ]}
+  solucao={<><Eq>{`\sin^2 x = (\sin x)^2`}</Eq>: <Eq>{`\sin x`}</Eq> continuous, <Eq>{`(\ )^2`}</Eq> continuous. Composition continuous on <Eq>{`\mathbb{R}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 144", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Is $f(x) = \sin^2 x$ continuous on $\mathbb{R}$?
+
+</Exercicio>
+
+<Exercicio numero="46.15" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$k=6$.", correta: true },
+    { texto: "$k=-6$." },
+    { texto: "$k=3$." },
+    { texto: "$k=12$." },
+  ]}
+  solucao={<>At <Eq>{`x=3`}</Eq>: <Eq>{`\lim^-=3k`}</Eq> and <Eq>{`\lim^+=18`}</Eq>. <Eq>{`3k=18\Rightarrow k=6`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`\lim_{x\to3^-}=kx|_{x=3}=3k`}</Eq>.</li>
+      <li><Eq>{`f(3)=3^2+9=18`}</Eq>... if <Eq>{`f=x^2+9`}</Eq> for <Eq>{`x\geq3`}</Eq>: <Eq>{`f(3)=18`}</Eq>.</li>
+      <li>Equate: <Eq>{`3k=18\Rightarrow k=6`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 145", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Find $k$ such that $f(x)=kx$ for $x<3$ and $f(x)=x^2+9$ for $x\geq3$ is continuous.
+
+</Exercicio>
+
+<Exercicio numero="46.16" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$k=2$.", correta: true },
+    { texto: "$k=-2$." },
+    { texto: "$k=4$." },
+    { texto: "$k=0$." },
+  ]}
+  solucao={<>At <Eq>{`x=2`}</Eq>: <Eq>{`\lim^-=2k`}</Eq> and <Eq>{`\lim^+=2+2=4`}</Eq>. <Eq>{`2k=4\Rightarrow k=2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 146", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Find $k$ such that $f(x)=kx$ for $x\leq2$ and $f(x)=x+2$ for $x>2$ is continuous.
+
+</Exercicio>
+
+<Exercicio numero="46.17" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$k=-4$.", correta: true },
+    { texto: "$k=4$." },
+    { texto: "$k=0$." },
+    { texto: "$k=2$." },
+  ]}
+  solucao={<>At <Eq>{`x=0`}</Eq>: <Eq>{`\lim^-=k`}</Eq> and <Eq>{`\lim^+=2(0)-4=-4`}</Eq>. <Eq>{`k=-4`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 147", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Find $k$ such that $f(x)=k$ for $x\leq0$ and $f(x)=2x-4$ for $x>0$ is continuous.
+
+</Exercicio>
+
+<Exercicio numero="46.18" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$k=2$.", correta: true },
+    { texto: "$k=-2$." },
+    { texto: "$k=4$." },
+    { texto: "$k=1$." },
+  ]}
+  solucao={<>At <Eq>{`x=2`}</Eq>: <Eq>{`\lim^-=2k`}</Eq> and <Eq>{`\lim^+=2^2=4`}</Eq>. <Eq>{`2k=4\Rightarrow k=2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 148", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Find $k$ such that $f(x)=kx$ for $x\leq2$ and $f(x)=x^2$ for $x>2$ is continuous.
+
+</Exercicio>
+
+<Exercicio numero="46.19" dificuldade="desafio"
+  opcoes={[
+    { texto: "$k=5$.", correta: true },
+    { texto: "$k=-5$." },
+    { texto: "$k=25$." },
+    { texto: "$k=1$." },
+  ]}
+  solucao={<>At <Eq>{`x=2`}</Eq>: <Eq>{`\lim^-=4k-4`}</Eq> and <Eq>{`\lim^+=16`}</Eq>. <Eq>{`4k-4=16\Rightarrow k=5`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`\lim_{x\to2^-}=kx^2-4|_{x=2}=4k-4`}</Eq>.</li>
+      <li><Eq>{`\lim_{x\to2^+}=16`}</Eq>.</li>
+      <li><Eq>{`4k-4=16\Rightarrow 4k=20\Rightarrow k=5`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 149", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Find $k$ such that $f(x)=kx^2-4$ for $x\leq2$ and $f(x)=16$ for $x>2$ is continuous.
+
+</Exercicio>
+
+<Exercicio numero="46.20" dificuldade="modelagem"
+  opcoes={[
+    { texto: "By IVT, $h$ attains the value $5$ at some point in $(-\\infty, 2]$.", correta: true },
+    { texto: "IVT does not apply here." },
+    { texto: "By IVT, $h$ attains the value $5$ only at $x=2$." },
+    { texto: "By IVT, $h$ does not attain the value $5$." },
+  ]}
+  solucao={<><Eq>{`h(x)=3x^2-4`}</Eq> for <Eq>{`x\leq2`}</Eq>: <Eq>{`h(0)=-4<5`}</Eq> and <Eq>{`h(2)=8>5`}</Eq>. <Eq>{`h`}</Eq> continuous on <Eq>{`(-\infty,2]`}</Eq>. By IVT, there exists <Eq>{`c\in(0,2)`}</Eq> with <Eq>{`h(c)=5`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 150", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+$h(x)=3x^2-4$ for $x\leq2$ and $h(x)=5+4x$ for $x>2$. Use IVT to show that $h$ attains the value $5$ in $(-\infty,2)$.
+
+</Exercicio>
+
+<Exercicio numero="46.21" dificuldade="modelagem"
+  opcoes={[
+    { texto: "By IVT, the particle passes through position $0$ at some instant in $(0,1)$.", correta: true },
+    { texto: "The particle does not pass through $0$ in $(0,1)$." },
+    { texto: "IVT is not applicable to particle positions." },
+    { texto: "The particle passes through $0$ exactly at $t=0.5$." },
+  ]}
+  solucao={<>Position <Eq>{`s(t)`}</Eq> is continuous. If <Eq>{`s(0)=-2<0`}</Eq> and <Eq>{`s(1)=3>0`}</Eq>, then IVT guarantees <Eq>{`c\in(0,1)`}</Eq> with <Eq>{`s(c)=0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 151", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+A particle has position $s(0)=-2$ and $s(1)=3$, with $s$ continuous. Does IVT guarantee that the particle passes through position $0$?
+
+</Exercicio>
+
+<Exercicio numero="46.22" dificuldade="modelagem"
+  opcoes={[
+    { texto: "By IVT, $\\cos t = t$ has a solution in $(0, \\pi/2)$.", correta: true },
+    { texto: "By IVT, $\\cos t = t$ has no solution in $(0,\\pi/2)$." },
+    { texto: "IVT does not apply because $\\cos t - t$ is not continuous." },
+    { texto: "By IVT, there are exactly two solutions." },
+  ]}
+  solucao={<><Eq>{`g(t)=\cos t-t`}</Eq>: <Eq>{`g(0)=1>0`}</Eq>, <Eq>{`g(\pi/2)=-\pi/2<0`}</Eq>. <Eq>{`g`}</Eq> continuous; changes sign. IVT guarantees a solution.</>}
+  passos={<>
+    <ol>
+      <li>Define <Eq>{`g(t)=\cos t - t`}</Eq>.</li>
+      <li><Eq>{`g(0)=\cos 0 - 0 = 1 > 0`}</Eq>.</li>
+      <li><Eq>{`g(\pi/2)=0-\pi/2 = -\pi/2 < 0`}</Eq>.</li>
+      <li><Eq>{`g`}</Eq> is continuous (sum of continuous functions) and changes sign: IVT guarantees <Eq>{`c\in(0,\pi/2)`}</Eq> with <Eq>{`g(c)=0`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 152", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Use IVT to show that $\cos t = t$ has a solution in $(0,\pi/2)$.
+
+</Exercicio>
+
+<Exercicio numero="46.23" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "By IVT, $2^x=x+3$ has a solution in $(1,3)$.", correta: true },
+    { texto: "By IVT, the solution is in $(0,1)$." },
+    { texto: "IVT does not guarantee a solution." },
+    { texto: "There is no real solution." },
+  ]}
+  solucao={<><Eq>{`h(x)=2^x-x-3`}</Eq>: <Eq>{`h(1)=2-4=-2<0`}</Eq>, <Eq>{`h(3)=8-6=2>0`}</Eq>. Continuous, changes sign: IVT guarantees <Eq>{`c\in(1,3)`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Define <Eq>{`h(x)=2^x-(x+3)`}</Eq>.</li>
+      <li><Eq>{`h(1)=2-4=-2<0`}</Eq>.</li>
+      <li><Eq>{`h(3)=8-6=2>0`}</Eq>.</li>
+      <li>Continuous and changes sign: IVT guarantees <Eq>{`c\in(1,3)`}</Eq> with <Eq>{`h(c)=0`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 153", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Use IVT to show that $2^x = x+3$ has a solution in $(1,3)$.
+
+</Exercicio>
+
+<Exercicio numero="46.24" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "By IVT, $f$ attains the value $0$ at some point in $[a,b]$.", correta: true },
+    { texto: "By IVT, $f$ attains only the extreme values $f(a)$ and $f(b)$." },
+    { texto: "IVT guarantees that $f$ is constant." },
+    { texto: "IVT requires that $f(a) > 0$ and $f(b) < 0$." },
+  ]}
+  solucao={<>If <Eq>{`f`}</Eq> is continuous on <Eq>{`[a,b]`}</Eq> and <Eq>{`f(a) < 0 < f(b)`}</Eq> (or vice-versa), then by IVT there exists <Eq>{`c\in(a,b)`}</Eq> with <Eq>{`f(c)=0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 154", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+State the consequence of IVT when $f(a) < 0$ and $f(b) > 0$.
+
+</Exercicio>
+
+<Exercicio numero="46.25" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Jump at $x=1$: $\\lim^+=3$ and $\\lim^-=1$.", correta: true },
+    { texto: "Removable at $x=1$." },
+    { texto: "Infinite at $x=1$." },
+    { texto: "Continuous at $x=1$." },
+  ]}
+  solucao={<><Eq>{`\lim_{x\to1^+}=3(1)=3`}</Eq> and <Eq>{`\lim_{x\to1^-}=1^3=1`}</Eq>. Distinct: jump.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 155", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+$f(x)=3x$ for $x>1$ and $f(x)=x^3$ for $x\leq1$. Classify the discontinuity at $x=1$.
+
+</Exercicio>
+
+<Exercicio numero="46.26" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$f(1)=2$ would make $f$ continuous (continuous extension).", correta: true },
+    { texto: "$f(1)=0$." },
+    { texto: "$f(1)=1$." },
+    { texto: "$f(1)=4$." },
+  ]}
+  solucao={<><Eq>{`f(x)=\frac{x^4-1}{x^2-1}=\frac{(x^2-1)(x^2+1)}{x^2-1}=x^2+1`}</Eq> for <Eq>{`x\neq\pm1`}</Eq>. <Eq>{`\lim_{x\to1}=1+1=2`}</Eq>. Define <Eq>{`f(1)=2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 156", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+For $f(x)=\dfrac{x^4-1}{x^2-1}$, what value of $f(1)$ would make $f$ continuous at $x=1$?
+
+</Exercicio>
+
+<Exercicio numero="46.27" dificuldade="compreensao"
+  opcoes={[
+    { texto: "A function with $f(a) > 0$ and $f(b) < 0$ that is continuous on $[a,b]$ has a root in $(a,b)$.", correta: true },
+    { texto: "A continuous function cannot have a root." },
+    { texto: "IVT guarantees a root only if $f$ is increasing." },
+    { texto: "IVT applies only to polynomials." },
+  ]}
+  solucao={<>The IVT: if <Eq>{`f`}</Eq> is continuous on <Eq>{`[a,b]`}</Eq> and <Eq>{`f(a)`}</Eq> and <Eq>{`f(b)`}</Eq> have opposite signs, then there exists <Eq>{`c\in(a,b)`}</Eq> with <Eq>{`f(c)=0`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Hypothesis 1: <Eq>{`f`}</Eq> is continuous on <Eq>{`[a,b]`}</Eq>.</li>
+      <li>Hypothesis 2: <Eq>{`f(a)`}</Eq> and <Eq>{`f(b)`}</Eq> have opposite signs (e.g., <Eq>{`f(a)<0<f(b)`}</Eq>).</li>
+      <li>Conclusion: there exists <Eq>{`c\in(a,b)`}</Eq> with <Eq>{`f(c)=0`}</Eq>.</li>
+      <li>Motivation: <Eq>{`f`}</Eq> cannot "jump" from one sign to another without passing through zero.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 157", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+State the Intermediate Value Theorem (IVT) for roots of continuous functions.
+
+</Exercicio>
+
+<Exercicio numero="46.28" dificuldade="compreensao"
+  opcoes={[
+    { texto: "No; IVT guarantees existence but not uniqueness of the root.", correta: true },
+    { texto: "Yes; IVT guarantees exactly one root." },
+    { texto: "IVT guarantees an even number of roots." },
+    { texto: "Impossible to determine without computing explicitly." },
+  ]}
+  solucao={<>The IVT is an existence theorem, not a uniqueness theorem. A function can have multiple roots in the interval and IVT does not count them.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 158", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Does IVT guarantee exactly one root when $f(a)$ and $f(b)$ have opposite signs?
+
+</Exercicio>
+
+<Exercicio numero="46.29" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous on $\\mathbb{R}$: composition of continuous functions.", correta: true },
+    { texto: "Discontinuity at $x=0$." },
+    { texto: "Discontinuity at $x=1$." },
+    { texto: "Discontinuity at $x=-1$." },
+  ]}
+  solucao={<><Eq>{`f(x)=e^{x^2+1}`}</Eq>: <Eq>{`x^2+1`}</Eq> is a polynomial (continuous); <Eq>{`e^t`}</Eq> is continuous. Composition continuous on <Eq>{`\mathbb{R}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 159", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = e^{x^2+1}$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.30" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous on $(0,+\\infty)$.", correta: true },
+    { texto: "Continuous on $\\mathbb{R}$." },
+    { texto: "Continuous on $(-\\infty,0)$." },
+    { texto: "Discontinuity at $x=1$." },
+  ]}
+  solucao={<><Eq>{`\ln(\sin x)`}</Eq>: domain requires <Eq>{`\sin x > 0`}</Eq>, which occurs on <Eq>{`(0,\pi)\cup(2\pi,3\pi)\cup\ldots`}</Eq>. On any open subinterval where <Eq>{`\sin x > 0`}</Eq>, it is continuous.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 160", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = \ln(\sin x)$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.31" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous on $\\mathbb{R}$.", correta: true },
+    { texto: "Discontinuity at $x=0$." },
+    { texto: "Discontinuity at $x=1$." },
+    { texto: "Discontinuity at $x=-1$." },
+  ]}
+  solucao={<><Eq>{`\sin(\cos x)`}</Eq>: <Eq>{`\cos x`}</Eq> continuous, <Eq>{`\sin t`}</Eq> continuous. Composition continuous on <Eq>{`\mathbb{R}`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 161", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = \sin(\cos x)$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.32" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous on $[0,+\\infty)$.", correta: true },
+    { texto: "Continuous on $\\mathbb{R}$." },
+    { texto: "Continuous on $(0,+\\infty)$." },
+    { texto: "Discontinuity at $x=1$." },
+  ]}
+  solucao={<><Eq>{`\sqrt{x^2-1}`}</Eq>: requires <Eq>{`x^2-1\geq0`}</Eq>, i.e., <Eq>{`|x|\geq1`}</Eq>. Domain <Eq>{`= (-\infty,-1]\cup[1,+\infty)`}</Eq>. Continuous there.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 162", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = \sqrt{x^2-1}$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.33" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous on $(-\\infty,0)\\cup(0,+\\infty)$.", correta: true },
+    { texto: "Continuous on $\\mathbb{R}$." },
+    { texto: "Removable discontinuity at $x=0$." },
+    { texto: "Continuous on $(0,+\\infty)$ only." },
+  ]}
+  solucao={<><Eq>{`\frac{\sin x}{x}`}</Eq>: continuous where <Eq>{`x\neq0`}</Eq>. At <Eq>{`x=0`}</Eq>: limit exists (<Eq>{`=1`}</Eq>) but <Eq>{`f(0)`}</Eq> undefined — removable discontinuity, but outside the domain.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 163", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = \dfrac{\sin x}{x}$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.34" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous on $\\mathbb{R}\setminus\{0\}$.", correta: true },
+    { texto: "Continuous on $\\mathbb{R}$." },
+    { texto: "Jump discontinuity at $x=0$." },
+    { texto: "Infinite discontinuity at $x=0$." },
+  ]}
+  solucao={<><Eq>{`\cos(1/x)`}</Eq>: for <Eq>{`x\neq0`}</Eq>, composition of continuous functions — continuous. At <Eq>{`x=0`}</Eq>: <Eq>{`1/x`}</Eq> diverges, <Eq>{`\cos`}</Eq> oscillates — limit does not exist. Discontinuity at <Eq>{`x=0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 164", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = \cos\!\left(\dfrac{1}{x}\right)$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.35" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous on $\\mathbb{R}$.", correta: true },
+    { texto: "Discontinuity at $x=0$." },
+    { texto: "Discontinuity at the zeros of $\\cos x$." },
+    { texto: "Continuous only for $x>0$." },
+  ]}
+  solucao={<><Eq>{`e^{\cos x}`}</Eq>: <Eq>{`\cos x`}</Eq> continuous; <Eq>{`e^t`}</Eq> continuous. Composition continuous on <Eq>{`\mathbb{R}`}</Eq>. Moreover, <Eq>{`e^{\cos x} > 0`}</Eq> for all <Eq>{`x`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 165", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = e^{\cos x}$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.36" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous where $\\tan x$ is continuous: $\\mathbb{R}\setminus\{\\pi/2+n\\pi\}$.", correta: true },
+    { texto: "Continuous on $\\mathbb{R}$." },
+    { texto: "Discontinuity only at $x=0$." },
+    { texto: "Continuous on $[0,\\pi]$." },
+  ]}
+  solucao={<><Eq>{`\ln(\tan x)`}</Eq>: requires <Eq>{`\tan x > 0`}</Eq> and <Eq>{`\tan x`}</Eq> defined. On <Eq>{`(-\pi/2,\pi/2)`}</Eq>: <Eq>{`\tan x`}</Eq> is positive on <Eq>{`(0,\pi/2)`}</Eq>, etc.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 166", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = \ln(\tan x)$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.37" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Continuous on $\\mathbb{R}$.", correta: true },
+    { texto: "Discontinuity at $x=0$." },
+    { texto: "Continuous only on $(0,+\\infty)$." },
+    { texto: "Discontinuity at $x=\\pm1$." },
+  ]}
+  solucao={<><Eq>{`\sqrt{1+\cos x}`}</Eq>: <Eq>{`1+\cos x\geq0`}</Eq> because <Eq>{`\cos x\geq-1`}</Eq>, so <Eq>{`1+\cos x\geq0`}</Eq>. The square root is continuous on its entire domain.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 167", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Where is $f(x) = \sqrt{1+\cos x}$ continuous?
+
+</Exercicio>
+
+<Exercicio numero="46.38" dificuldade="modelagem"
+  opcoes={[
+    { texto: "The force is continuous for $r>0$; the limit as $r\\to0^+$ defines the 'force at the point'.", correta: true },
+    { texto: "Coulomb force is discontinuous for all $r$." },
+    { texto: "Coulomb force is continuous at $r=0$." },
+    { texto: "Continuity of force implies that it is constant." },
+  ]}
+  solucao={<>Coulomb's law <Eq>{`F=kq_1q_2/r^2`}</Eq>: for <Eq>{`r>0`}</Eq>, it is continuous (rational with no zeros of denominator in domain). At <Eq>{`r=0`}</Eq>: infinite discontinuity (singularity).</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 168", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Is the electrostatic force (Coulomb's Law) continuous for $r>0$. What happens at $r=0$?
+
+</Exercicio>
+
+<Exercicio numero="46.39" dificuldade="modelagem"
+  opcoes={[
+    { texto: "By IVT, the force attains all values between $F(r_1)$ and $F(r_2)$ for $r\\in[r_1,r_2]$.", correta: true },
+    { texto: "By IVT, the force is constant between $r_1$ and $r_2$." },
+    { texto: "IVT does not apply to Coulomb's law." },
+    { texto: "By IVT, the force changes sign between $r_1$ and $r_2$." },
+  ]}
+  solucao={<>Force <Eq>{`F(r)`}</Eq> is continuous on <Eq>{`(0,+\infty)`}</Eq>. The IVT guarantees that <Eq>{`F`}</Eq> attains all intermediate values between <Eq>{`F(r_1)`}</Eq> and <Eq>{`F(r_2)`}</Eq> on any interval <Eq>{`[r_1,r_2]\subset(0,+\infty)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 169", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Apply IVT to Coulomb force $F(r)$ for $r\in[r_1,r_2]$ with $0<r_1<r_2$.
+
+</Exercicio>
+
+<Exercicio numero="46.40" dificuldade="modelagem"
+  opcoes={[
+    { texto: "By IVT, there exists $r_0\\in(r_1,r_2)$ such that $F(r_0)=F_0$ for any $F_0$ between $F(r_1)$ and $F(r_2)$.", correta: true },
+    { texto: "The force never attains intermediate values." },
+    { texto: "IVT does not guarantee this because $F$ may not be continuous." },
+    { texto: "IVT only works for polynomial functions." },
+  ]}
+  solucao={<>Since <Eq>{`F`}</Eq> is continuous on <Eq>{`[r_1,r_2]`}</Eq> (provided <Eq>{`0<r_1`}</Eq>), the IVT guarantees that <Eq>{`F`}</Eq> attains any value between <Eq>{`F(r_1)`}</Eq> and <Eq>{`F(r_2)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 170", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+For $F(r) = kq_1q_2/r^2$ with $r\in[1,2]$: by IVT, does $F$ attain the intermediate value $F_0$?
+
+</Exercicio>
+
+<Exercicio numero="46.41" dificuldade="modelagem"
+  opcoes={[
+    { texto: "The force behaves as $1/r^2$: continuous, decreasing, tends to $+\\infty$ as $r\\to0^+$.", correta: true },
+    { texto: "The force is constant for $r$ near zero." },
+    { texto: "The force changes sign when $r\\to0$." },
+    { texto: "The force is discontinuous for $r < 1$." },
+  ]}
+  solucao={<><Eq>{`F = k/r^2`}</Eq> with <Eq>{`k>0`}</Eq>: it is positive, decreases with <Eq>{`r`}</Eq>, and tends to <Eq>{`+\infty`}</Eq> as <Eq>{`r\to0^+`}</Eq>. Continuous for all <Eq>{`r>0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 171", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Describe the behavior of $F(r) = k/r^2$ (simplified Coulomb force) for $r>0$.
+
+</Exercicio>
+
+<Exercicio numero="46.42" dificuldade="desafio"
+  opcoes={[
+    { texto: "By IVT, $x^5-x=1$ has a solution in $(1,2)$.", correta: true },
+    { texto: "By IVT, $x^5-x=1$ has no solution in $(1,2)$." },
+    { texto: "The solution is in $(0,1)$." },
+    { texto: "There is no real solution." },
+  ]}
+  solucao={<><Eq>{`h(x)=x^5-x-1`}</Eq>: <Eq>{`h(1)=1-1-1=-1<0`}</Eq>; <Eq>{`h(2)=32-2-1=29>0`}</Eq>. Continuous, changes sign: IVT guarantees <Eq>{`c\in(1,2)`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><Eq>{`h(x)=x^5-x-1`}</Eq>.</li>
+      <li><Eq>{`h(1)=1-1-1=-1<0`}</Eq>.</li>
+      <li><Eq>{`h(2)=32-2-1=29>0`}</Eq>.</li>
+      <li><Eq>{`h`}</Eq> is a polynomial (continuous). By IVT, there exists <Eq>{`c\in(1,2)`}</Eq> with <Eq>{`h(c)=0`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 153", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Use IVT to show that $x^5 - x = 1$ has a solution in $(1,2)$.
+
+</Exercicio>
+
+<Exercicio numero="46.43" dificuldade="desafio"
+  opcoes={[
+    { texto: "By IVT, $\\ln x = e^{-x}$ has a solution in $(1,e)$.", correta: true },
+    { texto: "There is no solution in $(1,e)$." },
+    { texto: "IVT does not apply because the functions may not be continuous." },
+    { texto: "The solution is in $(e,\\infty)$." },
+  ]}
+  solucao={<><Eq>{`g(x)=\ln x - e^{-x}`}</Eq>: <Eq>{`g(1)=0-e^{-1}<0`}</Eq> and <Eq>{`g(e)=1-e^{-e}>0`}</Eq>. Continuous, changes sign: IVT guarantees solution in <Eq>{`(1,e)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 172", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Use IVT to show that $\ln x = e^{-x}$ has a solution in $(1,e)$.
+
+</Exercicio>
+
+<Exercicio numero="46.44" dificuldade="desafio"
+  opcoes={[
+    { texto: "By IVT, $x^3 + x^2 - 2x + 1 = 0$ has a root in $(-3,-2)$.", correta: true },
+    { texto: "There is no root in $(-3,-2)$." },
+    { texto: "The root is in $(0,1)$." },
+    { texto: "IVT does not apply here." },
+  ]}
+  solucao={<><Eq>{`f(-3)=-27+9+6+1=-11<0`}</Eq> and <Eq>{`f(-2)=-8+4+4+1=1>0`}</Eq>. Continuous, changes sign: IVT guarantees root in <Eq>{`(-3,-2)`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 173", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+Use IVT to locate a root of $f(x) = x^3+x^2-2x+1$ in $(-3,-2)$.
+
+</Exercicio>
+
+<Exercicio numero="46.45" dificuldade="demonstracao"
+  opcoes={[
+    { texto: "IVT is a consequence of the completeness of $\\mathbb{R}$: continuous functions cannot 'skip' values.", correta: true },
+    { texto: "IVT is a consequence of Weierstrass's Theorem on maxima and minima." },
+    { texto: "IVT is valid only for differentiable functions." },
+    { texto: "IVT is equivalent to L'Hôpital's Rule." },
+  ]}
+  solucao={<>The IVT reflects the principle that continuous functions on <Eq>{`\mathbb{R}`}</Eq> — completeness (least upper bound axiom) — cannot "skip" values. If <Eq>{`f(a)`}</Eq> and <Eq>{`f(b)`}</Eq> have opposite signs, the function must cross zero at some interior point.</>}
+  fonte={{ livro: "OpenStax Calculus Volume 1", url: "https://openstax.org/books/calculus-volume-1/pages/2-4-continuity", secao: "§2.4", exercicio: "ex. 158", licenca: "CC-BY-NC-SA 4.0" }}
+>
+
+The Intermediate Value Theorem is a consequence of which fundamental property of $\mathbb{R}$?
+
+</Exercicio>
 
 </ListaExercicios>
 
 ## Sources
 
-- [**Active Calculus**](https://activecalculus.org/single/) — Boelkins · 2024 · §1.9.
-- [**Calculus (Volume 1)**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · 2016 · §2.4.
-- [**Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — REAMAT · 2024 · ch. 3 (bisection).
-- [**Basic Analysis**](https://www.jirka.org/ra/) — Lebl · 2024 · §3.3.
+- [**Active Calculus 2.0**](https://activecalculus.org/single/) — Matt Boelkins · Grand Valley State University · 2024 · CC-BY-NC-SA. Primary source. §1.1 (*How Do We Measure Velocity?*) and §1.3 (*The Derivative at a Point*) — basis of Examples 3, 4, 5, Blocks C, D and E.
+- [**OpenStax Calculus: Volume 1**](https://openstax.org/details/books/calculus-volume-1) — OpenStax · Rice University · 2016 · CC-BY-NC-SA. §2.4 (*Continuity* and IVT) — basis of Example 1 and Blocks A and E. §2.1 (*A Preview of Calculus*) — basis of Block D.
+- [**REAMAT — Numerical Calculus (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — UFRGS · 2024 · CC-BY 4.0. §3.1 (*Bisection Method*) — basis of Example 2 and Block B.
+- [**Basic Analysis I**](https://www.jirka.org/ra/) — Jiří Lebl · 2024 · CC-BY-SA. §3.3 — proof of IVT via completeness of $\mathbb{R}$ (Formal door).

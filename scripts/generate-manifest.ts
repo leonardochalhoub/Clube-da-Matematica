@@ -26,14 +26,22 @@ const CONTENT_DIR = path.join(ROOT, 'content')
 const I18N_DIR = path.join(CONTENT_DIR, 'i18n')
 const OUT = path.join(ROOT, 'src/lib/content/manifest.generated.ts')
 
-// Maps URL prefix locale codes (used as BUILD_LOCALE values) to
-// filesystem directory names under content/i18n/. Filesystem uses
-// long codes (en-US); URL uses short codes (en). 'pt-BR' is special
-// — it has no URL prefix and reads from content/ directly.
-const LOCALE_TO_FS_DIR: Record<string, string> = {
+// BUILD_LOCALE is a URL code (pt-br, en, es, …). Maps:
+//   urlCode -> filesystem dir under content/i18n/ (long code: en-US, …)
+//   urlCode -> manifest KEY consumed by carregarMdxLocalizado (manifest.ts):
+//              pt-BR uses key 'pt-BR' and reads from content/ directly;
+//              others use their speechLang (en-US, …) as both dir AND key.
+// pt-br is a normal URL locale now (served at /pt-br/), but its SOURCE files
+// live in content/ (not content/i18n/pt-BR) and its manifest key stays 'pt-BR'.
+const URL_TO_FS_DIR: Record<string, string> = {
   'en': 'en-US', 'es': 'es-ES', 'zh': 'zh-CN', 'ja': 'ja-JP',
   'de': 'de-DE', 'fr': 'fr-FR', 'it': 'it-IT', 'ru': 'ru-RU',
   'ko': 'ko-KR', 'pl': 'pl-PL',
+}
+// Manifest key per URL code (what carregarMdxLocalizado looks up).
+const URL_TO_MANIFEST_KEY: Record<string, string> = {
+  'pt-br': 'pt-BR', 'en': 'en-US', 'es': 'es-ES', 'zh': 'zh-CN', 'ja': 'ja-JP',
+  'de': 'de-DE', 'fr': 'fr-FR', 'it': 'it-IT', 'ru': 'ru-RU', 'ko': 'ko-KR', 'pl': 'pl-PL',
 }
 
 async function* walkMdx(dir: string, prefix = ''): AsyncGenerator<string> {
@@ -112,19 +120,57 @@ async function main() {
   //   /<locale>/... URLs only. Artifacts merge after.
   const buildLocale = process.env.BUILD_LOCALE ?? ''
   const isMatrixBuild = buildLocale !== ''
-  const includeTranslationsFor = new Set<string>([
-    // Strict-mode re-sourced lessons (real exercises from OpenStax + Active
-    // Calculus, with MC + solucao + 25% passos + all 5 fonte fields).
-    // These MUST be bundled via webpack manifest so the locale route
-    // preserves the JSX-expression props (opcoes, solucao, passos, fonte) —
-    // compileMDX (next-mdx-remote/rsc) drops them and lessons render
-    // without MC/solution buttons.
-    'aulas/ano-1/trim-1/licao-01-conjuntos-intervalos',
-    'aulas/ano-1/trim-1/licao-02-funcoes',
-    'aulas/ano-2/trim-5/licao-41-limite-formal',
-    'aulas/ano-2/trim-6/licao-51-derivada-definicao',
-    'aulas/ano-3/trim-9/licao-82-integral-definida',
-  ])
+
+  // A maintained-locale translation is BUNDLED into the webpack manifest only
+  // if it passes BOTH gates:
+  //   (1) EXERCISE-SYNCED   — same `<Exercicio` count as the canonical PT-BR
+  //                           (else it's a stale, half-translated lesson), and
+  //   (2) BUILD-COMPILES    — `@mdx-js/mdx` (acorn, what `next build` runs)
+  //                           parses it without error.
+  // A file that fails either gate falls back to PT-BR under the locale URL —
+  // which is correct: better the source language than a broken page that
+  // crashes the whole build. Gate (2) is essential because exercise-count
+  // parity does NOT imply the JSX/MDX is valid; on 2026-06-02 three es-ES
+  // files were count-synced but had unclosed tags / acorn errors, and bundling
+  // them broke `next build`. Bundling the manifest is what preserves the
+  // JSX-expression props (opcoes, solucao, passos, fonte) that compileMDX
+  // (next-mdx-remote/rsc) silently drops. Re-synced+fixed locales auto-include
+  // on the next manifest regen — no hardcoded list to maintain.
+  const MAINTAINED_LOCALES = ['en-US', 'es-ES']
+  const countExercicios = (txt: string) => (txt.match(/<Exercicio\b/g) ?? []).length
+  const compilesMdx = async (file: string): Promise<boolean> => {
+    try {
+      const { compile } = await import('@mdx-js/mdx')
+      const remarkGfm = (await import('remark-gfm')).default
+      const remarkMath = (await import('remark-math')).default
+      const raw = await fs.readFile(file, 'utf-8')
+      const body = raw.replace(/^---[\s\S]*?---\n/, '')
+      await compile(body, { remarkPlugins: [remarkGfm, remarkMath] })
+      return true
+    } catch { return false }
+  }
+  // syncedByLocale[fsDir] = Set of paths where that locale is synced AND compiles.
+  const syncedByLocale: Record<string, Set<string>> = {}
+  for (const fsDir of MAINTAINED_LOCALES) syncedByLocale[fsDir] = new Set()
+  for (const p of ptPaths) {
+    let src: number
+    try { src = countExercicios(await fs.readFile(path.join(CONTENT_DIR, `${p}.mdx`), 'utf-8')) }
+    catch { continue }
+    for (const fsDir of MAINTAINED_LOCALES) {
+      const tgt = path.join(I18N_DIR, fsDir, `${p}.mdx`)
+      try {
+        if (countExercicios(await fs.readFile(tgt, 'utf-8')) !== src) continue  // gate 1
+        if (!(await compilesMdx(tgt))) continue                                  // gate 2
+        syncedByLocale[fsDir]!.add(p)
+      } catch { /* no translation file */ }
+    }
+  }
+  // A lesson is in the allowlist if ANY maintained locale is bundled for it.
+  const includeTranslationsFor = new Set<string>()
+  for (const fsDir of MAINTAINED_LOCALES) for (const p of syncedByLocale[fsDir]!) includeTranslationsFor.add(p)
+  for (const fsDir of MAINTAINED_LOCALES) {
+    console.log(`   ${fsDir}: ${syncedByLocale[fsDir]!.size} lessons synced+compiling → bundled`)
+  }
 
   let out = `/**
  * GERADO AUTOMATICAMENTE por scripts/generate-manifest.ts
@@ -145,27 +191,25 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
   for (const p of sortedPaths) {
     out += `  '${p}': {\n`
     if (isMatrixBuild) {
-      // Matrix mode: emit a single entry for the target locale.
-      // For PT-BR, use the canonical source. For other locales, use the
-      // translation file if it exists, else fall back to the PT-BR file
-      // (the locale URL still gets a route — just with PT-BR content).
-      if (buildLocale === 'pt-BR') {
-        out += `    'pt-BR': () => import('@/../content/${p}.mdx'),\n`
+      // Matrix mode: BUILD_LOCALE is a URL code (pt-br, en, …). Emit a single
+      // entry keyed by the MANIFEST KEY that carregarMdxLocalizado looks up
+      // (pt-BR uses 'pt-BR'; others use their speechLang, e.g. 'en-US').
+      const manifestKey = URL_TO_MANIFEST_KEY[buildLocale] ?? buildLocale
+      if (buildLocale === 'pt-br') {
+        // pt-BR source lives in content/ (not content/i18n).
+        out += `    '${manifestKey}': () => import('@/../content/${p}.mdx'),\n`
       } else {
-        // BUILD_LOCALE is the URL prefix (en, de, etc.). The filesystem
-        // directory uses the long code (en-US, de-DE) — translate.
-        const fsDir = LOCALE_TO_FS_DIR[buildLocale]
-        const localeSet = fsDir ? localeMap[fsDir] : undefined
-        const fileExists = !!localeSet?.has(p)
-        const allowlisted = includeTranslationsFor.has(p)
-        if (fileExists && allowlisted && fsDir) {
-          // Translation is aligned with current canonical PT-BR.
-          out += `    '${buildLocale}': () => import('@/../content/i18n/${fsDir}/${p}.mdx'),\n`
+        const fsDir = URL_TO_FS_DIR[buildLocale]
+        // Bundle only if THIS locale's file is exercise-synced + compiles
+        // (per-locale gate). syncedByLocale is computed for MAINTAINED_LOCALES;
+        // a locale not yet maintained has no synced set → always falls back.
+        const synced = !!(fsDir && syncedByLocale[fsDir]?.has(p))
+        if (synced && fsDir) {
+          out += `    '${manifestKey}': () => import('@/../content/i18n/${fsDir}/${p}.mdx'),\n`
         } else {
-          // Either no translation file, OR file exists but is stale (lesson
-          // was rewritten and translation hasn't been regenerated yet).
-          // Route is served from PT-BR module under the locale URL.
-          out += `    '${buildLocale}': () => import('@/../content/${p}.mdx'),\n`
+          // No translation OR stale/broken → serve PT-BR content under the
+          // locale URL (the route still exists; content falls back).
+          out += `    '${manifestKey}': () => import('@/../content/${p}.mdx'),\n`
         }
       }
     } else {
@@ -179,14 +223,14 @@ export const manifestoI18n: Record<string, Partial<Record<string, MdxLoader>>> =
       // translations also have stale JSX (pre-strict-mode content) that
       // throws webpack cache serializer warnings. EN+ES are the locales
       // we actively maintain; others rebuild only via the matrix CI.
-      const BUNDLE_LOCALES = new Set(['en-US', 'es-ES'])
       out += `    'pt-BR': () => import('@/../content/${p}.mdx'),\n`
-      if (includeTranslationsFor.has(p)) {
-        for (const [locale, set] of Object.entries(localeMap)) {
-          if (!BUNDLE_LOCALES.has(locale)) continue
-          if (set.has(p)) {
-            out += `    '${locale}': () => import('@/../content/i18n/${locale}/${p}.mdx'),\n`
-          }
+      // Bundle a maintained locale's file ONLY if it is exercise-synced for
+      // this lesson (per-locale gate). Stale translations are skipped → the
+      // locale URL falls back to PT-BR rather than shipping a half-translated
+      // lesson with the wrong exercise count.
+      for (const fsDir of MAINTAINED_LOCALES) {
+        if (syncedByLocale[fsDir]!.has(p)) {
+          out += `    '${fsDir}': () => import('@/../content/i18n/${fsDir}/${p}.mdx'),\n`
         }
       }
     }

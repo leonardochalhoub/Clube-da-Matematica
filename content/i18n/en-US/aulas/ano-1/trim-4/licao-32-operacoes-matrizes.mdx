@@ -3,337 +3,1338 @@ titulo: "Lesson 32 — Matrix Operations"
 slug: "licao-32-operacoes-matrizes"
 categoria: "aulas"
 subcategoria: "ano-1-trim-4"
-descricao: "Sum, scalar multiplication, matrix product. Multiplication as composition of linear transformations."
+descricao: "Addition, scalar multiplication, matrix product. Multiplication as composition of linear transformations."
 ordem: 32
 publicado: true
 tags: ["matrizes", "produto matricial", "ano-1", "trim-4"]
 prerrequisitos: ["licao-31-matrizes"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-usadoEm: ["1.º ano EM (álgebra linear elementar)", "Equiv. Math I japonês cap. matrizes", "Equiv. Klasse 11 alemã (Matrizen)"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["1.º year HS (elementary linear algebra)", "Equiv. Math I Japanese ch. matrices", "Equiv. Grade 11 German (Matrizen)"]
 versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="(AB)_{ij} = \sum_{k=1}^{n} a_{ik} b_{kj}"
-  legenda={<><strong>Matrix product</strong>: the entry <em>(i,j)</em> is the dot product of row <em>i</em> of <em>A</em> with column <em>j</em> of <em>B</em>. Note: <em>AB ≠ BA</em> in general. Multiplication corresponds to <strong>composition</strong> of linear transformations.</>}
-  audioTexto="Matrix product. AB element i j equals the sum from k of one to n, of a sub i k times b sub k j. It is the dot product of row i of A with column j of B. In general AB is different from BA."
+  formula="(AB)_{ij} = \sum_{k=1}^{n} a_{ik}\, b_{kj}"
+  legenda={<><strong>Matrix product:</strong> the element in row <Eq>{`i`}</Eq> and column <Eq>{`j`}</Eq> of <Eq>{`AB`}</Eq> is the sum of products between the elements of row <Eq>{`i`}</Eq> of <Eq>{`A`}</Eq> and the elements of column <Eq>{`j`}</Eq> of <Eq>{`B`}</Eq>. This is only possible when the number of columns of <Eq>{`A`}</Eq> equals the number of rows of <Eq>{`B`}</Eq>. In general, <Eq>{`AB \neq BA`}</Eq>.</>}
+  audioTexto="Matrix product. The element i j of A B is equal to the sum from k equals 1 to n of a sub i k times b sub k j. That is: take row i of A and column j of B, multiply the elements in the same position, and add all the results. In general, A B is different from B A: the order of the matrices matters."
 />
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books that cover this lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://hefferon.net/linearalgebra/" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Hefferon — Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · ch. 3 (Maps Between Spaces) · CC-BY-SA · </span>
+      <em className="text-clube-mist">Matrix operations treated as representations of linear transformations; exercises with rigorous proofs.</em>
+    </li>
+    <li>
+      <a href="http://linear.pugetsound.edu/html/section-MO.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Beezer — A First Course in Linear Algebra (§MO and §MM)
+      </a>
+      <span className="text-clube-mist"> · §MO (operations) and §MM (matrix product) · GNU FDL · </span>
+      <em className="text-clube-mist">Formal definitions with detailed proofs, exercises categorized by property, and excellent coverage of special cases.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/college-algebra-2e/pages/9-5-matrices-and-matrix-operations" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — College Algebra 2e (§9.5)
+      </a>
+      <span className="text-clube-mist"> · §9.5 Matrices and Matrix Operations · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Graduated examples with real business data (revenue, costs, inventory) that illustrate matrix product as a computational tool.</em>
+    </li>
+  </ul>
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="Operations">
+<Porta nivel="formal" titulo="Rigorous definition">
 
-### Sum and difference
+### Matrices — basic types
 
-For matrices of **the same dimension**:
-$$(A + B)_{ij} = a_{ij} + b_{ij}$$
+A **matrix** $A$ of order $m \times n$ is a rectangular table of $mn$ real numbers with $m$ rows and $n$ columns. Its entry in position $(i, j)$ is $a_{ij}$.
 
-### Scalar multiplication
+<Definicao titulo="Special types of matrix">
 
-$$(\alpha A)_{ij} = \alpha \cdot a_{ij}$$
+| Type | Condition | Symbol |
+|---|---|---|
+| Row | $m = 1$ | $[a_{1j}]_{1 \times n}$ |
+| Column | $n = 1$ | $[a_{i1}]_{m \times 1}$ |
+| Square | $m = n$ | $[a_{ij}]_{n \times n}$ |
+| Diagonal | square, $a_{ij}=0$ if $i \neq j$ | $\mathrm{diag}(d_1,\ldots,d_n)$ |
+| Identity | diagonal with $d_i = 1$ | $I_n$ |
+| Zero | all entries $= 0$ | $O$ |
+
+</Definicao>
+
+### Addition and scalar multiplication
+
+<Definicao titulo="Matrix addition">
+
+Defined only for matrices of **the same order** $m \times n$:
+
+$$( A + B )_{ij} = a_{ij} + b_{ij}$$
+
+</Definicao>
+
+<Definicao titulo="Scalar multiplication">
+
+For $c \in \mathbb{R}$ and $A \in M_{m \times n}(\mathbb{R})$:
+
+$$(cA)_{ij} = c \cdot a_{ij}$$
+
+</Definicao>
 
 ### Matrix product
 
-Defined **only when** the number of columns of $A$ = number of rows of $B$:
-$$A_{m \times n} \cdot B_{n \times p} = (AB)_{m \times p}$$
+<Definicao titulo="Product AB">
 
-$$\boxed{(AB)_{ij} = \sum_{k=1}^n a_{ik} b_{kj}}$$
+Defined **only when** the number of columns of $A$ equals the number of rows of $B$. If $A$ is $m \times n$ and $B$ is $n \times p$, then $C = AB$ is $m \times p$:
+
+$$\boxed{(AB)_{ij} = \sum_{k=1}^{n} a_{ik}\, b_{kj}}, \quad i = 1, \ldots, m,\; j = 1, \ldots, p.$$
+
+</Definicao>
+
+> "The matrix product $AB$ is defined when the number of columns of $A$ equals the number of rows of $B$. If $A$ is $m \times n$ and $B$ is $n \times p$, then the product $AB$ is $m \times p$." — [OpenStax College Algebra 2e, §9.5](https://openstax.org/books/college-algebra-2e/pages/9-5-matrices-and-matrix-operations)
+
+> "If $A$ is an $m \times n$ matrix and $B$ is an $n \times p$ matrix, then the product $AB$ is defined and is an $m \times p$ matrix. The $(i,j)$ element of $AB$ is the dot product of the $i$-th row of $A$ with the $j$-th column of $B$." — [Beezer, A First Course in Linear Algebra, §MO](http://linear.pugetsound.edu/html/section-MO.html)
 
 ### Properties
 
-| Operation | Property |
-|---|---|
-| Sum | commutative, associative, identity $O$ |
-| Scalar | distributive: $\alpha(A+B) = \alpha A + \alpha B$ |
-| Product | associative: $(AB)C = A(BC)$ |
-| Product | distributive: $A(B+C) = AB + AC$ |
-| Product | **NOT commutative** in general |
-| Identity | $AI = IA = A$ |
-| Zero | $AO = OA = O$ |
+<Teorema titulo="Properties of matrix operations">
 
-### Why the matrix product is "weird"
+| Operation | Property | Note |
+|---|---|---|
+| Addition | commutative: $A+B = B+A$ | always |
+| Addition | associative: $(A+B)+C = A+(B+C)$ | always |
+| Addition | identity: $A + O = A$ | $O$ is the zero matrix |
+| Scalar | $c(A+B) = cA + cB$ | distributive |
+| Scalar | $(c+d)A = cA + dA$ | distributive |
+| Product | associative: $(AB)C = A(BC)$ | always |
+| Product | distributive: $A(B+C) = AB + AC$ | always |
+| Product | **NOT commutative**: $AB \neq BA$ in general | critical rule |
+| Product | identity: $AI_n = I_m A = A$ | for $A \in M_{m \times n}$ |
+| Product | transpose: $(AB)^T = B^T A^T$ | order reverses |
 
-Because it corresponds to **composition** of linear transformations: applying first $B$ and then $A$ is the same as applying $AB$. Order matters because composition matters.
+</Teorema>
 
-### Powers
+### Non-commutativity and composition
 
-$A^n = A \cdot A \cdots A$ ($n$ times), $A^0 = I$. Defined only for square matrices.
+The product $AB$ corresponds to applying transformation $B$ first and then $A$. Since function composition depends on order, the product does not commute.
+
+Canonical example: <Eq>{`A = \\begin{pmatrix} 0 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq>, <Eq>{`B = \\begin{pmatrix} 0 & 0 \\\\ 1 & 0 \\end{pmatrix}`}</Eq>. Then <Eq>{`AB = \\begin{pmatrix} 1 & 0 \\\\ 0 & 0 \\end{pmatrix}`}</Eq> and <Eq>{`BA = \\begin{pmatrix} 0 & 0 \\\\ 0 & 1 \\end{pmatrix}`}</Eq>, which are different.
+
+<Insight>
+
+Non-commutativity is not a defect — it is the precise expression of the fact that **the order of transformations matters**. Rotating an object and then scaling it produces a different result than scaling it and then rotating. Matrix product captures this exactly.
+
+</Insight>
 
 </Porta>
 
 <Porta nivel="5" titulo="For a 5-year-old">
 
-Imagine two egg cartons of **the same size**. To **add**, just add egg by egg, slot by slot.
+Imagine you have an **egg carton** with two levels and three columns. There are six spaces total.
 
-To **multiply everyone by 3**, multiply each egg by 3 — they get three times bigger.
+To **add** two identical cartons, you pair egg with egg: the corner space with the corner space, the middle one with the middle one. Easy.
 
-But there's a **magic trick** called "multiplying boxes". It's quite different: a row of the first meets a column of the second, they mix, and that gives a new number. It's **harder**, but it's what computers do millions of times per second.
+To **multiply everything by 3**, you replace each egg with three eggs. Each space becomes three times larger.
+
+But there is a **special trick** called "matrix product" that is more complicated. It is as if you needed to pair the rows of one carton with the columns of another carton, multiply pair by pair, and add everything up. The computer does this trick millions of times per second to display images in video games.
 
 </Porta>
 
 <Porta nivel="10" titulo="For a 10-year-old">
 
-**Sum and scalar are easy**:
-- Sum: term by term (need the same size).
-- Scalar: multiply everything by the number.
+A **matrix** is a table of numbers organized in rows and columns. Like a spreadsheet.
 
-**Matrix product** is the trick. Imagine:
-- You have **prices per product** (matrix $A$).
-- You have **quantities per store** (matrix $B$).
-- You want **revenue per store**: product $AB$!
+**Addition is easy**: add number to number in the same position. The two matrices must be the same size.
 
-Each entry of $AB$ comes from "row times column": take row $i$ of $A$, take column $j$ of $B$, multiply pair by pair, and sum it all. That's $(AB)_{ij}$.
+**Multiplying by a number is also easy**: multiply each number in the table by the same value.
 
-**Crucial rule**: to multiply $A \cdot B$, the number of columns of $A$ must equal the number of rows of $B$. Otherwise it doesn't work.
+**Matrix product** is the difficult trick. Imagine:
+- A table with **prices** of 3 products in US dollars (row: P1 = US$10, P2 = US$25, P3 = US$40).
+- A table with **quantities sold** by store and by product.
+- You want to know the **total revenue** by store: that is the matrix product.
 
-**Strange thing**: $AB$ is rarely equal to $BA$! Order matters.
+To calculate each number in the result, you take an entire row of the first table and an entire column of the second, multiply the elements one by one, and add everything up.
+
+**Dimension rule**: to multiply $A \times B$, the number of columns of $A$ must equal the number of rows of $B$.
+
+**Important warning**: $A \times B$ is almost never equal to $B \times A$. Order matters a lot.
 
 </Porta>
 
 <Porta nivel="15" titulo="For a 15-year-old teen">
 
-**Sum**: term by term. $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} + \begin{pmatrix} 5 & 6 \\ 7 & 8 \end{pmatrix} = \begin{pmatrix} 6 & 8 \\ 10 & 12 \end{pmatrix}$.
+Three distinct operations. The first two are straightforward; the third requires care.
 
-**Scalar**: multiply every entry. $3 \cdot \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} = \begin{pmatrix} 3 & 6 \\ 9 & 12 \end{pmatrix}$.
+**Addition** (same dimensions required):
+$$\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} + \begin{pmatrix} 5 & -1 \\ 0 & 2 \end{pmatrix} = \begin{pmatrix} 6 & 1 \\ 3 & 6 \end{pmatrix}$$
 
-**Product** is more complicated: row × column. To multiply $A \cdot B$, the number of columns of $A$ must equal the number of rows of $B$.
+**Scalar** (multiplies each entry):
+$$3 \cdot \begin{pmatrix} 2 & -1 \\ 0 & 4 \end{pmatrix} = \begin{pmatrix} 6 & -3 \\ 0 & 12 \end{pmatrix}$$
 
-Step-by-step example: $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \cdot \begin{pmatrix} 5 \\ 6 \end{pmatrix}$.
+**Matrix product** — row times column, summed:
 
-- Row 1 × column 1: $1 \cdot 5 + 2 \cdot 6 = 17$.
-- Row 2 × column 1: $3 \cdot 5 + 4 \cdot 6 = 39$.
+To compute <Eq>{`\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix} \\cdot \\begin{pmatrix} 5 & 6 \\\\ 7 & 8 \\end{pmatrix}`}</Eq>:
 
-Result: $\begin{pmatrix} 17 \\ 39 \end{pmatrix}$.
+- $(AB)_{11}$: row 1 of $A$ · column 1 of $B$: $1 \cdot 5 + 2 \cdot 7 = 19$
+- $(AB)_{12}$: row 1 of $A$ · column 2 of $B$: $1 \cdot 6 + 2 \cdot 8 = 22$
+- $(AB)_{21}$: row 2 of $A$ · column 1 of $B$: $3 \cdot 5 + 4 \cdot 7 = 43$
+- $(AB)_{22}$: row 2 of $A$ · column 2 of $B$: $3 \cdot 6 + 4 \cdot 8 = 50$
 
-**Beware**: $AB$ rarely equals $BA$. **Order matters.** Try $A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}$ and $B = \begin{pmatrix} 0 & 0 \\ 1 & 0 \end{pmatrix}$ — you'll see that $AB \neq BA$ and even $AB$ and $BA$ have different traces.
+Result: <Eq>{`\\begin{pmatrix} 19 & 22 \\\\ 43 & 50 \\end{pmatrix}`}</Eq>.
 
-**Identity** is like the "1": $AI = IA = A$.
+**Dimension rule**: $A_{m \times n} \cdot B_{n \times p} = C_{m \times p}$. The inner dimensions ($n$) must match; the outer dimensions ($m$ and $p$) form the result's dimension.
 
-**Why all this?** Because **composition** of linear transformations — rotations, reflections, projections, scalings — is exactly the matrix product. You're rotating + scaling + projecting all at once.
+**Non-commutativity**: swap $A$ and $B$ and compute $BA$. You get a different result. This is not a bug — it is a fundamental property.
+
+**Identity**: $A \cdot I = I \cdot A = A$ for any square $A$. The identity $I_n$ has 1's on the diagonal and 0's elsewhere.
+
+<Insight>
+Why is the matrix product "row times column"? Because it represents the **composition** of linear transformations. If $B$ first transforms a vector and $A$ then transforms the result, then $AB$ is the unique transformation that does everything at once. Rotation followed by scaling is different from scaling followed by rotation — hence $AB \neq BA$.
+</Insight>
 
 </Porta>
 
 <Porta nivel="25" titulo="For an engineering student">
 
-Matrix operations are primitives of **computational linear algebra**. In BLAS:
-- **Level 1** (vector-vector): sum, scalar, inner product.
-- **Level 2** (matrix-vector): $A\mathbf x$ — $O(mn)$.
-- **Level 3** (matrix-matrix): $AB$ — $O(mnp)$.
+Matrix operations are primitives of **computational linear algebra** (LAPACK/BLAS). The cost hierarchy:
 
-### Proof: product = composition
+- **Addition** $A + B$: $O(mn)$ flops — trivial.
+- **Scalar** $cA$: $O(mn)$ flops — trivial.
+- **Product** $A_{m \times n} B_{n \times p}$: $O(mnp)$ flops — dominates in deep networks.
 
-Let $T_A: \mathbb R^n \to \mathbb R^m$ and $T_B: \mathbb R^p \to \mathbb R^n$ be linear maps with matrices $A, B$. Then $T_A \circ T_B: \mathbb R^p \to \mathbb R^m$ has matrix $AB$. This explains:
+### Product = composition of linear transformations
 
-- **Non-commutativity**: a rotation $R_\theta$ followed by a reflection $S$ differs from $S$ followed by $R_\theta$.
-- **Associativity**: composition of functions is associative.
+Let $T_B: \mathbb{R}^p \to \mathbb{R}^n$ and $T_A: \mathbb{R}^n \to \mathbb{R}^m$ be linear with matrices $B$ and $A$. Then $T_A \circ T_B: \mathbb{R}^p \to \mathbb{R}^m$ has matrix $AB$. Proof:
 
-### Computational cost
+$$(T_A \circ T_B)(\mathbf{x}) = T_A(B\mathbf{x}) = A(B\mathbf{x}) = (AB)\mathbf{x}.$$
 
-- Sum: $O(mn)$ flops.
-- Product $A_{m\times n} B_{n\times p}$: $O(mnp)$ flops.
-- **Strassen**: $O(n^{2.807})$ — only for large $n$, with overhead.
-- **Coppersmith-Winograd and variants**: theoretical $O(n^{2.37})$, rarely implemented.
+This explains non-commutativity (function composition does not commute in general) and associativity (composition is associative).
 
-### Numerical stability
+### Fundamental cross-domain identities
 
-Relative error of $AB$: $\|AB - \widehat{AB}\|/\|AB\| \lesssim n \epsilon_\text{mach}$ — grows with $n$. In float32 vs float64, it matters a lot in deep networks (mixed precision).
+- **Control**: $\dot{\mathbf{x}} = A\mathbf{x} + B\mathbf{u}$ — state-space equation with sum and matrix product.
+- **ML**: forward pass $\mathbf{z}^{(l)} = W^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}$ — GEMM + bias per layer.
+- **Graphics**: homogeneous transformation $4 \times 4$ combines rotation, scale, translation.
+- **Statistics**: covariance $\Sigma = E[(\mathbf{x}-\mu)(\mathbf{x}-\mu)^T]$ — outer product of vectors.
 
-### Cross-domain fundamental identities
+### Complexity and algorithms
 
-- **Engineering**: $\dot{\mathbf x} = A\mathbf x + B\mathbf u$ — sum of matrix terms is the base equation of control.
-- **ML**: forward pass: $\mathbf z = W\mathbf x + \mathbf b$, $\mathbf a = \sigma(\mathbf z)$. Each layer is GEMM + non-linearity.
-- **Quantum physics**: commutator $[A, B] = AB - BA$ measures non-commutativity — Heisenberg uncertainty relation.
-- **Statistics**: $\text{Cov}(X) = E[XX^T] - \mu\mu^T$ — sum and matrix product.
+| Algorithm | Cost | Practical use |
+|---|---|---|
+| Naïve (3 loops) | $O(n^3)$ | $n < 200$ |
+| Strassen | $O(n^{2.807})$ | $n > 1\,000$ with overhead |
+| BLAS Level 3 (DGEMM) | $O(n^3)$ with small constant | industry standard |
+| Tensor Cores (NVIDIA) | mixed FP16/FP32 | generative AI |
 
-### Idempotent, nilpotent, involution
+### Special classes and powers
 
-- **Idempotent** ($A^2 = A$): projections.
-- **Nilpotent** ($A^k = 0$): strictly triangular matrices, Jordan blocks.
-- **Involution** ($A^2 = I$): reflections.
+- **Idempotent** ($A^2 = A$): projection matrices.
+- **Nilpotent** ($A^k = O$ for some $k$): Jordan blocks.
+- **Involution** ($A^2 = I$): isometric reflections.
+
+### Transpose rule
+
+$(AB)^T = B^T A^T$ — order reverses. Essential in backpropagation (gradient of $W\mathbf{x}$ with respect to $W$ is $\mathbf{x}^T$).
 
 </Porta>
 
 <Porta nivel="40" titulo="For a senior professional">
 
-Matrix operations are instances of the **associative algebra** structure on $M_n$, and the product is an instance of **morphism composition** in $\text{Hom}(V, W)$ in the category $\textbf{Vect}$.
+The pair $(M_n(\mathbb{R}), +, \cdot)$ is a **unitary associative $\mathbb{R}$-algebra of dimension $n^2$**, non-commutative for $n \geq 2$. It is isomorphic to $\mathrm{End}(\mathbb{R}^n)$ — the ring of linear endomorphisms.
 
 ### Algebraic structure
 
-$(M_n(\mathbb R), +, \cdot)$ is an **algebra**:
-- $(M_n, +)$ is an abelian group.
-- $(M_n, \cdot)$ is a monoid with identity $I_n$, **non-commutative** for $n \geq 2$.
-- $\cdot$ distributes over $+$.
-
-There are **zero divisors**: $A, B \neq 0$ with $AB = 0$. So $M_n$ is not an integral domain. Example: $\begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix} \begin{pmatrix} 0 & 0 \\ 0 & 1 \end{pmatrix} = O$.
-
-### Wolfram tour
-
-```mathematica
-A = {{1, 2}, {3, 4}}; B = {{0, 1}, {1, 0}};
-A.B - B.A  (* commutator *)
-MatrixPower[A, 5]
-```
+- $(M_n, +)$ is a free abelian group over $\mathbb{R}$-module.
+- $(M_n, \cdot)$ is a monoid with identity $I_n$, **non-commutative**.
+- $M_n$ has **zero divisors**: <Eq>{`\\begin{pmatrix} 1 & 0 \\\\ 0 & 0 \\end{pmatrix}\\begin{pmatrix} 0 & 0 \\\\ 0 & 1 \\end{pmatrix} = O`}</Eq>. Thus it is not an integral domain.
+- The group $GL_n(\mathbb{R}) = \{A \in M_n : \det A \neq 0\}$ is the group of invertible matrices.
 
 ### GEMM on modern hardware
 
-- **Tensor cores** (NVIDIA Volta+) execute mixed-precision GEMM (FP16 input, FP32 accumulator) in a single instruction. All modern generative AI depends on this.
-- **Google's TPU**: systolic array — multiplies $128 \times 128$ blocks per cycle.
-- **Roofline model**: many GEMMs are compute-bound; some memory-bound — critical distinction in optimization.
+- **Tensor Cores** (Volta+): GEMM in FP16 accumulated in FP32; $\sim 8\times$ speedup over FP64 naive.
+- **TPU** (Google): systolic array $128 \times 128$ — each cycle advances one dot product.
+- **Roofline model**: dense GEMM is compute-bound for large matrices; attention is memory-bound for short sequences.
 
-### Quant/finance
+### Finance and PDE
 
-PDE pricing: discretization yields $\mathbf u^{n+1} = (I - \tau A)^{-1}(I + \tau B) \mathbf u^n$ (Crank-Nicolson). Each step is two matrix-vector products + one linear solve.
+Crank-Nicolson method for Black-Scholes:
 
-### Categorical generalizations
+$$\mathbf{u}^{n+1} = (I - \tfrac{\tau}{2}A)^{-1}(I + \tfrac{\tau}{2}A)\mathbf{u}^n.$$
 
-- **$\text{Hom}(V, W)$** with sum (pointwise) and composition is an **operator algebra**.
-- In **infinite dim**: bounded operators on Hilbert form a $C^*$-algebra.
-- **Dual numbers** $a + b\epsilon$ ($\epsilon^2 = 0$) with matrix $\begin{pmatrix} a & b \\ 0 & a \end{pmatrix}$ — used in forward-mode autodiff.
+Each time step requires product $A\mathbf{u}^n$ (GEMV) and tridiagonal solve — operations in $M_n$.
 
 ### Current research
 
-- **Sub-cubic matrix multiplication**: $\omega < 2.37$ (Strassen-improved, Strassen-like) — open whether $\omega = 2$.
-- **Sparse linear algebra**: GraphBLAS standardizes operations over semirings (shortest paths = product over $(\min, +)$).
+- Lower bound on complexity of matrix product: open whether $\omega = 2$ is achievable.
+- **DeepMind AlphaTensor** (2022): discovered matrix product algorithms with fewer scalar multiplications than Strassen in certain fields.
+- **GraphBLAS**: generalizes GEMM to semirings (e.g., $(\min, +)$ for shortest paths).
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Practical application">
+<Porta nivel="pratica" titulo="Practice — 3 scenarios with US data">
 
-**Recipe: how to combine matrix operations fluently.**
+### Scenario 1: Production cost in a textile factory
 
-1. **Check dimensions before multiplying**. Dimension errors are bug #1 in numerical code.
-2. **Use optimized libraries** (NumPy/SciPy/MATLAB), never implement triple-loop kernels in production.
-3. **Vectorize** — broadcasting + ufuncs in NumPy.
+A factory in North Carolina produces three shirt models (M1, M2, M3). The **unit costs** of raw material and labor are:
 
-### NumPy recipe
+$$C = \begin{pmatrix} 12 & 8 \\ 18 & 11 \\ 25 & 15 \end{pmatrix} \text{ (rows = models, columns = [raw material, labor])}$$
 
-```python
-import numpy as np
+In April, production at two facilities (CA and NC) was:
 
-A = np.array([[1, 2], [3, 4]])
-B = np.array([[5, 6], [7, 8]])
+$$Q = \begin{pmatrix} 300 & 150 & 80 \\ 200 & 400 & 60 \end{pmatrix} \text{ (rows = facilities, columns = models)}$$
 
-# Sum and scalar
-print(A + B)
-print(3 * A)
+The **total cost per facility and per category** is $QC$ (dimension $2 \times 2$). Example: raw material cost for CA facility = $300(12) + 150(18) + 80(25) = 3{,}600 + 2{,}700 + 2{,}000 = 8{,}300$ dollars.
 
-# Matrix product — use @ (Python 3.5+)
-print(A @ B)
-print(np.matmul(A, B))    # equivalent
+Matrix product $QC$ automatically gives the costs for all facilities in all categories — without repeating calculations row by row.
 
-# CAUTION: A * B is HADAMARD (element-wise), NOT matrix product!
-print(A * B)              # different from A @ B
+### Scenario 2: Markov chain for customer churn (digital bank)
 
-# Power
-print(np.linalg.matrix_power(A, 5))
+A digital bank models client transitions between two states: **Active** (A) and **Inactive** (I). The monthly transition matrix is:
 
-# Identity and zero
-I = np.eye(2)
-O = np.zeros((2, 2))
-print(A @ I)              # == A
-```
+$$P = \begin{pmatrix} 0.92 & 0.08 \\ 0.15 & 0.85 \end{pmatrix}$$
 
-### Symbolic SymPy
+(row 1 = starting from A: 92% stays active, 8% becomes inactive; row 2 = starting from I: 15% reactivates, 85% stays inactive.)
 
-```python
-import sympy as sp
-A = sp.Matrix([[1, 2], [3, 4]])
-B = sp.Matrix([[5, 6], [7, 8]])
-print(A * B)              # matrix product in SymPy
-print((A * B).T == B.T * A.T)
-```
+If today the distribution is $\pi_0 = (0.70,\; 0.30)^T$ (70% active), after two months:
 
-### Non-commutativity check
+$$\pi_2 = P^2 \pi_0$$
 
-```python
-def commute(A, B):
-    return np.allclose(A @ B, B @ A)
+Compute $P^2$ and then $P^2 \pi_0$ — the result is the forecast distribution after two months. This matrix power structure appears in LTV (lifetime value) models for clients at US digital banks like Square, Stripe, and Affirm.
 
-R = np.array([[0, -1], [1, 0]])     # 90° rotation
-S = np.array([[1, 0], [0, -1]])     # reflection across x-axis
-print(commute(R, S))                # False — order matters
-```
+### Scenario 3: Geometric transformation in computer graphics
 
-### Common pitfalls
+In game engines (Unity, Godot, Blender — all used by US studios), a rotation followed by scaling is represented by matrix composition:
 
-- **`*` is Hadamard in NumPy, not matrix product**. Always use `@`.
-- **Shape `(n,)` vs `(n,1)`**: 1D vector vs column. `A @ v` works with both but the result may surprise you.
-- **`np.dot` for 2D is matrix; for 1D is inner product**. Prefer `@`.
-- **`A**2` in NumPy is element-wise!** Use `np.linalg.matrix_power(A, 2)` or `A @ A`.
+$$M = S \cdot R(\theta) = \begin{pmatrix} s & 0 \\ 0 & s \end{pmatrix} \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix} = \begin{pmatrix} s\cos\theta & -s\sin\theta \\ s\sin\theta & s\cos\theta \end{pmatrix}$$
 
-### Essential task
+For $\theta = 45°$ and $s = 2$: <Eq>{`M = \\begin{pmatrix} \\sqrt{2} & -\\sqrt{2} \\\\ \\sqrt{2} & \\sqrt{2} \\end{pmatrix}`}</Eq>.
 
-Solve every exercise. Build **muscle memory** for matrix multiplication — it pays interest for the rest of your career.
+Applying to vertex $(1, 0)^T$: result = $(\sqrt{2},\; \sqrt{2})^T$ — the vertex was rotated 45° and doubled in size, in **a single matrix product**, which is more efficient than applying transformations separately.
 
 </Porta>
 
 </DuasPortas>
 
+## Worked Examples
+
+<Exemplo titulo="Matrix addition and scalar multiplication" numero="1">
+
+**Problem.** Given <Eq>{`A = \\begin{pmatrix} 3 & -1 \\\\ 0 & 4 \\end{pmatrix}`}</Eq> and <Eq>{`B = \\begin{pmatrix} 2 & 5 \\\\ -3 & 1 \\end{pmatrix}`}</Eq>, compute $A + B$ and $2A - B$.
+
+**Strategy.** Addition and subtraction of matrices are entry-by-entry operations. Scalar multiplication multiplies each entry. We always verify that dimensions match — here both are $2 \times 2$, so the operations are defined.
+
+**Solution.**
+
+Step 1 — Addition:
+$$(A + B)_{ij} = a_{ij} + b_{ij}$$
+$$A + B = \begin{pmatrix} 3+2 & -1+5 \\ 0+(-3) & 4+1 \end{pmatrix} = \begin{pmatrix} 5 & 4 \\ -3 & 5 \end{pmatrix}$$
+
+Step 2 — Scalar on $A$:
+$$2A = \begin{pmatrix} 6 & -2 \\ 0 & 8 \end{pmatrix}$$
+
+Step 3 — Difference $2A - B$:
+$$2A - B = \begin{pmatrix} 6-2 & -2-5 \\ 0-(-3) & 8-1 \end{pmatrix} = \begin{pmatrix} 4 & -7 \\ 3 & 7 \end{pmatrix}$$
+
+**Verification.** $(2A - B)_{11} = 2 \cdot 3 - 2 = 4$. Correct.
+
+**Source.** [OpenStax — College Algebra 2e §9.5](https://openstax.org/books/college-algebra-2e/pages/9-5-matrices-and-matrix-operations) — CC-BY 4.0 license.
+</Exemplo>
+
+<Exemplo titulo="2×2 matrix product and non-commutativity" numero="2">
+
+**Problem.** Compute $AB$ and $BA$ for <Eq>{`A = \\begin{pmatrix} 1 & 3 \\\\ 2 & 0 \\end{pmatrix}`}</Eq> and <Eq>{`B = \\begin{pmatrix} -1 & 2 \\\\ 4 & 1 \\end{pmatrix}`}</Eq>.
+
+**Strategy.** Each entry $(AB)_{ij}$ is the dot product of row $i$ of $A$ with column $j$ of $B$. We will compute $AB$ and then $BA$ to explicitly demonstrate non-commutativity.
+
+**Solution.**
+
+Product $AB$:
+
+$$(AB)_{11} = 1 \cdot (-1) + 3 \cdot 4 = -1 + 12 = 11$$
+$$(AB)_{12} = 1 \cdot 2 + 3 \cdot 1 = 2 + 3 = 5$$
+$$(AB)_{21} = 2 \cdot (-1) + 0 \cdot 4 = -2 + 0 = -2$$
+$$(AB)_{22} = 2 \cdot 2 + 0 \cdot 1 = 4 + 0 = 4$$
+
+$$AB = \begin{pmatrix} 11 & 5 \\ -2 & 4 \end{pmatrix}$$
+
+Product $BA$:
+
+$$(BA)_{11} = (-1) \cdot 1 + 2 \cdot 2 = -1 + 4 = 3$$
+$$(BA)_{12} = (-1) \cdot 3 + 2 \cdot 0 = -3 + 0 = -3$$
+$$(BA)_{21} = 4 \cdot 1 + 1 \cdot 2 = 4 + 2 = 6$$
+$$(BA)_{22} = 4 \cdot 3 + 1 \cdot 0 = 12 + 0 = 12$$
+
+$$BA = \begin{pmatrix} 3 & -3 \\ 6 & 12 \end{pmatrix}$$
+
+**Conclusion.** <Eq>{`AB = \\begin{pmatrix} 11 & 5 \\\\ -2 & 4 \\end{pmatrix} \\neq \\begin{pmatrix} 3 & -3 \\\\ 6 & 12 \\end{pmatrix} = BA`}</Eq>. Matrix multiplication is not commutative.
+
+**Source.** [OpenStax — College Algebra 2e §9.5](https://openstax.org/books/college-algebra-2e/pages/9-5-matrices-and-matrix-operations) — CC-BY 4.0 license.
+</Exemplo>
+
+<Exemplo titulo="Matrix product with distinct dimensions — 2x3 by 3x2" numero="3">
+
+**Problem.** Compute $AB$ for <Eq>{`A = \\begin{pmatrix} 1 & 0 & 2 \\\\ -1 & 3 & 1 \\end{pmatrix}`}</Eq> (order $2 \times 3$) and <Eq>{`B = \\begin{pmatrix} 3 & 1 \\\\ 2 & -1 \\\\ 0 & 4 \\end{pmatrix}`}</Eq> (order $3 \times 2$).
+
+**Strategy.** We verify the dimension rule: columns of $A$ = 3 = rows of $B$. The result $AB$ will have dimension $2 \times 2$. We compute each of the four entries via dot product of row by column.
+
+**Solution.**
+
+Step 1 — Verification of dimensions: $A$ is $2 \times 3$ and $B$ is $3 \times 2$. The inner dimensions match ($n = 3$). The product $AB$ will be $2 \times 2$.
+
+Step 2 — Computing entries:
+
+$$(AB)_{11} = 1 \cdot 3 + 0 \cdot 2 + 2 \cdot 0 = 3 + 0 + 0 = 3$$
+$$(AB)_{12} = 1 \cdot 1 + 0 \cdot (-1) + 2 \cdot 4 = 1 + 0 + 8 = 9$$
+$$(AB)_{21} = (-1) \cdot 3 + 3 \cdot 2 + 1 \cdot 0 = -3 + 6 + 0 = 3$$
+$$(AB)_{22} = (-1) \cdot 1 + 3 \cdot (-1) + 1 \cdot 4 = -1 - 3 + 4 = 0$$
+
+$$AB = \begin{pmatrix} 3 & 9 \\ 3 & 0 \end{pmatrix}$$
+
+Step 3 — Note that $BA$ would be $3 \times 3$ (defined), but $AB$ and $BA$ have different dimensions — they are completely distinct.
+
+**Verification.** $(AB)_{11} = $ row 1 of $A$ · column 1 of $B$ $= (1)(3) + (0)(2) + (2)(0) = 3$. Correct.
+
+**Source.** [Beezer — A First Course in Linear Algebra, §MO](http://linear.pugetsound.edu/html/section-MO.html) — GNU FDL license.
+</Exemplo>
+
+<Exemplo titulo="3×3 matrix product" numero="4">
+
+**Problem.** Compute $AB$ for <Eq>{`A = \\begin{pmatrix} 2 & 0 & 1 \\\\ 1 & 3 & -1 \\\\ 0 & 2 & 4 \\end{pmatrix}`}</Eq> and <Eq>{`B = \\begin{pmatrix} 1 & 2 & 0 \\\\ 0 & 1 & 3 \\\\ 2 & -1 & 1 \\end{pmatrix}`}</Eq>.
+
+**Strategy.** Both are $3 \times 3$, so $AB$ is also $3 \times 3$ — nine entries to compute. We proceed row by row of $A$, column by column of $B$.
+
+**Solution.**
+
+Row 1 of $A$ = $(2, 0, 1)$:
+
+$$(AB)_{11} = 2(1) + 0(0) + 1(2) = 4$$
+$$(AB)_{12} = 2(2) + 0(1) + 1(-1) = 3$$
+$$(AB)_{13} = 2(0) + 0(3) + 1(1) = 1$$
+
+Row 2 of $A$ = $(1, 3, -1)$:
+
+$$(AB)_{21} = 1(1) + 3(0) + (-1)(2) = -1$$
+$$(AB)_{22} = 1(2) + 3(1) + (-1)(-1) = 6$$
+$$(AB)_{23} = 1(0) + 3(3) + (-1)(1) = 8$$
+
+Row 3 of $A$ = $(0, 2, 4)$:
+
+$$(AB)_{31} = 0(1) + 2(0) + 4(2) = 8$$
+$$(AB)_{32} = 0(2) + 2(1) + 4(-1) = -2$$
+$$(AB)_{33} = 0(0) + 2(3) + 4(1) = 10$$
+
+$$AB = \begin{pmatrix} 4 & 3 & 1 \\ -1 & 6 & 8 \\ 8 & -2 & 10 \end{pmatrix}$$
+
+**Verification.** $(AB)_{22} = 1(2) + 3(1) + (-1)(-1) = 2 + 3 + 1 = 6$. Correct.
+
+**Source.** [Beezer — A First Course in Linear Algebra, §MO](http://linear.pugetsound.edu/html/section-MO.html) — GNU FDL license.
+</Exemplo>
+
+<Exemplo titulo="Total revenue by region via matrix product (modeling)" numero="5">
+
+**Problem.** A company sells three products (P1, P2, P3) in two regions (South, North). The **unit price** matrix is <Eq>{`P = \\begin{pmatrix} 10 & 25 & 40 \\end{pmatrix}`}</Eq> (row vector, in US$). The **quantities sold** matrix by region is:
+
+$$Q = \begin{pmatrix} 200 & 150 & 80 \\ 120 & 300 & 50 \end{pmatrix}$$
+
+(rows = regions South/North, columns = products P1/P2/P3). Compute the **total revenue by region**.
+
+**Strategy.** Revenue for a region is $\sum_j p_j \cdot q_{ij}$. This is exactly the matrix product $R = Q \cdot P^T$, where $P^T$ is the column vector of prices. The result $R$ will be a $2 \times 1$ vector — revenue per region.
+
+**Solution.**
+
+Step 1 — Organization: $Q$ is $2 \times 3$, $P^T$ is $3 \times 1$. Thus $R = Q P^T$ will be $2 \times 1$.
+
+$$P^T = \begin{pmatrix} 10 \\ 25 \\ 40 \end{pmatrix}$$
+
+Step 2 — Revenue for South region (row 1 of $Q$):
+
+$$R_1 = 200 \cdot 10 + 150 \cdot 25 + 80 \cdot 40 = 2{,}000 + 3{,}750 + 3{,}200 = 8{,}950$$
+
+Step 3 — Revenue for North region (row 2 of $Q$):
+
+$$R_2 = 120 \cdot 10 + 300 \cdot 25 + 50 \cdot 40 = 1{,}200 + 7{,}500 + 2{,}000 = 10{,}700$$
+
+$$R = QP^T = \begin{pmatrix} 8{,}950 \\ 10{,}700 \end{pmatrix} \text{ (in US dollars)}$$
+
+**Interpretation.** North region generates US$10,700 and South region generates US$8,950. Matrix product automates the calculation for any number of regions or products.
+
+**Source.** [OpenStax — College Algebra 2e §9.5](https://openstax.org/books/college-algebra-2e/pages/9-5-matrices-and-matrix-operations) — CC-BY 4.0 license.
+</Exemplo>
+
 <ListaExercicios seed="licao-32">
 
-### Block A — Basic operations (32.1 to 32.20)
+<Exercicio numero="32.1" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes, if the matrices have the same number of rows and columns.", correta: true },
+    { texto: "Yes, regardless of dimensions." },
+    { texto: "No, it is never possible to add matrices." },
+    { texto: "Only if one of them is a scalar." },
+  ]}
+  solucao={<>Addition is only defined when two matrices have exactly the same number of rows and columns.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="32.1" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} + \begin{pmatrix} 5 & -1 \\ 0 & 2 \end{pmatrix}$. (Ans: $\begin{pmatrix} 6 & 1 \\ 3 & 6 \end{pmatrix}$.)</Exercicio>
-<Exercicio numero="32.2" dificuldade="aplicacao">Compute $3 \cdot \begin{pmatrix} 2 & 1 \\ -1 & 0 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="32.3" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \cdot \begin{pmatrix} 5 & 6 \\ 7 & 8 \end{pmatrix}$. (Ans: $\begin{pmatrix} 19 & 22 \\ 43 & 50 \end{pmatrix}$.)</Exercicio>
-<Exercicio numero="32.4" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \cdot \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$ — what do you get?</Exercicio>
-<Exercicio numero="32.5" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \cdot \begin{pmatrix} 0 & 0 \\ 0 & 0 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="32.6" dificuldade="aplicacao">Multiply a $2 \times 3$ matrix by a $3 \times 2$ — what is the result's dimension? (Ans: $2 \times 2$.)</Exercicio>
-<Exercicio numero="32.7" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{pmatrix} \cdot \begin{pmatrix} 7 \\ 8 \\ 9 \end{pmatrix}$. (Ans: $\begin{pmatrix} 50 \\ 122 \end{pmatrix}$.)</Exercicio>
-<Exercicio numero="32.8" dificuldade="aplicacao">Verify $AB \neq BA$ for $A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}$, $B = \begin{pmatrix} 1 & 0 \\ 1 & 1 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="32.9" dificuldade="aplicacao">$A^2$ for $A = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$. (Ans: $I$.)</Exercicio>
-<Exercicio numero="32.10" dificuldade="aplicacao">Compute $(A + B)^2$ and $(A^2 + 2AB + B^2)$. When do they coincide? (When $AB = BA$.)</Exercicio>
-<Exercicio numero="32.11" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}^2$.</Exercicio>
-<Exercicio numero="32.12" dificuldade="aplicacao">Multiply $\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$ by $\begin{pmatrix} 1 \\ 0 \end{pmatrix}$. (Ans: $(\cos\theta, \sin\theta)^T$.)</Exercicio>
-<Exercicio numero="32.13" dificuldade="aplicacao">Compute the product $\begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix} \cdot \begin{pmatrix} 0 & 0 \\ 0 & 1 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="32.14" dificuldade="aplicacao">Verify distributivity: $A(B+C) = AB + AC$ for $A = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$, $B, C$ of your choice.</Exercicio>
-<Exercicio numero="32.15" dificuldade="aplicacao">For $A_{2 \times 3}$ and $B_{3 \times 4}$, dimension of $AB$? And $BA$? ($BA$ does not exist.)</Exercicio>
-<Exercicio numero="32.16" dificuldade="aplicacao">Compute $\begin{pmatrix} 2 & 0 \\ 0 & 3 \end{pmatrix} \cdot \begin{pmatrix} 4 \\ 5 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="32.17" dificuldade="aplicacao">Show that the product of two diagonal matrices is diagonal — compute explicitly.</Exercicio>
-<Exercicio numero="32.18" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}^3$.</Exercicio>
-<Exercicio numero="32.19" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}^n$ — find a general formula in terms of $n$. (Ans: $\begin{pmatrix} 1 & n \\ 0 & 1 \end{pmatrix}$.)</Exercicio>
-<Exercicio numero="32.20" dificuldade="aplicacao">For which $A_{2\times 2}$ does $A^2 = A$ hold? (Idempotent — projection.) Give two examples.</Exercicio>
+Can we add any two matrices? If yes, explain why; if no, explain why not and give an example of two matrices that cannot be added.
+</Exercicio>
 
-### Block B — Composition and properties (32.21 to 32.32)
+<Exercicio numero="32.2" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes, whenever the number of columns of the first matches the number of rows of the second.", correta: true },
+    { texto: "Yes, regardless of dimensions." },
+    { texto: "No, it is never possible to multiply a column by a row." },
+    { texto: "Only if both are square." },
+  ]}
+  solucao={<>Column-row multiplication only works when the column has one entry (1×k) and the row has k entries (k×1).</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="32.21" dificuldade="aplicacao">Compute $\begin{pmatrix} 2 & -1 \\ 3 & 4 \end{pmatrix} \begin{pmatrix} 1 & 0 \\ -1 & 2 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="32.22" dificuldade="aplicacao">Compute $\begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix} \begin{pmatrix} 4 & 5 & 6 \end{pmatrix}$ — outer product, dimension $3 \times 3$.</Exercicio>
-<Exercicio numero="32.23" dificuldade="aplicacao">Compute $\begin{pmatrix} 4 & 5 & 6 \end{pmatrix} \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix}$ — inner product, dimension $1 \times 1$. (Ans: $32$.)</Exercicio>
-<Exercicio numero="32.24" dificuldade="aplicacao">Compute $A^4$ for $A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$. (Ans: $I$.)</Exercicio>
-<Exercicio numero="32.25" dificuldade="aplicacao">Find $A^2$ for $A = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 0 \end{pmatrix}$. And $A^3$? (Nilpotent.)</Exercicio>
-<Exercicio numero="32.26" dificuldade="aplicacao">Verify $(AB)^T = B^T A^T$ for $A = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}$, $B = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="32.27" dificuldade="aplicacao">Compute $\begin{pmatrix} \cos\alpha & -\sin\alpha \\ \sin\alpha & \cos\alpha \end{pmatrix} \begin{pmatrix} \cos\beta & -\sin\beta \\ \sin\beta & \cos\beta \end{pmatrix}$ — verify it gives a rotation by $\alpha + \beta$.</Exercicio>
-<Exercicio numero="32.28" dificuldade="compreensao">Show that multiplying by the identity matrix does not change the matrix. (Direct from the definition.)</Exercicio>
-<Exercicio numero="32.29" dificuldade="compreensao">Show that the zero matrix multiplied gives the zero matrix.</Exercicio>
-<Exercicio numero="32.30" dificuldade="compreensao">Show that if $A$ is diagonal and $B$ is diagonal, $AB$ is diagonal and the diagonal entries multiply.</Exercicio>
-<Exercicio numero="32.31" dificuldade="compreensao">Show that if $A$ is upper-triangular and $B$ is upper-triangular, $AB$ is upper-triangular.</Exercicio>
-<Exercicio numero="32.32" dificuldade="compreensao">Show that $\text{tr}(AB) = \text{tr}(BA)$ even when $AB \neq BA$.</Exercicio>
+Can we multiply any matrix column by any matrix row? Explain why or why not.
+</Exercicio>
 
-### Block C — Modeling (32.33 to 32.42)
+<Exercicio numero="32.3" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes, as long as the dimensions of A and B allow the two sequential multiplications.", correta: true },
+    { texto: "No, because the order of the matrices can never be repeated." },
+    { texto: "Yes, but only if A and B are square of the same order." },
+    { texto: "No, because matrix multiplication is not associative." },
+  ]}
+  solucao={<>For ABAB and BABA to exist, A must have columns compatible with rows of B and vice versa; then both chains are well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="32.33" dificuldade="modelagem">On a team, players score goals $G$ and assists $A$. Score: goal $\times 3$ + assist $\times 1$. Model as a matrix product.</Exercicio>
-<Exercicio numero="32.34" dificuldade="modelagem">In a neural network, layer $\mathbf{y} = W\mathbf{x} + \mathbf{b}$. For $W \in M_{10 \times 5}$, what is the dimension of $\mathbf x$ and $\mathbf y$?</Exercicio>
-<Exercicio numero="32.35" dificuldade="modelagem">Markov chain: distribution $\pi'$ = $\pi P$. If $\pi = (0.5, 0.5)$ and $P = \begin{pmatrix} 0.9 & 0.1 \\ 0.2 & 0.8 \end{pmatrix}$, compute $\pi'$.</Exercicio>
-<Exercicio numero="32.36" dificuldade="modelagem">Rotation in the plane: $\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix} \cdot \begin{pmatrix} x \\ y \end{pmatrix}$ rotates $(x, y)$ by $\theta$. Apply it to $(1, 0)$ with $\theta = \pi/2$.</Exercicio>
-<Exercicio numero="32.37" dificuldade="modelagem">PageRank iterates $\mathbf v_{n+1} = M \mathbf v_n$ with $M$ stochastic. What is the eigenvector of $M$ used for?</Exercicio>
-<Exercicio numero="32.38" dificuldade="modelagem">In CG, 2D affine transformation: $T(\mathbf x) = A\mathbf x + \mathbf t$. How can it be represented via a $3\times 3$ matrix applied to $(x, y, 1)^T$?</Exercicio>
-<Exercicio numero="32.39" dificuldade="modelagem">In economics, input-output matrix: $\mathbf x = A\mathbf x + \mathbf d$ ⟹ $\mathbf x = (I-A)^{-1}\mathbf d$. What computational cost?</Exercicio>
-<Exercicio numero="32.40" dificuldade="modelagem">In finance, returns $\mathbf r = R \mathbf w$ where $R$ is the matrix of returns by asset × scenario. Model.</Exercicio>
-<Exercicio numero="32.41" dificuldade="modelagem">RGB image $H \times W \times 3$. Conversion to grayscale: $g = 0.299 r + 0.587 g + 0.114 b$. How to express it as a matrix product?</Exercicio>
-<Exercicio numero="32.42" dificuldade="modelagem">In control, system $\mathbf x_{k+1} = A\mathbf x_k + B\mathbf u_k$. After 3 steps, $\mathbf x_3$ as a function of $\mathbf x_0, \mathbf u_0, \mathbf u_1, \mathbf u_2$.</Exercicio>
+Is it possible to define the products ABAB and BABA? If yes, explain how; if no, explain why not.
+</Exercicio>
 
-### Block D — Challenges and proofs (32.43 to 32.46)
+<Exercicio numero="32.4" dificuldade="compreensao"
+  opcoes={[
+    { texto: "No, equal size does not guarantee compatibility for multiplication.", correta: true },
+    { texto: "Yes, as long as they have the same number of rows." },
+    { texto: "Yes, as long as they have the same number of columns." },
+    { texto: "No, two matrices can never be multiplied." },
+  ]}
+  solucao={<>To multiply, the number of columns of the first must match the number of rows of the second; having the same size (m×n) does not guarantee this.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="32.43" dificuldade="desafio">Find $A \neq 0$ and $B \neq 0$ such that $AB = 0$ (matrix zero divisors).</Exercicio>
-<Exercicio numero="32.44" dificuldade="desafio">Find $A \neq I$ such that $A^2 = I$ (non-trivial involution).</Exercicio>
-<Exercicio numero="32.45" dificuldade="desafio">Show that if $AB = I$ for square $A, B$, then $BA = I$ as well (not trivial — depends on finite dimensionality).</Exercicio>
-<Exercicio numero="32.46" dificuldade="demonstracao">Prove associativity: $(AB)C = A(BC)$ via $\sum_k$ and switching order of sums.</Exercicio>
+Can any two matrices of the same size be multiplied? If yes, explain why; if no, explain why not and give an example of two matrices of the same size that cannot be multiplied.
+</Exercicio>
+
+<Exercicio numero="32.5" dificuldade="demonstracao"
+  opcoes={[
+    { texto: "No, in general AB ≠ BA.", correta: true },
+    { texto: "Yes, because order does not change the result." },
+    { texto: "Yes, only when the matrices are diagonal." },
+    { texto: "No, only when the matrices are square." },
+  ]}
+  solucao={<>Matrix multiplication generally does not commute; a simple counterexample (for instance, two non-identity 2×2 matrices) suffices to show AB ≠ BA.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Is matrix multiplication commutative? That is, does AB = BA always hold? If yes, prove it; if no, explain why not.
+</Exercicio>
+
+<Exercicio numero="32.6" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Matrices <Eq>{`A`}</Eq> and <Eq>{`B`}</Eq> have the same number of rows and columns, therefore the sum is defined.</>}
+  passos={<>
+    <ol>
+      <li>Verify the dimensions of <Eq>{`A`}</Eq>.</li>
+      <li>Verify the dimensions of <Eq>{`B`}</Eq>.</li>
+      <li>Compare number of rows and columns.</li>
+      <li>Conclude that dimensions match.</li>
+      <li>Thus, the sum <Eq>{`A+B`}</Eq> is defined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the sum $A + B$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.7" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Matrices <Eq>{`C`}</Eq> and <Eq>{`D`}</Eq> have the same dimensions, thus addition is possible.</>}
+  passos={<>
+    <ol>
+      <li>Obtain the dimensions of <Eq>{`C`}</Eq>.</li>
+      <li>Obtain the dimensions of <Eq>{`D`}</Eq>.</li>
+      <li>Confirm equality of rows and columns.</li>
+      <li>Declare the sum as defined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the sum $C + D$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.8" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Since <Eq>{`A`}</Eq> and <Eq>{`C`}</Eq> have the same size, the sum <Eq>{`A+C`}</Eq> is well-defined.</>}
+  passos={<>
+    <ol>
+      <li>Count rows and columns of <Eq>{`A`}</Eq>.</li>
+      <li>Count rows and columns of <Eq>{`C`}</Eq>.</li>
+      <li>Verify equality.</li>
+      <li>Conclude that the operation is allowed.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the sum $A + C$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.9" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Matrices <Eq>{`B`}</Eq> and <Eq>{`E`}</Eq> have equal dimensions, therefore subtraction is valid.</>}
+  passos={<>
+    <ol>
+      <li>Verify size of <Eq>{`B`}</Eq>.</li>
+      <li>Verify size of <Eq>{`E`}</Eq>.</li>
+      <li>Confirm match.</li>
+      <li>Declare operation defined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the difference $B - E$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.10" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Since <Eq>{`C`}</Eq> and <Eq>{`F`}</Eq> have the same number of rows and columns, addition is defined.</>}
+  passos={<>
+    <ol>
+      <li>Observe dimensions of <Eq>{`C`}</Eq>.</li>
+      <li>Observe dimensions of <Eq>{`F`}</Eq>.</li>
+      <li>Compare the two.</li>
+      <li>Conclude that addition can be done.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the sum $C + F$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.11" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Matrices <Eq>{`D`}</Eq> and <Eq>{`B`}</Eq> have equal dimensions, thus subtraction is permitted.</>}
+  passos={<>
+    <ol>
+      <li>Count rows and columns of <Eq>{`D`}</Eq>.</li>
+      <li>Count rows and columns of <Eq>{`B`}</Eq>.</li>
+      <li>Verify equality.</li>
+      <li>Assert that the operation is valid.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the difference $D - B$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.12" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Scalar multiplication is always defined for any matrix.</>}
+  passos={<>
+    <ol>
+      <li>Identify that <Eq>{`5`}</Eq> is a scalar.</li>
+      <li>Multiply each entry of <Eq>{`A`}</Eq> by <Eq>{`5`}</Eq>.</li>
+      <li>Conclude that the operation is valid.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the scalar multiplication $5A$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.13" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Multiplying <Eq>{`B`}</Eq> by <Eq>{`3`}</Eq> is always possible, since <Eq>{`3`}</Eq> is a scalar.</>}
+  passos={<>
+    <ol>
+      <li>Recognize <Eq>{`3`}</Eq> as a scalar.</li>
+      <li>Apply <Eq>{`3`}</Eq> to each entry of <Eq>{`B`}</Eq>.</li>
+      <li>Operation well-defined.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the scalar multiplication $3B$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.14" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Negative scalars can also multiply matrices, therefore the operation is defined.</>}
+  passos={<>
+    <ol>
+      <li>Identify <Eq>{`-2`}</Eq> as a scalar.</li>
+      <li>Multiply each entry of <Eq>{`B`}</Eq> by <Eq>{`-2`}</Eq>.</li>
+      <li>Conclude that the operation is valid.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the scalar multiplication $-2B$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.15" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Any scalar, including negative, can be multiplied by a matrix; the operation is well-defined.</>}
+  passos={<>
+    <ol>
+      <li>Verify that <Eq>{`-4`}</Eq> is a scalar.</li>
+      <li>Apply <Eq>{`-4`}</Eq> to each entry of <Eq>{`C`}</Eq>.</li>
+      <li>Operation permitted.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the scalar multiplication $-4C$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.16" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Fractional scalars are also allowed; therefore multiplication is defined.</>}
+  passos={<>
+    <ol>
+      <li>Recognize <Eq>{`\\frac{1}{2}`}</Eq> as a scalar.</li>
+      <li>Multiply each entry of <Eq>{`C`}</Eq> by <Eq>{`\\frac{1}{2}`}</Eq>.</li>
+      <li>Conclude that the operation is valid.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the scalar multiplication $\frac{1}{2}C$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.17" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done with integers" },
+    { texto: "Can only be done with real numbers" },
+  ]}
+  solucao={<>Multiplying by <Eq>{`100`}</Eq> is always possible; the operation is well-defined.</>}
+  passos={<>
+    <ol>
+      <li>Identify <Eq>{`100`}</Eq> as a scalar.</li>
+      <li>Apply <Eq>{`100`}</Eq> to each entry of <Eq>{`D`}</Eq>.</li>
+      <li>Operation permitted.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the scalar multiplication $100D$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.18" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ and $B$ are square" },
+    { texto: "Can only be done when $A$ and $B$ have the same size" },
+  ]}
+  solucao={<>The dimensions of <Eq>{`A`}</Eq> and <Eq>{`B`}</Eq> allow multiplication (columns of <Eq>{`A`}</Eq> = rows of <Eq>{`B`}</Eq>), thus the product is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product $AB$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.19" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ and $C$ are square" },
+    { texto: "Can only be done when $B$ and $C$ have the same size" },
+  ]}
+  solucao={<>The number of columns of <Eq>{`B`}</Eq> matches the number of rows of <Eq>{`C`}</Eq>, therefore the product <Eq>{`BC`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product $BC$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.20" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $C$ and $A$ are square" },
+    { texto: "Can only be done when $C$ and $A$ have the same size" },
+  ]}
+  solucao={<>The dimensions are compatible (columns of <Eq>{`C`}</Eq> = rows of <Eq>{`A`}</Eq>), thus the product <Eq>{`CA`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product $CA$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.21" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ and $D$ are square" },
+    { texto: "Can only be done when $B$ and $D$ have the same size" },
+  ]}
+  solucao={<>The multiplication <Eq>{`BD`}</Eq> is possible because the number of columns of <Eq>{`B`}</Eq> matches the number of rows of <Eq>{`D`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product $BD$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.22" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $D$ and $C$ are square" },
+    { texto: "Can only be done when $D$ and $C$ have the same size" },
+  ]}
+  solucao={<>The dimensions of <Eq>{`D`}</Eq> and <Eq>{`C`}</Eq> allow multiplication, therefore <Eq>{`DC`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product $DC$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.23" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $C$ and $B$ are square" },
+    { texto: "Can only be done when $C$ and $B$ have the same size" },
+  ]}
+  solucao={<>Since the columns of <Eq>{`C`}</Eq> match the rows of <Eq>{`B`}</Eq>, the product <Eq>{`CB`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the matrix product $CB$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.24" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$, $B$ and $C$ are square" },
+    { texto: "Can only be done when $A$, $B$ and $C$ have the same size" },
+  ]}
+  solucao={<>All three matrices have the same size, thus the combination <Eq>{`A+B-C`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression $A + B - C$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.25" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ and $D$ are square" },
+    { texto: "Can only be done when $A$ and $D$ have the same size" },
+  ]}
+  solucao={<>Since <Eq>{`A`}</Eq> and <Eq>{`D`}</Eq> have equal dimensions, the linear combination <Eq>{`4A+5D`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression $4A + 5D$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.26" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $C$ and $B$ are square" },
+    { texto: "Can only be done when $C$ and $B$ have the same size" },
+  ]}
+  solucao={<>Matrices <Eq>{`C`}</Eq> and <Eq>{`B`}</Eq> have the same number of rows and columns, therefore <Eq>{`2C+B`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression $2C + B$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.27" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $D$ and $E$ are square" },
+    { texto: "Can only be done when $D$ and $E$ have the same size" },
+  ]}
+  solucao={<>Since <Eq>{`D`}</Eq> and <Eq>{`E`}</Eq> have equal dimensions, the combination <Eq>{`3D+4E`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression $3D + 4E$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.28" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $C$ and $D$ are square" },
+    { texto: "Can only be done when $C$ and $D$ have the same size" },
+  ]}
+  solucao={<>The dimensions match, thus the subtraction <Eq>{`C-0.5D`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression $C - 0.5D$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.29" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $D$ and $E$ are square" },
+    { texto: "Can only be done when $D$ and $E$ have the same size" },
+  ]}
+  solucao={<>Since <Eq>{`D`}</Eq> and <Eq>{`E`}</Eq> have the same size, the combination <Eq>{`100D-10E`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression $100D - 10E$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.30" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ is square" },
+    { texto: "Can only be done when $A$ has size 2×2" },
+  ]}
+  solucao={<>For <Eq>{`A^2`}</Eq> to exist, <Eq>{`A`}</Eq> must be square; the problem assumes this, so the operation is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $A^2$ (that is, $A\cdot A$) using the given matrices.
+</Exercicio>
+
+<Exercicio numero="32.31" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ is square" },
+    { texto: "Can only be done when $B$ has size 2×2" },
+  ]}
+  solucao={<>Assuming <Eq>{`B`}</Eq> is square, <Eq>{`B^2`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B^2$ (that is, $B\cdot B$) using the given matrices.
+</Exercicio>
+
+<Exercicio numero="32.32" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $C$ is square" },
+    { texto: "Can only be done when $C$ has size 2×2" },
+  ]}
+  solucao={<>If <Eq>{`C`}</Eq> is square, the product <Eq>{`C^2`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $C^2$ (that is, $C\cdot C$) using the given matrices.
+</Exercicio>
+
+<Exercicio numero="32.33" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ and $B$ are square of the same order" },
+    { texto: "Can only be done when $A$ and $B$ have compatible dimensions" },
+  ]}
+  solucao={<>First we compute <Eq>{`B^2`}</Eq> (requires <Eq>{`B`}</Eq> square) and <Eq>{`A^2`}</Eq> (requires <Eq>{`A`}</Eq> square); since both are square of the same order, the product <Eq>{`B^2A^2`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression $B^2A^2$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.34" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ and $B$ are square of the same order" },
+    { texto: "Can only be done when $A$ and $B$ have compatible dimensions" },
+  ]}
+  solucao={<>Since <Eq>{`A`}</Eq> and <Eq>{`B`}</Eq> are square of the same order, <Eq>{`A^2`}</Eq> and <Eq>{`B^2`}</Eq> exist and their product is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute the expression $A^2B^2$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.35" dificuldade="desafio"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ and $B$ are square of the same order" },
+    { texto: "Can only be done when $AB$ is square" },
+  ]}
+  solucao={<>First we compute <Eq>{`AB`}</Eq> (possible by dimensions); since <Eq>{`AB`}</Eq> results in a square matrix, we can multiply it by itself, thus <Eq>{`(AB)^2`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $(AB)^2$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.36" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ and $B$ are square" },
+    { texto: "Can only be done when $A$ and $B$ have the same size" },
+  ]}
+  solucao={<>The dimensions of <Eq>{`A`}</Eq> and <Eq>{`B`}</Eq> allow multiplication, therefore <Eq>{`AB`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $A B$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.37" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ and $A$ are square" },
+    { texto: "Can only be done when $B$ and $A$ have the same size" },
+  ]}
+  solucao={<>The dimensions of <Eq>{`B`}</Eq> and <Eq>{`A`}</Eq> are compatible, thus <Eq>{`BA`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B A$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.38" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ and $D$ are square" },
+    { texto: "Can only be done when $B$ and $D$ have the same size" },
+  ]}
+  solucao={<>Since the columns of <Eq>{`B`}</Eq> match the rows of <Eq>{`D`}</Eq>, the product <Eq>{`BD`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B D$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.39" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $D$ and $C$ are square" },
+    { texto: "Can only be done when $D$ and $C$ have the same size" },
+  ]}
+  solucao={<>The dimensions allow multiplication, thus <Eq>{`DC`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $D C$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.40" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $D$ is square" },
+    { texto: "Can only be done when $D$ has size 2×2" },
+  ]}
+  solucao={<>If <Eq>{`D`}</Eq> is square, <Eq>{`D^2`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $D^2$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.41" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ is square" },
+    { texto: "Can only be done when $A$ has size 2×2" },
+  ]}
+  solucao={<>Assuming <Eq>{`A`}</Eq> is square, <Eq>{`A^2`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $A^2$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.42" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $D$ is square" },
+    { texto: "Can only be done when $D$ has size 2×2" },
+  ]}
+  solucao={<>If <Eq>{`D`}</Eq> is square, we can multiply it by itself three times; therefore <Eq>{`D^3`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $D^3$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.43" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$, $B$ and $C$ are square" },
+    { texto: "Can only be done when dimensions are compatible" },
+  ]}
+  solucao={<>First we compute <Eq>{`AB`}</Eq> (possible); the result has dimensions compatible with <Eq>{`C`}</Eq>, thus <Eq>{`(AB)C`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $(A B) C$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.44" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$, $B$ and $C$ are square" },
+    { texto: "Can only be done when dimensions are compatible" },
+  ]}
+  solucao={<>First we compute <Eq>{`BC`}</Eq>; the resulting product has dimensions compatible with <Eq>{`A`}</Eq>, therefore <Eq>{`A(BC)`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $A (B C)$ using the given matrices. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.45" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$ and $B$ are square" },
+    { texto: "Can only be done when $A$ and $B$ have the same size" },
+  ]}
+  solucao={<>The dimensions allow multiplication; just use a calculator to confirm that <Eq>{`AB`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $A B$ using the given matrices and verify the result with a calculator. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.46" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ and $A$ are square" },
+    { texto: "Can only be done when $B$ and $A$ have the same size" },
+  ]}
+  solucao={<>Dimension compatibility ensures that <Eq>{`BA`}</Eq> can be computed; the calculator confirms the result.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B A$ using the given matrices and verify the result with a calculator. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.47" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $C$ and $A$ are square" },
+    { texto: "Can only be done when $C$ and $A$ have the same size" },
+  ]}
+  solucao={<>The dimensions of <Eq>{`C`}</Eq> and <Eq>{`A`}</Eq> are compatible, therefore <Eq>{`CA`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $C A$ using the given matrices and verify the result with a calculator. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.48" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ and $C$ are square" },
+    { texto: "Can only be done when $B$ and $C$ have the same size" },
+  ]}
+  solucao={<>The multiplication <Eq>{`BC`}</Eq> is possible by the given dimensions; the calculator confirms the result.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B C$ using the given matrices and verify the result with a calculator. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.49" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $A$, $B$ and $C$ are square" },
+    { texto: "Can only be done when dimensions are compatible" },
+  ]}
+  solucao={<>First we compute <Eq>{`AB`}</Eq>, then multiply the result by <Eq>{`C`}</Eq>; the dimensions are compatible, thus the operation is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $A B C$ using the given matrices and verify the result with a calculator. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.50" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ is square" },
+    { texto: "Can only be done when $B$ has size 2×2" },
+  ]}
+  solucao={<>If <Eq>{`B`}</Eq> is square, <Eq>{`B^2`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B^2$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.51" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ is square" },
+    { texto: "Can only be done when $B$ has size 2×2" },
+  ]}
+  solucao={<>With <Eq>{`B`}</Eq> square, we can multiply it by itself three times; <Eq>{`B^3`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B^3$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.52" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ is square" },
+    { texto: "Can only be done when $B$ has size 2×2" },
+  ]}
+  solucao={<>If <Eq>{`B`}</Eq> is square, <Eq>{`B^4`}</Eq> is well-defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B^4$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.53" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Operation defined", correta: true },
+    { texto: "Operation undefined" },
+    { texto: "Can only be done when $B$ is square" },
+    { texto: "Can only be done when $B$ has size 2×2" },
+  ]}
+  solucao={<>With <Eq>{`B`}</Eq> square, <Eq>{`B^5`}</Eq> is defined.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Compute $B^5$ using the given matrix. Indicate whether the operation is undefined.
+</Exercicio>
+
+<Exercicio numero="32.54" dificuldade="desafio"
+  opcoes={[
+    { texto: "The formula $B^n = B^{n-1}\\cdot B$ works for all $n\\ge 1$.", correta: true },
+    { texto: "The formula $B^n = n\\cdot B$." },
+    { texto: "The formula $B^n = B$ for all $n$." },
+    { texto: "The formula $B^n = B^{n+1}$." },
+  ]}
+  solucao={<>The recursive definition <Eq>{`B^n = B^{n-1}B`}</Eq> (with <Eq>{`B^1 = B`}</Eq>) correctly generates <Eq>{`B^{201}`}</Eq> and <Eq>{`B^{202}`}</Eq>; just apply the rule repeatedly.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Using the questions above, find a formula for $B^n$. Test the formula for $B^{201}$ and $B^{202}$ using a calculator.
+</Exercicio>
+
+<Exercicio numero="32.55" dificuldade="demonstracao"
+  opcoes={[
+    { texto: "Show two matrices $A$ and $B$ such that $AB\\neq BA$.", correta: true },
+    { texto: "Show that $AB = BA$ for all matrices." },
+    { texto: "Argue that commutativity depends only on the size of the matrices." },
+    { texto: "Use the identity $AB = BA$ for diagonal matrices." },
+  ]}
+  solucao={<>Choose, for example, <Eq>{`A = \\begin{pmatrix}1&1\\\\0&1\\end{pmatrix}`}</Eq> and <Eq>{`B = \\begin{pmatrix}1&0\\\\1&1\\end{pmatrix}`}</Eq>; then <Eq>{`AB \\neq BA`}</Eq>, proving that commutativity fails in general.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-5-matrices-and-matrix-operations", secao: "§7.5", licenca: "CC-BY 4.0" }}
+>
+
+Prove that matrix multiplication is not commutative in general by presenting a counterexample.
+</Exercicio>
 
 </ListaExercicios>
 
 ## Sources
 
-- [**A First Course in Linear Algebra**](http://linear.ups.edu/) — Robert A. Beezer · 2022 · EN · GFDL · ch. M and MM. **Primary source.**
-- [**Linear Algebra Done Right**](https://linear.axler.net/) — Sheldon Axler · 2024, 4th ed · EN · CC-BY-NC · ch. 3.
-- [**Álgebra linear**](https://pt.wikibooks.org/wiki/%C3%81lgebra_linear) — Wikibooks · alive · PT-BR · CC-BY-SA.
+- [OpenStax — College Algebra 2e](https://openstax.org/books/college-algebra-2e/pages/9-5-matrices-and-matrix-operations) — Abramson et al. · §9.5 · CC-BY 4.0. Source of Block A and C exercises; 5 worked examples partially adapted from the section.
+- [Beezer — A First Course in Linear Algebra](http://linear.pugetsound.edu/) — Rob Beezer · §MO (Matrix Operations) and §MM (Matrix Multiplication) · GNU FDL. Source of property exercises, counterexamples, and proofs in Blocks B and D.
+- [Hefferon — Linear Algebra](https://hefferon.net/linearalgebra/) — Jim Hefferon · ch. 3 (Maps Between Spaces) · CC-BY-SA. Source of the associativity proof (exercise 32.40) and the conceptual framework on matrices as linear transformation representations.

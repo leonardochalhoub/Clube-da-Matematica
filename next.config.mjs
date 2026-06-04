@@ -9,6 +9,31 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
+// KaTeX hardcodes `console.warn("No character metrics for...")` with no
+// config gate (strict:false only affects parser, not font-metric warnings).
+// Same for "Unrecognized Unicode character" and "LaTeX-incompatible input"
+// emitted from buildCommon.js. Filter them at the process level — build only.
+const _origWarn = console.warn
+console.warn = (...args) => {
+  const msg = args[0]
+  if (typeof msg === 'string' && (
+    msg.startsWith('No character metrics for') ||
+    msg.startsWith('LaTeX-incompatible input') ||
+    msg.includes('Unrecognized Unicode character')
+  )) return
+  _origWarn(...args)
+}
+const _origStderrWrite = process.stderr.write.bind(process.stderr)
+process.stderr.write = (chunk, ...rest) => {
+  const s = typeof chunk === 'string' ? chunk : chunk.toString()
+  if (
+    s.startsWith('No character metrics for') ||
+    s.startsWith('LaTeX-incompatible input') ||
+    s.includes('Unrecognized Unicode character')
+  ) return true
+  return _origStderrWrite(chunk, ...rest)
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const macros = JSON.parse(
   readFileSync(resolve(__dirname, 'docs/architecture/katex-macros.json'), 'utf-8'),
@@ -45,6 +70,16 @@ const nextConfig = {
     NEXT_PUBLIC_BASE_PATH: basePath,
   },
   devIndicators: false,
+  // Webpack's infrastructure logging emits "Skipped not serializable cache
+  // item" warnings every time a vfile with KaTeX messages can't be cached.
+  // Those are noise — silence them with level: 'error'.
+  webpack: (config) => {
+    config.infrastructureLogging = {
+      ...(config.infrastructureLogging ?? {}),
+      level: 'error',
+    }
+    return config
+  },
   /**
    * Turbopack rules para `.mdx`. Usa `@mdx-js/loader` direto (não o wrapper
    * `@next/mdx`, cujas options não são serializáveis pelo Turbopack).

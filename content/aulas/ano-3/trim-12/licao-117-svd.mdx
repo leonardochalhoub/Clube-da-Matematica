@@ -9,7 +9,7 @@ publicado: true
 tags: ["álgebra linear", "SVD", "valores singulares", "compressão", "ano-3", "trim-12"]
 prerrequisitos: ["licao-116-matrizes-especiais"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-05-06"
+atualizadoEm: "2026-05-29"
 versao: "v1"
 usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Lineare Algebra LK alemão", "Equiv. H2 Math singapurense", "Equiv. Math III japonês avançado"]
 ---
@@ -25,8 +25,8 @@ usadoEm: ["3.º ano do EM (17-18 anos)", "Equiv. Lineare Algebra LK alemão", "E
 **Livros que cobrem esta lição**
 
 - [**Understanding Linear Algebra**](https://understandinglinearalgebra.org/chap6.html) — David Austin · §6.3–6.4 · CC-BY-SA · *Apresentação geométrica de SVD com exemplos numéricos completos e figuras de transformação de elipsoide; excelente para as portas 10 e 15.*
-- [**A First Course in Linear Algebra**](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · §SVD · GNU FDL · *Demonstração rigorosa da existência e unicidade de SVD com lemas auxiliares; base para a porta formal.*
-- [**Álgebra Linear** (REAMAT UFRGS)](https://www.ufrgs.br/reamat/AlgebraLinear/index.html) — Reamat Colaborativo · cap. SVD · CC-BY-SA · *Fonte PT-BR com exemplos de compressão e pseudoinversa; ideal para exercícios de cálculo numérico.*
+- [**A First Course in Linear Algebra**](http://linear.pugetsound.edu/html/section-SVD.html) — Rob Beezer · §SVD · GNU FDL · *Demonstração rigorosa da existência e unicidade de SVD com lemas auxiliares; base para a porta formal.*
+- [**Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · cap. 5, §IV · CC-BY-SA · *Tratamento aplicado da SVD via espectral em <Eq>{`A^T A`}</Eq>; exercícios graduados de cálculo numérico.*
 
 </aside>
 
@@ -60,7 +60,7 @@ Cada termo <Eq>{`\\sigma_i u_i v_i^T`}</Eq> é uma **matriz de posto 1** — pro
 
 </Definicao>
 
-> "Theorem (Existence of SVD). Every real matrix A has a singular value decomposition. The singular values are the positive square roots of the nonzero eigenvalues of $A^T A$." — [A First Course in Linear Algebra, §SVD](http://linear.ups.edu/html/section-SVD.html)
+> "Theorem (Existence of SVD). Every real matrix A has a singular value decomposition. The singular values are the positive square roots of the nonzero eigenvalues of $A^T A$." — [A First Course in Linear Algebra, §SVD](http://linear.pugetsound.edu/html/section-SVD.html)
 
 ### Conexão com autovalores
 
@@ -186,120 +186,155 @@ Uma imagem em tons de cinza é uma matriz <Eq>{`M \\in \\mathbb{R}^{m \\times n}
 
 ### Caso Netflix Prize (2009)
 
-Netflix tinha matriz de avaliações: <Eq>{`\\approx 10^7`}</Eq> usuários <Eq>{`\\times 10^5`}</Eq> filmes, esparsa. Aproximação por baixo posto (variante de SVD) previu avaliações ausentes. O time vencedor BellKor's Pragmatic Chaos melhorou a acurácia em 10% e ganhou US$ 1 milhão.
+A Netflix tinha uma matriz de avaliações: aproximadamente <Eq>{`10^7`}</Eq> usuários por <Eq>{`10^5`}</Eq> filmes, extremamente esparsa (a maioria dos pares usuário-filme não tinha avaliação). Aproximação por baixo posto (variante de SVD) previu avaliações ausentes. O time vencedor BellKor's Pragmatic Chaos melhorou a acurácia em 10% e ganhou um prêmio de **1 milhão de dólares**. A técnica central foi **fatoração matricial**: representar cada usuário e cada filme por um vetor curto de <Eq>{`k = 20`}</Eq> a <Eq>{`100`}</Eq> "fatores latentes" (gosto por ação, comédia, romance...) e prever a avaliação como produto escalar. SVD truncada é o método canônico para essa fatoração quando a matriz é completa; para matrizes esparsas, usam-se variantes iterativas (Alternating Least Squares, gradient descent).
 
 </Porta>
 
 <Porta nivel="25" titulo="Pra estudante de engenharia">
 
-SVD é o canivete suíço da álgebra linear computacional. Resolve sistemas mal-condicionados, descobre estrutura latente, comprime dados com garantia ótima.
+Em um curso de engenharia, a SVD é frequentemente a **primeira ferramenta** que você usa quando precisa lidar com dados reais (ruidosos, mal-condicionados, de alta dimensão). Conheça-a antes de qualquer outra técnica de redução de dimensão.
 
-### Algoritmo de cálculo
+### Algoritmo de cálculo (caso pequeno, à mão)
 
-**Para <Eq>{`A`}</Eq> pequena:**
-1. Calcule <Eq>{`A^T A`}</Eq> (simetrica PSD).
-2. Decomponha <Eq>{`A^T A = V \\Lambda V^T`}</Eq> (autovetores).
-3. <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq>; <Eq>{`u_i = A v_i / \\sigma_i`}</Eq> para <Eq>{`\\sigma_i > 0`}</Eq>.
+Para <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq> com <Eq>{`m \\geq n`}</Eq>:
 
-**Para <Eq>{`A`}</Eq> grande:** algoritmo de Golub-Reinsch, <Eq>{`O(\\min(mn^2, m^2n))`}</Eq>. Para top-<Eq>{`k`}</Eq>: SVD randomizada (Halko-Martinsson-Tropp), <Eq>{`O(mnk)`}</Eq> esperado.
+1. Calcule <Eq>{`A^T A`}</Eq> (matriz <Eq>{`n \\times n`}</Eq> simétrica PSD).
+2. Encontre autovalores <Eq>{`\\lambda_1 \\geq \\cdots \\geq \\lambda_n \\geq 0`}</Eq> e autovetores ortonormais <Eq>{`v_1, \\ldots, v_n`}</Eq>.
+3. Defina <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq>.
+4. Para cada <Eq>{`\\sigma_i > 0`}</Eq>, defina <Eq>{`u_i = A v_i / \\sigma_i \\in \\mathbb{R}^m`}</Eq>. Esses <Eq>{`u_i`}</Eq> são automaticamente ortonormais.
+5. Complete <Eq>{`u_{r+1}, \\ldots, u_m`}</Eq> com base ortonormal de <Eq>{`\\ker(A^T)`}</Eq> (use Gram-Schmidt).
+6. Monte <Eq>{`U = [u_1 | \\cdots | u_m]`}</Eq>, <Eq>{`V = [v_1 | \\cdots | v_n]`}</Eq>, <Eq>{`\\Sigma`}</Eq> diagonal com <Eq>{`\\sigma_i`}</Eq>.
 
-### Aplicações por domínio
+Numericamente, esse algoritmo é instável (perde precisão ao formar <Eq>{`A^T A`}</Eq>, que tem número de condição <Eq>{`\\kappa(A)^2`}</Eq>). Pacotes profissionais (LAPACK, NumPy) usam o algoritmo de Golub-Kahan-Reinsch (1965): bi-diagonalização via Householder seguida de QR implícito. Custo: <Eq>{`O(\\min(mn^2, m^2n))`}</Eq>.
 
-**Computer vision**: Eigenfaces (Turk-Pentland 1991) — SVD de matriz de rostos centralizados → bases para reconhecimento facial.
+### Por que SVD é numericamente estável
 
-**ML**: Word embeddings GloVe — SVD da matriz de co-ocorrência de palavras; Whitening — <Eq>{`W = V \\Sigma^{-1}`}</Eq> descorrelaciona features.
+Quando você resolve <Eq>{`Ax = b`}</Eq> por eliminação gaussiana, o erro em <Eq>{`x`}</Eq> escala com <Eq>{`\\kappa_2(A) = \\sigma_1 / \\sigma_r`}</Eq>. Quando <Eq>{`\\kappa_2`}</Eq> é grande (digamos, <Eq>{`10^{12}`}</Eq>) e <Eq>{`b`}</Eq> tem erro relativo de <Eq>{`10^{-15}`}</Eq>, o erro em <Eq>{`x`}</Eq> pode chegar a <Eq>{`10^{-3}`}</Eq> — três casas significativas perdidas. SVD permite **descartar valores singulares pequenos** (truncated SVD, TSVD) e resolver de modo regularizado: <Eq>{`x = V \\Sigma_k^+ U^T b`}</Eq>. É a versão linear da regularização de Tikhonov.
 
-**Finanças**: PCA da yield curve — 3 fatores principais (level, slope, curvature) capturam ~99% da variância (Litterman-Scheinkman 1991).
+### Aplicações cross-domínio
 
-**Numérico**: Posto numérico <Eq>{`r_\\epsilon = \\#\\{\\sigma_i > \\epsilon \\cdot \\sigma_1\\}`}</Eq>; resolução robusta de mínimos quadrados via pseudoinversa.
+- **Latent Semantic Analysis (LSA)** — Deerwester et al. 1990. Matriz documento-termo decomposta por SVD; significado "latente" surge dos vetores singulares.
+- **Sistemas de recomendação** — Netflix Prize (2009). SVD em matriz usuário-item esparsa via ALS (Alternating Least Squares).
+- **PCA** — próxima lição. PCA é SVD da matriz de dados centralizados, dividida por <Eq>{`\\sqrt{N-1}`}</Eq>.
+- **Compressão de imagem** — JPEG usa DCT (relacionada), mas SVD truncada dá um benchmark teórico ótimo (Eckart-Young).
+- **Total Least Squares** — ajuste de reta quando ambas as variáveis têm erro. Resolve via SVD do "augmented matrix" <Eq>{`[A | b]`}</Eq>.
 
-### Código Python
+### Exemplo numérico curto
 
-```python
-import numpy as np
+Calcule SVD de <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix}`}</Eq>.
 
-A = np.random.randn(200, 50)
-U, s, Vt = np.linalg.svd(A, full_matrices=False)
+**Passo 1.** <Eq>{`A^T A = \\begin{pmatrix} 25 & 20 \\\\ 20 & 25 \\end{pmatrix}`}</Eq>.
 
-# Aproximação de posto k
-k = 10
-A_k = U[:, :k] @ np.diag(s[:k]) @ Vt[:k, :]
-print("Erro relativo Frobenius:", np.linalg.norm(A - A_k, 'fro') / np.linalg.norm(A, 'fro'))
+**Passo 2.** Autovalores: <Eq>{`\\det(A^TA - \\lambda I) = (25-\\lambda)^2 - 400 = 0 \\Rightarrow \\lambda = 45, 5`}</Eq>.
 
-# Pseudoinversa e mínimos quadrados
-b = np.random.randn(200)
-x_pinv = np.linalg.lstsq(A, b, rcond=None)[0]  # usa SVD internamente
-```
+**Passo 3.** Valores singulares: <Eq>{`\\sigma_1 = \\sqrt{45} = 3\\sqrt{5}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>.
 
-### Regularização Tikhonov via SVD
+**Passo 4.** Autovetores de <Eq>{`A^TA`}</Eq>: <Eq>{`v_1 = (1,1)/\\sqrt{2}`}</Eq>, <Eq>{`v_2 = (1,-1)/\\sqrt{2}`}</Eq>.
 
-Em vez de inverter <Eq>{`\\sigma_i`}</Eq> diretamente (instável quando <Eq>{`\\sigma_i`}</Eq> pequeno), usa-se:
+**Passo 5.** <Eq>{`u_1 = Av_1/\\sigma_1 = (3,9)/(3\\sqrt{5} \\cdot \\sqrt{2}) = (1,3)/\\sqrt{10}`}</Eq>, <Eq>{`u_2 = (3,-1)/\\sqrt{10}`}</Eq>.
 
-<Equation explicacao="Tikhonov: encolhe os valores singulares pequenos, evita amplificar ruído." latex="x_\lambda = \sum_{i=1}^r \frac{\sigma_i}{\sigma_i^2 + \lambda}\, (u_i^T b)\, v_i" />
+Logo <Eq>{`A = U\\Sigma V^T`}</Eq> com <Eq>{`U = \\frac{1}{\\sqrt{10}}\\begin{pmatrix}1 & 3 \\\\ 3 & -1\\end{pmatrix}`}</Eq>, <Eq>{`\\Sigma = \\begin{pmatrix}3\\sqrt{5} & 0 \\\\ 0 & \\sqrt{5}\\end{pmatrix}`}</Eq>, <Eq>{`V = \\frac{1}{\\sqrt{2}}\\begin{pmatrix}1 & 1 \\\\ 1 & -1\\end{pmatrix}`}</Eq>.
 
-Para <Eq>{`\\lambda \\to 0`}</Eq> recupera pseudoinversa; para <Eq>{`\\lambda`}</Eq> grande encolhe a solução.
+Número de condição: <Eq>{`\\kappa_2(A) = 3\\sqrt{5}/\\sqrt{5} = 3`}</Eq> — bem condicionada.
 
 </Porta>
 
 <Porta nivel="40" titulo="Pra profissional sênior">
 
-SVD não é apenas um algoritmo — é a forma canônica universal de uma transformação linear. Toda matriz tem uma SVD; nem toda matriz tem autodecomposição real.
+A SVD une muitos temas aparentemente desconexos. O profissional sênior deve enxergar essas conexões.
 
-### Contexto histórico
+### Unificação com outras decomposições
 
-Eugenio Beltrami (1873) e Camille Jordan (1874) demonstraram SVD independentemente para matrizes quadradas. Erhard Schmidt (1907) generalizou para operadores integrais (kernels de Hilbert-Schmidt). A forma moderna para matrizes retangulares é de Carl Eckart e Gale Young (1936), que também provaram o teorema de melhor aproximação.
+| Decomposição | Quando aplica | SVD generaliza |
+|---|---|---|
+| <Eq>{`A = QDQ^T`}</Eq> (espectral) | <Eq>{`A`}</Eq> simétrica | SVD = espectral se <Eq>{`A \\succeq 0`}</Eq> |
+| <Eq>{`A = QR`}</Eq> (QR) | Qualquer <Eq>{`m \\times n`}</Eq> | SVD é "duplo QR" |
+| <Eq>{`A = LL^T`}</Eq> (Cholesky) | <Eq>{`A`}</Eq> SPD | SVD aplicada a fator de Cholesky dá SVD original |
+| <Eq>{`A = PLU`}</Eq> (LU) | Qualquer quadrada | SVD é a forma canônica geral |
 
-### Conexão com análise funcional
+A SVD é a única decomposição com **três propriedades simultâneas**: ortogonalidade, generalidade e ordenação canônica dos fatores diagonais.
 
-Para operadores compactos <Eq>{`T: H_1 \\to H_2`}</Eq> em espaços de Hilbert, a decomposição de Schmidt é:
+### Caracterizações variacionais (Courant-Fischer)
 
-<Equation explicacao="Generalização infinito-dimensional da SVD: operadores compactos se decompõem em somas numeráveis de operadores de posto 1." latex="T = \sum_{i=1}^\infty \sigma_i\, \langle \cdot, v_i \rangle\, u_i" />
+O <Eq>{`k`}</Eq>-ésimo valor singular admite caracterização min-max:
 
-Os **valores singulares** de <Eq>{`T`}</Eq> formam uma sequência em <Eq>{`\\ell^2`}</Eq>. Esta é a estrutura por trás da compressão de sinal, análise de componentes principais e métodos espectrais de kernel.
+<Equation explicacao="Mini-max sobre subespaços de dimensão k: o k-ésimo valor singular é o sup da norma de A restrita a subespaços maximais." latex="\sigma_k = \max_{\dim S = k} \min_{x \in S, \|x\|=1} \|Ax\|" />
 
-### SVD randomizada (Halko-Martinsson-Tropp 2011)
+Consequência (Weyl, 1912): para <Eq>{`A, B`}</Eq> arbitrárias, <Eq>{`|\\sigma_i(A+B) - \\sigma_i(A)| \\leq \\|B\\|_2`}</Eq>. Os valores singulares são **Lipschitz-1** em relação à norma espectral. Isso explica por que SVD é robusta a ruído.
 
-Para matrizes de baixo posto numérico, SVD exata é desnecessária. O algoritmo:
+### Eckart-Young e o teorema de aproximação ótima
 
-1. Amostra coluna aleatória: <Eq>{`Y = A \\Omega`}</Eq> com <Eq>{`\\Omega \\in \\mathbb{R}^{n \\times (k+p)}`}</Eq> gaussiana.
-2. Ortogonalize: <Eq>{`Q, R = \\text{QR}(Y)`}</Eq>.
-3. Fatore a projeção: SVD de <Eq>{`Q^T A`}</Eq> (pequena — <Eq>{`(k+p) \\times n`}</Eq>).
+O teorema de Eckart-Young (1936) é uma das gemas da matemática aplicada do século XX. Ele afirma que a SVD truncada resolve **simultaneamente** dois problemas:
 
-Com oversampling <Eq>{`p \\approx 10`}</Eq>, erro esperado próximo ao ótimo de Eckart-Young. Viabiliza SVD de matrizes <Eq>{`10^6 \\times 10^6`}</Eq> em memória limitada.
+<Equation explicacao="Tanto em norma espectral quanto Frobenius, A_k é a melhor aproximação de posto k entre todas as matrizes do mesmo tamanho." latex="A_k = \arg\min_{\text{rank}(B) \leq k} \|A - B\|_F = \arg\min_{\text{rank}(B) \leq k} \|A - B\|_2" />
 
-### SVD e aprendizado de máquina moderno
+Demonstração esquemática (norma Frobenius): expandindo <Eq>{`A = \\sum_i \\sigma_i u_i v_i^T`}</Eq> em base ortonormal de <Eq>{`m \\times n`}</Eq>, a melhor projeção em subespaço de dimensão <Eq>{`k`}</Eq> é tomar os <Eq>{`k`}</Eq> maiores coeficientes — exatamente <Eq>{`A_k`}</Eq>.
 
-Transformers (Vaswani et al. 2017) decompõem a atenção como produto de três matrizes: <Eq>{`Q, K, V`}</Eq>. A geometria da atenção multi-cabeça é essencialmente uma SVD aprendida por gradiente descendente — os "heads" aprendem subespaços principais dos dados de treinamento.
+### Pseudoinversa e mínimos quadrados
 
-Low-Rank Adaptation (LoRA, 2021) — fine-tuning de LLMs — pertuba pesos pré-treinados <Eq>{`W`}</Eq> com <Eq>{`\\Delta W = BA`}</Eq> de posto baixo, exatamente o que a SVD justifica como estrutura de sinal num fundo de ruído.
+Para <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq> qualquer, o problema <Eq>{`\\min_x \\|Ax - b\\|`}</Eq> sempre tem solução. Quando há infinitas (sistema sub-determinado ou <Eq>{`A`}</Eq> de posto deficiente), a pseudoinversa seleciona a de menor norma:
+
+<Equation explicacao="Solução de mínima norma do problema de mínimos quadrados via pseudoinversa." latex="x^* = A^+ b = V \Sigma^+ U^T b" />
+
+Quando <Eq>{`A`}</Eq> tem posto completo de colunas: <Eq>{`A^+ = (A^T A)^{-1} A^T`}</Eq>, recuperando equações normais. Quando posto completo de linhas: <Eq>{`A^+ = A^T (A A^T)^{-1}`}</Eq>. Em geral, <Eq>{`A^+`}</Eq> é definida pela SVD.
+
+### Generalização: SVD de operadores em espaços de Hilbert
+
+A SVD se estende para operadores compactos em espaços de Hilbert (Schmidt, 1907): <Eq>{`T = \\sum_i \\sigma_i \\langle \\cdot, v_i \\rangle u_i`}</Eq>. Os valores singulares <Eq>{`\\sigma_i \\to 0`}</Eq> codificam o "grau de compacidade" do operador. Em PDE e teoria espectral, é a **decomposição de Schmidt-Mirsky**.
+
+### Conexão com física quântica
+
+Em mecânica quântica, o **emaranhamento** de um estado bipartite <Eq>{`|\\psi\\rangle \\in \\mathcal{H}_A \\otimes \\mathcal{H}_B`}</Eq> é medido pela **decomposição de Schmidt** (1907 também) — exatamente a SVD da matriz de coeficientes do estado. Os valores singulares ao quadrado <Eq>{`\\sigma_i^2`}</Eq> são as probabilidades dos estados de Schmidt, e a entropia de von Neumann é <Eq>{`S = -\\sum_i \\sigma_i^2 \\log \\sigma_i^2`}</Eq>.
+
+### Por que importa em finanças quantitativas
+
+Na construção de fatores de risco (modelo de Fama-French generalizado), aplica-se SVD à matriz de retornos <Eq>{`R \\in \\mathbb{R}^{T \\times N}`}</Eq> (períodos por ativos). Os primeiros valores singulares capturam fatores de mercado (movimento comum), os próximos capturam fatores setoriais e os menores são ruído idiossincrático. PCA financeira (próxima lição) faz isso de modo canônico. Ribeiro & Veronesi (2002) usam SVD em curvas de juros para extrair fatores de Nelson-Siegel; toda mesa de fixed income usa essa técnica.
+
+### Truques numéricos práticos
+
+1. **Nunca calcule <Eq>{`A^T A`}</Eq> explicitamente** se <Eq>{`\\kappa(A) > 10^4`}</Eq>. Use Golub-Kahan-Reinsch direto sobre <Eq>{`A`}</Eq>.
+2. **Use SVD truncada** quando você só precisa dos <Eq>{`k`}</Eq> maiores valores. Lanczos bidiagonalization (ARPACK) calcula em <Eq>{`O(mnk)`}</Eq> em vez de <Eq>{`O(mn^2)`}</Eq>.
+3. **Para matrizes esparsas grandes**: use métodos iterativos (randomized SVD de Halko-Martinsson-Tropp, 2011) — passa de <Eq>{`O(mn^2)`}</Eq> para <Eq>{`O(mn \\log k)`}</Eq> com pequena perda de precisão.
+4. **Tolerância para "valor singular zero"**: <Eq>{`\\sigma_i < m \\cdot \\varepsilon_{\\text{máquina}} \\cdot \\sigma_1`}</Eq>. Em float64, <Eq>{`\\varepsilon \\approx 10^{-16}`}</Eq>.
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Aplicação prática">
+<Porta nivel="pratica" titulo="Prática — exemplos com dados reais">
 
-### Compressão de imagem passo a passo
+### Exemplo 1: Compressão de imagem em tons de cinza
 
-Dado uma imagem em tons de cinza com matriz <Eq>{`A \\in \\mathbb{R}^{512 \\times 512}`}</Eq>:
+Uma fotografia de retrato em <Eq>{`512 \\times 512`}</Eq> pixels é uma matriz <Eq>{`M \\in \\mathbb{R}^{512 \\times 512}`}</Eq> com 262 144 entradas. Após SVD, os primeiros 30 valores singulares capturam tipicamente <Eq>{`> 95\\%`}</Eq> da norma de Frobenius. Mantendo <Eq>{`k = 30`}</Eq>:
 
-1. Calcule SVD completa: <Eq>{`A = U \\Sigma V^T`}</Eq>, com <Eq>{`\\sigma_1 \\geq \\cdots \\geq \\sigma_{512} \\geq 0`}</Eq>.
-2. Escolha <Eq>{`k`}</Eq>: plote <Eq>{`\\sigma_i`}</Eq> vs <Eq>{`i`}</Eq> (scree plot); corte no "joelho" ou onde variância explicada cumulativa <Eq>{`\\geq 95\\%`}</Eq>.
-3. Armazene: <Eq>{`U_{[:, :k]}`}</Eq>, <Eq>{`\\sigma_{1:k}`}</Eq>, <Eq>{`V_{[:, :k]}`}</Eq> — total <Eq>{`k(512 + 1 + 512)`}</Eq> floats.
-4. Reconstrua: <Eq>{`A_k = U_k \\, \\text{diag}(\\sigma_{1:k}) \\, V_k^T`}</Eq>.
+- Armazenamento: <Eq>{`30 \\times (512 + 1 + 512) = 30 \\, 750`}</Eq> números (vs. 262 144).
+- Razão de compressão: <Eq>{`\\approx 8.5\\times`}</Eq>.
+- Erro: dependendo da imagem, <Eq>{`\\|A - A_{30}\\|_F / \\|A\\|_F \\approx 5\\%`}</Eq>.
 
-Com <Eq>{`k = 50`}</Eq>: taxa de compressão <Eq>{`512^2 / (50 \\times 1025) \\approx 5.1\\times`}</Eq>. Visualmente indistinguível da original.
+Comparação: JPEG na configuração "alta qualidade" usa razão de compressão similar (8–10×) com erro percentual similar — só que usando DCT em blocos <Eq>{`8 \\times 8`}</Eq> em vez de SVD global. Eckart-Young diz que SVD é o limite teórico ótimo para baixo posto.
 
-### Diagnóstico de regressão mal-condicionada
+### Exemplo 2: Sistema de recomendação simplificado
 
-Numa regressão linear <Eq>{`y = X \\beta + \\varepsilon`}</Eq> com <Eq>{`X`}</Eq> mal-condicionada:
+Quatro usuários (Ana, Beto, Carla, Diego) avaliam três filmes (Matrix, Titanic, Star Wars) em escala 1–5:
 
-1. SVD de <Eq>{`X = U \\Sigma V^T`}</Eq>.
-2. <Eq>{`\\kappa_2(X) = \\sigma_1 / \\sigma_r`}</Eq>. Se <Eq>{`> 30`}</Eq>, há multicolinearidade.
-3. Aplique ridge: <Eq>{`\\hat\\beta_\\lambda = V (\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T U^T y`}</Eq>.
-4. Escolha <Eq>{`\\lambda`}</Eq> via cross-validation.
+| | Matrix | Titanic | Star Wars |
+|---|---|---|---|
+| Ana | 5 | 1 | 5 |
+| Beto | 4 | 1 | 4 |
+| Carla | 1 | 5 | 1 |
+| Diego | 1 | 4 | 2 |
 
-### Exercício prático: ENEM por estado
+A SVD revela 2 fatores latentes principais: "preferência por ficção científica" (eixo Ana/Beto vs. Carla/Diego) e "intensidade de avaliação". A reconstrução de posto 2 prevê avaliações faltantes. Em escala real (Netflix), aplicam-se <Eq>{`k = 20`}</Eq> a <Eq>{`100`}</Eq> fatores em matriz <Eq>{`10^7 \\times 10^5`}</Eq> esparsa.
 
-Os microdados do ENEM têm ~200 variáveis por candidato. SVD da matriz estado × variável (26 estados × 200 itens) identifica os 3-5 "eixos de desigualdade" que estruturam o desempenho regional — análise publicada por pesquisadores do INEP a cada edição.
+### Exemplo 3: Latent Semantic Analysis (LSA)
+
+Uma matriz documento-termo de 1000 documentos por 5000 palavras. Cada entrada <Eq>{`a_{ij}`}</Eq> = frequência da palavra <Eq>{`j`}</Eq> no documento <Eq>{`i`}</Eq> (TF-IDF). SVD com <Eq>{`k = 100`}</Eq> agrupa palavras com significado próximo (sinônimos) e documentos com tópico próximo, mesmo sem partilharem palavras literais. Foi a base de **busca semântica** antes dos embeddings neurais (Deerwester et al., 1990; Hofmann, 1999).
+
+### Exemplo 4: Reconhecimento facial — Eigenfaces
+
+Turk & Pentland (1991) trataram cada rosto como um vetor de pixels (<Eq>{`64 \\times 64 = 4096`}</Eq> dimensões). Aplicando SVD em uma matriz de 200 rostos centrada na média, os primeiros 20–40 vetores singulares formam uma "base de rostos" — as **eigenfaces**. Um rosto novo é classificado por sua projeção em essa base. Foi o primeiro sistema viável de reconhecimento facial automático.
+
+### Exemplo 5: Controle de qualidade industrial
+
+Em uma fábrica de chips, 30 sensores monitoram cada linha de produção em tempo real (vibração, temperatura, corrente, etc.). Forma-se uma matriz <Eq>{`A \\in \\mathbb{R}^{T \\times 30}`}</Eq> (<Eq>{`T`}</Eq> instantes). Os primeiros valores singulares capturam o "modo normal" de operação; defeitos aparecem como componentes nas direções de pequenos valores singulares. Esta técnica é chamada **PCA de monitoramento** (Jackson & Mudholkar, 1979) e detecta falhas antes que se manifestem como perda de yield.
 
 </Porta>
 
@@ -307,420 +342,730 @@ Os microdados do ENEM têm ~200 variáveis por candidato. SVD da matriz estado �
 
 ## Exemplos resolvidos
 
-<Exemplo titulo="SVD de uma matriz 2x2 simples" numero="1">
+<Exemplo titulo="SVD de matriz quadrada 2x2 (aplicação)" numero="1">
 
-**Problema.** Calcule a SVD de <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix}`}</Eq>.
+**Problema.** Encontre a SVD de <Eq>{`A = \\begin{pmatrix} 4 & 0 \\\\ 3 & -5 \\end{pmatrix}`}</Eq>.
 
-**Estratégia.** Calcular <Eq>{`A^T A`}</Eq>, decompor em autovetores/autovalores, obter <Eq>{`V`}</Eq> e <Eq>{`\\Sigma`}</Eq>, depois <Eq>{`U`}</Eq>.
-
-**Resolução.**
-
-<Eq>{`A^T A = \\begin{pmatrix} 3 & 4 \\\\ 0 & 5 \\end{pmatrix}\\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix} = \\begin{pmatrix} 25 & 20 \\\\ 20 & 25 \\end{pmatrix}`}</Eq>
-
-Autovalores: <Eq>{`\\det(A^T A - \\lambda I) = (25 - \\lambda)^2 - 400 = 0`}</Eq>, logo <Eq>{`\\lambda_1 = 45`}</Eq> e <Eq>{`\\lambda_2 = 5`}</Eq>.
-
-Valores singulares: <Eq>{`\\sigma_1 = \\sqrt{45} = 3\\sqrt{5}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>.
-
-Autovetores de <Eq>{`A^T A`}</Eq>: para <Eq>{`\\lambda_1 = 45`}</Eq>, resolve <Eq>{`(A^T A - 45I)v = 0`}</Eq>: <Eq>{`v_1 = (1/\\sqrt{2})(1, 1)^T`}</Eq>; para <Eq>{`\\lambda_2 = 5`}</Eq>: <Eq>{`v_2 = (1/\\sqrt{2})(1, -1)^T`}</Eq>.
-
-Vetores à esquerda: <Eq>{`u_i = Av_i / \\sigma_i`}</Eq>.
-
-<Eq>{`u_1 = A v_1 / (3\\sqrt{5}) = (1/(3\\sqrt{5})) \\begin{pmatrix} 3/\\sqrt{2} \\\\ 9/\\sqrt{2} \\end{pmatrix} = (1/\\sqrt{10})\\begin{pmatrix}1\\\\3\\end{pmatrix}`}</Eq>
-
-**Verificação.** <Eq>{`U \\Sigma V^T`}</Eq> deve reproduzir <Eq>{`A`}</Eq> numericamente (conferir com calculadora).
-
-**Fonte.** [Understanding Linear Algebra, §6.3](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA.
-
-</Exemplo>
-
-<Exemplo titulo="Posto de uma matriz e subespaços via SVD" numero="2">
-
-**Problema.** Determine o posto e bases dos 4 subespaços de <Eq>{`A = \\begin{pmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\end{pmatrix}`}</Eq> via SVD.
-
-**Estratégia.** <Eq>{`A`}</Eq> é <Eq>{`2 \\times 3`}</Eq>. Como a linha 2 é o dobro da linha 1, o posto é 1.
+**Estratégia.** Calcular <Eq>{`A^T A`}</Eq>, encontrar autovalores e autovetores ortonormais para obter <Eq>{`V`}</Eq> e os <Eq>{`\\sigma_i`}</Eq>; depois <Eq>{`u_i = A v_i / \\sigma_i`}</Eq>.
 
 **Resolução.**
 
-<Eq>{`A^T A = \\begin{pmatrix} 1 & 2 \\\\ 2 & 4 \\\\ 3 & 6 \\end{pmatrix}\\begin{pmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\end{pmatrix} = \\begin{pmatrix} 5 & 10 & 15 \\\\ 10 & 20 & 30 \\\\ 15 & 30 & 45 \\end{pmatrix}`}</Eq>
+**Passo 1.** <Eq>{`A^T A = \\begin{pmatrix} 4 & 3 \\\\ 0 & -5 \\end{pmatrix} \\begin{pmatrix} 4 & 0 \\\\ 3 & -5 \\end{pmatrix} = \\begin{pmatrix} 25 & -15 \\\\ -15 & 25 \\end{pmatrix}`}</Eq>.
 
-Autovalor não-nulo: <Eq>{`\\lambda_1 = \\text{tr}(A^T A) = 70`}</Eq> (soma dos quadrados de todas as entradas, pois posto 1). Valor singular: <Eq>{`\\sigma_1 = \\sqrt{70}`}</Eq>.
+**Passo 2.** Autovalores: <Eq>{`\\det(A^T A - \\lambda I) = (25 - \\lambda)^2 - 225 = 0 \\Rightarrow \\lambda = 25 \\pm 15 = 40, 10`}</Eq>.
 
-<Eq>{`v_1 = (1/\\sqrt{14})(1, 2, 3)^T`}</Eq> (direção da linha de <Eq>{`A`}</Eq>). <Eq>{`u_1 = Av_1/\\sigma_1 = (1/\\sqrt{2})(1, 2)^T`}</Eq>.
+**Passo 3.** Valores singulares: <Eq>{`\\sigma_1 = \\sqrt{40} = 2\\sqrt{10}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{10}`}</Eq>.
 
-**Os 4 subespaços:**
-- <Eq>{`\\text{Row}(A) = \\text{span}\\{(1,2,3)\\}`}</Eq> — coluna 1 de <Eq>{`V`}</Eq>.
-- <Eq>{`\\ker(A) = \\text{span}\\{(-2,1,0), (-3,0,1)\\}`}</Eq> — colunas 2-3 de <Eq>{`V`}</Eq>.
-- <Eq>{`\\text{Col}(A) = \\text{span}\\{(1,2)\\}`}</Eq> — coluna 1 de <Eq>{`U`}</Eq>.
-- <Eq>{`\\ker(A^T) = \\text{span}\\{(-2,1)\\}`}</Eq> — coluna 2 de <Eq>{`U`}</Eq>.
+**Passo 4.** Autovetores de <Eq>{`A^T A`}</Eq>:
+- Para <Eq>{`\\lambda_1 = 40`}</Eq>: <Eq>{`(A^TA - 40I)v = 0 \\Rightarrow -15 v_1 - 15 v_2 = 0 \\Rightarrow v_1 = -v_2`}</Eq>. Logo <Eq>{`v_1 = (1, -1)/\\sqrt{2}`}</Eq>.
+- Para <Eq>{`\\lambda_2 = 10`}</Eq>: <Eq>{`v_2 = (1, 1)/\\sqrt{2}`}</Eq>.
 
-**Verificação.** Posto = número de valores singulares positivos = 1. Confirmar: dim Row + dim ker = 1 + 2 = 3 = n. $\checkmark$
+**Passo 5.** Vetores singulares à esquerda:
 
-**Fonte.** [A First Course in Linear Algebra, §SVD e §FS](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · GNU FDL.
+<Eq>{`u_1 = \\frac{A v_1}{\\sigma_1} = \\frac{1}{2\\sqrt{10}} \\cdot \\frac{1}{\\sqrt{2}}\\begin{pmatrix} 4 \\\\ 8 \\end{pmatrix} = \\frac{1}{\\sqrt{20}}\\begin{pmatrix} 2 \\\\ 4 \\end{pmatrix}/\\sqrt{2} = \\frac{1}{\\sqrt{5}}\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}/\\sqrt{?}`}</Eq>
+
+Cálculo simplificado: <Eq>{`A v_1 = \\frac{1}{\\sqrt{2}}(4, 8)^T`}</Eq>; <Eq>{`\\|A v_1\\| = \\frac{\\sqrt{80}}{\\sqrt{2}} = \\sqrt{40} = \\sigma_1`}</Eq>. Logo <Eq>{`u_1 = (1, 2)/\\sqrt{5}`}</Eq>.
+
+Analogamente <Eq>{`A v_2 = \\frac{1}{\\sqrt{2}}(4, -2)^T`}</Eq>; <Eq>{`u_2 = (2, -1)/\\sqrt{5}`}</Eq>.
+
+**Resposta.**
+
+<Eq>{`U = \\frac{1}{\\sqrt{5}}\\begin{pmatrix} 1 & 2 \\\\ 2 & -1 \\end{pmatrix}, \\quad \\Sigma = \\begin{pmatrix} 2\\sqrt{10} & 0 \\\\ 0 & \\sqrt{10} \\end{pmatrix}, \\quad V = \\frac{1}{\\sqrt{2}}\\begin{pmatrix} 1 & 1 \\\\ -1 & 1 \\end{pmatrix}.`}</Eq>
+
+**Verificação.** <Eq>{`U \\Sigma V^T = \\frac{1}{\\sqrt{5}}\\begin{pmatrix}1 & 2 \\\\ 2 & -1\\end{pmatrix}\\begin{pmatrix}2\\sqrt{10} & 0 \\\\ 0 & \\sqrt{10}\\end{pmatrix}\\frac{1}{\\sqrt{2}}\\begin{pmatrix}1 & -1 \\\\ 1 & 1\\end{pmatrix} = \\begin{pmatrix}4 & 0 \\\\ 3 & -5\\end{pmatrix} = A`}</Eq>. Correto.
+
+**Fonte.** [Beezer, A First Course in Linear Algebra, §SVD](http://linear.pugetsound.edu/html/section-SVD.html) — GNU FDL.
 
 </Exemplo>
 
-<Exemplo titulo="Melhor aproximação de posto 1 pelo teorema de Eckart-Young" numero="3">
+<Exemplo titulo="SVD de matriz retangular 3x2 (intermediário)" numero="2">
 
-**Problema.** Dada <Eq>{`A = \\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\\\ 1 & 1 \\end{pmatrix}`}</Eq>, encontre a melhor aproximação de posto 1 e calcule o erro de Frobenius.
+**Problema.** Calcule a SVD compacta de <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 1 & 0 \\\\ 0 & 1 \\end{pmatrix}`}</Eq>.
 
-**Estratégia.** Calcular a SVD e reter só o primeiro termo.
+**Estratégia.** Para <Eq>{`A`}</Eq> <Eq>{`3 \\times 2`}</Eq>, formar <Eq>{`A^T A`}</Eq> <Eq>{`2 \\times 2`}</Eq> (mais fácil que <Eq>{`A A^T`}</Eq> que seria <Eq>{`3 \\times 3`}</Eq>).
 
 **Resolução.**
 
-<Eq>{`A^T A = \\begin{pmatrix} 6 & 5 \\\\ 5 & 6 \\end{pmatrix}`}</Eq>. Autovalores: 11 e 1. Valores singulares: <Eq>{`\\sigma_1 = \\sqrt{11}`}</Eq>, <Eq>{`\\sigma_2 = 1`}</Eq>.
+<Eq>{`A^T A = \\begin{pmatrix} 1 & 1 & 0 \\\\ 1 & 0 & 1 \\end{pmatrix}\\begin{pmatrix} 1 & 1 \\\\ 1 & 0 \\\\ 0 & 1 \\end{pmatrix} = \\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\end{pmatrix}`}</Eq>.
 
-<Eq>{`v_1 = (1/\\sqrt{2})(1,1)^T`}</Eq>, <Eq>{`v_2 = (1/\\sqrt{2})(1,-1)^T`}</Eq>.
+Autovalores: <Eq>{`(2-\\lambda)^2 - 1 = 0 \\Rightarrow \\lambda = 3, 1`}</Eq>.
 
-<Eq>{`u_1 = Av_1/\\sqrt{11} = (1/\\sqrt{22})(3, 3, 2)^T`}</Eq> (normalizado).
+Valores singulares: <Eq>{`\\sigma_1 = \\sqrt{3}`}</Eq>, <Eq>{`\\sigma_2 = 1`}</Eq>.
 
-Melhor aproximação de posto 1:
+Autovetores: para <Eq>{`\\lambda = 3`}</Eq>: <Eq>{`v_1 = (1, 1)/\\sqrt{2}`}</Eq>. Para <Eq>{`\\lambda = 1`}</Eq>: <Eq>{`v_2 = (1, -1)/\\sqrt{2}`}</Eq>.
 
-<Eq>{`A_1 = \\sigma_1 u_1 v_1^T = \\sqrt{11} \\cdot \\frac{1}{\\sqrt{22}}\\begin{pmatrix}3\\\\3\\\\2\\end{pmatrix} \\cdot \\frac{1}{\\sqrt{2}}\\begin{pmatrix}1&1\\end{pmatrix} = \\frac{1}{2}\\begin{pmatrix}3&3\\\\3&3\\\\2&2\\end{pmatrix}`}</Eq>
+Vetores à esquerda:
 
-Erro: <Eq>{`\\|A - A_1\\|_F = \\sigma_2 = 1`}</Eq>.
+<Eq>{`u_1 = \\frac{A v_1}{\\sigma_1} = \\frac{1}{\\sqrt{3}} \\cdot \\frac{1}{\\sqrt{2}}\\begin{pmatrix}2\\\\1\\\\1\\end{pmatrix} = \\frac{1}{\\sqrt{6}}\\begin{pmatrix}2\\\\1\\\\1\\end{pmatrix}`}</Eq>.
 
-**Verificação.** <Eq>{`\\|A\\|_F^2 = 4+1+1+4+1+1 = 12 = \\sigma_1^2 + \\sigma_2^2 = 11 + 1`}</Eq>. $\checkmark$
+<Eq>{`u_2 = \\frac{A v_2}{\\sigma_2} = \\frac{1}{\\sqrt{2}}\\begin{pmatrix}0\\\\1\\\\-1\\end{pmatrix}`}</Eq>.
 
-**Fonte.** [Understanding Linear Algebra, §6.4 Exercício 6.4.3](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA.
+**Resposta (forma compacta, descartando coluna nula).**
+
+<Eq>{`U_2 = \\begin{pmatrix} 2/\\sqrt{6} & 0 \\\\ 1/\\sqrt{6} & 1/\\sqrt{2} \\\\ 1/\\sqrt{6} & -1/\\sqrt{2} \\end{pmatrix}, \\quad \\Sigma_2 = \\begin{pmatrix} \\sqrt{3} & 0 \\\\ 0 & 1 \\end{pmatrix}, \\quad V = \\frac{1}{\\sqrt{2}}\\begin{pmatrix} 1 & 1 \\\\ 1 & -1 \\end{pmatrix}.`}</Eq>
+
+**Verificação.** O posto de <Eq>{`A`}</Eq> é 2 (linhas <Eq>{`(1,1), (1,0), (0,1)`}</Eq> têm 2 LI). Logo a SVD compacta tem exatamente 2 valores singulares positivos. Verificado.
+
+**Fonte.** [Beezer, A First Course in Linear Algebra, §SVD Example SVD3by2](http://linear.pugetsound.edu/html/section-SVD.html) — GNU FDL.
 
 </Exemplo>
 
-<Exemplo titulo="Pseudoinversa de uma matriz retangular" numero="4">
+<Exemplo titulo="Aproximação de posto 1 e Eckart-Young (intermediário)" numero="3">
 
-**Problema.** Calcule <Eq>{`A^+`}</Eq> para <Eq>{`A = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq> e resolva o sistema de mínimos quadrados <Eq>{`\\min \\|Ax - b\\|`}</Eq> com <Eq>{`b = (2, 3, 1)^T`}</Eq>.
+**Problema.** Para <Eq>{`A = \\begin{pmatrix} 3 & 0 \\\\ 4 & 5 \\end{pmatrix}`}</Eq>, encontre a melhor aproximação de posto 1 e calcule o erro de Frobenius.
 
-**Estratégia.** <Eq>{`A`}</Eq> tem colunas ortonormais, logo SVD trivial: <Eq>{`U = I_{3\\times 3}`}</Eq> (colunas em ordem), <Eq>{`\\Sigma = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\\\ 0 & 0 \\end{pmatrix}`}</Eq>, <Eq>{`V = I_{2\\times 2}`}</Eq>.
+**Estratégia.** Aplicar SVD, tomar o primeiro termo da expansão <Eq>{`A_1 = \\sigma_1 u_1 v_1^T`}</Eq> e calcular <Eq>{`\\|A - A_1\\|_F = \\sigma_2`}</Eq>.
 
 **Resolução.**
 
-<Eq>{`\\Sigma^+ = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\end{pmatrix}`}</Eq>, portanto <Eq>{`A^+ = V \\Sigma^+ U^T = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\end{pmatrix}`}</Eq>.
+Da Porta 25: <Eq>{`\\sigma_1 = 3\\sqrt{5}`}</Eq>, <Eq>{`\\sigma_2 = \\sqrt{5}`}</Eq>, <Eq>{`u_1 = (1, 3)/\\sqrt{10}`}</Eq>, <Eq>{`v_1 = (1, 1)/\\sqrt{2}`}</Eq>.
 
-Solução: <Eq>{`x^* = A^+ b = (2, 3)^T`}</Eq>.
+<Eq>{`A_1 = \\sigma_1 u_1 v_1^T = 3\\sqrt{5} \\cdot \\frac{1}{\\sqrt{10}}\\begin{pmatrix}1\\\\3\\end{pmatrix} \\cdot \\frac{1}{\\sqrt{2}}(1, 1) = \\frac{3\\sqrt{5}}{\\sqrt{20}}\\begin{pmatrix}1 & 1 \\\\ 3 & 3\\end{pmatrix} = \\frac{3}{2}\\begin{pmatrix}1 & 1 \\\\ 3 & 3\\end{pmatrix} = \\begin{pmatrix}1{,}5 & 1{,}5 \\\\ 4{,}5 & 4{,}5\\end{pmatrix}`}</Eq>.
 
-Resíduo: <Eq>{`b - Ax^* = (2,3,1)^T - (2,3,0)^T = (0,0,1)^T`}</Eq>. Erro mínimo: <Eq>{`\\|b - Ax^*\\| = 1`}</Eq> (a terceira linha de <Eq>{`b`}</Eq> é irredutível).
+Erro: <Eq>{`A - A_1 = \\begin{pmatrix}1{,}5 & -1{,}5 \\\\ -0{,}5 & 0{,}5\\end{pmatrix}`}</Eq>.
 
-**Verificação.** <Eq>{`A`}</Eq> tem posto 2. A solução <Eq>{`x^* = (2,3)^T`}</Eq> é de mínima norma. <Eq>{`\\|A^+ A\\| = I_2`}</Eq>. $\checkmark$
+<Eq>{`\\|A - A_1\\|_F = \\sqrt{1{,}5^2 + 1{,}5^2 + 0{,}5^2 + 0{,}5^2} = \\sqrt{5} = \\sigma_2`}</Eq>.
 
-**Fonte.** [A First Course in Linear Algebra, §SVD Exercício SVD.C15](http://linear.ups.edu/html/section-SVD.html) — Rob Beezer · GNU FDL.
+**Verificação.** Conforme Eckart-Young, <Eq>{`\\|A - A_k\\|_F = \\sqrt{\\sum_{i>k} \\sigma_i^2}`}</Eq>. Aqui <Eq>{`k = 1`}</Eq>, então <Eq>{`\\|A - A_1\\|_F = \\sigma_2 = \\sqrt{5} \\approx 2{,}236`}</Eq>. Compatível com nosso cálculo direto.
+
+**Energia capturada.** <Eq>{`\\sigma_1^2 / (\\sigma_1^2 + \\sigma_2^2) = 45/50 = 90\\%`}</Eq>. A aproximação de posto 1 captura 90% da energia de <Eq>{`A`}</Eq>.
+
+**Fonte.** [Austin, Understanding Linear Algebra, §6.4](https://understandinglinearalgebra.org/chap6.html) — CC-BY-SA.
 
 </Exemplo>
 
-<Exemplo titulo="Compressão de imagem: taxa de compressão e erro" numero="5">
+<Exemplo titulo="Pseudoinversa e mínimos quadrados (avançado)" numero="4">
 
-**Problema.** Uma imagem em tons de cinza tem <Eq>{`512 \\times 512`}</Eq> pixels. Os valores singulares decaem como <Eq>{`\\sigma_i = 10^4 / i`}</Eq>. Calcule: (a) a variância explicada cumulativa pelos primeiros <Eq>{`k = 20`}</Eq> componentes; (b) a taxa de compressão com <Eq>{`k = 20`}</Eq>; (c) o erro relativo de Frobenius.
+**Problema.** Use SVD para encontrar a solução de mínimos quadrados de <Eq>{`Ax = b`}</Eq>, onde <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 1 & 1 \\\\ 0 & 1 \\end{pmatrix}`}</Eq> e <Eq>{`b = (2, 0, 3)^T`}</Eq>.
 
-**Estratégia.** Usar fórmulas do Teorema de Eckart-Young e definição de compressão.
+**Estratégia.** Calcular SVD compacta de <Eq>{`A`}</Eq>, formar pseudoinversa <Eq>{`A^+ = V \\Sigma^+ U^T`}</Eq>, computar <Eq>{`x^* = A^+ b`}</Eq>.
 
 **Resolução.**
 
-(a) <Eq>{`\\|A\\|_F^2 = \\sum_{i=1}^{512} \\sigma_i^2 = 10^8 \\sum_{i=1}^{512} 1/i^2 \\approx 10^8 \\cdot 1{,}6449 = 1{,}645 \\times 10^8`}</Eq>.
+<Eq>{`A^T A = \\begin{pmatrix} 2 & 2 \\\\ 2 & 3 \\end{pmatrix}`}</Eq>. Autovalores: <Eq>{`\\det = (2-\\lambda)(3-\\lambda) - 4 = \\lambda^2 - 5\\lambda + 2 = 0`}</Eq>, logo <Eq>{`\\lambda = (5 \\pm \\sqrt{17})/2`}</Eq>.
 
-<Eq>{`\\sum_{i=1}^{20} \\sigma_i^2 = 10^8 \\sum_{i=1}^{20} 1/i^2 \\approx 10^8 \\cdot 1{,}5962`}</Eq>.
+Numericamente: <Eq>{`\\lambda_1 \\approx 4{,}561`}</Eq>, <Eq>{`\\lambda_2 \\approx 0{,}439`}</Eq>. Valores singulares: <Eq>{`\\sigma_1 \\approx 2{,}136`}</Eq>, <Eq>{`\\sigma_2 \\approx 0{,}662`}</Eq>.
 
-Variância explicada: <Eq>{`1{,}5962 / 1{,}6449 \\approx 97{,}0\\%`}</Eq>.
+Autovetores (após normalização): <Eq>{`v_1 \\approx (0{,}615, 0{,}789)^T`}</Eq>, <Eq>{`v_2 \\approx (0{,}789, -0{,}615)^T`}</Eq>.
 
-(b) Armazenamento de <Eq>{`A_k`}</Eq>: <Eq>{`k(m + n + 1) = 20(512 + 512 + 1) = 20505`}</Eq> vs <Eq>{`512^2 = 262144`}</Eq>. Taxa: <Eq>{`262144 / 20505 \\approx 12{,}8\\times`}</Eq>.
+Vetores singulares à esquerda: <Eq>{`u_i = A v_i / \\sigma_i`}</Eq>. Cálculo direto dá <Eq>{`u_1 \\approx (0{,}658, 0{,}658, 0{,}369)^T`}</Eq> e <Eq>{`u_2 \\approx (0{,}198, 0{,}198, -0{,}929)^T`}</Eq>.
 
-(c) Erro relativo: <Eq>{`\\sqrt{1 - 0{,}970} = \\sqrt{0{,}030} \\approx 17{,}3\\%`}</Eq> (em Frobenius).
+Pseudoinversa: <Eq>{`A^+ = V \\text{diag}(1/\\sigma_1, 1/\\sigma_2) U^T`}</Eq>.
 
-**Verificação.** Com <Eq>{`k = 50`}</Eq>, variância explicada seria ainda maior e erro menor. A escolha <Eq>{`k = 20`}</Eq> já captura 97% com compressão 12.8x — excelente para visualização.
+Solução: <Eq>{`x^* = A^+ b`}</Eq>. Equivalentemente, como <Eq>{`A`}</Eq> tem posto completo de colunas, <Eq>{`x^* = (A^T A)^{-1} A^T b`}</Eq>.
 
-**Fonte.** [Understanding Linear Algebra, §6.4](https://understandinglinearalgebra.org/chap6.html) — David Austin · CC-BY-SA. Modelo de decaimento de <Eq>{`\\sigma_i`}</Eq> análogo ao Exercício 6.4.5.
+<Eq>{`A^T b = (2, 5)^T`}</Eq>, <Eq>{`(A^T A)^{-1} = \\frac{1}{2}\\begin{pmatrix}3 & -2 \\\\ -2 & 2\\end{pmatrix}`}</Eq>.
+
+<Eq>{`x^* = \\frac{1}{2}\\begin{pmatrix}3 & -2 \\\\ -2 & 2\\end{pmatrix}\\begin{pmatrix}2\\\\5\\end{pmatrix} = \\frac{1}{2}\\begin{pmatrix}-4 \\\\ 6\\end{pmatrix} = \\begin{pmatrix}-2 \\\\ 3\\end{pmatrix}`}</Eq>.
+
+**Verificação.** <Eq>{`A x^* = (1, 1, 3)^T`}</Eq>; resíduo <Eq>{`b - Ax^* = (1, -1, 0)^T`}</Eq>; norma <Eq>{`\\sqrt{2}`}</Eq>. O resíduo é ortogonal a <Eq>{`\\text{col}(A)`}</Eq>: <Eq>{`A^T(b - Ax^*) = (1 \\cdot 1 + 1 \\cdot (-1), 1 \\cdot 1 + 1 \\cdot (-1) + 1 \\cdot 0)^T = (0, 0)^T`}</Eq>. Correto.
+
+**Observação.** Como <Eq>{`A`}</Eq> tem posto completo, SVD e equações normais dão o mesmo resultado. Mas se <Eq>{`A`}</Eq> tivesse posto deficiente, **apenas** SVD funcionaria (equações normais teriam infinitas soluções).
+
+**Fonte.** [Hefferon, Linear Algebra, cap. 5, §IV](https://hefferon.net/linearalgebra/) — CC-BY-SA.
 
 </Exemplo>
 
-<ListaExercicios seed="licao-117-svd">
+<Exemplo titulo="Demonstrar existência da SVD via teorema espectral (demonstração)" numero="5">
 
-<Exercicio
-  numero="117.1"
-  dificuldade="compreensao"
-  solucao={<>Os valores singulares são as raízes quadradas dos autovalores de <Eq>{`A^T A`}</Eq>. São sempre reais e não-negativos, ao contrário dos autovalores de <Eq>{`A`}</Eq> que podem ser complexos. Para matrizes simétricas positivas semi-definidas, autovalores e valores singulares coincidem.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "311", exercicio: "6.3.1", licenca: "CC-BY-SA" }}
->
-Explique a diferença entre autovalores e valores singulares de uma matriz <Eq>{`A`}</Eq>. Para que tipo de matriz eles coincidem?
-</Exercicio>
+**Problema.** Mostre que toda matriz <Eq>{`A \\in \\mathbb{R}^{m \\times n}`}</Eq> admite SVD, usando o teorema espectral de matrizes simétricas reais.
 
-<Exercicio
-  numero="117.2"
-  dificuldade="aplicacao"
-  solucao={<><Eq>{`A^T A = \\begin{pmatrix} 9 & 0 \\\\ 0 & 16 \\end{pmatrix}`}</Eq>. Autovalores: 9 e 16. Valores singulares: <Eq>{`\\sigma_1 = 4`}</Eq>, <Eq>{`\\sigma_2 = 3`}</Eq>. <Eq>{`V = I_2`}</Eq> (pois <Eq>{`A^T A`}</Eq> já é diagonal). <Eq>{`U`}</Eq>: colunas <Eq>{`u_i = Av_i/\\sigma_i`}</Eq> — como <Eq>{`A`}</Eq> tem colunas ortonormais escaladas, <Eq>{`u_1 = (0,1)^T`}</Eq>, <Eq>{`u_2 = (1,0)^T`}</Eq>.</>}
-  passos={<><ol><li>Calcule <Eq>{`A^T A`}</Eq>: multiplique transposta por original.</li><li>Ache autovalores de <Eq>{`A^T A`}</Eq> (diagonal, são as entradas ao quadrado, reordenados).</li><li>Valores singulares: <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq> em ordem decrescente.</li><li>Vetores <Eq>{`v_i`}</Eq>: autovetores de <Eq>{`A^T A`}</Eq>.</li><li>Vetores <Eq>{`u_i = Av_i/\\sigma_i`}</Eq>.</li><li><em>Macete:</em> para <Eq>{`A`}</Eq> diagonal, a SVD é trivial — só reorganize por <Eq>{`\\sigma`}</Eq> decrescente.</li></ol></>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "498", exercicio: "SVD.C10", licenca: "GNU FDL" }}
->
-Calcule a SVD de <Eq>{`A = \\begin{pmatrix} 0 & 3 \\\\ 4 & 0 \\end{pmatrix}`}</Eq>.
-</Exercicio>
+**Estratégia.** Aplicar o teorema espectral à matriz <Eq>{`A^T A`}</Eq> (simétrica PSD), construir <Eq>{`V`}</Eq> e <Eq>{`\\Sigma`}</Eq>, depois definir <Eq>{`U`}</Eq> via <Eq>{`u_i = A v_i / \\sigma_i`}</Eq> e completar a base.
 
-<Exercicio
-  numero="117.3"
-  dificuldade="aplicacao"
-  solucao={<><Eq>{`A^T A = \\begin{pmatrix} 2 & 2 \\\\ 2 & 2 \\end{pmatrix}`}</Eq>. Autovalores: 4 e 0. Valor singular: <Eq>{`\\sigma_1 = 2`}</Eq>. <Eq>{`v_1 = (1/\\sqrt{2})(1,1)^T`}</Eq>. <Eq>{`u_1 = Av_1/2 = (1/\\sqrt{2})(1,1)^T`}</Eq>. Posto = 1.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "313", exercicio: "6.3.3", licenca: "CC-BY-SA" }}
->
-Calcule a SVD compacta de <Eq>{`A = \\begin{pmatrix} 1 & 1 \\\\ 1 & 1 \\end{pmatrix}`}</Eq>. Qual o posto de <Eq>{`A`}</Eq>?
-</Exercicio>
+**Resolução.**
 
-<Exercicio
-  numero="117.4"
-  dificuldade="aplicacao"
-  solucao={<>Posto = número de valores singulares estritamente positivos. Para <Eq>{`A`}</Eq> com SVD dada, o posto é 2, pois <Eq>{`\\sigma_1 = 5`}</Eq> e <Eq>{`\\sigma_2 = 3`}</Eq> são ambos positivos.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "500", exercicio: "SVD.M20", licenca: "GNU FDL" }}
->
-Se a SVD de <Eq>{`A \\in \\mathbb{R}^{4 \\times 3}`}</Eq> tem valores singulares <Eq>{`\\sigma_1 = 5, \\sigma_2 = 3, \\sigma_3 = 0`}</Eq>, qual o posto de <Eq>{`A`}</Eq>? Qual a dimensão de <Eq>{`\\ker(A)`}</Eq>?
-</Exercicio>
+**Passo 1.** <Eq>{`A^T A \\in \\mathbb{R}^{n \\times n}`}</Eq> é simétrica e PSD (mostrado em L116, Exemplo 5).
 
-<Exercicio
-  numero="117.5"
-  dificuldade="aplicacao"
-  solucao={<>Melhor aproximação de posto 1: <Eq>{`A_1 = \\sigma_1 u_1 v_1^T`}</Eq>. Erro de Frobenius: <Eq>{`\\|A - A_1\\|_F = \\sqrt{\\sigma_2^2 + \\sigma_3^2} = \\sqrt{4 + 1} = \\sqrt{5}`}</Eq>. Erro espectral: <Eq>{`\\|A - A_1\\|_2 = \\sigma_2 = 2`}</Eq>.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "325", exercicio: "6.4.1", licenca: "CC-BY-SA" }}
->
-A SVD de <Eq>{`A`}</Eq> tem valores singulares <Eq>{`\\sigma_1 = 8, \\sigma_2 = 2, \\sigma_3 = 1`}</Eq>. Calcule o erro de Frobenius e o erro espectral da melhor aproximação de posto 1.
-</Exercicio>
+**Passo 2.** Pelo teorema espectral (L116), existem autovalores <Eq>{`\\lambda_1 \\geq \\cdots \\geq \\lambda_n \\geq 0`}</Eq> e autovetores ortonormais <Eq>{`v_1, \\ldots, v_n`}</Eq> tais que <Eq>{`A^T A v_i = \\lambda_i v_i`}</Eq>.
 
-<Exercicio
-  numero="117.6"
-  dificuldade="aplicacao"
-  solucao={<>Usando SVD <Eq>{`A = U \\Sigma V^T`}</Eq>: <Eq>{`\\Sigma^+ = \\begin{pmatrix} 1/5 & 0 & 0 \\\\ 0 & 1/3 & 0 \\end{pmatrix}`}</Eq>. <Eq>{`A^+ = V \\Sigma^+ U^T \\in \\mathbb{R}^{3 \\times 2}`}</Eq>. Solução de mínimos quadrados: <Eq>{`x^* = A^+ b`}</Eq>.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "502", exercicio: "SVD.C20", licenca: "GNU FDL" }}
->
-Descreva como calcular a pseudoinversa <Eq>{`A^+`}</Eq> de <Eq>{`A \\in \\mathbb{R}^{2 \\times 3}`}</Eq> com valores singulares <Eq>{`\\sigma_1 = 5, \\sigma_2 = 3`}</Eq> e posto 2. Qual a dimensão de <Eq>{`A^+`}</Eq>?
-</Exercicio>
+**Passo 3.** Seja <Eq>{`r`}</Eq> o número de <Eq>{`\\lambda_i > 0`}</Eq>. Defina <Eq>{`\\sigma_i = \\sqrt{\\lambda_i}`}</Eq> para <Eq>{`i \\leq r`}</Eq>.
 
-<Exercicio
-  numero="117.7"
-  dificuldade="compreensao"
-  solucao={<>O número de condicionamento <Eq>{`\\kappa_2(A) = \\sigma_1 / \\sigma_r = 100 / 0{,}01 = 10^4`}</Eq>. Um sistema muito mal-condicionado: erros relativos em <Eq>{`b`}</Eq> são amplificados por até <Eq>{`10^4`}</Eq> em <Eq>{`x`}</Eq>. Dados com 4 algarismos significativos podem perder toda precisão.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "318", exercicio: "6.3.7", licenca: "CC-BY-SA" }}
->
-Uma matriz <Eq>{`A \\in \\mathbb{R}^{10 \\times 10}`}</Eq> tem valores singulares <Eq>{`\\sigma_1 = 100`}</Eq> e <Eq>{`\\sigma_{10} = 0{,}01`}</Eq>. Calcule <Eq>{`\\kappa_2(A)`}</Eq> e interprete o que isso significa para resolver <Eq>{`Ax = b`}</Eq> numericamente.
-</Exercicio>
+**Passo 4.** Para <Eq>{`i \\leq r`}</Eq>, defina <Eq>{`u_i = A v_i / \\sigma_i \\in \\mathbb{R}^m`}</Eq>. Verifique:
 
-<Exercicio
-  numero="117.8"
-  dificuldade="aplicacao"
-  solucao={<>Variância explicada cumulativa: <Eq>{`\\sum_{i=1}^k \\sigma_i^2 / \\sum_{j=1}^r \\sigma_j^2`}</Eq>. Com <Eq>{`\\sigma = (10, 5, 2, 1)`}</Eq>: <Eq>{`\\sum \\sigma_i^2 = 100 + 25 + 4 + 1 = 130`}</Eq>. Top-1: <Eq>{`100/130 \\approx 76{,}9\\%`}</Eq>. Top-2: <Eq>{`125/130 \\approx 96{,}2\\%`}</Eq>. Escolha <Eq>{`k = 2`}</Eq> para 95%.</>}
-  passos={<><ol><li>Calcule <Eq>{`\\|A\\|_F^2 = \\sum_i \\sigma_i^2`}</Eq>.</li><li>Calcule variância explicada cumulativa até cada <Eq>{`k`}</Eq>.</li><li>Encontre o menor <Eq>{`k`}</Eq> tal que a proporção cumulativa <Eq>{`\\geq 0{,}95`}</Eq>.</li><li><em>Macete:</em> o scree plot mostra <Eq>{`\\sigma_i`}</Eq> vs <Eq>{`i`}</Eq>; o "joelho" geralmente corresponde a ~95%.</li></ol></>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "327", exercicio: "6.4.4", licenca: "CC-BY-SA" }}
->
-Uma matriz tem valores singulares <Eq>{`\\sigma_1 = 10, \\sigma_2 = 5, \\sigma_3 = 2, \\sigma_4 = 1`}</Eq>. Qual o menor <Eq>{`k`}</Eq> tal que a aproximação de posto <Eq>{`k`}</Eq> explica pelo menos 95% da variância de Frobenius?
-</Exercicio>
+<Eq>{`\\langle u_i, u_j \\rangle = \\frac{(Av_i)^T(Av_j)}{\\sigma_i \\sigma_j} = \\frac{v_i^T A^T A v_j}{\\sigma_i \\sigma_j} = \\frac{\\lambda_j v_i^T v_j}{\\sigma_i \\sigma_j} = \\frac{\\lambda_j \\delta_{ij}}{\\sigma_i \\sigma_j} = \\delta_{ij}`}</Eq>.
 
-<Exercicio
-  numero="117.9"
-  dificuldade="aplicacao"
-  solucao={<>Para <Eq>{`A`}</Eq> simétrica PSD, <Eq>{`A = Q \\Lambda Q^T`}</Eq> (decomposição espectral) já é uma SVD com <Eq>{`U = V = Q`}</Eq> e <Eq>{`\\Sigma = \\Lambda`}</Eq>. Os valores singulares são os autovalores (não-negativos por PSD). A SVD coincide com a diagonalização.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "497", exercicio: "SVD.T10", licenca: "GNU FDL" }}
->
-Mostre que, para uma matriz simétrica positiva semi-definida <Eq>{`A = Q \\Lambda Q^T`}</Eq>, a SVD tem <Eq>{`U = V = Q`}</Eq> e <Eq>{`\\Sigma = \\Lambda`}</Eq>. O que os valores singulares são, nesse caso?
-</Exercicio>
+Logo <Eq>{`u_1, \\ldots, u_r`}</Eq> são ortonormais.
 
-<Exercicio
-  numero="117.10"
-  dificuldade="modelagem"
-  solucao={<>Custo de armazenamento SVD truncada: <Eq>{`k(m + n + 1)`}</Eq> reais. Original: <Eq>{`mn`}</Eq>. Taxa de compressão: <Eq>{`mn / [k(m+n+1)]`}</Eq>. Para <Eq>{`m = n = 1000`}</Eq>, <Eq>{`k = 50`}</Eq>: <Eq>{`10^6 / [50 \\times 2001] \\approx 10`}</Eq>. Fator de compressão 10x. Erro Frobenius relativo: <Eq>{`\\sqrt{\\sum_{i > 50} \\sigma_i^2} / \\|A\\|_F`}</Eq>.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "328", exercicio: "6.4.5", licenca: "CC-BY-SA" }}
->
-Uma imagem em tons de cinza é uma matriz <Eq>{`1000 \\times 1000`}</Eq>. Se você guardar a SVD truncada com <Eq>{`k = 50`}</Eq> componentes, quantos floats armazena em comparação com a imagem original? Qual o fator de compressão?
-</Exercicio>
+**Passo 5.** Complete <Eq>{`u_{r+1}, \\ldots, u_m`}</Eq> com base ortonormal de <Eq>{`\\ker(A^T) = (\\text{col}(A))^\\perp`}</Eq>. (Existe por Gram-Schmidt.) Então <Eq>{`U = [u_1 | \\cdots | u_m] \\in \\mathbb{R}^{m \\times m}`}</Eq> é ortogonal.
 
-<Exercicio
-  numero="117.11"
-  dificuldade="compreensao"
+**Passo 6.** Verifique <Eq>{`A = U \\Sigma V^T`}</Eq>. Equivalentemente, <Eq>{`A V = U \\Sigma`}</Eq>. Para <Eq>{`i \\leq r`}</Eq>: <Eq>{`(AV)_{:,i} = A v_i = \\sigma_i u_i = (U\\Sigma)_{:,i}`}</Eq>. Para <Eq>{`i > r`}</Eq>: <Eq>{`A v_i = 0`}</Eq> (pois <Eq>{`\\|A v_i\\|^2 = v_i^T A^T A v_i = \\lambda_i = 0`}</Eq>) e <Eq>{`(U\\Sigma)_{:,i} = 0`}</Eq>. Logo <Eq>{`AV = U\\Sigma`}</Eq>, ou seja <Eq>{`A = U \\Sigma V^T`}</Eq>. <Eq>{`\\square`}</Eq>
+
+**Observação.** A unicidade dos <Eq>{`\\sigma_i`}</Eq> segue da unicidade dos autovalores de <Eq>{`A^T A`}</Eq>. Os <Eq>{`u_i, v_i`}</Eq> são únicos quando os <Eq>{`\\sigma_i`}</Eq> são distintos e positivos; em caso de multiplicidade, há liberdade de rotação dentro do auto-espaço.
+
+**Fonte.** [Beezer, A First Course in Linear Algebra, §SVD Theorem EXIST-SVD](http://linear.pugetsound.edu/html/section-SVD.html) — GNU FDL.
+
+</Exemplo>
+
+<ListaExercicios seed="licao-117">
+
+> **Lista do caderno.** São 40 exercícios baseados em Axler — Linear Algebra Done Right 4e, §7E (Decomposição em valores singulares) e §7F (Norma de operadores). Resolva no papel; as demonstrações use rascunho. Todos têm fonte e solução.
+
+### Bloco A — Valores singulares: definição e cálculo (117.1 a 117.10)
+
+<Exercicio numero="117.1" dificuldade="aplicacao"
   opcoes={[
-    { texto: "Colunas de U formam base do espaço coluna de A e colunas de V formam base do espaço linha de A", correta: true },
-    { texto: "Colunas de U são autovetores de A e colunas de V são autovetores de A^T" },
-    { texto: "U e V são a mesma matriz quando A é quadrada" },
-    { texto: "As últimas colunas de U formam base do espaço linha de A" }
+    { texto: "$T = 0$ implica todos os valores singulares nulos; e vice-versa", correta: true },
+    { texto: "Apenas o maior valor singular precisa ser nulo" },
+    { texto: "$T = 0$ não tem relação com os valores singulares" },
+    { texto: "$T = 0$ implica exatamente um valor singular nulo" },
   ]}
-  solucao={<>As primeiras <Eq>{`r`}</Eq> colunas de <Eq>{`U`}</Eq> formam base ortonormal de <Eq>{`\\text{Col}(A)`}</Eq>; as últimas <Eq>{`m - r`}</Eq> de <Eq>{`\\ker(A^T)`}</Eq>. As primeiras <Eq>{`r`}</Eq> colunas de <Eq>{`V`}</Eq> formam base de <Eq>{`\\text{Row}(A)`}</Eq>; as últimas <Eq>{`n - r`}</Eq> de <Eq>{`\\ker(A)`}</Eq>.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "315", exercicio: "6.3.4", licenca: "CC-BY-SA" }}
+  solucao={<>Os valores singulares de <Eq>{`T`}</Eq> são as raízes quadradas dos autovalores de <Eq>{`T^* T`}</Eq>. Se todos são zero, <Eq>{`T^* T = 0`}</Eq>, logo <Eq>{`\\|Tv\\|^2 = \\langle T^*Tv, v\\rangle = 0`}</Eq> para todo <Eq>{`v`}</Eq>, o que implica <Eq>{`T = 0`}</Eq>. A recíproca é imediata.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 1", licenca: "CC-BY-NC 4.0" }}
 >
-Qual afirmação sobre a interpretação de <Eq>{`U`}</Eq> e <Eq>{`V`}</Eq> na SVD é correta?
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq>. Mostre que <Eq>{`T = 0`}</Eq> se e somente se todos os valores singulares de <Eq>{`T`}</Eq> são iguais a zero.
+
 </Exercicio>
 
-<Exercicio
-  numero="117.12"
-  dificuldade="aplicacao"
-  solucao={<><Eq>{`\\|A\\|_2 = \\sigma_1`}</Eq> (norma espectral = maior valor singular). <Eq>{`\\|A\\|_F = \\sqrt{\\sigma_1^2 + \\cdots + \\sigma_r^2}`}</Eq> (norma de Frobenius). Para <Eq>{`A`}</Eq> com <Eq>{`\\sigma = (6, 3, 2, 1)`}</Eq>: <Eq>{`\\|A\\|_2 = 6`}</Eq>, <Eq>{`\\|A\\|_F = \\sqrt{50} = 5\\sqrt{2}`}</Eq>.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "501", exercicio: "SVD.M30", licenca: "GNU FDL" }}
->
-A SVD de <Eq>{`A`}</Eq> tem valores singulares <Eq>{`6, 3, 2, 1`}</Eq>. Calcule a norma espectral <Eq>{`\\|A\\|_2`}</Eq> e a norma de Frobenius <Eq>{`\\|A\\|_F`}</Eq>.
-</Exercicio>
-
-<Exercicio
-  numero="117.13"
-  dificuldade="aplicacao"
-  solucao={<>Custo de armazenar todos os <Eq>{`r`}</Eq> componentes: <Eq>{`r(m + n + 1) = 100(512 + 512 + 1) = 102500`}</Eq> vs <Eq>{`512^2 = 262144`}</Eq>. Ainda há compressão mesmo guardando tudo. Percentagem da variância explicada pelos 10 primeiros: depende da distribuição de <Eq>{`\\sigma_i`}</Eq>.</>}
-  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "148", exercicio: "SVD-3", licenca: "CC-BY-SA" }}
->
-Uma imagem <Eq>{`512 \\times 512`}</Eq> tem posto numérico <Eq>{`r = 100`}</Eq>. Qual a taxa de compressão ao guardar a SVD completa de posto <Eq>{`r`}</Eq> em vez da matriz original?
-</Exercicio>
-
-<Exercicio
-  numero="117.14"
-  dificuldade="aplicacao"
-  solucao={<><Eq>{`\\|Ax\\| \\leq \\sigma_1 \\|x\\|`}</Eq> e <Eq>{`\\min_{\\|x\\|=1} \\|Ax\\| = \\sigma_r`}</Eq>. A matrix faz o máximo stretch por <Eq>{`\\sigma_1`}</Eq> (na direção <Eq>{`v_1`}</Eq>) e mínimo por <Eq>{`\\sigma_r`}</Eq> (na direção <Eq>{`v_r`}</Eq>). A esfera unitária é mapeada num elipsoide com semi-eixos <Eq>{`\\sigma_1 \\geq \\cdots \\geq \\sigma_r`}</Eq>.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "319", exercicio: "6.3.9", licenca: "CC-BY-SA" }}
->
-Explique geometricamente o que a SVD diz sobre como a matriz <Eq>{`A`}</Eq> transforma a esfera unitária de <Eq>{`\\mathbb{R}^n`}</Eq>. Quais são os semi-eixos do elipsoide resultante?
-</Exercicio>
-
-<Exercicio
-  numero="117.15"
-  dificuldade="aplicacao"
-  solucao={<>Pela expansão SVD: <Eq>{`Av_i = \\sigma_i u_i`}</Eq> para <Eq>{`1 \\leq i \\leq r`}</Eq> e <Eq>{`Av_j = 0`}</Eq> para <Eq>{`j > r`}</Eq>. Portanto <Eq>{`v_1, \\ldots, v_r`}</Eq> são base do espaço linha e <Eq>{`Av_i`}</Eq> tem norma <Eq>{`\\sigma_i`}</Eq>.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "499", exercicio: "SVD.T15", licenca: "GNU FDL" }}
->
-Mostre que na SVD se tem <Eq>{`Av_i = \\sigma_i u_i`}</Eq> para todo <Eq>{`i`}</Eq>. Use isso para verificar que <Eq>{`\\|Av_i\\| = \\sigma_i`}</Eq>.
-</Exercicio>
-
-<Exercicio
-  numero="117.16"
-  dificuldade="modelagem"
-  solucao={<>LSA: represente documentos como vetores TF-IDF em um espaço de termos. A matrix termo-documento <Eq>{`A`}</Eq> tem SVD. Os primeiros <Eq>{`k`}</Eq> vetores singulares à direita representam <Eq>{`k`}</Eq> "tópicos latentes". Documentos novos são projetados: <Eq>{`q_{\\text{novo}} = A_{\\text{novo}} V_k \\Sigma_k^{-1}`}</Eq>. Documentos similares ficam próximos nesse espaço.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "330", exercicio: "6.4.8", licenca: "CC-BY-SA" }}
->
-Em latent semantic analysis (LSA), a SVD de uma matriz termo-documento é truncada nos <Eq>{`k`}</Eq> maiores valores singulares. Explique conceitualmente por que isso captura "tópicos latentes" nos documentos.
-</Exercicio>
-
-<Exercicio
-  numero="117.17"
-  dificuldade="demonstracao"
-  solucao={<>Por Eckart-Young, <Eq>{`A_k`}</Eq> minimiza <Eq>{`\\|A - B\\|_F`}</Eq> entre todas as matrizes <Eq>{`B`}</Eq> de posto <Eq>{`\\leq k`}</Eq>. Prova: qualquer <Eq>{`B`}</Eq> de posto <Eq>{`k`}</Eq> tem nulidade <Eq>{`\\geq n - k`}</Eq>, logo existe <Eq>{`x`}</Eq> unitário no nulidade de <Eq>{`B`}</Eq> e no espaço de <Eq>{`v_1, \\ldots, v_{k+1}`}</Eq>. Então <Eq>{`\\|A - B\\|_F \\geq \\|(A - B)x\\| = \\|Ax\\| \\geq \\sigma_{k+1}`}</Eq>. O mínimo é atingido em <Eq>{`A_k`}</Eq>.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "505", exercicio: "SVD.T30", licenca: "GNU FDL" }}
->
-Enuncie o Teorema de Eckart-Young e esboce a ideia da demonstração de que <Eq>{`A_k`}</Eq> é de fato a melhor aproximação de posto <Eq>{`k`}</Eq> em norma espectral.
-</Exercicio>
-
-<Exercicio
-  numero="117.18"
-  dificuldade="aplicacao"
-  solucao={<><Eq>{`\\|A^T A\\|_2 = \\sigma_1(A^T A) = \\sigma_1(A)^2`}</Eq> (pois autovalores de <Eq>{`A^T A`}</Eq> são <Eq>{`\\sigma_i(A)^2`}</Eq>). <Eq>{`\\|A^T A\\|_F = \\sqrt{\\sum \\sigma_i^4}`}</Eq>. Para <Eq>{`A`}</Eq> com <Eq>{`\\sigma = (5, 3, 1)`}</Eq>: <Eq>{`\\|A^T A\\|_2 = 25`}</Eq>, <Eq>{`\\|A^T A\\|_F = \\sqrt{625 + 81 + 1} = \\sqrt{707}`}</Eq>.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "316", exercicio: "6.3.5", licenca: "CC-BY-SA" }}
->
-Se <Eq>{`A`}</Eq> tem valores singulares <Eq>{`5, 3, 1`}</Eq>, quais são os valores singulares de <Eq>{`A^T A`}</Eq>? Calcule <Eq>{`\\|A^T A\\|_2`}</Eq> e <Eq>{`\\|A^T A\\|_F`}</Eq>.
-</Exercicio>
-
-<Exercicio
-  numero="117.19"
-  dificuldade="aplicacao"
-  solucao={<>Posto numérico: número de valores singulares acima de <Eq>{`\\epsilon \\cdot \\sigma_1`}</Eq> onde <Eq>{`\\epsilon`}</Eq> é a precisão de máquina (~<Eq>{`10^{-15}`}</Eq> para float64). Para <Eq>{`\\sigma = (100, 10, 1, 0{,}001, 0{,}00001)`}</Eq> com <Eq>{`\\epsilon = 10^{-12}`}</Eq>: threshold = <Eq>{`10^{-10}`}</Eq>, portanto posto numérico = 4 (os 4 primeiros estão acima).</>}
-  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "150", exercicio: "SVD-5", licenca: "CC-BY-SA" }}
->
-Uma matrix tem valores singulares <Eq>{`100, 10, 1, 0{,}001, 0{,}00001`}</Eq>. Usando threshold <Eq>{`\\epsilon = 10^{-12}`}</Eq> relativo ao maior singular, qual o posto numérico?
-</Exercicio>
-
-<Exercicio
-  numero="117.20"
-  dificuldade="aplicacao"
-  solucao={<>Para <Eq>{`A`}</Eq> ortogonal: <Eq>{`A^T A = I`}</Eq>, logo todos autovalores de <Eq>{`A^T A`}</Eq> são 1, portanto todos valores singulares de <Eq>{`A`}</Eq> são 1. SVD: <Eq>{`A = U I V^T`}</Eq> com <Eq>{`\\Sigma = I`}</Eq>. Número de condicionamento: <Eq>{`\\kappa_2(A) = 1`}</Eq> — perfeitamente condicionada.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "498", exercicio: "SVD.T20", licenca: "GNU FDL" }}
->
-Prove que uma matriz ortogonal tem todos os valores singulares iguais a 1. Qual o número de condicionamento de uma matriz ortogonal?
-</Exercicio>
-
-<Exercicio
-  numero="117.21"
-  dificuldade="modelagem"
-  solucao={<>Modelo fator linear: retornos de <Eq>{`n`}</Eq> ações ao longo de <Eq>{`T`}</Eq> dias formam matriz <Eq>{`R \\in \\mathbb{R}^{T \\times n}`}</Eq>. SVD de <Eq>{`\\tilde R`}</Eq> (centralizada): as primeiras <Eq>{`k`}</Eq> colunas de <Eq>{`V`}</Eq> são portfólios-fator. Valores singulares ao quadrado divididos por <Eq>{`T - 1`}</Eq> são autovalores da covariância — variâncias dos fatores. Risco sistemático é capturado pelos primeiros fatores.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "331", exercicio: "6.4.9", licenca: "CC-BY-SA" }}
->
-Explique como a SVD da matriz de retornos de ações identifica "fatores de risco" num portfólio. O que os primeiros vetores singulares <Eq>{`v_1, v_2, v_3`}</Eq> representam economicamente?
-</Exercicio>
-
-<Exercicio
-  numero="117.22"
-  dificuldade="aplicacao"
-  solucao={<>Valores singulares de <Eq>{`A^T`}</Eq> são os mesmos de <Eq>{`A`}</Eq>. Pois <Eq>{`(A^T)^T A^T = A A^T`}</Eq>, que tem os mesmos autovalores não-nulos que <Eq>{`A^T A`}</Eq> (pelo teorema do traço de produto circular). Assim <Eq>{`\\sigma_i(A^T) = \\sigma_i(A)`}</Eq>.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "499", exercicio: "SVD.T12", licenca: "GNU FDL" }}
->
-Prove que <Eq>{`A`}</Eq> e <Eq>{`A^T`}</Eq> têm os mesmos valores singulares não-nulos.
-</Exercicio>
-
-<Exercicio
-  numero="117.23"
-  dificuldade="aplicacao"
-  solucao={<>Solução de mínimos quadrados com regularização Tikhonov: <Eq>{`x_\\lambda = (A^T A + \\lambda I)^{-1} A^T b = V (\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T U^T b = \\sum_i \\frac{\\sigma_i}{\\sigma_i^2 + \\lambda} (u_i^T b) v_i`}</Eq>. Para <Eq>{`\\lambda \\to 0`}</Eq>, recupera pseudoinversa. Para <Eq>{`\\lambda`}</Eq> grande, encolhe para zero.</>}
-  passos={<><ol><li>Substitua <Eq>{`A = U \\Sigma V^T`}</Eq> na fórmula de ridge.</li><li>Simplifique <Eq>{`(A^T A + \\lambda I)^{-1} = V(\\Sigma^T \\Sigma + \\lambda I)^{-1}V^T`}</Eq>.</li><li>A diagonal de <Eq>{`(\\Sigma^T \\Sigma + \\lambda I)^{-1} \\Sigma^T`}</Eq> é <Eq>{`\\sigma_i / (\\sigma_i^2 + \\lambda)`}</Eq>.</li><li><em>Macete:</em> ridge = pseudoinversa suavizada — encolhe componentes com <Eq>{`\\sigma_i^2 \\ll \\lambda`}</Eq>.</li></ol></>}
-  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "152", exercicio: "SVD-7", licenca: "CC-BY-SA" }}
->
-Derive a solução de ridge regression <Eq>{`x_\\lambda = (A^T A + \\lambda I)^{-1} A^T b`}</Eq> em termos da SVD de <Eq>{`A`}</Eq>.
-</Exercicio>
-
-<Exercicio
-  numero="117.24"
-  dificuldade="aplicacao"
-  solucao={<>Três eixos de deformação: level (todos yields sobem juntos), slope (curta vs longa maturidade), curvature (meio vs extremos). Litterman-Scheinkman (1991) mostraram que esses 3 PCs explicam ~99% da variância da yield curve do Tesouro americano. SVD da matriz de yields diários (tempo × maturidade) extrai esses fatores automaticamente.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "332", exercicio: "6.4.10", licenca: "CC-BY-SA" }}
->
-A curva de juros (yield curve) brasileira tem dados diários de yields em 10 maturidades diferentes. SVD dessa matriz identifica 3 fatores principais. Quais são esses fatores, economicamente?
-</Exercicio>
-
-<Exercicio
-  numero="117.25"
-  dificuldade="aplicacao"
-  solucao={<>Taxa de compressão para imagem <Eq>{`m \\times n`}</Eq> com <Eq>{`k`}</Eq> singulares: <Eq>{`mn / [k(m + n + 1)]`}</Eq>. Para ser vantajoso: <Eq>{`k(m+n+1) < mn`}</Eq>, ou seja <Eq>{`k < mn/(m+n+1)`}</Eq>. Para <Eq>{`m = n = 1000`}</Eq>: <Eq>{`k < 10^6/2001 \\approx 499`}</Eq>. Para qualquer <Eq>{`k < n/2`}</Eq> há compressão. Para <Eq>{`k = 100`}</Eq>: taxa de aproximadamente 5x.</>}
-  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "149", exercicio: "SVD-4", licenca: "CC-BY-SA" }}
->
-Para quais valores de <Eq>{`k`}</Eq> a SVD truncada de uma imagem <Eq>{`n \\times n`}</Eq> ocupa menos memória que a imagem original? Derive a condição geral.
-</Exercicio>
-
-<Exercicio
-  numero="117.26"
-  dificuldade="compreensao"
+<Exercicio numero="117.2" dificuldade="compreensao"
   opcoes={[
-    { texto: "Soma dos quadrados de todos os valores singulares de A", correta: true },
-    { texto: "Soma de todos os valores singulares de A" },
-    { texto: "Maior valor singular de A ao quadrado" },
-    { texto: "Produto de todos os valores singulares de A" }
+    { texto: "$s$ é valor singular sse existem $v \\neq 0$ e $w \\neq 0$ com $Tv = sw$ e $T^*w = sv$", correta: true },
+    { texto: "$s$ é valor singular sse $T v = s v$ para algum $v \\neq 0$" },
+    { texto: "$s$ é valor singular sse $\\det(T - sI) = 0$" },
+    { texto: "$s$ é valor singular sse $T^* T v = s v$ para algum $v$" },
   ]}
-  solucao={<><Eq>{`\\|A\\|_F^2 = \\text{tr}(A^T A) = \\sum_i \\sigma_i^2`}</Eq>. Esta é a identidade central que conecta norma de Frobenius com SVD e justifica a fórmula de erro de Eckart-Young.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "501", exercicio: "SVD.M25", licenca: "GNU FDL" }}
+  solucao={<>O par <Eq>{`(v, w)`}</Eq> satisfazendo <Eq>{`Tv = sw`}</Eq> e <Eq>{`T^* w = sv`}</Eq> é chamado par de Schmidt. A condição <Eq>{`Tv = sw`}</Eq> diz que <Eq>{`w = Tv/s`}</Eq> (desde que <Eq>{`s > 0`}</Eq>); substituindo em <Eq>{`T^* w = sv`}</Eq> obtém-se <Eq>{`T^* T v = s^2 v`}</Eq>, ou seja, <Eq>{`s^2`}</Eq> é autovalor de <Eq>{`T^* T`}</Eq> e <Eq>{`s`}</Eq> é valor singular. Erhard Schmidt introduziu os valores singulares em 1907.</>}
+  passos={<>
+    <ol>
+      <li>Suponha que <Eq>{`s`}</Eq> é valor singular positivo. Então <Eq>{`s^2`}</Eq> é autovalor de <Eq>{`T^* T`}</Eq>; tome <Eq>{`v`}</Eq> autovetor unitário. Defina <Eq>{`w = Tv/s`}</Eq> (tem norma 1 pois <Eq>{`\\|Tv\\| = s`}</Eq>). Então <Eq>{`Tv = sw`}</Eq> e <Eq>{`T^* w = T^*(Tv)/s = (T^*T v)/s = s^2 v/s = sv`}</Eq>.</li>
+      <li>Reciprocamente, se <Eq>{`Tv = sw`}</Eq> e <Eq>{`T^* w = sv`}</Eq> com <Eq>{`s > 0`}</Eq> e <Eq>{`v, w \\neq 0`}</Eq>, então <Eq>{`T^* T v = T^*(sw) = s(T^* w) = s(sv) = s^2 v`}</Eq>. Logo <Eq>{`s^2`}</Eq> é autovalor de <Eq>{`T^* T`}</Eq> e <Eq>{`s`}</Eq> é valor singular.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 2", licenca: "CC-BY-NC 4.0" }}
 >
-A norma de Frobenius <Eq>{`\\|A\\|_F^2`}</Eq> é igual a:
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq> e <Eq>{`s > 0`}</Eq>. Prove que <Eq>{`s`}</Eq> é valor singular de <Eq>{`T`}</Eq> se e somente se existem vetores não-nulos <Eq>{`v \\in V`}</Eq> e <Eq>{`w \\in W`}</Eq> tais que <Eq>{`Tv = sw`}</Eq> e <Eq>{`T^* w = sv`}</Eq>. (Esses vetores são chamados de **par de Schmidt**.)
+
 </Exercicio>
 
-<Exercicio
-  numero="117.27"
-  dificuldade="aplicacao"
-  solucao={<>Valores singulares de <Eq>{`cA`}</Eq>: <Eq>{`|c| \\sigma_i(A)`}</Eq>. Pois SVD de <Eq>{`cA = U (c\\Sigma) V^T`}</Eq>; valores singulares são entradas de <Eq>{`|c|\\Sigma`}</Eq>. Valores singulares de <Eq>{`AB`}</Eq> não têm fórmula simples em geral, mas <Eq>{`\\sigma_1(AB) \\leq \\sigma_1(A) \\sigma_1(B)`}</Eq>.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.3", pagina: "317", exercicio: "6.3.6", licenca: "CC-BY-SA" }}
+<Exercicio numero="117.3" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$T(x,y) = (5y, 0)$ em $\\mathbf{C}^2$", correta: true },
+    { texto: "$T(x,y) = (5x, 0)$ em $\\mathbf{C}^2$" },
+    { texto: "$T = 5I$ em $\\mathbf{C}^2$" },
+    { texto: "$T(x,y) = (x + 5y, 0)$" },
+  ]}
+  solucao={<>Tome <Eq>{`T(x,y) = (5y, 0)`}</Eq>. O único autovalor é 0 (matriz nilpotente). <Eq>{`T^* T (x,y) = 25(x,0)`}</Eq>... Recalculando: <Eq>{`T`}</Eq> tem matriz <Eq>{`\\begin{pmatrix}0&5\\\\0&0\\end{pmatrix}`}</Eq>; <Eq>{`T^* T = \\begin{pmatrix}0&0\\\\5&0\\end{pmatrix}\\begin{pmatrix}0&5\\\\0&0\\end{pmatrix} = \\begin{pmatrix}0&0\\\\0&25\\end{pmatrix}`}</Eq>. Autovalores de <Eq>{`T^* T`}</Eq>: 0 e 25. Valores singulares: 5 e 0. Autovalores de <Eq>{`T`}</Eq>: ambos 0 (nilpotente). Condição satisfeita.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 3", licenca: "CC-BY-NC 4.0" }}
 >
-Se <Eq>{`A`}</Eq> tem valores singulares <Eq>{`\\sigma_1, \\sigma_2, \\sigma_3`}</Eq>, quais são os valores singulares de <Eq>{`-3A`}</Eq>?
+
+Dê um exemplo de um operador <Eq>{`T \\in \\mathcal{L}(\\mathbf{C}^2)`}</Eq> tal que 0 é o único autovalor de <Eq>{`T`}</Eq> e os valores singulares de <Eq>{`T`}</Eq> são 5 e 0.
+
 </Exercicio>
 
-<Exercicio
-  numero="117.28"
-  dificuldade="demonstracao"
-  solucao={<>Quatro subespaços pela SVD: (1) <Eq>{`\\text{Col}(A) = \\text{span}\\{u_1, \\ldots, u_r\\}`}</Eq> (dimensão <Eq>{`r`}</Eq>); (2) <Eq>{`\\ker(A^T) = \\text{span}\\{u_{r+1}, \\ldots, u_m\\}`}</Eq> (dimensão <Eq>{`m - r`}</Eq>); (3) <Eq>{`\\text{Row}(A) = \\text{span}\\{v_1, \\ldots, v_r\\}`}</Eq> (dimensão <Eq>{`r`}</Eq>); (4) <Eq>{`\\ker(A) = \\text{span}\\{v_{r+1}, \\ldots, v_n\\}`}</Eq> (dimensão <Eq>{`n - r`}</Eq>). Demonstração: <Eq>{`Av_j = \\sigma_j u_j`}</Eq> para <Eq>{`j \\leq r`}</Eq> e <Eq>{`Av_j = 0`}</Eq> para <Eq>{`j > r`}</Eq>.</>}
-  fonte={{ livro: "A First Course in Linear Algebra", url: "http://linear.ups.edu/html/section-SVD.html", secao: "§SVD", pagina: "503", exercicio: "SVD.T25", licenca: "GNU FDL" }}
+<Exercicio numero="117.4" dificuldade="compreensao"
+  opcoes={[
+    { texto: "$\\{\\|Tv\\| : v \\in V,\\, \\|v\\| = 1\\} = [s_n, s_1]$", correta: true },
+    { texto: "$\\{\\|Tv\\| : \\|v\\| = 1\\} = \\{s_1\\}$ apenas" },
+    { texto: "$\\{\\|Tv\\| : \\|v\\| = 1\\} = \\{s_n, s_1\\}$ (apenas dois pontos)" },
+    { texto: "$\\{\\|Tv\\| : \\|v\\| = 1\\} = [0, s_1]$" },
+  ]}
+  solucao={<>Se <Eq>{`x = \\sum_i c_i v_i`}</Eq> com <Eq>{`\\sum c_i^2 = 1`}</Eq>, então <Eq>{`\\|Tx\\|^2 = \\sum c_i^2 s_i^2`}</Eq>, que é uma média ponderada de <Eq>{`s_i^2`}</Eq> com pesos <Eq>{`c_i^2 \\geq 0`}</Eq> somando 1. Logo <Eq>{`s_n^2 \\leq \\|Tx\\|^2 \\leq s_1^2`}</Eq>. O valor <Eq>{`s_1`}</Eq> é atingido em <Eq>{`x = v_1`}</Eq> e <Eq>{`s_n`}</Eq> em <Eq>{`x = v_n`}</Eq>. Por continuidade do mapa <Eq>{`x \\mapsto \\|Tx\\|`}</Eq> na esfera (conexa), todo valor intermediário é atingido.</>}
+  passos={<>
+    <ol>
+      <li>Expandir <Eq>{`x = \\sum_i c_i v_i`}</Eq> na base de vetores singulares à direita, com <Eq>{`\\sum c_i^2 = 1`}</Eq>.</li>
+      <li>Calcular <Eq>{`\\|Tx\\|^2 = \\sum_i c_i^2 s_i^2`}</Eq>. Como os pesos somam 1, este é valor entre <Eq>{`s_n^2`}</Eq> e <Eq>{`s_1^2`}</Eq>.</li>
+      <li>O mapa é contínuo e a esfera unitária é conexa, portanto a imagem é o intervalo <Eq>{`[s_n, s_1]`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 4", licenca: "CC-BY-NC 4.0" }}
 >
-Demonstre que as colunas de <Eq>{`U`}</Eq> e <Eq>{`V`}</Eq> na SVD de <Eq>{`A`}</Eq> formam bases ortonormais dos 4 subespaços fundamentais de <Eq>{`A`}</Eq>. Enuncie cada subespaço e sua base explicitamente.
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq>, com maior valor singular <Eq>{`s_1`}</Eq> e menor <Eq>{`s_n`}</Eq>. Prove que <Eq>{`\\{\\|Tv\\| : v \\in V,\\, \\|v\\| = 1\\} = [s_n, s_1]`}</Eq>.
+
 </Exercicio>
 
-<Exercicio
-  numero="117.29"
-  dificuldade="modelagem"
-  solucao={<>Passos: (1) montar matrix de ratings <Eq>{`R`}</Eq> (usuários × itens, esparsa); (2) preencher ausências com média; (3) centralizar por usuário; (4) SVD truncada de rank <Eq>{`k`}</Eq>; (5) aproximação <Eq>{`R_k = U_k \\Sigma_k V_k^T`}</Eq> preenche os ratings faltantes; (6) recomendar os itens com maior valor predito. A ideia é que "gostos latentes" são capturados pelos primeiros <Eq>{`k`}</Eq> fatores.</>}
-  fonte={{ livro: "Álgebra Linear (REAMAT UFRGS)", url: "https://www.ufrgs.br/reamat/AlgebraLinear/index.html", secao: "cap. SVD", pagina: "154", exercicio: "SVD-9", licenca: "CC-BY-SA" }}
+<Exercicio numero="117.5" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Valores singulares: 4 e 1", correta: true },
+    { texto: "Valores singulares: 4 e 4" },
+    { texto: "Valores singulares: $\\sqrt{17}$ e 0" },
+    { texto: "Valores singulares: 2 e 2" },
+  ]}
+  solucao={<><Eq>{`T`}</Eq> tem matriz <Eq>{`\\begin{pmatrix}0 & -4 \\\\ 1 & 0\\end{pmatrix}`}</Eq>. <Eq>{`T^* T = \\begin{pmatrix}0 & 1 \\\\ -4 & 0\\end{pmatrix}\\begin{pmatrix}0 & -4 \\\\ 1 & 0\\end{pmatrix} = \\begin{pmatrix}1 & 0 \\\\ 0 & 16\\end{pmatrix}`}</Eq>. Autovalores de <Eq>{`T^* T`}</Eq>: 1 e 16. Valores singulares em ordem decrescente: 4 e 1.</>}
+  passos={<>
+    <ol>
+      <li>Escreva a matriz de <Eq>{`T`}</Eq> na base canônica: <Eq>{`T(x,y) = (-4y, x)`}</Eq> dá <Eq>{`M = \\begin{pmatrix}0 & -4 \\\\ 1 & 0\\end{pmatrix}`}</Eq>.</li>
+      <li>Calcule <Eq>{`M^* M = M^T M`}</Eq> (entradas reais): <Eq>{`\\begin{pmatrix}0 & 1 \\\\ -4 & 0\\end{pmatrix}\\begin{pmatrix}0 & -4 \\\\ 1 & 0\\end{pmatrix} = \\begin{pmatrix}1 & 0 \\\\ 0 & 16\\end{pmatrix}`}</Eq>.</li>
+      <li>Autovalores: 1 e 16. Valores singulares: <Eq>{`s_1 = 4`}</Eq>, <Eq>{`s_2 = 1`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 5", licenca: "CC-BY-NC 4.0" }}
 >
-Descreva o algoritmo de recomendação por SVD colaborativo: dado uma matriz usuário-item esparsa, como a SVD truncada pode prever ratings ausentes e recomendar itens?
+
+Seja <Eq>{`T \\in \\mathcal{L}(\\mathbf{C}^2)`}</Eq> definido por <Eq>{`T(x, y) = (-4y, x)`}</Eq>. Encontre os valores singulares de <Eq>{`T`}</Eq>.
+
 </Exercicio>
 
-<Exercicio
-  numero="117.30"
-  dificuldade="desafio"
-  solucao={<>SVD randomizada (Halko-Martinsson-Tropp 2011): (1) Gere <Eq>{`\\Omega \\in \\mathbb{R}^{n \\times (k+p)}`}</Eq> aleatória; (2) <Eq>{`Y = A \\Omega`}</Eq> (sketch da imagem); (3) <Eq>{`Q, R = \\text{QR}(Y)`}</Eq>; (4) <Eq>{`B = Q^T A`}</Eq> (pequena); (5) SVD de <Eq>{`B = \\hat U \\Sigma V^T`}</Eq>; (6) <Eq>{`U = Q \\hat U`}</Eq>. Complexidade: <Eq>{`O(mn(k+p))`}</Eq> vs <Eq>{`O(mn^2)`}</Eq> para SVD exata. Com oversampling <Eq>{`p = 10`}</Eq>, o erro esperado é próximo ao ótimo de Eckart-Young.</>}
-  fonte={{ livro: "Understanding Linear Algebra", url: "https://understandinglinearalgebra.org/chap6.html", secao: "§6.4", pagina: "334", exercicio: "6.4.12", licenca: "CC-BY-SA" }}
+<Exercicio numero="117.6" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\sqrt{3/5}$ e 0 (um valor singular positivo)", correta: true },
+    { texto: "$1$ e $0$" },
+    { texto: "$\\sqrt{2}$ e $\\sqrt{2}$" },
+    { texto: "$3/5$ e $0$" },
+  ]}
+  solucao={<>Com o produto interno do Exemplo 6.34 (<Eq>{`\\langle p, q \\rangle = \\int_{-1}^1 p(x)q(x)\\,dx`}</Eq>), o operador diferenciação <Eq>{`D: \\mathcal{P}_2(\\mathbf{R}) \\to \\mathcal{P}_2(\\mathbf{R})`}</Eq> (com <Eq>{`Dp = p'`}</Eq>) tem <Eq>{`D^* D`}</Eq> com autovalores <Eq>{`3/5`}</Eq> e 0. O único valor singular positivo é <Eq>{`\\sqrt{3/5}`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 6", licenca: "CC-BY-NC 4.0" }}
 >
-Descreva o algoritmo de SVD randomizada de Halko-Martinsson-Tropp (2011) em 5 passos. Por que ele é vantajoso para matrizes grandes de baixo posto numérico? Qual a complexidade comparada com SVD exata?
+
+Encontre os valores singulares do operador diferenciação <Eq>{`D \\in \\mathcal{L}(\\mathcal{P}_2(\\mathbf{R}))`}</Eq> definido por <Eq>{`Dp = p'`}</Eq>, onde o produto interno em <Eq>{`\\mathcal{P}_2(\\mathbf{R})`}</Eq> é <Eq>{`\\langle p, q \\rangle = \\int_{-1}^1 p(x)q(x)\\,dx`}</Eq> (conforme Exemplo 6.34 de Axler).
+
+</Exercicio>
+
+<Exercicio numero="117.7" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Os valores singulares são $|\\lambda_1|, \\ldots, |\\lambda_n|$ em ordem decrescente", correta: true },
+    { texto: "Os valores singulares são iguais aos autovalores (sem valor absoluto)" },
+    { texto: "Os valores singulares não têm relação com autovalores em geral" },
+    { texto: "Os valores singulares são $\\lambda_i^2$ em ordem decrescente" },
+  ]}
+  solucao={<>Se <Eq>{`T`}</Eq> é auto-adjunto ou (<Eq>{`\\mathbf{F} = \\mathbf{C}`}</Eq> e) normal, pelo teorema espectral existe base ortonormal <Eq>{`e_1, \\ldots, e_n`}</Eq> de autovetores com autovalores <Eq>{`\\lambda_i`}</Eq>. Então <Eq>{`T^* T e_i = |\\lambda_i|^2 e_i`}</Eq>. Os autovalores de <Eq>{`T^* T`}</Eq> são <Eq>{`|\\lambda_i|^2`}</Eq>, logo os valores singulares são <Eq>{`|\\lambda_i|`}</Eq>, ordenados de forma decrescente.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 7", licenca: "CC-BY-NC 4.0" }}
+>
+
+Suponha que <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> é auto-adjunto, ou que <Eq>{`\\mathbf{F} = \\mathbf{C}`}</Eq> e <Eq>{`T`}</Eq> é normal. Sejam <Eq>{`\\lambda_1, \\ldots, \\lambda_n`}</Eq> os autovalores de <Eq>{`T`}</Eq> (com multiplicidade). Mostre que os valores singulares de <Eq>{`T`}</Eq> são <Eq>{`|\\lambda_1|, \\ldots, |\\lambda_n|`}</Eq> em ordem decrescente.
+
+</Exercicio>
+
+<Exercicio numero="117.8" dificuldade="demonstracao"
+  solucao={<>Dado o desenvolvimento <Eq>{`Tv = \\sum_{k=1}^m s_k \\langle v, e_k \\rangle f_k`}</Eq>:
+(a) Se <Eq>{`w \\in \\text{range}\\, T`}</Eq>, então <Eq>{`w = Tv`}</Eq> é combinação de <Eq>{`f_1, \\ldots, f_m`}</Eq>. Recíproca: cada <Eq>{`f_k = T(e_k/s_k)`}</Eq> está em <Eq>{`\\text{range}\\, T`}</Eq>. Logo <Eq>{`\\{f_1, \\ldots, f_m\\}`}</Eq> é base ortonormal de <Eq>{`\\text{range}\\, T`}</Eq>.
+(b) <Eq>{`(\\text{null}\\, T)^\\perp = \\text{range}\\, T^*`}</Eq>. Analogamente, <Eq>{`T^* w = \\sum s_k \\langle w, f_k \\rangle e_k`}</Eq>, logo <Eq>{`\\{e_1, \\ldots, e_m\\}`}</Eq> gera <Eq>{`\\text{range}\\, T^*`}</Eq>.
+(c) <Eq>{`T^* T e_k = T^*(s_k f_k) = s_k^2 e_k`}</Eq>, então <Eq>{`s_k^2`}</Eq> é autovalor de <Eq>{`T^* T`}</Eq>, confirmando que os <Eq>{`s_k`}</Eq> são os valores singulares positivos.
+(d) Item (c) já demonstra.
+(e) <Eq>{`T T^* w = T\\bigl(\\sum s_k \\langle w, f_k\\rangle e_k\\bigr) = \\sum s_k^2 \\langle w, f_k\\rangle f_k`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 8", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq> com <Eq>{`s_1 \\geq s_2 \\geq \\cdots \\geq s_m > 0`}</Eq>. Suponha listas ortonormais <Eq>{`e_1, \\ldots, e_m`}</Eq> em <Eq>{`V`}</Eq> e <Eq>{`f_1, \\ldots, f_m`}</Eq> em <Eq>{`W`}</Eq> tais que <Eq>{`Tv = s_1 \\langle v, e_1 \\rangle f_1 + \\cdots + s_m \\langle v, e_m \\rangle f_m`}</Eq> para todo <Eq>{`v`}</Eq>. Demonstre: (a) <Eq>{`f_1, \\ldots, f_m`}</Eq> é base ortonormal de <Eq>{`\\text{range}\\, T`}</Eq>; (b) <Eq>{`e_1, \\ldots, e_m`}</Eq> é base ortonormal de <Eq>{`(\\text{null}\\, T)^\\perp`}</Eq>; (c) <Eq>{`s_1, \\ldots, s_m`}</Eq> são os valores singulares positivos de <Eq>{`T`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.9" dificuldade="compreensao"
+  opcoes={[
+    { texto: "$T$ e $T^*$ têm os mesmos valores singulares positivos", correta: true },
+    { texto: "$T$ e $T^*$ têm os mesmos autovalores" },
+    { texto: "Os valores singulares de $T^*$ são os inversos dos de $T$" },
+    { texto: "$T$ e $T^*$ têm valores singulares totalmente distintos" },
+  ]}
+  solucao={<>Os autovalores não-nulos de <Eq>{`T^* T`}</Eq> e <Eq>{`T T^*`}</Eq> coincidem (se <Eq>{`T^* T v = \\lambda v`}</Eq> com <Eq>{`\\lambda > 0`}</Eq>, então <Eq>{`T T^*(Tv) = \\lambda (Tv)`}</Eq>). Os valores singulares de <Eq>{`T`}</Eq> são raízes dos autovalores de <Eq>{`T^* T`}</Eq>; os de <Eq>{`T^*`}</Eq> são raízes dos de <Eq>{`(T^*)^* T^* = T T^*`}</Eq>. Logo os valores singulares positivos coincidem.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 9", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq>. Mostre que <Eq>{`T`}</Eq> e <Eq>{`T^*`}</Eq> têm os mesmos valores singulares positivos.
+
+</Exercicio>
+
+<Exercicio numero="117.10" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Os valores singulares de $T^{-1}$ são $1/s_n, \\ldots, 1/s_1$", correta: true },
+    { texto: "Os valores singulares de $T^{-1}$ são $-s_1, \\ldots, -s_n$" },
+    { texto: "Os valores singulares de $T^{-1}$ coincidem com os de $T$" },
+    { texto: "Os valores singulares de $T^{-1}$ são $s_1^2, \\ldots, s_n^2$" },
+  ]}
+  solucao={<>Se <Eq>{`T = U\\Sigma V^*`}</Eq> é a SVD de <Eq>{`T`}</Eq> invertível (todos <Eq>{`s_i > 0`}</Eq>), então <Eq>{`T^{-1} = V \\Sigma^{-1} U^*`}</Eq>. Os valores diagonais de <Eq>{`\\Sigma^{-1}`}</Eq> são <Eq>{`1/s_1, \\ldots, 1/s_n`}</Eq>, e em ordem decrescente ficam <Eq>{`1/s_n \\geq \\cdots \\geq 1/s_1`}</Eq>. Logo os valores singulares de <Eq>{`T^{-1}`}</Eq> são os inversos dos de <Eq>{`T`}</Eq>, na ordem reversa.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 10", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq> invertível com valores singulares <Eq>{`s_1, \\ldots, s_n`}</Eq>. Prove que os valores singulares de <Eq>{`T^{-1}`}</Eq> são <Eq>{`1/s_n, \\ldots, 1/s_1`}</Eq>.
+
+</Exercicio>
+
+### Bloco B — Propriedades e relações dos valores singulares (117.11 a 117.20)
+
+<Exercicio numero="117.11" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\|Tv_1\\|^2 + \\cdots + \\|Tv_n\\|^2 = s_1^2 + \\cdots + s_n^2$", correta: true },
+    { texto: "$\\sum \\|Tv_i\\| = \\sum s_i$" },
+    { texto: "$\\sum \\|Tv_i\\|^2 = \\sum s_i$" },
+    { texto: "$\\sum \\|Tv_i\\|^2 = (\\sum s_i)^2$" },
+  ]}
+  solucao={<>Para qualquer base ortonormal <Eq>{`v_1, \\ldots, v_n`}</Eq>: <Eq>{`\\sum_i \\|Tv_i\\|^2 = \\sum_i \\langle T^* T v_i, v_i \\rangle = \\text{tr}(T^* T) = \\sum_j s_j^2`}</Eq>, onde a última igualdade usa que o traço é a soma dos autovalores (contados com multiplicidade). Parte (b): se <Eq>{`T`}</Eq> é positivo, a soma <Eq>{`\\sum \\langle Tv_i, v_i \\rangle = \\text{tr}(T) = \\sum s_j`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Use a fórmula do traço: <Eq>{`\\text{tr}(T^* T) = \\sum_i \\langle T^* T v_i, v_i \\rangle = \\sum_i \\|Tv_i\\|^2`}</Eq>.</li>
+      <li>Pela invariância do traço por mudança de base ortonormal: <Eq>{`\\text{tr}(T^* T) = \\sum_j s_j^2`}</Eq> (autovalores de <Eq>{`T^* T`}</Eq>).</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 11", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq> e <Eq>{`v_1, \\ldots, v_n`}</Eq> base ortonormal de <Eq>{`V`}</Eq>. Prove que <Eq>{`\\|Tv_1\\|^2 + \\cdots + \\|Tv_n\\|^2 = s_1^2 + \\cdots + s_n^2`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.12" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Em geral falso; verdadeiro quando $T$ é normal", correta: true },
+    { texto: "Sempre verdadeiro para qualquer operador" },
+    { texto: "Sempre falso" },
+    { texto: "Verdadeiro apenas quando $T$ é auto-adjunto" },
+  ]}
+  solucao={<>(a) Contra-exemplo: tome <Eq>{`T(x,y) = (0, x)`}</Eq> (deslocamento). Valores singulares de <Eq>{`T`}</Eq>: 1, 0. Valores singulares de <Eq>{`T^2 = 0`}</Eq>: 0, 0. Mas <Eq>{`0 \\neq 1^2`}</Eq>. (b) Se <Eq>{`T`}</Eq> é normal, existe base ortonormal de autovetores <Eq>{`e_i`}</Eq> com autovalores <Eq>{`\\lambda_i`}</Eq>. <Eq>{`T^2 e_i = \\lambda_i^2 e_i`}</Eq>, então <Eq>{`T^2`}</Eq> também é normal com autovalores <Eq>{`\\lambda_i^2`}</Eq>. Valores singulares de <Eq>{`T^2`}</Eq>: <Eq>{`|\\lambda_i^2| = |\\lambda_i|^2`}</Eq>. Valor singular de <Eq>{`T`}</Eq>: <Eq>{`|\\lambda_i|`}</Eq>. Logo os valores singulares de <Eq>{`T^2`}</Eq> são os quadrados dos de <Eq>{`T`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 12", licenca: "CC-BY-NC 4.0" }}
+>
+
+(a) Dê um exemplo de operador <Eq>{`T`}</Eq> tal que os valores singulares de <Eq>{`T^2`}</Eq> não são os quadrados dos de <Eq>{`T`}</Eq>. (b) Prove que se <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> é normal, então os valores singulares de <Eq>{`T^2`}</Eq> são os quadrados dos valores singulares de <Eq>{`T`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.13" dificuldade="compreensao"
+  opcoes={[
+    { texto: "$T_1$ e $T_2$ têm mesmos valores singulares sse $T_1 = S_1 T_2 S_2$ com $S_1, S_2$ unitários", correta: true },
+    { texto: "$T_1$ e $T_2$ têm mesmos valores singulares sse são semelhantes ($T_1 = P T_2 P^{-1}$)" },
+    { texto: "$T_1$ e $T_2$ têm mesmos valores singulares sse $T_1 = T_2$" },
+    { texto: "$T_1$ e $T_2$ têm mesmos valores singulares sse $T_1 + T_2 = 0$" },
+  ]}
+  solucao={<>(⇒) Se <Eq>{`T_1 = U_1 \\Sigma V_1^*`}</Eq> e <Eq>{`T_2 = U_2 \\Sigma V_2^*`}</Eq> com mesma <Eq>{`\\Sigma`}</Eq>, tome <Eq>{`S_1 = U_1 U_2^*`}</Eq> e <Eq>{`S_2 = V_2 V_1^*`}</Eq> (unitários). Então <Eq>{`T_1 = S_1 T_2 S_2`}</Eq>. (⇐) Se <Eq>{`T_1 = S_1 T_2 S_2`}</Eq> com unitários, os valores singulares são invariantes sob multiplicação por unitários (pois norma espectral é preservada): <Eq>{`\\sigma_k(T_1) = \\sigma_k(T_2)`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 13", licenca: "CC-BY-NC 4.0" }}
+>
+
+Prove que <Eq>{`T_1, T_2 \\in \\mathcal{L}(V)`}</Eq> têm os mesmos valores singulares se e somente se existem operadores unitários <Eq>{`S_1, S_2 \\in \\mathcal{L}(V)`}</Eq> tais que <Eq>{`T_1 = S_1 T_2 S_2`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.14" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$s_n \\|v\\| \\leq \\|Tv\\|$ para todo $v \\in V$", correta: true },
+    { texto: "$\\|Tv\\| \\leq s_n \\|v\\|$ para todo $v$" },
+    { texto: "$\\|Tv\\| = s_n \\|v\\|$ para todo $v$" },
+    { texto: "$\\|Tv\\| \\geq s_1 \\|v\\|$ para todo $v$" },
+  ]}
+  solucao={<>Expandindo <Eq>{`v = \\sum_i c_i v_i`}</Eq> na base de vetores singulares à direita: <Eq>{`\\|Tv\\|^2 = \\sum c_i^2 s_i^2 \\geq s_n^2 \\sum c_i^2 = s_n^2 \\|v\\|^2`}</Eq>. Tomando raiz quadrada: <Eq>{`\\|Tv\\| \\geq s_n \\|v\\|`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 14", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq> e <Eq>{`s_n`}</Eq> o menor valor singular de <Eq>{`T`}</Eq>. Prove que <Eq>{`s_n \\|v\\| \\leq \\|Tv\\|`}</Eq> para todo <Eq>{`v \\in V`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.15" dificuldade="compreensao"
+  opcoes={[
+    { texto: "$s_n \\leq |\\lambda| \\leq s_1$ para todo autovalor $\\lambda$", correta: true },
+    { texto: "$|\\lambda| = s_1$ para todo autovalor" },
+    { texto: "$|\\lambda| \\leq s_n$ para todo autovalor" },
+    { texto: "Não há relação entre autovalores e valores singulares" },
+  ]}
+  solucao={<>Se <Eq>{`Tv = \\lambda v`}</Eq> com <Eq>{`v \\neq 0`}</Eq>, do exercício 117.14: <Eq>{`s_n \\|v\\| \\leq \\|Tv\\| = |\\lambda| \\|v\\|`}</Eq>, logo <Eq>{`s_n \\leq |\\lambda|`}</Eq>. Do exercício 117.4, <Eq>{`\\|Tv\\|/\\|v\\| \\leq s_1`}</Eq>, logo <Eq>{`|\\lambda| \\leq s_1`}</Eq>. Portanto <Eq>{`s_n \\leq |\\lambda| \\leq s_1`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 15", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> com valores singulares <Eq>{`s_1 \\geq \\cdots \\geq s_n`}</Eq>. Prove que se <Eq>{`\\lambda`}</Eq> é autovalor de <Eq>{`T`}</Eq>, então <Eq>{`s_n \\leq |\\lambda| \\leq s_1`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.16" dificuldade="demonstracao"
+  solucao={<>Mostre que <Eq>{`(T^*)^\\dagger = (T^\\dagger)^*`}</Eq>. A pseudoinversa <Eq>{`T^\\dagger`}</Eq> via SVD é <Eq>{`T^\\dagger = V \\Sigma^+ U^*`}</Eq>. Logo <Eq>{`(T^\\dagger)^* = U (\\Sigma^+)^* V^* = U \\Sigma^+ V^*`}</Eq> (pois <Eq>{`\\Sigma^+`}</Eq> é real diagonal). Por outro lado <Eq>{`T^* = U \\Sigma V^*`}</Eq> com papéis de <Eq>{`U, V`}</Eq> trocados; sua pseudoinversa é <Eq>{`(T^*)^\\dagger = V (\\Sigma^*)^+ U^* = V \\Sigma^+ U^*`}</Eq>... Verificação: ambas resultam em <Eq>{`U \\Sigma^+ V^*`}</Eq> quando as dimensões são compatíveis. Comparar com o caso invertível: <Eq>{`(T^{-1})^* = (T^*)^{-1}`}</Eq>, análogo.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 16", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq>. Prove que <Eq>{`(T^*)^\\dagger = (T^\\dagger)^*`}</Eq>. Compare com o resultado análogo para mapas lineares invertíveis.
+
+</Exercicio>
+
+### Bloco C — Norma de operadores e decomposição polar (117.17 a 117.28)
+
+<Exercicio numero="117.17" dificuldade="demonstracao"
+  solucao={<>(<Eq>{`\\Rightarrow`}</Eq>) Se <Eq>{`T`}</Eq> é auto-adjunto, <Eq>{`T^* = T`}</Eq>. A pseudoinversa via SVD de <Eq>{`T`}</Eq> é <Eq>{`T^\\dagger = V \\Sigma^+ U^*`}</Eq>; e <Eq>{`(T^\\dagger)^* = U \\Sigma^+ V^*`}</Eq>. Para <Eq>{`T`}</Eq> auto-adjunto, <Eq>{`U = V`}</Eq> (os espaços próprios de <Eq>{`T^*T = T^2`}</Eq> e <Eq>{`TT^* = T^2`}</Eq> coincidem). Logo <Eq>{`(T^\\dagger)^* = V \\Sigma^+ V^* = T^\\dagger`}</Eq>. (<Eq>{`\\Leftarrow`}</Eq>) Recíproca analogamente por <Eq>{`T^{**} = T`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7E", exercicio: "ex. 17", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V)`}</Eq>. Prove que <Eq>{`T`}</Eq> é auto-adjunto se e somente se <Eq>{`T^\\dagger`}</Eq> é auto-adjunto.
+
+</Exercicio>
+
+<Exercicio numero="117.18" dificuldade="demonstracao"
+  solucao={<>A desigualdade reversa do triângulo afirma <Eq>{`|\\|S\\| - \\|T\\|| \\leq \\|S - T\\|`}</Eq>. Da desigualdade triangular: <Eq>{`\\|S\\| = \\|(S-T) + T\\| \\leq \\|S-T\\| + \\|T\\|`}</Eq>, logo <Eq>{`\\|S\\| - \\|T\\| \\leq \\|S-T\\|`}</Eq>. Trocando <Eq>{`S`}</Eq> e <Eq>{`T`}</Eq>: <Eq>{`\\|T\\| - \\|S\\| \\leq \\|T-S\\| = \\|S-T\\|`}</Eq>. Combinando: <Eq>{`|\\|S\\| - \\|T\\|| \\leq \\|S-T\\|`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 1", licenca: "CC-BY-NC 4.0" }}
+>
+
+Prove que se <Eq>{`S, T \\in \\mathcal{L}(V, W)`}</Eq>, então <Eq>{`|\\|S\\| - \\|T\\|| \\leq \\|S - T\\|`}</Eq>. (Essa é a **desigualdade reversa do triângulo** para normas de operadores.)
+
+</Exercicio>
+
+<Exercicio numero="117.19" dificuldade="compreensao"
+  opcoes={[
+    { texto: "$\\|T\\| = \\max\\{|\\lambda| : \\lambda \\text{ autovalor de } T\\}$ quando $T$ é auto-adjunto ou normal", correta: true },
+    { texto: "$\\|T\\| = \\max\\{|\\lambda|\\}$ para qualquer operador" },
+    { texto: "$\\|T\\| = \\min\\{|\\lambda|\\}$ para operadores normais" },
+    { texto: "$\\|T\\| = \\sum |\\lambda_i|$ para operadores normais" },
+  ]}
+  solucao={<>Se <Eq>{`T`}</Eq> é normal (ou auto-adjunto em <Eq>{`\\mathbf{R}`}</Eq>), pelo teorema espectral os valores singulares são <Eq>{`|\\lambda_i|`}</Eq> (exercício 117.7). A norma de operador é o maior valor singular: <Eq>{`\\|T\\| = s_1 = \\max_i |\\lambda_i|`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 2", licenca: "CC-BY-NC 4.0" }}
+>
+
+Suponha que <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> é auto-adjunto, ou que <Eq>{`\\mathbf{F} = \\mathbf{C}`}</Eq> e <Eq>{`T`}</Eq> é normal. Prove que <Eq>{`\\|T\\| = \\max\\{|\\lambda| : \\lambda \\text{ é autovalor de } T\\}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.20" dificuldade="demonstracao"
+  solucao={<>(<Eq>{`\\Rightarrow`}</Eq>) Suponha <Eq>{`\\|Tv\\| = \\|T\\| \\|v\\|`}</Eq>. Pode-se supor <Eq>{`\\|v\\| = 1`}</Eq>; então <Eq>{`\\|Tv\\|^2 = \\|T\\|^2 = s_1^2`}</Eq>. Da prova de que <Eq>{`\\|T\\| = s_1`}</Eq>: <Eq>{`s_1^2 = \\|Tv\\|^2 = \\sum c_i^2 s_i^2`}</Eq> com <Eq>{`\\sum c_i^2 = 1`}</Eq>. Isso exige <Eq>{`c_i = 0`}</Eq> para todo <Eq>{`i`}</Eq> com <Eq>{`s_i < s_1`}</Eq>, portanto <Eq>{`v \\in \\text{span}\\{v_i : s_i = s_1\\}`}</Eq> e <Eq>{`T^* T v = s_1^2 v`}</Eq>, ou seja <Eq>{`\\|T\\|^2 v`}</Eq>. (<Eq>{`\\Leftarrow`}</Eq>) Se <Eq>{`T^* T v = \\|T\\|^2 v`}</Eq>, então <Eq>{`\\|Tv\\|^2 = \\langle T^* T v, v \\rangle = \\|T\\|^2 \\|v\\|^2`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 3", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq> e <Eq>{`v \\in V`}</Eq>. Prove que <Eq>{`\\|Tv\\| = \\|T\\| \\|v\\|`}</Eq> se e somente se <Eq>{`T^* T v = \\|T\\|^2 v`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.21" dificuldade="demonstracao"
+  solucao={<>Suponha <Eq>{`\\|Tv\\| = \\|T\\| \\|v\\|`}</Eq> e <Eq>{`\\langle u, v \\rangle = 0`}</Eq>. Devemos mostrar <Eq>{`\\langle Tu, Tv \\rangle = 0`}</Eq>. Pelo resultado anterior, <Eq>{`T^* T v = \\|T\\|^2 v`}</Eq>. Então <Eq>{`\\langle Tu, Tv \\rangle = \\langle T^* T v, u \\rangle^* = \\langle \\|T\\|^2 v, u \\rangle^* = \\|T\\|^2 \\langle v, u \\rangle^* = 0`}</Eq>, pois <Eq>{`\\langle u, v \\rangle = 0`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 4", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq>, <Eq>{`v \\in V`}</Eq> com <Eq>{`\\|Tv\\| = \\|T\\| \\|v\\|`}</Eq>. Prove que se <Eq>{`u \\in V`}</Eq> e <Eq>{`\\langle u, v \\rangle = 0`}</Eq>, então <Eq>{`\\langle Tu, Tv \\rangle = 0`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.22" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\|ST\\| \\leq \\|S\\| \\|T\\|$", correta: true },
+    { texto: "$\\|ST\\| = \\|S\\| \\|T\\|$ sempre" },
+    { texto: "$\\|ST\\| \\geq \\|S\\| \\|T\\|$ sempre" },
+    { texto: "$\\|ST\\| = \\|S\\| + \\|T\\|$" },
+  ]}
+  solucao={<>Para qualquer <Eq>{`v`}</Eq> com <Eq>{`\\|v\\| \\leq 1`}</Eq>: <Eq>{`\\|ST v\\| \\leq \\|S\\| \\|Tv\\| \\leq \\|S\\| \\|T\\| \\|v\\| \\leq \\|S\\| \\|T\\|`}</Eq>. Tomando sup sobre a bola unitária: <Eq>{`\\|ST\\| \\leq \\|S\\| \\|T\\|`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Pela definição de norma de operador: <Eq>{`\\|S\\| = \\sup_{\\|v\\|=1} \\|Sv\\|`}</Eq>.</li>
+      <li>Para qualquer <Eq>{`v`}</Eq> unitário: <Eq>{`\\|STv\\| \\leq \\|S\\| \\|Tv\\|`}</Eq> (definição de <Eq>{`\\|S\\|`}</Eq>).</li>
+      <li>E <Eq>{`\\|Tv\\| \\leq \\|T\\| \\|v\\| = \\|T\\|`}</Eq>.</li>
+      <li>Logo <Eq>{`\\|STv\\| \\leq \\|S\\| \\|T\\|`}</Eq> para todo unitário <Eq>{`v`}</Eq>; tomando sup: <Eq>{`\\|ST\\| \\leq \\|S\\| \\|T\\|`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 5", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`U`}</Eq> espaço de produto interno de dimensão finita, <Eq>{`T \\in \\mathcal{L}(V, U)`}</Eq> e <Eq>{`S \\in \\mathcal{L}(U, W)`}</Eq>. Prove que <Eq>{`\\|ST\\| \\leq \\|S\\| \\|T\\|`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.23" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Falso em geral; contra-exemplo existe", correta: true },
+    { texto: "Verdadeiro sempre, pois $\\|ST\\| = \\|TS\\|$" },
+    { texto: "Verdadeiro apenas quando $S, T$ comutam" },
+    { texto: "Verdadeiro apenas quando $S$ ou $T$ é unitário" },
+  ]}
+  solucao={<>Tome <Eq>{`V = \\mathbf{R}^2`}</Eq>, <Eq>{`S = \\begin{pmatrix}1&0\\\\0&0\\end{pmatrix}`}</Eq>, <Eq>{`T = \\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}`}</Eq>. Então <Eq>{`ST = \\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}`}</Eq> tem <Eq>{`\\|ST\\| = 1`}</Eq>, mas <Eq>{`TS = \\begin{pmatrix}0&0\\\\0&0\\end{pmatrix}`}</Eq> tem <Eq>{`\\|TS\\| = 0`}</Eq>. Logo <Eq>{`\\|ST\\| \\neq \\|TS\\|`}</Eq> em geral.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 6", licenca: "CC-BY-NC 4.0" }}
+>
+
+Prove ou dê contra-exemplo: se <Eq>{`S, T \\in \\mathcal{L}(V)`}</Eq>, então <Eq>{`\\|ST\\| = \\|TS\\|`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.24" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$d(S,T) = \\|S - T\\|$ define uma métrica em $\\mathcal{L}(V,W)$", correta: true },
+    { texto: "A norma de operador não satisfaz a desigualdade triangular" },
+    { texto: "$d$ é métrica apenas quando $V = W$" },
+    { texto: "A norma de operador não é uma norma vetorial" },
+  ]}
+  solucao={<>Verificamos os axiomas de métrica: (i) <Eq>{`d(S,T) \\geq 0`}</Eq> com igualdade sse <Eq>{`S = T`}</Eq>; (ii) simetria: <Eq>{`d(S,T) = \\|S-T\\| = \\|T-S\\| = d(T,S)`}</Eq>; (iii) desigualdade triangular: <Eq>{`d(S,R) = \\|S-R\\| = \\|(S-T)+(T-R)\\| \\leq \\|S-T\\|+\\|T-R\\| = d(S,T)+d(T,R)`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 7", licenca: "CC-BY-NC 4.0" }}
+>
+
+Mostre que definir <Eq>{`d(S,T) = \\|S - T\\|`}</Eq> para <Eq>{`S, T \\in \\mathcal{L}(V, W)`}</Eq> faz de <Eq>{`d`}</Eq> uma métrica em <Eq>{`\\mathcal{L}(V, W)`}</Eq>.
+
+</Exercicio>
+
+### Bloco D — Invertibilidade e continuidade (117.25 a 117.33)
+
+<Exercicio numero="117.25" dificuldade="demonstracao"
+  solucao={<>(a) Se <Eq>{`\\|I - T\\| < 1`}</Eq>, a série de Neumann <Eq>{`\\sum_{k=0}^\\infty (I-T)^k`}</Eq> converge na norma de operador (pois cada termo tem norma <Eq>{`\\leq \\|I-T\\|^k`}</Eq>, série geométrica), e sua soma é o inverso de <Eq>{`T = I-(I-T)`}</Eq>. (b) Escreva <Eq>{`T = S[I - S^{-1}(S-T)]`}</Eq>; o fator colchete é invertível se <Eq>{`\\|S^{-1}(S-T)\\| \\leq \\|S^{-1}\\| \\|S-T\\| < 1`}</Eq>, condição garantida por <Eq>{`\\|S-T\\| < 1/\\|S^{-1}\\|`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 8", licenca: "CC-BY-NC 4.0" }}
+>
+
+(a) Prove que se <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> e <Eq>{`\\|I - T\\| < 1`}</Eq>, então <Eq>{`T`}</Eq> é invertível. (b) Seja <Eq>{`S \\in \\mathcal{L}(V)`}</Eq> invertível. Prove que se <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> e <Eq>{`\\|S - T\\| < 1/\\|S^{-1}\\|`}</Eq>, então <Eq>{`T`}</Eq> é invertível. (Isso mostra que o conjunto de operadores invertíveis é aberto em <Eq>{`\\mathcal{L}(V)`}</Eq>.)
+
+</Exercicio>
+
+<Exercicio numero="117.26" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Para todo $\\varepsilon > 0$, existe $S$ invertível com $0 < \\|T - S\\| < \\varepsilon$", correta: true },
+    { texto: "Todo operador é limite de operadores invertíveis" },
+    { texto: "Apenas operadores com posto completo têm essa propriedade" },
+    { texto: "Não existe tal $S$ quando $T = 0$" },
+  ]}
+  solucao={<>Tome a SVD de <Eq>{`T = U\\Sigma V^*`}</Eq> e defina <Eq>{`S = U (\\Sigma + \\varepsilon/2 \\cdot I) V^*`}</Eq> para <Eq>{`\\varepsilon > 0`}</Eq> arbitrário. Então <Eq>{`S`}</Eq> é invertível (todos os valores singulares positivos) e <Eq>{`\\|T - S\\| = \\varepsilon/2 < \\varepsilon`}</Eq>. Também <Eq>{`T \\neq S`}</Eq>, então <Eq>{`\\|T-S\\| > 0`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 9", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V)`}</Eq>. Prove que para todo <Eq>{`\\varepsilon > 0`}</Eq>, existe um operador invertível <Eq>{`S \\in \\mathcal{L}(V)`}</Eq> tal que <Eq>{`0 < \\|T - S\\| < \\varepsilon`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.27" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Para todo $\\varepsilon > 0$ existe $S$ não-invertível com $0 < \\|T - S\\| < \\varepsilon$", correta: true },
+    { texto: "Operadores não-invertíveis são isolados" },
+    { texto: "Somente quando $\\dim V = 1$" },
+    { texto: "Não existe tal $S$ perto de $T$" },
+  ]}
+  solucao={<>Seja <Eq>{`T`}</Eq> não-invertível com SVD <Eq>{`T = U\\Sigma V^*`}</Eq>. Como <Eq>{`T`}</Eq> não é invertível, algum <Eq>{`s_k = 0`}</Eq>. Modifique o próximo valor singular pequeno: para <Eq>{`\\varepsilon > 0`}</Eq>, defina <Eq>{`S`}</Eq> com a mesma SVD mas substituindo um <Eq>{`s_j > 0`}</Eq> mínimo por <Eq>{`s_j - \\delta`}</Eq> para <Eq>{`\\delta`}</Eq> pequeno, de modo que <Eq>{`\\|T-S\\| = \\delta < \\varepsilon`}</Eq> e <Eq>{`S`}</Eq> ainda não-invertível (mantendo um valor singular nulo). (Alternativamente: <Eq>{`S = T`}</Eq> não serve; tomar uma pequena perturbação que preserva um zero na diagonal de <Eq>{`\\Sigma`}</Eq>.)</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 10", licenca: "CC-BY-NC 4.0" }}
+>
+
+Suponha <Eq>{`\\dim V > 1`}</Eq> e <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> não invertível. Prove que para todo <Eq>{`\\varepsilon > 0`}</Eq>, existe <Eq>{`S \\in \\mathcal{L}(V)`}</Eq> com <Eq>{`0 < \\|T - S\\| < \\varepsilon`}</Eq> e <Eq>{`S`}</Eq> não invertível.
+
+</Exercicio>
+
+<Exercicio numero="117.28" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Para todo $\\varepsilon > 0$ existe $S$ diagonalizável com $0 < \\|T - S\\| < \\varepsilon$ (para $\\mathbf{F} = \\mathbf{C}$)", correta: true },
+    { texto: "Operadores diagonalizáveis são densos apenas em dimensão 1" },
+    { texto: "A afirmação é falsa: operadores diagonalizáveis são isolados" },
+    { texto: "Válido somente para $T$ normal" },
+  ]}
+  solucao={<>Sobre <Eq>{`\\mathbf{C}`}</Eq>, todo operador é triangularizável (Schur). Os autovalores de <Eq>{`T`}</Eq> formam um conjunto finito; pode-se perturbar levemente para torná-los distintos (autovalores distintos implicam diagonalizabilidade). Uma perturbação de norma menor que <Eq>{`\\varepsilon`}</Eq> na forma de Schur com autovalores perturbados produz o operador desejado.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 11", licenca: "CC-BY-NC 4.0" }}
+>
+
+Suponha <Eq>{`\\mathbf{F} = \\mathbf{C}`}</Eq> e <Eq>{`T \\in \\mathcal{L}(V)`}</Eq>. Prove que para todo <Eq>{`\\varepsilon > 0`}</Eq>, existe um operador diagonalizável <Eq>{`S \\in \\mathcal{L}(V)`}</Eq> com <Eq>{`0 < \\|T - S\\| < \\varepsilon`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.29" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\|\\sqrt{T}\\| = \\sqrt{\\|T\\|}$ para $T$ positivo", correta: true },
+    { texto: "$\\|\\sqrt{T}\\| = \\|T\\|^2$" },
+    { texto: "$\\|\\sqrt{T}\\| = \\|T\\|/2$" },
+    { texto: "$\\|\\sqrt{T}\\|$ não tem relação simples com $\\|T\\|$" },
+  ]}
+  solucao={<>Para <Eq>{`T`}</Eq> positivo, autovalores <Eq>{`\\lambda_i \\geq 0`}</Eq>. Como <Eq>{`T`}</Eq> é normal (auto-adjunto), <Eq>{`\\|T\\| = \\max_i \\lambda_i`}</Eq>. Autovalores de <Eq>{`\\sqrt{T}`}</Eq>: <Eq>{`\\sqrt{\\lambda_i}`}</Eq>. Logo <Eq>{`\\|\\sqrt{T}\\| = \\max_i \\sqrt{\\lambda_i} = \\sqrt{\\max_i \\lambda_i} = \\sqrt{\\|T\\|}`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 12", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> um operador positivo. Mostre que <Eq>{`\\|\\sqrt{T}\\| = \\sqrt{\\|T\\|}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.30" dificuldade="compreensao"
+  opcoes={[
+    { texto: "$\\|S - T\\| \\leq \\max\\{\\|S\\|, \\|T\\|\\} \\leq \\|S + T\\|$", correta: true },
+    { texto: "$\\|S - T\\| \\geq \\|S + T\\|$ sempre" },
+    { texto: "$\\|S + T\\| \\leq \\|S - T\\|$ sempre" },
+    { texto: "Nenhuma dessas relações é válida em geral" },
+  ]}
+  solucao={<>Para operadores positivos <Eq>{`S, T`}</Eq>: (esquerda) <Eq>{`\\|S - T\\| \\leq \\max\\{\\|S\\|, \\|T\\|\\}`}</Eq> por invariância unitária e Weyl. (direita) <Eq>{`\\max\\{\\|S\\|, \\|T\\|\\} \\leq \\|S+T\\|`}</Eq> pois <Eq>{`S + T \\succeq S`}</Eq> (operadores positivos), logo o maior autovalor de <Eq>{`S+T`}</Eq> é pelo menos o de <Eq>{`S`}</Eq> (e o de <Eq>{`T`}</Eq>). Portanto <Eq>{`\\|S+T\\| \\geq \\max\\{\\|S\\|, \\|T\\|\\}`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 13", licenca: "CC-BY-NC 4.0" }}
+>
+
+Sejam <Eq>{`S, T \\in \\mathcal{L}(V)`}</Eq> operadores positivos. Mostre que <Eq>{`\\|S - T\\| \\leq \\max\\{\\|S\\|, \\|T\\|\\} \\leq \\|S + T\\|`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.31" dificuldade="demonstracao"
+  solucao={<>Se <Eq>{`\\|P_U - P_W\\| < 1`}</Eq>, vamos mostrar <Eq>{`\\dim U = \\dim W`}</Eq>. Seja <Eq>{`u \\in U`}</Eq> com <Eq>{`\\|u\\| = 1`}</Eq>. Então <Eq>{`\\|P_W u\\| = \\|u - (P_U - P_W)u\\| \\geq \\|u\\| - \\|P_U - P_W\\| > 0`}</Eq>. Logo <Eq>{`P_W u \\neq 0`}</Eq>, i.e., <Eq>{`u \\notin W^\\perp`}</Eq>. Isso mostra que a restrição <Eq>{`P_W|_U: U \\to W`}</Eq> é injetiva (pois o núcleo de <Eq>{`P_W`}</Eq> restrito a <Eq>{`U`}</Eq> é trivial). Logo <Eq>{`\\dim U \\leq \\dim W`}</Eq>. Por simetria <Eq>{`\\dim W \\leq \\dim U`}</Eq>. Portanto <Eq>{`\\dim U = \\dim W`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 14", licenca: "CC-BY-NC 4.0" }}
+>
+
+Sejam <Eq>{`U`}</Eq> e <Eq>{`W`}</Eq> subespaços de <Eq>{`V`}</Eq> tais que <Eq>{`\\|P_U - P_W\\| < 1`}</Eq> (onde <Eq>{`P_U, P_W`}</Eq> são as projeções ortogonais). Prove que <Eq>{`\\dim U = \\dim W`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.32" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$S$ unitário e $T = S\\sqrt{T^*T}$ (decomposição polar)", correta: true },
+    { texto: "$S = T$ e $\\sqrt{T^*T} = I$" },
+    { texto: "$S = T^*$ e $\\sqrt{T^*T} = T$" },
+    { texto: "Tal $S$ não existe em geral" },
+  ]}
+  solucao={<>Defina <Eq>{`T = U\\Sigma V^*`}</Eq> (SVD). Então <Eq>{`\\sqrt{T^* T} = V\\Sigma V^*`}</Eq>. Tome <Eq>{`S = UV^*`}</Eq> (produto de unitários, logo unitário). Então <Eq>{`S \\sqrt{T^* T} = UV^* V \\Sigma V^* = U\\Sigma V^* = T`}</Eq>. Esta é a **decomposição polar** de <Eq>{`T`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Calcule <Eq>{`T^* T = V\\Sigma^2 V^*`}</Eq> (usando <Eq>{`T = U\\Sigma V^*`}</Eq>).</li>
+      <li>Portanto <Eq>{`\\sqrt{T^* T} = V\\Sigma V^*`}</Eq> (raiz quadrada de operador positivo).</li>
+      <li>Defina <Eq>{`S = UV^*`}</Eq>; verifique que <Eq>{`S^* S = V U^* U V^* = VV^* = I`}</Eq>, portanto <Eq>{`S`}</Eq> é unitário.</li>
+      <li>Confira: <Eq>{`S\\sqrt{T^*T} = UV^* \\cdot V\\Sigma V^* = U\\Sigma V^* = T`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 15", licenca: "CC-BY-NC 4.0" }}
+>
+
+Defina <Eq>{`T \\in \\mathcal{L}(\\mathbf{F}^3)`}</Eq> por <Eq>{`T(z_1, z_2, z_3) = (z_3, 2z_1, 3z_2)`}</Eq>. Encontre (explicitamente) um operador unitário <Eq>{`S \\in \\mathcal{L}(\\mathbf{F}^3)`}</Eq> tal que <Eq>{`T = S\\sqrt{T^* T}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.33" dificuldade="demonstracao"
+  solucao={<>Seja <Eq>{`S_0`}</Eq> o positivo invertível dado. Seja <Eq>{`\\delta = \\min_i \\lambda_i(S_0) > 0`}</Eq> (menor autovalor de <Eq>{`S_0`}</Eq>). Se <Eq>{`T`}</Eq> é auto-adjunto com <Eq>{`\\|S_0 - T\\| < \\delta/2`}</Eq>, então por Weyl: <Eq>{`|\\lambda_i(T) - \\lambda_i(S_0)| \\leq \\|S_0 - T\\| < \\delta/2`}</Eq>. Logo <Eq>{`\\lambda_i(T) > \\lambda_i(S_0) - \\delta/2 \\geq \\delta - \\delta/2 = \\delta/2 > 0`}</Eq>. Portanto <Eq>{`T`}</Eq> é positivo para <Eq>{`\\delta = \\min_i \\lambda_i(S_0)/2`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 16", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`S \\in \\mathcal{L}(V)`}</Eq> positivo e invertível. Prove que existe <Eq>{`\\delta > 0`}</Eq> tal que <Eq>{`T`}</Eq> é positivo para todo operador auto-adjunto <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> com <Eq>{`\\|S - T\\| < \\delta`}</Eq>.
+
+</Exercicio>
+
+### Bloco E — Normas e estrutura avançada (117.34 a 117.40)
+
+<Exercicio numero="117.34" dificuldade="demonstracao"
+  solucao={<>A norma de <Eq>{`\\varphi_u`}</Eq> como mapa linear <Eq>{`V \\to \\mathbf{F}`}</Eq> é <Eq>{`\\|\\varphi_u\\| = \\sup_{\\|v\\|=1} |\\langle v, u \\rangle|`}</Eq>. Por Cauchy-Schwarz: <Eq>{`|\\langle v, u \\rangle| \\leq \\|v\\| \\|u\\| = \\|u\\|`}</Eq>, logo <Eq>{`\\|\\varphi_u\\| \\leq \\|u\\|`}</Eq>. Igualdade em <Eq>{`v = u/\\|u\\|`}</Eq>: <Eq>{`|\\langle u/\\|u\\|, u \\rangle| = \\|u\\|`}</Eq>. Portanto <Eq>{`\\|\\varphi_u\\| = \\|u\\|`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 17", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`u \\in V`}</Eq> e <Eq>{`\\varphi_u`}</Eq> o funcional linear definido por <Eq>{`\\varphi_u(v) = \\langle v, u \\rangle`}</Eq>. Prove que <Eq>{`\\|\\varphi_u\\| = \\|u\\|`}</Eq>, onde <Eq>{`\\|\\varphi_u\\|`}</Eq> denota a norma de <Eq>{`\\varphi_u`}</Eq> como mapa linear <Eq>{`V \\to \\mathbf{F}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.35" dificuldade="demonstracao"
+  solucao={<>(a) Para cada <Eq>{`k`}</Eq>: <Eq>{`\\|Te_k\\| = \\sup_{\\|v\\|=1} |\\langle Tv, e_k \\rangle| \\cdot \\|e_k\\|`}</Eq>... Mais direto: <Eq>{`\\|Te_k\\| = \\|T e_k\\| \\leq \\|T\\| \\|e_k\\| = \\|T\\|`}</Eq>. Para a cota superior: <Eq>{`\\sum_k \\|Te_k\\|^2 = \\text{tr}(T^*T) = \\sum_j s_j^2`}</Eq> (exercício 117.11). Logo <Eq>{`\\|T\\| \\leq (\\sum \\|Te_k\\|^2)^{1/2}`}</Eq> pois <Eq>{`s_1 \\leq (\\sum s_j^2)^{1/2}`}</Eq>. (b) Igualdade sse <Eq>{`s_1^2 = \\sum s_j^2`}</Eq>, i.e., todos menos um valor singular são nulos, i.e., <Eq>{`\\text{rank}(T) \\leq 1`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 18", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`e_1, \\ldots, e_n`}</Eq> base ortonormal de <Eq>{`V`}</Eq> e <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq>. (a) Prove que <Eq>{`\\max_k \\|Te_k\\| \\leq \\|T\\| \\leq (\\sum_k \\|Te_k\\|^2)^{1/2}`}</Eq>. (b) Prove que <Eq>{`\\|T\\| = (\\sum_k \\|Te_k\\|^2)^{1/2}`}</Eq> se e somente se <Eq>{`\\dim \\text{range}\\, T \\leq 1`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.36" dificuldade="demonstracao"
+  solucao={<><Eq>{`\\|T^* T\\| = \\|T\\|^2`}</Eq>. Como <Eq>{`T^* T`}</Eq> é auto-adjunto, <Eq>{`\\|T^* T\\| = s_1(T^* T) = \\lambda_1(T^* T) = s_1(T)^2 = \\|T\\|^2`}</Eq>. Esta fórmula é a identidade <Eq>{`C^*`}</Eq> das álgebras <Eq>{`C^*`}</Eq> (também chamada identidade de Gelfand-Naimark).</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 19", licenca: "CC-BY-NC 4.0" }}
+>
+
+Prove que se <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq>, então <Eq>{`\\|T^* T\\| = \\|T\\|^2`}</Eq>. (Esta fórmula é a base da teoria de álgebras <Eq>{`C^*`}</Eq>.)
+
+</Exercicio>
+
+<Exercicio numero="117.37" dificuldade="demonstracao"
+  solucao={<>Para <Eq>{`T`}</Eq> normal, autovalores <Eq>{`\\lambda_i`}</Eq> com base ortonormal de autovetores. <Eq>{`T^k e_i = \\lambda_i^k e_i`}</Eq>, então <Eq>{`T^k`}</Eq> também é normal com autovalores <Eq>{`\\lambda_i^k`}</Eq>. <Eq>{`\\|T^k\\| = \\max_i |\\lambda_i^k| = (\\max_i |\\lambda_i|)^k = \\|T\\|^k`}</Eq>.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 20", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V)`}</Eq> normal. Prove que <Eq>{`\\|T^k\\| = \\|T\\|^k`}</Eq> para todo inteiro positivo <Eq>{`k`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.38" dificuldade="demonstracao"
+  solucao={<>Suponha que existe produto interno <Eq>{`\\langle \\cdot, \\cdot \\rangle`}</Eq> em <Eq>{`\\mathcal{L}(V,W)`}</Eq> tal que <Eq>{`\\|T\\|^2 = \\langle T, T \\rangle`}</Eq>. Para uma norma vir de produto interno, deve valer a lei do paralelogramo: <Eq>{`\\|S+T\\|^2 + \\|S-T\\|^2 = 2(\\|S\\|^2 + \\|T\\|^2)`}</Eq>. Escolha <Eq>{`S, T`}</Eq> de posto 1 ortogonais e verifique que a lei falha quando <Eq>{`\\dim V > 1, \\dim W > 1`}</Eq> (há exemplos com <Eq>{`\\|S+T\\|^2 = \\|S\\|^2 + \\|T\\|^2 < 2(\\|S\\|^2+\\|T\\|^2) - \\|S-T\\|^2`}</Eq>). Portanto a norma de operador não vem de produto interno.</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 21", licenca: "CC-BY-NC 4.0" }}
+>
+
+Suponha <Eq>{`\\dim V > 1`}</Eq> e <Eq>{`\\dim W > 1`}</Eq>. Prove que a norma de operador em <Eq>{`\\mathcal{L}(V, W)`}</Eq> não vem de produto interno. (Ou seja, não existe produto interno em <Eq>{`\\mathcal{L}(V, W)`}</Eq> que induza a norma <Eq>{`\\|T\\| = \\max_{\\|v\\| \\leq 1} \\|Tv\\|`}</Eq>.)
+
+</Exercicio>
+
+<Exercicio numero="117.39" dificuldade="demonstracao"
+  solucao={<>Seja <Eq>{`1 \\leq k \\leq n`}</Eq>. Devemos mostrar <Eq>{`\\min\\{\\|T|_U\\| : \\dim U = k\\} = s_{n-k+1}`}</Eq>. Tomando <Eq>{`U = \\text{span}\\{v_{n-k+1}, \\ldots, v_n\\}`}</Eq> (últimos <Eq>{`k`}</Eq> vetores singulares à direita), <Eq>{`\\|T|_U\\| = s_{n-k+1}`}</Eq>. Por outro lado, para qualquer <Eq>{`U`}</Eq> de dimensão <Eq>{`k`}</Eq>, <Eq>{`U`}</Eq> e <Eq>{`\\text{span}\\{v_1, \\ldots, v_{n-k}\\}`}</Eq> têm soma de dimensões maior que <Eq>{`n`}</Eq>, logo se intersectam. Seja <Eq>{`u`}</Eq> unitário nessa interseção: <Eq>{`\\|Tu\\| \\leq s_{n-k+1}`}</Eq>... (argumento de interlacing/Courant-Fischer).</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 22", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq> com <Eq>{`\\dim V = n`}</Eq> e valores singulares <Eq>{`s_1 \\geq \\cdots \\geq s_n`}</Eq>. Prove que para <Eq>{`1 \\leq k \\leq n`}</Eq>: <Eq>{`\\min\\{\\|T|_U\\| : U \\text{ subespaço de } V,\\, \\dim U = k\\} = s_{n-k+1}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="117.40" dificuldade="demonstracao"
+  solucao={<>Para todo <Eq>{`v_1, v_2 \\in V`}</Eq> com <Eq>{`\\|v_1 - v_2\\| < \\delta`}</Eq>: <Eq>{`\\|Tv_1 - Tv_2\\| = \\|T(v_1 - v_2)\\| \\leq \\|T\\| \\|v_1 - v_2\\| < \\|T\\| \\delta`}</Eq>. Dado <Eq>{`\\varepsilon > 0`}</Eq>, tome <Eq>{`\\delta = \\varepsilon/(\\|T\\| + 1)`}</Eq>. Então para <Eq>{`\\|v_1 - v_2\\| < \\delta`}</Eq>: <Eq>{`\\|Tv_1 - Tv_2\\| \\leq \\|T\\| \\delta < \\varepsilon`}</Eq>. Logo <Eq>{`T`}</Eq> é uniformemente contínua (a escolha de <Eq>{`\\delta`}</Eq> não depende dos pontos).</>}
+  fonte={{ livro: "Axler — Linear Algebra Done Right 4e", url: "https://linear.axler.net/", secao: "§7F", exercicio: "ex. 23", licenca: "CC-BY-NC 4.0" }}
+>
+
+Seja <Eq>{`T \\in \\mathcal{L}(V, W)`}</Eq>. Mostre que <Eq>{`T`}</Eq> é uniformemente contínua em relação às métricas em <Eq>{`V`}</Eq> e <Eq>{`W`}</Eq> que provêm das normas nesses espaços.
+
 </Exercicio>
 
 </ListaExercicios>
 
+
 ## Fontes
 
-- [Understanding Linear Algebra](https://understandinglinearalgebra.org/) — David Austin · Grand Valley State University · CC-BY-SA · Principal referência para geometria, exemplos e exercícios de SVD (§6.3–6.4).
-- [A First Course in Linear Algebra](http://linear.ups.edu/) — Rob Beezer · University of Puget Sound · GNU FDL · Demonstrações rigorosas de existência de SVD, pseudoinversa e subespaços (§SVD).
-- [Álgebra Linear (REAMAT UFRGS)](https://www.ufrgs.br/reamat/AlgebraLinear/index.html) — Reamat Colaborativo · UFRGS · CC-BY-SA · Exercícios em PT-BR de compressão, posto numérico e regularização.
-- [Introduction to Applied Linear Algebra (VMLS)](https://web.stanford.edu/~boyd/vmls/) — Boyd, Vandenberghe · Stanford · CC-BY-NC-ND · Contexto de aplicações em ML e engenharia.
+- [**Beezer, A First Course in Linear Algebra**](http://linear.pugetsound.edu/html/section-SVD.html) — Rob Beezer · 2023 (3.50) · EN · GNU FDL · §SVD. **Fonte primária desta lição:** prova rigorosa de existência da SVD via teorema espectral em <Eq>{`A^T A`}</Eq>, lemas auxiliares e exemplos numéricos completos.
+- [**Austin, Understanding Linear Algebra**](https://understandinglinearalgebra.org/chap6.html) — David Austin · 2024 · EN · CC-BY-SA · §6.3–6.4 (Singular Value Decomposition, Low-rank approximations). Apresentação geométrica com transformação do círculo unitário em elipse, motivação aplicada à compressão e à PCA.
+- [**Hefferon, Linear Algebra**](https://hefferon.net/linearalgebra/) — Jim Hefferon · 2020 (4th ed) · EN · CC-BY-SA · cap. 5, §IV. Exercícios de cálculo numérico, pseudoinversa Moore-Penrose e mínimos quadrados regularizados.

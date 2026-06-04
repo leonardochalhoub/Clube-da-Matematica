@@ -31,6 +31,12 @@ CV1 = "openstax/calculus-volume-1"
 CV2 = "openstax/calculus-volume-2"
 CV3 = "openstax/calculus-volume-3"
 AC = "active-calculus/single"
+# New books added 2026-05-29
+S2 = "openstax/statistics"             # OpenStax Statistics (Illowsky, Dean) — CC-BY 4.0
+OI = "openintro/statistics"            # OpenIntro Statistics (Diez, Çetinkaya-Rundel) — CC-BY-SA 3.0
+BZ = "beezer/first-course-linear-algebra"  # Beezer FCLA — GFDL
+AX = "axler/linear-algebra-done-right-4e"  # Axler LADR 4e — CC-BY-NC 4.0
+AT = "openstax/algebra-and-trigonometry-2e"  # OpenStax Algebra and Trigonometry 2e — CC-BY 4.0
 
 # Per-lesson section whitelist. Curated by topic match between the lesson
 # title and the section title (using the inventory printed by aggregate-corpus
@@ -53,12 +59,37 @@ LESSON_SECTIONS: dict[int, list[tuple[str, str]]] = {
     12: [(CA2, "7.3"), (CA2, "7.4")],  # unit circle
     13: [(CA2, "8.1"), (CA2, "8.2")],  # trig functions
     14: [(CA2, "9.1"), (CA2, "9.2"), (CA2, "9.3")],  # trig equations
-    15: [(CA2, "10.1"), (CA2, "10.2")],  # laws of sines/cosines
+    15: [(AT, "10.1"), (AT, "10.2")],  # laws of sines/cosines — AlgTrig 2e parsed 2026-05-29
     16: [(CV1, "1.5")],  # sequences placeholder
     17: [(CA2, "13.2")],  # arithmetic sequences/series
     18: [(CA2, "13.3"), (CA2, "13.4")],  # geometric, binomial
     19: [(AC, "1.2"), (CV1, "2.1"), (CV1, "2.2")],  # intuitive limit
     20: [(CV1, "2.1")],  # consolidacao trim-2
+    # ===== Year 1, Trim 2: PA and PG (sequences) — corpus had it; old mapping was wrong =====
+    17: [(CA2, "9.1"), (CA2, "9.2"), (CA2, "9.4")],  # arithmetic seqs + series
+    18: [(CA2, "9.3"), (CA2, "9.6")],                # geometric seqs + binomial
+    # ===== Year 1, Trim 3: Analytic geometry, conics, vectors, systems =====
+    21: [(CA2, "2.1")],                                            # Rect coord systems, distance
+    22: [(CA2, "4.1"), (CA2, "4.2")],                              # Linear functions / modeling
+    23: [(CA2, "4.1"), (CA2, "7.1")],                              # Lines + systems 2x2
+    24: [(CA2, "8.1")],                                            # Ellipse (covers circles as a=b)
+    25: [(CA2, "8.1"), (CA2, "8.2"), (CA2, "8.3")],                # Ellipse / Hyperbola / Parabola
+    26: [(CV3, "2.1")],                                            # Vectors in the Plane
+    27: [(CV3, "2.3")],                                            # The Dot Product
+    28: [(CV3, "2.1"), (CV3, "2.3")],                              # Vector applications (physics)
+    29: [(CA2, "7.1"), (CA2, "7.2")],                              # Systems 2x2 + 3x3
+    30: [(CA2, "2.1"), (CA2, "8.1"), (CV3, "2.1"), (CA2, "7.1")],  # consolidacao trim-3
+    # ===== Year 1, Trim 4: Matrices, determinants, combinatorics, probability =====
+    31: [(CA2, "7.5")],                                            # Matrices and Matrix Operations
+    32: [(CA2, "7.5")],                                            # Matrix operations
+    33: [(CA2, "7.5"), (CA2, "7.7")],                              # Transpose, identity, inverse
+    34: [(CA2, "7.8")],                                            # Cramer's Rule uses determinants
+    35: [(CA2, "7.6"), (CA2, "7.8")],                              # Gaussian + Cramer
+    36: [(CA2, "9.5")],                                            # Counting Principles (PFC)
+    37: [(CA2, "9.5")],                                            # Permutations / arrangements
+    38: [(CA2, "9.5"), (CA2, "9.6")],                              # Combinations + Binomial Theorem
+    39: [(CA2, "9.7")],                                            # Probability
+    40: [(CA2, "7.5"), (CA2, "8.1"), (CA2, "9.5"), (CA2, "9.7")],  # consolidacao anual
     # ===== Year 2, Trim 5: Limits =====
     41: [(CV1, "2.5"), (CV1, "2.2"), (CV1, "2.3"), (AC, "1.2"), (AC, "1.7")],
     42: [(CV1, "2.3"), (AC, "1.2")],  # limit laws
@@ -92,8 +123,17 @@ LESSON_SECTIONS: dict[int, list[tuple[str, str]]] = {
     68: [(CV1, "4.8")],  # L'Hôpital
     69: [(CV1, "4.9")],  # Newton-Raphson
     70: [(CV1, "4.3"), (CV1, "4.7"), (CV1, "4.8")],  # consolidacao trim-7
-    # ===== Year 2, Trim 8: Descriptive statistics (will need OpenIntro) =====
-    # 71-80: TODO once stats parser is ready
+    # ===== Year 2, Trim 8: Descriptive statistics =====
+    71: [(S2, "2.P"), (S2, "2.H"), (S2, "2.B")],                    # central tendency
+    72: [(S2, "2.P"), (S2, "2.H"), (OI, "2.1")],                    # variance / spread
+    73: [(S2, "2.P"), (S2, "2.H"), (OI, "2.1")],                    # quartis / boxplot
+    74: [(S2, "4.P"), (S2, "4.H"), (OI, "3.4")],                    # discrete RV
+    75: [(S2, "4.P"), (S2, "4.H"), (OI, "4.3")],                    # binomial
+    76: [(S2, "6.P"), (S2, "6.H"), (OI, "4.1")],                    # normal
+    77: [(S2, "7.P"), (S2, "7.H"), (OI, "5.1")],                    # CLT
+    78: [(S2, "12.P"), (S2, "12.H"), (OI, "8.1"), (OI, "8.2")],     # correlation + regression
+    79: [(S2, "3.P"), (S2, "3.H"), (OI, "3.2")],                    # Bayes
+    80: [(S2, "2.P"), (S2, "4.P"), (S2, "6.P"), (S2, "7.P"), (S2, "12.P")],  # consolidação Trim 8
     # ===== Year 3, Trim 9: Integration =====
     81: [(CV1, "4.10"), (AC, "5.1"), (AC, "5.5")],  # antiderivatives
     82: [(CV1, "5.1"), (CV1, "5.2"), (AC, "4.3")],  # definite integral
@@ -116,13 +156,29 @@ LESSON_SECTIONS: dict[int, list[tuple[str, str]]] = {
     98: [(CV1, "6.8")],  # exponential decay
     99: [(CV2, "4.5")],  # variation of parameters
     100: [(AC, "7.1"), (AC, "7.4")],  # consolidacao trim-10
-    # ===== Year 3, Trim 11: Inferential statistics — needs OpenIntro =====
-    # 101-110: TODO once stats parser is ready
+    # ===== Year 3, Trim 11: Inferential statistics =====
+    101: [(S2, "1.P"), (S2, "1.H"), (OI, "1.3"), (OI, "1.4")],     # sampling
+    102: [(S2, "8.P"), (S2, "8.H"), (OI, "5.2")],                  # CI for mean
+    103: [(S2, "9.P"), (S2, "9.H"), (OI, "5.3")],                  # hypothesis test structure
+    104: [(S2, "9.P"), (S2, "9.H"), (S2, "10.P"), (S2, "10.H")],   # z + t tests
+    105: [(S2, "12.P"), (S2, "12.H"), (OI, "8.1"), (OI, "8.2")],   # linear regression
+    106: [(S2, "12.P"), (S2, "12.H"), (OI, "9.1")],                # multiple regression
+    107: [(S2, "13.P"), (S2, "13.H")],                             # ANOVA one-way
+    108: [(S2, "11.P"), (S2, "11.H"), (OI, "6.3"), (OI, "6.4")],   # chi-square
+    109: [(S2, "3.P"), (S2, "3.H"), (OI, "3.2")],                  # bayesian intro (using Bayes/conditional)
+    110: [(S2, "8.P"), (S2, "9.P"), (S2, "12.P"), (S2, "13.P")],   # consolidação Trim 11
     # ===== Year 3, Trim 12: Linear algebra + synthesis =====
     111: [(CV3, "2.1"), (CV3, "2.2")],  # vectors
     112: [(CV3, "2.3"), (CV3, "2.4")],  # dot/cross
     113: [(CV3, "2.5"), (CV3, "2.6")],  # planes/lines
-    # 114-120: linear algebra + Black-Scholes — needs MIT 18.06 parser
+    # ===== Year 3, Trim 12: Linear Algebra + Black-Scholes synthesis =====
+    114: [(AX, "5A"), (AX, "5B"), (BZ, "EE"), (BZ, "PEE")],         # eigenvalues
+    115: [(AX, "5D"), (AX, "5C"), (BZ, "SD")],                       # diagonalização
+    116: [(AX, "7A"), (AX, "7B"), (BZ, "O"), (BZ, "OD")],            # symmetric/orthog/hermitian
+    117: [(AX, "7E"), (AX, "7F"), (AX, "6B"), (AX, "6C")],           # SVD + orthonormal
+    118: [(AX, "7E"), (AX, "7F"), (AX, "6B")],                       # PCA via SVD
+    119: [(BZ, "LT"), (BZ, "IVLT"), (AX, "5D")],                     # applications / Black-Scholes prereqs
+    120: [(AX, "5A"), (AX, "7E"), (BZ, "LT"), (BZ, "EE")],           # workshop final mix
 }
 
 

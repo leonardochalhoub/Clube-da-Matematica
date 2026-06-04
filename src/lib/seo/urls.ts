@@ -12,27 +12,29 @@
  * Google "this URL has a German translation" when in fact `/de/...` ships
  * PT-BR content — duplicate-content penalty. We check the filesystem.
  */
-import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import { LOCALES, localeToUrl, type Locale } from '@/lib/i18n/locales'
 import { caminhoArquivoMdx } from '@/lib/content/loader-i18n'
 import { SITE_ORIGIN, BASE_PATH } from '@/lib/seo/site'
 
 /**
  * Full absolute URL for a (caminho, locale) pair. Always ends with a slash
- * because `trailingSlash: true` in next.config.
+ * because `trailingSlash: true` in next.config. Every locale (pt-BR included)
+ * is prefixed with its URL segment (`pt-br/aulas/…`, `en/aulas/…`).
  */
 export function canonicalUrlFor(caminho: string, locale: Locale): string {
-  const path = locale === 'pt-BR' ? caminho : `${locale}/${caminho}`
+  const path = `${localeToUrl(locale)}/${caminho}`
   const prefix = BASE_PATH ? `${BASE_PATH}/` : '/'
   return `${SITE_ORIGIN}${prefix}${path}/`
 }
 
-/** Site root URL for a locale ("/en/", "/", etc). Trailing-slash safe. */
-export function homeUrlFor(locale: Locale): string {
-  if (locale === 'pt-BR') {
-    return `${SITE_ORIGIN}${BASE_PATH || ''}/`
-  }
-  const prefix = BASE_PATH ? `${BASE_PATH}/` : '/'
-  return `${SITE_ORIGIN}${prefix}${locale}/`
+/**
+ * Site root URL for a locale. The HOMEPAGE stays at root `/` for every locale
+ * (it lives at `app/page.tsx` and translates client-side — it is NOT a
+ * per-locale route). Only lesson URLs move under `/<urlCode>/` (see
+ * `canonicalUrlFor`). So home is always the site root. Trailing-slash safe.
+ */
+export function homeUrlFor(_locale: Locale): string {
+  return `${SITE_ORIGIN}${BASE_PATH || ''}/`
 }
 
 /**

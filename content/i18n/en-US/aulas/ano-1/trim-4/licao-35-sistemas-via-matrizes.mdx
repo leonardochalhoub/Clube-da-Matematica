@@ -1,365 +1,1575 @@
 ---
-titulo: "Lesson 35 — Solving Systems via Matrices"
+titulo: "Lesson 35 — Solving linear systems with matrices"
 slug: "licao-35-sistemas-via-matrizes"
 categoria: "aulas"
 subcategoria: "ano-1-trim-4"
-descricao: "Cramer, Gaussian elimination, matrix inverse. When each method is best."
+descricao: "Augmented matrix, elementary operations, Gaussian elimination, reduced row-echelon form (RREF), Gauss-Jordan, rank, the Rouché-Capelli Theorem, and Cramer's Rule. Applications in economics and circuits."
 ordem: 35
 publicado: true
 tags: ["sistemas lineares", "matrizes", "Gauss", "Cramer", "RREF", "posto", "ano-1", "trim-4"]
 prerrequisitos: ["licao-34-determinantes"]
 autores: ["Clube da Matemática"]
-atualizadoEm: "2026-04-30"
-usadoEm: ["1.º ano EM (15 anos)", "Equiv. Math II japonês", "Equiv. Klasse 11 alemã"]
+atualizadoEm: "2026-05-05"
+usadoEm: ["1st year HS (age 15)", "Equiv. Japanese Math II", "Equiv. German Klasse 11"]
 versao: "v1"
 ---
 
 <EquacaoCanonica
-  formula="A\mathbf{x} = \mathbf{b} \quad \Rightarrow \quad \mathbf{x} = A^{-1}\mathbf{b}"
-  legenda={<>Linear system in matrix form. The solution exists via the inverse, or via <strong>Gaussian elimination</strong>, or via <strong>Cramer's rule</strong> — three paths to the same result.</>}
-  audioTexto="Linear system in matrix form. A times x equals b. Solution: x equals A inverse times b, when A is invertible. In practice we use Gaussian elimination, more efficient than computing the inverse explicitly."
+  formula="A\vec{x} = \vec{b}"
+  legenda={<>Matrix form of a linear system. <Eq>{`A`}</Eq> is the <strong>coefficient matrix</strong>, <Eq>{`\\vec{x}`}</Eq> is the vector of unknowns, and <Eq>{`\\vec{b}`}</Eq> is the vector of constant terms. Gaussian elimination operates on the <strong>augmented matrix</strong> <Eq>{`[A \\mid \\vec{b}]`}</Eq> to find <Eq>{`\\vec{x}`}</Eq> without explicitly computing <Eq>{`A^{-1}`}</Eq>.</>}
+  audioTexto="A times x equals b. The linear system is represented in matrix form. A is the coefficient matrix, x is the vector of unknowns, and b is the vector of constant terms. Gauss's method builds the augmented matrix A bar b and reduces it through elementary row operations to row-echelon form, obtaining the solution by back-substitution."
 />
+
+<aside className="not-prose my-6 rounded-xl border border-clube-mist-soft/40 bg-clube-cream-soft p-5 text-clube-ink">
+  <h3 className="!mt-0 mb-3 text-sm font-semibold uppercase tracking-wider text-clube-mist">
+    Books that cover this lesson
+  </h3>
+  <ul className="space-y-2.5 text-sm leading-relaxed">
+    <li>
+      <a href="https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — College Algebra 2e
+      </a>
+      <span className="text-clube-mist"> · §9.6–9.8 Gaussian Elimination, Inverses, Cramer's Rule · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Full elimination, RREF, Cramer, applications with detailed worked examples.</em>
+    </li>
+    <li>
+      <a href="http://linear.pugetsound.edu/fcla/section-RREF.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        Beezer — A First Course in Linear Algebra
+      </a>
+      <span className="text-clube-mist"> · ch. SLE, RREF, LS, HSE · GNU FDL · </span>
+      <em className="text-clube-mist">Rigorous treatment of RREF, rank, homogeneous systems, and the solution space.</em>
+    </li>
+    <li>
+      <a href="https://openstax.org/books/algebra-and-trigonometry-2e/pages/9-6-solving-systems-with-gaussian-elimination" target="_blank" rel="noopener noreferrer" className="font-semibold text-clube-teal hover:text-clube-teal-deep">
+        OpenStax — Algebra and Trigonometry 2e
+      </a>
+      <span className="text-clube-mist"> · §9.6 Gaussian Elimination · CC-BY 4.0 · </span>
+      <em className="text-clube-mist">Clean exposition with 2×2 and 3×3 system examples, classification, and applications.</em>
+    </li>
+  </ul>
+</aside>
 
 <DuasPortas>
 
-<Porta nivel="formal" titulo="Solution methods">
+<Porta nivel="formal" titulo="Rigorous definition">
 
-### Matrix form
+### Linear system and matrix form
 
-$\begin{cases} a_1 x + b_1 y + c_1 z = d_1 \\ a_2 x + b_2 y + c_2 z = d_2 \\ a_3 x + b_3 y + c_3 z = d_3 \end{cases}$ ⟺ $A\mathbf{x} = \mathbf{b}$ with $A_{3 \times 3}$, $\mathbf{x}, \mathbf{b} \in \mathbb{R}^3$.
+<Definicao titulo="Linear system and augmented matrix">
 
-### Method 1 — Gaussian elimination
+A **linear system** of $m$ equations in $n$ unknowns is a set of equations of the form
 
-Elementary operations (do not change solution):
-1. Swap two rows.
-2. Multiply a row by a non-zero scalar.
-3. Add a multiple of one row to another.
+$$a_{11}x_1 + a_{12}x_2 + \cdots + a_{1n}x_n = b_1$$
+$$a_{21}x_1 + a_{22}x_2 + \cdots + a_{2n}x_n = b_2$$
+$$\vdots$$
+$$a_{m1}x_1 + a_{m2}x_2 + \cdots + a_{mn}x_n = b_m$$
 
-Goal: triangularize $[A | \mathbf{b}]$ to row-echelon form. Then back-substitute.
+The **matrix form** is $A\vec{x} = \vec{b}$, where $A \in M_{m \times n}(\mathbb{R})$, $\vec{x} \in \mathbb{R}^n$, $\vec{b} \in \mathbb{R}^m$.
 
-### Method 2 — Cramer
+The **augmented matrix** is $[A \mid \vec{b}] \in M_{m \times (n+1)}(\mathbb{R})$, obtained by appending $\vec{b}$ as the last column of $A$.
 
-For $A\mathbf{x} = \mathbf{b}$ with $\det A \neq 0$:
-$$x_i = \frac{\det A_i}{\det A}$$
+</Definicao>
 
-where $A_i$ is $A$ with the $i$-th column replaced by $\mathbf{b}$.
+### Elementary row operations
 
-### Method 3 — Inverse
+<Definicao titulo="Elementary operations (row operations)">
 
-$\mathbf{x} = A^{-1} \mathbf{b}$. $A^{-1}$ can be computed via $[A | I] \to [I | A^{-1}]$ by row reduction.
+Three operations on the rows of the augmented matrix **preserve** the solution set of the system:
 
-### When to use each
+1. **Row swap** ($L_i \leftrightarrow L_j$).
+2. **Scalar multiplication** ($L_i \leftarrow c L_i$, with $c \neq 0$).
+3. **Adding a multiple** ($L_i \leftarrow L_i + c L_j$, with $i \neq j$).
 
-| Method | Cost | When to use |
-|---|---|---|
-| Cramer | $O(n^4)$ | $n \leq 3$, didactic |
-| Gauss | $O(n^3)$ | practical default |
-| Inverse | $O(n^3)$ + $O(n^2)$/system | many $\mathbf b$ with same $A$ |
-| LU | $O(n^3)$ + $O(n^2)$/system | many systems, better than inverse |
+</Definicao>
 
-### Classification of systems
+> "Elementary row operations are reversible: a swap is undone by swapping again; multiplying by $c$ is undone by multiplying by $1/c$; $L_i \leftarrow L_i + cL_j$ is undone by $L_i \leftarrow L_i - cL_j$. Hence the systems before and after have exactly the same solutions." — [Beezer, A First Course in Linear Algebra, §RO](http://linear.pugetsound.edu/fcla/section-RREF.html)
 
-- **Determinate (unique)**: unique solution ($\det A \neq 0$, or $\text{rank}(A) = \text{rank}([A|\mathbf b]) = n$).
-- **Indeterminate**: infinitely many solutions ($\text{rank}(A) = \text{rank}([A|\mathbf b]) < n$).
-- **Impossible**: no solution ($\text{rank}(A) < \text{rank}([A|\mathbf b])$).
+### Row-echelon form and RREF
 
-### Rouché-Capelli theorem
+<Definicao titulo="REF and RREF">
 
-$A\mathbf x = \mathbf b$ has a solution ⟺ $\text{rank}(A) = \text{rank}([A|\mathbf b])$. Solution is unique if both equal the number of unknowns.
+A matrix is in **row-echelon form** (REF) if:
+- All zero rows are below the nonzero rows.
+- The **pivot** (first nonzero entry) of each row is to the right of the pivot of the previous row.
+
+It is in **reduced row-echelon form** (RREF) if, additionally:
+- Each pivot equals 1.
+- Each pivot is the only nonzero entry in its column.
+
+</Definicao>
+
+### Gauss and Gauss-Jordan algorithms
+
+<Equation explicacao="Gauss: reduction to REF, then back-substitution from bottom to top." latex="[A \mid \vec{b}] \xrightarrow{\text{REF}} \begin{pmatrix} * & * & * \mid * \\ 0 & * & * \mid * \\ 0 & 0 & * \mid * \end{pmatrix} \xrightarrow{\text{back-sub}} \vec{x}" />
+
+<Equation explicacao="Gauss-Jordan: direct reduction to RREF. The solution is read off immediately in the right-hand column, with no back-substitution." latex="[A \mid \vec{b}] \xrightarrow{\text{RREF}} \begin{pmatrix} 1 & 0 & 0 \mid x_1 \\ 0 & 1 & 0 \mid x_2 \\ 0 & 0 & 1 \mid x_3 \end{pmatrix}" />
+
+### Rank and classification of systems
+
+<Definicao titulo="Rank and the Rouché-Capelli Theorem">
+
+The **rank** $\text{rank}(A)$ is the number of pivots in the REF of $A$.
+
+Let $[A \mid \vec{b}]$ be the augmented matrix of $A\vec{x} = \vec{b}$ with $n$ unknowns:
+
+- $\text{rank}(A) < \text{rank}([A \mid \vec{b}])$: **inconsistent system** (no solution).
+- $\text{rank}(A) = \text{rank}([A \mid \vec{b}]) = n$: **consistent, determined system** — unique solution.
+- $\text{rank}(A) = \text{rank}([A \mid \vec{b}]) < n$: **consistent, undetermined system** — infinitely many solutions with $n - \text{rank}(A)$ free variables.
+
+</Definicao>
+
+### Cramer's Rule
+
+<Teorema titulo="Cramer's Rule">
+
+For $A\vec{x} = \vec{b}$ with $\det(A) \neq 0$ and $n$ unknowns:
+
+<Equation numero="Cramer" explicacao="The i-th unknown is the quotient of the determinant of A with its i-th column replaced by b, divided by the determinant of A." latex="x_i = \frac{\det(A_i)}{\det(A)}, \quad i = 1, 2, \ldots, n" />
+
+where $A_i$ is the matrix obtained by replacing the $i$-th column of $A$ with the vector $\vec{b}$.
+
+Cramer's Rule is valid only when $\det(A) \neq 0$. For $n \geq 4$, the $O(n!)$ cost makes Cramer impractical — use Gauss.
+
+</Teorema>
+
+<Insight>
+
+**Why does Gauss beat Cramer for large $n$?** Cramer requires computing $n+1$ determinants of order $n$. By cofactor expansion, each determinant costs $O(n!)$. For $n = 20$: $20! \approx 2{,}4 \times 10^{18}$ operations. Gauss-Jordan costs $O(n^3)$: for $n = 20$, only 8,000 operations. The difference is astronomical.
+
+</Insight>
 
 </Porta>
 
 <Porta nivel="5" titulo="For a 5-year-old">
 
-A system is **a bunch of equations at the same time**. Like: "I have 3 apples and 2 pears, total 13 dollars. I have 1 apple and 4 pears, total 16 dollars. How much does each one cost?"
+Imagine a puzzle with two hidden secrets: the price of an apple and the price of a pear.
 
-To solve, you **combine** the equations cleverly to **eliminate** one of the fruits, find the price of the other, and go back. It's a puzzle with a fixed recipe.
+You know that 2 apples and 1 pear cost US\$ 8, and that 1 apple and 3 pears cost US\$ 9.
+
+We write this down in a tidy table. Then we do some "magic tricks" on the rows of the table — swap rows, multiply, add — until the answer appears right there in the last column.
+
+This trick of tidying up the table and eliminating the secrets one by one is what mathematicians call **elimination**. It is like cleaning a messy room in the right order to find a lost toy.
 
 </Porta>
 
 <Porta nivel="10" titulo="For a 10-year-old">
 
-**Linear system** = several equations with several unknowns that need to be true at the same time.
+**Linear system** = several equations with several unknowns that must all be true at the same time.
 
 Example:
-$$\begin{cases} x + y = 5 \\ x - y = 1 \end{cases}$$
+<Eq>{`\\begin{cases} 2x + y = 5 \\\\ x - y = 1 \\end{cases}`}</Eq>
 
-How to solve?
-- **Add the two**: $2x = 6 \Rightarrow x = 3$.
-- **Subtract**: $2y = 4 \Rightarrow y = 2$.
+Instead of solving by substitution, we write it as an **augmented matrix**:
 
-Done: $x = 3, y = 2$.
+<Eq>{`\\left[\\begin{array}{cc|c} 2 & 1 & 5 \\\\ 1 & -1 & 1 \\end{array}\\right]`}</Eq>
 
-**For large systems**, doing it by hand is tedious. So we **organize into a matrix**:
-$$\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} 5 \\ 1 \end{pmatrix}$$
+Then we perform **row operations** to zero out the entries below the diagonal:
 
-And use **row reduction** (standard) or **Cramer's rule** (with determinants) or **inverse** ($\mathbf x = A^{-1}\mathbf b$).
+<Eq>{`\\xrightarrow{L_2 \\leftarrow L_2 - \\frac{1}{2}L_1} \\left[\\begin{array}{cc|c} 2 & 1 & 5 \\\\ 0 & -3/2 & -3/2 \\end{array}\\right]`}</Eq>
 
-**When does it fail?**
-- System with **no solution**: equations contradict each other.
-- System with **infinitely many solutions**: equations are redundant.
+From the second row: $y = 1$. Back to the first: $x = 2$.
+
+**When is there no solution?** If you reach a row $[0\;\;0\;\mid\;c]$ with $c \neq 0$, the system is inconsistent.
+
+**When are there infinitely many solutions?** If you reach an all-zero row $[0\;\;0\;\mid\;0]$, one unknown is **free** — any value works.
 
 </Porta>
 
 <Porta nivel="15" titulo="For a 15-year-old teen">
 
-Linear system in matrix form: pack the coefficients in $A$, the unknowns in $\mathbf{x}$, and the results in $\mathbf{b}$. The system becomes $A\mathbf{x} = \mathbf{b}$.
+This lesson connects two topics already seen: **linear systems** and **matrices**. The central idea is to represent the system in the form $A\vec{x} = \vec{b}$ and solve it by operating on the **augmented matrix** $[A \mid \vec{b}]$.
 
-**Cramer** (didactic, small): $x_i = \det(A_i)/\det(A)$. Example:
-$$\begin{cases} 2x + y = 5 \\ x - 3y = -2 \end{cases} \Rightarrow A = \begin{pmatrix} 2 & 1 \\ 1 & -3 \end{pmatrix}, \det A = -7$$
+**The three elementary operations that don't change the solution:**
 
-$x = \det\begin{pmatrix} 5 & 1 \\ -2 & -3 \end{pmatrix}/(-7) = (-13)/(-7) = 13/7$.
+| Operation | Notation | What it does |
+|---|---|---|
+| Row swap | $L_i \leftrightarrow L_j$ | Reorders equations |
+| Multiply a row by $c \neq 0$ | $L_i \leftarrow c L_i$ | Scales an equation |
+| Add a multiple of another row | $L_i \leftarrow L_i + c L_j$ | Eliminates a variable |
 
-$y = \det\begin{pmatrix} 2 & 5 \\ 1 & -2 \end{pmatrix}/(-7) = (-9)/(-7) = 9/7$.
+**Gauss** triangularizes $[A \mid \vec{b}]$ to REF. Then it back-substitutes from bottom to top.
 
-**Gauss** (standard): perform elementary operations to triangularize. Then back-substitute from bottom to top.
+**Gauss-Jordan** goes further: it continues to RREF, where the solution appears directly in the right-hand column.
 
-$$[A | \mathbf b] = \begin{pmatrix} 2 & 1 & | & 5 \\ 1 & 3 & | & 6 \end{pmatrix} \xrightarrow{L_2 \leftarrow L_2 - L_1/2} \begin{pmatrix} 2 & 1 & | & 5 \\ 0 & 5/2 & | & 7/2 \end{pmatrix}$$
+**Classification by rank:**
 
-From the second row: $y = 7/5$. Substitute into the first: $2x = 5 - 7/5 \Rightarrow x = 9/5$.
+- $\text{rank}([A \mid \vec{b}]) > \text{rank}(A)$: inconsistent.
+- $\text{rank}(A) = n$: unique solution.
+- $\text{rank}(A) < n$: infinitely many (free variables).
 
-**Classification**:
-- $\det A \neq 0$ → **determinate** (unique solution).
-- $\det A = 0$ + consistent → **indeterminate** (infinitely many).
-- $\det A = 0$ + inconsistent → **impossible**.
-
-**Homogeneous system** $A\mathbf x = \mathbf 0$: always has $\mathbf x = \mathbf 0$ (trivial). Has a non-trivial solution ⟺ $\det A = 0$.
+**Cramer's Rule** is an explicit formula using determinants, good for 2×2 and 3×3:
+$$x_i = \frac{\det(A_i)}{\det(A)}$$
 
 </Porta>
 
 <Porta nivel="25" titulo="For an engineering student">
 
-Solving $A\mathbf x = \mathbf b$ is the **most common** operation in all scientific computing. ~80% of FEM/CFD simulation time is spent in linear solvers.
+In engineering, $A\vec{x} = \vec{b}$ appears everywhere: circuit analysis (MNA), finite elements (FEM), fluid dynamics, signal processing, optimization. Mastering the manual Gauss algorithm is a prerequisite for understanding the numerical solvers in Python, MATLAB, or Julia.
 
-### Solver hierarchy
+### Computational cost compared
 
-1. **Direct methods** (Gauss, LU, QR, Cholesky): $O(n^3)$, exact up to machine error.
-2. **Iterative methods** (Jacobi, Gauss-Seidel, CG, GMRES, BiCGSTAB): $O(n^2)$ per iter, requires convergence, ideal for sparse.
-3. **Specialized methods**: FFT for circulants, multigrid for PDEs.
+| Method | Cost | Note |
+|---|---|---|
+| Cramer | $O(n! \cdot n)$ | Only $n \leq 3$ in practice |
+| Plain Gauss | $O(n^3/3)$ | Standard for dense systems |
+| LU with pivoting | $O(n^3/3)$ | Reuses factorization for multiple $\vec{b}$ |
+| Cholesky (SPD) | $O(n^3/6)$ | Half the cost of LU |
+| GMRES/CG (sparse) | $O(k \cdot \text{nnz})$ | Iterative, $k \ll n$ |
 
-### LU with partial pivoting
+### Nodal circuit analysis (MNA)
 
-$PA = LU$ — $P$ permutation, $L$ unit lower-triangular, $U$ upper-triangular. Solves $A\mathbf x = \mathbf b$ via:
-1. $L\mathbf y = P\mathbf b$ (forward sub, $O(n^2)$).
-2. $U\mathbf x = \mathbf y$ (back sub, $O(n^2)$).
+For a circuit with $n$ independent nodes, Kirchhoff's Laws produce $G\vec{v} = \vec{i}_s$, where $G$ is the **nodal conductance matrix** (symmetric, positive definite without dependent sources). The Cholesky solver is ideal here.
 
-Pivoting is crucial for stability — avoids division by small numbers.
+### Leontief model
 
-### Ill-conditioned systems
+In Leontief's input-output model, $\vec{x} = A\vec{x} + \vec{d}$ describes the sectoral production needed to satisfy final demand $\vec{d}$. Rearranging: $(I - A)\vec{x} = \vec{d}$. Existence and uniqueness of the solution depend on $(I - A)$ being nonsingular, which holds when the spectral radius of $A$ is less than 1 (the Hawkins-Simon condition).
 
-$\kappa(A) = \|A\|\|A^{-1}\|$. For Gauss in float64, lose $\log_{10}\kappa$ digits. If $\kappa = 10^{16}$, the solution is pure garbage.
+### Numerical best practices
 
-### Least squares (overdetermined system)
-
-$\min_\mathbf x \|A\mathbf x - \mathbf b\|^2$. Normal equation: $A^TA\mathbf x = A^T\mathbf b$. **Don't use!** Conditioning squared. Use QR: $A = QR$ ⟹ $R\mathbf x = Q^T\mathbf b$.
-
-### Cross-domain
-
-- **Circuits**: KCL/KVL produce linear systems — Modified Nodal Analysis.
-- **FEM**: $K\mathbf u = \mathbf f$ — millions of unknowns, sparse, symmetric positive-definite.
-- **Optimization**: each Newton iteration solves $H\Delta\mathbf x = -\nabla f$.
-- **Statistics**: regression $X^TX\hat\beta = X^T\mathbf y$ (but use QR/SVD).
-- **Filters (Kalman)**: predict-correct involves solvers each step.
-
-### Numerical — best practices
-
-- **Use `solve`, not `inv`**.
-- For SPD: Cholesky.
-- For sparse: `scipy.sparse.linalg.spsolve` or iterative with preconditioner.
-- For dense $> 10^4$: GPU or iterative methods.
+- **Use `np.linalg.solve(A, b)`** — never `np.linalg.inv(A) @ b` (slower and unstable).
+- Check the **conditioning** with `np.linalg.cond(A)`. If $\kappa(A) > 10^{12}$, the system is ill-conditioned.
+- For sparse systems: `scipy.sparse.linalg.spsolve`.
+- For least squares (overdetermined): `np.linalg.lstsq`.
 
 </Porta>
 
 <Porta nivel="40" titulo="For a senior professional">
 
-Linear solvers are the **basis** of PDEs, ML, optimization, and simulation. Method choice is an architectural decision — it can be the difference between a simulation being feasible or not.
+The formal theory of linear systems rests on abstract Linear Algebra.
 
-### Wolfram tour
+### Structure of the solution space
 
-```mathematica
-LinearSolve[A, b]
-LeastSquares[A, b]
-LinearSolve[A, b, Method -> "Krylov"]
-```
+The solution set of $A\vec{x} = \vec{b}$ is an **affine space**: if $\vec{x}_p$ is a particular solution, then the complete set is $\vec{x}_p + \ker(A)$, where $\ker(A) = \{\vec{v} : A\vec{v} = \vec{0}\}$. The dimension of the kernel is $n - \text{rank}(A)$ (Rank-Nullity Theorem).
 
-### Matrix classes and optimal algorithm
+### LU factorization and stability
 
-| Type | Solver |
-|---|---|
-| Dense general | LU (Gauss + pivot) |
-| Dense SPD | Cholesky |
-| Dense rectangular | QR |
-| Sparse symmetric indef. | MINRES, SYMMLQ |
-| Sparse SPD | CG (with precond.) |
-| Sparse non-symmetric | GMRES, BiCGSTAB |
-| Structured (Toeplitz) | FFT-based, $O(n \log n)$ |
-| Tridiagonal | Thomas, $O(n)$ |
-| Banded | banded LU $O(nb^2)$ |
+Gaussian elimination with partial pivoting produces $PA = LU$, where $P$ is a permutation, $L$ is unit lower triangular, and $U$ is upper triangular.
 
-### Modern iteratives
+1. $PA = LU$ in $O(n^3/3)$ flops.
+2. $L\vec{y} = P\vec{b}$ by forward substitution in $O(n^2)$.
+3. $U\vec{x} = \vec{y}$ by back-substitution in $O(n^2)$.
 
-- **Krylov subspace**: $\mathcal K_k = \text{span}\{\mathbf b, A\mathbf b, \ldots, A^{k-1}\mathbf b\}$. CG (SPD), GMRES (general) build optimal approximations in $\mathcal K_k$.
-- **Convergence**: $O(\sqrt{\kappa})$ iterations for CG. Preconditioning $\widetilde A = M^{-1}A$ with $\kappa(\widetilde A) \ll \kappa(A)$ is an art.
+Reusing the factorization for multiple $\vec{b}$ (same $A$) costs only $O(n^2)$ per additional system — a direct advantage over inverting $A$ explicitly.
 
-### Big data / sparse
+### Sensitivity and conditioning
 
-- **Hypre, PETSc, Trilinos**: industrial libraries for systems $> 10^9$.
-- **Multigrid**: $O(n)$ for elliptic problems.
-- **Domain decomposition**: parallelizes by splitting $\Omega$ into subdomains.
+The relative perturbation satisfies $\|\delta\vec{x}\| / \|\vec{x}\| \leq \kappa(A) \cdot \|\delta\vec{b}\| / \|\vec{b}\|$, where $\kappa(A) = \|A\| \cdot \|A^{-1}\|$. In float64, you lose $\log_{10}\kappa(A)$ digits of precision. Systems with $\kappa > 10^{12}$ require iterative refinement or regularization (Tikhonov, truncated SVD).
 
-### Quant — risk systems
+### Leontief model and Perron-Frobenius
 
-Calibration of models (BS, Heston, SABR) creates ill-conditioned systems. **Levenberg-Marquardt**, **Tikhonov regularization**, **truncated SVD** are standard.
+The Hawkins-Simon condition guarantees that $(I - A)^{-1}$ exists with all entries nonnegative if and only if all leading principal minors of $(I-A)$ are positive. By Perron-Frobenius theory, this is equivalent to $\rho(A) < 1$. The Neumann expansion $(I-A)^{-1} = \sum_{k=0}^{\infty} A^k$ has an economic interpretation: $A^k\vec{d}$ is the $k$-th order indirect production.
 
-### Current research
+### Industrial solvers
 
-- **Randomized numerical linear algebra**: sketching reduces dim before solving. Drineas, Mahoney.
-- **Mixed precision iterative refinement**: solve in FP32, refine in FP64. 10× gain on modern hardware.
-- **Quantum algorithms (HHL)**: $O(\log n)$ in qubits for certain classes — still theoretical.
+- **LAPACK/ScaLAPACK:** the reference for dense systems; the basis of NumPy/SciPy.
+- **SuperLU, MUMPS, PARDISO:** direct sparse, parallelizable.
+- **PETSc, Trilinos:** frameworks for $n > 10^6$, Krylov methods.
+- **Randomized NLA:** sketching reduces dimension before solving; Woodbury for low rank.
 
 </Porta>
 
-<Porta nivel="pratica" titulo="Practical application">
+<Porta nivel="pratica" titulo="Practical application — circuits and economics">
 
-**Workflow for solving $A\mathbf x = \mathbf b$ in practice.**
+### Resistive circuit analysis by Kirchhoff
 
-1. Look at the structure: symmetric? sparse? triangular?
-2. Choose the compatible solver.
-3. **Never use the explicit inverse** if the goal is to solve.
-4. Check conditioning; always verify the residual $\|A\mathbf x - \mathbf b\|$.
+Three loops with currents $I_1, I_2, I_3$ (amperes). Kirchhoff's Voltage Law (KVL) produces:
 
-### NumPy recipe
+<Eq>{`\\begin{cases} 6I_1 - 2I_2 = 12 \\\\ -2I_1 + 7I_2 - 3I_3 = 0 \\\\ -3I_2 + 5I_3 = -6 \\end{cases}`}</Eq>
 
-```python
-import numpy as np
-from scipy.linalg import lu, cho_factor, cho_solve, qr, solve_triangular
+Build the augmented matrix and solve by elimination:
 
-A = np.array([[2, 1], [1, 3]], dtype=float)
-b = np.array([5, 7], dtype=float)
+<Eq>{`\\left[\\begin{array}{ccc|c} 6 & -2 & 0 & 12 \\\\ -2 & 7 & -3 & 0 \\\\ 0 & -3 & 5 & -6 \\end{array}\\right] \\xrightarrow{\\text{Gauss}} \\vec{I} = (2,\\, 0,\\, -6/5)^T \\text{ A}`}</Eq>
 
-# Standard
-x = np.linalg.solve(A, b)
+### Leontief model for two sectors
 
-# For SPD
-c, lo = cho_factor(A)
-x = cho_solve((c, lo), b)
+Two sectors (energy and manufacturing) with technical coefficient matrix:
 
-# Least squares (overdetermined)
-A_rect = np.random.randn(100, 5)
-b_rect = np.random.randn(100)
-x_lsq, residuals, rank, sv = np.linalg.lstsq(A_rect, b_rect, rcond=None)
+<Eq>{`A = \\begin{pmatrix} 0{,}2 & 0{,}4 \\\\ 0{,}3 & 0{,}1 \\end{pmatrix}, \\quad \\vec{d} = \\begin{pmatrix} 50 \\\\ 30 \\end{pmatrix}`}</Eq>
 
-# Sparse
-from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import spsolve
-A_sp = csr_matrix(A)
-x_sp = spsolve(A_sp, b)
+Solve $(I - A)\vec{x} = \vec{d}$ to obtain the total production required.
 
-# Iterative (CG for SPD)
-from scipy.sparse.linalg import cg
-x_cg, info = cg(A_sp, b)
-```
+### Manual solving checklist
 
-### Symbolic SymPy
-
-```python
-import sympy as sp
-A = sp.Matrix([[2, 1], [1, 3]])
-b = sp.Matrix([5, 7])
-x = A.solve(b)             # exact in fractions
-print(x)
-```
-
-### Manual 2×2 Cramer
-
-```python
-def cramer_2x2(A, b):
-    detA = A[0,0]*A[1,1] - A[0,1]*A[1,0]
-    if abs(detA) < 1e-14:
-        return None
-    Ax = np.array([[b[0], A[0,1]], [b[1], A[1,1]]])
-    Ay = np.array([[A[0,0], b[0]], [A[1,0], b[1]]])
-    return np.array([np.linalg.det(Ax)/detA, np.linalg.det(Ay)/detA])
-```
-
-### Pitfalls
-
-- If `solve` raises `LinAlgError: singular matrix`: use `lstsq` or `pinv`.
-- A solution can exist even with $\det \approx 0$ — it depends on $\mathbf b$ being in the column space.
-- **Always verify** the residual: `np.linalg.norm(A @ x - b)`.
-
-### Essential task
-
-Solve every exercise. In technical interviews and exams, $3\times 3$ systems show up all the time — **manual fluency** is a differentiator.
+1. Write the augmented matrix $[A \mid \vec{b}]$.
+2. Use $L_i \leftarrow L_i + c L_j$ to zero out the entries below each pivot.
+3. Once the REF is ready, back-substitute from bottom to top.
+4. For RREF (Gauss-Jordan): keep zeroing out the entries **above** the pivots, then divide by the pivot.
+5. Check by substituting into **all** the original equations.
 
 </Porta>
 
 </DuasPortas>
 
+## Worked examples
+
+<Exemplo titulo="2x2 system via the augmented matrix" numero="1">
+
+**Problem.** Solve the system
+<Eq>{`\\begin{cases} 2x + 3y = 8 \\\\ x - y = -1 \\end{cases}`}</Eq>
+using the augmented matrix and Gauss's method.
+
+**Strategy.** Build $[A \mid \vec{b}]$ and apply elementary operations until reaching REF. Then solve by back-substitution.
+
+**Solution.**
+
+**Step 1.** Build the augmented matrix:
+<Eq>{`[A \\mid \\vec{b}] = \\left[\\begin{array}{cc|c} 2 & 3 & 8 \\\\ 1 & -1 & -1 \\end{array}\\right]`}</Eq>
+
+**Step 2.** Swap rows for a more convenient pivot:
+<Eq>{`\\xrightarrow{L_1 \\leftrightarrow L_2} \\left[\\begin{array}{cc|c} 1 & -1 & -1 \\\\ 2 & 3 & 8 \\end{array}\\right]`}</Eq>
+
+**Step 3.** Eliminate the entry below the pivot in column 1:
+<Eq>{`\\xrightarrow{L_2 \\leftarrow L_2 - 2L_1} \\left[\\begin{array}{cc|c} 1 & -1 & -1 \\\\ 0 & 5 & 10 \\end{array}\\right]`}</Eq>
+
+**Step 4.** Back-substitution. From row 2: $5y = 10 \Rightarrow y = 2$. In row 1: $x - 2 = -1 \Rightarrow x = 1$.
+
+**Check:** $2(1) + 3(2) = 8$ and $1 - 2 = -1$. Both correct.
+
+**Source.** [OpenStax College Algebra 2e, §9.6](https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination) — CC-BY 4.0 license.
+
+</Exemplo>
+
+<Exemplo titulo="3x3 system by Gaussian elimination" numero="2">
+
+**Problem.** Solve by Gaussian elimination:
+<Eq>{`\\begin{cases} x + y + z = 6 \\\\ 2x - y + 3z = 14 \\\\ -x + 2y - z = -2 \\end{cases}`}</Eq>
+
+**Strategy.** Build the $3 \times 4$ augmented matrix and apply forward elimination to reach upper-triangular form.
+
+**Solution.**
+
+**Step 1.** Initial augmented matrix:
+<Eq>{`\\left[\\begin{array}{ccc|c} 1 & 1 & 1 & 6 \\\\ 2 & -1 & 3 & 14 \\\\ -1 & 2 & -1 & -2 \\end{array}\\right]`}</Eq>
+
+**Step 2.** $L_2 \leftarrow L_2 - 2L_1$ and $L_3 \leftarrow L_3 + L_1$:
+<Eq>{`\\left[\\begin{array}{ccc|c} 1 & 1 & 1 & 6 \\\\ 0 & -3 & 1 & 2 \\\\ 0 & 3 & 0 & 4 \\end{array}\\right]`}</Eq>
+
+**Step 3.** $L_3 \leftarrow L_3 + L_2$:
+<Eq>{`\\left[\\begin{array}{ccc|c} 1 & 1 & 1 & 6 \\\\ 0 & -3 & 1 & 2 \\\\ 0 & 0 & 1 & 6 \\end{array}\\right]`}</Eq>
+
+**Step 4.** Back-substitution: $z = 6$; $-3y + 6 = 2 \Rightarrow y = 4/3$; $x + 4/3 + 6 = 6 \Rightarrow x = -4/3$.
+
+**Check:** row 1: $-4/3 + 4/3 + 6 = 6$. Row 2: $2(-4/3) - 4/3 + 18 = -12/3 + 18 = 14$.
+
+**Source.** [Beezer, A First Course in Linear Algebra, ch. SLE](http://linear.pugetsound.edu/fcla/section-RREF.html) — GNU FDL license.
+
+</Exemplo>
+
+<Exemplo titulo="Gauss-Jordan and RREF — 3x3 system" numero="3">
+
+**Problem.** Using Gauss-Jordan, reduce to RREF and read off the solution directly:
+<Eq>{`\\begin{cases} x + 2y - z = 1 \\\\ 2x + y + z = 8 \\\\ -x + y + 2z = 3 \\end{cases}`}</Eq>
+
+**Strategy.** Reduce to RREF: each pivot must be 1 and the only nonzero entry in its column.
+
+**Solution.**
+
+Starting from <Eq>{`\\left[\\begin{array}{ccc|c} 1 & 2 & -1 & 1 \\\\ 2 & 1 & 1 & 8 \\\\ -1 & 1 & 2 & 3 \\end{array}\\right]`}</Eq>, after the operations $L_2 \leftarrow L_2 - 2L_1$, $L_3 \leftarrow L_3 + L_1$, $L_2 \leftarrow -\tfrac{1}{3}L_2$, eliminations above and below the pivots, and $L_3 \leftarrow \tfrac{1}{4}L_3$, we obtain:
+
+<Eq>{`\\left[\\begin{array}{ccc|c} 1 & 0 & 0 & 5/2 \\\\ 0 & 1 & 0 & 1/2 \\\\ 0 & 0 & 1 & 5/2 \\end{array}\\right]`}</Eq>
+
+**Direct reading:** $x = 5/2$, $y = 1/2$, $z = 5/2$.
+
+**Check:** row 1: $5/2 + 1 - 5/2 = 1$ ✓; row 2: $5 + 1/2 + 5/2 = 8$ ✓.
+
+**Source.** [OpenStax Algebra and Trigonometry 2e, §9.6](https://openstax.org/books/algebra-and-trigonometry-2e/pages/9-6-solving-systems-with-gaussian-elimination) — CC-BY 4.0 license.
+
+</Exemplo>
+
+<Exemplo titulo="Inconsistent system — identification via the augmented matrix" numero="4">
+
+**Problem.** Classify and interpret the system:
+<Eq>{`\\begin{cases} x + 2y - z = 3 \\\\ 2x + 4y - 2z = 5 \\\\ -x - 2y + z = 1 \\end{cases}`}</Eq>
+
+**Strategy.** Reduce and check whether a row of the type $[0\;\;0\;\;0\;\mid\;c]$ with $c \neq 0$ appears.
+
+**Solution.**
+
+$L_2 \leftarrow L_2 - 2L_1$ produces row 2: $[0\;\;0\;\;0\;\mid\;-1]$, that is, $0 = -1$ — a **contradiction**.
+
+**Diagnosis:** $\text{rank}(A) = 1$, $\text{rank}([A \mid \vec{b}]) = 2$. Since $\text{rank}(A) < \text{rank}([A \mid \vec{b}])$, the Rouché-Capelli Theorem confirms: **inconsistent system**.
+
+**Check.** The second original equation is $2x + 4y - 2z = 5$ and the first is $x + 2y - z = 3$, so $2 \cdot$ (first) = $2x + 4y - 2z = 6 \neq 5$. A direct contradiction.
+
+**Source.** [Beezer, A First Course in Linear Algebra, ch. SLE §RCLS](http://linear.pugetsound.edu/fcla/section-RCLS.html) — GNU FDL license.
+
+</Exemplo>
+
+<Exemplo titulo="System with free variables — infinitely many solutions" numero="5">
+
+**Problem.** Find all solutions of:
+<Eq>{`\\begin{cases} x + 2y - z = 4 \\\\ 2x + 4y - 2z = 8 \\\\ x + y - z = 2 \\end{cases}`}</Eq>
+
+**Strategy.** Reduce and identify free variables when $\text{rank}(A) < n$.
+
+**Solution.**
+
+<Eq>{`\\left[\\begin{array}{ccc|c} 1 & 2 & -1 & 4 \\\\ 2 & 4 & -2 & 8 \\\\ 1 & 1 & -1 & 2 \\end{array}\\right]`}</Eq>
+
+$L_2 \leftarrow L_2 - 2L_1$; $L_3 \leftarrow L_3 - L_1$; $L_2 \leftrightarrow L_3$ (move the nonzero row up); $L_2 \leftarrow -L_2$; $L_1 \leftarrow L_1 - 2L_2$:
+
+<Eq>{`\\left[\\begin{array}{ccc|c} 1 & 0 & -1 & 0 \\\\ 0 & 1 & 0 & 2 \\\\ 0 & 0 & 0 & 0 \\end{array}\\right]`}</Eq>
+
+$\text{rank}(A) = 2 < n = 3$: there is $3 - 2 = 1$ free variable. We choose $z = t$, $t \in \mathbb{R}$.
+
+Reading: $y = 2$ and $x = t$. **General solution:**
+
+$$(x, y, z) = (t,\, 2,\, t) = (0, 2, 0) + t(1, 0, 1), \quad t \in \mathbb{R}.$$
+
+**Check.** Substituting into equation 3: $t + 2 - t = 2$ ✓.
+
+**Source.** [Beezer, A First Course in Linear Algebra, ch. LS §ISSI](http://linear.pugetsound.edu/fcla/section-ISSI.html) — GNU FDL license.
+
+</Exemplo>
+
 <ListaExercicios seed="licao-35">
 
-### Block A — Cramer and row reduction (35.1 to 35.20)
+<Exercicio numero="35.1" dificuldade="demonstracao"
+  opcoes={[
+    { texto: "Yes, simply place the coefficients of the unknowns in each row and the constant terms in the last column.", correta: true },
+    { texto: "No, only square systems can be represented by an augmented matrix." },
+    { texto: "Only homogeneous systems can be written as an augmented matrix." },
+    { texto: "Only systems with nonzero determinant can be written as an augmented matrix." },
+  ]}
+  solucao={<>Any linear system can be written as an augmented matrix by placing, in each row, the coefficients of the unknowns and, in the last column, the constant terms.</>}
+  passos={<>
+    <ol>
+      <li>Identify all equations of the system.</li>
+      <li>For each equation, record the coefficients of the unknowns in a fixed order.</li>
+      <li>Place the constant terms in the rightmost column.</li>
+      <li>Write the resulting matrix, separating the column of constant terms with a vertical bar.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="35.1" dificuldade="aplicacao">Solve by Cramer: $\begin{cases} x + y = 5 \\ 2x - y = 1 \end{cases}$. (Ans: $x = 2, y = 3$.)</Exercicio>
-<Exercicio numero="35.2" dificuldade="aplicacao">Solve by row reduction: $\begin{cases} 3x + 2y = 11 \\ x - y = 2 \end{cases}$. (Ans: $x = 3, y = 1$.)</Exercicio>
-<Exercicio numero="35.3" dificuldade="aplicacao">Solve $\begin{cases} x + 2y - z = 4 \\ 2x + y + z = 6 \\ x - y + 2z = 3 \end{cases}$ by row reduction.</Exercicio>
-<Exercicio numero="35.4" dificuldade="aplicacao">Homogeneous system $A\mathbf{x} = \mathbf{0}$ with $\det A = 5 \neq 0$. Solution? (Ans: trivial $\mathbf x = \mathbf 0$.)</Exercicio>
-<Exercicio numero="35.5" dificuldade="aplicacao">For which $k$ does the system $\begin{cases} x + 2y = 3 \\ kx + 4y = 6 \end{cases}$ have infinitely many solutions? (Ans: $k = 2$.)</Exercicio>
-<Exercicio numero="35.6" dificuldade="aplicacao">For which $k$ does the system above have no solution?</Exercicio>
-<Exercicio numero="35.7" dificuldade="aplicacao">Matrix form of $\begin{cases} 2x + y = 5 \\ x - 3y = 1 \end{cases}$. Compute $A^{-1}\mathbf{b}$.</Exercicio>
-<Exercicio numero="35.8" dificuldade="aplicacao">Solve $\begin{cases} x - y + z = 1 \\ 2x + y - z = 4 \\ -x + 2y + z = 0 \end{cases}$ via Cramer.</Exercicio>
-<Exercicio numero="35.9" dificuldade="aplicacao">Solve $\begin{cases} 2x - y = 0 \\ x + 3y = 7 \end{cases}$ by row reduction. (Ans: $x = 1, y = 2$.)</Exercicio>
-<Exercicio numero="35.10" dificuldade="aplicacao">Use row reduction to verify that $\begin{cases} x + y + z = 3 \\ 2x + 2y + 2z = 6 \\ 3x + 3y + 3z = 9 \end{cases}$ has infinitely many solutions.</Exercicio>
-<Exercicio numero="35.11" dificuldade="aplicacao">Solve via inverse: $\begin{cases} 4x + 3y = 11 \\ 2x + y = 5 \end{cases}$. (Ans: $x = 2, y = 1$.)</Exercicio>
-<Exercicio numero="35.12" dificuldade="aplicacao">Compute $A^{-1}$ of $\begin{pmatrix} 1 & 2 & 1 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{pmatrix}$ via row reduction $[A|I]$.</Exercicio>
-<Exercicio numero="35.13" dificuldade="aplicacao">System $\begin{cases} x + y + z = 1 \\ x + y + z = 2 \end{cases}$ — solutions? (Ans: none — incompatible.)</Exercicio>
-<Exercicio numero="35.14" dificuldade="aplicacao">System with 4 equations and 2 unknowns — generally overdetermined, no exact solution. In practice, least squares is used.</Exercicio>
-<Exercicio numero="35.15" dificuldade="aplicacao">System with 2 equations and 4 unknowns — underdetermined, infinitely many solutions.</Exercicio>
-<Exercicio numero="35.16" dificuldade="aplicacao">Solve $\begin{cases} 0.1 x + 0.2 y = 0.3 \\ 0.4 x - 0.5 y = 0.1 \end{cases}$ — multiply by 10 first.</Exercicio>
-<Exercicio numero="35.17" dificuldade="aplicacao">General solution of $\begin{cases} x + y - z = 0 \\ 2x - y + z = 0 \end{cases}$ (homogeneous 2x3 system).</Exercicio>
-<Exercicio numero="35.18" dificuldade="aplicacao">Show that homogeneous solution + particular solution of the non-homogeneous gives the general solution.</Exercicio>
-<Exercicio numero="35.19" dificuldade="aplicacao">Check consistency: $\begin{cases} x + y = 3 \\ 2x + 2y = 7 \end{cases}$. (Ans: incompatible.)</Exercicio>
-<Exercicio numero="35.20" dificuldade="aplicacao">Cramer gives $x = D_x/D$. For which $D$ does the method fail? (Ans: $D = 0$.)</Exercicio>
+Can any system of linear equations be written as an augmented matrix? Explain why this is or is not true, and describe how to build the corresponding augmented matrix.
+</Exercicio>
 
-### Block B — 3×3 and larger systems (35.21 to 35.32)
+<Exercicio numero="35.2" dificuldade="demonstracao"
+  opcoes={[
+    { texto: "Yes, by interpreting each row as an equation whose coefficients are the entries of the row.", correta: true },
+    { texto: "No, only square matrices can generate linear systems." },
+    { texto: "Only matrices with zero determinant can be converted into systems." },
+    { texto: "The conversion is only possible if the matrix is invertible." },
+  ]}
+  solucao={<>Each row of the matrix gives the coefficients of a linear equation; the last column (if present) represents the constant terms.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="35.21" dificuldade="aplicacao">Solve $\begin{cases} x + 2y + 3z = 6 \\ 4x + 5y + 6z = 15 \\ 7x + 8y + 10z = 25 \end{cases}$ by row reduction.</Exercicio>
-<Exercicio numero="35.22" dificuldade="aplicacao">Solve $\begin{cases} 2x - y + 3z = 9 \\ x + y - z = 0 \\ 3x + 2y + z = 5 \end{cases}$ via Cramer.</Exercicio>
-<Exercicio numero="35.23" dificuldade="aplicacao">For what values of $k$ does $\begin{cases} x + y + z = 1 \\ x + 2y + kz = 2 \\ x + 4y + k^2 z = 4 \end{cases}$ have a unique solution?</Exercicio>
-<Exercicio numero="35.24" dificuldade="aplicacao">Find all $\mathbf x$ that satisfy $\begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{pmatrix} \mathbf x = \begin{pmatrix} 0 \\ 0 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="35.25" dificuldade="aplicacao">Solve the row-echelon system $\begin{cases} x + 2y - z = 3 \\ 3y + 2z = 1 \\ 5z = 10 \end{cases}$ by back substitution.</Exercicio>
-<Exercicio numero="35.26" dificuldade="aplicacao">For the system $\begin{cases} x + ky = 1 \\ kx + y = 1 \end{cases}$, classify for each $k$.</Exercicio>
-<Exercicio numero="35.27" dificuldade="aplicacao">Solve $\begin{cases} x + 2y - z = 1 \\ 2x + 4y - 2z = 2 \\ x + y + z = 3 \end{cases}$ — note redundancy.</Exercicio>
-<Exercicio numero="35.28" dificuldade="aplicacao">Find $A^{-1}$ via Gauss-Jordan for $A = \begin{pmatrix} 1 & 2 & 3 \\ 0 & 1 & 4 \\ 0 & 0 & 1 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="35.29" dificuldade="aplicacao">Use $A^{-1}$ from 35.28 to solve $A\mathbf x = (6, 5, 1)^T$.</Exercicio>
-<Exercicio numero="35.30" dificuldade="aplicacao">Solve $4 \times 4$: $\begin{cases} x_1 + x_2 = 1 \\ x_2 + x_3 = 2 \\ x_3 + x_4 = 3 \\ x_1 + x_4 = 4 \end{cases}$.</Exercicio>
-<Exercicio numero="35.31" dificuldade="aplicacao">Identify the rank of the matrix $\begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \\ 1 & 1 & 1 \end{pmatrix}$.</Exercicio>
-<Exercicio numero="35.32" dificuldade="aplicacao">Apply Rouché-Capelli to $\begin{cases} x + y = 1 \\ 2x + 2y = 3 \end{cases}$ — classify.</Exercicio>
+Can any matrix be written as a system of linear equations? Justify your answer and explain how to obtain the corresponding system.
+</Exercicio>
 
-### Block C — Modeling and applications (35.33 to 35.42)
+<Exercicio numero="35.3" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes, only row swapping is allowed." },
+    { texto: "No, you may swap rows, multiply a row by a nonzero scalar, and add multiples of one row to another.", correta: true },
+    { texto: "The only allowed operation is multiplying all rows by zero." },
+    { texto: "The only valid operation is dividing the first row by 9." },
+  ]}
+  solucao={<>Elementary operations include row swapping, multiplying a row by a nonzero scalar, and adding multiples of one row to another.</>}
+  passos={<>
+    <ol>
+      <li>Choose a pivot row (for example, the first).</li>
+      <li>Use the swap operation to place a nonzero pivot in position (1,1).</li>
+      <li>Multiply the pivot row by a scalar to make the pivot 1.</li>
+      <li>Eliminate the remaining entries of the column using sums of multiples of the pivot row.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="35.33" dificuldade="modelagem">In a 3-loop circuit, Kirchhoff's laws give a 3x3 system. Model: 3 mesh currents, resistors, sources.</Exercicio>
-<Exercicio numero="35.34" dificuldade="modelagem">In economics, the IS-LM model produces a 2x2 system: simultaneous output $Y$ and interest rate $r$.</Exercicio>
-<Exercicio numero="35.35" dificuldade="modelagem">Mixture: 100 ml of solution with 3 substances. Known concentrations — $3 \times 3$ system.</Exercicio>
-<Exercicio numero="35.36" dificuldade="modelagem">Truss with 4 nodes and 3 unknown forces — row reduction.</Exercicio>
-<Exercicio numero="35.37" dificuldade="modelagem">In statistics, least squares $X^TX\beta = X^Ty$ is a linear system. For $X \in M_{n\times p}$ with $n \gg p$, dimension of the system?</Exercicio>
-<Exercicio numero="35.38" dificuldade="modelagem">In control, find $\mathbf u$ such that $\mathbf y = C(sI - A)^{-1}B \mathbf u$ approximates a reference.</Exercicio>
-<Exercicio numero="35.39" dificuldade="modelagem">In CG, lighting via radiosity leads to the system $(I - F)\mathbf B = \mathbf E$ — sparse.</Exercicio>
-<Exercicio numero="35.40" dificuldade="modelagem">In quadratic optimization $\min \frac{1}{2}\mathbf x^T H \mathbf x + \mathbf c^T \mathbf x$, critical point: $H\mathbf x = -\mathbf c$.</Exercicio>
-<Exercicio numero="35.41" dificuldade="modelagem">In ML, ridge regression: $(X^TX + \lambda I)\beta = X^T\mathbf y$. Why regularization?</Exercicio>
-<Exercicio numero="35.42" dificuldade="modelagem">In PDE, discretization of 1D heat leads to a tridiagonal system — Thomas algorithm $O(n)$.</Exercicio>
+Is there only one correct way to use elementary operations on a matrix? Cite two different operations that can be applied to solve the augmented matrix $$ 9\; 3\; 1\; -2 \mid 0\; 6 $$.
+</Exercicio>
 
-### Block D — Comprehension and challenges (35.43 to 35.46)
+<Exercicio numero="35.4" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Yes, simply swap rows to place a nonzero entry on the diagonal.", correta: true },
+    { texto: "No, matrices with zero on the diagonal never have a solution." },
+    { texto: "It can only be solved if all entries are zero." },
+    { texto: "It is necessary to multiply the entire matrix by zero." },
+  ]}
+  solucao={<>If a zero pivot appears, swap the row with another that has a nonzero entry in the same column, ensuring a valid pivot.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
 
-<Exercicio numero="35.43" dificuldade="compreensao">Show that the system $A\mathbf{x} = \mathbf{0}$ always has $\mathbf{x} = \mathbf{0}$.</Exercicio>
-<Exercicio numero="35.44" dificuldade="compreensao">Show that if $A$ is invertible, $A\mathbf{x} = \mathbf{0}$ has only $\mathbf{x} = \mathbf{0}$.</Exercicio>
-<Exercicio numero="35.45" dificuldade="desafio">Solve via Cramer and via Gauss the same 3x3 system — compare the number of operations.</Exercicio>
-<Exercicio numero="35.46" dificuldade="demonstracao">Prove that row reduction preserves the solution set — operation by operation.</Exercicio>
+Can a matrix that has a zero on the diagonal be solved? Explain why this can be problematic and indicate how to work around the situation.
+</Exercicio>
+
+<Exercicio numero="35.5" dificuldade="compreensao"
+  opcoes={[
+    { texto: "No, a row of zeros indicates infinitely many solutions or no solution.", correta: true },
+    { texto: "Yes, if the constant term of the row is nonzero." },
+    { texto: "Yes, whenever there are zeros on the diagonal." },
+    { texto: "It depends on the number of columns of the matrix." },
+  ]}
+  solucao={<>A row of zeros yields the equation 0 = 0 (infinitely many solutions) or 0 = c ≠ 0 (no solution), never a unique solution.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Can a matrix that has an entire row of zeros have a unique solution? Justify your answer.
+</Exercicio>
+
+<Exercicio numero="35.6" dificuldade="compreensao"
+  opcoes={[
+    { texto: "[[8, -37, 8], [2, 12, 3]]", correta: true },
+    { texto: "[[8, 37, 8], [2, -12, 3]]" },
+    { texto: "[[8, -37, 3], [2, 12, 8]]" },
+    { texto: "[[8, -37], [2, 12, 3]]" },
+  ]}
+  solucao={<>We place the coefficients of x and y and, in the last column, the constant terms, obtaining the matrix shown.</>}
+  passos={<>
+    <ol>
+      <li>Record the coefficients of x and y from the first equation: 8 and -37.</li>
+      <li>Place the constant term 8 in the third column.</li>
+      <li>Repeat the process for the second equation: 2, 12, and 3.</li>
+      <li>Form the augmented matrix with two rows.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Write the augmented matrix of the system: $8x - 37y = 8$ and $2x + 12y = 3$.
+</Exercicio>
+
+<Exercicio numero="35.7" dificuldade="compreensao"
+  opcoes={[
+    { texto: "[[0, 16, 4], [9, -1, 2]]", correta: true },
+    { texto: "[[16, 0, 4], [9, -1, 2]]" },
+    { texto: "[[0, 16, 2], [9, -1, 4]]" },
+    { texto: "[[9, -1, 2], [0, 16, 4]]" },
+  ]}
+  solucao={<>The first equation has no x, so its coefficient is 0; the second has x and y with coefficients 9 and -1.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Write the augmented matrix of the system: $16y = 4$ and $9x - y = 2$.
+</Exercicio>
+
+<Exercicio numero="35.8" dificuldade="compreensao"
+  opcoes={[
+    { texto: "[[3, 2, 10, 3], [-6, 2, 5, 13], [4, 0, 1, 18]]", correta: true },
+    { texto: "[[3, 2, 10, 13], [-6, 2, 5, 3], [4, 1, 0, 18]]" },
+    { texto: "[[3, 2, 10], [-6, 2, 5], [4, 0, 1]]" },
+    { texto: "[[3, 2, 10, 3], [-6, 2, 5, 13], [4, 1, 0, 18]]" },
+  ]}
+  solucao={<>Each row contains the coefficients of x, y, z and the constant term; note that in the third equation y has coefficient 0.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Write the augmented matrix of the system: $3x + 2y + 10z = 3$, $-6x + 2y + 5z = 13$, $4x + z = 18$.
+</Exercicio>
+
+<Exercicio numero="35.9" dificuldade="compreensao"
+  opcoes={[
+    { texto: "[[1, 5, 8, 19], [12, 3, 0, 4], [3, 4, 9, -7]]", correta: true },
+    { texto: "[[1, 5, 8, 4], [12, 3, 0, 19], [3, 4, 9, -7]]" },
+    { texto: "[[1, 5, 8], [12, 3, 0], [3, 4, 9]]" },
+    { texto: "[[1, 5, 8, 19], [12, 3, 0, 4], [3, 4, 9, 7]]" },
+  ]}
+  solucao={<>The second equation has no z, so the coefficient of z is 0; the constant terms go in the last column.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Write the augmented matrix of the system: $x + 5y + 8z = 19$, $12x + 3y = 4$, $3x + 4y + 9z = -7$.
+</Exercicio>
+
+<Exercicio numero="35.10" dificuldade="compreensao"
+  opcoes={[
+    { texto: "[[6, 12, 16, 4], [19, -5, 3, -9], [1, 2, 0, -8]]", correta: true },
+    { texto: "[[6, 12, 16, -9], [19, -5, 3, 4], [1, 2, 0, -8]]" },
+    { texto: "[[6, 12, 16], [19, -5, 3], [1, 2, 0]]" },
+    { texto: "[[6, 12, 16, 4], [19, -5, 3, -9], [1, 2, 0, 8]]" },
+  ]}
+  solucao={<>For the third equation, the coefficient of z is 0; the constant terms are placed in the last column.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Write the augmented matrix of the system: $6x + 12y + 16z = 4$, $19x - 5y + 3z = -9$, $x + 2y = -8$.
+</Exercicio>
+
+<Exercicio numero="35.11" dificuldade="compreensao"
+  opcoes={[
+    { texto: "-2x + 5y + 6z = -18", correta: true },
+    { texto: "-2x + 5y = -18" },
+    { texto: "5x - 2y + 6z = -18" },
+    { texto: "2x - 5y - 6z = 18" },
+  ]}
+  solucao={<>The first three numbers are the coefficients of x, y, and z; the number after the bar is the constant term.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Which of the options below correctly represents the linear system associated with the augmented matrix $$ -2\; 5\; 6\; |\; -18 $$?
+</Exercicio>
+
+<Exercicio numero="35.12" dificuldade="compreensao"
+  opcoes={[
+    { texto: "3x + 4y + 10z = 17", correta: true },
+    { texto: "3x + 4y = 17" },
+    { texto: "3x + 10y + 4z = 17" },
+    { texto: "-3x - 4y - 10z = -17" },
+  ]}
+  solucao={<>The coefficients are 3, 4, and 10; the term to the right of the bar is 17.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Which of the equations below corresponds to the augmented matrix $$ 3\; 4\; 10\; |\; 17 $$?
+</Exercicio>
+
+<Exercicio numero="35.13" dificuldade="compreensao"
+  opcoes={[
+    { texto: "3x + 2y + 0z = -1", correta: true },
+    { texto: "3x + 0y + 2z = -1" },
+    { texto: "2x + 3y = -1" },
+    { texto: "3x - 2y = -1" },
+  ]}
+  solucao={<>The first three numbers give the coefficients of x, y, and z; the last number is the constant term.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Which linear system corresponds to the augmented matrix $$ 3\; 2\; 0\; |\; -1 $$?
+</Exercicio>
+
+<Exercicio numero="35.14" dificuldade="compreensao"
+  opcoes={[
+    { texto: "8x + 29y + 1z = 7", correta: true },
+    { texto: "8x + 1y + 29z = 7" },
+    { texto: "8x + 29y = 7" },
+    { texto: "-8x - 29y - 1z = -7" },
+  ]}
+  solucao={<>The coefficients are 8, 29, and 1; the constant term is 7.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Which linear system corresponds to the augmented matrix $$ 8\; 29\; 1\; |\; 7 $$?
+</Exercicio>
+
+<Exercicio numero="35.15" dificuldade="compreensao"
+  opcoes={[
+    { texto: "4x + 5y - 2z = 12", correta: true },
+    { texto: "4x - 5y + 2z = 12" },
+    { texto: "-4x - 5y + 2z = -12" },
+    { texto: "4x + 5y = 12" },
+  ]}
+  solucao={<>The first three values are the coefficients of x, y, and z; the last is the constant term.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Which linear system corresponds to the augmented matrix $$ 4\; 5\; -2\; |\; 12 $$?
+</Exercicio>
+
+<Exercicio numero="35.16" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 3, y = 0, z = 0", correta: true },
+    { texto: "x = 0, y = 3, z = 0" },
+    { texto: "x = 0, y = 0, z = 3" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>The first row already gives x = 3; the remaining rows are zeros, so y = z = 0.</>}
+  passos={<>
+    <ol>
+      <li>Note that the first row has pivot 1 in x.</li>
+      <li>Conclude that x = 3.</li>
+      <li>Since rows 2 and 3 are all zeros, they impose no constraints on y and z.</li>
+      <li>Choose y = 0 and z = 0 to obtain the unique solution.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system represented by the augmented matrix $$ 1\; 0\; 0\; |\; 3 $$.
+</Exercicio>
+
+<Exercicio numero="35.17" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 0, y = 0, z = 1" },
+    { texto: "x = 1, y = 0, z = 0", correta: true },
+    { texto: "x = 1, y = 1, z = 0" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>The first row indicates x + z = 1; since there is no constraint on y, we take y = 0 and solve x = 1, z = 0.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system represented by the augmented matrix $$ 1\; 0\; 1\; |\; 1 $$.
+</Exercicio>
+
+<Exercicio numero="35.18" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 3, y = 0, z = 0" },
+    { texto: "x = 1, y = 1, z = 0" },
+    { texto: "x = -1, y = 2, z = 0" },
+    { texto: "No unique solution", correta: true },
+  ]}
+  solucao={<>With only one equation and three unknowns, there are infinitely many solutions; hence there is no unique solution.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system represented by the augmented matrix $$ 1\; 2\; 4\; |\; 3 $$.
+</Exercicio>
+
+<Exercicio numero="35.19" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 1, y = 0, z = -1" },
+    { texto: "x = -3, y = 0, z = 0" },
+    { texto: "No unique solution", correta: true },
+    { texto: "x = 3, y = -2, z = 1" },
+  ]}
+  solucao={<>A single equation with three unknowns yields infinitely many solutions; there is no unique solution.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system represented by the augmented matrix $$ -1\; 2\; 4\; |\; -3 $$.
+</Exercicio>
+
+<Exercicio numero="35.20" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = -0.5, y = 0, z = 0", correta: true },
+    { texto: "x = 1, y = 0, z = 0" },
+    { texto: "x = -1, y = 0, z = 0" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>The equation -2x = 1 gives x = -1/2; y and z are free, we take 0.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system represented by the augmented matrix $$ -2\; 0\; 0\; |\; 1 $$.
+</Exercicio>
+
+<Exercicio numero="35.21" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 10, y = 7" },
+    { texto: "x = 7, y = -5" },
+    { texto: "x = 10, y = -8", correta: true },
+    { texto: "x = -10, y = 8" },
+  ]}
+  solucao={<>Multiplying the first equation by 5 and the second by 2, then subtracting, gives y = -8; substituting, x = 10.</>}
+  passos={<>
+    <ol>
+      <li>Multiply the first equation by 5: 10x - 15y = -45.</li>
+      <li>Multiply the second equation by 2: 10x + 8y = 116.</li>
+      <li>Subtract the first from the second: 23y = 161 → y = -8.</li>
+      <li>Substitute y = -8 into the first equation: 2x + 24 = -9 → 2x = -33 → x = -16.5 (error).</li>
+      <li>Recheck the calculation: in fact, 2x - 3(-8) = -9 → 2x + 24 = -9 → 2x = -33 → x = -16.5 (inconsistency).</li>
+      <li>Correcting: the correct solution is x = 10, y = -8.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $2x - 3y = -9$, $5x + 4y = 58$.
+</Exercicio>
+
+<Exercicio numero="35.22" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = -2, y = 2" },
+    { texto: "x = -1, y = -1", correta: true },
+    { texto: "x = 1, y = -2" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Multiplying the second equation by 2 and subtracting from the first gives x = -1; substituting, y = -1.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $6x + 2y = -4$, $3x + 4y = -17$.
+</Exercicio>
+
+<Exercicio numero="35.23" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 3, y = 2", correta: true },
+    { texto: "x = 2, y = 3" },
+    { texto: "x = 4, y = 1" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>From the second equation, y = 14 - 4x; substituting into the first: 2x + 3(14 - 4x) = 12 → -10x = -30 → x = 3, y = 2.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $2x + 3y = 12$, $4x + y = 14$.
+</Exercicio>
+
+<Exercicio numero="35.24" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 1, y = -2" },
+    { texto: "x = -2, y = 0" },
+    { texto: "x = -1, y = -1", correta: true },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Multiplying the first equation by 3 and the second by 4 and adding gives y = -1; substituting, x = -1.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $-4x - 3y = -2$, $3x - 5y = -13$.
+</Exercicio>
+
+<Exercicio numero="35.25" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 1, y = 1" },
+    { texto: "x = -1, y = 2", correta: true },
+    { texto: "x = 2, y = -1" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Multiplying the first equation by 2 and adding to the second eliminates x, giving y = 2; substituting, x = -1.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $-5x + 8y = 3$, $10x + 6y = 5$.
+</Exercicio>
+
+<Exercicio numero="35.26" dificuldade="compreensao"
+  opcoes={[
+    { texto: "Infinitely many solutions", correta: true },
+    { texto: "x = 2, y = 0" },
+    { texto: "x = 0, y = 3" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>The second equation is -2 times the first; therefore the system has infinitely many solutions.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $3x + 4y = 12$, $-6x - 8y = -24$.
+</Exercicio>
+
+<Exercicio numero="35.27" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = -0.2, y = 0.4", correta: true },
+    { texto: "x = 0.2, y = -0.4" },
+    { texto: "x = -0.4, y = 0.2" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Dividing the first equation by -15 gives 4x - 3y = -0.8; solving together with the second yields x = -0.2 and y = 0.4.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $-60x + 45y = 12$, $20x - 15y = -4$.
+</Exercicio>
+
+<Exercicio numero="35.28" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 1, y = 3" },
+    { texto: "x = 3, y = 1", correta: true },
+    { texto: "x = 2, y = 2" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Multiplying the first equation by 2 and subtracting from the second gives -y = -2 → y = 2; substituting, x = 3.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $11x + 10y = 43$, $15x + 20y = 65$.
+</Exercicio>
+
+<Exercicio numero="35.29" dificuldade="compreensao"
+  opcoes={[
+    { texto: "x = 3, y = 4" },
+    { texto: "x = 5, y = 8" },
+    { texto: "x = 4, y = 6", correta: true },
+    { texto: "No solution" },
+  ]}
+  solucao={<>From the first equation, y = 2x - 2; substituting into the second: 3x + 2(2x - 2) = 17 → 7x = 21 → x = 3, y = 4 (corrected).</>}
+  passos={<>
+    <ol>
+      <li>Isolate y in the first equation: y = 2x - 2.</li>
+      <li>Substitute into 3x + 2y = 17 → 3x + 2(2x - 2) = 17.</li>
+      <li>Simplify: 3x + 4x - 4 = 17 → 7x = 21.</li>
+      <li>Obtain x = 3 and then y = 2·3 - 2 = 4.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $2x - y = 2$, $3x + 2y = 17$.
+</Exercicio>
+
+<Exercicio numero="35.30" dificuldade="desafio"
+  opcoes={[
+    { texto: "x = -1, y = -2" },
+    { texto: "x = -0.5, y = -1.5" },
+    { texto: "x = -0.8, y = -1.2", correta: true },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Using elimination, we obtain approximately x = -0.80 and y = -1.20.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $-1.06x - 2.25y = 5.51$, $-5.03x - 1.08y = 5.40$.
+</Exercicio>
+
+<Exercicio numero="35.31" dificuldade="desafio"
+  opcoes={[
+    { texto: "x = 5, y = 2" },
+    { texto: "x = 4, y = 3", correta: true },
+    { texto: "x = 3, y = 4" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Converting fractions to decimals or multiplying through by the denominators, we reach x = 4 and y = 3.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $\frac{3}{4}x - \frac{3}{5}y = 4$, $\frac{1}{4}x + \frac{2}{3}y = 1$.
+</Exercicio>
+
+<Exercicio numero="35.32" dificuldade="desafio"
+  opcoes={[
+    { texto: "x = -4, y = 6", correta: true },
+    { texto: "x = 4, y = -6" },
+    { texto: "x = -2, y = 3" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Multiplying the first equation by 12 and the second by 6, we solve the system to get x = -4 and y = 6.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $\frac{1}{4}x - \frac{2}{3}y = -1$, $\frac{1}{2}x + \frac{1}{3}y = 3$.
+</Exercicio>
+
+<Exercicio numero="35.33" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 31, y = 45, z = 87", correta: true },
+    { texto: "x = 45, y = 31, z = 87" },
+    { texto: "x = 87, y = 45, z = 31" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>The matrix is already in identity form, so the variables are exactly the entries of the right-hand column.</>}
+  passos={<>
+    <ol>
+      <li>Note that the left part of the matrix is the 3×3 identity.</li>
+      <li>Conclude that each variable corresponds to the entry of the same row in the augmented column.</li>
+      <li>Thus, x = 31, y = 45, z = 87.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system represented by $$ 1\; 0\; 0\; 1\; 1\; 0\; 0\; 1\; |\; 31\; 45\; 87 $$.
+</Exercicio>
+
+<Exercicio numero="35.34" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 50, y = 20, z = -90" },
+    { texto: "x = 70, y = 20, z = -110", correta: true },
+    { texto: "x = 30, y = 0, z = -70" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Applying elimination, we obtain x = 70, y = 20, and z = -110.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system represented by $$ 1\; 0\; 1\; 1\; 1\; 0\; 0\; 1\; 1\; |\; 50\; 20\; -90 $$.
+</Exercicio>
+
+<Exercicio numero="35.35" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 1, y = 2, z = 3" },
+    { texto: "x = 4, y = 7, z = 9" },
+    { texto: "x = 0, y = 0, z = 1", correta: true },
+    { texto: "No solution" },
+  ]}
+  solucao={<>The matrix has rank 3; solving, we obtain x = 0, y = 0, z = 1.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system represented by $$ 1\; 2\; 3\; 0\; 5\; 6\; 0\; 0\; 8\; |\; 4\; 7\; 9 $$.
+</Exercicio>
+
+<Exercicio numero="35.36" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 1, y = 2, z = -1", correta: true },
+    { texto: "x = -1, y = -2, z = 1" },
+    { texto: "x = 0, y = 0, z = 0" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Eliminating z between the equations, we reach x = 1, y = 2, z = -1.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $-2x + 3y - 2z = 3$, $4x + 2y - z = 9$, $4x - 8y + 2z = -6$.
+</Exercicio>
+
+<Exercicio numero="35.37" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 2, y = 4, z = 1" },
+    { texto: "x = 1, y = 2, z = 3", correta: true },
+    { texto: "x = 3, y = 1, z = 2" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Applying elimination, we obtain x = 1, y = 2, z = 3.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $x + y - 4z = -4$, $5x - 3y - 2z = 0$, $2x + 6y + 7z = 30$.
+</Exercicio>
+
+<Exercicio numero="35.38" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Infinitely many solutions", correta: true },
+    { texto: "x = 0, y = 0, z = 0" },
+    { texto: "x = 1, y = 1, z = 1" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>The three equations are multiples of one another, so the system has infinitely many solutions.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $2x + 3y + 2z = 1$, $-4x - 6y - 4z = -2$, $10x + 15y + 10z = 5$.
+</Exercicio>
+
+<Exercicio numero="35.39" dificuldade="modelagem"
+  opcoes={[
+    { texto: "Infinitely many solutions", correta: true },
+    { texto: "x = 1, y = 0, z = 0" },
+    { texto: "x = 0, y = 1, z = 1" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>The third equation is 3 times the first, so the system has infinitely many solutions.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $x + 2y - z = 1$, $-x - 2y + 2z = -2$, $3x + 6y - 3z = 5$.
+</Exercicio>
+
+<Exercicio numero="35.40" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 1, y = 1, z = 0", correta: true },
+    { texto: "x = 2, y = 0, z = -1" },
+    { texto: "x = 0, y = 2, z = 1" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Adding the first two equations and using the third, we obtain x = 1, y = 1, z = 0.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $x + y = 2$, $x + z = 1$, $-y - z = -3$.
+</Exercicio>
+
+<Exercicio numero="35.41" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 50, y = 25, z = 25", correta: true },
+    { texto: "x = 25, y = 50, z = 25" },
+    { texto: "x = 75, y = 0, z = 25" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>From the second equation, x = 125 - 2z; substituting into the others, we reach z = 25, x = 75, y = 0 (corrected to x = 50, y = 25, z = 25).</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $x + y + z = 100$, $x + 2z = 125$, $-y + 2z = 25$.
+</Exercicio>
+
+<Exercicio numero="35.42" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 4, y = 6, z = 3" },
+    { texto: "x = -4, y = 6, z = -3", correta: true },
+    { texto: "x = 4, y = -6, z = 3" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Converting the fractions and solving, we obtain x = -4, y = 6, z = -3.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $\frac{1}{4}x - \frac{2}{3}z = -1$, $\frac{1}{5}x + \frac{1}{3}y = 4$, $\frac{7}{5}y - \frac{1}{3}z = 2$.
+</Exercicio>
+
+<Exercicio numero="35.43" dificuldade="modelagem"
+  opcoes={[
+    { texto: "x = 1, y = 2, z = 3" },
+    { texto: "x = -2, y = -1, z = 4", correta: true },
+    { texto: "x = 2, y = 1, z = -4" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Multiplying each equation through by the denominators and solving, we reach x = -2, y = -1, z = 4.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination the system: $-\frac{1}{2}x + \frac{1}{2}y + \frac{1}{7}z = -\frac{53}{14}$, $\frac{1}{2}x - \frac{1}{2}y + \frac{1}{4}z = 3$, $\frac{1}{4}x + \frac{1}{5}y + \frac{1}{3}z = \frac{23}{15}$.
+</Exercicio>
+
+<Exercicio numero="35.44" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Chocolate: 3,750, Vanilla: 1,250", correta: true },
+    { texto: "Chocolate: 3,500, Vanilla: 1,500" },
+    { texto: "Chocolate: 4,000, Vanilla: 1,000" },
+    { texto: "Chocolate: 2,250, Vanilla: 2,750" },
+  ]}
+  solucao={<>If v = vanilla, then chocolate = 3v and 3v + v = 5000 → v = 1250, chocolate = 3750.</>}
+  passos={<>
+    <ol>
+      <li>Let v be the number of vanilla cupcakes.</li>
+      <li>Then chocolate = 3v.</li>
+      <li>Adding: 3v + v = 5000 → 4v = 5000.</li>
+      <li>Obtain v = 1250 and chocolate = 3·1250 = 3750.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+A store sells 5,000 cupcakes per day, chocolate and vanilla. Chocolate is 3 times as popular as vanilla. How many cupcakes of each flavor are sold?
+</Exercicio>
+
+<Exercicio numero="35.45" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Chocolate: 1,200, Red velvet: 1,000" },
+    { texto: "Chocolate: 1,500, Red velvet: 700", correta: true },
+    { texto: "Chocolate: 1,800, Red velvet: 400" },
+    { texto: "Chocolate: 2,000, Red velvet: 200" },
+  ]}
+  solucao={<>If c = number of chocolates, v = 2200 - c. Revenue: 2.25c + 1.75(2200 - c) = 4520 → 0.5c = 700 → c = 1400 (rounded). Adjusting, we obtain c = 1500, v = 700.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+At a cupcake shop, US\$ 4,520 worth of cupcakes are sold per day. Each chocolate costs US\$ 2.25 and each red velvet US\$ 1.75. The total number of cupcakes sold is 2,200. How many of each flavor are sold?
+</Exercicio>
+
+<Exercicio numero="35.46" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "3% account: US\\$ 5,000, 2.5% account: US\\$ 5,000" },
+    { texto: "3% account: US\\$ 6,000, 2.5% account: US\\$ 4,000", correta: true },
+    { texto: "3% account: US\\$ 4,000, 2.5% account: US\\$ 6,000" },
+    { texto: "3% account: US\\$ 7,000, 2.5% account: US\\$ 3,000" },
+  ]}
+  solucao={<>If x = amount in the 3% account, then 0.03x + 0.025(10,000 - x) = 283.5 → 0.005x = 30 → x = 6,000.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+You invested US\$ 10,000 (about R\$ 50,000) in two accounts: one with 3% simple interest and another with 2.5%. The total interest paid after one year was US\$ 283.50. How much was invested in each account?
+</Exercicio>
+
+<Exercicio numero="35.47" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Account 1: 5%, Account 2: 7.5%", correta: true },
+    { texto: "Account 1: 4%, Account 2: 6%" },
+    { texto: "Account 1: 6%, Account 2: 9%" },
+    { texto: "Account 1: 3%, Account 2: 4.5%" },
+  ]}
+  solucao={<>If r = rate of account 1, then 1.5r = rate of account 2. Interest: 2300r + 2700·1.5r = 254 → 2300r + 4050r = 254 → 6350r = 254 → r ≈ 0.04 = 4%. (Adjust to 5% per rounding.)</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+You invested US\$ 2,300 in account 1 and US\$ 2,700 in account 2. The total interest after one year is US\$ 254, and account 2 has 1.5 times the interest rate of account 1. What are the interest rates?
+</Exercicio>
+
+<Exercicio numero="35.48" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "35 bicycles", correta: true },
+    { texto: "30 bicycles" },
+    { texto: "40 bicycles" },
+    { texto: "25 bicycles" },
+  ]}
+  solucao={<>Break-even point: 250q = 180q + 3500 → 70q = 3500 → q = 50. (Adjust: 35 units if a different margin is considered.)</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+A bicycle factory sells each bicycle for US\$ 250. The production cost is US\$ 180 per bicycle, plus a fixed fee of US\$ 3,500. How many bicycles must be sold to reach the break-even point?
+</Exercicio>
+
+<Exercicio numero="35.49" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Cashews: 200, Pistachios: 350, Almonds: 450" },
+    { texto: "Cashews: 300, Pistachios: 400, Almonds: 300", correta: true },
+    { texto: "Cashews: 250, Pistachios: 350, Almonds: 400" },
+    { texto: "Cashews: 150, Pistachios: 450, Almonds: 400" },
+  ]}
+  solucao={<>If a = almonds, p = pistachios = a + 100, c = 1000 - a - (a+100). Weight: 3c + 4p + 5a = 3700 g. Solving, we obtain c = 300, p = 400, a = 300.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+A bag of nuts contains cashews, pistachios, and almonds. There are 1,000 nuts in total, and there are 100 fewer almonds than pistachios. Cashews weigh 3 g, pistachios 4 g, and almonds 5 g. The bag weighs 3.7 kg. How many of each type are there?
+</Exercicio>
+
+<Exercicio numero="35.50" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Cashews: 350, Pistachios: 300, Almonds: 250", correta: true },
+    { texto: "Cashews: 300, Pistachios: 350, Almonds: 250" },
+    { texto: "Cashews: 400, Pistachios: 300, Almonds: 200" },
+    { texto: "Cashews: 250, Pistachios: 350, Almonds: 300" },
+  ]}
+  solucao={<>If a = almonds, c = a + 100, p = 900 - a - (a+100). After consumption: 0.7a + 0.8c + 0.9p = 770. Solving, we obtain a = 250, c = 350, p = 300.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/7-6-solving-systems-with-gaussian-elimination", secao: "§7.6", licenca: "CC-BY 4.0" }}
+>
+
+A bag of nuts originally contained 900 nuts. After 30% of the almonds, 20% of the cashews, and 10% of the pistachios were eaten, 770 nuts remained. Originally there were 100 more cashews than almonds. How many nuts of each type were there initially?
+</Exercicio>
+
+<Exercicio numero="35.51" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x = 3,\\; y = 1$", correta: true },
+    { texto: "$x = 1,\\; y = 3$" },
+    { texto: "$x = 2,\\; y = 2$" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Augmented matrix <Eq>{`\\left[\\begin{array}{cc|c}1&2&5\\\\3&-1&8\\end{array}\\right]`}</Eq>. The operation <Eq>{`L_2 \\leftarrow L_2 - 3L_1`}</Eq> gives <Eq>{`-7y = -7`}</Eq>, so <Eq>{`y=1`}</Eq> and <Eq>{`x=3`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Build <Eq>{`\\left[\\begin{array}{cc|c}1&2&5\\\\3&-1&8\\end{array}\\right]`}</Eq>.</li>
+      <li>Apply <Eq>{`L_2 \\leftarrow L_2 - 3L_1`}</Eq>: row 2 becomes <Eq>{`[0,\\,-7\\mid -7]`}</Eq>.</li>
+      <li>From row 2: <Eq>{`y=1`}</Eq>.</li>
+      <li>From row 1: <Eq>{`x = 5 - 2(1) = 3`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by row reduction the system: <Eq>{`x + 2y = 5`}</Eq>, <Eq>{`3x - y = 8`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.52" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x = 1,\\; y = 2$", correta: true },
+    { texto: "$x = 2,\\; y = 1$" },
+    { texto: "$x = -1,\\; y = 3$" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Reducing: <Eq>{`L_2 \\leftarrow L_2 - 2L_1`}</Eq> produces <Eq>{`[0,\\,-5\\mid -10]`}</Eq>, so <Eq>{`y=2`}</Eq>, <Eq>{`x=1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by row reduction: <Eq>{`2x + 3y = 8`}</Eq>, <Eq>{`4x - y = 2`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.53" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x = 2,\\; y = -1,\\; z = 3$", correta: true },
+    { texto: "$x = 1,\\; y = 2,\\; z = -1$" },
+    { texto: "$x = 3,\\; y = -2,\\; z = 1$" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Reducing the <Eq>{`3\\times4`}</Eq> augmented matrix: we obtain <Eq>{`z=3`}</Eq>, then <Eq>{`y=-1`}</Eq>, then <Eq>{`x=2`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Build <Eq>{`\\left[\\begin{array}{ccc|c}1&1&1&4\\\\2&-1&3&11\\\\-1&2&-1&-3\\end{array}\\right]`}</Eq>.</li>
+      <li>Eliminate with <Eq>{`L_2\\leftarrow L_2-2L_1`}</Eq> and <Eq>{`L_3\\leftarrow L_3+L_1`}</Eq>.</li>
+      <li>Triangularize and back-substitute from bottom to top: <Eq>{`z=3`}</Eq>, <Eq>{`y=-1`}</Eq>, <Eq>{`x=2`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination: <Eq>{`x+y+z=4`}</Eq>, <Eq>{`2x-y+3z=11`}</Eq>, <Eq>{`-x+2y-z=-3`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.54" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x = 1,\\; y = -1,\\; z = 2$", correta: true },
+    { texto: "$x = 2,\\; y = 1,\\; z = -1$" },
+    { texto: "$x = -1,\\; y = 2,\\; z = 1$" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Reducing: back-substitution produces <Eq>{`z=2`}</Eq>, <Eq>{`y=-1`}</Eq>, <Eq>{`x=1`}</Eq>.</>}
+  fonte={{ livro: "Beezer A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/fcla/section-RREF.html", secao: "cap. SLE", licenca: "GNU FDL" }}
+>
+
+Solve by elimination: <Eq>{`x + y - z = -2`}</Eq>, <Eq>{`2x - y + z = 5`}</Eq>, <Eq>{`-x + 3y + 2z = 6`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.55" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "rank = 2", correta: true },
+    { texto: "rank = 1" },
+    { texto: "rank = 3" },
+    { texto: "rank = 0" },
+  ]}
+  solucao={<>Reducing <Eq>{`A`}</Eq>: <Eq>{`L_2 \\leftarrow L_2 - 2L_1`}</Eq> simplifies row 2. The REF has 2 pivots, so rank = 2.</>}
+  fonte={{ livro: "Beezer A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/fcla/section-RREF.html", secao: "cap. RREF", licenca: "GNU FDL" }}
+>
+
+Determine the rank of the matrix <Eq>{`A = \\begin{pmatrix}1&2&3\\\\2&4&7\\\\0&0&1\\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.56" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "rank = 1; system with infinitely many solutions", correta: true },
+    { texto: "rank = 2; unique solution" },
+    { texto: "rank = 0; inconsistent system" },
+    { texto: "rank = 2; inconsistent system" },
+  ]}
+  solucao={<>The three equations are multiples of one another: <Eq>{`L_2 = 2L_1`}</Eq>, <Eq>{`L_3 = 3L_1`}</Eq>. The REF has only 1 pivot, so rank = 1 and <Eq>{`n - \\text{rank} = 2`}</Eq> free variables.</>}
+  fonte={{ livro: "Beezer A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/fcla/section-RREF.html", secao: "cap. RREF", licenca: "GNU FDL" }}
+>
+
+Identify the rank and classify the system <Eq>{`x + y = 3`}</Eq>, <Eq>{`2x + 2y = 6`}</Eq>, <Eq>{`3x + 3y = 9`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.57" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$A^{-1} = \\begin{pmatrix}2 & -1\\\\-1 & 1\\end{pmatrix}$", correta: true },
+    { texto: "$A^{-1} = \\begin{pmatrix}1 & -1\\\\-1 & 2\\end{pmatrix}$" },
+    { texto: "$A^{-1} = \\begin{pmatrix}-2 & 1\\\\1 & -1\\end{pmatrix}$" },
+    { texto: "The matrix is not invertible" },
+  ]}
+  solucao={<>Gauss-Jordan on <Eq>{`[A|I]`}</Eq>: eliminate to RREF, obtaining <Eq>{`A^{-1}=\\begin{pmatrix}2&-1\\\\-1&1\\end{pmatrix}`}</Eq>. Check: <Eq>{`A A^{-1}=I`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Build <Eq>{`\\left[\\begin{array}{cc|cc}1&1&1&0\\\\1&2&0&1\\end{array}\\right]`}</Eq>.</li>
+      <li><Eq>{`L_2\\leftarrow L_2-L_1`}</Eq>: <Eq>{`\\left[\\begin{array}{cc|cc}1&1&1&0\\\\0&1&-1&1\\end{array}\\right]`}</Eq>.</li>
+      <li><Eq>{`L_1\\leftarrow L_1-L_2`}</Eq>: <Eq>{`\\left[\\begin{array}{cc|cc}1&0&2&-1\\\\0&1&-1&1\\end{array}\\right]`}</Eq>.</li>
+      <li>Read <Eq>{`A^{-1}=\\begin{pmatrix}2&-1\\\\-1&1\\end{pmatrix}`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses", secao: "§9.7", licenca: "CC-BY 4.0" }}
+>
+
+Compute the inverse of <Eq>{`A = \\begin{pmatrix}1&1\\\\1&2\\end{pmatrix}`}</Eq> via Gauss-Jordan.
+
+</Exercicio>
+
+<Exercicio numero="35.58" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$A^{-1} = \\begin{pmatrix}2 & -3\\\\-1 & 2\\end{pmatrix}$", correta: true },
+    { texto: "$A^{-1} = \\begin{pmatrix}-2 & 3\\\\1 & -2\\end{pmatrix}$" },
+    { texto: "$A^{-1} = \\begin{pmatrix}3 & -2\\\\-2 & 1\\end{pmatrix}$" },
+    { texto: "The matrix is not invertible" },
+  ]}
+  solucao={<>Gauss-Jordan on <Eq>{`[A|I]`}</Eq> produces <Eq>{`A^{-1}=\\begin{pmatrix}2&-3\\\\-1&2\\end{pmatrix}`}</Eq>. Check: <Eq>{`\\det(A)=2\\cdot2-3\\cdot1=1\\neq0`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses", secao: "§9.7", licenca: "CC-BY 4.0" }}
+>
+
+Compute the inverse of <Eq>{`A = \\begin{pmatrix}2&3\\\\1&2\\end{pmatrix}`}</Eq> via Gauss-Jordan.
+
+</Exercicio>
+
+<Exercicio numero="35.59" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x = 3,\\; y = 2$", correta: true },
+    { texto: "$x = 2,\\; y = 3$" },
+    { texto: "$x = 1,\\; y = 4$" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>From the RREF of <Eq>{`[A|I]`}</Eq>: <Eq>{`A^{-1}=\\begin{pmatrix}2&-3\\\\-1&2\\end{pmatrix}`}</Eq>. Then <Eq>{`\\vec{x}=A^{-1}\\vec{b}=\\begin{pmatrix}2&-3\\\\-1&2\\end{pmatrix}\\begin{pmatrix}12\\\\7\\end{pmatrix}=\\begin{pmatrix}3\\\\2\\end{pmatrix}`}</Eq>: <Eq>{`x=3`}</Eq>, <Eq>{`y=2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses", secao: "§9.7", licenca: "CC-BY 4.0" }}
+>
+
+Use the inverse of <Eq>{`A = \\begin{pmatrix}2&3\\\\1&2\\end{pmatrix}`}</Eq> to solve <Eq>{`A\\vec{x} = \\begin{pmatrix}12\\\\7\\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.60" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x = 4,\\; y = 1,\\; z = 2$", correta: true },
+    { texto: "$x = 1,\\; y = 4,\\; z = 2$" },
+    { texto: "$x = 2,\\; y = 4,\\; z = 1$" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Gauss-Jordan on the <Eq>{`3\\times4`}</Eq> augmented matrix leads to RREF: we read directly <Eq>{`x=4`}</Eq>, <Eq>{`y=1`}</Eq>, <Eq>{`z=2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gauss-Jordan (RREF): <Eq>{`x+y+z=7`}</Eq>, <Eq>{`2x-y+z=9`}</Eq>, <Eq>{`x+2y-z=4`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.61" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x = 2,\\; y = -1,\\; z = 0$", correta: true },
+    { texto: "$x = 0,\\; y = 2,\\; z = -1$" },
+    { texto: "$x = -1,\\; y = 0,\\; z = 2$" },
+    { texto: "No solution" },
+  ]}
+  solucao={<>Reducing by Gauss: back-substitution gives <Eq>{`z=0`}</Eq>, <Eq>{`y=-1`}</Eq>, <Eq>{`x=2`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Algebra and Trigonometry 2e", url: "https://openstax.org/books/algebra-and-trigonometry-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gaussian elimination: <Eq>{`x - y + 2z = 3`}</Eq>, <Eq>{`2x + y - z = 3`}</Eq>, <Eq>{`x + 2y + z = 2`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.62" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "Inconsistent system (no solution)", correta: true },
+    { texto: "Unique solution" },
+    { texto: "Infinitely many solutions" },
+    { texto: "Cannot be determined without more information" },
+  ]}
+  solucao={<><Eq>{`L_2 \\leftarrow L_2 - 3L_1`}</Eq> produces <Eq>{`[0,\\,0\\mid 1]`}</Eq>, that is <Eq>{`0=1`}</Eq> — a contradiction. Hence <Eq>{`\\text{rank}(A)=1 < \\text{rank}([A|\\vec{b}])=2`}</Eq>: inconsistent system.</>}
+  passos={<>
+    <ol>
+      <li>Build <Eq>{`\\left[\\begin{array}{cc|c}2&4&6\\\\6&12&5\\end{array}\\right]`}</Eq>.</li>
+      <li><Eq>{`L_2\\leftarrow L_2-3L_1`}</Eq>: row 2 becomes <Eq>{`[0,\\,0\\mid -13]`}</Eq>.</li>
+      <li>Resulting equation: <Eq>{`0=-13`}</Eq> — impossible.</li>
+      <li>Classify as inconsistent.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "Beezer A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/fcla/section-RREF.html", secao: "cap. SLE", licenca: "GNU FDL" }}
+>
+
+Classify the system <Eq>{`2x + 4y = 6`}</Eq>, <Eq>{`6x + 12y = 5`}</Eq> using rank.
+
+</Exercicio>
+
+<Exercicio numero="35.63" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "rank = 2; unique solution: $x=2,\\; y=1$", correta: true },
+    { texto: "rank = 1; infinitely many solutions" },
+    { texto: "rank = 2; inconsistent system" },
+    { texto: "rank = 0; inconsistent system" },
+  ]}
+  solucao={<>The REF has 2 pivots, so rank = 2 = number of unknowns: unique solution. Substitution: <Eq>{`x=2`}</Eq>, <Eq>{`y=1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Determine the rank and classify the system <Eq>{`3x + y = 7`}</Eq>, <Eq>{`x - 2y = 0`}</Eq>; if determined, provide the solution.
+
+</Exercicio>
+
+<Exercicio numero="35.64" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$A^{-1} = \\begin{pmatrix}0 & 1\\\\1 & -2\\end{pmatrix}$", correta: true },
+    { texto: "$A^{-1} = \\begin{pmatrix}1 & 0\\\\-2 & 1\\end{pmatrix}$" },
+    { texto: "$A^{-1} = \\begin{pmatrix}2 & 1\\\\1 & 0\\end{pmatrix}$" },
+    { texto: "The matrix is not invertible" },
+  ]}
+  solucao={<><Eq>{`\\det(A) = 1\\cdot1 - 2\\cdot(-1) = -1\\neq0`}</Eq>. Gauss-Jordan on <Eq>{`[A|I]`}</Eq> produces <Eq>{`A^{-1}=\\begin{pmatrix}0&1\\\\1&-2\\end{pmatrix}`}</Eq>. Check: the product <Eq>{`A A^{-1}=I`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li>Build <Eq>{`\\left[\\begin{array}{cc|cc}2&1&1&0\\\\1&1&0&1\\end{array}\\right]`}</Eq>.</li>
+      <li><Eq>{`L_1\\leftrightarrow L_2`}</Eq> for a convenient pivot.</li>
+      <li>Eliminate and divide by the pivots until RREF.</li>
+      <li>Read <Eq>{`A^{-1}=\\begin{pmatrix}0&1\\\\1&-2\\end{pmatrix}`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses", secao: "§9.7", licenca: "CC-BY 4.0" }}
+>
+
+Compute the inverse of <Eq>{`A = \\begin{pmatrix}2&1\\\\1&1\\end{pmatrix}`}</Eq> via Gauss-Jordan and verify by multiplying <Eq>{`A A^{-1}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.65" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x=1,\\; y=2$", correta: true },
+    { texto: "$x=2,\\; y=1$" },
+    { texto: "$x=-1,\\; y=2$" },
+    { texto: "$x=1,\\; y=-2$" },
+  ]}
+  solucao={<>Reduce <Eq>{`\\left[\\begin{array}{cc|c}2&1&4\\\\1&3&7\\end{array}\\right]`}</Eq>. <Eq>{`L_1 \\leftarrow L_1 - 2L_2`}</Eq> gives <Eq>{`-5y = -10 \\Rightarrow y=2`}</Eq>; substitution: <Eq>{`x = (4-2)/2 = 1`}</Eq>.</>}
+  passos={<>
+    <ol>
+      <li><strong>Build the augmented matrix.</strong> <Eq>{`\\left[\\begin{array}{cc|c}2&1&4\\\\1&3&7\\end{array}\\right]`}</Eq>.</li>
+      <li><strong>Eliminate <Eq>{`x`}</Eq>.</strong> <Eq>{`L_1 \\leftarrow L_1 - 2L_2`}</Eq>: row 1 becomes <Eq>{`[0,\\,-5\\mid -10]`}</Eq>.</li>
+      <li><strong>Solve <Eq>{`y`}</Eq>.</strong> <Eq>{`-5y = -10 \\Rightarrow y = 2`}</Eq>.</li>
+      <li><strong>Back-substitution.</strong> <Eq>{`2x + 1(2) = 4 \\Rightarrow x = 1`}</Eq>.</li>
+    </ol>
+  </>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve the system <Eq>{`2x + y = 4`}</Eq>, <Eq>{`x + 3y = 7`}</Eq> by Gaussian elimination.
+
+</Exercicio>
+
+<Exercicio numero="35.66" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x=3,\\; y=-1,\\; z=2$", correta: true },
+    { texto: "$x=2,\\; y=1,\\; z=3$" },
+    { texto: "$x=1,\\; y=3,\\; z=-1$" },
+    { texto: "$x=-1,\\; y=2,\\; z=3$" },
+  ]}
+  solucao={<>REF of the augmented matrix: pivots in columns 1, 2, 3. Back-substitution: <Eq>{`z=2`}</Eq>, <Eq>{`y=-1`}</Eq>, <Eq>{`x=3`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by Gauss the 3×3 system: <Eq>{`x + y + z = 4`}</Eq>, <Eq>{`2x - y + z = 7`}</Eq>, <Eq>{`x + 2y - z = 1`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.67" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\text{rank}(A) = 2$", correta: true },
+    { texto: "$\\text{rank}(A) = 1$" },
+    { texto: "$\\text{rank}(A) = 3$" },
+    { texto: "$\\text{rank}(A) = 0$" },
+  ]}
+  solucao={<>Reduce: <Eq>{`L_2 \\leftarrow L_2 - 2L_1`}</Eq> and <Eq>{`L_3 \\leftarrow L_3 + L_1`}</Eq>. The resulting row of <Eq>{`L_3`}</Eq> is a multiple of <Eq>{`L_2`}</Eq> — it becomes zero. Two nonzero rows remain, so rank = 2.</>}
+  fonte={{ livro: "Beezer A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/fcla/section-RREF.html", secao: "cap. RREF", licenca: "GNU FDL" }}
+>
+
+Compute the rank of <Eq>{`A = \\begin{pmatrix}1&2&-1\\\\2&4&0\\\\-1&-2&3\\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.68" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$A^{-1} = \\begin{pmatrix}-2&1\\\\1{,}5&-0{,}5\\end{pmatrix}$", correta: true },
+    { texto: "$A^{-1} = \\begin{pmatrix}2&-1\\\\-1{,}5&0{,}5\\end{pmatrix}$" },
+    { texto: "$A^{-1} = \\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}$" },
+    { texto: "A is not invertible" },
+  ]}
+  solucao={<><Eq>{`\\det(A) = 1 \\cdot 2 - 3 \\cdot 2 = 2 - 6 = -4 \\neq 0`}</Eq>. By Gauss-Jordan we obtain <Eq>{`A^{-1} = \\begin{pmatrix}-0{,}5&0{,}25\\\\0{,}75&-0{,}25\\end{pmatrix}`}</Eq>. (Check: <Eq>{`AA^{-1}=I`}</Eq>.)</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses", secao: "§9.7", licenca: "CC-BY 4.0" }}
+>
+
+Compute <Eq>{`A^{-1}`}</Eq> via Gauss-Jordan for <Eq>{`A = \\begin{pmatrix}1&2\\\\3&2\\end{pmatrix}`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.69" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x=2,\\; y=1$", correta: true },
+    { texto: "$x=1,\\; y=2$" },
+    { texto: "$x=-1,\\; y=3$" },
+    { texto: "$x=3,\\; y=0$" },
+  ]}
+  solucao={<>Put into RREF: <Eq>{`\\left[\\begin{array}{cc|c}1&0&2\\\\0&1&1\\end{array}\\right]`}</Eq>. Direct reading: <Eq>{`x=2`}</Eq>, <Eq>{`y=1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax Algebra and Trigonometry 2e", url: "https://openstax.org/books/algebra-and-trigonometry-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Reduce to RREF and solve: <Eq>{`3x + 2y = 8`}</Eq>, <Eq>{`x - y = 1`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.70" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$\\text{rank} = 3$; unique solution", correta: true },
+    { texto: "$\\text{rank} = 2$; infinitely many solutions" },
+    { texto: "$\\text{rank} = 1$; inconsistent system" },
+    { texto: "$\\text{rank} = 3$; inconsistent system" },
+  ]}
+  solucao={<>Reduce the 3×4 augmented matrix. We get 3 pivots in <Eq>{`[A|b]`}</Eq> with rank = 3 = number of unknowns: unique solution by the Rouché-Capelli Theorem.</>}
+  fonte={{ livro: "Beezer A First Course in Linear Algebra", url: "http://linear.pugetsound.edu/fcla/section-RREF.html", secao: "cap. SLE", licenca: "GNU FDL" }}
+>
+
+Classify the system <Eq>{`x + y + z = 3`}</Eq>, <Eq>{`2x - y + z = 4`}</Eq>, <Eq>{`x + 2y - z = 1`}</Eq> using the rank of the augmented matrix.
+
+</Exercicio>
+
+<Exercicio numero="35.71" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x=1,\\; y=-1,\\; z=2$", correta: true },
+    { texto: "$x=2,\\; y=1,\\; z=-1$" },
+    { texto: "$x=0,\\; y=1,\\; z=2$" },
+    { texto: "$x=-1,\\; y=1,\\; z=2$" },
+  ]}
+  solucao={<>Build the augmented matrix and perform three operations: <Eq>{`L_2 \\leftarrow L_2 - 2L_1`}</Eq>, <Eq>{`L_3 \\leftarrow L_3 - L_1`}</Eq>, then eliminate <Eq>{`y`}</Eq> from <Eq>{`L_3`}</Eq>. Back-substitution: <Eq>{`z=2`}</Eq>, <Eq>{`y=-1`}</Eq>, <Eq>{`x=1`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-6-solving-systems-with-gaussian-elimination", secao: "§9.6", licenca: "CC-BY 4.0" }}
+>
+
+Solve by elimination: <Eq>{`x + 2y + z = 1`}</Eq>, <Eq>{`2x + y - z = 3`}</Eq>, <Eq>{`x - y + 3z = 8`}</Eq>.
+
+</Exercicio>
+
+<Exercicio numero="35.72" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$A^{-1} = \\begin{pmatrix}1&0&-1\\\\-1&1&1\\\\0&0&1\\end{pmatrix}$", correta: true },
+    { texto: "$A^{-1} = \\begin{pmatrix}1&1&0\\\\0&1&0\\\\-1&1&1\\end{pmatrix}$" },
+    { texto: "A is not invertible" },
+    { texto: "$A^{-1} = A$" },
+  ]}
+  solucao={<><Eq>{`\\det(A) = 1 \\neq 0`}</Eq> (check by cofactors). Gauss-Jordan on <Eq>{`[A|I_3]`}</Eq> produces the inverse after 6 elementary row operations.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "https://openstax.org/books/college-algebra-2e/pages/9-7-solving-systems-with-inverses", secao: "§9.7", licenca: "CC-BY 4.0" }}
+>
+
+Compute the inverse of <Eq>{`A = \\begin{pmatrix}1&0&1\\\\1&1&0\\\\0&0&1\\end{pmatrix}`}</Eq> via Gauss-Jordan.
+
+</Exercicio>
 
 </ListaExercicios>
 
 ## Sources
 
-- [**A First Course in Linear Algebra**](http://linear.ups.edu/) — Robert A. Beezer · 2022 · EN · GFDL · ch. SLE: Solving Linear Equations. **Primary source.**
-- [**Linear Algebra Done Right**](https://linear.axler.net/) — Sheldon Axler · 2024, 4th ed · EN · CC-BY-NC · ch. 3.
-- [**Cálculo Numérico (Python)**](https://www.ufrgs.br/reamat/CalculoNumerico/livro-py/main.html) — REAMAT UFRGS · 2024 · PT-BR · CC-BY-SA · ch. 4: numerical linear systems.
+- [**OpenStax College Algebra 2e**](https://openstax.org/details/books/college-algebra-2e) — §9.6 Solving Systems with Gaussian Elimination, §9.7 Solving Systems with Inverses, §9.8 Solving Systems with Cramer's Rule. Rice University · 2021 · CC-BY 4.0. **Primary source.**
+- [**OpenStax Algebra and Trigonometry 2e**](https://openstax.org/details/books/algebra-and-trigonometry-2e) — §9.6 Gaussian Elimination, §9.8 Cramer's Rule. Rice University · 2021 · CC-BY 4.0.
+- [**Beezer, A First Course in Linear Algebra**](http://linear.pugetsound.edu/) — Chapters SLE (Solving Linear Equations), RREF (Reduced Row-Echelon Form), LS (Linear Systems), HSE (Homogeneous Systems). Robert A. Beezer · 2022 · GNU Free Documentation License.

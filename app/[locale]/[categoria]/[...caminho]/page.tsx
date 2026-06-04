@@ -6,11 +6,14 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import { carregarPorSlug } from '@/lib/content/loader'
+import {
+  carregarPorSlug,
+  publicadosApenas,
+} from '@/lib/content/loader'
 import { carregarMdxLocalizado } from '@/lib/content/manifest'
 import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
 import { LessonPageShell } from '@/components/layout/LessonPageShell'
-import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import { LOCALES, localeToUrl, urlToLocale, type Locale } from '@/lib/i18n/locales'
 import { DuasPortas, Porta } from '@/components/math/DuasPortas'
 import { Equation, Eq } from '@/components/math/Equation'
 import { EquacaoCanonica } from '@/components/math/EquacaoCanonica'
@@ -28,17 +31,15 @@ import {
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
-// NOTE: In this route, `categoria` param = locale code (e.g. "en-US"),
-// and `subcategoria` param = content category (e.g. "engenharia").
-// The folder was renamed [locale] → [categoria] and [categoria] → [subcategoria]
-// to satisfy Next.js requirement that dynamic segments at the same URL
-// position share the same name across sibling routes.
 interface Props {
-  params: Promise<{ categoria: string; subcategoria: string; caminho: string[] }>
+  params: Promise<{ locale: string; categoria: string; caminho: string[] }>
 }
 
 const ROOT = process.cwd()
 
+/**
+ * Walks a directory recursively, returning relative paths to .mdx files.
+ */
 function walkMdx(dir: string, base = dir): string[] {
   if (!existsSync(dir)) return []
   const out: string[] = []
@@ -54,40 +55,56 @@ function walkMdx(dir: string, base = dir): string[] {
 }
 
 export function generateStaticParams() {
-  const params: Array<{ categoria: string; subcategoria: string; caminho: string[] }> = []
-  const i18nRoot = join(ROOT, 'content', 'i18n')
-  if (!existsSync(i18nRoot)) return params
+  // Emits one route per (locale, lesson). The `locale` param is the URL code
+  // (`pt-br`, `en`, …). ALL locales route here, including pt-BR.
+  //
+  // BUILD_LOCALE / PREVIEW_LOCALES carry URL codes (e.g. "pt-br", "en") and
+  // restrict the build to those locales (per-locale CI matrix). When neither
+  // is set (local dev / single build), every locale present on disk is built.
+  const params: Array<{ locale: string; categoria: string; caminho: string[] }> = []
 
   const buildLocale = process.env.BUILD_LOCALE ?? ''
-  if (buildLocale === 'pt-BR') return params
-
   const previewLocales = buildLocale
     ? new Set([buildLocale])
     : process.env.PREVIEW_LOCALES
       ? new Set(process.env.PREVIEW_LOCALES.split(',').map((s) => s.trim()))
       : null
 
-  for (const speechLang of readdirSync(i18nRoot)) {
-    const dir = join(i18nRoot, speechLang)
-    if (!statSync(dir).isDirectory()) continue
-    const localeEntry = Object.values(LOCALES).find((l) => l.speechLang === speechLang)
-    if (!localeEntry) continue
-    const localeCode = localeEntry.code
-    if (localeCode === 'pt-BR') continue
-    if (previewLocales && !previewLocales.has(localeCode)) continue
-    for (const rel of walkMdx(dir)) {
-      const partes = rel.split('/')
-      const [subcategoria, ...rest] = partes
-      if (!subcategoria || rest.length === 0) continue
-      // categoria = locale code, subcategoria = content category
-      params.push({ categoria: localeCode, subcategoria, caminho: rest })
+  const wants = (urlCode: string) => !previewLocales || previewLocales.has(urlCode)
+
+  // pt-BR — source lessons live in content/ (not content/i18n). Use the
+  // published-content loader so we only emit publicado:true lessons.
+  if (wants(localeToUrl('pt-BR'))) {
+    for (const { caminho } of publicadosApenas()) {
+      const [categoria, ...rest] = caminho.split('/')
+      if (!categoria || rest.length === 0) continue
+      params.push({ locale: localeToUrl('pt-BR'), categoria, caminho: rest })
+    }
+  }
+
+  // Translated locales — walk content/i18n/<speechLang>.
+  const i18nRoot = join(ROOT, 'content', 'i18n')
+  if (existsSync(i18nRoot)) {
+    for (const speechLang of readdirSync(i18nRoot)) {
+      const dir = join(i18nRoot, speechLang)
+      if (!statSync(dir).isDirectory()) continue
+      const localeEntry = Object.values(LOCALES).find((l) => l.speechLang === speechLang)
+      if (!localeEntry || localeEntry.code === 'pt-BR') continue
+      const urlCode = localeEntry.urlCode
+      if (!wants(urlCode)) continue
+      for (const rel of walkMdx(dir)) {
+        const partes = rel.split('/')
+        const [categoria, ...rest] = partes
+        if (!categoria || rest.length === 0) continue
+        params.push({ locale: urlCode, categoria, caminho: rest })
+      }
     }
   }
   return params
 }
 
-function caminhoCompleto(subcategoria: string, caminho: string[]): string {
-  return [subcategoria, ...caminho].join('/')
+function caminhoCompleto(categoria: string, caminho: string[]): string {
+  return [categoria, ...caminho].join('/')
 }
 
 function slugDoCaminho(caminho: string[]): string {
@@ -95,26 +112,26 @@ function slugDoCaminho(caminho: string[]): string {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // categoria = locale code, subcategoria = content category
-  const { categoria: locale, subcategoria, caminho } = await params
+  const { locale: urlCode, categoria, caminho } = await params
+  const locale = urlToLocale(urlCode)
   const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
-  if (!conteudo) return { title: 'Not found' }
+  if (!conteudo || !locale) return { title: 'Not found' }
 
   let titulo = conteudo.meta.titulo
   let descricao = conteudo.meta.descricao
-  if (locale in LOCALES && locale !== 'pt-BR') {
-    const info = LOCALES[locale as Locale]
-    const completo = caminhoCompleto(subcategoria, caminho)
-    const arquivo = caminhoArquivoMdx(completo, locale as Locale, info.speechLang)
-    if (arquivo) {
-      try {
-        const { data } = await lerMdxSource(arquivo)
-        if (typeof data.titulo === 'string') titulo = data.titulo
-        if (typeof data.descricao === 'string') descricao = data.descricao
-      } catch {
-        /* keep PT-BR meta */
-      }
+  // Read locale-specific frontmatter from disk. pt-BR reads from content/ and
+  // others from content/i18n/<speechLang> — caminhoArquivoMdx handles both.
+  const info = LOCALES[locale]
+  const completo = caminhoCompleto(categoria, caminho)
+  const arquivo = caminhoArquivoMdx(completo, locale, info.speechLang)
+  if (arquivo) {
+    try {
+      const { data } = await lerMdxSource(arquivo)
+      if (typeof data.titulo === 'string') titulo = data.titulo
+      if (typeof data.descricao === 'string') descricao = data.descricao
+    } catch {
+      /* keep PT-BR meta */
     }
   }
   return { title: titulo, description: descricao }
@@ -133,7 +150,7 @@ const MDX_OPTIONS: Parameters<typeof compileMDX>[0]['options'] = {
   mdxOptions: {
     remarkPlugins: [remarkGfm, remarkMath],
     rehypePlugins: [
-      rehypeKatex,
+      [rehypeKatex, { output: 'htmlAndMathml', throwOnError: false, strict: false }],
       rehypeSlug,
       [rehypeAutolinkHeadings, { behavior: 'wrap' }],
     ],
@@ -141,12 +158,12 @@ const MDX_OPTIONS: Parameters<typeof compileMDX>[0]['options'] = {
 }
 
 export default async function ConteudoLocalizadoPage({ params }: Props) {
-  // categoria = locale code, subcategoria = content category
-  const { categoria: locale, subcategoria, caminho } = await params
-  if (!(locale in LOCALES)) notFound()
-  const localeInfo = LOCALES[locale as Locale]
+  const { locale: urlCode, categoria, caminho } = await params
+  const locale = urlToLocale(urlCode)
+  if (!locale) notFound()
+  const localeInfo = LOCALES[locale]
 
-  const completo = caminhoCompleto(subcategoria, caminho)
+  const completo = caminhoCompleto(categoria, caminho)
   const slug = slugDoCaminho(caminho)
   const conteudo = carregarPorSlug(slug)
   if (!conteudo || conteudo.caminho !== completo) notFound()
@@ -154,10 +171,19 @@ export default async function ConteudoLocalizadoPage({ params }: Props) {
   let mdxRendered: React.ReactNode
   let translatedFrontmatter: Record<string, unknown> = {}
 
+  // PRIMARY PATH: webpack-bundled MDX module via manifest.
+  // This is the only path that PRESERVES JSX-expression props on
+  // <Exercicio> — opcoes={[...]}, solucao={<>...</>}, passos={...},
+  // fonte={{...}}. compileMDX (next-mdx-remote/rsc) drops them, which
+  // is why locale pages were showing exercises without MC/solution
+  // buttons. Lessons must be in `includeTranslationsFor` in
+  // scripts/generate-manifest.ts to land here.
   const mod = await carregarMdxLocalizado(completo, locale)
   if (mod) {
     const MDXContent: React.ComponentType = mod.default
     mdxRendered = <MDXContent />
+    // Still read frontmatter from disk so page header (titulo, descricao,
+    // usadoEm) renders in the active locale.
     const arquivo = caminhoArquivoMdx(completo, locale as Locale, localeInfo.speechLang)
     if (arquivo) {
       try {
@@ -168,6 +194,10 @@ export default async function ConteudoLocalizadoPage({ params }: Props) {
       }
     }
   } else {
+    // FALLBACK PATH: compileMDX from disk for lessons not in the manifest
+    // allowlist. JSX-expression props will NOT render correctly here —
+    // any lesson with MC/solution/passos must be added to the manifest
+    // allowlist instead of relying on this fallback.
     let arquivo = caminhoArquivoMdx(completo, locale as Locale, localeInfo.speechLang)
     if (!arquivo) {
       arquivo = caminhoArquivoMdx(completo, 'pt-BR', 'pt-BR')
@@ -200,8 +230,8 @@ export default async function ConteudoLocalizadoPage({ params }: Props) {
     }
   }
 
-  const isAula = subcategoria === 'aulas'
-  const isFinancas = subcategoria === 'financas-quantitativas'
+  const isAula = categoria === 'aulas'
+  const isFinancas = categoria === 'financas-quantitativas'
 
   const localizedMeta = {
     ...conteudo.meta,

@@ -3,7 +3,7 @@
 > *"A matemática é a única linguagem em que se pode raciocinar sem ambiguidade sobre o infinito, o aleatório e o invisível."*
 > — adaptado de Bertrand Russell
 
-**Open source · gratuito · UI em 11 idiomas · Lições em 3 idiomas (PT-BR · en-US · es-ES) — restantes em andamento**
+**Open source · gratuito · UI em 11 idiomas · Lições completas em 2 idiomas (PT-BR fonte · en-US) — restantes em andamento**
 
 Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lineares, 12 trimestres, 120 lições, do nível conjunto/intervalo até Black-Scholes. Escrito com **rigor de engenharia** (BR + JP + DE + SG), com cada conceito explicado em **7 níveis progressivos** (criança de 5 anos → profissional sênior).
 
@@ -14,12 +14,12 @@ Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lin
 ## O que está pronto hoje
 
 - ✅ **120 lições** em PT-BR cobrindo o Ensino Médio inteiro (Anos 1-3 × 4 trimestres × 10 lições)
-- ✅ **~4.770 exercícios** com fonte (livro · página · licença) — nenhum inventado pela IA
-- ✅ **1.800 questões em provas** (12 trim × 10 versões × 15 q)
+- ✅ **5.319 exercícios** com fonte (livro · página · licença) — nenhum inventado pela IA (100% sourced), **100% com uma única resposta correta** (auditoria de correção matemática em 2026-05-31)
+- ✅ **1.800 questões em provas** (12 trim × 10 versões × 15 q) — 100% com múltipla escolha
 - ✅ **UI traduzida em 11 idiomas** (botões, navegação, "Ouvir", breadcrumb)
 - ✅ **Acessibilidade — leitor de voz em toda página**: cada lição, exemplo e seção tem uma **caixa de áudio "Ouvir"** que narra o conteúdo via Web Speech API nativa do navegador (zero arquivos MP3, voz no idioma selecionado). Ajuda alunos com dislexia, deficiência visual, ou que aprendem melhor por audição.
 - ✅ **Build estático** em GitHub Pages — custo R$ 0,00
-- 🟡 **Tradução das lições MDX em andamento** — PT-BR (fonte), en-US e es-ES completos (124/124 cada). Restantes 8 idiomas com cobertura parcial (ver tabela abaixo)
+- 🟡 **Tradução das lições MDX em andamento** — PT-BR (fonte, recém-revisado e perfeito), **en-US completo (120/120, re-sincronizado em 2026-05-31)**. Demais idiomas com cobertura parcial e defasada em relação à nova fonte PT-BR (ver tabela abaixo)
 - ⏳ **Provas i18n** — TO-DO (1.800 questões × 10 idiomas)
 - ⏳ **Próximos módulos**: Física Ensino Médio, Engenharia introdutória
 
@@ -31,13 +31,14 @@ Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lin
 |---|---|
 | **Lições** | 120 (3 anos × 4 trimestres × 10 lições) |
 | **Portas pedagógicas por lição** | 7 (formal · 5 anos · 10 anos · 15 anos · engenharia · sênior · prática) |
-| **Exercícios reais** | ~4.770 (não placeholders) |
+| **Exercícios reais** | 5.319 (não placeholders, 100% MC, 100% com resposta única correta) |
 | **Provas curadas** | 120 versões (12 trimestres × 10 versões) |
 | **Questões em provas** | 1.800 |
 | **Idiomas (UI + áudio)** | 11 (português, inglês, espanhol, mandarim, japonês, alemão, francês, italiano, russo, coreano, polonês) |
-| **Idiomas (lições MDX)** | 3 completos (PT-BR fonte · en-US · es-ES) + 8 parciais |
+| **Idiomas (lições MDX)** | 2 completos (PT-BR fonte · en-US) + 9 parciais/em re-sincronização |
 | **Componentes interativos** | 14 (DuasPortas, ListaExercicios, AudioReader, VerificarPasso, etc.) |
 | **Linhas de código** | ~30.000 |
+| **Conformidade L1 (lições)** | 120/120 (100%) ✓ |
 | **Custo de hospedagem** | R\$ 0,00 (GitHub Pages) |
 
 ---
@@ -111,25 +112,27 @@ Não é Google Translate em runtime. É **tradução pré-compilada**. Hoje, o s
 
 - **UI** (botões, menus, breadcrumb, "Ouvir") → **11 idiomas, 100%**
 - **Áudio TTS** (narrado pelo botão "Ouvir") → **11 idiomas, 100%**, com voz nativa do SO via Web Speech API
-- **Lições MDX (corpos das aulas)** → **PT-BR fonte + en-US e es-ES completos (100%)**. Demais 8 idiomas com cobertura parcial (24–52%) e crescendo. Quando o aluno escolhe um idioma com cobertura parcial, lições não traduzidas continuam em PT-BR (fallback explícito).
+- **Lições MDX (corpos das aulas)** → **PT-BR fonte (revisado e perfeito em 2026-05-31) + en-US completo (100%, re-sincronizado à nova fonte)**. Demais idiomas com cobertura parcial e defasada em relação à nova fonte PT-BR (em re-sincronização). Quando o aluno escolhe um idioma sem a lição traduzida, ela continua em PT-BR (fallback explícito).
 
-Pipeline de tradução: **baseada em Claude** (agentes via Claude Code) — **Haiku** faz ~95% das lições (padrão para volume), **Sonnet** assume lições > 1050 linhas em idiomas que expandem (de/ru/es/it) por causa do teto de 32k tokens de saída do Haiku, **Opus** é usado raramente para revisão profunda. `scripts/translate-parallel.py` com Gemini free-tier permanece disponível como fallback para tarefas pontuais, mas não é o caminho primário.
+Pipeline de tradução: **baseada em Claude** (agentes via Claude Code) — **Haiku** faz ~95% das lições (padrão para volume), **Sonnet** assume lições > 1050 linhas em idiomas que expandem (de/ru/es/it) por causa do teto de 32k tokens de saída do Haiku, e **Opus 4.8** é acionado uma a uma para o punhado de lições gigantes (1257–1575 linhas, ex.: L35 com 72 exercícios) que truncam mesmo no Sonnet. `scripts/translate-parallel.py` com Gemini free-tier permanece disponível como fallback para tarefas pontuais, mas não é o caminho primário.
 
 Idiomas atualmente removidos: árabe, hebraico e hindi — saíram temporariamente porque o TTS gratuito não rendia bem; voltarão quando tivermos uma solução de voz neural.
 
-| Idioma | UI | TTS | Lições MDX |
+| Idioma | UI | TTS | Lições MDX (sincronizadas*) |
 |---|---|---|---|
-| 🇧🇷 Português (Brasil) | 100% | 100% | **100% (fonte)** |
-| 🇺🇸 English | 100% | 100% | **100%** |
-| 🇪🇸 Español | 100% | 100% | **100%** |
-| 🇩🇪 Deutsch | 100% | 100% | 52% |
-| 🇮🇹 Italiano | 100% | 100% | 47% |
-| 🇨🇳 中文 (简体) | 100% | 100% | 45% |
-| 🇰🇷 한국어 | 100% | 100% | 39% |
-| 🇫🇷 Français | 100% | 100% | 38% |
-| 🇷🇺 Русский | 100% | 100% | 29% |
-| 🇯🇵 日本語 | 100% | 100% | 28% |
-| 🇵🇱 Polski | 100% | 100% | 24% |
+| 🇧🇷 Português (Brasil) | 100% | 100% | **120/120 (fonte, revisada)** |
+| 🇺🇸 English | 100% | 100% | **120/120 ✅** |
+| 🇪🇸 Español | 100% | 100% | 25/120 — re-sincronização pendente |
+| 🇨🇳 中文 (简体) | 100% | 100% | 28/120 — re-sincronização pendente |
+| 🇵🇱 Polski | 100% | 100% | 25/120 — re-sincronização pendente |
+| 🇩🇪 Deutsch | 100% | 100% | 22/120 — re-sincronização pendente |
+| 🇫🇷 Français | 100% | 100% | 21/120 — re-sincronização pendente |
+| 🇮🇹 Italiano | 100% | 100% | 19/120 — re-sincronização pendente |
+| 🇰🇷 한국어 | 100% | 100% | 9/120 — re-sincronização pendente |
+| 🇷🇺 Русский | 100% | 100% | 10/120 — re-sincronização pendente |
+| 🇯🇵 日本語 | 100% | 100% | 9/120 — re-sincronização pendente |
+
+<sub>*Sincronizada = a lição traduzida tem **exatamente os mesmos exercícios** da fonte PT-BR atual. **Só PT-BR e en-US estão 100%.** Os demais idiomas têm arquivos traduzidos, mas contra uma versão anterior da fonte — após a revisão de 2026-05-31 (932 correções de linguagem + 819 de correção matemática + 5 bancos de exercícios regenerados), as contagens de exercícios mudaram, então cada lição precisa ser re-traduzida para incluir os exercícios novos/corrigidos. Espanhol inclusive.</sub>
 
 ---
 
@@ -239,8 +242,8 @@ Fontes externas mantêm suas próprias licenças (OpenStax CC-BY, Active Calculu
 - [x] **UI traduzida** em 11 idiomas
 - [x] **Áudio TTS / leitor de voz acessível** em 11 idiomas (Web Speech API)
 - [x] **Lições L1-L120 padronizadas no template canônico** (Lição 1 standard)
-- [x] **MDX das lições traduzido**: en-US ✅ · es-ES ✅
-- [ ] **MDX das lições — 8 idiomas restantes** (zh-CN, ja-JP, de-DE, fr-FR, it-IT, ru-RU, ko-KR, pl-PL) — cobertura parcial 24–52%, em andamento
+- [x] **MDX das lições traduzido + sincronizado**: en-US ✅ (120/120)
+- [ ] **MDX das lições — 9 idiomas restantes** (es-ES, zh-CN, pl-PL, de-DE, fr-FR, it-IT, ko-KR, ru-RU, ja-JP) — todos precisam de re-sincronização de exercícios com a fonte PT-BR revisada (2026-05-31); contagem sincronizada hoje: es 25, zh 28, pl 25, de 22, fr 21, it 19, ko 9, ru 10, ja 9 (de 120)
 - [ ] **Provas i18n** (1.800 questões × 10 idiomas) — TO-DO
 - [ ] **Retorno de árabe / hebraico / hindi** quando houver TTS neural decente
 - [ ] **Próximo módulo: Física Ensino Médio** (mecânica, ondas, eletromagnetismo)

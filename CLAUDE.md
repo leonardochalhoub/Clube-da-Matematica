@@ -112,6 +112,390 @@ atualizadoEm: "2026-MM-DD"
 - `$math$` inside `legenda={<>...</>}` → MDX evaluates `{...}` as JSX expression. Use `<Eq>{`...`}</Eq>` with double-escaped backslashes.
 - Stray `</content>` from translator agents → strip before commit. There is a sweep script (search history).
 
+### Cascade JSX pitfalls — READ BEFORE WRITING ANY MDX (2026-05-29)
+
+The cascade pipeline (Sonnet/Haiku/Cerebras for source + translators) has cost the owner **hours of build-fix work over multiple sessions** and real LLM spend on top. Documented healing totals from a single day (2026-05-29):
+
+- **1,353 corrupted props** healed across i18n files (nested `<Eq>`, escaped backticks, R\$ inside template literals)
+- **635 files** missing blank-line separator between JSX block tag and markdown body
+- **86 i18n files** had compact `<Exercicio>body</Exercicio>` (one line) that needed multi-line rewrite
+- **2,652 body `$\begin{X}…\end{X}$` spans** in 267 files needed conversion to `<Eq>` template-literal form
+- **831 `<Eq>{`...\\begin{cases}…\\end{cases}…`}</Eq>` blocks** in 200+ files needed rewrite to comma-joined inline equations (the cases environment broke the locale-route chunk)
+- **5 i18n files for L120** (en/es/de/pl/zh) and **10 i18n files for L26** had to be DELETED because they couldn't be healed safely
+- **7 PT-BR lessons** had their last `<Exercicio>` truncated mid-body (LLM ran out of tokens before closing tags) and needed manual close-tag insertion
+- Plus dozens of one-off ReferenceErrors: `n is not defined`, `PQ is not defined`, `cases is not defined`, `rT is not defined`, `HH is not defined`, `pmatrix is not defined`, `Var is not defined`, `Cov is not defined`, `d is not defined`, `dx is not defined`
+
+**Every single one of these was a Sonnet/Haiku agent emitting MDX that looked plausible but broke the Next.js prerender stringify because the model didn't internalize the JSX-children parsing rules.**
+
+**The rules below are NON-NEGOTIABLE for any agent (Sonnet subagent, Haiku translator, Opus rewriter, Gemini drafter, anyone else) that writes or revises lesson MDX. Read them before you write a single character. Run the rule-12 self-check on every single `<Exercicio>` you emit.**
+
+If you violate any of these and the build breaks, the owner reverts your work and the LLM spend is wasted. Past Sonnet agents have ignored these rules; the cost has been real. **This time, follow them.**
+
+#### Structure
+
+1. **`<Exercicio>` MUST be multi-line form**:
+   ```mdx
+   <Exercicio numero="..." dificuldade="..."
+     opcoes={[...]}
+     solucao={<>...</>}
+     fonte={{...}}
+   >
+
+   Enunciado em markdown body.
+
+   </Exercicio>
+   ```
+   The closing `>` of the open tag is on its own line, then **a blank line**, then the body, then **a blank line**, then `</Exercicio>`. Compact `<Exercicio>body</Exercicio>` (single line) makes MDX parse `{cases}`/`{n}`/`{pmatrix}` as JSX expressions → ReferenceError. (86 i18n files had to be auto-rewritten to multi-line.)
+
+2. **MANDATORY blank line between any JSX block tag and its markdown body.** Without the blank line, the body is parsed as **JSX children**, not markdown. `$\begin{cases}` inside JSX children has `{cases}` evaluated as a JSX expression with undefined identifier `cases`. (635 files were missing this blank line; build crashed at `cases is not defined` on lessons like L34.)
+
+   Wrong (no blank line):
+   ```mdx
+   <Exercicio numero="34.24" dificuldade="aplicacao">
+   Resolva $\begin{cases} 2x + 3y = 7 \\ x - y = 1 \end{cases}$.
+   </Exercicio>
+   ```
+   Right:
+   ```mdx
+   <Exercicio numero="34.24" dificuldade="aplicacao">
+
+   Resolva $\begin{cases} 2x + 3y = 7 \\ x - y = 1 \end{cases}$.
+
+   </Exercicio>
+   ```
+
+3. **Count tag balance before stopping.** `<Exercicio>` opens MUST match `</Exercicio>` closes. Same for `<DuasPortas>` / `<Porta>` / `<ListaExercicios>` / `<>...</>` fragments. LLMs truncate; if you're running out of tokens, **close every open tag first**, then reduce content. The build fails with "Expected a closing tag for `<Exercicio>` (1188:1-1207:2)" when an exercise gets cut mid-body.
+
+#### Math inside JSX
+
+4. **Never put bare `{Identifier}` or `{expr-with-identifier}` anywhere outside `<Eq>{`...`}</Eq>` template literals or `$...$` body math.** Examples that broke the build:
+   - `2\overrightarrow{PQ}` in JSX body → `PQ is not defined`
+   - `(1-p)^{n-k}` in `<li>` JSX children → `n is not defined` / `k is not defined`
+   - `K*e^{-rT}*N(d_2)` in `passos={<><ol>...` → `rT is not defined`
+   - `\frac{d}{dx}` in JSX children → `d is not defined` / `dx is not defined`
+
+   Wrap in `<Eq>`: `<Eq>{`2\\overrightarrow{PQ}`}</Eq>`. Or replace braces with parens: `e^(-rT)` works as plain text in JSX children, just won't render via KaTeX (acceptable when the real math is shown via inline `<Eq>` earlier in the same exercise).
+
+5. **Inside `<Eq>{`...`}</Eq>`, double every backslash.** `<Eq>{`\\frac{1}{2}`}</Eq>`, not `<Eq>{`\frac{1}{2}`}</Eq>`. KaTeX consumes one `\` for the command; the template literal needs the other.
+
+6. **Never write `\$` inside `<Eq>{`...`}</Eq>`.** Some scanners read `\` immediately before `` ` `` as escaping the closing backtick, terminating the template literal mid-content. For currency, put it OUTSIDE math: `R\$ 50 (<Eq>{`50`}</Eq> reais)` or `1250 reais` as prose.
+
+7. **Never write escaped backticks `\``** inside JSX expressions. They are not valid syntax; emit literal `` ` `` only.
+
+8. **Body markdown `$math$` is fragile when math contains `\command{...}` or `\begin{X}`.** Even with proper blank lines around the body, the MDX expression-scanner grabs `{cases}` / `{pmatrix}` / `{N}` from `$\begin{cases}…$` / `$\mathcal{N}…$` BEFORE remark-math claims the `$…$` span as math. Result: `ReferenceError: cases is not defined` etc. **2,652 body math spans in 267 files had to be auto-converted.**
+
+   ALWAYS use `<Eq>` form when math has braces:
+   - WRONG: `Resolva $\begin{cases}2x+3y=7\\x-y=1\end{cases}$ via Cramer.`
+   - RIGHT: `Resolva <Eq>{`\\begin{cases}2x+3y=7\\\\x-y=1\\end{cases}`}</Eq> via Cramer.`
+
+   Single-letter math (`$x$`, `$n=4$`) without braces is usually fine in body.
+
+#### Attributes and strings
+
+9. **No HTML entities in JSX content** (`&lt;`, `&gt;`, `&amp;`, etc.). They reach the parser as literal characters and break tags. Use the actual characters: `<`, `>`, `&`.
+
+10. **Inside `texto: "..."` (and any other JS string attribute), double backslashes and avoid `\$`/`\t` escapes.** `texto: "$\text{não existe}$"` puts a literal TAB in the string because `\t` is JS string escape for TAB. Use `texto: "$\\text{nao existe}$"` (double `\\`, ASCII inside `\text` to avoid KaTeX warnings).
+
+#### Sources (CLAUDE.md hard rule)
+
+11. **Books are the ledger.** Every `<Exercicio>` MUST have `fonte={{ livro, url, secao, ..., licenca }}` pointing to a real open-licensed book in `livros/CATALOG.md`. If you can't find a sourced exercise for the topic, **DROP IT** or reduce count. **Never fabricate exercises.** This rule is repeated from §3 because translator agents have ignored it twice.
+
+12. **Self-check before emitting any MDX.** Mental walkthrough:
+    - [ ] Multi-line `<Exercicio>` with blank lines around the body?
+    - [ ] Every `{ident}` inside backticks or `$math$`?
+    - [ ] Every `\` doubled inside `<Eq>{`...`}</Eq>`?
+    - [ ] No `\$` / `\``  / `\<` / `\>` inside JSX expressions?
+    - [ ] No HTML entities (`&lt;`, etc.)?
+    - [ ] All tags closed?
+    - [ ] Every `<Exercicio>` has `fonte={{ ... }}` to a real book?
+
+**When in doubt: use `<Eq>{`...`}</Eq>` over body `$...$`.** The template-literal form is always safe; body math is fragile.
+
+**Reference memory:** `~/.claude/projects/-home-leochalhoub-Clube-da-Matematica/memory/feedback_cascade_jsx_pitfalls.md` has worked examples of each failure mode.
+
+**If you violate any of these and the build breaks, the owner will revert your work.** Review is tough. Write correctly the first time.
+
+### Worked-example gallery — every failure we hit, with the fix
+
+Every entry below is a real bug from cascade output that broke the build. Memorize the patterns.
+
+#### A. Compact `<Exercicio>` (no multi-line, no blank line)
+```mdx
+WRONG:
+<Exercicio numero="34.24" dificuldade="aplicacao">Löse: $\begin{cases} 2x+3y=7 \\ x-y=1 \end{cases}$.</Exercicio>
+
+RIGHT:
+<Exercicio numero="34.24" dificuldade="aplicacao"
+  opcoes={[
+    { texto: "$x=2,\\,y=1$", correta: true },
+  ]}
+  solucao={<>Por Cramer: <Eq>{`x = D_x/D`}</Eq>, <Eq>{`y = D_y/D`}</Eq>.</>}
+  fonte={{ livro: "OpenStax College Algebra 2e", url: "...", secao: "§7.8", licenca: "CC-BY 4.0" }}
+>
+
+Resolva por Cramer: <Eq>{`2x+3y=7`}</Eq>, <Eq>{`x-y=1`}</Eq>.
+
+</Exercicio>
+```
+Failure: `ReferenceError: cases is not defined` at Next.js stringify (chunk N at col X). Reason: MDX parses single-line `<Exercicio>...</Exercicio>` body as JSX children; `{cases}` inside `$\begin{cases}$` is JSX expression with undefined identifier.
+
+#### B. `<Exercicio>` with body but no blank line
+```mdx
+WRONG:
+<Exercicio numero="34.24" dificuldade="aplicacao">
+Resolva por Cramer: $\begin{cases}2x+3y=7\\x-y=1\end{cases}$.
+</Exercicio>
+
+RIGHT:
+<Exercicio numero="34.24" dificuldade="aplicacao">
+
+Resolva por Cramer: <Eq>{`\\begin{cases}2x+3y=7\\\\x-y=1\\end{cases}`}</Eq>.
+
+</Exercicio>
+```
+Failure: same `cases is not defined`. Reason: without blank line, body still parsed as JSX children. **And** even with blank line, body `$\begin{X}…$` is unsafe because MDX expression-scanner runs before remark-math.
+
+#### C. Bare `{Identifier}` in JSX body / children
+```mdx
+WRONG:
+solucao={<>O vetor unitário de <Eq>{`\\vec v=(3,4)`}</Eq> é 2\overrightarrow{PQ}/5.</>}
+
+RIGHT (math wrapped):
+solucao={<>O vetor unitário de <Eq>{`\\vec v=(3,4)`}</Eq> é <Eq>{`2\\overrightarrow{PQ}/5`}</Eq>.</>}
+
+ALSO RIGHT (HTML entities if you really want bare text):
+solucao={<>O vetor unitário de <Eq>{`\\vec v=(3,4)`}</Eq> é 2\overrightarrow&#123;PQ&#125;/5.</>}
+```
+Failure: `ReferenceError: PQ is not defined`. Reason: `\overrightarrow` is plain text in JSX children (the `\` doesn't escape `{` in JSX); `{PQ}` is then a JSX expression.
+
+#### D. Body math with `\command{...}` braces
+```mdx
+WRONG:
+Prior $\mu \sim \mathcal{N}(0,1)$, observe $x_i$ com $n=4$.
+
+RIGHT:
+Prior <Eq>{`\\mu \\sim \\mathcal{N}(0,1)`}</Eq>, observe <Eq>{`x_i`}</Eq> com <Eq>{`n=4`}</Eq>.
+```
+Failure: `ReferenceError: N is not defined`. Reason: MDX expression-scanner grabs `{N}` from inside `\mathcal{N}` before remark-math claims `$…$` as math.
+
+#### E. Super/subscript braces in JSX children
+```mdx
+WRONG (passos= block):
+passos={<>
+  <ol>
+    <li>Aplique a fórmula: $P(X=k) = C(n,k) p^k (1-p)^{n-k}$.</li>
+  </ol>
+</>}
+
+RIGHT (math wrapped):
+passos={<>
+  <ol>
+    <li>Aplique a fórmula: <Eq>{`P(X=k) = C(n,k) p^k (1-p)^{n-k}`}</Eq>.</li>
+  </ol>
+</>}
+
+ALSO RIGHT (paren form, no math rendering but no JSX error):
+passos={<>
+  <ol>
+    <li>Aplique a fórmula: P(X=k) = C(n,k) p^k (1-p)^(n-k).</li>
+  </ol>
+</>}
+```
+Failure: `ReferenceError: n is not defined`. Reason: `^{n-k}` after `\` removal becomes `{n-k}` JSX expression; `n` and `k` undefined.
+
+#### F. Comma-separated identifiers as set notation
+```mdx
+WRONG:
+<li>Espaço amostral: {HH, HT, TH, TT}.</li>
+
+RIGHT (math wrapped):
+<li>Espaço amostral: <Eq>{`\\{HH, HT, TH, TT\\}`}</Eq>.</li>
+
+ALSO RIGHT (entity escape):
+<li>Espaço amostral: &#123;HH, HT, TH, TT&#125;.</li>
+```
+Failure: `ReferenceError: HH is not defined`. Reason: `{HH, HT, TH, TT}` is JSX expression — comma-expression of identifiers.
+
+#### G. Exponential `e^{-rT}` in JSX children
+```mdx
+WRONG (passos= block):
+passos={<><ol><li>K*e^{-rT}*N(d2) = 50*0,9418 = 47,09.</li></ol></>}
+
+RIGHT (math wrapped):
+passos={<><ol><li><Eq>{`K \\cdot e^{-rT} \\cdot N(d_2) = 50 \\cdot 0{,}9418 = 47{,}09`}</Eq>.</li></ol></>}
+
+ALSO RIGHT (paren form):
+passos={<><ol><li>K*e^(-rT)*N(d2) = 50*0,9418 = 47,09.</li></ol></>}
+```
+Failure: `ReferenceError: rT is not defined`. Same class as E.
+
+#### H. Single backslash inside `<Eq>{`...`}</Eq>` template literal
+```mdx
+WRONG:
+<Eq>{`\frac{1}{2}`}</Eq>
+
+RIGHT (double backslash):
+<Eq>{`\\frac{1}{2}`}</Eq>
+```
+Failure: KaTeX renders nothing, or MDX may complain about `\f` (form-feed JS escape). The template literal needs `\\` to deliver `\` to KaTeX.
+
+#### I. `R\$` currency inside template literal
+```mdx
+WRONG:
+solucao={<><Eq>{`\\mathrm{R\\$}\\;1250`}</Eq></>}
+solucao={<><Eq>{`Valor: R\$ 50`}</Eq></>}
+
+RIGHT (currency OUTSIDE math):
+solucao={<>Valor: R\$ 50 (<Eq>{`50`}</Eq> reais)</>}
+
+ALSO RIGHT (prose only):
+solucao={<>Valor: 50 reais</>}
+```
+Failure: cascade-output scanners read `\$` as escaping the closing `` ` `` and the template literal "leaks" into surrounding JSX, breaking everything downstream.
+
+#### J. HTML entities in JSX
+```mdx
+WRONG:
+solucao={<>Com <Eq>{`d_1=0{,}40`}</Eq>.&lt;/
+passos={&lt;&gt;
+
+RIGHT:
+solucao={<>Com <Eq>{`d_1=0{,}40`}</Eq>.</>}
+passos={<>
+```
+Failure: `Unexpected character '<' (U+003C) before attribute name` or worse. Reason: entities don't help inside JSX; emit actual characters.
+
+#### K. Escaped backticks
+```mdx
+WRONG:
+<Eq>{\`\\sin x\`}</Eq>
+
+RIGHT:
+<Eq>{`\\sin x`}</Eq>
+```
+Failure: `Could not parse expression with acorn`. Reason: `\``  is not valid JSX-expression syntax.
+
+#### L. Truncated `<Exercicio>` (LLM ran out of tokens)
+```mdx
+WRONG (file ends here):
+<Exercicio numero="75.42"
+  dificuldade="desafio"
+  opcoes={[…]}
+  solucao={<>…</>}
+>
+Sob que condição $X_1 \sim \text{Bin}(n_1, p)$
+
+RIGHT (always close before stopping):
+<Exercicio numero="75.42"
+  dificuldade="desafio"
+  opcoes={[…]}
+  solucao={<>…</>}
+>
+
+Sob que condição binomiais somam binomial? Resposta na referência.
+
+</Exercicio>
+
+</ListaExercicios>
+
+## Fontes
+- ...
+```
+Failure: `Expected a closing tag for <Exercicio> (873:1-879:2)`. Reason: LLM token budget exhausted mid-sentence; never closed the tag, the `</ListaExercicios>`, or the `## Fontes` section. **Always close ALL open tags before running out of budget; reduce body length if needed.**
+
+### Required prompt template for invoking Sonnet/Haiku agents
+
+When the owner (or main thread) spawns a Sonnet/Haiku agent to write/translate lesson MDX, the agent prompt MUST include this preamble:
+
+```
+You are writing/translating MDX content for the Clube da Matemática repo. Before
+emitting any MDX, READ CLAUDE.md §3 "Cascade JSX pitfalls" — specifically the
+12 rules and the worked-example gallery (A–L).
+
+Apply rule 12 (self-check) on EVERY single <Exercicio>, <Exemplo>, <Equation>,
+<EquacaoCanonica>, <DuasPortas>, <Porta> you emit. Do not stop until every open
+tag has a matching close tag.
+
+Hard reminders:
+- Multi-line <Exercicio> with blank line before AND after the body
+- Every {ident} inside <Eq>{`...`}</Eq> backticks or $...$ math
+- Body math with \begin{X}/\command{} → use <Eq> instead
+- Double-backslash inside template literals
+- Never bare {HH, HT, TH, TT} comma-list in JSX children
+- Books are the ledger — fonte= is mandatory; never fabricate
+- Close every <Eq>: `}</Eq> NOT `</Eq> (missing-brace = #1 build break)
+- NEVER translate component tag names (Exemplo/Exercicio/etc. stay verbatim — no Ejemplo/Ejercicio)
+- No bare < or > operators in JSX text — wrap in <Eq> or write in words
+- Books are the ledger — fonte= is mandatory; never fabricate
+
+If you can't finish a 30+ exercise list in budget, write FEWER exercises but
+CLOSE every tag. Truncated <Exercicio> blocks crash the build.
+
+VERIFY before finishing (REQUIRED): node scripts/check-mdx-build.mjs <file>
+must print fail=0. Do NOT use check-rsc-all.mjs — it is lenient and passes
+files the real build rejects. See §3 "Translator mistakes that broke the
+build (2026-06-02)" for the full checklist.
+```
+
+This preamble is non-negotiable. Agents that don't see it have a track record of producing broken output. The cost of the preamble (a few hundred tokens) is negligible compared to the cost of the build-fix iterations it prevents.
+
+### What to do if an agent already produced broken output
+
+If you discover broken MDX from a past Sonnet/Haiku run:
+
+1. **Don't try to write more** — first heal what's there. Run the **build-accurate** check: `node scripts/check-mdx-build.mjs <dir-or-file>` (acorn/`@mdx-js/mdx`, matches `next build`). Do NOT rely on `scripts/check-rsc-all.mjs` — it is lenient and hid 30 broken files in the 2026-06-02 pass.
+2. **Categorize the failures** by class (compact form / no blank line / body math with braces / bare {ident} in children / truncated tags). Each class has a sweep that fixes it in bulk — see the commit log around 2026-05-29 for examples.
+3. **Push and watch CI.** Don't commit-spam — heal everything you can find locally first, push once.
+4. **If a single file keeps failing across multiple builds with the same digest**, the file is likely beyond bulk-heal repair. Delete it (worst case the URL 404s) or rewrite it from scratch with a fresh agent prompted with this section.
+
+---
+
+### ⛔ Translator mistakes that broke the build (2026-06-02) — DO NOT REPEAT
+
+A full en-US translation pass (Haiku + Sonnet + Opus 4.8) produced files that **passed `scripts/check-rsc-all.mjs` but broke `next build`** — 30 of 120 files failed the real compiler. Root cause and the exact recurring defects are below. **Every translator/rewriter agent MUST read this and self-check against it before finishing.**
+
+#### THE VERIFIER TRAP (most important)
+
+- **`scripts/check-rsc-all.mjs` uses `next-mdx-remote` and is LENIENT — it passes files the build rejects. NEVER trust it as proof a file compiles.**
+- **`next build` uses `@mdx-js/mdx` + acorn (STRICT).** The build-accurate validator is **`scripts/check-mdx-build.mjs`** (added 2026-06-02). **Always verify translations with `node scripts/check-mdx-build.mjs <file>` — it must print `fail=0`.** A file is not "done" until it passes THIS checker, not the lenient one.
+- **Acorn parsing is NOT enough either.** `$\\mathbb{R}$` / `$\\mathcal{N}$` / `$\\bar{C}$` inside a JSX fragment (a `<Porta>` body, `solucao={<>…</>}`, `<li>`, …) PARSES fine but throws `R is not defined` / `N is not defined` at PRERENDER — which is what crashed the en deploy. Verify with **`node scripts/check-mdx-render.mjs <file>`** (it actually renders each lesson; `fail=0` required). Fix by wrapping the brace-math in `<Eq>{`…`}</Eq>` (doubled backslashes). CI runs this render-check before `next build`.
+- Acorn reports **one error at a time** and often without a useful line number ("Could not parse expression with acorn"). Fix, re-run, repeat until `fail=0`.
+
+#### The five defect classes that broke the build (with exact fix)
+
+1. **Missing closing brace on inline math — 244 occurrences across 10 files.**
+   The single most common defect. A `<Eq>` was written as `` <Eq>{`...`</Eq> `` — the `}` before `</Eq>` is missing.
+   - WRONG: `` <Eq>{`|7| = 7 \\leq 13`</Eq> ``
+   - RIGHT: `` <Eq>{`|7| = 7 \\leq 13`}</Eq> ``
+   - Sweep to detect: `grep -rn '`</Eq>' content/i18n/<locale>` — any hit (backtick directly before `</Eq>`) is ALWAYS this bug. Fix: `perl -i -pe 's/`<\/Eq>/`}<\/Eq>/g'`.
+
+2. **Translated JSX component tag names — 38 occurrences across 19 files.**
+   Translators "translated" component names into the target language (Spanish forms leaked into en-US): `</Exemplo>`→`</Ejemplo>`, `</Exercicio>`→`</Ejercicio>`. **Component names are CODE, never translate them.** The real component set (from `mdx-components.tsx`): `Exemplo, Exercicio, Definicao, Teorema, Insight, Cuidado, DuasPortas, Porta, ListaExercicios, Eq, Equation, EquacaoCanonica`. (Note `Teorema`/`Insight` ARE real — don't "fix" those.) Detect: `grep -rnoE '</?(Ejemplo|Ejercicio|Ejercicios|Definición|DosPuertas|Puerta|ListaEjercicios)\b' content/i18n/<locale>`.
+
+3. **Bare `<` or `>` operators in JSX children / props.**
+   A `<` or `>` used as a math/comparison operator inside JSX text makes acorn try to parse a tag.
+   - WRONG: `<em>a > 1</em>`, `0 < a < 1`, `(DEFF > 1 due to clustering)`, `Since 12.4% < 25%`, `p-value > 0.05`
+   - RIGHT: wrap the math — `` <Eq>{`a > 1`}</Eq> `` — or write it in words ("greater than 1", "is less than 25%"), or as a JSX string expression `{'>'}`. This bites hardest inside `legenda={<>...</>}`, `solucao={<>...</>}`, `passos={<>...</>}`, and `<li>` children.
+
+4. **Truncated files (LLM ran out of tokens) — several files.**
+   The agent stopped mid-exercise; the file ended without closing `</Exercicio>`, `</ListaExercicios>`, and the `## Fontes`/`## Sources` section. **Always close every open tag before finishing; if low on budget, write SHORTER exercises but NEVER stop mid-tag.** Verify the file ends with the Sources section (`tail -n 5`) and that `<Exercicio` open-count == close-count.
+
+5. **Orphaned / unbalanced structural tags + tool-call artifacts.**
+   Missing `<ListaExercicios>` open tag (only the close existed), a duplicate `</ListaExercicios>` + Sources block mid-file leaving later exercises orphaned, and once a literal `</invoke>` tool-call artifact pasted into the MDX. Detect: count `<ListaExercicios` vs `</ListaExercicios` (must be 1 each), `<Exercicio` vs `</Exercicio>` (must match), and `grep -n 'invoke\|antml' <file>` for stray tool tags.
+
+#### Mandatory self-check for ANY agent writing/translating a lesson file
+
+Before declaring a file done, run and confirm ALL of:
+```
+node scripts/check-mdx-build.mjs <file>          # MUST print fail=0  (NOT check-rsc-all.mjs)
+grep -c '<Exercicio' <file>                       # MUST equal the PT-BR source count
+grep -c '<Exercicio' <file> == grep -c '</Exercicio>' <file>   # opens == closes
+grep -n '`</Eq>' <file>                           # MUST be empty (missing-brace bug)
+grep -noE '</?(Ejemplo|Ejercicio)\b' <file>       # MUST be empty (translated tag names)
+tail -n 5 <file>                                  # MUST show ## Fontes/## Sources, not a cut-off tag
+```
+Translators get **`Read` + `Write` + `Bash`** for this verification loop (Bash is required to run the checker; the old "Read+Write only" rule was for blind Haiku bulk runs — for build-critical work the agent MUST verify with Bash).
+
 ---
 
 ## 4. Internationalization (i18n)
@@ -142,7 +526,7 @@ Removed: `ar`, `hi`, `he` — gTTS quality bad, Edge-TTS neural blocked by corp 
 |-------|-------|--------|------|
 | UI strings (buttons, headings, navigation) | `src/lib/i18n/translations.ts` | 100% in 11 locales | Claude (already done) |
 | Audio narration text (TTS) | `src/content/audio-translations.generated.ts` | 100% in 11 locales | Claude (already done) |
-| Lesson MDX bodies | `content/i18n/<speechLang>/aulas/...` | **en-US ✅ · es-ES ✅ · 8 locales partial (24–52%)** | **Claude subagents** — Haiku primary, Sonnet for oversized, Opus rarely |
+| Lesson MDX bodies | `content/i18n/<speechLang>/aulas/...` | **en-US ✅ 120/120 (re-synced 2026-05-31) · 9 locales stale vs new PT-BR** | **Claude subagents** — Haiku primary, Sonnet for oversized, Opus 4.8 for the few 1257–1575-line files that truncate |
 
 ### Translation pipeline — Claude-based (as of 2026-05-11)
 
@@ -307,13 +691,22 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ## 9. Roadmap snapshot (current)
 
-- ✅ 120 lessons in PT-BR with 7 doors + ~4,770 sourced exercises.
+- ✅ **120/120 lessons CLEAN** against the L1 canonical template (100% conformity, 2026-05-30).
+- ✅ **PT-BR source perfected (2026-05-31).** Full-corpus copy-edit + math-correctness audit:
+  - **932 language fixes** (accents/diacritics, grammar, crase, agreement, awkward phrasing, stray editorial artifacts, English-in-prose).
+  - **819 exercise math-correctness fixes** (wrong `correta` flags re-pointed, missing answers added to option sets, body/solução/option mismatches reconciled, duplicates de-duped).
+  - **5 cascade-shuffled banks regenerated** (lessons whose entire `<ListaExercicios>` was the wrong topic): **L13** funções trig (was ellipses), **L14** equações trig (was sequences), **L16** sequências (was exp/log), **L112** transformações lineares (was dot/cross products), **L113** núcleo e imagem (was lines/planes) — ~200 new on-topic, book-sourced MC exercises (Beezer, Hefferon, OpenStax A&T, Stitz–Zeager).
+  - **Verified:** 120/120 compile (0 FAIL via `scripts/check-rsc-all.mjs`), **5,319 MC exercises with exactly one `correta:true` (0 violations)**.
+  - Residual per-exercise oddities (a few corrupt source enunciados, intentional `Confirme` duplicate pairs, textbook-figure exercises) are individually self-consistent and logged; not blocking.
+- ✅ **5,319 sourced exercises** (100% with `solucao+fonte`, 100% with MC `opcoes` + single `correta`, ~25% with `passos`).
+- ✅ **1,800 exam questions** (12 trimesters × 10 versions × 15 questions) in `provas-data.ts` — **100% with MC** `opcoes` arrays (1,800/1,800 questions have plausible distractors).
 - ✅ All 120 lessons stabilized to the Lição 1 canonical template (L14-L120 rewritten 2026-04 → 2026-05; build green).
-- ✅ 1,800 exam questions (12 trimesters × 10 versions × 15 questions) in `provas-data.ts`.
 - ✅ UI translated to 11 locales (no MDX bodies).
 - ✅ Per-locale lesson routing (1,390 static pages — incl. en/es/zh/ja/de/fr/it/ru/ko/pl prefixes that fall back to PT-BR bodies).
 - ✅ Footer with `version · commit · timestamp` (currently `0.2.0`).
-- 🟡 **MDX lesson translations in progress**: en-US ✅ (124/124) · es-ES ✅ (124/124) · 8 locales partial (24–52%). Executed via Haiku subagents (primary) with `scripts/fix-translated-frontmatter.py` post-sweep.
+- 🟡 **MDX lesson translations — measured by EXERCISE-SYNC** (per-lesson `<Exercicio` count == current PT-BR; file-existence % is NOT the real bar and over-reported coverage badly): **only PT-BR and en-US are 100% (120/120).** All others are stale vs the 2026-05-31 PT-BR — exercise counts changed via the math + regen passes, so even fully-filed locales are short the new/corrected exercises. Exercise-synced today: es-ES 25/120 · zh-CN 28 · pl-PL 25 · de-DE 22 · fr-FR 21 · it-IT 19 · ko-KR 9 · ru-RU 10 · ja-JP 9.
+  - en-US was re-synced via Haiku subagents (primary); the 6 largest files (1257–1575 lines, where Haiku's 32k cap truncates) were finished with **Opus 4.8 one-at-a-time** after Sonnet's structured-output step kept failing on them.
+  - **Re-sync playbook (for every non-en locale, Spanish included):** for each lesson compare `grep -c '<Exercicio'` of target vs PT-BR source; re-translate every mismatch/missing file (Haiku → Sonnet for >1050 lines → Opus 4.8 for the ~6 giants); then `scripts/fix-translated-frontmatter.py --only <locale>`; verify 120/120 exercise-sync + orphan-slug check.
 - ⏳ Provas i18n → TO-DO.
 - ⏳ Wolfram Alpha exercise links must use clean symbolic queries. Lesson-1 audit pending.
 - 🔜 Future modules: Physics (high-school), Engineering intro.
@@ -344,4 +737,4 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ---
 
-> **Last update:** 2026-05-11. Translation pipeline reframed as Claude-based (Haiku primary, Sonnet for oversized, Opus rare); Gemini free demoted to fallback. en-US and es-ES brought to 100% lesson MDX coverage. If you change a convention, edit this file in the same commit.
+> **Last update:** 2026-06-02. en-US 120/120 made BUILD-clean (acorn): fixed 30 files the lenient check-rsc-all.mjs had passed but `next build` rejected — 244 missing-brace `<Eq>{`...`}</Eq>`, 38 translated component tags (Ejemplo/Ejercicio), bare </> operators in JSX, truncated/orphaned tags. Added scripts/check-mdx-build.mjs (acorn, build-accurate) as the authoritative verifier; documented all defect classes in §3 "Translator mistakes that broke the build". Earlier 2026-05-31: PT-BR source perfected: 932 language fixes + 819 exercise math-correctness fixes + 5 cascade-shuffled exercise banks regenerated (L13/14/16/112/113); 120/120 compile, 5,319 MC exercises with 0 `correta` violations. en-US re-synced 120/120 to the new PT-BR (last 6 oversized files via Opus 4.8 one-at-a-time). All other locales are now STALE vs the updated PT-BR and need re-sync (compare per-file `<Exercicio` counts). **Orchestration note:** translation/audit waves run as Workflow subagents — they DIE if the launching turn is interrupted, so verify journal *freshness* (mtime), not just result counts, and resume on the remaining set. If you change a convention, edit this file in the same commit.
