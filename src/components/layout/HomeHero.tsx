@@ -55,10 +55,16 @@ export function HomeHero({ anos }: HomeHeroProps) {
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link
-                href="/financas"
+                href="/ensino-medio"
+                className="inline-flex items-center gap-2 rounded-full bg-clube-teal px-5 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-clube-teal-deep hover:no-underline"
+              >
+                {t('nav.middleSchool')} →
+              </Link>
+              <Link
+                href="/engenharia"
                 className="inline-flex items-center gap-2 rounded-full border border-clube-mist-soft/60 bg-clube-surface px-4 py-2 text-sm font-semibold text-clube-ink transition-all hover:-translate-y-0.5 hover:border-clube-teal hover:text-clube-teal hover:no-underline"
               >
-                {t('home.cta.bs')}
+                {t('nav.engineering')} →
               </Link>
               <a
                 href="https://leonardochalhoub.github.io/mirante-dos-dados-br/articles/calculo-ensino-medio-internacional.pdf"

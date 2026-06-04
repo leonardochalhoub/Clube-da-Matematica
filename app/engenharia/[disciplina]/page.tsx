@@ -48,10 +48,11 @@ function LicaoItem({ licao }: { licao: LicaoEng }) {
       {/* Conteúdo */}
       <div className="flex-1 min-w-0">
         <div className="font-semibold text-clube-ink leading-snug">
-          {/* CORREÇÃO: link usa /${licao.caminho} que aponta para o roteador genérico */}
+          {/* Lessons render via the /[locale] route (the root generic router was
+              removed in the /pt-br refactor); link to the pt-BR locale path. */}
           {publicada && licao.caminho ? (
             <Link
-              href={`/${licao.caminho}`}
+              href={`/pt-br/${licao.caminho}/`}
               className="text-clube-teal hover:text-clube-teal-deep"
             >
               {licao.titulo} →

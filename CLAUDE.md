@@ -8,9 +8,24 @@
 
 ## 1. Identity & North Star
 
-**Clube da Matemática** is a Brazilian high-school mathematics curriculum, open-source, free, multilingual, statically deployed to GitHub Pages. Three years (12 trimesters, 120 lessons), culminating in Black-Scholes (lesson 119) and a synthesis workshop (lesson 120).
+**Clube da Matemática** is a Brazilian mathematics curriculum spanning **Ensino Médio
+(high school) and Ensino Superior (higher education)**, open-source, free, multilingual,
+statically deployed to GitHub Pages.
+
+- **Ensino Médio** (`content/aulas/`, route `/ensino-medio` + lessons under `/pt-br/aulas/…`):
+  three years, 12 trimesters, 120 lessons, culminating in Black-Scholes (lesson 119) + a
+  synthesis workshop (lesson 120).
+- **Ensino Superior** (`content/engenharia/`, route `/engenharia` = "Ensino Superior" in the
+  UI): Cálculo 1–4 with engineering rigor, in construction, same 7-door template.
 
 - **Editorial template (canonical):** `content/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos.mdx` — the **Lesson 1 standard**. Documented in detail at `docs/kb/lesson-template/`. Every new lesson imitates this file: 7 doors + 5 worked examples (ascending difficulty, all sourced) + 30–80 multiple-choice exercises (every one with `solucao` + `fonte`, ~25% with `passos`) + 3 books header + audio reader + bibliography. The earlier templates (Lesson 52 / Black-Scholes) remain valid for advanced lessons but the Lesson 1 standard is the **primary** template now.
+- **Exercises are the ledger.** Every exercise (EM done 2026-06-03; ES Cálculo pending) must
+  be a REAL exercise taken from the parsed open-book corpus (`livros/_parsed/_corpus.jsonl`),
+  carrying `fonte={{ livro, url, secao, exercicio: "ex. N", licenca }}` — source AND a link to
+  the exercise itself. Regenerate banks with `scripts/build-lesson-candidates.py` +
+  `scripts/REGEN-INSTRUCTIONS.md`; never fabricate. ⚠️ **The Ensino Superior Cálculo banks
+  (`content/engenharia/calculo-1/…`) are still AI-written (0 `fonte`) and MUST be re-sourced
+  from the corpus** the same way the 120 EM lessons were. See [[project_exercise_resourcing]].
 - **Mission:** rigorous mathematics + native-language access + zero cost to the student. The repo itself is the product.
 
 ---

@@ -177,6 +177,47 @@ MAP: dict[int, list[tuple[str, list[str]]]] = {
 }
 
 
+# Ensino Superior — Cálculo 1 (content/engenharia/calculo-1). Keyed by slug.
+# l01-l05 already corpus-sourced; l06-l40 are AI-written and need re-sourcing.
+CALC1_MAP: dict[str, list[tuple[str, list[str]]]] = {
+    "cal1-u1-l06-continuidade": [(C1, ["2.4"]), (AC, ["1.7"])],
+    "cal1-u1-l07-tvi": [(C1, ["2.4"]), (AC, ["1.7"])],
+    "cal1-u1-l08-weierstrass": [(C1, ["4.3"])],
+    "cal1-u1-l09-limites-sequencias": [(C2, ["5.1"])],
+    "cal1-u1-l10-workshop": [(C1, ["2.2", "2.3", "2.4", "4.6"])],
+    "cal1-u2-l11-derivada-definicao": [(C1, ["3.1", "3.2"]), (AC, ["1.3", "1.4"])],
+    "cal1-u2-l12-regras-derivacao": [(C1, ["3.3"]), (AC, ["2.1", "2.3"])],
+    "cal1-u2-l13-regra-cadeia": [(C1, ["3.6"]), (AC, ["2.5"])],
+    "cal1-u2-l14-derivadas-trig-inversas": [(C1, ["3.5", "3.7"]), (AC, ["2.4", "2.6"])],
+    "cal1-u2-l15-derivadas-exp-log": [(C1, ["3.9"])],
+    "cal1-u2-l16-derivacao-implicita": [(C1, ["3.8"]), (AC, ["2.7"])],
+    "cal1-u2-l17-derivadas-ordem-superior": [(C1, ["3.3"]), (AC, ["1.6"])],
+    "cal1-u2-l18-diferenciabilidade-aproximacao": [(C1, ["4.2"]), (AC, ["1.8"])],
+    "cal1-u2-l19-taxas-relacionadas": [(C1, ["4.1"]), (AC, ["3.1"])],
+    "cal1-u2-l20-workshop": [(C1, ["3.3", "3.6", "4.1"])],
+    "cal1-u3-l21-tvm": [(C1, ["4.4"])],
+    "cal1-u3-l22-crescimento-decrescimento": [(C1, ["4.5"])],
+    "cal1-u3-l23-concavidade-inflexao": [(C1, ["4.5"]), (AC, ["1.6"])],
+    "cal1-u3-l24-esboco-graficos": [(C1, ["4.5", "4.6"])],
+    "cal1-u3-l25-maximos-minimos-globais": [(C1, ["4.3"]), (AC, ["3.3", "3.5"])],
+    "cal1-u3-l26-otimizacao": [(C1, ["4.7"]), (AC, ["3.6"])],
+    "cal1-u3-l27-lhopital": [(C1, ["4.8"])],
+    "cal1-u3-l28-taylor": [(C2, ["6.3", "6.4"]), (AC, ["8.2", "8.4"])],
+    "cal1-u3-l29-newton-raphson": [(C1, ["4.9"])],
+    "cal1-u3-l30-workshop": [(C1, ["4.3", "4.5", "4.7", "4.8"])],
+    "cal1-u4-l31-somas-riemann": [(C1, ["5.1"])],
+    "cal1-u4-l32-propriedades-integral": [(C1, ["5.2"])],
+    "cal1-u4-l33-antiderivada-integral-indefinida": [(C1, ["4.10"]), (AC, ["5.1"])],
+    "cal1-u4-l34-tfc": [(C1, ["5.3"])],
+    "cal1-u4-l35-substituicao": [(C1, ["5.5"]), (AC, ["5.3"])],
+    "cal1-u4-l36-area-curvas": [(C1, ["6.1"]), (AC, ["6.1"])],
+    "cal1-u4-l37-volumes": [(C1, ["6.2", "6.3"]), (AC, ["6.2"])],
+    "cal1-u4-l38-comprimento-arco": [(C1, ["6.4"])],
+    "cal1-u4-l39-aplicacoes-fisicas": [(C1, ["6.5"]), (AC, ["6.4"])],
+    "cal1-u4-l40-workshop": [(C1, ["5.2", "5.3", "5.5", "6.1"])],
+}
+
+
 def fonte(r: dict) -> str:
     sid = r["source_id"]
     livro, lic = LIVRO.get(sid, (sid, "open"))
@@ -232,6 +273,23 @@ def main() -> None:
                 o.write(json.dumps(r, ensure_ascii=False) + "\n")
         flag = "" if len(rows) >= 30 else "  <-- THIN"
         print(f"  {slug:<40} {len(rows):>5}  {', '.join(srcs)}{flag}")
+
+    # ---- Ensino Superior — Cálculo 1 ----
+    print("\n--- Cálculo 1 (Ensino Superior) ---")
+    for slug in sorted(CALC1_MAP):
+        rows, srcs = [], []
+        for sid, sections in CALC1_MAP[slug]:
+            for sec in sections:
+                hits = by_sec.get((sid, sec), [])
+                rows.extend(hits)
+                srcs.append(f"{sid.split('/')[-1]}§{sec}({len(hits)})")
+        for r in rows:
+            r["fonte"] = fonte(r)
+        with (OUT / f"{slug}.jsonl").open("w", encoding="utf-8") as o:
+            for r in rows:
+                o.write(json.dumps(r, ensure_ascii=False) + "\n")
+        flag = "" if len(rows) >= 15 else "  <-- THIN"
+        print(f"  {slug:<44} {len(rows):>5}  {', '.join(srcs)}{flag}")
 
 
 if __name__ == "__main__":

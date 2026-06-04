@@ -71,6 +71,26 @@ export function EnsinoMedioPageContent({
 
       <HashOpener />
 
+      {/* Provas — moved out of the top nav; lives here since the exams are the
+          Ensino Médio assessment track. */}
+      <Link
+        href="/provas"
+        className="mb-8 flex items-center justify-between gap-4 rounded-2xl border border-clube-gold-deep/30 bg-gradient-to-r from-clube-gold/10 to-clube-cream-soft p-5 no-underline transition-all hover:-translate-y-0.5 hover:border-clube-gold-deep/60 hover:no-underline hover:shadow-md"
+      >
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-lg font-extrabold text-clube-teal-deep">
+            <span aria-hidden className="text-clube-gold-deep">▦</span>
+            {t('page.ensinoMedio.provas.title')}
+          </h2>
+          <p className="mt-1 text-sm text-clube-ink/75">
+            {t('page.ensinoMedio.provas.desc')}
+          </p>
+        </div>
+        <span className="shrink-0 rounded-full bg-clube-teal px-4 py-2 text-sm font-semibold text-white">
+          {t('page.ensinoMedio.provas.cta')} →
+        </span>
+      </Link>
+
       <section className="space-y-3">
         {programa.map((ano) => {
           const publicadas = publicadasPorAno[ano.num] ?? 0
