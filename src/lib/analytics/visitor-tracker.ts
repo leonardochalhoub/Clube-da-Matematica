@@ -15,6 +15,8 @@
  * resolver geolocalização aproximada.
  */
 
+import { recordVisitorPin } from './visitor-pins'
+
 const TRACKED_KEY = 'clube-tracked-v1'
 const COUNTER_BASE = 'https://api.counterapi.dev/v1/clube-da-matematica'
 
@@ -34,6 +36,8 @@ interface IpInfo {
   country_name?: string
   city?: string
   region?: string
+  latitude?: number
+  longitude?: number
 }
 
 async function getGeolocation(): Promise<IpInfo | null> {
@@ -80,6 +84,8 @@ export async function trackVisitor(): Promise<void> {
     const slug = slugifyCidade(geo.city) + '-' + geo.country_code.toLowerCase()
     promises.push(bumpCounter(`cidade-${slug}`))
   }
+  // Pin no mapa de visitantes (Supabase). No-op se não configurado.
+  promises.push(recordVisitorPin(geo))
   await Promise.all(promises)
 }
 

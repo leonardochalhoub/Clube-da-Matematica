@@ -1,13 +1,26 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useLocale } from './LocaleProvider'
-import { VisitorMap } from './VisitorMap'
 
 /**
- * Conteúdo client-side da página /mapa.
+ * Conteúdo client-side da página /mapa — "Mapa de Visitantes".
  * Strings PT-BR foram extraídas pra useLocale().t() — i18n via LocaleProvider.
  * O `app/mapa/page.tsx` permanece server (mantém export `metadata`) e renderiza este.
+ *
+ * O mapa Leaflet é importado com ssr:false (precisa de `window`); enquanto
+ * carrega, mostra um placeholder do tamanho do mapa pra não dar layout shift.
  */
+const VisitorPinMap = dynamic(
+  () => import('./VisitorPinMap').then((m) => m.VisitorPinMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[60vh] min-h-[420px] w-full animate-pulse rounded-2xl border border-clube-mist-soft/40 bg-clube-cream-soft/50" />
+    ),
+  }
+)
+
 export function MapaPageContent() {
   const { t } = useLocale()
 
@@ -28,7 +41,7 @@ export function MapaPageContent() {
         </p>
       </header>
 
-      <VisitorMap />
+      <VisitorPinMap />
 
       <footer className="mx-auto mt-16 max-w-3xl rounded-2xl border border-clube-mist-soft/40 bg-clube-cream-soft/30 p-6 text-sm text-clube-mist">
         <h2 className="mb-2 text-base font-semibold text-clube-teal-deep">
