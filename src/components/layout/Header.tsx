@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: '/livros', tKey: 'nav.books' },
   { href: '/videos', tKey: 'nav.videos' },
   { href: '/provas', tKey: 'nav.exams' },
+  { href: '/mapa', tKey: 'nav.visitorMap' },
   { href: '/manifesto', tKey: 'nav.manifesto' },
 ] as const
 

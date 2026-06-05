@@ -61,6 +61,9 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 const nextConfig = {
   output: 'export',
   pageExtensions: ['ts', 'tsx', 'mdx'],
+  // react-leaflet v5 + @react-leaflet/core são ESM-only e quebram o webpack
+  // build worker do Next sem transpile. Usados só no /mapa (Mapa de Visitantes).
+  transpilePackages: ['react-leaflet', '@react-leaflet/core', 'leaflet'],
   images: { unoptimized: true },
   trailingSlash: true,
   reactStrictMode: true,

@@ -122,6 +122,11 @@ export const TRANSLATIONS: Record<string, Translations> = {
     de: 'Hochschule', fr: 'Enseignement supérieur', it: 'Istruzione superiore', ru: 'Высшее образование', ko: '고등교육', pl: 'Szkolnictwo wyższe',
 },
 
+  'nav.visitorMap': {
+    'pt-BR': 'Mapa de Visitantes', en: 'Visitor Map', es: 'Mapa de Visitantes', zh: '访客地图', ja: '訪問者マップ',
+    de: 'Besucherkarte', fr: 'Carte des visiteurs', it: 'Mappa dei visitatori', ru: 'Карта посетителей', ko: '방문자 지도', pl: 'Mapa odwiedzających',
+  },
+
   // ===== ENSINO MÉDIO / TRIM LISTING =====
   'em.breadcrumb.root': {
     'pt-BR': 'Ensino Médio', en: 'High School', es: 'Bachillerato', zh: '高中', ja: '高校',
@@ -1631,17 +1636,30 @@ export const TRANSLATIONS: Record<string, Translations> = {
     pl: '◆ Skąd pochodzi nasza ekipa ◆',
   },
   'mapa.title': {
-    'pt-BR': 'Mapa do mundo',
-    en: 'World map',
-    es: 'Mapa del mundo',
-    zh: '世界地图',
-    ja: '世界地図',
-    de: 'Weltkarte',
-    fr: 'Carte du monde',
-    it: 'Mappa del mondo',
-    ru: 'Карта мира',
-    ko: '세계 지도',
-    pl: 'Mapa świata',
+    'pt-BR': 'Mapa de Visitantes',
+    en: 'Visitor Map',
+    es: 'Mapa de Visitantes',
+    zh: '访客地图',
+    ja: '訪問者マップ',
+    de: 'Besucherkarte',
+    fr: 'Carte des visiteurs',
+    it: 'Mappa dei visitatori',
+    ru: 'Карта посетителей',
+    ko: '방문자 지도',
+    pl: 'Mapa odwiedzających',
+  },
+  'mapa.pins.onmap': {
+    'pt-BR': 'visitantes no mapa',
+    en: 'visitors on the map',
+    es: 'visitantes en el mapa',
+    zh: '位访客在地图上',
+    ja: '人の訪問者がマップ上に',
+    de: 'Besucher auf der Karte',
+    fr: 'visiteurs sur la carte',
+    it: 'visitatori sulla mappa',
+    ru: 'посетителей на карте',
+    ko: '명의 방문자가 지도에',
+    pl: 'odwiedzających na mapie',
   },
   'mapa.intro': {
     'pt-BR': 'Cada acesso ao Clube é registrado de forma anônima — só país e cidade aproximada (via IP). Nada de IP guardado, nada de cookie de tracking, nada de venda de dados.',
