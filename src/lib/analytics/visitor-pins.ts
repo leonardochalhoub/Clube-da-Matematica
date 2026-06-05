@@ -20,14 +20,18 @@ export interface VisitorPin {
   lat: number
   lng: number
   city: string | null
+  region: string | null
+  region_code: string | null
   country: string | null
 }
 
-/** Dados de geolocalização aproximada (formato do ipapi.co/json/). */
+/** Dados de geolocalização aproximada (formato normalizado dos provedores). */
 export interface GeoInput {
   latitude?: number
   longitude?: number
   city?: string
+  region?: string
+  region_code?: string
   country_name?: string
   country_code?: string
 }
@@ -79,6 +83,8 @@ export async function recordVisitorPin(geo: GeoInput): Promise<void> {
     lat: coarse(geo.latitude),
     lng: coarse(geo.longitude),
     city: geo.city?.slice(0, 120) ?? null,
+    region: geo.region?.slice(0, 120) ?? null,
+    region_code: geo.region_code?.slice(0, 16) ?? null,
     country: geo.country_name?.slice(0, 120) ?? null,
     country_code: geo.country_code?.slice(0, 8) ?? null,
   }
@@ -106,7 +112,7 @@ export async function fetchVisitorPins(): Promise<VisitorPin[]> {
   try {
     const { data, error } = await supabase
       .from('visitor_pins')
-      .select('lat, lng, city, country')
+      .select('lat, lng, city, region, region_code, country')
       .limit(10000)
     if (error || !data) return []
     return data as VisitorPin[]

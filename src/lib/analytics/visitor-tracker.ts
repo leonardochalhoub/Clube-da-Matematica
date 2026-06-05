@@ -49,6 +49,8 @@ const GEO_PROVIDERS: Array<() => Promise<Geo | null>> = [
       latitude: d.latitude,
       longitude: d.longitude,
       city: d.city,
+      region: d.region,
+      region_code: d.region_code,
       country_name: d.country_name,
       country_code: d.country_code,
     }
@@ -62,6 +64,8 @@ const GEO_PROVIDERS: Array<() => Promise<Geo | null>> = [
       latitude: d.latitude,
       longitude: d.longitude,
       city: d.city,
+      region: d.region,
+      region_code: d.region_code,
       country_name: d.country,
       country_code: d.country_code,
     }
@@ -74,6 +78,8 @@ const GEO_PROVIDERS: Array<() => Promise<Geo | null>> = [
       latitude: parseFloat(d.latitude),
       longitude: parseFloat(d.longitude),
       city: d.city,
+      region: d.region,
+      region_code: d.region_code,
       country_name: d.country,
       country_code: d.country_code,
     }
