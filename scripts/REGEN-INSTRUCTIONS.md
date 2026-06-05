@@ -33,7 +33,10 @@ section. Use Edit to swap the block.
    confidence, SKIP that candidate and use another. NEVER invent an exercise.
 4. For each exercise author:
    - `opcoes={[…]}` — 4 multiple-choice options, EXACTLY one `correta: true`,
-     three plausible distractors.
+     three plausible distractors. **Option `texto` is a STRING — write math as
+     `$...$` (e.g. `texto: "$7x^6$"`), NOT `<Eq>{`…`}</Eq>`.** A `<Eq>` inside a
+     quoted string renders as literal text ("{`7x^6`}"). Use `\\` for backslashes
+     inside the `$...$` string (e.g. `"$\\dfrac{1}{2}$"`). Currency: `US\$`/`R\$`.
    - `solucao={<>…</>}` — short, correct, with the key reasoning.
    - ~1 in 4 ALSO gets `passos={<>…</>}` (`<ol><li>…</li></ol>` walkthrough).
    - `dificuldade`: mix ≈60% "aplicacao", ≈15% "modelagem", ≈15% "compreensao",

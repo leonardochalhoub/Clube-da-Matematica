@@ -9,11 +9,9 @@ import { useLocale } from './LocaleProvider'
 
 const NAV_LINKS = [
   { href: '/ensino-medio', tKey: 'nav.middleSchool' },
-  { href: '/financas', tKey: 'nav.finance' },
   { href: '/engenharia',  tKey: 'nav.engineering' },
   { href: '/livros', tKey: 'nav.books' },
   { href: '/videos', tKey: 'nav.videos' },
-  { href: '/provas', tKey: 'nav.exams' },
   { href: '/mapa', tKey: 'nav.visitorMap' },
   { href: '/manifesto', tKey: 'nav.manifesto' },
 ] as const
@@ -61,16 +59,6 @@ export function Header() {
                 </Link>
               </li>
             ))}
-            <li>
-              <a
-                href="https://github.com/leonardochalhoub/Clube-da-Matematica"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-md px-3 py-2 text-sm font-medium text-clube-ink/80 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal hover:no-underline"
-              >
-                GitHub
-              </a>
-            </li>
           </ul>
         </nav>
 
@@ -127,17 +115,6 @@ export function Header() {
                   </Link>
                 </li>
               ))}
-              <li>
-                <a
-                  href="https://github.com/leonardochalhoub/Clube-da-Matematica"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpen(false)}
-                  className="block rounded-md px-3 py-3 text-base font-medium text-clube-ink/85 transition-colors hover:bg-clube-cream-soft hover:text-clube-teal hover:no-underline"
-                >
-                  GitHub ↗
-                </a>
-              </li>
             </ul>
           </nav>
         </>

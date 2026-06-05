@@ -163,7 +163,7 @@ export function TrimPageContent({
       <nav className="mt-10 grid gap-3 sm:grid-cols-2">
         {trimNum > 1 && (
           <Link
-            href={`/ensino-medio/ano-${anoNum}/trim-${trimNum - 1}/`}
+            href={`/ensino-medio/ano-${Math.ceil((trimNum - 1) / 4)}/trim-${trimNum - 1}/`}
             className="card-clube no-underline hover:no-underline"
           >
             <div className="text-xs uppercase tracking-wider text-clube-mist">
@@ -176,7 +176,7 @@ export function TrimPageContent({
         )}
         {trimNum < 12 && (
           <Link
-            href={`/ensino-medio/ano-${anoNum}/trim-${trimNum + 1}/`}
+            href={`/ensino-medio/ano-${Math.ceil((trimNum + 1) / 4)}/trim-${trimNum + 1}/`}
             className="card-clube no-underline hover:no-underline sm:text-right"
           >
             <div className="text-xs uppercase tracking-wider text-clube-mist">

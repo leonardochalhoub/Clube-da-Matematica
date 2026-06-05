@@ -5,7 +5,12 @@
 
 **Open source · gratuito · UI em 11 idiomas · Lições completas em 2 idiomas (PT-BR fonte · en-US) — restantes em andamento**
 
-Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lineares, 12 trimestres, 120 lições, do nível conjunto/intervalo até Black-Scholes. Escrito com **rigor de engenharia** (BR + JP + DE + SG), com cada conceito explicado em **7 níveis progressivos** (criança de 5 anos → profissional sênior).
+Currículo de matemática **do Ensino Médio ao Ensino Superior**, brasileiro e gratuito:
+
+- **Ensino Médio** — 3 anos lineares, 12 trimestres, 120 lições, do nível conjunto/intervalo até Black-Scholes.
+- **Ensino Superior** — Cálculo 1–4 com rigor de engenharia (em construção), seguindo o mesmo template das 7 portas.
+
+Escrito com **rigor de engenharia** (BR + JP + DE + SG), com cada conceito explicado em **7 níveis progressivos** (criança de 5 anos → profissional sênior). **Todos os exercícios são extraídos de livros abertos** (OpenStax, Active Calculus, Axler, Beezer, OpenIntro) — cada um com fonte e link para o exercício de origem. Nada é inventado pela IA.
 
 [**Acessar o site →**](https://leonardochalhoub.github.io/Clube-da-Matematica/)
 
@@ -14,7 +19,8 @@ Curso completo de matemática para o **Ensino Médio brasileiro** — 3 anos lin
 ## O que está pronto hoje
 
 - ✅ **120 lições** em PT-BR cobrindo o Ensino Médio inteiro (Anos 1-3 × 4 trimestres × 10 lições)
-- ✅ **5.319 exercícios** com fonte (livro · página · licença) — nenhum inventado pela IA (100% sourced), **100% com uma única resposta correta** (auditoria de correção matemática em 2026-05-31)
+- ✅ **Ensino Superior — Cálculo** em construção (`/engenharia`), mesma estrutura de 7 portas
+- ✅ **~4.900 exercícios re-extraídos do corpus de livros abertos** (`livros/_parsed/`) — **100% com fonte e 99,9% com link para o exercício de origem** (`exercicio: "ex. N"`); 0 fontes inventadas (verificado por varredura fonte-vs-corpus em 2026-06-03)
 - ✅ **1.800 questões em provas** (12 trim × 10 versões × 15 q) — 100% com múltipla escolha
 - ✅ **UI traduzida em 11 idiomas** (botões, navegação, "Ouvir", breadcrumb)
 - ✅ **Acessibilidade — leitor de voz em toda página**: cada lição, exemplo e seção tem uma **caixa de áudio "Ouvir"** que narra o conteúdo via Web Speech API nativa do navegador (zero arquivos MP3, voz no idioma selecionado). Ajuda alunos com dislexia, deficiência visual, ou que aprendem melhor por audição.
@@ -244,10 +250,12 @@ Fontes externas mantêm suas próprias licenças (OpenStax CC-BY, Active Calculu
 - [x] **Lições L1-L120 padronizadas no template canônico** (Lição 1 standard)
 - [x] **MDX das lições traduzido + sincronizado**: en-US ✅ (120/120)
 - [ ] **MDX das lições — 9 idiomas restantes** (es-ES, zh-CN, pl-PL, de-DE, fr-FR, it-IT, ko-KR, ru-RU, ja-JP) — todos precisam de re-sincronização de exercícios com a fonte PT-BR revisada (2026-05-31); contagem sincronizada hoje: es 25, zh 28, pl 25, de 22, fr 21, it 19, ko 9, ru 10, ja 9 (de 120)
-- [ ] **Provas i18n** (1.800 questões × 10 idiomas) — TO-DO
+- [ ] **Provas i18n** (1.800 questões × 10 idiomas) — TO-DO; aplicar também o padrão fonte+link do corpus às provas
+- [ ] **Ensino Fundamental** — novo segmento, anterior ao Ensino Médio
+- [ ] **Ensino Superior — Cálculo 1–4** versão completa e polida (Stewart/Guidorizzi/Apostol/Active Calculus/REAMAT)
+- [ ] **Física — Ensino Médio e Ensino Superior** (mecânica, ondas, eletromagnetismo, mecânica dos materiais, termo, fluidos)
+- [ ] **Tradução para os demais países-alvo** (completar as 11 línguas e expandir o alcance)
 - [ ] **Retorno de árabe / hebraico / hindi** quando houver TTS neural decente
-- [ ] **Próximo módulo: Física Ensino Médio** (mecânica, ondas, eletromagnetismo)
-- [ ] **Próximo módulo: Engenharia introdutória** (mecânica dos materiais, termo, fluidos)
 
 ---
 

@@ -109,7 +109,8 @@ export function LocaleSwitcher() {
                         pathname.startsWith(`/${c}/aulas`) ||
                         pathname.startsWith(`/${c}/financas-quantitativas`) ||
                         pathname.startsWith(`/${c}/metodos-numericos`) ||
-                        pathname.startsWith(`/${c}/calculo-1`),
+                        pathname.startsWith(`/${c}/calculo-1`) ||
+                        pathname.startsWith(`/${c}/engenharia`),
                     )
                   if (isLessonRoute && pathname) {
                     router.push(pathParaLocale(pathname, info.code as Locale))
