@@ -50,9 +50,42 @@ function makePinIcon(): L.DivIcon {
   })
 }
 
-function pinLabel(pin: VisitorPin): string {
-  const parts = [pin.city, pin.country].filter(Boolean) as string[]
+interface Place {
+  lat: number
+  lng: number
+  label: string
+  count: number
+}
+
+/** "Cuiabá, MT, Brazil" — cidade, estado/região (código preferido), país. */
+function placeLabel(p: VisitorPin): string {
+  const parts = [p.city, p.region_code || p.region, p.country].filter(Boolean) as string[]
   return parts.length ? parts.join(', ') : '—'
+}
+
+/**
+ * Agrupa pins por lugar (cidade+região+país) → um marcador por lugar, com a
+ * contagem de visitantes distintos ali. A coordenada é a média do grupo.
+ */
+function aggregatePlaces(pins: VisitorPin[]): Place[] {
+  const groups = new Map<string, { lat: number; lng: number; n: number; label: string }>()
+  for (const p of pins) {
+    const key = `${p.city ?? ''}|${p.region ?? ''}|${p.country ?? ''}`.toLowerCase()
+    const g = groups.get(key)
+    if (g) {
+      g.lat += p.lat
+      g.lng += p.lng
+      g.n += 1
+    } else {
+      groups.set(key, { lat: p.lat, lng: p.lng, n: 1, label: placeLabel(p) })
+    }
+  }
+  return Array.from(groups.values()).map((g) => ({
+    lat: g.lat / g.n,
+    lng: g.lng / g.n,
+    label: g.label,
+    count: g.n,
+  }))
 }
 
 export function VisitorPinMap() {
@@ -60,6 +93,7 @@ export function VisitorPinMap() {
   const [pins, setPins] = useState<VisitorPin[] | null>(null)
   const icon = useMemo(() => makePinIcon(), [])
   const dark = useIsDark()
+  const places = useMemo(() => aggregatePlaces(pins ?? []), [pins])
 
   useEffect(() => {
     let cancelled = false
@@ -109,10 +143,15 @@ export function VisitorPinMap() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
             url={`https://{s}.basemaps.cartocdn.com/${dark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`}
           />
-          {(pins ?? []).map((pin, i) => (
-            <Marker key={i} position={[pin.lat, pin.lng]} icon={icon}>
+          {places.map((place, i) => (
+            <Marker key={i} position={[place.lat, place.lng]} icon={icon}>
               <Tooltip direction="top" offset={[0, -6]} opacity={1}>
-                {pinLabel(pin)}
+                <span className="font-semibold">{place.label}</span>
+                <br />
+                <span className="text-xs opacity-80">
+                  {place.count.toLocaleString(numberLocale)}{' '}
+                  {t(place.count === 1 ? 'mapa.tip.visitor' : 'mapa.tip.visitors')}
+                </span>
               </Tooltip>
             </Marker>
           ))}

@@ -1684,6 +1684,14 @@ export const TRANSLATIONS: Record<string, Translations> = {
     ko: '명의 방문자가 지도에',
     pl: 'odwiedzających na mapie',
   },
+  'mapa.tip.visitor': {
+    'pt-BR': 'visitante', en: 'visitor', es: 'visitante', zh: '位访客', ja: '人の訪問者',
+    de: 'Besucher', fr: 'visiteur', it: 'visitatore', ru: 'посетитель', ko: '명의 방문자', pl: 'odwiedzający',
+  },
+  'mapa.tip.visitors': {
+    'pt-BR': 'visitantes', en: 'visitors', es: 'visitantes', zh: '位访客', ja: '人の訪問者',
+    de: 'Besucher', fr: 'visiteurs', it: 'visitatori', ru: 'посетителей', ko: '명의 방문자', pl: 'odwiedzających',
+  },
   'mapa.intro': {
     'pt-BR': 'Cada acesso ao Clube é registrado de forma anônima — só país e cidade aproximada (via IP). Nada de IP guardado, nada de cookie de tracking, nada de venda de dados.',
     en: 'Every visit to the Clube is recorded anonymously — only country and approximate city (via IP). No IP stored, no tracking cookie, no data sales.',
