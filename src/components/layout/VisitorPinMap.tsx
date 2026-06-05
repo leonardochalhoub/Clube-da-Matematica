@@ -90,7 +90,10 @@ export function VisitorPinMap() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-clube-mist-soft/40 shadow-sm">
+      {/* relative z-0 + isolate confines Leaflet's internal z-index (panes/controls
+          go up to 1000) into its own stacking context, so the sticky header's
+          language dropdown (z-40) stays above the map instead of behind it. */}
+      <div className="relative z-0 isolate overflow-hidden rounded-2xl border border-clube-mist-soft/40 shadow-sm">
         <MapContainer
           center={[15, 0]}
           zoom={2}

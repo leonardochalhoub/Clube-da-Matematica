@@ -1,23 +1,24 @@
 /**
  * Tracker de visitantes — totalmente anônimo, client-side.
  *
- * Pipeline:
- *   1. Verifica sessionStorage 'clube-tracked' — se já trackou, pula.
- *   2. Busca geolocation aproximada via ipapi.co (free, 30k req/mês,
- *      sem chave). Retorna { country_code, city, region }.
- *   3. Incrementa contadores no CounterAPI:
- *        - clube-pais-{ISO2}    (ex.: clube-pais-BR)
- *        - clube-cidade-{slug}  (ex.: clube-cidade-sao-paulo-br)
- *   4. Marca sessionStorage para evitar duplicação na mesma sessão.
+ * Dois trabalhos independentes, cada um com seu próprio guard:
+ *   1. Contador de visitas por sessão (sessionStorage `clube-tracked-v1`) →
+ *      incrementa CounterAPI (pais-/cidade-) uma vez por sessão.
+ *   2. Pin no mapa de visitantes (localStorage `clube-pin-sent-v1`) →
+ *      grava UMA vez por dispositivo, pra sempre. NÃO é gated pela sessão,
+ *      então quem já visitou antes (flag de sessão setada) ainda ganha o pin.
  *
- * Privacidade: nenhum dado pessoal armazenado. Apenas contadores
- * agregados por localização. IP nunca é persistido — só usado pra
- * resolver geolocalização aproximada.
+ * Geolocalização: tenta vários provedores free/CORS/no-key em cascata, então
+ * um rate-limit do ipapi.co não mata o registro. Os guards só são gravados
+ * APÓS sucesso — falha transitória é re-tentada no próximo load.
+ *
+ * Privacidade: nenhum dado pessoal. IP nunca persistido — só usado pra
+ * resolver geolocalização aproximada. Coordenadas arredondadas no pin.
  */
-
-import { recordVisitorPin } from './visitor-pins'
+import { recordVisitorPin, type GeoInput } from './visitor-pins'
 
 const TRACKED_KEY = 'clube-tracked-v1'
+const PIN_SENT_KEY = 'clube-pin-sent-v1'
 const COUNTER_BASE = 'https://api.counterapi.dev/v1/clube-da-matematica'
 
 /** Slugify cidade pra chave estável: "São Paulo" → "sao-paulo" */
@@ -31,26 +32,72 @@ function slugifyCidade(cidade: string): string {
     .slice(0, 40)
 }
 
-interface IpInfo {
-  country_code?: string
-  country_name?: string
-  city?: string
-  region?: string
-  latitude?: number
-  longitude?: number
-}
+type Geo = GeoInput
 
-async function getGeolocation(): Promise<IpInfo | null> {
-  try {
-    const res = await fetch('https://ipapi.co/json/', {
-      // O ipapi.co é CORS-enabled e não precisa de key pra free tier
-      method: 'GET',
-    })
-    if (!res.ok) return null
-    return (await res.json()) as IpInfo
-  } catch {
-    return null
+/**
+ * Provedores de geolocalização por IP — todos free, CORS-enabled, sem chave.
+ * Normalizados pro mesmo shape. Tentados em ordem; o primeiro que resolver
+ * lat/lng válidos vence.
+ */
+const GEO_PROVIDERS: Array<() => Promise<Geo | null>> = [
+  async () => {
+    const r = await fetch('https://ipapi.co/json/')
+    if (!r.ok) return null
+    const d = await r.json()
+    if (d?.error) return null
+    return {
+      latitude: d.latitude,
+      longitude: d.longitude,
+      city: d.city,
+      country_name: d.country_name,
+      country_code: d.country_code,
+    }
+  },
+  async () => {
+    const r = await fetch('https://ipwho.is/')
+    if (!r.ok) return null
+    const d = await r.json()
+    if (!d?.success) return null
+    return {
+      latitude: d.latitude,
+      longitude: d.longitude,
+      city: d.city,
+      country_name: d.country,
+      country_code: d.country_code,
+    }
+  },
+  async () => {
+    const r = await fetch('https://get.geojs.io/v1/ip/geo.json')
+    if (!r.ok) return null
+    const d = await r.json()
+    return {
+      latitude: parseFloat(d.latitude),
+      longitude: parseFloat(d.longitude),
+      city: d.city,
+      country_name: d.country,
+      country_code: d.country_code,
+    }
+  },
+]
+
+async function getGeolocation(): Promise<Geo | null> {
+  for (const provider of GEO_PROVIDERS) {
+    try {
+      const g = await provider()
+      if (
+        g &&
+        typeof g.latitude === 'number' &&
+        typeof g.longitude === 'number' &&
+        !Number.isNaN(g.latitude) &&
+        !Number.isNaN(g.longitude)
+      ) {
+        return g
+      }
+    } catch {
+      /* tenta o próximo provedor */
+    }
   }
+  return null
 }
 
 async function bumpCounter(key: string): Promise<void> {
@@ -62,31 +109,55 @@ async function bumpCounter(key: string): Promise<void> {
 }
 
 /**
- * Track uma visita. Idempotente por sessão.
+ * Track uma visita. Counter idempotente por sessão; pin idempotente por
+ * dispositivo. Busca geo só se algum dos dois ainda precisa rodar.
  */
 export async function trackVisitor(): Promise<void> {
   if (typeof window === 'undefined') return
+
+  let needCounter = true
+  let needPin = true
   try {
-    if (window.sessionStorage.getItem(TRACKED_KEY)) return
-    window.sessionStorage.setItem(TRACKED_KEY, Date.now().toString())
+    needCounter = !window.sessionStorage.getItem(TRACKED_KEY)
   } catch {
-    return
+    needCounter = false
   }
+  try {
+    needPin = !window.localStorage.getItem(PIN_SENT_KEY)
+  } catch {
+    needPin = true
+  }
+  if (!needCounter && !needPin) return
 
   const geo = await getGeolocation()
-  if (!geo) return
+  if (!geo) return // guards intactos → re-tenta no próximo load
 
-  const promises: Promise<void>[] = []
-  if (geo.country_code) {
-    promises.push(bumpCounter(`pais-${geo.country_code.toLowerCase()}`))
+  const tasks: Promise<unknown>[] = []
+
+  if (needCounter) {
+    // Só marca a sessão DEPOIS que a geo resolveu (evita queimar a sessão num
+    // erro transitório do provedor).
+    try {
+      window.sessionStorage.setItem(TRACKED_KEY, Date.now().toString())
+    } catch {
+      /* ok */
+    }
+    if (geo.country_code) {
+      tasks.push(bumpCounter(`pais-${geo.country_code.toLowerCase()}`))
+    }
+    if (geo.city && geo.country_code) {
+      const slug = slugifyCidade(geo.city) + '-' + geo.country_code.toLowerCase()
+      tasks.push(bumpCounter(`cidade-${slug}`))
+    }
   }
-  if (geo.city && geo.country_code) {
-    const slug = slugifyCidade(geo.city) + '-' + geo.country_code.toLowerCase()
-    promises.push(bumpCounter(`cidade-${slug}`))
+
+  if (needPin) {
+    // recordVisitorPin tem seu próprio guard (PIN_SENT_KEY) e só o grava em
+    // sucesso, então falha de rede é re-tentada depois.
+    tasks.push(recordVisitorPin(geo))
   }
-  // Pin no mapa de visitantes (Supabase). No-op se não configurado.
-  promises.push(recordVisitorPin(geo))
-  await Promise.all(promises)
+
+  await Promise.all(tasks)
 }
 
 /**
