@@ -18,11 +18,27 @@ import { useLocale } from './LocaleProvider'
  * evitar o bug de asset 404 sob `basePath` no GitHub Pages.
  */
 
+// Fills use the theme CSS vars (via style=, since var() isn't valid in a bare
+// SVG presentation attribute) so the pin recolors automatically under `.dark`.
 const PIN_HTML = `
 <svg width="26" height="34" viewBox="0 0 26 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M13 0C5.82 0 0 5.82 0 13c0 9.2 11.3 19.86 11.78 20.3a1.8 1.8 0 0 0 2.44 0C14.7 32.86 26 22.2 26 13 26 5.82 20.18 0 13 0Z" fill="rgb(15,118,110)"/>
-  <circle cx="13" cy="13" r="5" fill="rgb(254,243,221)"/>
+  <path d="M13 0C5.82 0 0 5.82 0 13c0 9.2 11.3 19.86 11.78 20.3a1.8 1.8 0 0 0 2.44 0C14.7 32.86 26 22.2 26 13 26 5.82 20.18 0 13 0Z" style="fill:rgb(var(--clube-teal))"/>
+  <circle cx="13" cy="13" r="5" style="fill:rgb(var(--clube-surface))"/>
 </svg>`
+
+/** Tracks `.dark` on <html> (ThemeToggle flips the class, no React state). */
+function useIsDark(): boolean {
+  const [dark, setDark] = useState(false)
+  useEffect(() => {
+    const el = document.documentElement
+    const update = () => setDark(el.classList.contains('dark'))
+    update()
+    const obs = new MutationObserver(update)
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
+  return dark
+}
 
 function makePinIcon(): L.DivIcon {
   return L.divIcon({
@@ -43,6 +59,7 @@ export function VisitorPinMap() {
   const { t, locale } = useLocale()
   const [pins, setPins] = useState<VisitorPin[] | null>(null)
   const icon = useMemo(() => makePinIcon(), [])
+  const dark = useIsDark()
 
   useEffect(() => {
     let cancelled = false
@@ -81,12 +98,13 @@ export function VisitorPinMap() {
           maxZoom={12}
           scrollWheelZoom
           worldCopyJump
-          className="h-[60vh] min-h-[420px] w-full bg-clube-cream-soft"
-          style={{ background: 'rgb(247,243,233)' }}
+          className="h-[60vh] min-h-[420px] w-full"
+          style={{ background: 'rgb(var(--clube-cream-soft))' }}
         >
           <TileLayer
+            key={dark ? 'dark' : 'light'}
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            url={`https://{s}.basemaps.cartocdn.com/${dark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`}
           />
           {(pins ?? []).map((pin, i) => (
             <Marker key={i} position={[pin.lat, pin.lng]} icon={icon}>
