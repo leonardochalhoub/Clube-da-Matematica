@@ -42,7 +42,7 @@ export const SITE_NAME_BY_LOCALE: Record<Locale, string> = {
 /** Default site-level description per locale (used on home + as fallback). */
 export const SITE_DESCRIPTION_BY_LOCALE: Record<Locale, string> = {
   'pt-BR':
-    'Curso completo de matemática para o Ensino Médio brasileiro — 120 lições, 3 anos, 4.770 exercícios sourceados. Open source, gratuito, em 11 idiomas.',
+    'Curso completo de matemática para o Ensino Médio brasileiro — 120 lições, 3 anos, 4.770 exercícios sourceados. Open source e gratuito.',
   en:
     'Complete high-school mathematics curriculum — 120 lessons, 3 years, 4,770 sourced exercises. Open-source, free, in 11 languages. From sets and intervals to Black-Scholes.',
   es:

@@ -638,7 +638,7 @@ export const TRANSLATIONS: Record<string, Translations> = {
     pl: 'Liceum: 3 lata · 120 lekcji · 4900+ zadań. Studia: analiza.',
   },
   'home.stats.features': {
-    'pt-BR': '{n} idiomas · 7 portas (formal, 5/10/15/25/40, prática) · áudio nativo · 40-80 exercícios por lição',
+    'pt-BR': '7 portas (formal, 5/10/15/25/40, prática) · áudio nativo · 40-80 exercícios por lição',
     en: '{n} languages · 7 doors (formal, 5/10/15/25/40, practical) · native audio · 40-80 exercises per lesson',
     es: '{n} idiomas · 7 puertas (formal, 5/10/15/25/40, práctica) · audio nativo · 40-80 ejercicios por lección',
     zh: '{n} 种语言 · 7 道门（正式、5/10/15/25/40、实践）· 母语音频 · 每课 40-80 道练习',

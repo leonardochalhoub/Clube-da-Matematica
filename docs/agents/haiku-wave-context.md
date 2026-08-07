@@ -1,5 +1,9 @@
 # Haiku Translation Wave — Context & Orchestration Playbook
 
+> **FROZEN 2026-08-06.** Translation work is paused — the frontend serves PT-BR only
+> now (see `CLAUDE.md` §4). Don't dispatch a translation wave off this doc without
+> explicit owner sign-off. Kept as-is for when this resumes.
+
 > **Audience.** (1) The orchestrator (Claude main thread) dispatching a wave of Haiku subagents to translate the 120 *ensino médio* lessons into one target locale; (2) each individual Haiku translator subagent. Read the section that applies to you.
 >
 > **Companion docs.** Per-language system prompts live in `.claude/agents/translator-<lang>.md` (already pinned to `model: haiku`). Editorial structure: `docs/kb/lesson-template/`. MDX traps: `docs/kb/lesson-template/mdx-syntax-traps.md`. This file is the *operational* layer on top of those.

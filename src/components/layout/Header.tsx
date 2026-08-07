@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Logo } from '@/components/brand/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { LocaleSwitcher } from './LocaleSwitcher'
 import { useLocale } from './LocaleProvider'
 
 const NAV_LINKS = [
@@ -63,7 +62,6 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <LocaleSwitcher />
           <ThemeToggle />
           {/* Mobile hamburger */}
           <button

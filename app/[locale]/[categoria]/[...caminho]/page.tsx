@@ -28,77 +28,20 @@ import {
   Cuidado,
   Leituras,
 } from '@/components/math/Callouts'
-import { existsSync, readdirSync, statSync } from 'node:fs'
-import { join, relative } from 'node:path'
-
 interface Props {
   params: Promise<{ locale: string; categoria: string; caminho: string[] }>
 }
 
-const ROOT = process.cwd()
-
-/**
- * Walks a directory recursively, returning relative paths to .mdx files.
- */
-function walkMdx(dir: string, base = dir): string[] {
-  if (!existsSync(dir)) return []
-  const out: string[] = []
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry)
-    if (statSync(full).isDirectory()) {
-      out.push(...walkMdx(full, base))
-    } else if (entry.endsWith('.mdx')) {
-      out.push(relative(base, full).replace(/\.mdx$/, ''))
-    }
-  }
-  return out
-}
-
 export function generateStaticParams() {
-  // Emits one route per (locale, lesson). The `locale` param is the URL code
-  // (`pt-br`, `en`, …). ALL locales route here, including pt-BR.
-  //
-  // BUILD_LOCALE / PREVIEW_LOCALES carry URL codes (e.g. "pt-br", "en") and
-  // restrict the build to those locales (per-locale CI matrix). When neither
-  // is set (local dev / single build), every locale present on disk is built.
+  // PT-BR only (2026-08-06 pivot — see CLAUDE.md §4). This route still takes
+  // a `locale` URL param because pt-BR itself is served at /pt-br/… (source
+  // MDX lives in content/, not content/i18n), but no other locale is emitted
+  // here anymore — translated content/i18n/ stays on disk, just unrouted.
   const params: Array<{ locale: string; categoria: string; caminho: string[] }> = []
-
-  const buildLocale = process.env.BUILD_LOCALE ?? ''
-  const previewLocales = buildLocale
-    ? new Set([buildLocale])
-    : process.env.PREVIEW_LOCALES
-      ? new Set(process.env.PREVIEW_LOCALES.split(',').map((s) => s.trim()))
-      : null
-
-  const wants = (urlCode: string) => !previewLocales || previewLocales.has(urlCode)
-
-  // pt-BR — source lessons live in content/ (not content/i18n). Use the
-  // published-content loader so we only emit publicado:true lessons.
-  if (wants(localeToUrl('pt-BR'))) {
-    for (const { caminho } of publicadosApenas()) {
-      const [categoria, ...rest] = caminho.split('/')
-      if (!categoria || rest.length === 0) continue
-      params.push({ locale: localeToUrl('pt-BR'), categoria, caminho: rest })
-    }
-  }
-
-  // Translated locales — walk content/i18n/<speechLang>.
-  const i18nRoot = join(ROOT, 'content', 'i18n')
-  if (existsSync(i18nRoot)) {
-    for (const speechLang of readdirSync(i18nRoot)) {
-      const dir = join(i18nRoot, speechLang)
-      if (!statSync(dir).isDirectory()) continue
-      const localeEntry = Object.values(LOCALES).find((l) => l.speechLang === speechLang)
-      if (!localeEntry || localeEntry.code === 'pt-BR') continue
-      const urlCode = localeEntry.urlCode
-      if (!wants(urlCode)) continue
-      for (const rel of walkMdx(dir)) {
-        const partes = rel.split('/')
-        const [categoria, ...rest] = partes
-        if (!categoria || rest.length === 0) continue
-        params.push({ locale: urlCode, categoria, caminho: rest })
-      }
-    }
+  for (const { caminho } of publicadosApenas()) {
+    const [categoria, ...rest] = caminho.split('/')
+    if (!categoria || rest.length === 0) continue
+    params.push({ locale: localeToUrl('pt-BR'), categoria, caminho: rest })
   }
   return params
 }

@@ -2,6 +2,14 @@
 
 What's wired, what's pending, what to monitor. Single source of truth for SEO operations.
 
+> **Multi-language signals below are FROZEN as of 2026-08-06.** The site now serves
+> PT-BR only — hreflang/OG `alternateLocale`/sitemap all collapse to a single PT-BR
+> entry, and `app/[categoria]/[...caminho]/page.tsx` mentioned below never existed as a
+> real route (stale even before the freeze) — all lessons, PT-BR included, are served by
+> `app/[locale]/[categoria]/[...caminho]/page.tsx` at `/pt-br/...`. See `CLAUDE.md` §4
+> for exactly what changed. The rest of this doc (structured data, Search Console
+> checklist, image OG pipeline) is still accurate for the single-locale site.
+
 ## What's wired (as of 2026-05-11)
 
 ### Crawler infrastructure

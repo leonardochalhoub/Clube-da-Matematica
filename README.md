@@ -3,7 +3,7 @@
 > *"A matemática é a única linguagem em que se pode raciocinar sem ambiguidade sobre o infinito, o aleatório e o invisível."*
 > — adaptado de Bertrand Russell
 
-**Open source · gratuito · UI em 11 idiomas · Lições completas em 2 idiomas (PT-BR fonte · en-US) — restantes em andamento**
+**Open source · gratuito · currículo completo em português**
 
 Currículo de matemática **do Ensino Médio ao Ensino Superior**, brasileiro e gratuito:
 
@@ -22,11 +22,11 @@ Escrito com **rigor de engenharia** (BR + JP + DE + SG), com cada conceito expli
 - ✅ **Ensino Superior — Cálculo** em construção (`/engenharia`), mesma estrutura de 7 portas
 - ✅ **~4.900 exercícios re-extraídos do corpus de livros abertos** (`livros/_parsed/`) — **100% com fonte e 99,9% com link para o exercício de origem** (`exercicio: "ex. N"`); 0 fontes inventadas (verificado por varredura fonte-vs-corpus em 2026-06-03)
 - ✅ **1.800 questões em provas** (12 trim × 10 versões × 15 q) — 100% com múltipla escolha
-- ✅ **UI traduzida em 11 idiomas** (botões, navegação, "Ouvir", breadcrumb)
-- ✅ **Acessibilidade — leitor de voz em toda página**: cada lição, exemplo e seção tem uma **caixa de áudio "Ouvir"** que narra o conteúdo via Web Speech API nativa do navegador (zero arquivos MP3, voz no idioma selecionado). Ajuda alunos com dislexia, deficiência visual, ou que aprendem melhor por audição.
+- ✅ **Site 100% em português** — a partir de 2026-08-06 o frontend converge só para PT-BR (ver seção "Multilinguagem" abaixo)
+- ✅ **Acessibilidade — leitor de voz em toda página**: cada lição, exemplo e seção tem uma **caixa de áudio "Ouvir"** que narra o conteúdo via Web Speech API nativa do navegador (zero arquivos MP3). Ajuda alunos com dislexia, deficiência visual, ou que aprendem melhor por audição.
 - ✅ **Build estático** em GitHub Pages — custo R$ 0,00
-- 🟡 **Tradução das lições MDX em andamento** — PT-BR (fonte, recém-revisado e perfeito), **en-US completo (120/120, re-sincronizado em 2026-05-31)**. Demais idiomas com cobertura parcial e defasada em relação à nova fonte PT-BR (ver tabela abaixo)
-- ⏳ **Provas i18n** — TO-DO (1.800 questões × 10 idiomas)
+- 🟡 **Conteúdo traduzido preservado, mas pausado** — MDX de lições em 10 outros idiomas (incl. en-US 120/120) continua no repositório em `content/i18n/`; não está mais roteado no site ao vivo
+- ⏳ **Provas i18n** — pausado junto com o resto da tradução
 - ⏳ **Próximos módulos**: Física Ensino Médio, Engenharia introdutória
 
 ---
@@ -40,8 +40,8 @@ Escrito com **rigor de engenharia** (BR + JP + DE + SG), com cada conceito expli
 | **Exercícios reais** | 5.319 (não placeholders, 100% MC, 100% com resposta única correta) |
 | **Provas curadas** | 120 versões (12 trimestres × 10 versões) |
 | **Questões em provas** | 1.800 |
-| **Idiomas (UI + áudio)** | 11 (português, inglês, espanhol, mandarim, japonês, alemão, francês, italiano, russo, coreano, polonês) |
-| **Idiomas (lições MDX)** | 2 completos (PT-BR fonte · en-US) + 9 parciais/em re-sincronização |
+| **Idioma do site (ao vivo)** | 1 — português (BR) |
+| **Idiomas traduzidos no repo (pausados)** | 10, incl. en-US 120/120 — preservados em `content/i18n/`, não roteados no site |
 | **Componentes interativos** | 14 (DuasPortas, ListaExercicios, AudioReader, VerificarPasso, etc.) |
 | **Linhas de código** | ~30.000 |
 | **Conformidade L1 (lições)** | 120/120 (100%) ✓ |
@@ -112,33 +112,19 @@ A [**Lição 119 — Black-Scholes**](content/aulas/ano-3/trim-12/licao-119-bs-s
 
 ---
 
-## Multilinguagem (estado atual)
+## Multilinguagem (pausada em 2026-08-06)
 
-Não é Google Translate em runtime. É **tradução pré-compilada**. Hoje, o status real é:
+O projeto original tinha um plano ambicioso de UI + lições em 11 idiomas. Na prática, manter as lições sincronizadas com a fonte PT-BR (que segue evoluindo) exige uma nova rodada de tradução via LLM a cada revisão de conteúdo — um custo real e recorrente em tokens que o projeto não consegue sustentar agora nem no curto prazo.
 
-- **UI** (botões, menus, breadcrumb, "Ouvir") → **11 idiomas, 100%**
-- **Áudio TTS** (narrado pelo botão "Ouvir") → **11 idiomas, 100%**, com voz nativa do SO via Web Speech API
-- **Lições MDX (corpos das aulas)** → **PT-BR fonte (revisado e perfeito em 2026-05-31) + en-US completo (100%, re-sincronizado à nova fonte)**. Demais idiomas com cobertura parcial e defasada em relação à nova fonte PT-BR (em re-sincronização). Quando o aluno escolhe um idioma sem a lição traduzida, ela continua em PT-BR (fallback explícito).
+**Decisão:** o site converge para **PT-BR apenas**. O que existia é preservado no repositório, não foi apagado — só parou de ser roteado no frontend ao vivo:
 
-Pipeline de tradução: **baseada em Claude** (agentes via Claude Code) — **Haiku** faz ~95% das lições (padrão para volume), **Sonnet** assume lições > 1050 linhas em idiomas que expandem (de/ru/es/it) por causa do teto de 32k tokens de saída do Haiku, e **Opus 4.8** é acionado uma a uma para o punhado de lições gigantes (1257–1575 linhas, ex.: L35 com 72 exercícios) que truncam mesmo no Sonnet. `scripts/translate-parallel.py` com Gemini free-tier permanece disponível como fallback para tarefas pontuais, mas não é o caminho primário.
+- **UI** (botões, menus, breadcrumb) → dicionário em `src/lib/i18n/translations.ts` continua com as 11 traduções, mas o seletor de idioma foi removido e o provider força PT-BR sempre.
+- **Áudio TTS** → `src/content/audio-translations.generated.ts` idem — infraestrutura intacta, só inacessível pela UI hoje.
+- **Lições MDX** → `content/i18n/<locale>/aulas/...` (10 idiomas, incluindo en-US 120/120) continua no disco. As rotas `/[locale]/...` só geram páginas PT-BR agora (`generateStaticParams` foi restrito), então essas URLs deixaram de existir no site publicado.
 
-Idiomas atualmente removidos: árabe, hebraico e hindi — saíram temporariamente porque o TTS gratuito não rendia bem; voltarão quando tivermos uma solução de voz neural.
+Isso é reversível: os arquivos, o dicionário, os scripts de tradução (Haiku/Sonnet/Opus via Claude Code) e o pipeline de CI multi-locale continuam no repo. Retomar é questão de reverter os pontos documentados em `CLAUDE.md` §4, não reescrever do zero.
 
-| Idioma | UI | TTS | Lições MDX (sincronizadas*) |
-|---|---|---|---|
-| 🇧🇷 Português (Brasil) | 100% | 100% | **120/120 (fonte, revisada)** |
-| 🇺🇸 English | 100% | 100% | **120/120 ✅** |
-| 🇪🇸 Español | 100% | 100% | 25/120 — re-sincronização pendente |
-| 🇨🇳 中文 (简体) | 100% | 100% | 28/120 — re-sincronização pendente |
-| 🇵🇱 Polski | 100% | 100% | 25/120 — re-sincronização pendente |
-| 🇩🇪 Deutsch | 100% | 100% | 22/120 — re-sincronização pendente |
-| 🇫🇷 Français | 100% | 100% | 21/120 — re-sincronização pendente |
-| 🇮🇹 Italiano | 100% | 100% | 19/120 — re-sincronização pendente |
-| 🇰🇷 한국어 | 100% | 100% | 9/120 — re-sincronização pendente |
-| 🇷🇺 Русский | 100% | 100% | 10/120 — re-sincronização pendente |
-| 🇯🇵 日本語 | 100% | 100% | 9/120 — re-sincronização pendente |
-
-<sub>*Sincronizada = a lição traduzida tem **exatamente os mesmos exercícios** da fonte PT-BR atual. **Só PT-BR e en-US estão 100%.** Os demais idiomas têm arquivos traduzidos, mas contra uma versão anterior da fonte — após a revisão de 2026-05-31 (932 correções de linguagem + 819 de correção matemática + 5 bancos de exercícios regenerados), as contagens de exercícios mudaram, então cada lição precisa ser re-traduzida para incluir os exercícios novos/corrigidos. Espanhol inclusive.</sub>
+Idiomas que já estavam removidos antes da pausa (TTS ruim): árabe, hebraico, hindi.
 
 ---
 
@@ -150,7 +136,7 @@ Conteúdo:   MDX + frontmatter YAML + KaTeX
 Estilo:     Tailwind CSS + tokens RGB-tuple
 Áudio:      Web Speech API (zero arquivos, exceto MP3 fallback removido)
 Hospedagem: GitHub Pages (CDN gratuito, custo R$ 0)
-i18n:       Sem libs externas — dicionário TypeScript pré-compilado
+i18n:       Sem libs externas — dicionário TypeScript pré-compilado (site serve só PT-BR hoje; ver "Multilinguagem")
 Testes:     Vitest
 Validação:  npm run validate-content (frontmatter + YAML + Zod schemas)
 ```
@@ -197,10 +183,9 @@ Esse projeto não é um cursinho a mais. É **a primeira vez** que um currículo
 - Por **dois autores** (Leonardo Chalhoub + Jefferson Korte Junior) com co-autoria do Claude Opus 4.7.
 - Em **3 anos lineares**, com 12 trimestres encadeados que culminam em Black-Scholes.
 - Com **rigor de engenharia** — não é "matemática para professor", é matemática para quem vai usar (engenheiro, físico, economista, cientista de dados, médico estatístico, programador).
-- Em **13 idiomas** simultaneamente — porque um aluno em Lima, Tóquio ou Berlim merece o mesmo conteúdo de um aluno em São Paulo.
-- **Open source** — qualquer professor no mundo pode forkar, adaptar e usar com sua turma.
+- **Open source** — qualquer professor no mundo pode forkar, adaptar e usar com sua turma, inclusive traduzir para seu idioma (o repo já tem 10 traduções de lições prontas, só pausadas — ver "Multilinguagem" acima).
 
-Não estamos competindo com Khan Academy ou Brasil Escola. Estamos preenchendo uma lacuna específica: **rigor + profundidade + acessibilidade + multilinguagem**, tudo gratuito.
+Não estamos competindo com Khan Academy ou Brasil Escola. Estamos preenchendo uma lacuna específica: **rigor + profundidade + acessibilidade**, tudo gratuito.
 
 ---
 
@@ -245,17 +230,12 @@ Fontes externas mantêm suas próprias licenças (OpenStax CC-BY, Active Calculu
 
 - [x] **120/120 lições** em PT-BR com 7 portas + ~4.770 exercícios sourceados
 - [x] **1.800 questões em provas** (12 trim × 10 versões × 15 q)
-- [x] **UI traduzida** em 11 idiomas
-- [x] **Áudio TTS / leitor de voz acessível** em 11 idiomas (Web Speech API)
 - [x] **Lições L1-L120 padronizadas no template canônico** (Lição 1 standard)
-- [x] **MDX das lições traduzido + sincronizado**: en-US ✅ (120/120)
-- [ ] **MDX das lições — 9 idiomas restantes** (es-ES, zh-CN, pl-PL, de-DE, fr-FR, it-IT, ko-KR, ru-RU, ja-JP) — todos precisam de re-sincronização de exercícios com a fonte PT-BR revisada (2026-05-31); contagem sincronizada hoje: es 25, zh 28, pl 25, de 22, fr 21, it 19, ko 9, ru 10, ja 9 (de 120)
-- [ ] **Provas i18n** (1.800 questões × 10 idiomas) — TO-DO; aplicar também o padrão fonte+link do corpus às provas
+- [x] **Site convergido para PT-BR** (2026-08-06) — infra de tradução (UI em 11 idiomas, TTS em 11 idiomas, MDX en-US 120/120 + 9 idiomas parciais) preservada no repo, pausada por custo de tokens de LLM. Ver "Multilinguagem" acima.
 - [ ] **Ensino Fundamental** — novo segmento, anterior ao Ensino Médio
 - [ ] **Ensino Superior — Cálculo 1–4** versão completa e polida (Stewart/Guidorizzi/Apostol/Active Calculus/REAMAT)
 - [ ] **Física — Ensino Médio e Ensino Superior** (mecânica, ondas, eletromagnetismo, mecânica dos materiais, termo, fluidos)
-- [ ] **Tradução para os demais países-alvo** (completar as 11 línguas e expandir o alcance)
-- [ ] **Retorno de árabe / hebraico / hindi** quando houver TTS neural decente
+- [ ] **Multilinguagem** — retomar quando houver orçamento de tokens; inclui provas i18n e o retorno de árabe/hebraico/hindi (pendente de TTS neural decente)
 
 ---
 

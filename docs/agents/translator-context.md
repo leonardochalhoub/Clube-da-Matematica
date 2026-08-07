@@ -1,5 +1,9 @@
 # Translator Context — for Gemini Free Agents
 
+> **FROZEN 2026-08-06.** Translation work is paused — the frontend serves PT-BR only
+> now (see `CLAUDE.md` §4). Don't dispatch a translation run off this doc without
+> explicit owner sign-off. Kept as-is for when this resumes.
+
 > **Audience.** A Gemini Flash agent (free tier) translating one MDX lesson from Brazilian Portuguese into a target locale. Read top-to-bottom before processing the file.
 
 ---

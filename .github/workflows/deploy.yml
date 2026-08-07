@@ -15,24 +15,25 @@ concurrency:
   cancel-in-progress: false
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PER-LOCALE MATRIX BUILD
+# PT-BR ONLY BUILD (2026-08-06)
 #
-# pt-BR is now a normal URL locale (/pt-br/…) served by the unified
+# The frontend was converged to PT-BR only — translating lesson MDX into other
+# languages burns real LLM token budget the project can't sustain right now.
+# Translated content (content/i18n/, translations.ts, audio strings) stays in
+# the repo untouched as paused inventory; it's just not routed/served anymore.
+#
+# pt-BR is a normal URL locale (/pt-br/…) served by the unified
 # app/[locale]/[categoria]/[...caminho] route — there is no root lesson route.
-# Each locale builds in its OWN job via BUILD_LOCALE=<urlcode>:
-#   - generate-manifest.ts emits only that locale's modules (matrix mode)
-#   - generateStaticParams() emits only that locale's /<urlcode>/… pages
-# So PT-BR is built exactly once (the pt-br job), no per-job duplication, and
-# per-job memory stays flat regardless of how many locales exist → scales to 11.
-#
-# Add a locale to `matrix.url` once it is exercise-synced AND acorn-clean (the
-# generate-manifest gate decides whether its files bundle or fall back to PT-BR).
-# Each job uploads its ./out slice; the `merge` job overlays all slices into one
-# site (slices are disjoint per /<urlcode>/ subtree; shared root pages —
-# homepage, sitemap, robots — are byte-identical across slices).
+# generateStaticParams() there now hardcodes pt-BR only (no locale loop), so
+# this single job builds the whole site.
 #
 # The pt-br job also emits backward-compat redirect stubs at the OLD root URLs
 # (/aulas/… → /pt-br/aulas/…) via scripts/gen-redirect-stubs.mjs.
+#
+# To resume other locales: restore a matrix entry here, restore the "Translated
+# locales" loop in generateStaticParams() (app/[locale]/.../page.tsx and
+# opengraph-image.tsx), and the multi-locale logic in sitemap.ts / seo/urls.ts
+# / seo/metadata.ts (see CLAUDE.md §4 for the full list of what was trimmed).
 # ─────────────────────────────────────────────────────────────────────────────
 
 jobs:
@@ -45,7 +46,6 @@ jobs:
         # ('' for pt-BR, whose source lives in content/).
         include:
           - { url: pt-br, fsdir: '' }
-          - { url: en, fsdir: en-US }
     steps:
       - name: Checkout
         uses: actions/checkout@v4

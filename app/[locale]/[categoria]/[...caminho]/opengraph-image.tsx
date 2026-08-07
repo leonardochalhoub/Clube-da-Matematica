@@ -3,14 +3,10 @@ import { carregarPorSlug, publicadosApenas } from '@/lib/content/loader'
 import { caminhoArquivoMdx, lerMdxSource } from '@/lib/content/loader-i18n'
 import { LOCALES, localeToUrl, urlToLocale, type Locale } from '@/lib/i18n/locales'
 import { SITE_NAME_BY_LOCALE } from '@/lib/seo/site'
-import { existsSync, readdirSync, statSync } from 'node:fs'
-import { join, relative } from 'node:path'
 
 export const alt = 'Clube da Matemática — lesson card'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
-
-const ROOT = process.cwd()
 
 interface Params {
   locale: string
@@ -32,54 +28,15 @@ function hashSeed(s: string): number {
   return h >>> 0
 }
 
-function walkMdx(dir: string, base = dir): string[] {
-  if (!existsSync(dir)) return []
-  const out: string[] = []
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry)
-    if (statSync(full).isDirectory()) out.push(...walkMdx(full, base))
-    else if (entry.endsWith('.mdx')) out.push(relative(base, full).replace(/\.mdx$/, ''))
-  }
-  return out
-}
-
 /**
- * Mirror the page's generateStaticParams (same locale partitioning) so an OG
- * image PNG is emitted for every lesson × locale the page renders. The
- * `locale` param is the URL code (pt-br, en, …).
+ * PT-BR only (2026-08-06 pivot — mirrors the page's generateStaticParams).
  */
 export async function generateStaticParams(): Promise<Params[]> {
   const params: Params[] = []
-  const buildLocale = process.env.BUILD_LOCALE ?? ''
-  const previewLocales = buildLocale
-    ? new Set([buildLocale])
-    : process.env.PREVIEW_LOCALES
-      ? new Set(process.env.PREVIEW_LOCALES.split(',').map((s) => s.trim()))
-      : null
-  const wants = (urlCode: string) => !previewLocales || previewLocales.has(urlCode)
-
-  if (wants(localeToUrl('pt-BR'))) {
-    for (const { caminho } of publicadosApenas()) {
-      const [categoria, ...rest] = caminho.split('/')
-      if (!categoria || rest.length === 0) continue
-      params.push({ locale: localeToUrl('pt-BR'), categoria, caminho: rest })
-    }
-  }
-
-  const i18nRoot = join(ROOT, 'content', 'i18n')
-  if (existsSync(i18nRoot)) {
-    for (const speechLang of readdirSync(i18nRoot)) {
-      const dir = join(i18nRoot, speechLang)
-      if (!statSync(dir).isDirectory()) continue
-      const entry = Object.values(LOCALES).find((l) => l.speechLang === speechLang)
-      if (!entry || entry.code === 'pt-BR') continue
-      if (!wants(entry.urlCode)) continue
-      for (const rel of walkMdx(dir)) {
-        const [categoria, ...rest] = rel.split('/')
-        if (!categoria || rest.length === 0) continue
-        params.push({ locale: entry.urlCode, categoria, caminho: rest })
-      }
-    }
+  for (const { caminho } of publicadosApenas()) {
+    const [categoria, ...rest] = caminho.split('/')
+    if (!categoria || rest.length === 0) continue
+    params.push({ locale: localeToUrl('pt-BR'), categoria, caminho: rest })
   }
   return params
 }

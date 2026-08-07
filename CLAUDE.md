@@ -9,8 +9,10 @@
 ## 1. Identity & North Star
 
 **Clube da Matemática** is a Brazilian mathematics curriculum spanning **Ensino Médio
-(high school) and Ensino Superior (higher education)**, open-source, free, multilingual,
-statically deployed to GitHub Pages.
+(high school) and Ensino Superior (higher education)**, open-source, free, statically
+deployed to GitHub Pages. **The live frontend serves PT-BR only** (converged 2026-08-06 —
+see §4). Translated content for 10 other languages still exists in the repo but is
+paused, not routed on the live site.
 
 - **Ensino Médio** (`content/aulas/`, route `/ensino-medio` + lessons under `/pt-br/aulas/…`):
   three years, 12 trimesters, 120 lessons, culminating in Black-Scholes (lesson 119) + a
@@ -52,9 +54,9 @@ npm run test              # vitest
 **Build memory rule.** `next build` for this repo MUST run with `NODE_OPTIONS=--max-old-space-size=13312` (13 GB), set by the `build` script in `package.json` via `cross-env` — that value OVERRIDES any `NODE_OPTIONS` set in the GH Actions workflow env, so edit `package.json` to change it, not just the workflow. Raised from 8192 → 13312 on 2026-05-27: a clean CI build (no `.next` cache) of ~1,835 pages OOM'd at 8 GB after Cálculo 1 (PR #2) added ~445 pages. The public `ubuntu-latest` runner has 16 GB RAM, so 13 GB heap is safe headroom. A warm local cache can mask the OOM — always trust the clean CI build.
 
 ### Routing
-- **`/[categoria]/[...caminho]`** — root PT-BR lessons (e.g. `/aulas/ano-1/trim-1/aula-01-conjuntos-intervalos`).
-- **`/[locale]/[categoria]/[...caminho]`** — translated lessons (e.g. `/en/aulas/...`, `/es/aulas/...`). Filesystem-based, server-rendered via `compileMDX`. See `app/[locale]/[categoria]/[...caminho]/page.tsx`.
-- **All other pages** stay on canonical PT-BR URL — UI translates client-side via `useLocale()`.
+- **`/[locale]/[categoria]/[...caminho]`** — ALL lessons, including PT-BR, are served by this one route (`app/[locale]/[categoria]/[...caminho]/page.tsx`). PT-BR's URL segment is `pt-br` (source MDX lives in `content/`, not `content/i18n/`), e.g. `/pt-br/aulas/ano-1/trim-1/licao-01-conjuntos-intervalos/`. There is no separate root-level lesson route — `scripts/gen-redirect-stubs.mjs` emits static redirect stubs from the old bare `/aulas/...` URLs to `/pt-br/aulas/...` for backward compatibility.
+- **Since 2026-08-06, `generateStaticParams()` in that route only emits PT-BR params.** Translated locales' MDX still exists in `content/i18n/` but no page is built for them — visiting `/en/aulas/...` etc. now 404s. See §4.
+- **All other pages** (home, `/ensino-medio`, `/manifesto`, etc.) live at a single root URL (not per-locale). Their UI text goes through `useLocale().t()`, but `LocaleProvider` now hardcodes `locale = 'pt-BR'` — see §4.
 
 ---
 
@@ -513,7 +515,53 @@ Translators get **`Read` + `Write` + `Bash`** for this verification loop (Bash i
 
 ---
 
-## 4. Internationalization (i18n)
+## 4. Internationalization (i18n) — FROZEN 2026-08-06
+
+**The live frontend serves PT-BR only.** Keeping 11 languages of lesson MDX in sync
+with an evolving PT-BR source means re-running the LLM translation pipeline on every
+content revision — a real, recurring token cost the project can't sustain right now
+or in the near future. The owner's decision: converge the frontend to PT-BR, leave
+everything already built in the repo untouched (nothing was deleted), and stop
+routing/marketing the other languages until there's budget to resume.
+
+**What actually changed (code):**
+- `LocaleProvider` (`src/components/layout/LocaleProvider.tsx`) hardcodes
+  `locale = 'pt-BR'`. No more URL-prefix parsing, `detectLocale()` (timezone/browser
+  auto-detect), or `localStorage` preference. `DEFAULT_LOCALE` in `locales.ts` is now
+  `'pt-BR'` (was `'en'`).
+- `LocaleSwitcher.tsx` (the header language dropdown) is **deleted**. `Header.tsx` no
+  longer renders it.
+- `generateStaticParams()` in `app/[locale]/[categoria]/[...caminho]/page.tsx` and its
+  `opengraph-image.tsx` sibling only emit PT-BR params now — the "walk
+  `content/i18n/<locale>` and emit a route per translated file" loop was removed. Other
+  locales' MDX files are untouched on disk; they just don't get a route anymore.
+- `.github/workflows/deploy.yml`'s build matrix is down to a single `pt-br` job (was
+  `pt-br` + `en`).
+- `app/sitemap.ts`, `src/lib/seo/urls.ts` (`hreflangAlternatesFor`,
+  `homeHreflangAlternates`, `localesAvailableFor`), and `src/lib/seo/metadata.ts`
+  (`buildSectionMetadata`'s alternates loop, `alternateLocale` in Open Graph) were all
+  simplified to only ever emit/consider PT-BR — otherwise sitemap/hreflang would point
+  crawlers at URLs that 404 now.
+- "11 idiomas" / "11 languages" bragging text removed from `app/layout.tsx`,
+  `src/lib/seo/site.ts` (`SITE_DESCRIPTION_BY_LOCALE['pt-BR']`),
+  `src/lib/seo/structured-data.ts`, `HomeHero.tsx` (flag banner + language count), and
+  the `home.stats.features` PT-BR string in `translations.ts`.
+
+**What did NOT change (still in the repo, just unreachable from the live site):**
+`content/i18n/<locale>/aulas/...` (10 languages, incl. en-US 120/120),
+`src/lib/i18n/translations.ts` (11-locale UI dictionary),
+`src/content/audio-translations.generated.ts` (11-locale TTS strings),
+`src/lib/i18n/locales.ts`'s `LOCALES`/`detectLocale`/timezone-country maps,
+`src/lib/content/loader-i18n.ts` + `manifest.ts` + `scripts/generate-manifest.ts`
+(multi-locale webpack bundling logic), the translator subagents
+(`.claude/agents/translator-*.md`), and everything documented below in this section.
+
+**To resume a locale:** re-add its matrix entry in `deploy.yml`, restore the
+"translated locales" loop in both `generateStaticParams()` functions, restore the
+multi-locale logic in `sitemap.ts`/`urls.ts`/`metadata.ts`, and re-add the
+`LocaleSwitcher` to `Header.tsx` (or rebuild it — it's small). Everything below this
+point describes how the pipeline worked while it was active; it's still accurate for
+when this resumes.
 
 ### Locales (11 total, after Hebrew/Arabic/Hindi removal)
 
@@ -585,6 +633,10 @@ Each `/[locale]/...` page reads its MDX from disk at SSG time and compiles via `
 
 ## 5. Cost & Model Tiering
 
+**Translation-specific rows below are paused along with i18n (§4, frozen 2026-08-06).**
+The tiering discipline itself (Haiku → Sonnet → Opus, ask before escalating) still
+applies to all other work — lesson authoring, refactors, reviews.
+
 The project follows a strict cost discipline:
 
 ```
@@ -616,8 +668,8 @@ When dispatching parallel agents, **always print progress** in the form `[Haiku 
 ```
 .
 ├── app/                              Next.js routes
-│   ├── [categoria]/[...caminho]/    PT-BR lessons (root)
-│   ├── [locale]/[categoria]/...     Translated lessons (filesystem read)
+│   ├── [locale]/[categoria]/...     ALL lessons incl. PT-BR (/pt-br/...); other
+│   │                                 locales' generateStaticParams frozen (§4)
 │   ├── ensino-medio/, financas/, manifesto/, livros/, videos/, provas/, mapa/
 │   └── layout.tsx, page.tsx, globals.css
 ├── content/
@@ -666,7 +718,7 @@ Saved in `~/.claude/projects/-home-leochalhoub-Clube-da-Matematica/memory/` and 
 
 1. **English-only chat.** Reply in English. If the user writes PT-BR, nudge them to switch.
 2. **Default model = Sonnet** (subagents and main). Ask before escalating to Opus.
-3. **Translation pipeline is Claude-based** — Haiku for bulk, Sonnet for oversized, Opus rarely (ask first). Gemini free is only a fallback for small one-offs. (Memory `feedback-cheap-models.md` superseded for translation.)
+3. **Translation pipeline is FROZEN (2026-08-06)** — frontend converged to PT-BR only for cost reasons; don't spin up translator subagents or resume locale builds without explicit owner sign-off. When it was active it was Claude-based — Haiku for bulk, Sonnet for oversized, Opus rarely (ask first). See §4.
 4. **Print agent progress.** Format `[Haiku 03/40] task description` (or `[Sonnet 1/3]`, etc. — show which model is running).
 5. **Black-Scholes is the editorial template.** All new content imitates its structure.
 6. **Nobel mention → nobelprize.org link.**
@@ -716,13 +768,30 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 - ✅ **5,319 sourced exercises** (100% with `solucao+fonte`, 100% with MC `opcoes` + single `correta`, ~25% with `passos`).
 - ✅ **1,800 exam questions** (12 trimesters × 10 versions × 15 questions) in `provas-data.ts` — **100% with MC** `opcoes` arrays (1,800/1,800 questions have plausible distractors).
 - ✅ All 120 lessons stabilized to the Lição 1 canonical template (L14-L120 rewritten 2026-04 → 2026-05; build green).
-- ✅ UI translated to 11 locales (no MDX bodies).
-- ✅ Per-locale lesson routing (1,390 static pages — incl. en/es/zh/ja/de/fr/it/ru/ko/pl prefixes that fall back to PT-BR bodies).
+- ⏸️ **i18n FROZEN 2026-08-06** (§4) — frontend now serves PT-BR only. The bullets below
+  are the state the multilingual effort was in when it paused; kept for when it resumes,
+  not reflective of what's live today.
+  - UI dictionary complete for 11 locales (`translations.ts`); TTS strings complete for 11
+    locales (`audio-translations.generated.ts`). Neither is reachable from the UI anymore
+    (no switcher, `LocaleProvider` hardcoded to pt-BR).
+  - **MDX lesson translations — measured by EXERCISE-SYNC** (per-lesson `<Exercicio` count
+    == current PT-BR; file-existence % is NOT the real bar and over-reported coverage
+    badly): **only PT-BR and en-US were 100% (120/120)** as of the freeze. All others were
+    stale vs the 2026-05-31 PT-BR — exercise counts changed via the math + regen passes, so
+    even fully-filed locales were short the new/corrected exercises. Exercise-synced at
+    freeze time: es-ES 25/120 · zh-CN 28 · pl-PL 25 · de-DE 22 · fr-FR 21 · it-IT 19 ·
+    ko-KR 9 · ru-RU 10 · ja-JP 9.
+    - en-US was re-synced via Haiku subagents (primary); the 6 largest files (1257–1575
+      lines, where Haiku's 32k cap truncates) were finished with **Opus 4.8
+      one-at-a-time** after Sonnet's structured-output step kept failing on them.
+    - **Re-sync playbook (for when this resumes):** for each lesson compare
+      `grep -c '<Exercicio'` of target vs PT-BR source; re-translate every
+      mismatch/missing file (Haiku → Sonnet for >1050 lines → Opus 4.8 for the ~6
+      giants); then `scripts/fix-translated-frontmatter.py --only <locale>`; verify
+      120/120 exercise-sync + orphan-slug check; then re-add the locale to the CI matrix
+      and restore the `generateStaticParams`/sitemap/hreflang loops (§4).
+  - Provas i18n was never started (paused with everything else).
 - ✅ Footer with `version · commit · timestamp` (currently `0.2.0`).
-- 🟡 **MDX lesson translations — measured by EXERCISE-SYNC** (per-lesson `<Exercicio` count == current PT-BR; file-existence % is NOT the real bar and over-reported coverage badly): **only PT-BR and en-US are 100% (120/120).** All others are stale vs the 2026-05-31 PT-BR — exercise counts changed via the math + regen passes, so even fully-filed locales are short the new/corrected exercises. Exercise-synced today: es-ES 25/120 · zh-CN 28 · pl-PL 25 · de-DE 22 · fr-FR 21 · it-IT 19 · ko-KR 9 · ru-RU 10 · ja-JP 9.
-  - en-US was re-synced via Haiku subagents (primary); the 6 largest files (1257–1575 lines, where Haiku's 32k cap truncates) were finished with **Opus 4.8 one-at-a-time** after Sonnet's structured-output step kept failing on them.
-  - **Re-sync playbook (for every non-en locale, Spanish included):** for each lesson compare `grep -c '<Exercicio'` of target vs PT-BR source; re-translate every mismatch/missing file (Haiku → Sonnet for >1050 lines → Opus 4.8 for the ~6 giants); then `scripts/fix-translated-frontmatter.py --only <locale>`; verify 120/120 exercise-sync + orphan-slug check.
-- ⏳ Provas i18n → TO-DO.
 - ⏳ Wolfram Alpha exercise links must use clean symbolic queries. Lesson-1 audit pending.
 - 🔜 Future modules: Physics (high-school), Engineering intro.
 
@@ -752,4 +821,6 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
 
 ---
 
-> **Last update:** 2026-06-02. en-US 120/120 made BUILD-clean (acorn): fixed 30 files the lenient check-rsc-all.mjs had passed but `next build` rejected — 244 missing-brace `<Eq>{`...`}</Eq>`, 38 translated component tags (Ejemplo/Ejercicio), bare </> operators in JSX, truncated/orphaned tags. Added scripts/check-mdx-build.mjs (acorn, build-accurate) as the authoritative verifier; documented all defect classes in §3 "Translator mistakes that broke the build". Earlier 2026-05-31: PT-BR source perfected: 932 language fixes + 819 exercise math-correctness fixes + 5 cascade-shuffled exercise banks regenerated (L13/14/16/112/113); 120/120 compile, 5,319 MC exercises with 0 `correta` violations. en-US re-synced 120/120 to the new PT-BR (last 6 oversized files via Opus 4.8 one-at-a-time). All other locales are now STALE vs the updated PT-BR and need re-sync (compare per-file `<Exercicio` counts). **Orchestration note:** translation/audit waves run as Workflow subagents — they DIE if the launching turn is interrupted, so verify journal *freshness* (mtime), not just result counts, and resume on the remaining set. If you change a convention, edit this file in the same commit.
+> **Last update:** 2026-08-06. **i18n frozen — frontend converged to PT-BR only** (owner decision: the LLM token cost of keeping 11 languages of lesson MDX in sync with an evolving PT-BR source isn't sustainable now or in the near future). Nothing was deleted — `content/i18n/`, `translations.ts`, `audio-translations.generated.ts`, the translator subagents, and the multi-locale build machinery all stay in the repo as paused inventory. What changed: `LocaleProvider` hardcoded to pt-BR, `LocaleSwitcher` deleted, `generateStaticParams()` (lesson page + OG image) emits PT-BR only, CI matrix down to one `pt-br` job, sitemap/hreflang/Open-Graph alternates collapsed to PT-BR, and "11 idiomas" marketing copy removed from README, homepage, and SEO metadata. Full detail in §4. See also `docs/i18n.md`, `docs/IDENTITY.md` for docs updated in the same pass.
+>
+> **2026-06-02 (superseded by the freeze above for anything i18n-related):** en-US 120/120 made BUILD-clean (acorn): fixed 30 files the lenient check-rsc-all.mjs had passed but `next build` rejected — 244 missing-brace `<Eq>{`...`}</Eq>`, 38 translated component tags (Ejemplo/Ejercicio), bare </> operators in JSX, truncated/orphaned tags. Added scripts/check-mdx-build.mjs (acorn, build-accurate) as the authoritative verifier; documented all defect classes in §3 "Translator mistakes that broke the build". Earlier 2026-05-31: PT-BR source perfected: 932 language fixes + 819 exercise math-correctness fixes + 5 cascade-shuffled exercise banks regenerated (L13/14/16/112/113); 120/120 compile, 5,319 MC exercises with 0 `correta` violations. en-US re-synced 120/120 to the new PT-BR (last 6 oversized files via Opus 4.8 one-at-a-time). All other locales are now STALE vs the updated PT-BR and need re-sync (compare per-file `<Exercicio` counts). **Orchestration note:** translation/audit waves run as Workflow subagents — they DIE if the launching turn is interrupted, so verify journal *freshness* (mtime), not just result counts, and resume on the remaining set. If you change a convention, edit this file in the same commit.

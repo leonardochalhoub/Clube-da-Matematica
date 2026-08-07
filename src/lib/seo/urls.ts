@@ -1,19 +1,15 @@
 /**
  * URL builders for canonical + hreflang.
  *
- * Routing model (recap):
- *   PT-BR (source/canonical):  https://host/<base>/<caminho>/
- *   Translated locale prefix:  https://host/<base>/<locale>/<caminho>/
+ * PT-BR only (2026-08-06 pivot — see CLAUDE.md §4): the frontend serves a
+ * single locale, so hreflang collapses to a self-referencing pt-BR entry +
+ * x-default. `localesAvailableFor` used to scan content/i18n/ on disk for
+ * other locales' MDX files; those files still exist but aren't routed
+ * anymore, so it now always returns just pt-BR.
  *
  * `caminho` is the source-relative path like `aulas/ano-1/trim-1/licao-01-conjuntos-intervalos`.
- *
- * `hreflang` must point to locales where a real translation file exists on
- * disk. Emitting hreflang for a locale that falls back to PT-BR would tell
- * Google "this URL has a German translation" when in fact `/de/...` ships
- * PT-BR content — duplicate-content penalty. We check the filesystem.
  */
-import { LOCALES, localeToUrl, type Locale } from '@/lib/i18n/locales'
-import { caminhoArquivoMdx } from '@/lib/content/loader-i18n'
+import { localeToUrl, type Locale } from '@/lib/i18n/locales'
 import { SITE_ORIGIN, BASE_PATH } from '@/lib/seo/site'
 
 /**
@@ -37,45 +33,19 @@ export function homeUrlFor(_locale: Locale): string {
   return `${SITE_ORIGIN}${BASE_PATH || ''}/`
 }
 
-/**
- * For a given source caminho, return the list of locales where the
- * translation actually exists on disk (PT-BR always included).
- */
-export function localesAvailableFor(caminho: string): Locale[] {
-  const out: Locale[] = ['pt-BR']
-  for (const code of Object.keys(LOCALES) as Locale[]) {
-    if (code === 'pt-BR') continue
-    const info = LOCALES[code]
-    const file = caminhoArquivoMdx(caminho, code, info.speechLang)
-    if (file) out.push(code)
-  }
-  return out
+/** PT-BR only — kept as a function so call sites don't need to change. */
+export function localesAvailableFor(_caminho: string): Locale[] {
+  return ['pt-BR']
 }
 
-/**
- * hreflang alternates dict suitable for `metadata.alternates.languages`.
- * Keys are BCP-47 codes (`pt-BR`, `en-US`, `es-ES`, ...); values are full
- * URLs. Includes `x-default` → PT-BR canonical.
- */
+/** hreflang alternates dict suitable for `metadata.alternates.languages`. */
 export function hreflangAlternatesFor(caminho: string): Record<string, string> {
-  const result: Record<string, string> = {}
-  const locales = localesAvailableFor(caminho)
-  for (const code of locales) {
-    const info = LOCALES[code]
-    result[info.speechLang] = canonicalUrlFor(caminho, code)
-  }
-  // x-default: send unspecified-language users to PT-BR (the source).
-  result['x-default'] = canonicalUrlFor(caminho, 'pt-BR')
-  return result
+  const url = canonicalUrlFor(caminho, 'pt-BR')
+  return { 'pt-BR': url, 'x-default': url }
 }
 
-/** hreflang alternates for the SITE HOME (not a lesson). All locales eligible. */
+/** hreflang alternates for the SITE HOME (not a lesson). */
 export function homeHreflangAlternates(): Record<string, string> {
-  const result: Record<string, string> = {}
-  for (const code of Object.keys(LOCALES) as Locale[]) {
-    const info = LOCALES[code]
-    result[info.speechLang] = homeUrlFor(code)
-  }
-  result['x-default'] = homeUrlFor('pt-BR')
-  return result
+  const url = homeUrlFor('pt-BR')
+  return { 'pt-BR': url, 'x-default': url }
 }

@@ -4,7 +4,7 @@
  * and Twitter Card.
  */
 import type { Metadata } from 'next'
-import { LOCALES, type Locale } from '@/lib/i18n/locales'
+import type { Locale } from '@/lib/i18n/locales'
 import {
   SITE_NAME_BY_LOCALE,
   SITE_DESCRIPTION_BY_LOCALE,
@@ -56,9 +56,6 @@ export function buildLessonMetadata({
       siteName,
       type: 'article',
       locale: ogLocale,
-      alternateLocale: Object.values(OG_LOCALE_BY_LOCALE).filter(
-        (l) => l !== ogLocale,
-      ),
     },
     twitter: {
       card: 'summary_large_image',
@@ -97,14 +94,7 @@ export function buildSectionMetadata({
   descricao,
 }: SectionMetaInput): Metadata {
   const canonical = path === '' ? homeUrlFor(locale) : canonicalUrlFor(path, locale)
-  // Static pages exist in every locale (UI is fully translated everywhere).
-  const alternates: Record<string, string> = {}
-  for (const code of Object.keys(LOCALES) as Locale[]) {
-    const info = LOCALES[code]
-    alternates[info.speechLang] =
-      path === '' ? homeUrlFor(code) : canonicalUrlFor(path, code)
-  }
-  alternates['x-default'] = path === '' ? homeUrlFor('pt-BR') : canonicalUrlFor(path, 'pt-BR')
+  const alternates = path === '' ? homeHreflangAlternates() : hreflangAlternatesFor(path)
 
   const siteName = SITE_NAME_BY_LOCALE[locale]
   const ogLocale = OG_LOCALE_BY_LOCALE[locale]
@@ -123,9 +113,6 @@ export function buildSectionMetadata({
       siteName,
       type: 'website',
       locale: ogLocale,
-      alternateLocale: Object.values(OG_LOCALE_BY_LOCALE).filter(
-        (l) => l !== ogLocale,
-      ),
     },
     twitter: {
       card: 'summary_large_image',

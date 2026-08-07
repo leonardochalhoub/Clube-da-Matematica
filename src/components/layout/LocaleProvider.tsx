@@ -1,20 +1,7 @@
 'use client'
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from 'react'
-import {
-  detectLocale,
-  saveLocale,
-  LOCALES,
-  type Locale,
-  DEFAULT_LOCALE,
-} from '@/lib/i18n/locales'
+import { createContext, useCallback, useContext, type ReactNode } from 'react'
+import { type Locale, DEFAULT_LOCALE } from '@/lib/i18n/locales'
 import { translate } from '@/lib/i18n/translations'
 
 interface LocaleContextValue {
@@ -26,40 +13,16 @@ interface LocaleContextValue {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null)
 
+/**
+ * Frontend is PT-BR only (2026-08-06 pivot — see CLAUDE.md §4). No more
+ * URL-prefix / timezone / browser-language auto-detection, no language
+ * switcher — `locale` is always DEFAULT_LOCALE ('pt-BR'). `setLocale` is
+ * kept as a no-op only so the context shape doesn't ripple through every
+ * `useLocale()` call site; nothing calls it anymore.
+ */
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  // SSR sempre usa DEFAULT_LOCALE; client troca após hidratação se preferência detectada
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE)
-
-  useEffect(() => {
-    // URL prefix wins over localStorage. If user is at /en/aulas/..., the
-    // page is serving EN translated MDX — UI chrome + cheer banner must
-    // match. Otherwise UI shows PT-BR while body shows EN (the previous
-    // bug: cheer phrase appeared in PT even when toggle showed EN).
-    const path = window.location.pathname
-    const urlMatch = path.match(/^\/([a-z]{2})(?:\/|$)/)
-    const urlLocale = urlMatch?.[1] && urlMatch[1] in LOCALES
-      ? (urlMatch[1] as Locale)
-      : null
-    const detected: Locale = urlLocale ?? detectLocale()
-    if (detected !== locale) setLocaleState(detected)
-    // Aplica RTL/LTR. **Não** mexe em `<html lang>` — esse atributo deve
-    // refletir a língua do CONTEÚDO (pt-BR enquanto não houver traduções
-    // de MDX), não a UI. Caso contrário o leitor de tela / Web Speech API
-    // tenta voz errada sobre texto PT-BR (= "PT com sotaque inglês").
-    try {
-      const info = LOCALES[detected]
-      document.documentElement.dir = info.dir
-    } catch {
-      /* noop */
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l)
-    saveLocale(l)
-  }, [])
-
+  const locale = DEFAULT_LOCALE
+  const setLocale = useCallback(() => {}, [])
   const t = useCallback(
     (key: string, defaultText?: string) => translate(key, locale, defaultText),
     [locale],

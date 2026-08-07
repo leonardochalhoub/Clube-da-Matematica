@@ -154,7 +154,7 @@ export function buildOrganizationSchema(locale: Locale): Record<string, unknown>
     url: homeUrlFor(locale),
     logo: SITE_LOGO,
     sameAs: [GITHUB_REPO],
-    description: 'Open-source mathematics curriculum for Brazilian High School, in 11 languages.',
+    description: 'Open-source mathematics curriculum for Brazilian High School.',
   }
 }
 

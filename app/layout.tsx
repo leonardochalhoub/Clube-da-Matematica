@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: '%s · Clube da Matemática',
   },
   description:
-    'Curso completo de matemática para o Ensino Médio brasileiro — 120 lições, 3 anos, 4.770 exercícios sourceados. Open source, gratuito, em 11 idiomas. Do conjunto de números a Black-Scholes.',
+    'Curso completo de matemática para o Ensino Médio brasileiro — 120 lições, 3 anos, 4.770 exercícios sourceados. Open source e gratuito. Do conjunto de números a Black-Scholes.',
   keywords: [
     'matemática', 'matemáticas', 'mathematics', 'maths',
     'cálculo', 'cálculo numérico', 'calculus',
@@ -50,17 +50,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Clube da Matemática',
     description:
-      'Curso aberto e gratuito de matemática para o Ensino Médio — 120 lições, 11 idiomas, 4.770 exercícios sourceados.',
+      'Curso aberto e gratuito de matemática para o Ensino Médio — 120 lições, 4.770 exercícios sourceados.',
     type: 'website',
     locale: 'pt_BR',
-    alternateLocale: ['en_US', 'es_ES', 'zh_CN', 'ja_JP', 'de_DE', 'fr_FR', 'it_IT', 'ru_RU', 'ko_KR', 'pl_PL'],
     siteName: 'Clube da Matemática',
     url: `${SITE_ORIGIN}${BASE_PATH || ''}/`,
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Clube da Matemática',
-    description: 'Curso aberto de matemática para o Ensino Médio — 120 lições, 11 idiomas.',
+    description: 'Curso aberto de matemática para o Ensino Médio — 120 lições.',
   },
   robots: {
     index: true,

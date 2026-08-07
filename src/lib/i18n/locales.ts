@@ -86,14 +86,11 @@ export const LOCALE_URL_CODES: string[] = (Object.keys(LOCALES) as Locale[]).map
 export const NUM_LOCALES = Object.keys(LOCALES).length
 
 /**
- * Last-resort fallback when `detectLocale()` can't infer the user's
- * locale from localStorage / timezone / navigator.language. English is
- * the widest-reach default. The site is meant to be DYNAMIC: a visitor
- * in Brazil should auto-resolve to pt-BR via timezone detection; this
- * constant only kicks in when every signal fails (no JS, missing Intl
- * support, unknown timezone + unknown browser language).
+ * The only locale the frontend serves (2026-08-06 pivot — see CLAUDE.md §4).
+ * `LocaleProvider` hardcodes this; `detectLocale()`/`saveLocale()` below are
+ * unused dead code kept for a possible future resume, not called anymore.
  */
-export const DEFAULT_LOCALE: Locale = 'en'
+export const DEFAULT_LOCALE: Locale = 'pt-BR'
 
 /**
  * Mapeia país (ISO 3166-1 alpha-2) para idioma local padrão.

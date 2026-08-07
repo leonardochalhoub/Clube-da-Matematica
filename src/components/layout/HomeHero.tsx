@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useLocale } from './LocaleProvider'
-import { LOCALES, NUM_LOCALES } from '@/lib/i18n/locales'
 import { anoTitulo, anoResumo } from '@/content/programa-em-i18n'
 
 interface AnoCard {
@@ -22,10 +21,7 @@ interface HomeHeroProps {
 
 export function HomeHero({ anos }: HomeHeroProps) {
   const { t, locale } = useLocale()
-  const features = t('home.stats.features').replace('{n}', String(NUM_LOCALES))
-  const bandeiras = Object.values(LOCALES)
-    .map((l) => l.bandeira)
-    .join(' ')
+  const features = t('home.stats.features')
   const yearLabel = t('page.ensinoMedio.year.label', 'Ano')
   const publishedLabel = t(
     'page.ensinoMedio.year.lessonsPublished',
@@ -50,8 +46,6 @@ export function HomeHero({ anos }: HomeHeroProps) {
               <strong>{t('home.stats.years')}</strong>
               <br />
               <span className="text-sm sm:text-base">{features}</span>
-              <br />
-              <span className="text-xs opacity-80 sm:text-sm">{bandeiras}</span>
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link

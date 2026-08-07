@@ -1,7 +1,5 @@
 import type { MetadataRoute } from 'next'
 import { publicadosApenas } from '@/lib/content/loader'
-import { LOCALES, type Locale } from '@/lib/i18n/locales'
-import { caminhoArquivoMdx } from '@/lib/content/loader-i18n'
 import { canonicalUrlFor } from '@/lib/seo/urls'
 import { SITE_ORIGIN, BASE_PATH } from '@/lib/seo/site'
 
@@ -9,13 +7,9 @@ import { SITE_ORIGIN, BASE_PATH } from '@/lib/seo/site'
 export const dynamic = 'force-static'
 
 /**
- * Sitemap with one entry per (caminho, locale) pair where a real
- * translation exists. PT-BR is the source — always emitted. Other locales
- * are emitted only if the MDX file exists on disk (no fallback entries —
- * those would create duplicate-content noise for crawlers).
- *
- * Includes static section pages in all locales (since UI is fully
- * translated, those work in every language).
+ * Sitemap. PT-BR only (2026-08-06 pivot — see CLAUDE.md §4): the frontend no
+ * longer routes translated locales, so emitting their URLs here would just
+ * point crawlers at 404s. Static section pages live at root (not per-locale).
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = []
@@ -32,11 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: 'mapa', priority: 0.6 },
   ]
 
-  const locales = Object.keys(LOCALES) as Locale[]
-
-  // Home + static section pages live at ROOT (/, /financas, …) and translate
-  // client-side — they are NOT per-locale routes, so emit each once (no locale
-  // prefix). Only lesson URLs are per-locale (handled below).
+  // Home + static section pages live at ROOT (/, /financas, …) — emit once.
   const prefix = BASE_PATH ? `${BASE_PATH}/` : '/'
   for (const { path, priority } of STATIC_PATHS) {
     entries.push({
@@ -47,32 +37,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })
   }
 
-  // --- Lessons + other content (filesystem-driven) -------------------
+  // --- Lessons (filesystem-driven, PT-BR only) ------------------------
   const todas = publicadosApenas()
   for (const c of todas) {
     const lastMod = c.meta.atualizadoEm ? new Date(c.meta.atualizadoEm) : undefined
-
-    // PT-BR — always emitted (source).
     entries.push({
       url: canonicalUrlFor(c.caminho, 'pt-BR'),
       lastModified: lastMod,
       changeFrequency: 'monthly',
       priority: 0.8,
     })
-
-    // Translated locales — only if MDX file exists on disk.
-    for (const loc of locales) {
-      if (loc === 'pt-BR') continue
-      const info = LOCALES[loc]
-      const file = caminhoArquivoMdx(c.caminho, loc, info.speechLang)
-      if (!file) continue
-      entries.push({
-        url: canonicalUrlFor(c.caminho, loc),
-        lastModified: lastMod,
-        changeFrequency: 'monthly',
-        priority: 0.8,
-      })
-    }
   }
 
   return entries
