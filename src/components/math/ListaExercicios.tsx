@@ -80,8 +80,9 @@ function respostaImpossivelDigitar(resposta: string): boolean {
 }
 
 export interface OpcaoExercicio {
-  /** Texto da opção. Pode conter $...$ inline KaTeX. */
-  texto: string
+  /** Texto da opção. String pode conter $...$ inline KaTeX; também aceita
+   *  ReactNode (ex.: `<><Eq>{`...`}</Eq></>`) para JSX já renderizado. */
+  texto: string | ReactNode
   /** Se essa opção é a correta. (Apenas uma deve ser true.) */
   correta?: boolean
 }
@@ -766,10 +767,15 @@ function ItemExercicio({
                     }}
                     className="mt-0.5 h-4 w-4 shrink-0 accent-clube-teal"
                   />
-                  <span
-                    className="flex-1 text-sm text-clube-ink"
-                    dangerouslySetInnerHTML={{ __html: renderInline(op.texto) }}
-                  />
+                  <span className="flex-1 text-sm text-clube-ink">
+                    {typeof op.texto === 'string' ? (
+                      <span
+                        dangerouslySetInnerHTML={{ __html: renderInline(op.texto) }}
+                      />
+                    ) : (
+                      op.texto
+                    )}
+                  </span>
                   {tentou && idx === indiceCorreto && (
                     <span className="text-clube-leaf" aria-label={t('exercise.correctAria')}>
                       ✓
