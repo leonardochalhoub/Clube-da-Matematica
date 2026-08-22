@@ -1,7 +1,9 @@
 /**
  * Pins de visitantes — um ponto no mapa por visitante DISTINTO, anônimo.
  *
- * Armazenamento: Supabase (tabela `visitor_pins`, RLS anon insert+select).
+ * Armazenamento: JSON estático congelado em `src/content/visitor-pins.json`
+ * (snapshot exportado do Supabase em 2026-08-22 — ver CLAUDE.md). O mapa não
+ * cresce mais; é um retrato dos visitantes até a data do congelamento.
  * Privacidade:
  *   - `visitor_id` é um UUID aleatório gerado no browser (localStorage) só pra
  *     deduplicar — não identifica a pessoa.
@@ -9,9 +11,11 @@
  *     antes de salvar. Nunca guardamos IP nem coordenada exata.
  *   - Só gravamos cidade + país. Nada mais.
  *
- * Degradação graciosa: sem Supabase configurado, tudo vira no-op silencioso.
+ * Degradação graciosa: sem Supabase configurado, o registro de novos pins
+ * vira no-op silencioso (mantido apenas até a remoção final do Supabase).
  */
 import { getSupabase } from '@/lib/supabase/client'
+import staticPins from '@/content/visitor-pins.json'
 
 const VISITOR_ID_KEY = 'clube-visitor-id-v1'
 const PIN_SENT_KEY = 'clube-pin-sent-v1'
@@ -107,16 +111,5 @@ export async function recordVisitorPin(geo: GeoInput): Promise<void> {
 
 /** Lê todos os pins (lat/lng/cidade/país) pra desenhar no mapa. */
 export async function fetchVisitorPins(): Promise<VisitorPin[]> {
-  const supabase = getSupabase()
-  if (!supabase) return []
-  try {
-    const { data, error } = await supabase
-      .from('visitor_pins')
-      .select('lat, lng, city, region, region_code, country')
-      .limit(10000)
-    if (error || !data) return []
-    return data as VisitorPin[]
-  } catch {
-    return []
-  }
+  return staticPins as VisitorPin[]
 }
