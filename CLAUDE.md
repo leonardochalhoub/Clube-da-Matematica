@@ -791,7 +791,7 @@ If `next build` OOMs, the cause is almost always: too many MDX dynamic imports f
       120/120 exercise-sync + orphan-slug check; then re-add the locale to the CI matrix
       and restore the `generateStaticParams`/sitemap/hreflang loops (§4).
   - Provas i18n was never started (paused with everything else).
-- ✅ Footer with `version · commit · timestamp` (currently `0.2.0`).
+- ✅ Footer with `version · commit · timestamp` (currently `1.1.0`, marked ESTÁVEL).
 - ⏳ Wolfram Alpha exercise links must use clean symbolic queries. Lesson-1 audit pending.
 - 🔜 Future modules: Physics (high-school), Engineering intro.
 

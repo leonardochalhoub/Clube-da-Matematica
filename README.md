@@ -3,7 +3,7 @@
 > *"A matemática é a única linguagem em que se pode raciocinar sem ambiguidade sobre o infinito, o aleatório e o invisível."*
 > — adaptado de Bertrand Russell
 
-**Open source · gratuito · currículo completo em português**
+**v1.1.0 · ESTÁVEL** · Open source · gratuito · currículo completo em português
 
 Currículo de matemática **do Ensino Médio ao Ensino Superior**, brasileiro e gratuito:
 
