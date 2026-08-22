@@ -97,9 +97,13 @@ export function VisitorPinMap() {
 
   useEffect(() => {
     let cancelled = false
-    fetchVisitorPins().then((data) => {
-      if (!cancelled) setPins(data)
-    })
+    fetchVisitorPins()
+      .then((data) => {
+        if (!cancelled) setPins(data)
+      })
+      .catch(() => {
+        if (!cancelled) setPins([])
+      })
     return () => {
       cancelled = true
     }

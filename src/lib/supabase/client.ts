@@ -24,9 +24,13 @@ export function getSupabase(): SupabaseClient | null {
     cached = null
     return null
   }
-  cached = createClient(URL, ANON, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  try {
+    cached = createClient(URL, ANON, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  } catch {
+    cached = null
+  }
   return cached
 }
 
